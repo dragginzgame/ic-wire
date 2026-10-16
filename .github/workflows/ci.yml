@@ -36,6 +36,8 @@ jobs:
           minimum-target: wasm32-unknown-unknown
       - name: Install reviewed common tools
         run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
+      - name: Prepare locked workspace dependencies
+        run: cargo fetch --locked
       - name: Validate scaffold and contributor tooling
         env:
           VALIDATION_LOG_DIR: ${{ runner.temp }}/ic-wire-validation

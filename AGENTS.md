@@ -20,10 +20,9 @@ moving sibling checkout or patch snapshot-owned files in place.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
-- Release exception: while this is an unpublished investigation with no remote or
-  selected release delivery contract, the common release entrypoints reject
-  before the shared runner. Establishing release delivery requires separate
-  maintainer authorization; tooling adoption does not supply it.
+- Maintainer-operated releases use direct Git delivery to origin/main through
+  Shared Tooling. Versioning, tags and pushes do not publish packages; keep
+  `publish = false`. Ordinary agent work does not execute releases.
 
 ## Development and validation
 

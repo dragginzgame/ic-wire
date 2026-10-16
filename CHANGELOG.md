@@ -2,6 +2,10 @@
 
 ## [0.1.2]
 
+- Enable maintainer-operated Git releases through Shared Tooling, with coordinated
+  Cargo metadata, retained validation evidence and interrupted-delivery checks.
+  Keep package publication disabled and separate from version/tag/push delivery.
+
 - Select Postcard for controlled inter-canister calls and owned user endpoints.
   Add a private browser experiment with Rust-generated bindings/vectors, a
   bounded TypeScript client and signed Chromium/PocketIC updates. Verify u64

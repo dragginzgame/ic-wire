@@ -56,7 +56,8 @@ The reviewed Shared Tooling snapshot owns setup, formatting and hooks; checks
 never install tools implicitly. CI is configured for Linux and both macOS
 architectures, including the Rust 1.91 floor and Wasm target. These checks qualify
 the scaffold only and establish no performance or protocol claims. Standard
-release targets are present but disabled while the investigation is unpublished.
+release targets validate, version, tag and push to origin/main; they do not
+publish packages. See the [release workflow](docs/development.md#snapshot-maintenance-and-release-boundary).
 
 ## License
 

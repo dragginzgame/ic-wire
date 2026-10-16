@@ -58,7 +58,8 @@ The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
 | `shared-tooling-check` | Offline snapshot hashes and executable modes |
 | `check-doc-links` | Local references in IC Wire's maintained documentation |
 | `check-pins` | Shared declaration checker with Cargo inheritance checks; requires Git and prepared host tools |
-| `check-tooling` | Local Make routing, release refusal and real formatting-hook fixture |
+| `check-release` | Disposable Git release, validation-failure and recovery fixture |
+| `check-tooling` | Local Make routing and real formatting-hook fixture |
 | `check-canister-evaluation` | Lint the evaluation package and compile both Wasm feature extremes; no emulator |
 | `evaluate-canisters` | Build four artifacts and verify them in local PocketIC; requires explicit `POCKET_IC_BIN` |
 | `check-typed-diagnostics` | Isolated offline compilation of valid and invalid prototype callers; requires fetched locked dependencies |
@@ -91,10 +92,39 @@ exporter, following [snapshot adoption](consuming-snapshots.md). Preserve the
 recorded entrypoints on refresh and review the preview before applying it.
 Do not copy uncommitted sibling edits or edit snapshot-owned payloads.
 
-The standard `release-patch`, `release-minor`, `release-major` and `release-resume`
-names exist but fail before the release runner. No release delivery adapter or
-destination is configured. Every crate retains `publish = false`; publication,
-registry name reservation, remote creation, commits, pushes and releases remain
-separately authorized maintainer actions. The initial pending changelog is
-`0.1.0`, with no finalized release; this tooling batch changes no library contract
-or package version.
+The maintainer-operated `release-patch`, `release-minor`, `release-major` and
+`release-resume VERSION=X.Y.Z` commands use direct Git delivery to `origin/main`.
+They validate, bump the coordinated Cargo workspace version and local lockfile
+entries, finalize the changelog, commit, create an annotated tag and atomically
+push the branch and that tag. They do not publish packages, create a GitHub Release
+object or deploy anything. Every crate retains `publish = false`.
+
+Commit intended source changes before invoking a release. Preflight requires a
+clean index/worktree, checks the pending changelog against the computed candidate,
+prepares the locked Cargo cache and selected common tools, then checks the graph.
+`RELEASE_CACHE_PREPARE=0` uses only cached dependencies and checks installed tools;
+explicit Cargo offline settings remain authoritative. Rust toolchains/targets
+remain prerequisites from the setup section above. Only direct delivery is
+configured; PR delivery rejects before metadata mutation.
+
+Every release kind runs `make ci` through the shared validation logger with Cargo
+offline. This is the complete scaffold gate, including the local release fixture;
+the separately invoked browser/PocketIC experiments are not release gates.
+Validation logs and source-bound receipts remain under `.git/release-state/`.
+Preparation uses the pinned Shared Tooling Cargo metadata adapter with rollback;
+only `Cargo.toml`, `Cargo.lock` and `CHANGELOG.md` are release metadata. The private
+browser harness version is independent and is not bumped by a Rust release.
+
+An interrupted release resumes with the shared saved-plan machinery. Before
+commit/tag/push, local checks require the selected validation identity and exact
+prepared metadata bytes. Later checks read the selected committed source.
+`make check-release` exercises these adapters and the real runner against a local
+bare remote, substituting expensive setup/validation targets. Prepare its cache
+with `cargo fetch --locked` first (CI does this explicitly). It covers dirty
+source, candidate mismatch, failed-validation logs, interrupted delivery, receipt
+rejection, exact branch/tag push and idempotent completed resume. It does not
+establish live GitHub permissions or hosted macOS qualification.
+
+Release execution, package publication and registry name reservation remain
+separately authorized maintainer actions. Preparing this tooling changes no
+workspace version and performs no release in the working repository.

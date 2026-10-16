@@ -48,8 +48,11 @@ Shared Tooling 0.15.4 is vendored at reviewed committed revision
 `879eb2b021522252a67e908dbc217a0f4efb2a6f`, with its manifest, common Make
 interface, setup catalogs/installers and formatting hook. Local Make targets and
 Linux/macOS CI cover scaffold checks, Wasm, MSRV and contributor tooling.
-See [development](../development.md). Release entrypoints reject before the
-shared runner; no release delivery adapter is configured.
+See [development](../development.md). Maintainer-operated release entrypoints now
+use the shared runner and pinned Cargo metadata adapter for direct origin/main
+Git delivery. Package publication remains disabled. Source-bound validation and
+prepared-byte receipts protect interrupted delivery; release execution is separate
+from ordinary agent work.
 
 ## Tooling validation (2026-10-16)
 
@@ -62,8 +65,8 @@ and two real management calls in local PocketIC. Host/Wasm checks pass on Rust
 On Linux x86_64, explicit `make install-tools` and offline `make tools-check`
 passed for the complete common toolset. Snapshot integrity, local documentation
 links, native formatting and the local Make/hook fixture passed. The fixture
-qualifies actual Cargo target routing with substitutes, release refusal before
-the runner, native hook formatting, unrelated edit preservation and partial
+qualifies actual Cargo target routing with substitutes, shared release routing,
+native hook formatting, unrelated edit preservation and partial
 staging rejection in disposable Git repositories. ShellCheck and actionlint
 passed for the consumer script and workflow.
 
@@ -80,7 +83,9 @@ formatting hook and created the private
 `origin` points to that repository, whose description identifies this as an
 unpublished investigation. Earlier Git-dependent checks used disposable exports;
 the initial Shared Tooling snapshot came from clean disposable Git checkouts.
-Package publication and release delivery remain disabled.
+Package publication remains disabled. The local release fixture qualifies Git
+version/tag/push and recovery with substituted setup/validation gates; no real
+repository release was executed while wiring the adapters.
 
 ## Next action
 

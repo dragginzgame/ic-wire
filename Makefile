@@ -6,9 +6,9 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 include make/consumer.mk
 
-.PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version release-policy-check
+.PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
 .PHONY: evaluate-codecs evaluate-journey check-typed-diagnostics evaluate-canisters
-.PHONY: check-canister-evaluation
+.PHONY: check-release check-canister-evaluation
 .PHONY: evaluate-browser check-browser
 
 evaluate-browser:
@@ -52,7 +52,7 @@ help:
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
-		'Releases: release-patch, release-minor, release-major, release-resume are disabled'
+		'Releases: release-patch, release-minor, release-major, release-resume (Git delivery only)'
 
 build:
 	+@env cargo build --locked -p ic-wire
@@ -79,6 +79,9 @@ check-doc-links:
 check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"
 
+check-release:
+	+@bash scripts/ci/test-local-release.sh
+
 check-tooling:
 	+@bash scripts/ci/test-local-make.sh
 
@@ -86,11 +89,31 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-doc-links check-tooling fmt-check check lint test check-typed-diagnostics check-canister-evaluation check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-doc-links check-tooling check-release fmt-check check lint test check-typed-diagnostics check-canister-evaluation check-wasm check-msrv
 
-# The investigation has no release destination or accepted release contract.
-# Keep the common entrypoints, but reject before invoking the shared runner.
-release-patch release-minor release-major release-resume: release-policy-check
-release-policy-check:
-	@printf '%s\n' 'IC Wire releases are disabled: this investigation remains unpublished; the maintainer must authorize and configure release delivery first.' >&2
-	@exit 2
+# Git release delivery is separate from package publication.
+export RELEASE_DELIVERY ?= direct
+export RELEASE_CACHE_PREPARE ?= 1
+export RELEASE_PREVIOUS RELEASE_VERSION RELEASE_DATE RELEASE_SOURCE RELEASE_COMMIT
+export RELEASE_REMOTE RELEASE_BRANCH
+.PHONY: release-version release-preflight release-verify release-prepare-version release-prepared-check release-files release-commit-check release-committed-check release-tagged-check release-push-check
+release-version:
+	@bash scripts/ci/ic-wire-release.sh version
+release-preflight:
+	+@bash scripts/ci/ic-wire-release.sh preflight
+release-verify:
+	+@bash scripts/ci/ic-wire-release.sh verify
+release-prepare-version:
+	+@bash scripts/ci/ic-wire-release.sh prepare
+release-prepared-check:
+	+@bash scripts/ci/ic-wire-release.sh prepared
+release-files:
+	@bash scripts/ci/ic-wire-release.sh files
+release-commit-check:
+	+@bash scripts/ci/ic-wire-release.sh commit
+release-committed-check:
+	+@bash scripts/ci/ic-wire-release.sh committed
+release-tagged-check:
+	+@bash scripts/ci/ic-wire-release.sh tagged
+release-push-check:
+	+@bash scripts/ci/ic-wire-release.sh push

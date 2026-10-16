@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
+export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 
 # Consumer qualification only. Git/index effects stay in this disposable export.
 # Requires prepared development Rust, pinned cargo-sort, Git, Bash and GNU Make.
@@ -31,15 +33,17 @@ make --no-print-directory -C "$fixture/repo" help > "$fixture/help.log"
 [[ ! -e "$fixture/repo/.tools" ]]
 cat > "$fixture/repo/scripts/ci/run-release.sh" <<'STUB'
 #!/usr/bin/env bash
-printf reached > "$RELEASE_SENTINEL"
+printf '%s\n' "$*" > "$RELEASE_SENTINEL"
 exit 99
 STUB
 export RELEASE_SENTINEL="$fixture/release-ran"
 for target in release-patch release-minor release-major release-resume; do
     status=0
     make --no-print-directory -C "$fixture/repo" "$target" VERSION=0.1.0 > "$fixture/$target.log" 2>&1 || status=$?
-    [[ "$status" == 2 && ! -e "$RELEASE_SENTINEL" ]]
-    grep -F 'IC Wire releases are disabled' "$fixture/$target.log" >/dev/null
+    [[ "$status" == 2 && -e "$RELEASE_SENTINEL" ]]
+    if [[ "$target" == release-resume ]]; then expected="resume 0.1.0 origin main"; else expected="${target#release-} origin main"; fi
+    [[ "$(cat "$RELEASE_SENTINEL")" == "$expected" ]]
+    rm "$RELEASE_SENTINEL"
 done
 
 # Admit the actual local Cargo recipes without compiling or running tests.
@@ -99,4 +103,4 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
     cmp "$fixture/staged-before" "$fixture/staged-after"
 )
 complete=true
-printf '%s\n' 'Local Make routing, release refusal and native formatting hook passed (disposable Git fixture).'
+printf '%s\n' 'Local Make routing, release routing and native formatting hook passed (disposable Git fixture).'
