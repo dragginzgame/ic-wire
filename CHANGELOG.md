@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.5]
+## [0.1.5] - 2026-10-16
 
 - Add the unpublished Postcard-only Rust runtime: explicit field/variant derives,
   bounded collections/text/bytes, finite schema budgets, canonical typed method
