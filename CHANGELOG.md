@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.4]
+## [0.1.4] - 2026-10-16
 
 - Add a Postcard-only installed protected-command experiment with bounded stable
   receipts. Verify direct-caller authorization, exact replay, conflicting request
