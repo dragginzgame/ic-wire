@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.3]
+## [0.1.3] - 2026-10-16
 
 - Exercise the same Postcard request/reply contract through Chromium and two
   installed canisters. Validate peer replies, retain exact repeated bytes, verify
