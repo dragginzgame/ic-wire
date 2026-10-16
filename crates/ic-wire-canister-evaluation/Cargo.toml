@@ -14,6 +14,7 @@ bindings = ["dep:postcard-bindgen"]
 candid-codec = []
 management = []
 peer = []
+replay = []
 
 [dependencies]
 candid.workspace = true
@@ -33,6 +34,11 @@ wasmparser.workspace = true
 [[example]]
 name = "measure-canisters"
 path = "examples/measure/mod.rs"
+
+[[example]]
+name = "replay-fixture"
+path = "examples/replay_fixture/mod.rs"
+required-features = ["replay"]
 
 [[example]]
 name = "browser-fixture"

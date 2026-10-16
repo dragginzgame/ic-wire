@@ -28,6 +28,8 @@ The [browser trial](docs/browser-interop.md) demonstrates a typed TypeScript cli
 using generated Postcard bindings in real Chromium against local PocketIC.
 The [peer extension](docs/peer-interop.md) exercises those same bytes through a
 forwarding canister and verifies the actual recipient caller.
+The [protected-command trial](docs/command-replay.md) qualifies direct-caller
+authorization, atomic local effects and stable exact-byte replay across upgrades.
 The [consumer adoption assessment](docs/consumer-adoption.md) maps Canic and sibling
 integration work and the remaining prerequisites.
 

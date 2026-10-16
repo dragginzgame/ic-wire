@@ -31,7 +31,8 @@ It is not an installed IC endpoint or an accepted runtime API.
 The released 0.1.2 batch generates scalar request serialization from an explicit
 schema declaration, distinguishes retained request/reply types and adds four
 compiler rejection checks. The existing six-byte request vector is preserved.
-The maintainer released and pushed 0.1.2; workspace metadata is at 0.1.2.
+The maintainer subsequently released and pushed 0.1.3; workspace metadata is at
+0.1.3. The earlier 0.1.2 evidence below retains its original source identity.
 That release includes the
 [matched canister experiment](../canister-comparison.md): three scalar/blob
 inputs, four installed artifacts, real management calls, Wasm sizes and separate
@@ -87,7 +88,7 @@ Package publication remains disabled. The local release fixture qualifies Git
 version/tag/push and recovery with substituted setup/validation gates; no real
 repository release was executed while wiring the adapters.
 
-## Pending 0.1.3
+## Released 0.1.3
 
 The [nested authority extension](../nested-authority.md) adds an installed update
 endpoint with at most eight delegates and eight grants per delegate. Optional
@@ -99,7 +100,7 @@ and two real management calls. The largest authority is 250 Postcard bytes versu
 966 Candid bytes; strict decode is about 100k versus 916k–922k instructions.
 New matched Wasm results include both endpoints; historical measurements are not
 overwritten or used as a cross-build savings baseline. No runtime API or sibling
-adoption is introduced. The manifest stays at the released 0.1.2.
+adoption is introduced. These changes were released in 0.1.3.
 
 The [consumer adoption assessment](../consumer-adoption.md) now traces committed
 Canic endpoint/call adapters, auth extraction, replay, hash and metadata owners.
@@ -118,7 +119,19 @@ dispatches no peer call; unconfigured/unavailable peers and unauthorized fixture
 configuration reject. Five native tests pass under both codec selections.
 This proves the local stateless transport slice, not durable replay, a nested
 Result contract or general generated bounds. Protected command/replay behavior
-is the next integration proof.
+is extended by the following local fixture.
+
+## Pending 0.1.4
+
+The [protected-command trial](../command-replay.md) adds a separate Postcard-only
+feature with controller/caller/audience/expiry checks and eight stable receipts.
+Installed PocketIC checks pass for exact replay, conflicting identities, 36
+admission/truncation rejections without mutation, atomic trap rollback, identical
+Wasm upgrade recovery, retained application failure and capacity refusal. The
+combined peer/replay library suite passes seven tests; all-feature Clippy and
+Rust 1.91 replay host/Wasm checks pass. No consumer source or production API
+changed. This qualifies local atomic effects under direct-caller auth, not
+delegated proofs or effects across awaits. Versions remain at released 0.1.3.
 
 ## Next action
 

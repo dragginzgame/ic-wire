@@ -98,7 +98,10 @@ The runtime must remain independent of CDK, Candid and host-side generators.
 The scalar/browser and nested Rust fixtures prove parts of this separately.
 They do not yet prove that a developer can declare a nested endpoint once and
 get bounded, matching Rust and browser clients. The peer trial proves transport
-and exact repetitions, but has no committed business effect to protect.
+and exact repetitions. The subsequent [protected-command trial](command-replay.md)
+adds an atomic local effect with stable receipts and same-contract upgrade replay.
+It uses direct-caller authorization; delegated proofs and external effects remain
+unqualified.
 
 ### Canic implementation and retirement
 

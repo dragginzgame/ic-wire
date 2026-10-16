@@ -5,6 +5,9 @@ pub mod authority;
 #[cfg(feature = "peer")]
 mod peer;
 
+#[cfg(feature = "replay")]
+mod replay;
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize, de};
 use std::{cell::RefCell, fmt};

@@ -7,7 +7,7 @@ export RUSTUP_AUTO_INSTALL := 0
 include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
-.PHONY: evaluate-codecs evaluate-journey check-typed-diagnostics evaluate-canisters
+.PHONY: evaluate-codecs evaluate-journey check-typed-diagnostics evaluate-canisters evaluate-replay
 .PHONY: check-release check-canister-evaluation
 .PHONY: evaluate-browser check-browser
 
@@ -20,7 +20,7 @@ check-browser:
 	+@env npm --prefix examples/browser run build
 
 check-canister-evaluation:
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features peer
+	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features peer,replay
 	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features candid-codec,peer
 	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
 	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown
@@ -30,6 +30,9 @@ check-canister-evaluation:
 
 evaluate-canisters:
 	+@bash scripts/ci/evaluate-canisters.sh
+
+evaluate-replay:
+	+@bash scripts/ci/evaluate-replay.sh
 
 check-typed-diagnostics:
 	+@bash scripts/ci/test-typed-diagnostics.sh
@@ -49,6 +52,7 @@ help:
 		'Evaluation: evaluate-journey (native typed request/reply prototype)' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: evaluate-canisters (requires explicit POCKET_IC_BIN)' \
+		'Evaluation: evaluate-replay (installed atomic-command/replay correctness)' \
 		'Evaluation: check-browser, evaluate-browser (prepared Node/npm/Chromium)' \
 		'Evaluation: check-canister-evaluation (compile and lint; no emulator)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \
@@ -76,7 +80,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/status/current.md
 
 check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"

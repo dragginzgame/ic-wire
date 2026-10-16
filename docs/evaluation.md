@@ -14,6 +14,9 @@ outside that measured subset. The subsequent
 client against the installed Postcard fixture. Postcard is now the selected
 engine for controlled RPC and owned user endpoints; adoption remains bounded
 by the unresolved protocol requirements.
+The [protected-command trial](command-replay.md) now qualifies bounded stable
+receipts for synchronous local effects, including trap rollback and replay after
+an identical Wasm upgrade. Delegated auth and external effects remain separate.
 
 Produce a reproducible codec comparison and one complete typed developer journey.
 Do not adopt a codec or promise savings solely from source size or symbol names.

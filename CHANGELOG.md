@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4]
+
+- Add a Postcard-only installed protected-command experiment with bounded stable
+  receipts. Verify direct-caller authorization, exact replay, conflicting request
+  rejection, atomic trap rollback, same-contract upgrade recovery and capacity
+  refusal. Keep application failures distinct and retain their response bytes.
+  This is evaluation evidence, not a production Canic replay/auth adapter.
+
 ## [0.1.3] - 2026-10-16
 
 - Exercise the same Postcard request/reply contract through Chromium and two

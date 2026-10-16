@@ -1,0 +1,30 @@
+{
+  "capacity_refusal": true,
+  "cargo_encoded_rustflags": "",
+  "final_balance": 17,
+  "limits": "No delegated proofs, external effects, browser command or format migration; lost reply modeled by discarding a successful response.",
+  "overflow_response_retained": true,
+  "profile": "canister-evaluation; wasm32-unknown-unknown; replay feature; Postcard",
+  "rejections_without_mutation": 36,
+  "request_hex": "d0a4010001040a7fffffffffe000000101ffffffffffffffffff010107",
+  "response_hex": "d0a40101010007",
+  "retained_receipts": 8,
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "rustflags": "",
+  "scenario": "direct-controller atomic local command; eight retained receipts",
+  "server_sha256": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792",
+  "server_version": "pocket-ic-server 16.0.0\n",
+  "source_sha256": {
+    "Cargo.lock": "e00c06545cbecd6a890e7bea541ec3418317c6dbcd1ee72de93f60e3d9d15e2f",
+    "Cargo.toml": "eb01365aadbd8d6d14602bf0bebdf9880f31cb86c095ec63097abe9273611eb3",
+    "crates/ic-wire-canister-evaluation/Cargo.toml": "27ad6f21b667364d5ed83b062620db09ffdc715f1401caecd8f35be80ede9379",
+    "crates/ic-wire-canister-evaluation/examples/replay_fixture/mod.rs": "8d922acc1ad413a19e9a0da3983c581c0d8398019befbcd0ec036bd313d29aee",
+    "crates/ic-wire-canister-evaluation/src/authority/mod.rs": "933489488f31507ec165fc7a2a99fb5fe09c2d759f112cf701a6e775b8ac9662",
+    "crates/ic-wire-canister-evaluation/src/lib.rs": "ed95a419850c94fc81f25847c1ad71d707ebdd347d60e83481a553a83fefcff5",
+    "crates/ic-wire-canister-evaluation/src/replay/mod.rs": "76bfd24d27810ed0a6c26b36e4242de36491801248728419c62e94a870ffb1b2",
+    "scripts/ci/evaluate-replay.sh": "66b44baeb4da54daa060cba0738bb91aad39d33f35b0db8c71a605c6cbcb0bf9"
+  },
+  "trap_rollback": true,
+  "upgrade_replay": true,
+  "wasm_sha256": "c82024c537ae5775a24e034dbf16c94838c571e4a7a309b7bd118623346c60e1"
+}
