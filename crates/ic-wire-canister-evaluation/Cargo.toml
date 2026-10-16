@@ -16,6 +16,7 @@ management = []
 macro-fixture = ["dep:ic-wire", "dep:ic-wire-derive", "ic-wire-derive/adapter-fixture"]
 peer = []
 replay = ["dep:ic-wire"]
+runtime-benchmark = ["dep:ic-wire"]
 
 [dependencies]
 candid.workspace = true
@@ -31,6 +32,11 @@ pocket-ic.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
 wasmparser.workspace = true
+
+[[example]]
+name = "runtime-measure"
+path = "examples/runtime_measure/mod.rs"
+required-features = ["runtime-benchmark"]
 
 [[example]]
 name = "measure-canisters"

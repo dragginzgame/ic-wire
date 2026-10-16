@@ -5,7 +5,9 @@
 The [Postcard runtime](runtime.md) and [installed adoption proof](runtime-adoption.md)
 now qualify a controlled Rust-to-Rust adoption path. Historical comparisons below
 retain their original bytes and build identities; their savings are not measurements
-of the new runtime envelope. Browser/runtime code generation remains outstanding.
+of the new runtime envelope. The [current-runtime comparison](runtime-comparison.md)
+now measures that envelope and its bounds on a mixed bounded schema. Optional
+TypeScript generation and installed browser correctness are also qualified.
 
 The initial [payload screen](codec-screen.md) implements steps 1–2 with bounded
 synthetic fixtures and partial rejection evidence. It does not complete the typed

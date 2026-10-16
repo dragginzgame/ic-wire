@@ -1,8 +1,7 @@
 # Current handoff
 
-Updated 2026-10-16. Workspace versions remain 0.1.6 after the maintainer release;
-the pending batch is documented under 0.2.0 because the public Schema enum gains
-float metadata and becomes non-exhaustive. Package versions are unchanged.
+Updated 2026-10-16. The maintainer released 0.2.0; workspace versions remain
+0.2.0. The compatible benchmark-only batch is documented under pending 0.2.1.
 
 ## Implemented runtime
 
@@ -71,9 +70,13 @@ subnormals, and reject NaN/infinity. TypeScript rejects silent f32 rounding.
 The conformance corpus includes bounded heterogeneous SQL-shaped pages, not actual
 IcyDB contracts. String/Vec still convert through existing bounded wrappers.
 Recursive values remain unsupported; rarity does not remove their admission needs.
-Current-runtime performance comparisons and full IcyDB SQL integration remain
-unmeasured/unqualified. Existing runtime/browser/macro evidence stays historical
-at its recorded source hashes; this float addition is native/Node conformance.
+The [current-runtime comparison](../runtime-comparison.md) now measures a bounded
+mixed record against strict Candid: 1.74–2.49× fewer codec instructions, 86.97%
+smaller internal-only Wasm and 8.55% smaller Wasm with management Candid retained.
+All rows share the same maximum schema; empty values still pay maximum scratch
+allocation costs. This is not actual IcyDB SQL integration or a scalar-only matrix.
+Earlier runtime/browser/macro evidence stays historical at its recorded hashes;
+the new benchmark adds installed float measurements to native/Node conformance.
 
 Browser login/delegation, composite-query behavior and external-effect recovery
 remain unqualified. SDK/CDK transports allocate raw replies before codec checks;
@@ -87,6 +90,10 @@ ordered keys, journals and authenticated cursor formats stay outside scope.
 
 ## Evidence and tooling
 
+The current-runtime comparison passes 72 measured calls, 120 rejection checks,
+matched export checks and two real management calls. Both codec configurations
+pass focused clippy; the default evaluation tests and Rust 1.91 Wasm check pass.
+
 Historical [codec comparison](../canister-comparison.md),
 [nested authority](../nested-authority.md) and [replay](../command-replay.md) reports
 retain their original source/build identities. They do not measure the new runtime
@@ -97,6 +104,6 @@ Shared Tooling 0.15.4 remains pinned at
 `879eb2b021522252a67e908dbc217a0f4efb2a6f`. See [development](../development.md)
 for setup, focused checks and maintainer-operated Git releases, separate from
 package publication. The disposable patch-release test now owns its synthetic
-changelog, so the real pending 0.2.0 notes do not block its recovery scenarios. Hosted macOS qualification of the earlier temporary-path
+changelog, so minor-release notes do not block its recovery scenarios. Hosted macOS qualification of the earlier temporary-path
 fix remains unverified here. No broad local CI or sibling suite is required or run
 for this batch; focused runtime/adapter results are recorded in the adoption proof.

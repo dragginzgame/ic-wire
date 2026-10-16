@@ -4,7 +4,10 @@ use candid::CandidType;
 use serde::{Deserialize, Serialize, de};
 use std::{fmt, marker::PhantomData};
 
-use super::{COUNTERS, CodecError, MAX_WIRE, decode_value, encode};
+#[cfg(not(feature = "runtime-benchmark"))]
+use super::COUNTERS;
+#[cfg(any(test, not(feature = "runtime-benchmark")))]
+use super::{CodecError, MAX_WIRE, decode_value, encode};
 
 const CONTRACT: u32 = 0x4155;
 const LIMIT: usize = 8;
@@ -103,6 +106,7 @@ impl Authority {
         self
     }
 }
+#[cfg(any(test, not(feature = "runtime-benchmark")))]
 fn decode(bytes: &[u8]) -> Result<Authority, CodecError> {
     let value: Authority = decode_value(bytes)?;
     if value.contract != CONTRACT || value.direction != 0 {
@@ -110,6 +114,7 @@ fn decode(bytes: &[u8]) -> Result<Authority, CodecError> {
     }
     Ok(value)
 }
+#[cfg(not(feature = "runtime-benchmark"))]
 #[ic_cdk::update(manual_reply = true)]
 fn evaluate_authority() {
     if ic0::msg_arg_data_size() > MAX_WIRE {

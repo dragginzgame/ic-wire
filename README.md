@@ -28,6 +28,8 @@ The [payload screen](docs/codec-screen.md) records reproducible sizes and the
 remaining obstacles to selecting a shared encoding.
 The [matched canister experiment](docs/canister-comparison.md) adds measured
 Wasm and IC instruction evidence, including retained Candid management traffic.
+The [production runtime comparison](docs/runtime-comparison.md) measures the
+current envelopes, bounds and finite floats against strict Candid.
 The [nested authority extension](docs/nested-authority.md) adds bounded delegate
 and grant collections with new installed measurements.
 The [browser trial](docs/browser-interop.md) demonstrates a typed TypeScript client

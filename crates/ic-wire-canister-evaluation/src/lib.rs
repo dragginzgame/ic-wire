@@ -3,6 +3,10 @@
 #[cfg(feature = "macro-fixture")]
 pub mod macro_fixture;
 
+/// Production-runtime performance comparison against Candid.
+#[cfg(feature = "runtime-benchmark")]
+pub mod runtime_benchmark;
+
 /// Bounded nested evaluation contract.
 pub mod authority;
 
@@ -74,6 +78,12 @@ pub struct Message {
 
 thread_local! { static COUNTERS: RefCell<[u64; 3]> = const { RefCell::new([0; 3]) }; }
 
+#[cfg(any(
+    test,
+    feature = "peer",
+    feature = "candid-codec",
+    not(feature = "runtime-benchmark")
+))]
 #[derive(Debug)]
 enum CodecError {
     Encode,
@@ -84,6 +94,12 @@ enum CodecError {
     Limit,
 }
 
+#[cfg(any(
+    test,
+    feature = "peer",
+    feature = "candid-codec",
+    not(feature = "runtime-benchmark")
+))]
 fn encode<T: Serialize + CandidType>(value: &T) -> Result<Vec<u8>, CodecError> {
     #[cfg(feature = "candid-codec")]
     let bytes = candid::encode_one(value).map_err(|_| CodecError::Encode)?;
@@ -100,6 +116,12 @@ fn encode<T: Serialize + CandidType>(value: &T) -> Result<Vec<u8>, CodecError> {
     Ok(bytes)
 }
 
+#[cfg(any(
+    test,
+    feature = "peer",
+    feature = "candid-codec",
+    not(feature = "runtime-benchmark")
+))]
 fn decode_value<T: serde::de::DeserializeOwned + Serialize + CandidType>(
     bytes: &[u8],
 ) -> Result<T, CodecError> {
@@ -135,6 +157,7 @@ fn decode_value<T: serde::de::DeserializeOwned + Serialize + CandidType>(
     Ok(value)
 }
 
+#[cfg(any(feature = "peer", not(feature = "runtime-benchmark")))]
 fn decode(bytes: &[u8]) -> Result<Message, CodecError> {
     let value: Message = decode_value(bytes)?;
     if value.contract != CONTRACT || value.direction != 0 {
@@ -143,6 +166,7 @@ fn decode(bytes: &[u8]) -> Result<Message, CodecError> {
     Ok(value)
 }
 
+#[cfg(any(feature = "peer", not(feature = "runtime-benchmark")))]
 #[ic_cdk::update(manual_reply = true)]
 fn evaluate() {
     if ic0::msg_arg_data_size() > MAX_WIRE {

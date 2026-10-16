@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1]
+
+- Add a reproducible installed comparison of the production runtime against
+  strict Candid, covering bounded blobs, UTF-8 text and finite doubles, with
+  separate internal-only and management-enabled Wasm measurements. See the
+  [measured results and limitations](docs/runtime-comparison.md).
+
 ## [0.2.0] - 2026-10-16
 
 - Isolate the patch-release test changelog from the real pending release, so
