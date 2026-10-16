@@ -96,6 +96,7 @@ The runtime adoption report is correctness evidence, not a performance compariso
 Shared Tooling 0.15.4 remains pinned at
 `879eb2b021522252a67e908dbc217a0f4efb2a6f`. See [development](../development.md)
 for setup, focused checks and maintainer-operated Git releases, separate from
-package publication. Hosted macOS qualification of the earlier temporary-path
+package publication. The disposable patch-release test now owns its synthetic
+changelog, so the real pending 0.2.0 notes do not block its recovery scenarios. Hosted macOS qualification of the earlier temporary-path
 fix remains unverified here. No broad local CI or sibling suite is required or run
 for this batch; focused runtime/adapter results are recorded in the adoption proof.

@@ -31,6 +31,12 @@ release-push-check:
 	@bash scripts/ci/ic-wire-release.sh push
 	@test ! -f .git/hold-push
 MAKE
+# This fixture exercises patch delivery, independently of the consumer's pending
+# patch/minor/major notes. Only the disposable copy receives synthetic notes;
+# the real release preflight still checks the real changelog against its candidate.
+previous="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
+candidate="$(bash scripts/ci/next-release-version.sh "$previous" patch)"
+printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$candidate" "$previous" > CHANGELOG.md
 git init -q -b main
 git config user.name Fixture
 git config user.email fixture@example.invalid
@@ -40,8 +46,6 @@ git commit -qm 'Disposable release baseline'
 git init -q --bare "$fixture/remote.git"
 git remote add origin "$fixture/remote.git"
 git push -q -u origin main
-previous="$(make -s release-version)"
-candidate="$(bash scripts/ci/next-release-version.sh "$previous" patch)"
 source="$(git rev-parse HEAD)"
 # Dirty source must refuse before gate or version effects.
 printf '\nfixture edit\n' >> README.md

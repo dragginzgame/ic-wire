@@ -2,6 +2,9 @@
 
 ## [0.2.0]
 
+- Isolate the patch-release test changelog from the real pending release, so
+  minor/major release notes do not prevent validation/recovery checks from running.
+
 - Add finite f32/f64 wire wrappers and matching TypeScript number projections,
   preserving finite bits while rejecting NaN and infinity. Qualify scalar edges
   and bounded SQL-shaped pages with Rust/TypeScript vectors. Recursion remains
