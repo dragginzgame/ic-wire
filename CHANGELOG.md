@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.2]
+## [0.1.2] - 2026-10-16
 
 - Enable maintainer-operated Git releases through Shared Tooling, with coordinated
   Cargo metadata, retained validation evidence and interrupted-delivery checks.
