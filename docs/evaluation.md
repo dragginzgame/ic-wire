@@ -2,6 +2,11 @@
 
 ## Outcome
 
+The [Postcard runtime](runtime.md) and [installed adoption proof](runtime-adoption.md)
+now qualify a controlled Rust-to-Rust adoption path. Historical comparisons below
+retain their original bytes and build identities; their savings are not measurements
+of the new runtime envelope. Browser/runtime code generation remains outstanding.
+
 The initial [payload screen](codec-screen.md) implements steps 1–2 with bounded
 synthetic fixtures and partial rejection evidence. It does not complete the typed
 developer journey. The [matched canister experiment](canister-comparison.md)

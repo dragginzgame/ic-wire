@@ -1,5 +1,10 @@
 # Protected command and replay trial
 
+Historical 0.1.4 fixture and evidence. Reproduce this exact tuple contract from
+the 0.1.4 source tag. The current `make evaluate-replay` uses the new
+[runtime contract and adoption trial](runtime-adoption.md); it starts fresh state
+and does not read or migrate this historical fixture layout.
+
 This evaluation-only Postcard fixture qualifies one local state-changing command
 under direct IC caller authorization. It is not a Canic adapter, delegated-proof
 implementation or production replay API. The `replay` feature is excluded from

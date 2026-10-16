@@ -1,7 +1,8 @@
 # IC Wire contributor instructions
 
 Read docs/status/current.md first, then README.md, docs/design.md and
- docs/evaluation.md. This is an unpublished investigation, not an implemented codec.
+ docs/evaluation.md. The unpublished Postcard runtime is qualified for bounded
+Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
 rules, vendored at `879eb2b021522252a67e908dbc217a0f4efb2a6f` (0.15.4).
@@ -15,7 +16,8 @@ moving sibling checkout or patch snapshot-owned files in place.
   name, publish, create a remote, push or release without explicit authorization.
 - Establish a reusable Rust developer experience and a substantial measured win
   before broad adoption. Postcard is selected for controlled RPC and owned user
-  endpoints; the wire contract and public API remain unfrozen.
+  endpoints. Preserve the explicit runtime contract in docs/runtime.md; no Candid
+  mode is part of the production API.
 - Keep runtime code Wasm-safe and independent of Candid, CDK and host tooling.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.

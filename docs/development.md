@@ -1,8 +1,8 @@
 # Local development
 
-IC Wire remains an unpublished, dependency-free no_std scaffold. These commands
-qualify contributor tooling and compilation; they do not establish a codec,
-wire contract or performance result.
+IC Wire provides an unpublished no_std + alloc Postcard runtime. See the
+[runtime guide](runtime.md) for its contract and [adoption evidence](runtime-adoption.md)
+for installed correctness checks. Compilation alone establishes no performance win.
 
 ## Setup
 

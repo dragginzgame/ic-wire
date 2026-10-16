@@ -1,168 +1,68 @@
 # Current handoff
 
-Updated 2026-10-16. The maintainer requested this local ic-wire scaffold after
-investigating removal of Candid from Canic-owned traffic. The name must remain
-unreserved on crates.io until the direction, usability and benefit are accepted.
+Updated 2026-10-16. The maintainer released/pushed 0.1.4, then requested a
+Postcard-only path until Canic can adopt IC Wire. Workspace versions remain
+0.1.4; the pending compatible addition is documented under 0.1.5.
 
-## Accepted scope
+## Implemented runtime
 
-- Shared Rust codec ownership outside host-only libraries.
-- Postcard selected for controlled inter-canister calls and owned user endpoints;
-  wire contract and public API remain unfrozen.
-- Canic, IC Relay, IcyDB and native clients are intended consumers.
-- Developer ease comparable to Candid, strong documentation and significant
-  measured benefits are requirements, not established properties.
-- External Candid contracts remain supported through their owning adapters.
-- No source adoption in sibling repositories is authorized by this setup.
+The unpublished `ic-wire` library now provides a no_std + alloc Postcard runtime,
+with the unpublished host-side `ic-wire-derive` crate. Its normal dependency graph
+excludes Candid, CDK and host tooling. Read [the runtime guide](../runtime.md)
+for the maintained public API, wire rules, supported types and Canic adapter steps.
 
-## Implemented
+- `Wire` derives serialize records by explicit field IDs and enums by explicit
+  variant IDs, independent of Rust declaration order. Generic/recursive derives
+  and unbounded containers are excluded. IDs and method identity are consumer-owned.
+- Bounded List, Bytes and UTF-8 Text compose with fixed-width integers, unit,
+  bool, Option, Result, fixed arrays and derived records/enums. Principal bytes
+  use Bytes<29>; existing consumer principal validation stays at the adapter.
+- Method binds request/response types, exported name, identity and per-direction
+  limits. Schema maxima bound bytes, value heap plus scratch, nodes and depth
+  before decoding. Input admission is conservative over the entire schema.
+- Canonical envelopes include marker, method identity and direction. Strict decode
+  rejects trailing/noncanonical bytes; immutable typed buffers retain exact bytes.
+  There is no Candid mode or runtime-owned retry/auth/storage policy.
 
-A virtual Cargo workspace, dependency-free no_std crate with no public API,
-publication disabled, initial license and design/evaluation documents.
-No production runtime codec, derive, endpoint adapter or wire contract is implemented.
-An evaluation-only example compares four encodings on seven synthetic fixtures;
-see [the payload screen](../codec-screen.md) for results and reproducibility.
-The production library's codec dependencies are development-only. A separate,
-unpublished evaluation package owns matched canister and PocketIC fixtures.
-The 0.1.1 batch added `make evaluate-journey`: a native typed balance
-request/reply experiment with explicit layouts, identity/direction checks and
-exact-byte retry retention. See [developer experience](../developer-experience.md).
-It is not an installed IC endpoint or an accepted runtime API.
-The released 0.1.2 batch generates scalar request serialization from an explicit
-schema declaration, distinguishes retained request/reply types and adds four
-compiler rejection checks. The existing six-byte request vector is preserved.
-The maintainer subsequently released and pushed 0.1.3; workspace metadata is at
-0.1.3. The earlier 0.1.2 evidence below retains its original source identity.
-That release includes the
-[matched canister experiment](../canister-comparison.md): three scalar/blob
-inputs, four installed artifacts, real management calls, Wasm sizes and separate
-strict-decode/handler/encode instruction-counter evidence. Postcard improves both
-measured codec regions here; complete Wasm reduction falls from 88.2% to 6.83%
-when the fixture retains Candid management traffic. This is not an application
-savings projection. These results preceded the maintainer's Postcard selection.
-That release also adds the [browser trial](../browser-interop.md): generated
-JavaScript/TypeScript bindings, a bounded typed client, and three signed Chromium
-updates against local PocketIC. Rust vectors match exactly, including large u64
-values; 4,264 truncated replies and wrong-root certificate verification reject.
-Generated decoder allocation and number/bigint behavior require the wrapper.
-Shared Tooling 0.15.4 is vendored at reviewed committed revision
-`879eb2b021522252a67e908dbc217a0f4efb2a6f`, with its manifest, common Make
-interface, setup catalogs/installers and formatting hook. Local Make targets and
-Linux/macOS CI cover scaffold checks, Wasm, MSRV and contributor tooling.
-See [development](../development.md). Maintainer-operated release entrypoints now
-use the shared runner and pinned Cargo metadata adapter for direct origin/main
-Git delivery. Package publication remains disabled. Source-bound validation and
-prepared-byte receipts protect interrupted delivery; release execution is separate
-from ordinary agent work.
+The [installed adoption proof](../runtime-adoption.md) uses these same production
+functions in a nested query, a protected command and two real peer deliveries.
+It checks retained success/failure responses, conflicting requests, trap rollback,
+capacity refusal and same-contract upgrade replay. The private 0.1.4 tuple replay
+probe is retired from current source; its historical evidence remains labeled.
+This qualifies initial controlled Rust endpoint integration, not full Canic rollout.
 
-## Tooling validation (2026-10-16)
+## Scope and remaining work
 
-The 0.1.2 prototype passes eleven example tests and four compile-fail cases on
-Linux. Its generated schema remains limited to nonempty scalar records.
-The matched canister fixture passes 36 typed replies, 60 malformed-call rejections
-and two real management calls in local PocketIC. Host/Wasm checks pass on Rust
-1.99 and 1.91; the production library's normal dependency graph remains empty.
+Canic owns query/update macros, dispatch, auth, replay policy, transport callbacks,
+metadata and exported-method validation. The [consumer assessment](../consumer-adoption.md)
+traces those committed source owners. Siblings remain read-only and unmodified.
+No publication, commit, push, release or version change is part of ordinary work.
+All packages remain `publish = false`. No registry name is reserved.
 
-On Linux x86_64, explicit `make install-tools` and offline `make tools-check`
-passed for the complete common toolset. Snapshot integrity, local documentation
-links, native formatting and the local Make/hook fixture passed. The fixture
-qualifies actual Cargo target routing with substitutes, shared release routing,
-native hook formatting, unrelated edit preservation and partial
-staging rejection in disposable Git repositories. ShellCheck and actionlint
-passed for the consumer script and workflow.
+General TypeScript generation for the runtime envelope, browser auth/delegation,
+composite-query behavior and external-effect recovery remain unqualified. Existing
+[browser](../browser-interop.md) and [peer](../peer-interop.md) trials use historical
+private layouts and are not runtime clients. Do not present their success as a
+browser rollout proof. The current CDK peer transport allocates its raw reply;
+Canic must enforce pre-copy reply limits in its own transport/callback layer.
 
-Native/Wasm library checks passed on Rust 1.91.0; the development Wasm check
-passed on Rust 1.99.0. These remain empty-scaffold compilation evidence.
-No full local `make ci` or sibling suite was run. Initial hosted Ubuntu CI passed;
-macOS arm64 failed the Make fixture's temporary-path comparison. The failure was
-reproduced with `TMPDIR=/tmp/` on Linux and corrected by resolving the fixture's
-physical path. Hosted macOS qualification of the fix is still outstanding.
+Next, integrate one controlled Rust-to-Rust Canic endpoint when sibling source
+changes are authorized, using the concrete runtime guide and shared contracts.
+Keep full auth/hash/client conversion coordinated; do not add compatibility lanes.
+An installed IcyDB schema comparison remains optional and separate. Database rows,
+ordered keys, journals and authenticated cursor formats stay outside scope.
 
-At the maintainer's request, initialized local Git on `main`, activated the
-formatting hook and created the private
-[dragginzgame/ic-wire repository](https://github.com/dragginzgame/ic-wire).
-`origin` points to that repository, whose description identifies this as an
-unpublished investigation. Earlier Git-dependent checks used disposable exports;
-the initial Shared Tooling snapshot came from clean disposable Git checkouts.
-Package publication remains disabled. The local release fixture qualifies Git
-version/tag/push and recovery with substituted setup/validation gates; no real
-repository release was executed while wiring the adapters.
+## Evidence and tooling
 
-## Released 0.1.3
+Historical [codec comparison](../canister-comparison.md),
+[nested authority](../nested-authority.md) and [replay](../command-replay.md) reports
+retain their original source/build identities. They do not measure the new runtime
+header or generic bounds overhead. No production Canic savings are established.
+The runtime adoption report is correctness evidence, not a performance comparison.
 
-The [nested authority extension](../nested-authority.md) adds an installed update
-endpoint with at most eight delegates and eight grants per delegate. Optional
-expiry is exercised with both present and absent values. Four host tests pass
-under both codec selections, including rejection before element decoding for
-known and unknown sequence lengths. Rust 1.99/1.91 host/Wasm checks pass.
-The installed extended corpus passes 72 replies, 132 malformed-call rejections
-and two real management calls. The largest authority is 250 Postcard bytes versus
-966 Candid bytes; strict decode is about 100k versus 916k–922k instructions.
-New matched Wasm results include both endpoints; historical measurements are not
-overwritten or used as a cross-build savings baseline. No runtime API or sibling
-adoption is introduced. These changes were released in 0.1.3.
-
-The [consumer adoption assessment](../consumer-adoption.md) now traces committed
-Canic endpoint/call adapters, auth extraction, replay, hash and metadata owners.
-A single endpoint is a moderate integration after a runtime API exists; a full
-owned-RPC cut requires coordinated consumer changes. Siblings remain untouched.
-The assessment now gives a concrete Canic implementation/retirement sequence,
-separates application-owned IcyDB DTOs from optional schema-codec replacement,
-and identifies supporting libraries needing only host integration or no adoption.
-It records additional committed source identities and acceptance checks; these
-are proposed consumer actions, not implemented adapters or measured sibling wins.
-The [peer transport trial](../peer-interop.md) now exercises the same scalar/blob
-contract through direct browser and forwarded inter-canister calls. Six signed
-browser updates and six peer calls pass; recipient observations verify actual
-caller identity and three identical-request repetitions. Invalid sender input
-dispatches no peer call; unconfigured/unavailable peers and unauthorized fixture
-configuration reject. Five native tests pass under both codec selections.
-This proves the local stateless transport slice, not durable replay, a nested
-Result contract or general generated bounds. Protected command/replay behavior
-is extended by the following local fixture.
-
-## Pending 0.1.4
-
-The [protected-command trial](../command-replay.md) adds a separate Postcard-only
-feature with controller/caller/audience/expiry checks and eight stable receipts.
-Installed PocketIC checks pass for exact replay, conflicting identities, 36
-admission/truncation rejections without mutation, atomic trap rollback, identical
-Wasm upgrade recovery, retained application failure and capacity refusal. The
-combined peer/replay library suite passes seven tests; all-feature Clippy and
-Rust 1.91 replay host/Wasm checks pass. No consumer source or production API
-changed. This qualifies local atomic effects under direct-caller auth, not
-delegated proofs or effects across awaits. Versions remain at released 0.1.3.
-
-## Next action
-
-The [shared-codec assessment](../shared-codec-evaluation.md) reviewed pinned
-IcyDB source and keeps sharing optional. Bounded message/schema serialization
-has useful overlap; row projection, ordered keys and authenticated/recovery
-envelopes retain distinct requirements. The subsequent payload screen gives
-Postcard the smallest bytes for all seven fixtures, but demonstrates its implicit
-field-order hazard. CBOR exceeds Candid on three fixtures. The fixed comparator
-does not beat Postcard. The subsequent installed-canister comparison supplies
-bounded fixture evidence. Postcard is selected; no sibling changes have been made.
-
-The browser trial passes on Chromium 156, Node 24.21.0 and SDK 6.1.1. Its generated
-bindings cover only the scalar/blob fixture; query endpoints, login delegation,
-frontend rollout and general generated bounds remain unqualified. Historical
-canister size evidence retains its original source/lock hashes and was not
-remeasured after adding browser binding generation.
-
-Continue docs/evaluation.md with an installed IcyDB-shaped schema artifact,
-and qualify generated-layout ergonomics plus intended
-Canic/client integration. Explicit tuple conversions demonstrate declaration-order
-independence locally; schema identity and general bounds remain unresolved.
-The native screen already includes an IcyDB-shaped schema; installed qualification
-and general nested browser bindings remain outstanding.
-Keep all candidates unpublished and compare equal-behavior Wasm builds; IcyDB
-adoption is not a prerequisite for choosing IC Wire's encoding.
-
-Read docs/evidence.md before citing size numbers. Historical symbol attribution
-suggests a substantial opportunity but establishes neither net savings nor speedup.
-The existing Relay delivery fixture already uses bounded binary bytes; its runtime
-remains a scaffold. IcyDB storage and ordered-key encoding are outside scope.
-
-The scaffold is not ready for publication or consumer adoption. Initial validation
-is recorded separately in docs/scaffold-validation.md.
+Shared Tooling 0.15.4 remains pinned at
+`879eb2b021522252a67e908dbc217a0f4efb2a6f`. See [development](../development.md)
+for setup, focused checks and maintainer-operated Git releases, separate from
+package publication. Hosted macOS qualification of the earlier temporary-path
+fix remains unverified here. No broad local CI or sibling suite is required or run
+for this batch; focused runtime/adapter results are recorded in the adoption proof.

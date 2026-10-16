@@ -1,18 +1,18 @@
 use super::*;
+use ic_wire::{Bytes, encode_request};
 
 #[test]
 fn rejects_bad_wire_without_mutation() {
     let caller = Principal::anonymous();
-    let bytes = postcard::to_allocvec(&(
-        CONTRACT,
-        0_u8,
-        caller.as_slice(),
-        caller.as_slice(),
-        100_u64,
-        1_u64,
-        7_u64,
-    ))
-    .unwrap();
+    let bytes = encode_request::<Apply>(&Command {
+        subject: Bytes::new(caller.as_slice().to_vec()).unwrap(),
+        audience: Bytes::new(caller.as_slice().to_vec()).unwrap(),
+        expiry: 100,
+        id: 1,
+        amount: 7,
+    })
+    .unwrap()
+    .into_bytes();
     let mut state = [0; STATE_BYTES];
     for end in 0..bytes.len() {
         assert!(execute(&mut state, &bytes[..end], caller, caller, 0).is_err());
@@ -36,16 +36,15 @@ fn scopes_receipts_to_caller_and_refuses_full_table() {
     let mut state = [0; STATE_BYTES];
     for i in 0..CAPACITY {
         let caller = Principal::from_slice(&[i as u8]);
-        let bytes = postcard::to_allocvec(&(
-            CONTRACT,
-            0_u8,
-            caller.as_slice(),
-            audience.as_slice(),
-            100_u64,
-            1_u64,
-            1_u64,
-        ))
-        .unwrap();
+        let bytes = encode_request::<Apply>(&Command {
+            subject: Bytes::new(caller.as_slice().to_vec()).unwrap(),
+            audience: Bytes::new(audience.as_slice().to_vec()).unwrap(),
+            expiry: 100,
+            id: 1,
+            amount: 1,
+        })
+        .unwrap()
+        .into_bytes();
         let reply = execute(&mut state, &bytes, caller, audience, 0).unwrap();
         assert_eq!(
             execute(&mut state, &bytes, caller, audience, 0).unwrap(),
@@ -54,16 +53,15 @@ fn scopes_receipts_to_caller_and_refuses_full_table() {
     }
     assert_eq!(u64::from_le_bytes(state[..8].try_into().unwrap()), 8);
     let before = state;
-    let bytes = postcard::to_allocvec(&(
-        CONTRACT,
-        0_u8,
-        audience.as_slice(),
-        audience.as_slice(),
-        100_u64,
-        2_u64,
-        1_u64,
-    ))
-    .unwrap();
+    let bytes = encode_request::<Apply>(&Command {
+        subject: Bytes::new(audience.as_slice().to_vec()).unwrap(),
+        audience: Bytes::new(audience.as_slice().to_vec()).unwrap(),
+        expiry: 100,
+        id: 2,
+        amount: 1,
+    })
+    .unwrap()
+    .into_bytes();
     assert_eq!(
         execute(&mut state, &bytes, audience, audience, 0),
         Err(CommandError::Capacity)

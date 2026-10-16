@@ -5,6 +5,10 @@ pub mod authority;
 #[cfg(feature = "peer")]
 mod peer;
 
+/// Shared runtime contracts used by the installed adoption trial.
+#[cfg(feature = "replay")]
+pub mod commands;
+
 #[cfg(feature = "replay")]
 mod replay;
 

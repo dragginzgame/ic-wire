@@ -1,16 +1,17 @@
 # Consumer adoption assessment
 
 Evaluated 2026-10-16 against committed source exports. A single Canic endpoint is
-an attainable integration trial once IC Wire has a usable runtime API. Replacing
+now supported by a usable Rust runtime and installed adapter fixture. Replacing
 Canic-owned RPC throughout the framework is a substantial coordinated change.
 The difficult work is preserving contracts around the encoded bytes: authorization,
 replay, hashing, client generation and deployment. Postcard itself is already
 working in the local installed/browser experiments.
 
 These are relative engineering estimates, not measured implementation times.
-IC Wire's production library still exposes no codec API. Its explicit-layout
-prototype supports scalar records; nested fixtures and browser guards are still
-hand-maintained. Adoption cannot yet be reduced to adding a dependency and derives.
+The [runtime guide](runtime.md) supplies concrete Rust contracts, bounds and
+method binding calls, qualified by the [installed adoption trial](runtime-adoption.md).
+Canic still needs to implement its own query/update expansion against that API.
+General browser generation and the complete framework-wide cut remain unfinished.
 
 ## Canic: existing integration points
 
@@ -46,7 +47,7 @@ change IC ingress signatures, certificates or consensus envelopes.
 
 | Consumer and bounded scope | Relative difficulty | What remains consumer-owned |
 | --- | --- | --- |
-| One Canic read-only owned endpoint plus typed Rust caller | Moderate, after the runtime/contract API exists | Dispatch/access policy, query semantics, observability and external adapters |
+| One Canic read-only owned endpoint plus typed Rust caller | Moderate, using the implemented runtime/contract API | Dispatch/access policy, query semantics, observability and external adapters |
 | Canic's complete owned RPC/client surface | High; several coordinated implementation/qualification batches | Authorization, replay, hashes, installation and deployment policy |
 | Relay typed application payloads | Low-to-moderate after the shared codec is usable | Durable delivery, recipient binding, retained bytes, ACK and retry policy |
 | Replacing Relay envelopes as well | Separate moderate/high-risk protocol task | Frame identity, sequencing, recovery and persistence; payload adoption does not require this |
@@ -88,14 +89,16 @@ usable runtime API; adding Postcard derives alone does not meet that prerequisit
 
 ### IC Wire prerequisites
 
-Before a consumer takes a dependency, qualify one shared declaration that owns
+Before broad browser-facing adoption, qualify one shared declaration that owns
 field order, variant identity, contract/direction identity and collection bounds.
 Generate the Rust and TypeScript projections from it. Cover principals, strings,
 bytes, nested sequences, options and application Result errors, with exact vectors
 and rejection before excessive allocation. Define unit/empty requests explicitly.
 The runtime must remain independent of CDK, Candid and host-side generators.
 
-The scalar/browser and nested Rust fixtures prove parts of this separately.
+The production Rust derive and installed runtime trial now qualify nested Rust
+contracts, query/update adapters and typed inter-canister requests. The historical
+browser fixture uses a different private contract.
 They do not yet prove that a developer can declare a nested endpoint once and
 get bounded, matching Rust and browser clients. The peer trial proves transport
 and exact repetitions. The subsequent [protected-command trial](command-replay.md)

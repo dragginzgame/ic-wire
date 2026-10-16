@@ -927,6 +927,7 @@ version = "0.1.4"
 dependencies = [
  "candid",
  "ciborium",
+ "ic-wire-derive",
  "ic_principal",
  "postcard",
  "serde",
@@ -940,6 +941,7 @@ version = "0.1.4"
 dependencies = [
  "candid",
  "ic-cdk",
+ "ic-wire",
  "ic0",
  "pocket-ic",
  "postcard",
@@ -948,6 +950,15 @@ dependencies = [
  "serde_json",
  "sha2",
  "wasmparser",
+]
+
+[[package]]
+name = "ic-wire-derive"
+version = "0.1.4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]

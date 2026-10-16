@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.5]
+
+- Add the unpublished Postcard-only Rust runtime: explicit field/variant derives,
+  bounded collections/text/bytes, finite schema budgets, canonical typed method
+  envelopes and immutable retry bytes. Keep Candid and CDK out of its dependency
+  graph. Document the concrete Canic adapter contract and unsupported types.
+- Qualify the runtime through installed nested queries, state-changing updates,
+  two inter-canister deliveries, exact replay and same-contract upgrade recovery.
+  Retire the private tuple replay fixture in current source; fresh fixture state
+  uses a distinct contract identity. Preserve historical measurements separately.
+
+
 ## [0.1.4] - 2026-10-16
 
 - Add a Postcard-only installed protected-command experiment with bounded stable

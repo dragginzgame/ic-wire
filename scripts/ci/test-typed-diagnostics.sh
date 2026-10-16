@@ -12,6 +12,7 @@ trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else prin
 cp "$root/Cargo.toml" "$root/Cargo.lock" "$root/rust-toolchain.toml" "$root/LICENSE" "$root/README.md" "$fixture/"
 cp -R "$root/crates" "$fixture/"
 mkdir -p "$fixture/docs/evidence"
+cp "$root/docs/runtime.md" "$fixture/docs/"
 cp "$root/docs/evidence/codec-screen.json" "$fixture/docs/evidence/"
 source_file="$fixture/crates/ic-wire/examples/typed_journey/mod.rs"
 cp "$source_file" "$fixture/original.rs"

@@ -14,11 +14,12 @@ bindings = ["dep:postcard-bindgen"]
 candid-codec = []
 management = []
 peer = []
-replay = []
+replay = ["dep:ic-wire"]
 
 [dependencies]
 candid.workspace = true
 ic-cdk.workspace = true
+ic-wire = { workspace = true, optional = true }
 ic0.workspace = true
 postcard.workspace = true
 postcard-bindgen = { workspace = true, optional = true }

@@ -28,7 +28,7 @@ No host companion, generic plugin architecture or schema language is required
 for the initial evaluation. No new principal identity type should be invented;
 evaluate the existing standalone principal representation without importing Candid.
 
-## Protocol requirements to resolve before freezing bytes
+## Initial protocol requirements and current resolution
 
 - Define integer widths, signed encoding, lengths, endianness, booleans, strings,
   principal bytes, options, arrays, sequences, records and enums exactly.
@@ -47,9 +47,14 @@ evaluate the existing standalone principal representation without importing Cand
 - Decide unknown-field and incompatible-schema behavior explicitly. Initial scope
   is coordinated Rust peers, not Candid's cross-language subtyping guarantees.
 
+The [runtime contract](runtime.md) now resolves the Rust subset with explicit
+field/variant IDs, finite schema budgets, method/direction identity and canonical
+Postcard envelopes. It has no Candid mode. General browser generation and
+consumer-specific hash/auth policies remain outside that qualified subset.
+
 The maintainer selected Postcard for controlled inter-canister calls and owned
 user endpoints after the payload and installed-canister experiments. This selects
-the encoding engine; the bounds, schema identity and public API still require
+the encoding engine; the broader consumer integration still requires
 qualification. The [browser trial](browser-interop.md) covers one scalar/blob
 update endpoint, with generated bindings and a bounded client wrapper.
 

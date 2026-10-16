@@ -8,14 +8,21 @@ license-file.workspace = true
 readme = "../../README.md"
 publish = false
 
+[dependencies]
+ic-wire-derive.workspace = true
+postcard.workspace = true
+serde.workspace = true
+
 [dev-dependencies]
 candid.workspace = true
 ciborium.workspace = true
 ic_principal.workspace = true
-postcard.workspace = true
-serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
+
+[[test]]
+name = "runtime"
+path = "tests/runtime/mod.rs"
 
 [[example]]
 name = "codec-evaluation"
