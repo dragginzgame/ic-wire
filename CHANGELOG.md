@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.2]
+## [0.2.2] - 2026-10-16
 
 - Reduce codec instruction costs by writing only emitted bytes and checking
   canonical serialization directly against input. Preserve wire bytes, admission
