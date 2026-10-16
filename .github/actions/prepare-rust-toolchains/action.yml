@@ -1,0 +1,58 @@
+name: Prepare Rust toolchains
+# Shared companions: scripts/dev/prepare-rust-toolchain.sh
+description: Install the explicitly selected development and minimum toolchains.
+inputs:
+  development:
+    description: Development toolchain version.
+    required: true
+  minimum:
+    description: Minimum supported toolchain version.
+    required: true
+  development-target:
+    description: Optional additional development target.
+    default: ''
+  minimum-target:
+    description: Additional minimum-toolchain target.
+    required: true
+  minimum-components:
+    description: Optional comma-separated minimum-toolchain components.
+    default: ''
+runs:
+  using: composite
+  steps:
+    - shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+      env:
+        DEVELOPMENT: ${{ inputs.development }}
+        MINIMUM: ${{ inputs.minimum }}
+        DEVELOPMENT_TARGET: ${{ inputs.development-target }}
+        MINIMUM_TARGET: ${{ inputs.minimum-target }}
+        MINIMUM_COMPONENTS: ${{ inputs.minimum-components }}
+        ACTION_ROOT: ${{ github.action_path }}
+      run: |
+        for name in DEVELOPMENT MINIMUM MINIMUM_TARGET; do
+          value="${!name}"
+          if [[ -z "$value" || "$value" == -* || "$value" == *[[:space:]]* ]]; then
+            echo "Invalid explicit Rust toolchain input: $name" >&2
+            exit 2
+          fi
+        done
+        if [[ "$DEVELOPMENT_TARGET" == -* || "$DEVELOPMENT_TARGET" == *[[:space:]]* ]]; then
+          echo 'Invalid explicit Rust toolchain input: DEVELOPMENT_TARGET' >&2
+          exit 2
+        fi
+        if [[ "$MINIMUM_COMPONENTS" == -* || "$MINIMUM_COMPONENTS" == *[[:space:]]* ||
+              "$MINIMUM_COMPONENTS" == ,* || "$MINIMUM_COMPONENTS" == *, || "$MINIMUM_COMPONENTS" == *,,* ]]; then
+          echo 'Invalid explicit Rust toolchain input: MINIMUM_COMPONENTS' >&2
+          exit 2
+        fi
+        installer="$ACTION_ROOT/../../../scripts/dev/prepare-rust-toolchain.sh"
+        arguments=(--component rustfmt --component clippy)
+        if [[ -n "$DEVELOPMENT_TARGET" ]]; then
+          arguments+=(--target "$DEVELOPMENT_TARGET")
+        fi
+        "$BASH" "$installer" "$DEVELOPMENT" "${arguments[@]}"
+        arguments=(--target "$MINIMUM_TARGET")
+        if [[ -n "$MINIMUM_COMPONENTS" ]]; then
+          arguments+=(--component "$MINIMUM_COMPONENTS")
+        fi
+        "$BASH" "$installer" "$MINIMUM" "${arguments[@]}"

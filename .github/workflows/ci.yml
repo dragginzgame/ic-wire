@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+
+jobs:
+  scaffold:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare development and minimum Rust toolchains
+        uses: ./.github/actions/prepare-rust-toolchains
+        with:
+          development: 1.99.0
+          minimum: 1.91.0
+          development-target: wasm32-unknown-unknown
+          minimum-target: wasm32-unknown-unknown
+      - name: Install reviewed common tools
+        run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
+      - name: Validate scaffold and contributor tooling
+        env:
+          VALIDATION_LOG_DIR: ${{ runner.temp }}/ic-wire-validation
+        run: make ci
+      - name: Retain failure evidence
+        if: ${{ failure() }}
+        uses: ./.github/actions/retain-failure-evidence
+        with:
+          name: scaffold-${{ matrix.os }}-${{ github.run_attempt }}
+          temp-root: ${{ runner.temp }}
+          repository-root: ${{ github.workspace }}
+          compact-successful-tools: 'true'

@@ -1,0 +1,26 @@
+[package]
+name = "ic-wire"
+description = "Unpublished investigation of bounded binary contracts for Rust IC applications"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+readme = "../../README.md"
+publish = false
+
+[dev-dependencies]
+candid.workspace = true
+ciborium.workspace = true
+ic_principal.workspace = true
+postcard.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[[example]]
+name = "codec-evaluation"
+path = "examples/codec_evaluation/mod.rs"
+test = true
+
+[lints]
+workspace = true
