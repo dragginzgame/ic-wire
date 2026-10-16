@@ -4,6 +4,10 @@ Measured 2026-10-16 in local PocketIC. These are installed canister results for 
 small controlled fixture, not projected savings for Canic, Relay or IcyDB.
 Postcard is a promising encoding engine; this does not select a production format.
 
+The [nested authority extension](nested-authority.md) records a later source
+snapshot with both endpoints linked. The values below remain historical; current
+`make evaluate-canisters` runs the extended corpus.
+
 ## Linked Wasm
 
 | Artifact | Complete Wasm bytes | Code-section payload bytes |

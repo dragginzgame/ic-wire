@@ -13,6 +13,7 @@ crate-type = ["cdylib", "rlib"]
 bindings = ["dep:postcard-bindgen"]
 candid-codec = []
 management = []
+peer = []
 
 [dependencies]
 candid.workspace = true

@@ -72,7 +72,46 @@ fn main() {
         .build();
     let id = pic.create_canister();
     pic.add_cycles(id, 10_000_000_000_000);
-    pic.install_canister(id, wasm, vec![], None);
+    pic.install_canister(id, wasm.clone(), vec![], None);
+    let sender = pic.create_canister();
+    pic.add_cycles(sender, 10_000_000_000_000);
+    pic.install_canister(sender, wasm, vec![], None);
+    let probe = postcard::to_allocvec(&Message {
+        contract: CONTRACT,
+        direction: 0,
+        account: 7,
+        revision: 42,
+        payload: Blob::new(&[]).unwrap(),
+    })
+    .unwrap();
+    let unconfigured = pic
+        .update_call(
+            sender,
+            Principal::anonymous(),
+            "evaluate_via_peer",
+            probe.clone(),
+        )
+        .unwrap_err();
+    assert!(format!("{unconfigured:?}").contains("Unconfigured"));
+    let unavailable = pic.create_canister();
+    pic.update_call(
+        sender,
+        Principal::anonymous(),
+        "configure_peer",
+        unavailable.as_slice().to_vec(),
+    )
+    .unwrap();
+    let failed = pic
+        .update_call(sender, Principal::anonymous(), "evaluate_via_peer", probe)
+        .unwrap_err();
+    assert!(format!("{failed:?}").contains("Transport"));
+    pic.update_call(
+        sender,
+        Principal::anonymous(),
+        "configure_peer",
+        id.as_slice().to_vec(),
+    )
+    .unwrap();
     // Confirm installation responds before publishing browser connection details.
     assert_eq!(
         pic.query_call(id, Principal::anonymous(), "measurements", vec![])
@@ -84,7 +123,7 @@ fn main() {
     fs::create_dir_all(root.join("artifacts")).unwrap();
     fs::write(
         root.join("artifacts/connection.json"),
-        serde_json::to_vec_pretty(&json!({"host":host.as_str(),"canisterId":id.to_text()}))
+        serde_json::to_vec_pretty(&json!({"host":host.as_str(),"canisterId":id.to_text(),"senderId":sender.to_text(),"unconfiguredRejected":true,"transportRejected":true}))
             .unwrap(),
     )
     .unwrap();

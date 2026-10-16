@@ -1,7 +1,9 @@
 //! Install matched artifacts in PocketIC and report separate size/instruction evidence.
-use candid::Principal;
+use candid::{CandidType, Principal};
+use ic_wire_canister_evaluation::authority::{Authority, oversized_requests};
 use ic_wire_canister_evaluation::{Blob, CONTRACT, MAX_WIRE, Message};
 use pocket_ic::PocketIcBuilder;
+use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{env, fs, path::PathBuf, process::Command};
@@ -10,14 +12,14 @@ use wasmparser::{Parser, Payload};
 fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
-fn encode(candid: bool, value: &Message) -> Vec<u8> {
+fn encode<T: Serialize + CandidType>(candid: bool, value: &T) -> Vec<u8> {
     if candid {
         candid::encode_one(value).unwrap()
     } else {
         postcard::to_allocvec(value).unwrap()
     }
 }
-fn decode(candid: bool, bytes: &[u8]) -> Message {
+fn decode<T: DeserializeOwned + CandidType>(candid: bool, bytes: &[u8]) -> T {
     if candid {
         candid::decode_one(bytes).unwrap()
     } else {
@@ -85,7 +87,7 @@ fn main() {
                     let reply = pic
                         .update_call(id, Principal::anonymous(), "evaluate", request.clone())
                         .unwrap();
-                    assert_eq!(decode(candid, &reply), expected);
+                    assert_eq!(decode::<Message>(candid, &reply), expected);
                     assert_eq!(reply, encode(candid, &expected));
                     if let Some(previous) = &response_bytes {
                         assert_eq!(&reply, previous);
@@ -125,7 +127,64 @@ fn main() {
                     );
                 }
             }
-            artifacts.push(json!({ "name": name, "wasm_bytes": wasm.len(), "code_section_payload_bytes": code_bytes, "wasm_sha256": hash(&wasm), "management_call_verified": management, "rows": rows }));
+            let mut authority_rows = Vec::new();
+            for (delegates, grants) in [(0, 0), (2, 3), (8, 8)] {
+                let value = Authority::fixture(delegates, grants).unwrap();
+                let request = encode(candid, &value);
+                let expected = value.reply();
+                let response = encode(candid, &expected);
+                let mut samples = Vec::new();
+                for _ in 0..3 {
+                    let reply = pic
+                        .update_call(
+                            id,
+                            Principal::anonymous(),
+                            "evaluate_authority",
+                            request.clone(),
+                        )
+                        .unwrap();
+                    assert_eq!(decode::<Authority>(candid, &reply), expected);
+                    assert_eq!(reply, response);
+                    let counters = pic
+                        .query_call(id, Principal::anonymous(), "measurements", vec![])
+                        .unwrap();
+                    assert_eq!(counters.len(), 24);
+                    samples.push(
+                        counters
+                            .as_chunks::<8>()
+                            .0
+                            .iter()
+                            .map(|chunk| u64::from_le_bytes(*chunk))
+                            .collect::<Vec<_>>(),
+                    );
+                }
+                let mut trailing = request.clone();
+                trailing.push(0);
+                let mut invalid = vec![
+                    vec![0; MAX_WIRE + 1],
+                    request[..request.len() - 1].to_vec(),
+                    trailing,
+                    response.clone(),
+                ];
+                invalid.extend(
+                    oversized_requests()
+                        .into_iter()
+                        .map(
+                            |(postcard, candid_bytes)| if candid { candid_bytes } else { postcard },
+                        ),
+                );
+                for bytes in invalid {
+                    assert!(
+                        pic.update_call(id, Principal::anonymous(), "evaluate_authority", bytes)
+                            .is_err(),
+                        "invalid authority accepted by {name}"
+                    );
+                }
+                authority_rows.push(json!({"delegates": delegates, "grants_per_delegate": grants,
+                    "request_bytes": request.len(), "request_sha256": hash(&request), "response_bytes": response.len(), "response_sha256": hash(&response),
+                    "instruction_samples_decode_strict_handler_encode": samples, "rejected_calls": 6}));
+            }
+            artifacts.push(json!({ "name": name, "wasm_bytes": wasm.len(), "code_section_payload_bytes": code_bytes, "wasm_sha256": hash(&wasm), "management_call_verified": management, "rows": rows, "authority_rows": authority_rows }));
         }
     }
     let rustc = Command::new("rustc").arg("-vV").output().unwrap();
@@ -140,7 +199,8 @@ fn main() {
         "target": "wasm32-unknown-unknown", "profile": "canister-evaluation: release, opt-level=z, lto=true, codegen-units=1, panic=abort, strip=debuginfo",
         "pocket_ic_server_version": String::from_utf8(server_version.stdout).unwrap(), "pocket_ic_server_sha256": hash(&fs::read(server).unwrap()),
         "subnet": "application; PocketIC defaults", "lock_sha256": hash(include_bytes!("../../../../Cargo.lock")),
-        "canister_source_sha256": hash(include_bytes!("../../src/lib.rs")), "runner_source_sha256": hash(include_bytes!("mod.rs")),
+        "canister_source_sha256": hash(include_bytes!("../../src/lib.rs")),
+        "authority_source_sha256": hash(include_bytes!("../../src/authority/mod.rs")), "runner_source_sha256": hash(include_bytes!("mod.rs")),
         "scope": "IC performance_counter(0) deltas: strict decode includes canonical re-encoding; handler; encode. Counter overhead included; no whole-call, native timing or compressed-size claims.",
         "artifacts": artifacts
     });

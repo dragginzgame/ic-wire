@@ -6,8 +6,10 @@ The initial [payload screen](codec-screen.md) implements steps 1–2 with bounde
 synthetic fixtures and partial rejection evidence. It does not complete the typed
 developer journey. The [matched canister experiment](canister-comparison.md)
 now covers installed scalar/blob calls, linked Wasm and IC instructions for both
-internal-only and management-enabled artifacts. Nested shapes and production
-developer ergonomics remain outside that measured subset. The subsequent
+internal-only and management-enabled artifacts. The [nested authority extension](nested-authority.md)
+adds finite delegate/grant trees and optional expiry, including maximum collection
+inputs. Installed schema artifacts and production developer ergonomics remain
+outside that measured subset. The subsequent
 [browser trial](browser-interop.md) qualifies one generated TypeScript update
 client against the installed Postcard fixture. Postcard is now the selected
 engine for controlled RPC and owned user endpoints; adoption remains bounded

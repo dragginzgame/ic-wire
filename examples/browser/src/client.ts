@@ -61,11 +61,13 @@ export function decodeResponse(bytes: Uint8Array): Response {
 }
 
 export function createClient(agent: HttpAgent, canisterId: string) {
+  async function call(methodName: 'evaluate' | 'evaluate_via_peer', request: Request): Promise<Response> {
+    const result = await agent.update(canisterId, { methodName, arg: encodeRequest(request) });
+    // Agent.update owns signatures, polling and certificate verification.
+    return decodeResponse(result.reply);
+  }
   return {
-    async evaluate(request: Request): Promise<Response> {
-      const result = await agent.update(canisterId, { methodName: 'evaluate', arg: encodeRequest(request) });
-      // Agent.update owns signatures, polling and certificate verification.
-      return decodeResponse(result.reply);
-    },
+    evaluate(request: Request): Promise<Response> { return call('evaluate', request); },
+    evaluateViaPeer(request: Request): Promise<Response> { return call('evaluate_via_peer', request); },
   };
 }

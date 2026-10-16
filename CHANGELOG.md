@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.3]
+
+- Exercise the same Postcard request/reply contract through Chromium and two
+  installed canisters. Validate peer replies, retain exact repeated bytes, verify
+  the recipient caller and reject invalid dispatch/configuration attempts.
+  This remains a stateless transport trial, not durable replay or a Canic adapter.
+
+- Map Canic and sibling adoption boundaries against committed source snapshots.
+  Separate a bounded endpoint trial from framework-wide RPC, auth, replay, hash
+  and client changes; keep storage formats and sibling source edits out of scope.
+  Add concrete consumer implementation/retirement steps, readiness checks and
+  supporting-library boundaries, including cases requiring no codec dependency.
+
+- Extend the installed Candid/Postcard comparison with bounded nested authority
+  trees, optional expiries and maximum collection fixtures. Check list limits
+  before element decoding, retain exact request/reply evidence and report new
+  matched Wasm/instruction measurements without changing production APIs.
+
 ## [0.1.2] - 2026-10-16
 
 - Enable maintainer-operated Git releases through Shared Tooling, with coordinated

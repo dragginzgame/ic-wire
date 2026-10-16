@@ -46,7 +46,7 @@ try {
   }, { connection, vectors });
   await page.screenshot({ path: 'artifacts/browser.png' });
   const hashes = {};
-  for (const path of ['package-lock.json','generated/wire-bindings/index.js','generated/wire-bindings/index.d.ts','generated/contract.json','generated/vectors.json','src/client.ts','src/main.ts','../../Cargo.lock','../../crates/ic-wire-canister-evaluation/src/lib.rs','../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs',process.env.IC_WIRE_BROWSER_WASM]) {
+  for (const path of ['test.mjs','package-lock.json','generated/wire-bindings/index.js','generated/wire-bindings/index.d.ts','generated/contract.json','generated/vectors.json','src/client.ts','src/main.ts','../../Cargo.lock','../../crates/ic-wire-canister-evaluation/src/lib.rs','../../crates/ic-wire-canister-evaluation/src/authority/mod.rs','../../crates/ic-wire-canister-evaluation/src/peer/mod.rs','../../crates/ic-wire-canister-evaluation/Cargo.toml','../../scripts/ci/evaluate-browser.sh','../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs',process.env.IC_WIRE_BROWSER_WASM]) {
     hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex');
   }
   hashes['PocketIC binary'] = createHash('sha256').update(await readFile(process.env.POCKET_IC_BIN)).digest('hex');
@@ -54,7 +54,8 @@ try {
   const report = { ...result, browser: browser.version(), node: process.version,
     rustc: execFileSync('rustc', ['-vV'], { encoding: 'utf8' }),
     pocketIc: execFileSync(process.env.POCKET_IC_BIN, ['--version'], { encoding: 'utf8' }).trim(),
-    sdk, generator: 'postcard-bindgen 0.9.1', bundleBytes: bundle.length, hashes };
+    sdk, generator: 'postcard-bindgen 0.9.1', canisterFeatures: ['peer'],
+    target: 'wasm32-unknown-unknown', profile: 'canister-evaluation', bundleBytes: bundle.length, hashes };
   await writeFile('artifacts/report.json', JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
 } finally {

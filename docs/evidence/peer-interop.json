@@ -1,0 +1,52 @@
+{
+  "vectors": 3,
+  "signedUpdates": 6,
+  "peerCalls": 6,
+  "exactPeerRequestRepeats": 3,
+  "recipientCallerVerified": true,
+  "unconfiguredRejected": true,
+  "transportRejected": true,
+  "peerOversizeRejected": true,
+  "peerMalformedRejected": true,
+  "configurationRejected": true,
+  "truncatedRepliesRejected": 4264,
+  "canisterRejected": true,
+  "certificateRejected": true,
+  "identity": "7a5w2-dcw2d-fulqo-znj5i-ec44o-lmtcs-sxxrc-lfbjz-ohaj5-thbdo-oqe",
+  "bigintBoundary": "0, 2^53+1, u64::MAX (revision wraps)",
+  "selectedEndpoints": [
+    "evaluate",
+    "evaluate_via_peer"
+  ],
+  "browser": "156.0.8078.4",
+  "node": "v24.21.0",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "pocketIc": "pocket-ic-server 16.0.0",
+  "sdk": "6.1.1",
+  "generator": "postcard-bindgen 0.9.1",
+  "canisterFeatures": [
+    "peer"
+  ],
+  "target": "wasm32-unknown-unknown",
+  "profile": "canister-evaluation",
+  "bundleBytes": 345141,
+  "hashes": {
+    "test.mjs": "89cddf31d666a3d59efb02b1f2bb16c75b5aafdafc84abe54281e0d169017180",
+    "package-lock.json": "ccac91d00dbe1bdd431482f704a1de0647ae7320e53e58371178bd8ad7afbb99",
+    "generated/wire-bindings/index.js": "5ce06690f28bed8d211202852b46ed153252206d5cceb9acc49dac346b1ccbcc",
+    "generated/wire-bindings/index.d.ts": "481bb59b213e4d16601093905ae64e95b9f4c64e30ec5d7184d500015d442a0b",
+    "generated/contract.json": "11da501570ffb384e0dc3db7b29f983b84649e9cadf8acaa20e045293384d9b5",
+    "generated/vectors.json": "d48ef7d3608b413a579d119fddfd197eb261ee866898d936b979b49eaea254ea",
+    "src/client.ts": "f817e0d21ab50a2c2578b9736d758141c79c9e5d459dc8b8265b246b2df973cd",
+    "src/main.ts": "41b33ad330c8ffe29192e17031ab413806ae090d07c1b7c5cba42dac0b30c138",
+    "../../Cargo.lock": "bc792f66b40d99d2d174aabae140e3680995a8bda191d1b61000512e1df629b5",
+    "../../crates/ic-wire-canister-evaluation/src/lib.rs": "2dbcdd1eab7417fa00daef17ceace41ffc97e0d7ca5633de3031d20f20691316",
+    "../../crates/ic-wire-canister-evaluation/src/authority/mod.rs": "933489488f31507ec165fc7a2a99fb5fe09c2d759f112cf701a6e775b8ac9662",
+    "../../crates/ic-wire-canister-evaluation/src/peer/mod.rs": "851a78b385bc4a659b9cea23b18aebe93bca9a3199edb21d90da6b6a3560d4ce",
+    "../../crates/ic-wire-canister-evaluation/Cargo.toml": "10dca9ca2054e85a6acbf30eb973c61023cd53b4e462d789b8487088ff3277b0",
+    "../../scripts/ci/evaluate-browser.sh": "114229893a2f269f9b191881ad7896b68c3c36c8a7e48b2b993525094d1a1553",
+    "../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs": "9f92d144b2989351e1c3bb2cc31151b78962ed177e2deb7159440109c900cc79",
+    "/home/adam/projects/ic-wire/target/wasm32-unknown-unknown/canister-evaluation/ic_wire_canister_evaluation.wasm": "a56e8043ec4a33062294feb65fa5c09fd9ed6fbb940dd256207288b7e9adc7c7",
+    "PocketIC binary": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792"
+  }
+}

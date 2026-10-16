@@ -1,4 +1,10 @@
 //! Finite, unpublished matched canister fixture; not the IC Wire runtime.
+/// Bounded nested evaluation contract.
+pub mod authority;
+
+#[cfg(feature = "peer")]
+mod peer;
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize, de};
 use std::{cell::RefCell, fmt};
@@ -69,7 +75,7 @@ enum CodecError {
     Limit,
 }
 
-fn encode(value: &Message) -> Result<Vec<u8>, CodecError> {
+fn encode<T: Serialize + CandidType>(value: &T) -> Result<Vec<u8>, CodecError> {
     #[cfg(feature = "candid-codec")]
     let bytes = candid::encode_one(value).map_err(|_| CodecError::Encode)?;
     #[cfg(not(feature = "candid-codec"))]
@@ -85,7 +91,12 @@ fn encode(value: &Message) -> Result<Vec<u8>, CodecError> {
     Ok(bytes)
 }
 
-fn decode(bytes: &[u8]) -> Result<Message, CodecError> {
+fn decode_value<T: serde::de::DeserializeOwned + Serialize + CandidType>(
+    bytes: &[u8],
+) -> Result<T, CodecError> {
+    if bytes.len() > MAX_WIRE {
+        return Err(CodecError::Limit);
+    }
     #[cfg(feature = "candid-codec")]
     let value = {
         let mut config = candid::de::DecoderConfig::new();
@@ -96,26 +107,29 @@ fn decode(bytes: &[u8]) -> Result<Message, CodecError> {
             .set_max_header_len(1024);
         let mut decoder = candid::de::IDLDeserialize::new_with_config(bytes, &config)
             .map_err(|_| CodecError::Decode)?;
-        let value = decoder
-            .get_value::<Message>()
-            .map_err(|_| CodecError::Decode)?;
+        let value = decoder.get_value::<T>().map_err(|_| CodecError::Decode)?;
         decoder.done().map_err(|_| CodecError::Trailing)?;
         value
     };
     #[cfg(not(feature = "candid-codec"))]
     let value = {
         let (value, rest) =
-            postcard::take_from_bytes::<Message>(bytes).map_err(|_| CodecError::Decode)?;
+            postcard::take_from_bytes::<T>(bytes).map_err(|_| CodecError::Decode)?;
         if !rest.is_empty() {
             return Err(CodecError::Trailing);
         }
         value
     };
-    if value.contract != CONTRACT || value.direction != 0 {
-        return Err(CodecError::Identity);
-    }
     if encode(&value)? != bytes {
         return Err(CodecError::Noncanonical);
+    }
+    Ok(value)
+}
+
+fn decode(bytes: &[u8]) -> Result<Message, CodecError> {
+    let value: Message = decode_value(bytes)?;
+    if value.contract != CONTRACT || value.direction != 0 {
+        return Err(CodecError::Identity);
     }
     Ok(value)
 }
@@ -135,6 +149,8 @@ fn evaluate() {
             return;
         }
     };
+    #[cfg(feature = "peer")]
+    peer::observe(&bytes);
     let decoded = ic_cdk::api::instruction_counter();
     value.direction = 1;
     value.revision = value.revision.wrapping_add(1);

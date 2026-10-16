@@ -22,8 +22,14 @@ The [payload screen](docs/codec-screen.md) records reproducible sizes and the
 remaining obstacles to selecting a shared encoding.
 The [matched canister experiment](docs/canister-comparison.md) adds measured
 Wasm and IC instruction evidence, including retained Candid management traffic.
+The [nested authority extension](docs/nested-authority.md) adds bounded delegate
+and grant collections with new installed measurements.
 The [browser trial](docs/browser-interop.md) demonstrates a typed TypeScript client
 using generated Postcard bindings in real Chromium against local PocketIC.
+The [peer extension](docs/peer-interop.md) exercises those same bytes through a
+forwarding canister and verifies the actual recipient caller.
+The [consumer adoption assessment](docs/consumer-adoption.md) maps Canic and sibling
+integration work and the remaining prerequisites.
 
 The intended consumers are Canic, IC Relay, IcyDB and native Rust clients.
 IC Wire owns encoding rules, bounds and typed codec errors. Each consumer owns

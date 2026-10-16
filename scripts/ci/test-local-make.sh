@@ -18,7 +18,7 @@ paths+=(docs/evidence/codec-screen.json)
 paths+=(crates/ic-wire/examples/typed_journey/mod.rs)
 paths+=(crates/ic-wire/examples/typed_journey/schema/mod.rs)
 paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs crates/ic-wire-canister-evaluation/examples/measure/mod.rs)
-paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs crates/ic-wire-canister-evaluation/src/authority/mod.rs crates/ic-wire-canister-evaluation/src/peer/mod.rs)
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue
     paths+=("$path")

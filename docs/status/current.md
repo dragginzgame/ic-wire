@@ -28,18 +28,18 @@ The 0.1.1 batch added `make evaluate-journey`: a native typed balance
 request/reply experiment with explicit layouts, identity/direction checks and
 exact-byte retry retention. See [developer experience](../developer-experience.md).
 It is not an installed IC endpoint or an accepted runtime API.
-The pending 0.1.2 batch generates scalar request serialization from an explicit
+The released 0.1.2 batch generates scalar request serialization from an explicit
 schema declaration, distinguishes retained request/reply types and adds four
 compiler rejection checks. The existing six-byte request vector is preserved.
-The library manifest stays at 0.1.1; its stale lockfile entry is synchronized.
-The same pending batch now includes the
+The maintainer released and pushed 0.1.2; workspace metadata is at 0.1.2.
+That release includes the
 [matched canister experiment](../canister-comparison.md): three scalar/blob
 inputs, four installed artifacts, real management calls, Wasm sizes and separate
 strict-decode/handler/encode instruction-counter evidence. Postcard improves both
 measured codec regions here; complete Wasm reduction falls from 88.2% to 6.83%
 when the fixture retains Candid management traffic. This is not an application
 savings projection. These results preceded the maintainer's Postcard selection.
-The same pending batch adds the [browser trial](../browser-interop.md): generated
+That release also adds the [browser trial](../browser-interop.md): generated
 JavaScript/TypeScript bindings, a bounded typed client, and three signed Chromium
 updates against local PocketIC. Rust vectors match exactly, including large u64
 values; 4,264 truncated replies and wrong-root certificate verification reject.
@@ -87,6 +87,39 @@ Package publication remains disabled. The local release fixture qualifies Git
 version/tag/push and recovery with substituted setup/validation gates; no real
 repository release was executed while wiring the adapters.
 
+## Pending 0.1.3
+
+The [nested authority extension](../nested-authority.md) adds an installed update
+endpoint with at most eight delegates and eight grants per delegate. Optional
+expiry is exercised with both present and absent values. Four host tests pass
+under both codec selections, including rejection before element decoding for
+known and unknown sequence lengths. Rust 1.99/1.91 host/Wasm checks pass.
+The installed extended corpus passes 72 replies, 132 malformed-call rejections
+and two real management calls. The largest authority is 250 Postcard bytes versus
+966 Candid bytes; strict decode is about 100k versus 916k–922k instructions.
+New matched Wasm results include both endpoints; historical measurements are not
+overwritten or used as a cross-build savings baseline. No runtime API or sibling
+adoption is introduced. The manifest stays at the released 0.1.2.
+
+The [consumer adoption assessment](../consumer-adoption.md) now traces committed
+Canic endpoint/call adapters, auth extraction, replay, hash and metadata owners.
+A single endpoint is a moderate integration after a runtime API exists; a full
+owned-RPC cut requires coordinated consumer changes. Siblings remain untouched.
+The assessment now gives a concrete Canic implementation/retirement sequence,
+separates application-owned IcyDB DTOs from optional schema-codec replacement,
+and identifies supporting libraries needing only host integration or no adoption.
+It records additional committed source identities and acceptance checks; these
+are proposed consumer actions, not implemented adapters or measured sibling wins.
+The [peer transport trial](../peer-interop.md) now exercises the same scalar/blob
+contract through direct browser and forwarded inter-canister calls. Six signed
+browser updates and six peer calls pass; recipient observations verify actual
+caller identity and three identical-request repetitions. Invalid sender input
+dispatches no peer call; unconfigured/unavailable peers and unauthorized fixture
+configuration reject. Five native tests pass under both codec selections.
+This proves the local stateless transport slice, not durable replay, a nested
+Result contract or general generated bounds. Protected command/replay behavior
+is the next integration proof.
+
 ## Next action
 
 The [shared-codec assessment](../shared-codec-evaluation.md) reviewed pinned
@@ -104,11 +137,12 @@ frontend rollout and general generated bounds remain unqualified. Historical
 canister size evidence retains its original source/lock hashes and was not
 remeasured after adding browser binding generation.
 
-Continue docs/evaluation.md by extending installed measurements to nested authority
-and schema shapes, and qualifying generated-layout ergonomics plus intended
+Continue docs/evaluation.md with an installed IcyDB-shaped schema artifact,
+and qualify generated-layout ergonomics plus intended
 Canic/client integration. Explicit tuple conversions demonstrate declaration-order
 independence locally; schema identity and general bounds remain unresolved.
-Include one local IcyDB-shaped schema artifact to test the sharing hypothesis.
+The native screen already includes an IcyDB-shaped schema; installed qualification
+and general nested browser bindings remain outstanding.
 Keep all candidates unpublished and compare equal-behavior Wasm builds; IcyDB
 adoption is not a prerequisite for choosing IC Wire's encoding.
 

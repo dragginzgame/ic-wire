@@ -22,6 +22,10 @@ its identity, signatures and certificate verification remain SDK responsibilitie
 The wrapper uses raw `HttpAgent.update` bytes instead of a Candid actor for this
 endpoint. Other Candid endpoints can retain their existing actors.
 
+The [two-canister extension](peer-interop.md) adds a forwarded path using the same
+contract. Current `make evaluate-browser` runs both paths; the original evidence
+below remains the first single-canister snapshot.
+
 ## Reproduce
 
 Prepare Rust 1.99.0 with `wasm32-unknown-unknown`, Node 24.21.0, npm 12.2.0 and

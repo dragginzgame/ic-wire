@@ -1,8 +1,9 @@
+import { Principal } from '@icp-sdk/core/principal';
 import { HttpAgent } from '@icp-sdk/core/agent';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { createClient, decodeResponse, encodeRequest, WireError } from './client.js';
 
-interface Connection { host: string; canisterId: string }
+interface Connection { host: string; canisterId: string; senderId: string; unconfiguredRejected: boolean; transportRejected: boolean }
 interface Vector { account: string; revision: string; payload: number[]; request: number[]; response: number[] }
 function assert(ok: unknown, message: string): asserts ok { if (!ok) throw new Error(message); }
 function equal(a: Uint8Array, b: number[] | Uint8Array): boolean { return a.length === b.length && a.every((v, i) => v === b[i]); }
@@ -21,6 +22,9 @@ export async function run(connection: Connection, vectors: Vector[]) {
   const identity = Ed25519KeyIdentity.generate();
   const agent = await HttpAgent.create({ host: host.href, identity, shouldFetchRootKey: true });
   const client = createClient(agent, connection.canisterId);
+  const peerClient = createClient(agent, connection.senderId);
+  assert(connection.canisterId !== connection.senderId, 'distinct installed canisters');
+  assert(connection.unconfiguredRejected && connection.transportRejected, 'fixture failure checks');
   let truncations = 0;
   for (const vector of vectors) {
     const request = { account: BigInt(vector.account), revision: BigInt(vector.revision), payload: Uint8Array.from(vector.payload) };
@@ -35,6 +39,17 @@ export async function run(connection: Connection, vectors: Vector[]) {
     const response = await client.evaluate(request);
     assert(response.account === expected.account && response.revision === expected.revision, 'installed update result');
     assert(equal(response.payload, expected.payload), 'installed update payload');
+    const forwarded = await peerClient.evaluateViaPeer(request);
+    assert(forwarded.account === expected.account && forwarded.revision === expected.revision, 'peer update result');
+    assert(equal(forwarded.payload, expected.payload), 'peer update payload');
+    const observation = await agent.query(connection.canisterId, { methodName: 'peer_observation', arg: new Uint8Array() });
+    assert(observation.status === 'replied', 'recipient observation replied');
+    const trace = new Uint8Array(observation.reply.arg);
+    assert(trace.length === 10 + trace[9] && trace[8] === 1, 'recipient saw identical repeated bytes');
+    const caller = Principal.fromUint8Array(trace.slice(10)).toText();
+    assert(caller === connection.senderId, 'recipient saw sender canister as actual caller');
+    const calls = new DataView(trace.buffer, trace.byteOffset, trace.byteLength).getBigUint64(0, true);
+    assert(calls === BigInt((vectors.indexOf(vector) + 1) * 3), 'one direct and two peer calls per vector');
   }
   const small = Uint8Array.from(vectors[0].response);
   rejected(() => decodeResponse(new Uint8Array(5121)), 'limit');
@@ -53,6 +68,22 @@ export async function run(connection: Connection, vectors: Vector[]) {
   try { await agent.update(connection.canisterId, { methodName: 'evaluate', arg: new Uint8Array(5121) }); }
   catch (error) { canisterRejected = /wire limit/.test(String(error)); }
   assert(canisterRejected, 'canister must reject oversized input');
+  let peerOversizeRejected = false;
+  try { await agent.update(connection.senderId, { methodName: 'evaluate_via_peer', arg: new Uint8Array(5121) }); }
+  catch (error) { peerOversizeRejected = /wire limit/.test(String(error)); }
+  assert(peerOversizeRejected, 'sender rejects oversized input');
+  let peerMalformedRejected = false;
+  try { await agent.update(connection.senderId, { methodName: 'evaluate_via_peer', arg: new Uint8Array([0]) }); }
+  catch (error) { peerMalformedRejected = /peer Request/.test(String(error)); }
+  assert(peerMalformedRejected, 'sender rejects malformed input before dispatch');
+  const afterRejection = await agent.query(connection.canisterId, { methodName: 'peer_observation', arg: new Uint8Array() });
+  assert(afterRejection.status === 'replied', 'post-rejection observation');
+  const afterTrace = new Uint8Array(afterRejection.reply.arg);
+  assert(new DataView(afterTrace.buffer, afterTrace.byteOffset, afterTrace.byteLength).getBigUint64(0, true) === BigInt(vectors.length * 3), 'invalid sender input dispatched no peer call');
+  let configurationRejected = false;
+  try { await agent.update(connection.senderId, { methodName: 'configure_peer', arg: Principal.fromText(connection.canisterId).toUint8Array() }); }
+  catch (error) { configurationRejected = /controller required/.test(String(error)); }
+  assert(configurationRejected, 'browser identity cannot reconfigure the peer');
   // Mainnet root key deliberately cannot validate this local subnet. No verifier
   // overrides, disabled certificate checks, or hand-written polling are used.
   const wrongRoot = await HttpAgent.create({ host: host.href, identity, shouldFetchRootKey: false });
@@ -62,9 +93,12 @@ export async function run(connection: Connection, vectors: Vector[]) {
     certificateRejected = /certificate|signature|verify|verification/i.test(String(error));
   }
   assert(certificateRejected, 'wrong root key must fail verification');
-  const result = { vectors: vectors.length, signedUpdates: vectors.length, truncatedRepliesRejected: truncations,
+  const result = { vectors: vectors.length, signedUpdates: vectors.length * 2, peerCalls: vectors.length * 2,
+    exactPeerRequestRepeats: vectors.length, recipientCallerVerified: true,
+    unconfiguredRejected: connection.unconfiguredRejected, transportRejected: connection.transportRejected,
+    peerOversizeRejected, peerMalformedRejected, configurationRejected, truncatedRepliesRejected: truncations,
     canisterRejected, certificateRejected, identity: identity.getPrincipal().toText(),
-    bigintBoundary: '0, 2^53+1, u64::MAX (revision wraps)', selectedEndpoint: 'evaluate' };
+    bigintBoundary: '0, 2^53+1, u64::MAX (revision wraps)', selectedEndpoints: ['evaluate', 'evaluate_via_peer'] };
   document.querySelector('output')!.textContent = JSON.stringify(result, null, 2);
   return result;
 }
