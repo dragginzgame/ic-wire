@@ -9,7 +9,10 @@ include make/consumer.mk
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
 .PHONY: evaluate-codecs evaluate-journey check-typed-diagnostics evaluate-canisters evaluate-replay
 .PHONY: check-release check-canister-evaluation
-.PHONY: evaluate-browser check-browser
+.PHONY: check-typescript evaluate-browser check-browser
+
+check-typescript:
+	+@bash scripts/ci/check-typescript.sh
 
 evaluate-browser:
 	+@bash scripts/ci/evaluate-browser.sh
@@ -53,6 +56,7 @@ help:
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: evaluate-canisters (requires explicit POCKET_IC_BIN)' \
 		'Evaluation: evaluate-replay (installed atomic-command/replay correctness)' \
+		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
 		'Evaluation: check-browser, evaluate-browser (prepared Node/npm/Chromium)' \
 		'Evaluation: check-canister-evaluation (compile and lint; no emulator)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \

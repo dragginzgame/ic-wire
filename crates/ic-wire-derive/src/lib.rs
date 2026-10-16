@@ -46,7 +46,7 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     }
     let name = input.ident;
     let mut ids = BTreeSet::new();
-    let (serialize, deserialize, shape) = match input.data {
+    let (serialize, deserialize, shape, schema) = match input.data {
         Data::Struct(data) => {
             let Fields::Named(fields) = data.fields else {
                 return Err(syn::Error::new_spanned(
@@ -74,6 +74,11 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
             fields.sort_by_key(|f| f.0);
             let names: Vec<_> = fields.iter().map(|f| &f.1).collect();
             let types: Vec<_> = fields.iter().map(|f| &f.2).collect();
+            let labels: Vec<_> = names
+                .iter()
+                .map(|name| name.to_string().trim_start_matches("r#").to_owned())
+                .collect();
+            let field_ids: Vec<_> = fields.iter().map(|f| f.0).collect();
             (
                 quote! { ::ic_wire::__private::serde::Serialize::serialize(&(#(&self.#names,)*), serializer) },
                 quote! {
@@ -81,6 +86,7 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                     Ok(Self { #(#names,)* })
                 },
                 quote! { ::ic_wire::Shape::record(&[#(<#types as ::ic_wire::Wire>::SHAPE,)*]) },
+                quote! { ::ic_wire::schema::Schema::Record(&[#(::ic_wire::schema::Field { name: #labels, id: #field_ids, value: &<#types as ::ic_wire::Wire>::SCHEMA },)*]) },
             )
         }
         Data::Enum(data) => {
@@ -91,6 +97,7 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
             let mut serializers = Vec::new();
             let mut decoders = Vec::new();
             let mut shapes = Vec::new();
+            let mut variants = Vec::new();
             for variant in data.variants {
                 let id = identity(&variant.attrs)?;
                 if !ids.insert(id) {
@@ -103,11 +110,13 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                     ));
                 }
                 let v = variant.ident;
+                let label = v.to_string().trim_start_matches("r#").to_owned();
                 match variant.fields {
                     Fields::Unit => {
                         serializers.push(quote! { Self::#v => ::ic_wire::__private::serde::Serialize::serialize(&(#id, ()), serializer) });
                         decoders.push(quote! { #id => { let _: () = seq.next_element()?.ok_or_else(|| ::ic_wire::__private::serde::de::Error::custom("missing variant payload"))?; Ok(#name::#v) } });
                         shapes.push(quote! { <() as ::ic_wire::Wire>::SHAPE });
+                        variants.push(quote! { ::ic_wire::schema::Variant { name: #label, id: #id, value: &<() as ::ic_wire::Wire>::SCHEMA } });
                     }
                     Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
                         let field = &fields.unnamed[0];
@@ -121,6 +130,7 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                         serializers.push(quote! { Self::#v(value) => ::ic_wire::__private::serde::Serialize::serialize(&(#id, value), serializer) });
                         decoders.push(quote! { #id => Ok(#name::#v(seq.next_element::<#ty>()?.ok_or_else(|| ::ic_wire::__private::serde::de::Error::custom("missing variant payload"))?)) });
                         shapes.push(quote! { <#ty as ::ic_wire::Wire>::SHAPE });
+                        variants.push(quote! { ::ic_wire::schema::Variant { name: #label, id: #id, value: &<#ty as ::ic_wire::Wire>::SCHEMA } });
                     }
                     _ => {
                         return Err(syn::Error::new_spanned(
@@ -145,6 +155,7 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                     deserializer.deserialize_tuple(2, #visitor)
                 },
                 quote! { ::ic_wire::Shape::choice(5, &[#(#shapes,)*]) },
+                quote! { ::ic_wire::schema::Schema::Enum(&[#(#variants,)*]) },
             )
         }
         Data::Union(_) => return Err(syn::Error::new_spanned(name, "unions are unsupported")),
@@ -156,6 +167,9 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
         impl<'de> ::ic_wire::__private::serde::Deserialize<'de> for #name {
             fn deserialize<D: ::ic_wire::__private::serde::Deserializer<'de>>(deserializer: D) -> ::core::result::Result<Self, D::Error> { #deserialize }
         }
-        impl ::ic_wire::Wire for #name { const SHAPE: ::ic_wire::Shape = #shape; }
+        impl ::ic_wire::Wire for #name {
+            const SHAPE: ::ic_wire::Shape = #shape;
+            const SCHEMA: ::ic_wire::schema::Schema = #schema;
+        }
     })
 }

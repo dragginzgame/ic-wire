@@ -133,10 +133,69 @@ callback/transport layer; runtime decode limits cannot retroactively bound that
 allocation. Its direct-caller auth and local atomic effect do not qualify delegated proofs,
 composite queries, async external-effect recovery or Canic's whole RPC surface.
 
-Existing browser experiments use historical private tuples; they are not clients
-for this runtime envelope. New TypeScript generation and login/delegation rollout
-must be qualified before moving browser-facing endpoints. Start Canic adoption
-with a controlled Rust-to-Rust endpoint; do not claim fleet-wide rollout readiness.
+The [installed browser fixture](browser-interop.md) now uses this runtime envelope
+and generated clients for queries, protected updates and a peer path. Controlled
+direct-caller auth is qualified; login/delegation and coordinated frontend rollout
+still need consumer qualification. Do not claim fleet-wide rollout readiness.
+
+## TypeScript generation
+
+Enable `ic-wire`'s `typescript` feature in a host generator, then write
+`ic_wire::typescript::generate::<YourMethod>()?` to a method-specific `.ts` file
+and `ic_wire::typescript::RUNTIME` to `wire-runtime.ts` beside it. Generation uses
+`Wire::SCHEMA`, emitted by the same derive that owns Rust field order, variant
+IDs and bounds. It rejects inadmissible methods, opaque manual implementations
+and excessively large/deep metadata. Hand-written metadata must faithfully match
+its serializer and shape; it is trusted code, not a schema supplied by a caller.
+The optional feature adds serde_json only to generation; leave it disabled in
+canister dependencies. No SDK or transport is imported by generated modules.
+
+Each module exports `Request`, `Response`, `methodName`, `encodeRequest`,
+`decodeRequest`, `encodeResponse` and `decodeResponse`. With the SDK transport
+already configured, an update adapter can use the following integration pattern
+(the installed fixture qualifies this pattern with its controlled test identity):
+
+```typescript
+import * as apply from './generated/apply.js';
+const bytes = apply.encodeRequest(request);
+const reply = await agent.update(canisterId, {
+  methodName: apply.methodName, arg: bytes,
+});
+const response = apply.decodeResponse(reply.reply);
+```
+
+Retain the encoded bytes for retries rather than regenerating them from a mutable
+object. Canic still owns safe retry, authentication, query/update selection and
+certificate verification. Browser transport reply allocation happens before decode.
+
+| Rust value | TypeScript projection |
+| --- | --- |
+| `u8` through `u32`, `i8` through `i32` | Checked integer `number` |
+| `u64`, `u128`, `i64`, `i128` | `bigint` |
+| `()`, `bool` | `null`, `boolean` |
+| `Bytes<N>`, `Text<N>` | `Uint8Array`, UTF-8 byte-bounded `string` |
+| `List<T,N>`, `[T;N]` | `ReadonlyArray<T>`; bounded/exact count checked at runtime |
+| `Option<T>` | `null` or `{ some: T }`, preserving nested options and unit |
+| `Result<T,E>` | `{ ok: T }` or `{ err: E }` |
+| Derived record | Named object; fields encoded in explicit ID order |
+| Derived enum | `{ tag: "Variant", value: payload }`; unit payload is `null` |
+
+Outgoing values are checked as well as incoming bytes. `WireError.code` is one
+of `limit`, `malformed`, `identity` or `value`. Decoding rejects nonminimal varints,
+unknown tags, invalid UTF-8, trailing bytes and wrong method/direction; encoding
+rejects unsafe integer representations, lone UTF-16 surrogates and extra fields.
+A leading Unicode BOM is retained as text. Decoded byte buffers own their data.
+Logical node/depth, frame, collection and UTF-8 byte bounds are enforced before
+unbounded work/allocation. JavaScript engine heap usage is not the Rust allocation
+budget: object overhead, temporary buffers and engine limits differ.
+
+`make check-typescript` uses prepared browser-harness Node and TypeScript tools.
+It generates 65 Rust vectors covering every supported primitive and composition,
+type-checks the emitted modules, and checks both directions in Node, including
+truncation, identity errors and hostile input/value cases. This is codec
+conformance; the separate installed browser fixture qualifies transport and
+controlled direct-caller auth. Neither is performance evidence.
+The maintained fixture is `crates/ic-wire/examples/typescript_conformance/`.
 
 ## Compile-time rejection examples
 

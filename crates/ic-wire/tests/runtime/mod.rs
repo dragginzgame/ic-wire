@@ -256,3 +256,70 @@ fn generated_names_and_explicit_variant_order_are_stable() {
     );
     assert_eq!(postcard::from_bytes::<Result>(&[]).unwrap(), Result {});
 }
+
+#[test]
+fn saturated_node_count_is_never_admitted() {
+    struct Saturated;
+    impl Method for Saturated {
+        type Request = List<(), { usize::MAX }>;
+        type Response = ();
+        const ID: u64 = 1;
+        const NAME: &'static str = "saturated";
+        const REQUEST_LIMITS: Limits = Limits {
+            bytes: usize::MAX,
+            allocation: usize::MAX,
+            nodes: usize::MAX,
+            depth: usize::MAX,
+        };
+        const RESPONSE_LIMITS: Limits = Self::REQUEST_LIMITS;
+    }
+    let value = List::new(vec![]).unwrap();
+    assert!(matches!(
+        encode_request::<Saturated>(&value),
+        Err(Error::SchemaLimit)
+    ));
+    assert!(matches!(
+        decode_request::<Saturated>(&[]),
+        Err(Error::SchemaLimit)
+    ));
+    #[cfg(feature = "typescript")]
+    assert_eq!(
+        ic_wire::typescript::generate::<Saturated>(),
+        Err(ic_wire::typescript::GenerationError::Limits)
+    );
+}
+
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_projects_explicit_id_order_and_rejects_opaque_metadata() {
+    use ic_wire::{
+        schema::Schema,
+        typescript::{GenerationError, generate},
+    };
+    let Schema::Record(fields) = Grant::SCHEMA else {
+        panic!("record metadata");
+    };
+    assert_eq!(
+        fields.iter().map(|f| (f.id, f.name)).collect::<Vec<_>>(),
+        [(10, "subject"), (20, "label")]
+    );
+    let generated = generate::<Read>().unwrap();
+    assert!(generated.contains("readonly some: bigint"));
+    assert!(generated.contains("readonly tag: \"Detail\""));
+    assert!(generated.contains("export const methodName = \"read\""));
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Manual;
+    impl Wire for Manual {
+        const SHAPE: ic_wire::Shape = ic_wire::Shape::scalar(0);
+    }
+    struct Opaque;
+    impl Method for Opaque {
+        type Request = Manual;
+        type Response = ();
+        const ID: u64 = 1;
+        const NAME: &'static str = "opaque";
+        const REQUEST_LIMITS: Limits = LIMITS;
+        const RESPONSE_LIMITS: Limits = LIMITS;
+    }
+    assert_eq!(generate::<Opaque>(), Err(GenerationError::Schema));
+}

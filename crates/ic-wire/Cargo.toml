@@ -8,10 +8,14 @@ license-file.workspace = true
 readme = "../../README.md"
 publish = false
 
+[features]
+typescript = ["dep:serde_json"]
+
 [dependencies]
 ic-wire-derive.workspace = true
 postcard.workspace = true
 serde.workspace = true
+serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 candid.workspace = true
@@ -33,6 +37,11 @@ test = true
 name = "typed-journey"
 path = "examples/typed_journey/mod.rs"
 test = true
+
+[[example]]
+name = "typescript-conformance"
+path = "examples/typescript_conformance/mod.rs"
+required-features = ["typescript"]
 
 [lints]
 workspace = true

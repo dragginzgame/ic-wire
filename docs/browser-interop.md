@@ -1,30 +1,32 @@
-# Postcard browser trial
+# Generated runtime browser integration
 
-One typed update endpoint works end-to-end in Chromium against a local PocketIC
-canister. Rust generates JavaScript bindings, TypeScript declarations, limits and
-golden vectors from the evaluation message. The frontend imports a small wrapper:
+The browser now uses the same explicit `Wire` and `Method` declarations as the
+installed Rust endpoints. The current fixture replaces its old private Message
+layout and hand-written preflight guards with the optional IC Wire generator.
+The [saved runtime report](evidence/runtime-browser.json) records source/artifact
+hashes, exact Rust vectors and compiler, SDK, browser and emulator identities.
+The [runtime guide](runtime.md#typescript-generation) defines the generated API.
 
-```ts
-import { createClient } from './client';
+[client.ts](../examples/browser/src/client.ts) is a small transport adapter:
 
+```typescript
 const client = createClient(agent, canisterId);
-const reply = await client.evaluate({
-  account: 7n,
-  revision: 42n,
-  payload: new Uint8Array([1, 2, 3]),
+const snapshot = await client.inspect({
+  labels: ['é🦀'], correlation: { some: 42n },
 });
-// reply.revision === 43n
+const receipt = await client.apply({
+  subject: identity.getPrincipal().toUint8Array(),
+  audience: Principal.fromText(canisterId).toUint8Array(),
+  expiry, id: 1n, amount: 7n,
+});
 ```
 
-This is compiling evaluation code in [client.ts](../examples/browser/src/client.ts),
-not an exported IC Wire library API. The agent is supplied by the application;
-its identity, signatures and certificate verification remain SDK responsibilities.
-The wrapper uses raw `HttpAgent.update` bytes instead of a Candid actor for this
-endpoint. Other Candid endpoints can retain their existing actors.
-
-The [two-canister extension](peer-interop.md) adds a forwarded path using the same
-contract. Current `make evaluate-browser` runs both paths; the original evidence
-below remains the first single-canister snapshot.
+The generated modules own field order, variant IDs, bounds and canonical envelope
+encoding. The application supplies its authenticated SDK agent; signatures,
+query verification, update polling and certificate verification stay with the SDK.
+There is no Candid actor or Candid selection in this client. The evaluation crate
+still uses Candid/CDK for existing fixture infrastructure; the production runtime
+dependency graph remains independent of them.
 
 ## Reproduce
 
@@ -34,61 +36,62 @@ PocketIC server 16.0.0. Install browser dependencies explicitly from the repo ro
 ```sh
 npm --prefix examples/browser ci --ignore-scripts
 npm --prefix examples/browser run prepare-browser
+make check-typescript
 make check-browser
 POCKET_IC_BIN=/absolute/path/to/pocket-ic make evaluate-browser
 ```
 
-The evaluation command builds the Postcard canister with the root
-`canister-evaluation` profile and a native fixture server, regenerates bindings,
-checks TypeScript, bundles the browser entrypoint and launches Chromium. It closes
-its browser and fixture afterward. It never installs tools automatically.
-Generated packages are private; bindings, node_modules, bundles, connection data,
-screenshots and reports stay ignored under `examples/browser/`.
+The command builds the canister with feature `replay`, target
+`wasm32-unknown-unknown` and profile `canister-evaluation`. A host-only `bindings`
+feature enables `ic-wire/typescript`; it is not enabled in that Wasm build.
+The host fixture generates `apply.ts`, `inspect.ts`, `wire-runtime.ts` and exact
+Rust vectors. TypeScript checks include expected failures for number/u64,
+array/byte-buffer, option and enum-tag mismatches. Esbuild bundles the browser
+entrypoint; Playwright launches Chromium against disposable local canisters.
+No dependencies or browser binaries are installed by the check. Generated files,
+node_modules, bundles, connections, screenshots and reports remain ignored under
+`examples/browser/`. The harness closes the browser and local fixture afterward.
 
-## Evidence
+## Qualified behavior
 
-The [saved report](evidence/browser-interop.json) records compiler, browser, SDK,
-generator and source/artifact hashes. The run used SDK 6.1.1, postcard-bindgen
-0.9.1 and Chromium 156.0.8078.4 (Playwright 1.64.1). The npm lockfile pins the
-browser tooling; Cargo.lock pins Postcard and binding generation.
+The Chromium 156.0.8078.4 / SDK 6.1.1 / PocketIC 16.0.0 run passed:
 
-- Three signed updates matched Rust request bytes and response values, using empty, 128-byte and
-  4,096-byte payloads. Account/revision values include integers above JavaScript's
-  safe range, `u64::MAX`, and wrapping revision output zero.
-- All 4,264 truncated response prefixes rejected. Local checks also rejected
-  oversized payloads, trailing bytes, wrong contract/direction, nonminimal varints
-  and out-of-range outbound integers.
-- A real oversized call failed at the installed canister's wire limit.
-- A separate agent retaining the mainnet root key rejected the local certificate.
-  The positive local fixture explicitly fetches its local root key. The reusable
-  wrapper does not fetch or replace root keys.
-- TypeScript rejection fixtures enforce bigint and Uint8Array caller fields.
+- Nested query request/reply bytes match Rust, preserving UTF-8, a leading BOM,
+  bounded lists and an optional `u64::MAX` correlation value.
+- Signed protected updates use principal bytes, bigint and explicit Result/enum
+  projections. Success and Overflow replies match Rust vectors. Exact request
+  retries return retained success and failure replies without duplicate effects.
+- Wrong subject, audience, expiry, conflicting bytes and a noncontroller caller
+  reject. Oversized/malformed input rejects; querying state confirms no mutation.
+- A signed browser call to `runtime_forward` produces two peer deliveries and one
+  effect. The receiver validates the forwarder's actual principal. Invalid,
+  oversized and unauthorized forwarding and an unavailable recipient reject.
+- All 68 truncated reply prefixes reject with typed codec errors. Trailing bytes,
+  wrong method identity, excess text and invalid outgoing UTF-16 reject too.
+- An agent retaining the mainnet root key rejects the local certificate. This
+  negative test replays an existing command, so submission cannot add an effect.
+  Only the local harness explicitly fetches its local root key; the adapter does
+  not change root keys or disable verification.
 
-The 341,942-byte bundle includes the SDK and browser test code, without production
-bundle optimization. It is not a codec size or deployment saving measurement.
-Earlier [canister size measurements](canister-comparison.md) retain their original
-source/lock hashes; those sizes were not remeasured after adding browser generation.
+The fixture uses a public deterministic test seed and explicitly grants that
+principal controller access. This qualifies controlled direct-caller auth, not
+Internet Identity, delegated proofs, session expiry or production access policy.
+The SDK owns raw transport buffers before codec validation; codec bounds do not
+retroactively limit that allocation or measure JavaScript engine heap use.
 
-## Remaining limits
+The bundle contains SDK and test code without production optimization. Its byte
+count is recorded for reproducibility, not as codec size or deployment savings.
+No native timing, IC instruction or Wasm savings comparison is made by this run.
+Canic macros, composite queries, external-effect recovery and coordinated cached
+frontend rollout still require their own integration work. Siblings are unchanged.
 
-The generated decoder allocates arrays from encoded lengths, so this wrapper
-first validates the complete fixed schema without allocating from those lengths.
-It enforces 5,120 outer bytes, 4,096 payload bytes, canonical bounded integers,
-contract/direction identity and exact input consumption. Re-encoding checks the
-canonical bytes after decoding. Generated u64 decoding returns numbers for small
-values despite bigint declarations; the wrapper normalizes both cases to bigint.
-These guards are handwritten for this one fixture and must be generated or
-otherwise maintained with the schema before general use.
+## Historical evidence
 
-Only u32/u8/u64 fields and one bounded byte vector are qualified here. Strings,
-options, enums, nested collections and general generator correctness are not.
-The fixture still derives its wire order from its Rust declarations; this trial
-does not resolve stable schema identity or general declaration-order independence.
-No query endpoint, Internet Identity/delegation flow, production deployment or
-cached-frontend rollout is tested. The signed test identity is ephemeral. Storage
-formats, sibling repositories and external Candid contracts are unchanged.
-
-The practical frontend direction is generated bindings plus a typed bounded
-client, while preserving the application's authenticated agent. The selected
-Postcard engine is viable for this endpoint; a general frontend contract still
-needs those unresolved checks before adoption.
+The original [single-canister report](evidence/browser-interop.json) and
+[two-canister report](evidence/peer-interop.json) remain unchanged snapshots of the
+private Message layout using postcard-bindgen 0.9.1. Their source hashes identify
+that earlier implementation. Current source retires those browser guards and the
+postcard-bindgen dependency; there is no compatibility decoder for that layout.
+The [historical peer description](peer-interop.md) and independent codec size
+comparisons retain their original scope. Current reproduction runs the runtime
+fixture described above, not those historical artifacts.

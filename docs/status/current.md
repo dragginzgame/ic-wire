@@ -1,8 +1,7 @@
 # Current handoff
 
-Updated 2026-10-16. The maintainer released/pushed 0.1.4, then requested a
-Postcard-only path until Canic can adopt IC Wire. Workspace versions remain
-0.1.4; the pending compatible addition is documented under 0.1.5.
+Updated 2026-10-16. The maintainer released/pushed 0.1.5. Workspace versions
+remain 0.1.5; the pending compatible addition is documented under 0.1.6.
 
 ## Implemented runtime
 
@@ -39,14 +38,28 @@ traces those committed source owners. Siblings remain read-only and unmodified.
 No publication, commit, push, release or version change is part of ordinary work.
 All packages remain `publish = false`. No registry name is reserved.
 
-General TypeScript generation for the runtime envelope, browser auth/delegation,
-composite-query behavior and external-effect recovery remain unqualified. Existing
-[browser](../browser-interop.md) and [peer](../peer-interop.md) trials use historical
-private layouts and are not runtime clients. Do not present their success as a
-browser rollout proof. The current CDK peer transport allocates its raw reply;
-Canic must enforce pre-copy reply limits in its own transport/callback layer.
+The optional host TypeScript generator now projects the runtime envelope from
+Wire metadata. `make check-typescript` passes 65 Rust/TypeScript vectors in both
+directions plus malformed-input/value checks, using Node 24.21.0 and TypeScript
+7.0.2. Rust runtime tests (10), doctests (5), clippy and host/Wasm MSRV checks
+qualify this addition. Saturated resource maxima now always fail admission.
+This does not measure performance or JavaScript heap usage.
 
-Next, integrate one controlled Rust-to-Rust Canic endpoint when sibling source
+The [generated browser fixture](../browser-interop.md) now passes installed
+Chromium queries, protected signed updates, exact success/failure replay and two
+peer deliveries with one effect. Rust vectors, 68 truncated replies, auth/input
+rejections and wrong-root certificate rejection are recorded in
+[the saved report](../evidence/runtime-browser.json). Hand-written browser guards
+and postcard-bindgen are retired from current source. Historical JSON evidence
+remains unchanged. The public deterministic seed is only a disposable test identity. Focused
+fixture clippy, six native evaluation tests, the Rust 1.91 host fixture build,
+TypeScript checks, pins, documentation links and local tooling checks pass.
+
+Browser login/delegation, composite-query behavior and external-effect recovery
+remain unqualified. SDK/CDK transports allocate raw replies before codec checks;
+Canic must enforce any pre-copy allowance in its transport/callback layer.
+
+Integrate one controlled Rust-to-Rust Canic endpoint when sibling source
 changes are authorized, using the concrete runtime guide and shared contracts.
 Keep full auth/hash/client conversion coordinated; do not add compatibility lanes.
 An installed IcyDB schema comparison remains optional and separate. Database rows,

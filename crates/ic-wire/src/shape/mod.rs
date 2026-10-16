@@ -74,6 +74,8 @@ impl Shape {
 pub trait Wire: Serialize + DeserializeOwned {
     /// Static resource authority for this value.
     const SHAPE: Shape;
+    /// Static projection metadata; custom implementations must opt in honestly.
+    const SCHEMA: crate::schema::Schema = crate::schema::Schema::Opaque;
 }
 
 /// Consumer-selected allowances, checked against the schema before decoding.
@@ -89,23 +91,34 @@ pub struct Limits {
     pub depth: usize,
 }
 macro_rules! scalars {
-    ($($ty:ty => $bytes:expr),* $(,)?) => { $(
-        impl Wire for $ty { const SHAPE: Shape = Shape::scalar($bytes); }
+    ($($ty:ty => ($bytes:expr, $schema:expr)),* $(,)?) => { $(
+        impl Wire for $ty {
+            const SHAPE: Shape = Shape::scalar($bytes);
+            const SCHEMA: crate::schema::Schema = $schema;
+        }
     )* };
 }
-scalars! { () => 0, bool => 1, u8 => 1, i8 => 1, u16 => 3, i16 => 3,
-u32 => 5, i32 => 5, u64 => 10, i64 => 10, u128 => 19, i128 => 19 }
+use crate::schema::Schema;
+scalars! { () => (0, Schema::Unit), bool => (1, Schema::Bool),
+u8 => (1, Schema::Unsigned(8)), i8 => (1, Schema::Signed(8)),
+u16 => (3, Schema::Unsigned(16)), i16 => (3, Schema::Signed(16)),
+u32 => (5, Schema::Unsigned(32)), i32 => (5, Schema::Signed(32)),
+u64 => (10, Schema::Unsigned(64)), i64 => (10, Schema::Signed(64)),
+u128 => (19, Schema::Unsigned(128)), i128 => (19, Schema::Signed(128)) }
 impl<T: Wire> Wire for Option<T> {
     const SHAPE: Shape = Shape::choice(1, &[T::SHAPE]);
+    const SCHEMA: Schema = Schema::Option(&T::SCHEMA);
 }
 impl<T: Wire, E: Wire> Wire for Result<T, E> {
     const SHAPE: Shape = Shape::choice(1, &[T::SHAPE, E::SHAPE]);
+    const SCHEMA: Schema = Schema::Result(&T::SCHEMA, &E::SCHEMA);
 }
 
 impl<T: Wire, const N: usize> Wire for [T; N]
 where
     [T; N]: Serialize + DeserializeOwned,
 {
+    const SCHEMA: Schema = Schema::Array(&T::SCHEMA, N);
     const SHAPE: Shape = Shape {
         bytes: T::SHAPE.bytes.saturating_mul(N),
         heap: T::SHAPE.heap.saturating_mul(N),

@@ -23,7 +23,6 @@ ic0 = "1.2.0"
 ic_principal = { version = "0.1.5", features = ["serde"] }
 pocket-ic = "16.1.0"
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
-postcard-bindgen = { version = "0.9.1", features = ["alloc"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }

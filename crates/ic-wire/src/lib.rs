@@ -7,7 +7,11 @@
 extern crate alloc;
 mod bounded;
 mod contract;
+pub mod schema;
 mod shape;
+/// Optional host-side TypeScript generation; never required by a canister.
+#[cfg(feature = "typescript")]
+pub mod typescript;
 pub use bounded::{Bytes, List, Text};
 pub use contract::{
     Method, RequestBytes, ResponseBytes, decode_request, decode_response, encode_request,

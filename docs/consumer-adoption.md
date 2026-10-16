@@ -11,7 +11,11 @@ These are relative engineering estimates, not measured implementation times.
 The [runtime guide](runtime.md) supplies concrete Rust contracts, bounds and
 method binding calls, qualified by the [installed adoption trial](runtime-adoption.md).
 Canic still needs to implement its own query/update expansion against that API.
-General browser generation and the complete framework-wide cut remain unfinished.
+Runtime TypeScript generation now passes Rust/Node codec conformance (see the
+[runtime guide](runtime.md#typescript-generation)); production browser
+login/delegation and the complete framework-wide cut remain unfinished. The
+[installed runtime browser fixture](browser-interop.md) qualifies controlled
+query/update/peer transport.
 
 ## Canic: existing integration points
 
@@ -29,7 +33,7 @@ anything in Canic. No sibling source was changed or compiled.
 | [Replay][replay] | Cached response bytes include Candid and a compact special case for cycle transfers, with schema/receipt checks. | Deliberately replace owned response encoding while preserving same-release byte identity, reservation, commit and recovery semantics. A stateless echo test does not qualify replay. |
 | [Hashing][hash] | Root-draining reservation hashes include a domain plus Candid-encoded content with the self-hash cleared. Other signed/hashed paths need their own inventory. | Specify exact producer/verifier bytes and domain rules together. Changing the serializer changes the hash input; canonical Postcard alone does not define semantic ordering or exclusions. |
 | [Payload metadata][metadata] and [lifecycle expansion][lifecycle] | Compiled limits are attached to Candid declaration text; lifecycle adapters share argument machinery. | Replace owned interface/limit discovery deliberately and retain export validation. Trace installation producers and consumers, not just ordinary RPC methods. |
-| [Host transport][host] | A local query transport already accepts/returns byte buffers. | Keep transport/identity ownership; replace typed payload projections and matching CLI/browser generators at the owned endpoint boundary. The existing browser trial qualifies only one update shape. |
+| [Host transport][host] | A local query transport already accepts/returns byte buffers. | Keep transport/identity ownership; replace typed payload projections and matching CLI/browser generators at the owned endpoint boundary. The runtime browser fixture qualifies a nested query and protected update. |
 
 The main benefit of Canic adoption would be centralizing this integration: callers
 could use shared request/response types and normal endpoint declarations while
@@ -97,10 +101,10 @@ and rejection before excessive allocation. Define unit/empty requests explicitly
 The runtime must remain independent of CDK, Candid and host-side generators.
 
 The production Rust derive and installed runtime trial now qualify nested Rust
-contracts, query/update adapters and typed inter-canister requests. The historical
-browser fixture uses a different private contract.
-They do not yet prove that a developer can declare a nested endpoint once and
-get bounded, matching Rust and browser clients. The peer trial proves transport
+contracts, query/update adapters and typed inter-canister requests. The current
+browser fixture generates bounded clients from those same declarations and checks
+installed replies against Rust vectors. Login/delegation and production rollover
+remain consumer work. The peer trial proves transport
 and exact repetitions. The subsequent [protected-command trial](command-replay.md)
 adds an atomic local effect with stable receipts and same-contract upgrade replay.
 It uses direct-caller authorization; delegated proofs and external effects remain

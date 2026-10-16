@@ -1,6 +1,10 @@
-# Browser and inter-canister Postcard trial
+# Historical browser and inter-canister Postcard trial
 
-The same scalar/blob contract now works on both a direct browser call and a
+This document describes the retained 0.1.3 evidence. Current browser source uses
+the [generated runtime integration](browser-interop.md); the examples below are
+historical and are not the current client API.
+
+The same scalar/blob contract worked on both a direct browser call and a
 browser → forwarding canister → recipient canister path in local PocketIC.
 This is an evaluation fixture, not an implemented Canic adapter or public codec API.
 The [saved report](evidence/peer-interop.json) binds the run to source and artifact
@@ -20,7 +24,7 @@ expected contract/direction, echo the account/payload and increment revision wit
 wrapping arithmetic. Both replies must also match byte-for-byte. The first reply
 is returned unchanged to the browser for the same generated decoder to consume.
 
-This compiles in [client.ts](../examples/browser/src/client.ts):
+The historical client exposed:
 
 ```ts
 const direct = createClient(agent, recipientId);
@@ -32,7 +36,7 @@ const b = await viaPeer.evaluateViaPeer(request);
 ```
 
 The [peer module](../crates/ic-wire-canister-evaluation/src/peer/mod.rs) is behind
-the evaluation-only `peer` feature. `make evaluate-browser` enables it; matched
+the evaluation-only `peer` feature. The historical browser command enabled it; matched
 size/instruction experiments do not. Fixture configuration requires the actual IC
 caller to be a controller. The recipient exposes a bounded observation containing
 its call count, whether its two latest requests match, and its last actual caller.
@@ -81,7 +85,8 @@ authorization and committed-effect replay remain unfinished. Transport failures
 and codec failures are distinguished internally and surfaced as IC rejection text;
 a typed public application-error contract has not been established.
 
-Reproduce with the prepared dependencies/server from the [browser setup](browser-interop.md):
+The current command below runs the replacement runtime fixture; reproducing this
+historical report requires its recorded source snapshot. See the [browser setup](browser-interop.md):
 
 ```sh
 POCKET_IC_BIN=/absolute/path/to/pocket-ic make evaluate-browser

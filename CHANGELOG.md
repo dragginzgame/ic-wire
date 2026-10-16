@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6] - Unreleased
+
+- Generate typed, bounded TypeScript codecs from the same explicit Rust Wire
+  metadata and Method envelope. Add cross-language scalar/composition vectors
+  and malformed-input checks. Keep generation optional and transport/auth policy
+  consumer-owned. Qualify generated clients in Chromium against installed nested
+  queries, protected updates, retained success/failure replies and peer calls.
+  Retire the private browser guards and postcard-bindgen dependency; preserve
+  historical evidence. Login/delegation and production rollout remain unqualified.
+- Reject saturated schema resource maxima even under maximum caller allowances.
+  Preserve existing wire bytes and keep workspace versions unchanged.
+
 ## [0.1.5] - 2026-10-16
 
 - Add the unpublished Postcard-only Rust runtime: explicit field/variant derives,

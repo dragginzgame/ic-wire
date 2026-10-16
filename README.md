@@ -10,7 +10,10 @@ The library supplies explicit-layout derives, bounded containers, typed method
 bindings and canonical request/reply envelopes. Its normal dependency graph has
 no Candid, CDK or host tooling. Start with the [runtime guide](docs/runtime.md)
 and [installed adoption proof](docs/runtime-adoption.md). Canic macro integration
-and browser bindings for this runtime remain consumer work.
+remains consumer work. An optional host generator now emits bounded TypeScript
+codecs from those same wire declarations. Installed Chromium tests qualify
+controlled queries, protected updates, replay and peer calls. Production browser
+login/delegation and Canic integration still need consumer qualification.
 The package has `publish = false`. Do not reserve the crates.io name or publish
 until the maintainer explicitly approves the direction and publication.
 

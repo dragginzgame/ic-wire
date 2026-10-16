@@ -7,7 +7,7 @@ cd "$root"
 [[ "$(node --version)" == "v$(cat examples/browser/.nvmrc)" ]] || { echo 'Select the Node version in examples/browser/.nvmrc' >&2; exit 1; }
 [[ "npm@$(npm --version)" == "$(node -p 'JSON.parse(require("fs").readFileSync("examples/browser/package.json", "utf8")).packageManager')" ]] || { echo 'Select the npm version in package.json' >&2; exit 1; }
 export CARGO_TARGET_DIR="$root/target"
-cargo build --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --profile canister-evaluation --features peer
+cargo build --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --profile canister-evaluation --features replay
 export IC_WIRE_BROWSER_WASM="$root/target/wasm32-unknown-unknown/canister-evaluation/ic_wire_canister_evaluation.wasm"
 cargo build --locked -p ic-wire-canister-evaluation --example browser-fixture --features bindings
 "$root/target/debug/examples/browser-fixture" "$root/examples/browser" --generate-only

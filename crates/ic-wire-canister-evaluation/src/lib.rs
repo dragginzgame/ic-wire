@@ -25,7 +25,6 @@ pub const CONTRACT: u32 = 0x4241;
 
 /// Bounded payload, with a byte-string representation in both codecs.
 #[derive(Clone, Debug, PartialEq, CandidType)]
-#[cfg_attr(feature = "bindings", derive(postcard_bindgen::PostcardBindings))]
 pub struct Blob(Vec<u8>);
 impl Blob {
     /// Construct a finite fixture, rejecting oversize before copying.
@@ -56,7 +55,6 @@ impl<'de> Deserialize<'de> for Blob {
 
 /// Fixed schema: field order below is the explicit Postcard layout authority.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, CandidType)]
-#[cfg_attr(feature = "bindings", derive(postcard_bindgen::PostcardBindings))]
 pub struct Message {
     /// Contract discriminator, shared by request and response.
     pub contract: u32,

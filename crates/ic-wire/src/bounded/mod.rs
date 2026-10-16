@@ -75,6 +75,7 @@ impl<'de, T: Deserialize<'de>, const N: usize> Deserialize<'de> for List<T, N> {
     }
 }
 impl<T: Wire, const N: usize> Wire for List<T, N> {
+    const SCHEMA: crate::schema::Schema = crate::schema::Schema::List(&T::SCHEMA, N);
     const SHAPE: Shape = Shape {
         bytes: 10_usize.saturating_add(T::SHAPE.bytes.saturating_mul(N)),
         heap: N.saturating_mul(core::mem::size_of::<T>().saturating_add(T::SHAPE.heap)),
@@ -129,6 +130,7 @@ impl<'de, const N: usize> Deserialize<'de> for Bytes<N> {
     }
 }
 impl<const N: usize> Wire for Bytes<N> {
+    const SCHEMA: crate::schema::Schema = crate::schema::Schema::Bytes(N);
     const SHAPE: Shape = Shape {
         bytes: N.saturating_add(10),
         heap: N,
@@ -167,5 +169,6 @@ impl<'de, const N: usize> Deserialize<'de> for Text<N> {
     }
 }
 impl<const N: usize> Wire for Text<N> {
+    const SCHEMA: crate::schema::Schema = crate::schema::Schema::Text(N);
     const SHAPE: Shape = Bytes::<N>::SHAPE;
 }

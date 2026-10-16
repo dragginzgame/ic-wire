@@ -10,7 +10,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [features]
-bindings = ["dep:postcard-bindgen"]
+bindings = ["replay", "ic-wire/typescript"]
 candid-codec = []
 management = []
 peer = []
@@ -22,12 +22,10 @@ ic-cdk.workspace = true
 ic-wire = { workspace = true, optional = true }
 ic0.workspace = true
 postcard.workspace = true
-postcard-bindgen = { workspace = true, optional = true }
 serde.workspace = true
 
 [dev-dependencies]
 pocket-ic.workspace = true
-postcard-bindgen = { workspace = true, features = ["generating"] }
 serde_json.workspace = true
 sha2.workspace = true
 wasmparser.workspace = true

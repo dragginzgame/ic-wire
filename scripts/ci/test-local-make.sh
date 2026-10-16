@@ -20,6 +20,7 @@ paths+=(crates/ic-wire/examples/typed_journey/schema/mod.rs)
 paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs crates/ic-wire-canister-evaluation/examples/measure/mod.rs)
 paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs crates/ic-wire-canister-evaluation/src/authority/mod.rs crates/ic-wire-canister-evaluation/src/peer/mod.rs)
 paths+=(crates/ic-wire-canister-evaluation/examples/replay_fixture/mod.rs crates/ic-wire-canister-evaluation/src/replay/mod.rs crates/ic-wire-canister-evaluation/src/replay/tests/mod.rs)
+paths+=(crates/ic-wire/src/schema/mod.rs crates/ic-wire/src/typescript/mod.rs crates/ic-wire/src/typescript/runtime.ts crates/ic-wire/examples/typescript_conformance/mod.rs crates/ic-wire/examples/typescript_conformance/checks.mjs)
 paths+=(docs/runtime.md crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/lib.rs crates/ic-wire/src/contract/mod.rs crates/ic-wire/src/bounded/mod.rs crates/ic-wire/src/shape/mod.rs crates/ic-wire/tests/runtime/mod.rs crates/ic-wire-canister-evaluation/src/commands/mod.rs)
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue

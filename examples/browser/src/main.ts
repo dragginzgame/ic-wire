@@ -1,104 +1,79 @@
 import { Principal } from '@icp-sdk/core/principal';
 import { HttpAgent } from '@icp-sdk/core/agent';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
-import { createClient, decodeResponse, encodeRequest, WireError } from './client.js';
+import { createClient } from './client.js';
+import * as apply from '../generated/apply.js';
+import * as inspect from '../generated/inspect.js';
+import { WireError } from '../generated/wire-runtime.js';
 
-interface Connection { host: string; canisterId: string; senderId: string; unconfiguredRejected: boolean; transportRejected: boolean }
-interface Vector { account: string; revision: string; payload: number[]; request: number[]; response: number[] }
+interface Connection { host: string; canisterId: string; senderId: string; caller: string; unavailableId: string }
+interface Vectors { query: number[]; queryReply: number[]; request: number[]; success: number[]; failure: number[] }
 function assert(ok: unknown, message: string): asserts ok { if (!ok) throw new Error(message); }
 function equal(a: Uint8Array, b: number[] | Uint8Array): boolean { return a.length === b.length && a.every((v, i) => v === b[i]); }
-function rejected(action: () => unknown, code?: string): void {
-  try { action(); } catch (error) {
-    assert(error instanceof WireError, 'expected typed wire error');
-    if (code) assert(error.code === code, `expected ${code}, got ${error.code}`);
-    return;
-  }
+async function rejected(action: () => unknown, pattern: RegExp): Promise<void> {
+  try { await action(); } catch (error) { assert(pattern.test(String(error)), `unexpected rejection: ${error}`); return; }
   throw new Error('expected rejection');
 }
-
-export async function run(connection: Connection, vectors: Vector[]) {
+export async function run(connection: Connection, vectors: Vectors) {
   const host = new URL(connection.host);
   assert(host.protocol === 'http:' && ['127.0.0.1', 'localhost'].includes(host.hostname), 'local fixture only');
-  const identity = Ed25519KeyIdentity.generate();
+  // Public deterministic seed belongs only to this disposable local test.
+  const identity = Ed25519KeyIdentity.generate(new Uint8Array(32).fill(7));
+  assert(identity.getPrincipal().toText() === connection.caller, 'fixture controller matches browser identity');
   const agent = await HttpAgent.create({ host: host.href, identity, shouldFetchRootKey: true });
   const client = createClient(agent, connection.canisterId);
-  const peerClient = createClient(agent, connection.senderId);
-  assert(connection.canisterId !== connection.senderId, 'distinct installed canisters');
-  assert(connection.unconfiguredRejected && connection.transportRejected, 'fixture failure checks');
+  const query: inspect.Request = { labels: ['é🦀', '\ufefftext'], correlation: { some: (1n << 64n)-1n } };
+  assert(equal(inspect.encodeRequest(query), vectors.query), 'Rust query request bytes');
+  const initial = await client.inspect(query);
+  assert(equal(inspect.encodeResponse(initial), vectors.queryReply), 'Rust installed query response bytes');
+  const command: apply.Request = { subject: identity.getPrincipal().toUint8Array(), audience: Principal.fromText(connection.canisterId).toUint8Array(), expiry: (1n<<64n)-1n, id: 1n, amount: 7n };
+  const retained = apply.encodeRequest(command);
+  assert(equal(retained, vectors.request), 'Rust command request bytes');
+  const success = await client.apply(command);
+  assert(equal(apply.encodeResponse(success), vectors.success), 'Rust installed success bytes');
+  const replay = await agent.update(connection.canisterId, { methodName: apply.methodName, arg: retained });
+  assert(equal(replay.reply, vectors.success), 'exact retained replay reply');
+  const failure = await client.apply({ ...command, id: 2n, amount: (1n<<64n)-1n });
+  assert('err' in failure && failure.err.tag === 'Overflow', 'typed application failure');
+  assert(equal(apply.encodeResponse(failure), vectors.failure), 'Rust failure bytes');
+  const failedReplay = await client.apply({ ...command, id: 2n, amount: (1n<<64n)-1n });
+  assert(equal(apply.encodeResponse(failedReplay), vectors.failure), 'retained failure');
+  await rejected(() => client.apply({ ...command, amount: 8n }), /Conflict/);
+  await rejected(() => client.apply({ ...command, subject: new Uint8Array([4]) }), /Caller/);
+  await rejected(() => client.apply({ ...command, audience: new Uint8Array([4]) }), /Audience/);
+  await rejected(() => client.apply({ ...command, expiry: 0n }), /Expired/);
+  const outsider = await HttpAgent.create({ host: host.href, identity: Ed25519KeyIdentity.generate(new Uint8Array(32).fill(8)), shouldFetchRootKey: true });
+  await rejected(() => createClient(outsider, connection.canisterId).apply(command), /controller required/);
+  await rejected(() => agent.update(connection.canisterId, { methodName: apply.methodName, arg: new Uint8Array(129) }), /request limit/);
+  await rejected(() => agent.update(connection.canisterId, { methodName: apply.methodName, arg: retained.slice(0,-1) }), /Codec/);
+  await rejected(() => agent.query(connection.canisterId, { methodName: inspect.methodName, arg: new Uint8Array(257) }).then(r => { if(r.status !== 'replied') throw new Error(r.reject_message); }), /request limit/);
+  assert((await client.inspect(query)).balance === 7n, 'rejected commands leave state unchanged');
+  const forwarded = apply.encodeRequest({ ...command, subject: Principal.fromText(connection.senderId).toUint8Array(), id: 3n, amount: 5n });
+  const peer = await agent.update(connection.senderId, { methodName: 'runtime_forward', arg: forwarded });
+  const receipt = apply.decodeResponse(peer.reply);
+  assert('ok' in receipt && receipt.ok.id === 3n && receipt.ok.balance === 12n, 'peer typed receipt');
+  assert((await client.inspect(query)).balance === 12n, 'two peer deliveries apply one effect');
+  await rejected(() => agent.update(connection.senderId, { methodName: 'runtime_forward', arg: retained }), /invalid forward request/);
+  await rejected(() => agent.update(connection.senderId, { methodName: 'runtime_forward', arg: new Uint8Array(129) }), /request limit/);
+  await rejected(() => outsider.update(connection.senderId, { methodName: 'runtime_forward', arg: forwarded }), /controller required/);
+  await rejected(() => agent.update(connection.senderId, { methodName: 'runtime_forward', arg: apply.encodeRequest({ ...command, subject: Principal.fromText(connection.senderId).toUint8Array(), audience: Principal.fromText(connection.unavailableId).toUint8Array() }) }), /transport failure/);
   let truncations = 0;
-  for (const vector of vectors) {
-    const request = { account: BigInt(vector.account), revision: BigInt(vector.revision), payload: Uint8Array.from(vector.payload) };
-    assert(equal(encodeRequest(request), vector.request), 'TypeScript encode must equal Rust bytes');
-    const expected = decodeResponse(Uint8Array.from(vector.response));
-    assert(expected.account === request.account, 'bigint account');
-    assert(expected.revision === ((request.revision + 1n) & ((1n << 64n) - 1n)), 'bigint revision');
-    assert(equal(expected.payload, request.payload), 'payload round trip');
-    for (let end = 0; end < vector.response.length; end++) {
-      rejected(() => decodeResponse(Uint8Array.from(vector.response.slice(0, end)))); truncations++;
+  for (const [decode, bytes] of [[inspect.decodeResponse, vectors.queryReply], [apply.decodeResponse, vectors.success], [apply.decodeResponse, vectors.failure]] as const) {
+    for (let end = 0; end < bytes.length; end++) {
+      try { decode(Uint8Array.from(bytes.slice(0,end))); throw new Error('accepted truncation'); }
+      catch (error) { assert(error instanceof WireError, 'typed truncation rejection'); truncations++; }
     }
-    const response = await client.evaluate(request);
-    assert(response.account === expected.account && response.revision === expected.revision, 'installed update result');
-    assert(equal(response.payload, expected.payload), 'installed update payload');
-    const forwarded = await peerClient.evaluateViaPeer(request);
-    assert(forwarded.account === expected.account && forwarded.revision === expected.revision, 'peer update result');
-    assert(equal(forwarded.payload, expected.payload), 'peer update payload');
-    const observation = await agent.query(connection.canisterId, { methodName: 'peer_observation', arg: new Uint8Array() });
-    assert(observation.status === 'replied', 'recipient observation replied');
-    const trace = new Uint8Array(observation.reply.arg);
-    assert(trace.length === 10 + trace[9] && trace[8] === 1, 'recipient saw identical repeated bytes');
-    const caller = Principal.fromUint8Array(trace.slice(10)).toText();
-    assert(caller === connection.senderId, 'recipient saw sender canister as actual caller');
-    const calls = new DataView(trace.buffer, trace.byteOffset, trace.byteLength).getBigUint64(0, true);
-    assert(calls === BigInt((vectors.indexOf(vector) + 1) * 3), 'one direct and two peer calls per vector');
+    await rejected(() => decode(Uint8Array.from([...bytes,0])), /wire/);
+    const wrong = Uint8Array.from(bytes); wrong[2] ^= 1;
+    await rejected(() => decode(wrong), /identity/);
   }
-  const small = Uint8Array.from(vectors[0].response);
-  rejected(() => decodeResponse(new Uint8Array(5121)), 'limit');
-  rejected(() => decodeResponse(Uint8Array.from([...small, 0])), 'malformed');
-  const wrongId = small.slice(); wrongId[0] ^= 1;
-  rejected(() => decodeResponse(wrongId), 'identity');
-  const wrongDirection = small.slice(); wrongDirection[3] = 0;
-  rejected(() => decodeResponse(wrongDirection), 'identity');
-  rejected(() => decodeResponse(Uint8Array.from([...small.slice(0, 6), 0x81, 0x20])), 'limit');
-  rejected(() => decodeResponse(Uint8Array.from([...small.slice(0, 4), 0x87, 0, ...small.slice(5)])), 'malformed');
-  rejected(() => encodeRequest({ account: -1n, revision: 0n, payload: new Uint8Array() }), 'limit');
-  rejected(() => encodeRequest({ account: 1n << 64n, revision: 0n, payload: new Uint8Array() }), 'limit');
-  rejected(() => encodeRequest({ account: 0n, revision: 0n, payload: new Uint8Array(4097) }), 'limit');
-  // Check the real adapter's reject path through the signed agent transport.
-  let canisterRejected = false;
-  try { await agent.update(connection.canisterId, { methodName: 'evaluate', arg: new Uint8Array(5121) }); }
-  catch (error) { canisterRejected = /wire limit/.test(String(error)); }
-  assert(canisterRejected, 'canister must reject oversized input');
-  let peerOversizeRejected = false;
-  try { await agent.update(connection.senderId, { methodName: 'evaluate_via_peer', arg: new Uint8Array(5121) }); }
-  catch (error) { peerOversizeRejected = /wire limit/.test(String(error)); }
-  assert(peerOversizeRejected, 'sender rejects oversized input');
-  let peerMalformedRejected = false;
-  try { await agent.update(connection.senderId, { methodName: 'evaluate_via_peer', arg: new Uint8Array([0]) }); }
-  catch (error) { peerMalformedRejected = /peer Request/.test(String(error)); }
-  assert(peerMalformedRejected, 'sender rejects malformed input before dispatch');
-  const afterRejection = await agent.query(connection.canisterId, { methodName: 'peer_observation', arg: new Uint8Array() });
-  assert(afterRejection.status === 'replied', 'post-rejection observation');
-  const afterTrace = new Uint8Array(afterRejection.reply.arg);
-  assert(new DataView(afterTrace.buffer, afterTrace.byteOffset, afterTrace.byteLength).getBigUint64(0, true) === BigInt(vectors.length * 3), 'invalid sender input dispatched no peer call');
-  let configurationRejected = false;
-  try { await agent.update(connection.senderId, { methodName: 'configure_peer', arg: Principal.fromText(connection.canisterId).toUint8Array() }); }
-  catch (error) { configurationRejected = /controller required/.test(String(error)); }
-  assert(configurationRejected, 'browser identity cannot reconfigure the peer');
-  // Mainnet root key deliberately cannot validate this local subnet. No verifier
-  // overrides, disabled certificate checks, or hand-written polling are used.
+  await rejected(() => inspect.encodeRequest({ labels: ['x'.repeat(33)], correlation: null }), /limit/);
+  await rejected(() => inspect.encodeRequest({ labels: ['\ud800'], correlation: null }), /value/);
+  // Replaying an existing request prevents the negative certificate test creating an effect.
   const wrongRoot = await HttpAgent.create({ host: host.href, identity, shouldFetchRootKey: false });
-  let certificateRejected = false;
-  try { await createClient(wrongRoot, connection.canisterId).evaluate({ account: 7n, revision: 42n, payload: new Uint8Array() }); }
-  catch (error) {
-    certificateRejected = /certificate|signature|verify|verification/i.test(String(error));
-  }
-  assert(certificateRejected, 'wrong root key must fail verification');
-  const result = { vectors: vectors.length, signedUpdates: vectors.length * 2, peerCalls: vectors.length * 2,
-    exactPeerRequestRepeats: vectors.length, recipientCallerVerified: true,
-    unconfiguredRejected: connection.unconfiguredRejected, transportRejected: connection.transportRejected,
-    peerOversizeRejected, peerMalformedRejected, configurationRejected, truncatedRepliesRejected: truncations,
-    canisterRejected, certificateRejected, identity: identity.getPrincipal().toText(),
-    bigintBoundary: '0, 2^53+1, u64::MAX (revision wraps)', selectedEndpoints: ['evaluate', 'evaluate_via_peer'] };
+  await rejected(() => createClient(wrongRoot, connection.canisterId).apply(command), /certificate|signature|verify|verification/i);
+  assert((await client.inspect(query)).balance === 12n, 'final balance');
+  const result = { runtimeEnvelope: true, rustVectors: 5, queryVerified: true, successReplayVerified: true, failureReplayVerified: true, authRejectionsVerified: true, invalidInputNoMutation: true, peerDeliveries: 2, peerEffects: 1, peerTransportFailureRejected: true, certificateRejected: true, truncatedRepliesRejected: truncations, finalBalance: '12', identity: connection.caller, selectedEndpoints: [inspect.methodName, apply.methodName, 'runtime_forward'] };
   document.querySelector('output')!.textContent = JSON.stringify(result, null, 2);
   return result;
 }

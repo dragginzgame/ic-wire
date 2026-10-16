@@ -44,8 +44,11 @@ macro_rules! retained {
 retained!(RequestBytes);
 retained!(ResponseBytes);
 
-fn admit<T: Wire>(limits: Limits) -> Result<usize, Error> {
+pub(crate) fn admit<T: Wire>(limits: Limits) -> Result<usize, Error> {
     let shape = T::SHAPE;
+    if [shape.bytes, shape.heap, shape.nodes, shape.depth].contains(&usize::MAX) {
+        return Err(Error::SchemaLimit);
+    }
     let size = shape.bytes.checked_add(HEADER).ok_or(Error::SchemaLimit)?;
     let allocation = shape.heap.checked_add(size).ok_or(Error::SchemaLimit)?;
     if size > limits.bytes
