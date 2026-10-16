@@ -1,15 +1,42 @@
 # Proposed developer experience
 
-All syntax below is illustrative. Wire, endpoint integration and typed method
-bindings are not implemented. Do not present these snippets as working quickstarts.
+The Wire and Canic syntax below is illustrative. The explicitly labeled native
+experiment compiles, but is not a public library API or installed IC endpoint.
 
-## Executable native experiment (0.1.1)
+## Executable native experiment (0.1.2)
 
 Run `make evaluate-journey` for the
 [typed journey example](../crates/ic-wire/examples/typed_journey/mod.rs).
 This is a compiling native experiment using Serde derives and Postcard, not an
 implementation of the proposed Wire or Canic syntax below. `make test` includes
-four tests for this experiment alongside the six payload-screen tests.
+five tests for this experiment alongside the six payload-screen tests.
+
+The request now uses the private `wire_record!` schema macro:
+
+```rust,ignore
+wire_record! {
+    struct Request {
+        account: u64,
+        at_revision: u64,
+    }
+}
+```
+
+This exact declaration compiles in the example. It generates the struct and
+Serde tuple implementations; there are no handwritten request conversions.
+The schema field list is authoritative wire order, not incidental Rust order.
+Reordering that list changes the contract. The macro supports nonempty records
+of `u64`, `u32` and `bool` only; it does not derive stable field IDs, support
+nested records or impose a generic allocation budget. Enum conversion remains
+handwritten with explicit tags. No new crate or procedural derive is introduced.
+
+`Prepared<Request>` and `Prepared<Outcome>` distinguish retained requests from
+replies at the caller boundary without adding bytes. Run
+`make check-typed-diagnostics` to compile a valid isolated copy, then verify four
+rejections: unsupported String fields, wrong request type, a retained reply used
+as a request, and a handler returning the wrong response type. The test uses
+locked, previously fetched dependencies offline, retains failure logs and is
+included in CI. These are compiler checks, not string-only source inspections.
 
 The single balance binding owns its method name, contract ID, request and reply
 types. The caller prepares a request once, passes immutable bytes to a transport
@@ -19,7 +46,7 @@ The closure in this example is a native loopback, not an IC transport or an
 authentication implementation. Retry tests establish byte reuse, not delivery
 deduplication or exactly-once effects.
 
-The finite layout uses explicit tuple conversions: request `(account: u64,
+The finite layout uses explicit tuples: request `(account: u64,
 at_revision: u64)`, reply `(tag: u8, amount: u64)` with tag 0 for balance and
 tag 1 for not-found (amount must be zero). An outer `(contract: u32,
 direction: u8, body)` tuple binds contract 0x4241 and direction 0/request or
@@ -41,10 +68,10 @@ x86_64-unknown-linux-gnu, default dev/test profiles. No dependency update was
 made for this experiment. The earlier saved screen reports its historical run;
 its six vector tests still pass under the current lockfile.
 
-The result demonstrates a small concrete binding, but requires handwritten tuple
-conversions and handler/client glue. It does **not** yet meet the Candid-like
-ergonomics criterion. A custom derive, compile-fail diagnostics, installed IC
-endpoint behavior and matched Wasm/instruction measurements remain unproved.
+The result removes record conversion boilerplate, but still requires explicit
+schema ordering, enum conversion and handler/client glue. It does **not** yet
+meet the Candid-like ergonomics criterion. A general derive, installed IC endpoint
+behavior and matched Wasm/instruction measurements remain unproved.
 Do not select or adopt Postcard based on this example alone.
 
 ## Shared types

@@ -1,0 +1,42 @@
+[package]
+name = "ic-wire-canister-evaluation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+bindings = ["dep:postcard-bindgen"]
+candid-codec = []
+management = []
+
+[dependencies]
+candid.workspace = true
+ic-cdk.workspace = true
+ic0.workspace = true
+postcard.workspace = true
+postcard-bindgen = { workspace = true, optional = true }
+serde.workspace = true
+
+[dev-dependencies]
+pocket-ic.workspace = true
+postcard-bindgen = { workspace = true, features = ["generating"] }
+serde_json.workspace = true
+sha2.workspace = true
+wasmparser.workspace = true
+
+[[example]]
+name = "measure-canisters"
+path = "examples/measure/mod.rs"
+
+[[example]]
+name = "browser-fixture"
+path = "examples/browser_fixture/mod.rs"
+required-features = ["bindings"]
+
+[lints]
+workspace = true

@@ -6,8 +6,9 @@ with substantially less Wasm code and serialization work for communication whose
 producers and consumers we control.
 
 **Status: no_std library scaffold with an evaluation-only codec comparison.**
-The library has no runtime dependencies or public API. No selected codec, Wire
-derive, endpoint integration or stable wire contract exists yet.
+The library has no runtime dependencies or public API. The maintainer selected
+Postcard for controlled inter-canister calls and owned user endpoints. The wire
+contract and production integration remain unfinished.
 The package has `publish = false`. Do not reserve the crates.io name or publish
 until the maintainer explicitly approves the direction and publication.
 
@@ -19,6 +20,10 @@ The [shared-codec assessment](docs/shared-codec-evaluation.md) evaluates optiona
 reuse with IcyDB and identifies the database contracts that remain separate.
 The [payload screen](docs/codec-screen.md) records reproducible sizes and the
 remaining obstacles to selecting a shared encoding.
+The [matched canister experiment](docs/canister-comparison.md) adds measured
+Wasm and IC instruction evidence, including retained Candid management traffic.
+The [browser trial](docs/browser-interop.md) demonstrates a typed TypeScript client
+using generated Postcard bindings in real Chromium against local PocketIC.
 
 The intended consumers are Canic, IC Relay, IcyDB and native Rust clients.
 IC Wire owns encoding rules, bounds and typed codec errors. Each consumer owns

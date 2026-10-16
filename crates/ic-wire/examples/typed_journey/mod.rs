@@ -1,28 +1,17 @@
 //! Native evaluation of explicit layouts and a typed method binding, not an IC adapter.
+#[macro_use]
+mod schema;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use std::marker::PhantomData;
 
 const CAPACITY: usize = 64;
 const BALANCE_ID: u32 = 0x4241;
 const BALANCE_NAME: &str = "balance";
 
-// The tuple conversion owns wire order; Rust field order does not.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(into = "(u64, u64)", from = "(u64, u64)")]
-struct Request {
-    account: u64,
-    at_revision: u64,
-}
-impl From<Request> for (u64, u64) {
-    fn from(value: Request) -> Self {
-        (value.account, value.at_revision)
-    }
-}
-impl From<(u64, u64)> for Request {
-    fn from((account, at_revision): (u64, u64)) -> Self {
-        Self {
-            account,
-            at_revision,
-        }
+wire_record! {
+    struct Request {
+        account: u64,
+        at_revision: u64,
     }
 }
 
@@ -62,22 +51,27 @@ enum Error {
 }
 
 // Owning immutable bytes lets a caller retry without encoding again.
-struct Prepared {
+struct Prepared<T> {
     bytes: [u8; CAPACITY],
     len: usize,
+    payload: PhantomData<fn() -> T>,
 }
-impl Prepared {
+impl<T> Prepared<T> {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes[..self.len]
     }
 }
 
-fn encode<T: Serialize>(direction: u8, value: &T) -> Result<Prepared, Error> {
+fn encode<T: Serialize>(direction: u8, value: &T) -> Result<Prepared<T>, Error> {
     let mut bytes = [0; CAPACITY];
     let len = postcard::to_slice(&(BALANCE_ID, direction, value), &mut bytes)
         .map_err(|_| Error::Limit)?
         .len();
-    Ok(Prepared { bytes, len })
+    Ok(Prepared {
+        bytes,
+        len,
+        payload: PhantomData,
+    })
 }
 
 fn decode<T: Serialize + DeserializeOwned>(direction: u8, bytes: &[u8]) -> Result<T, Error> {
@@ -104,16 +98,19 @@ fn decode<T: Serialize + DeserializeOwned>(direction: u8, bytes: &[u8]) -> Resul
 // One concrete binding owns the method name, layout identity and both types.
 struct BalanceMethod;
 impl BalanceMethod {
-    fn prepare(request: &Request) -> Result<Prepared, Error> {
+    fn prepare(request: &Request) -> Result<Prepared<Request>, Error> {
         encode(0, request)
     }
-    fn dispatch(bytes: &[u8], handler: impl FnOnce(Request) -> Outcome) -> Result<Prepared, Error> {
+    fn dispatch(
+        bytes: &[u8],
+        handler: impl FnOnce(Request) -> Outcome,
+    ) -> Result<Prepared<Outcome>, Error> {
         let request = decode::<Request>(0, bytes)?;
         encode(1, &handler(request))
     }
     fn call(
-        request: &Prepared,
-        transport: impl FnOnce(&str, &[u8]) -> Result<Prepared, Error>,
+        request: &Prepared<Request>,
+        transport: impl FnOnce(&str, &[u8]) -> Result<Prepared<Outcome>, Error>,
     ) -> Result<Outcome, Error> {
         let reply = transport(BALANCE_NAME, request.as_bytes())?;
         decode(1, reply.as_bytes())
@@ -151,6 +148,25 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn generated_scalar_layout_round_trips_boundaries() {
+        wire_record! { struct Scalars { counter: u64, index: u32, enabled: bool } }
+        for value in [
+            Scalars {
+                counter: 0,
+                index: 0,
+                enabled: false,
+            },
+            Scalars {
+                counter: u64::MAX,
+                index: u32::MAX,
+                enabled: true,
+            },
+        ] {
+            let bytes = encode(0, &value).unwrap();
+            assert_eq!(decode::<Scalars>(0, bytes.as_bytes()).unwrap(), value);
+        }
+    }
     #[test]
     fn typed_round_trip_and_application_error() {
         for (account, expected) in [(7, Outcome::Balance(1_000_000)), (9, Outcome::NotFound)] {

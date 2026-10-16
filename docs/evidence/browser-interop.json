@@ -1,0 +1,31 @@
+{
+  "vectors": 3,
+  "signedUpdates": 3,
+  "truncatedRepliesRejected": 4264,
+  "canisterRejected": true,
+  "certificateRejected": true,
+  "identity": "dr6rt-3hxga-ybczv-mwejy-5u5a6-oi5fb-qzkdk-vpbsx-vtpcb-nsw4o-zqe",
+  "bigintBoundary": "0, 2^53+1, u64::MAX (revision wraps)",
+  "selectedEndpoint": "evaluate",
+  "browser": "156.0.8078.4",
+  "node": "v24.21.0",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "pocketIc": "pocket-ic-server 16.0.0",
+  "sdk": "6.1.1",
+  "generator": "postcard-bindgen 0.9.1",
+  "bundleBytes": 341942,
+  "hashes": {
+    "package-lock.json": "ccac91d00dbe1bdd431482f704a1de0647ae7320e53e58371178bd8ad7afbb99",
+    "generated/wire-bindings/index.js": "5ce06690f28bed8d211202852b46ed153252206d5cceb9acc49dac346b1ccbcc",
+    "generated/wire-bindings/index.d.ts": "481bb59b213e4d16601093905ae64e95b9f4c64e30ec5d7184d500015d442a0b",
+    "generated/contract.json": "11da501570ffb384e0dc3db7b29f983b84649e9cadf8acaa20e045293384d9b5",
+    "generated/vectors.json": "d48ef7d3608b413a579d119fddfd197eb261ee866898d936b979b49eaea254ea",
+    "src/client.ts": "32a832dfcfeb8122ee54c29e2ae8f6720904f941fe35d1c6b6f4aae6667f51fa",
+    "src/main.ts": "ec505a016741739fd2e47b9eaf622dc503f08f0298416a703a78ed3d0868f10f",
+    "../../Cargo.lock": "90ae75e2f3dd38cb0753b671dac425cf0c8b3e23afcb04b3fb19ad815b82dd1d",
+    "../../crates/ic-wire-canister-evaluation/src/lib.rs": "489c6b461597ab4c437f27c53a951a5eb82d3045afba0005ba466129bfe406bc",
+    "../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs": "cdf453eb3f136746b88675d26b237b8cb95cf5260d5b9300c4266ed8dd704f02",
+    "/home/adam/projects/ic-wire/target/wasm32-unknown-unknown/canister-evaluation/ic_wire_canister_evaluation.wasm": "09d88efc472fa65603467360371a701f7de4220d35ae6c6afca26436b90b28de",
+    "PocketIC binary": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792"
+  }
+}

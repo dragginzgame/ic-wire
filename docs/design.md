@@ -47,9 +47,11 @@ evaluate the existing standalone principal representation without importing Cand
 - Decide unknown-field and incompatible-schema behavior explicitly. Initial scope
   is coordinated Rust peers, not Candid's cross-language subtyping guarantees.
 
-Select a compact existing codec if it satisfies these requirements and wins the
-measurements. Compare it with CBOR already used by consumers. A bespoke codec
-needs a demonstrated advantage; do not implement a general serializer first.
+The maintainer selected Postcard for controlled inter-canister calls and owned
+user endpoints after the payload and installed-canister experiments. This selects
+the encoding engine; the bounds, schema identity and public API still require
+qualification. The [browser trial](browser-interop.md) covers one scalar/blob
+update endpoint, with generated bindings and a bounded client wrapper.
 
 The [IcyDB sharing assessment](shared-codec-evaluation.md) supports evaluating a
 shared message/value codec, while keeping adoption optional. Similar byte helpers

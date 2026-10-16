@@ -59,6 +59,9 @@ The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
 | `check-doc-links` | Local references in IC Wire's maintained documentation |
 | `check-pins` | Shared declaration checker with Cargo inheritance checks; requires Git and prepared host tools |
 | `check-tooling` | Local Make routing, release refusal and real formatting-hook fixture |
+| `check-canister-evaluation` | Lint the evaluation package and compile both Wasm feature extremes; no emulator |
+| `evaluate-canisters` | Build four artifacts and verify them in local PocketIC; requires explicit `POCKET_IC_BIN` |
+| `check-typed-diagnostics` | Isolated offline compilation of valid and invalid prototype callers; requires fetched locked dependencies |
 | `cloc`, `version` | Workspace source counts and canonical workspace version |
 | `ci` | Complete scaffold/tooling gate; explicit local invocation or hosted CI |
 

@@ -4,7 +4,14 @@
 
 The initial [payload screen](codec-screen.md) implements steps 1–2 with bounded
 synthetic fixtures and partial rejection evidence. It does not complete the typed
-developer journey, matched Wasm comparison or IC instruction measurements below.
+developer journey. The [matched canister experiment](canister-comparison.md)
+now covers installed scalar/blob calls, linked Wasm and IC instructions for both
+internal-only and management-enabled artifacts. Nested shapes and production
+developer ergonomics remain outside that measured subset. The subsequent
+[browser trial](browser-interop.md) qualifies one generated TypeScript update
+client against the installed Postcard fixture. Postcard is now the selected
+engine for controlled RPC and owned user endpoints; adoption remains bounded
+by the unresolved protocol requirements.
 
 Produce a reproducible codec comparison and one complete typed developer journey.
 Do not adopt a codec or promise savings solely from source size or symbol names.

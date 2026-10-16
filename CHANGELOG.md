@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.2]
+
+- Select Postcard for controlled inter-canister calls and owned user endpoints.
+  Add a private browser experiment with Rust-generated bindings/vectors, a
+  bounded TypeScript client and signed Chromium/PocketIC updates. Verify u64
+  precision, malformed input and certificate rejection; public API remains open.
+
+- Add matched installed Candid/Postcard canister experiments with optional real
+  management traffic. Record payloads, complete Wasm/code-section sizes and IC
+  instruction counters with reproducible artifacts and rejection checks; keep
+  the production library independent of the evaluation dependencies.
+- Generate the native experiment's scalar record serialization from one explicit
+  wire-order declaration, preserving its existing request bytes. Type retained
+  request/reply buffers and add compile-fail checks for invalid callers and
+  unsupported fields. This remains private evaluation syntax, not a runtime API.
+- Synchronize the lockfile's local package entry with the existing 0.1.1 manifest
+  so locked builds succeed; no dependency versions change.
+
 ## [0.1.1]
 
 - Add a native typed request/reply experiment with explicit wire layout,

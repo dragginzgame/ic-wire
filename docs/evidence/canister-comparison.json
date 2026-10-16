@@ -1,0 +1,343 @@
+{
+  "artifacts": [
+    {
+      "code_section_payload_bytes": 321500,
+      "management_call_verified": false,
+      "name": "candid-internal",
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              206103,
+              207,
+              99585
+            ],
+            [
+              170870,
+              207,
+              98913
+            ],
+            [
+              171996,
+              207,
+              98913
+            ]
+          ],
+          "request_bytes": 63,
+          "request_sha256": "ae5f57317d3d31938d1e44d8eaf25cf2a90660ad8f02e3cae5d2fb5fa352f52d",
+          "response_bytes": 63,
+          "response_sha256": "9889882cf6a77b61f1d0f27a72d54b16dd60d88a9ced7d6de510e0790ea0dd16"
+        },
+        {
+          "blob_bytes": 128,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              176478,
+              207,
+              100413
+            ],
+            [
+              175781,
+              207,
+              100413
+            ],
+            [
+              175781,
+              207,
+              100413
+            ]
+          ],
+          "request_bytes": 192,
+          "request_sha256": "e39b54a73414add8825666d8aaed81cdcf60dab32e2e8c2f95af11b422149301",
+          "response_bytes": 192,
+          "response_sha256": "33c1db8d1a2aadeb45cc4a48601bf77816ee561d7177d72a1f96838a6a9bcefb"
+        },
+        {
+          "blob_bytes": 4096,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              293352,
+              207,
+              107920
+            ],
+            [
+              293316,
+              207,
+              107920
+            ],
+            [
+              293316,
+              207,
+              107920
+            ]
+          ],
+          "request_bytes": 4160,
+          "request_sha256": "e7f70056ffdbf2921e347d2a7a36e703c551db978310156a498084a3b060ba5e",
+          "response_bytes": 4160,
+          "response_sha256": "bcdd64dc130b12a902d2ede7feb146f34ec17e0faa607b15086de2e423a41674"
+        }
+      ],
+      "wasm_bytes": 649987,
+      "wasm_sha256": "02f8c6d051fda9621c5ea3975df065d503ddc21e21e4d45d90b7845756a4b5e5"
+    },
+    {
+      "code_section_payload_bytes": 36460,
+      "management_call_verified": false,
+      "name": "postcard-internal",
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              9022,
+              207,
+              7120
+            ],
+            [
+              9022,
+              207,
+              7120
+            ],
+            [
+              9022,
+              207,
+              7120
+            ]
+          ],
+          "request_bytes": 7,
+          "request_sha256": "23be8eb52f5c9f5229cb7d1d2c77da4f8d2d9772fc1dd2dc448e55a46c20505f",
+          "response_bytes": 7,
+          "response_sha256": "70a60894672886be91757198d6448269437d3f994f2cc6d67a5f352add54e160"
+        },
+        {
+          "blob_bytes": 128,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              13245,
+              207,
+              7514
+            ],
+            [
+              13245,
+              207,
+              7514
+            ],
+            [
+              13245,
+              207,
+              7514
+            ]
+          ],
+          "request_bytes": 136,
+          "request_sha256": "7873f331d297a16d8707f5c6431f5555a3cf536cf5fa3aae091f4bfdb07bed48",
+          "response_bytes": 136,
+          "response_sha256": "840d09de8eaddc3fd8fec073ebf17d1a0c7661a1daf725de1e3b1eb95bcb1bdc"
+        },
+        {
+          "blob_bytes": 4096,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              128305,
+              207,
+              15444
+            ],
+            [
+              128305,
+              207,
+              15444
+            ],
+            [
+              128305,
+              207,
+              15444
+            ]
+          ],
+          "request_bytes": 4104,
+          "request_sha256": "8caae5d031f37bb1d478baefac890049f0e37142b1a92e37688e2af3b4f9e9e6",
+          "response_bytes": 4104,
+          "response_sha256": "e10abfc12d0206e960b44d87a00560d0f51c6ab579f44cfcb005d3491210c274"
+        }
+      ],
+      "wasm_bytes": 76815,
+      "wasm_sha256": "2b8adda9615c62fcfc77d350661e8984b0b03908c041ea3070721b5b98e2d5e1"
+    },
+    {
+      "code_section_payload_bytes": 366368,
+      "management_call_verified": true,
+      "name": "candid-management",
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              197444,
+              207,
+              99336
+            ],
+            [
+              173227,
+              207,
+              99306
+            ],
+            [
+              173227,
+              207,
+              99306
+            ]
+          ],
+          "request_bytes": 63,
+          "request_sha256": "ae5f57317d3d31938d1e44d8eaf25cf2a90660ad8f02e3cae5d2fb5fa352f52d",
+          "response_bytes": 63,
+          "response_sha256": "9889882cf6a77b61f1d0f27a72d54b16dd60d88a9ced7d6de510e0790ea0dd16"
+        },
+        {
+          "blob_bytes": 128,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              176683,
+              207,
+              100630
+            ],
+            [
+              176925,
+              207,
+              100630
+            ],
+            [
+              176925,
+              207,
+              100630
+            ]
+          ],
+          "request_bytes": 192,
+          "request_sha256": "e39b54a73414add8825666d8aaed81cdcf60dab32e2e8c2f95af11b422149301",
+          "response_bytes": 192,
+          "response_sha256": "33c1db8d1a2aadeb45cc4a48601bf77816ee561d7177d72a1f96838a6a9bcefb"
+        },
+        {
+          "blob_bytes": 4096,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              293504,
+              207,
+              107736
+            ],
+            [
+              292483,
+              207,
+              107742
+            ],
+            [
+              292483,
+              207,
+              107742
+            ]
+          ],
+          "request_bytes": 4160,
+          "request_sha256": "e7f70056ffdbf2921e347d2a7a36e703c551db978310156a498084a3b060ba5e",
+          "response_bytes": 4160,
+          "response_sha256": "bcdd64dc130b12a902d2ede7feb146f34ec17e0faa607b15086de2e423a41674"
+        }
+      ],
+      "wasm_bytes": 727740,
+      "wasm_sha256": "c5e9ba6cd7f9499172bd4a09edc99a35671463feb0f35cf3180cab3735e100e1"
+    },
+    {
+      "code_section_payload_bytes": 339905,
+      "management_call_verified": true,
+      "name": "postcard-management",
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              9078,
+              207,
+              7146
+            ],
+            [
+              9078,
+              207,
+              7146
+            ],
+            [
+              9078,
+              207,
+              7146
+            ]
+          ],
+          "request_bytes": 7,
+          "request_sha256": "23be8eb52f5c9f5229cb7d1d2c77da4f8d2d9772fc1dd2dc448e55a46c20505f",
+          "response_bytes": 7,
+          "response_sha256": "70a60894672886be91757198d6448269437d3f994f2cc6d67a5f352add54e160"
+        },
+        {
+          "blob_bytes": 128,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              13429,
+              207,
+              7540
+            ],
+            [
+              13296,
+              207,
+              7540
+            ],
+            [
+              13296,
+              207,
+              7540
+            ]
+          ],
+          "request_bytes": 136,
+          "request_sha256": "7873f331d297a16d8707f5c6431f5555a3cf536cf5fa3aae091f4bfdb07bed48",
+          "response_bytes": 136,
+          "response_sha256": "840d09de8eaddc3fd8fec073ebf17d1a0c7661a1daf725de1e3b1eb95bcb1bdc"
+        },
+        {
+          "blob_bytes": 4096,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              128501,
+              207,
+              15542
+            ],
+            [
+              128501,
+              207,
+              15542
+            ],
+            [
+              128501,
+              207,
+              15542
+            ]
+          ],
+          "request_bytes": 4104,
+          "request_sha256": "8caae5d031f37bb1d478baefac890049f0e37142b1a92e37688e2af3b4f9e9e6",
+          "response_bytes": 4104,
+          "response_sha256": "e10abfc12d0206e960b44d87a00560d0f51c6ab579f44cfcb005d3491210c274"
+        }
+      ],
+      "wasm_bytes": 678026,
+      "wasm_sha256": "d19c1cae932a2f46d90d80ee921a3699f59dfd988ac4e6db524ea672845cbbf2"
+    }
+  ],
+  "build_script_sha256": "dafb26cae9f25c0d4c669dac13b726f01adb349ec107c16ffb3be9f82997735f",
+  "canister_source_sha256": "7ab98325e1f71eb28a66887902ce79e5fa32ce421b0f23039325da3b7e3c88e9",
+  "compiler_observed_at_execution": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "compiler_recorded_at_build": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "flags_recorded_at_build": "RUSTFLAGS=\nCARGO_ENCODED_RUSTFLAGS=\n",
+  "lock_sha256": "c245ccef7bd2a189f8d67732d0ba8efb836971ba8bbee9899370c8f764d2308c",
+  "package_manifest_sha256": "1b7b3bd43ed54634df884085a7d69d1536b429adf05b181abf77e282edc37f8b",
+  "pocket_ic_server_sha256": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792",
+  "pocket_ic_server_version": "pocket-ic-server 16.0.0\n",
+  "profile": "canister-evaluation: release, opt-level=z, lto=true, codegen-units=1, panic=abort, strip=debuginfo",
+  "runner_source_sha256": "08bb00890507033e86ba7769bc83eb54d30753d6f2ff27356616b035e8112da3",
+  "scope": "IC performance_counter(0) deltas: strict decode includes canonical re-encoding; handler; encode. Counter overhead included; no whole-call, native timing or compressed-size claims.",
+  "subnet": "application; PocketIC defaults",
+  "target": "wasm32-unknown-unknown",
+  "workspace_manifest_sha256": "e914761322dfcd83874375501dea723ed19f53da2435474159ca274cf4dc281f"
+}

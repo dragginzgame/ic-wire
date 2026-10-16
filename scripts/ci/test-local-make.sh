@@ -14,6 +14,9 @@ paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-too
 paths+=(crates/ic-wire/examples/codec_evaluation/mod.rs crates/ic-wire/examples/codec_evaluation/bounded/mod.rs crates/ic-wire/examples/codec_evaluation/fixtures/mod.rs crates/ic-wire/examples/codec_evaluation/fixed/mod.rs)
 paths+=(docs/evidence/codec-screen.json)
 paths+=(crates/ic-wire/examples/typed_journey/mod.rs)
+paths+=(crates/ic-wire/examples/typed_journey/schema/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs crates/ic-wire-canister-evaluation/examples/measure/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs)
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue
     paths+=("$path")

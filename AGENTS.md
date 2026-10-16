@@ -14,7 +14,8 @@ moving sibling checkout or patch snapshot-owned files in place.
 - Keep every package unpublished (`publish = false`). Do not reserve a registry
   name, publish, create a remote, push or release without explicit authorization.
 - Establish a reusable Rust developer experience and a substantial measured win
-  before broad adoption. No codec or public API has been selected.
+  before broad adoption. Postcard is selected for controlled RPC and owned user
+  endpoints; the wire contract and public API remain unfrozen.
 - Keep runtime code Wasm-safe and independent of Candid, CDK and host tooling.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
