@@ -36,6 +36,12 @@ fn describe(
         Schema::Opaque => return Err(GenerationError::Schema),
         Schema::Unit => (json!({"k":"unit"}), "null".into()),
         Schema::Bool => (json!({"k":"bool"}), "boolean".into()),
+        Schema::Float(bits) => {
+            if ![32, 64].contains(bits) {
+                return Err(GenerationError::Schema);
+            }
+            (json!({"k":"float","bits":bits}), "number".into())
+        }
         Schema::Unsigned(bits) | Schema::Signed(bits) => {
             if ![8, 16, 32, 64, 128].contains(bits) {
                 return Err(GenerationError::Schema);

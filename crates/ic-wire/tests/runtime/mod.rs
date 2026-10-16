@@ -323,3 +323,93 @@ fn typescript_projects_explicit_id_order_and_rejects_opaque_metadata() {
     }
     assert_eq!(generate::<Opaque>(), Err(GenerationError::Schema));
 }
+
+#[test]
+fn finite_float_bits_and_nonfinite_rejection() {
+    use ic_wire::{FiniteF32, FiniteF64};
+    struct FloatMethod;
+    impl Method for FloatMethod {
+        type Request = FiniteF32;
+        type Response = FiniteF64;
+        const ID: u64 = 0xf10a7;
+        const NAME: &'static str = "float";
+        const REQUEST_LIMITS: Limits = LIMITS;
+        const RESPONSE_LIMITS: Limits = LIMITS;
+    }
+    for value in [
+        0.0_f32,
+        -0.0,
+        f32::from_bits(1),
+        f32::MIN_POSITIVE,
+        f32::MIN,
+        f32::MAX,
+        0.1,
+        -2.5,
+    ] {
+        let bytes = encode_request::<FloatMethod>(&FiniteF32::new(value).unwrap()).unwrap();
+        assert_eq!(&bytes.as_bytes()[11..], &value.to_le_bytes());
+        assert_eq!(
+            decode_request::<FloatMethod>(bytes.as_bytes())
+                .unwrap()
+                .get()
+                .to_bits(),
+            value.to_bits()
+        );
+    }
+    for value in [
+        0.0_f64,
+        -0.0,
+        f64::from_bits(1),
+        f64::MIN_POSITIVE,
+        f64::MIN,
+        f64::MAX,
+        0.1,
+        -2.5,
+    ] {
+        let bytes = encode_response::<FloatMethod>(&FiniteF64::new(value).unwrap()).unwrap();
+        assert_eq!(&bytes.as_bytes()[11..], &value.to_le_bytes());
+        assert_eq!(
+            decode_response::<FloatMethod>(bytes.as_bytes())
+                .unwrap()
+                .get()
+                .to_bits(),
+            value.to_bits()
+        );
+    }
+    for bits in [
+        0x7f80_0000,
+        0xff80_0000,
+        0x7fc0_0000,
+        0x7f80_0001,
+        0xffc0_0123,
+    ] {
+        let value = f32::from_bits(bits);
+        assert_eq!(FiniteF32::new(value), Err(Error::Malformed));
+        let mut bytes = encode_request::<FloatMethod>(&FiniteF32::new(0.0).unwrap())
+            .unwrap()
+            .into_bytes();
+        bytes[11..].copy_from_slice(&bits.to_le_bytes());
+        assert_eq!(decode_request::<FloatMethod>(&bytes), Err(Error::Malformed));
+    }
+    for bits in [
+        0x7ff0_0000_0000_0000,
+        0xfff0_0000_0000_0000,
+        0x7ff8_0000_0000_0000,
+        0x7ff0_0000_0000_0001,
+        0xfff8_0000_0000_0123,
+    ] {
+        let value = f64::from_bits(bits);
+        assert_eq!(FiniteF64::new(value), Err(Error::Malformed));
+        let mut bytes = encode_response::<FloatMethod>(&FiniteF64::new(0.0).unwrap())
+            .unwrap()
+            .into_bytes();
+        bytes[11..].copy_from_slice(&bits.to_le_bytes());
+        assert_eq!(
+            decode_response::<FloatMethod>(&bytes),
+            Err(Error::Malformed)
+        );
+    }
+    assert_eq!(FiniteF32::SHAPE.bytes, 4);
+    assert_eq!(FiniteF64::SHAPE.bytes, 8);
+    assert_eq!(FiniteF64::SHAPE.heap, 0);
+}

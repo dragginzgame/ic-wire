@@ -9,6 +9,9 @@ publish = false
 [lib]
 proc-macro = true
 
+[features]
+adapter-fixture = []
+
 [dependencies]
 proc-macro2.workspace = true
 quote.workspace = true

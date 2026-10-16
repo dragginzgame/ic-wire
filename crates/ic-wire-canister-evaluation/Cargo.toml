@@ -13,6 +13,7 @@ crate-type = ["cdylib", "rlib"]
 bindings = ["replay", "ic-wire/typescript"]
 candid-codec = []
 management = []
+macro-fixture = ["dep:ic-wire", "dep:ic-wire-derive", "ic-wire-derive/adapter-fixture"]
 peer = []
 replay = ["dep:ic-wire"]
 
@@ -20,6 +21,7 @@ replay = ["dep:ic-wire"]
 candid.workspace = true
 ic-cdk.workspace = true
 ic-wire = { workspace = true, optional = true }
+ic-wire-derive = { workspace = true, optional = true }
 ic0.workspace = true
 postcard.workspace = true
 serde.workspace = true
@@ -43,6 +45,11 @@ required-features = ["replay"]
 name = "browser-fixture"
 path = "examples/browser_fixture/mod.rs"
 required-features = ["bindings"]
+
+[[example]]
+name = "macro-fixture"
+path = "examples/macro_fixture/mod.rs"
+required-features = ["macro-fixture"]
 
 [lints]
 workspace = true

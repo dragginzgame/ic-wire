@@ -1,4 +1,8 @@
 //! Finite, unpublished matched canister fixture; not the IC Wire runtime.
+/// Evaluation-only Canic-shaped macro integration fixture.
+#[cfg(feature = "macro-fixture")]
+pub mod macro_fixture;
+
 /// Bounded nested evaluation contract.
 pub mod authority;
 

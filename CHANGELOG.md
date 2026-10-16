@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0]
+
+- Add finite f32/f64 wire wrappers and matching TypeScript number projections,
+  preserving finite bits while rejecting NaN and infinity. Qualify scalar edges
+  and bounded SQL-shaped pages with Rust/TypeScript vectors. Recursion remains
+  unsupported and sibling/storage contracts are unchanged.
+- Add float metadata and make the public Schema enum non-exhaustive. Downstream
+  schema matches must include a fallback; this source API change selects a minor
+  release. Existing wire layouts remain unchanged. Workspace versions stay at
+  0.1.6 until maintainer release preparation.
+
+- Add evaluation-only Postcard query/update attributes and a local Canic-shaped
+  fixture, without changing siblings or the default runtime API. Check real Wasm
+  exports, sync/async handler types, stage ordering, typed errors and rollback
+  when response encoding fails after a local state change. Keep macro/auth/retry
+  policy consumer-owned and preserve prior evidence separately.
+
 ## [0.1.6] - 2026-10-16
 
 - Move the compile-fail gate from the retired private prototype to production

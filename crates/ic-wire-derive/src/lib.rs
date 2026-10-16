@@ -173,3 +173,24 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
         }
     })
 }
+
+#[cfg(feature = "adapter-fixture")]
+mod adapter_fixture;
+
+/// Evaluation-only query adapter; not a supported Canic macro API.
+#[cfg(feature = "adapter-fixture")]
+#[proc_macro_attribute]
+pub fn query(args: TokenStream, item: TokenStream) -> TokenStream {
+    adapter_fixture::expand(args.into(), item.into(), false)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+
+/// Evaluation-only sync/async update adapter; not a supported Canic macro API.
+#[cfg(feature = "adapter-fixture")]
+#[proc_macro_attribute]
+pub fn update(args: TokenStream, item: TokenStream) -> TokenStream {
+    adapter_fixture::expand(args.into(), item.into(), true)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}

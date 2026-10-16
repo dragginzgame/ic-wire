@@ -1,0 +1,168 @@
+//! Installed qualification of the evaluation-only query/update attributes.
+use candid::Principal;
+use ic_wire::{Method, decode_response, encode_request};
+use ic_wire_canister_evaluation::macro_fixture::{Add, BadReply, Read, Reset};
+use pocket_ic::PocketIcBuilder;
+use serde_json::json;
+use sha2::{Digest, Sha256};
+use std::{env, fs, process::Command};
+
+fn main() {
+    let wasm_path = env::args_os().nth(1).expect("Wasm path");
+    let wasm = fs::read(&wasm_path).unwrap();
+    let mut exports = Vec::new();
+    for payload in wasmparser::Parser::new(0).parse_all(&wasm) {
+        if let wasmparser::Payload::ExportSection(section) = payload.unwrap() {
+            for export in section {
+                exports.push(export.unwrap().name.to_owned());
+            }
+        }
+    }
+    for expected in [
+        format!("canister_query {}", Read::NAME),
+        format!("canister_update {}", Add::NAME),
+        format!("canister_update {}", Reset::NAME),
+    ] {
+        assert_eq!(exports.iter().filter(|name| **name == expected).count(), 1);
+    }
+    assert!(!exports.contains(&format!("canister_update {}", Read::NAME)));
+    assert!(!exports.contains(&format!("canister_query {}", Add::NAME)));
+    let server = env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server");
+    let pic = PocketIcBuilder::new()
+        .with_server_binary(server.clone().into())
+        .with_application_subnet()
+        .build();
+    let id = pic.create_canister();
+    pic.add_cycles(id, 10_000_000_000_000);
+    pic.install_canister(id, wasm.clone(), vec![], None);
+    let caller = Principal::anonymous();
+    let query = |value| {
+        let bytes = encode_request::<Read>(&value).unwrap();
+        let reply = pic
+            .query_call(id, caller, Read::NAME, bytes.into_bytes())
+            .unwrap();
+        decode_response::<Read>(&reply).unwrap()
+    };
+    let request = encode_request::<Add>(&7).unwrap().into_bytes();
+    assert_eq!(query(0), 0);
+    let reply = pic
+        .update_call(id, caller, Add::NAME, request.clone())
+        .unwrap();
+    assert_eq!(decode_response::<Add>(&reply).unwrap(), Ok(7));
+    assert_eq!(query(2), 9);
+    let committed = pic.get_stable_memory(id);
+    let mut rejected = 0;
+    for bytes in [
+        vec![0; 65],
+        encode_request::<Add>(&13).unwrap().into_bytes(),
+        encode_request::<Read>(&7).unwrap().into_bytes(),
+    ] {
+        assert!(pic.update_call(id, caller, Add::NAME, bytes).is_err());
+        assert_eq!(pic.get_stable_memory(id), committed);
+        rejected += 1;
+    }
+    for end in 0..request.len() {
+        assert!(
+            pic.update_call(id, caller, Add::NAME, request[..end].to_vec())
+                .is_err()
+        );
+        assert_eq!(pic.get_stable_memory(id), committed);
+        rejected += 1;
+    }
+    assert!(
+        pic.update_call(id, Principal::from_slice(&[42]), Add::NAME, request.clone())
+            .is_err()
+    );
+    assert_eq!(pic.get_stable_memory(id), committed);
+    rejected += 1;
+    let failure = pic
+        .update_call(
+            id,
+            caller,
+            Add::NAME,
+            encode_request::<Add>(&u64::MAX).unwrap().into_bytes(),
+        )
+        .unwrap();
+    assert_eq!(decode_response::<Add>(&failure).unwrap(), Err(7));
+    assert_eq!(pic.get_stable_memory(id), committed);
+    assert!(
+        pic.query_call(id, caller, Add::NAME, request.clone())
+            .is_err()
+    );
+    // The IC permits replicated execution of a query through an update call.
+    let replicated_query = pic
+        .update_call(
+            id,
+            caller,
+            Read::NAME,
+            encode_request::<Read>(&0).unwrap().into_bytes(),
+        )
+        .unwrap();
+    assert_eq!(decode_response::<Read>(&replicated_query).unwrap(), 7);
+    assert_eq!(pic.get_stable_memory(id), committed);
+    assert_eq!(query(0), 7);
+    // The macro deliberately adds no automatic replay policy.
+    let second = pic
+        .update_call(id, caller, Add::NAME, request.clone())
+        .unwrap();
+    assert_eq!(decode_response::<Add>(&second).unwrap(), Ok(14));
+    assert_eq!(query(0), 14);
+    let before_reply_failure = pic.get_stable_memory(id);
+    let error = pic
+        .update_call(
+            id,
+            caller,
+            BadReply::NAME,
+            encode_request::<BadReply>(&()).unwrap().into_bytes(),
+        )
+        .unwrap_err();
+    assert!(format!("{error:?}").contains("response codec"));
+    assert_eq!(pic.get_stable_memory(id), before_reply_failure);
+    assert_eq!(query(0), 14);
+    let unit = pic
+        .update_call(
+            id,
+            caller,
+            Reset::NAME,
+            encode_request::<Reset>(&()).unwrap().into_bytes(),
+        )
+        .unwrap();
+    decode_response::<Reset>(&unit).unwrap();
+    assert_eq!(unit.len(), 11);
+    assert_eq!(query(0), 0);
+    let mut sources = serde_json::Map::new();
+    for path in [
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates/ic-wire-derive/Cargo.toml",
+        "crates/ic-wire-derive/src/lib.rs",
+        "crates/ic-wire-derive/src/adapter_fixture/mod.rs",
+        "crates/ic-wire-canister-evaluation/Cargo.toml",
+        "crates/ic-wire-canister-evaluation/src/lib.rs",
+        "crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs",
+        "crates/ic-wire-canister-evaluation/src/macro_fixture/tests/mod.rs",
+        "crates/ic-wire-canister-evaluation/examples/macro_fixture/mod.rs",
+        "crates/ic-wire/src/contract/mod.rs",
+        "crates/ic-wire/src/shape/mod.rs",
+        "scripts/ci/evaluate-macros.sh",
+    ] {
+        sources.insert(
+            path.into(),
+            json!(format!("{:x}", Sha256::digest(fs::read(path).unwrap()))),
+        );
+    }
+    let version = |program: &std::ffi::OsStr, args: &[&str]| {
+        let output = Command::new(program).args(args).output().unwrap();
+        assert!(output.status.success());
+        String::from_utf8(output.stdout).unwrap()
+    };
+    let report = json!({"scope":"evaluation-only macro expansion; no Canic source changes","rustc":version(std::ffi::OsStr::new("rustc"), &["-vV"]),"pocketIc":version(&server,&["--version"]),"target":"wasm32-unknown-unknown","profile":"canister-evaluation","features":["macro-fixture"],"exports":exports,"request":request,"success":reply,"applicationFailure":failure,"rejectionsWithoutMutation":rejected,"updateViaQueryRejected":true,"replicatedQueryVerified":true,"repeatIsNewEffect":true,"replyFailureRolledBack":true,"finalBalance":0,"syncUnitReply":unit,"wasmSha256":format!("{:x}",Sha256::digest(&wasm)),"serverSha256":format!("{:x}",Sha256::digest(fs::read(server).unwrap())),"sources":sources});
+    fs::write(
+        env::args_os().nth(2).expect("report path"),
+        serde_json::to_string_pretty(&report).unwrap() + "\n",
+    )
+    .unwrap();
+    println!(
+        "Installed macro query/sync/async update, exports, typed failure and {rejected} rejection cases passed."
+    );
+}

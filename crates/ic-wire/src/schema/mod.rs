@@ -23,6 +23,7 @@ pub struct Variant {
 /// Finite type metadata, emitted by Wire derives and bounded built-ins.
 /// Manual Wire implementations default to Opaque and cannot generate bindings.
 #[derive(Clone, Copy, Debug)]
+#[non_exhaustive]
 pub enum Schema {
     /// No trustworthy generated projection is available.
     Opaque,
@@ -34,6 +35,8 @@ pub enum Schema {
     Unsigned(u8),
     /// Signed integer width in bits (i8 is a raw two's-complement byte).
     Signed(u8),
+    /// Finite IEEE-754 width in bits (32 or 64); preserves signed zero.
+    Float(u8),
     /// Bytes with a maximum length.
     Bytes(usize),
     /// UTF-8 text with a maximum byte length.

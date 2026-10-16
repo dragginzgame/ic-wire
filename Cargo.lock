@@ -911,6 +911,7 @@ dependencies = [
  "candid",
  "ic-cdk",
  "ic-wire",
+ "ic-wire-derive",
  "ic0",
  "pocket-ic",
  "postcard",

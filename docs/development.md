@@ -62,6 +62,7 @@ The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
 | `check-tooling` | Local Make routing and real formatting-hook fixture |
 | `check-canister-evaluation` | Lint the evaluation package and compile both Wasm feature extremes; no emulator |
 | `evaluate-canisters` | Build four artifacts and verify them in local PocketIC; requires explicit `POCKET_IC_BIN` |
+| `check-macro-diagnostics`, `evaluate-macros` | Evaluation-only macro compilation and installed query/update proof; the latter requires PocketIC |
 | `check-typed-diagnostics` | Isolated offline production derive, caller and sync/async adapter diagnostics; requires fetched locked dependencies |
 | `cloc`, `version` | Workspace source counts and canonical workspace version |
 | `ci` | Complete scaffold/tooling gate; explicit local invocation or hosted CI |

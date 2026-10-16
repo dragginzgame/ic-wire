@@ -61,9 +61,9 @@ There is one current contract, without fallback readers or automatic migration.
 Enums use explicit u32 `wire(id)` tags and support unit variants or one payload
 field (use a named record for several values). Rust variant order is irrelevant.
 Records support up to 16 named fields, including an empty record. Generic derives,
-recursive graphs, maps, floats and architecture-dependent integers are excluded.
-Supported leaves are unit, bool and fixed-width signed/unsigned integers through
-128 bits. Option, Result, bounded List/Bytes/Text and Serde-supported fixed arrays
+recursive graphs, maps, raw f32/f64 and architecture-dependent integers are
+excluded. Supported leaves are unit, bool, fixed-width signed/unsigned integers
+through 128 bits, and FiniteF32/FiniteF64. Option, Result, bounded List/Bytes/Text and Serde-supported fixed arrays
 compose. Result uses Postcard's fixed tags 0=Ok, 1=Err; Option uses 0=None, 1=Some.
 
 Principal values cross as `Bytes<29>`; adapters convert/validate with their existing
@@ -71,6 +71,48 @@ principal type. IC Wire adds no principal identity type or Candid dependency.
 A field of `Bytes<29>` alone establishes a byte bound, not caller authentication.
 Keep the dependency name `ic-wire` so generated paths resolve. Consumers do not
 need to depend directly on Serde or derive its traits for these records.
+
+## Finite floats and SQL-shaped messages
+
+`FiniteF32::new(value)` and `FiniteF64::new(value)` admit finite primitives and
+return `Error::Malformed` for NaN or infinity. `.get()` recovers the primitive.
+Decoding rejects non-finite IEEE-754 bit patterns, including signaling NaNs.
+Postcard encodes these transparent wrappers as native little-endian 4/8-byte
+floats. They add no heap allocation or dynamic traversal to Rust's scalar shape.
+Signed zero and subnormals are preserved, without consumer-specific normalization.
+
+```rust
+use ic_wire::{FiniteF32, FiniteF64};
+assert_eq!(FiniteF32::new(-0.0)?.get().to_bits(), (-0.0_f32).to_bits());
+assert_eq!(FiniteF64::new(2.5)?.get(), 2.5);
+assert!(FiniteF64::new(f64::INFINITY).is_err());
+# Ok::<(), ic_wire::Error>(())
+```
+
+Generated TypeScript uses `number`. A FiniteF32 input must already be exactly
+representable as f32; use `Math.fround(value)` when intentionally converting a
+JavaScript number. For example, `0.1` alone rejects while `Math.fround(0.1)` is
+accepted. FiniteF64 accepts finite JavaScript numbers. Both reject NaN/infinity;
+f32 overflow, underflow or silent rounding also rejects on encoding.
+
+The conformance fixture includes an empty and populated SQL-shaped page with
+bounded columns/rows, explicit cell tags, signed/unsigned integers, both finite
+floats, text, bytes, booleans, null and an optional continuation value. This is a
+local consumer-shaped DTO, not IcyDB's actual SQL API. Convert owned String/Vec
+values through Text/List/Bytes at the message boundary; their constructors check
+bounds without granting unrestricted Wire implementations to those containers.
+
+IcyDB's scalar-boundary documentation at commit
+`996498ad4edb5569964b68e0c0e3f5bb9df7d1c6` already specifies finite-only floats
+and normalizes negative zero (read-only inspection of `icydb-core/src/types/mod.rs`). That policy belongs in IcyDB's conversion; IC Wire does
+not silently apply it. Recursive values still need separate bounded admission and
+schema-generation work. Ordinary finite schemas retain the existing static resource
+model. Cross-language correctness does not establish new performance savings or
+qualify every SQL value kind, nested recursive value, or deployed SQL endpoint.
+
+The new Float metadata variant makes Schema non-exhaustive for future additions.
+External metadata matches must include a fallback. This is a source API change
+for the next minor release, not a change to previously supported wire bytes.
 
 ## Resource and failure contract
 
@@ -103,7 +145,8 @@ Encoding is deterministic for the supplied types, not a general signature policy
 ## Canic adapter work
 
 The installed fixture's shared contracts and replay module demonstrate these exact
-calls; this section does not claim Canic macros have been changed.
+calls. A separate [local macro proof](macro-adoption.md) tests actual evaluation-only
+query/update attributes; neither changes Canic macros.
 
 1. Bind each owned query/update to a shared Method. Canic's macro should validate
    that the function's argument and return types match that binding at compile
@@ -113,7 +156,10 @@ calls; this section does not claim Canic macros have been changed.
    their required order. Caller-only checks can run before decoding; proof-dependent
    checks require the admitted envelope. No handler runs after admission failure.
 3. Dispatch the existing synchronous/async handler; encode_response bounds the
-   reply and supplies exact bytes to the raw reply primitive. Keep application
+   reply and supplies exact bytes to the raw reply primitive. If response encoding
+   fails after a handler changes local state, trap to roll back the transaction;
+   a normal rejection can commit that mutation. This does not undo effects already
+   committed before an external await. Keep application
    Result errors inside the response, separate from codec and transport failure.
 4. Outbound adapters encode_request once, send those bytes to Method::NAME and
    decode_response under the same Method. Canic still owns query/update selection,
@@ -185,6 +231,7 @@ certificate verification. Browser transport reply allocation happens before deco
 | `u8` through `u32`, `i8` through `i32` | Checked integer `number` |
 | `u64`, `u128`, `i64`, `i128` | `bigint` |
 | `()`, `bool` | `null`, `boolean` |
+| `FiniteF32`, `FiniteF64` | Finite `number`; f32 must be exactly representable |
 | `Bytes<N>`, `Text<N>` | `Uint8Array`, UTF-8 byte-bounded `string` |
 | `List<T,N>`, `[T;N]` | `ReadonlyArray<T>`; bounded/exact count checked at runtime |
 | `Option<T>` | `null` or `{ some: T }`, preserving nested options and unit |
@@ -202,7 +249,7 @@ unbounded work/allocation. JavaScript engine heap usage is not the Rust allocati
 budget: object overhead, temporary buffers and engine limits differ.
 
 `make check-typescript` uses prepared browser-harness Node and TypeScript tools.
-It generates 65 Rust vectors covering every supported primitive and composition,
+It generates 83 Rust vectors covering every supported primitive and composition,
 type-checks the emitted modules, and checks both directions in Node, including
 truncation, identity errors and hostile input/value cases. This is codec
 conformance; the separate installed browser fixture qualifies transport and

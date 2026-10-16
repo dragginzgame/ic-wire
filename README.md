@@ -7,10 +7,11 @@ producers and consumers we control.
 
 **Status: unpublished bounded Postcard runtime for controlled Rust endpoints.**
 The library supplies explicit-layout derives, bounded containers, typed method
-bindings and canonical request/reply envelopes. Its normal dependency graph has
+bindings, finite float wrappers and canonical request/reply envelopes. Its normal dependency graph has
 no Candid, CDK or host tooling. Start with the [runtime guide](docs/runtime.md)
 and [installed adoption proof](docs/runtime-adoption.md). Canic macro integration
-remains consumer work. An optional host generator now emits bounded TypeScript
+remains consumer work; a [local macro fixture](docs/macro-adoption.md) tests the
+expansion pattern here. An optional host generator now emits bounded TypeScript
 codecs from those same wire declarations. Installed Chromium tests qualify
 controlled queries, protected updates, replay and peer calls. Production browser
 login/delegation and Canic integration still need consumer qualification.

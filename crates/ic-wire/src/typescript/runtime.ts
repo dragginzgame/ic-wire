@@ -5,6 +5,7 @@ export class WireError extends Error {
 type Entry = { name: string; id: number; value: Schema };
 type Schema = { k: 'unit' | 'bool' }
   | { k: 'u' | 'i'; bits: number }
+  | { k: 'float'; bits: 32 | 64 }
   | { k: 'bytes' | 'text'; max: number }
   | { k: 'list' | 'array'; max: number; item: Schema }
   | { k: 'option'; item: Schema }
@@ -67,6 +68,14 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
   switch (s.k) {
     case 'unit': if (value !== null) fail('value'); return;
     case 'bool': if (typeof value !== 'boolean') fail('value'); out.byte(value ? 1 : 0); return;
+    case 'float': {
+      if (typeof value !== 'number' || !Number.isFinite(value)) fail('value');
+      const n = value as number;
+      if (s.bits === 32 && !Object.is(Math.fround(n), n)) fail('value');
+      const bytes = new Uint8Array(s.bits / 8), view = new DataView(bytes.buffer);
+      if (s.bits === 32) view.setFloat32(0, n, true); else view.setFloat64(0, n, true);
+      out.raw(bytes); return;
+    }
     case 'u': case 'i': {
       if (s.bits <= 32 ? typeof value !== 'number' || !Number.isSafeInteger(value) : typeof value !== 'bigint') fail('value');
       const n = BigInt(value as number | bigint), bits = BigInt(s.bits), signed = s.k === 'i';
@@ -121,6 +130,13 @@ function read(s: Schema, input: Reader, budget: Budget, depth: number): unknown 
   switch (s.k) {
     case 'unit': return null;
     case 'bool': { const n = input.byte(); if (n > 1) return fail('malformed'); return n === 1; }
+    case 'float': {
+      const bytes = input.raw(s.bits / 8);
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      const value = s.bits === 32 ? view.getFloat32(0, true) : view.getFloat64(0, true);
+      if (!Number.isFinite(value)) return fail('malformed');
+      return value;
+    }
     case 'u': case 'i': {
       let n = s.bits === 8 ? BigInt(input.byte()) : input.varint(s.bits);
       if (s.k === 'i') n = s.bits === 8 ? (n >= 128n ? n - 256n : n) : (n >> 1n) ^ -(n & 1n);

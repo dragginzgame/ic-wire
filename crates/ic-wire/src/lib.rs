@@ -7,6 +7,7 @@
 extern crate alloc;
 mod bounded;
 mod contract;
+mod float;
 pub mod schema;
 mod shape;
 /// Optional host-side TypeScript generation; never required by a canister.
@@ -17,6 +18,7 @@ pub use contract::{
     Method, RequestBytes, ResponseBytes, decode_request, decode_response, encode_request,
     encode_response,
 };
+pub use float::{FiniteF32, FiniteF64};
 pub use ic_wire_derive::Wire;
 pub use shape::{Limits, Shape, Wire};
 

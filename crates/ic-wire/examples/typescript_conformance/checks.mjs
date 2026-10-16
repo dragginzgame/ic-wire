@@ -44,3 +44,16 @@ rejects(() => probe({k:'result',ok:{k:'unit'},err:{k:'unit'}}).encodeRequest({ok
 rejects(() => probe({k:'record',fields:[]}).encodeRequest({extra:1}), 'value');
 rejects(() => probe({k:'enum',variants:[]}).encodeRequest({tag:'Unknown',value:null}), 'value');
 console.log('Hostile-input and outgoing-value rejection checks passed');
+
+for (const bits of [32,64]) {
+  const codec = probe({k:'float',bits});
+  for (const value of [NaN,Infinity,-Infinity,'1',null]) rejects(() => codec.encodeRequest(value), 'value');
+  const patterns = bits === 32 ? [0x7f800000n,0xff800000n,0x7fc00000n,0x7f800001n,0xffc00123n] : [0x7ff0000000000000n,0xfff0000000000000n,0x7ff8000000000000n,0x7ff0000000000001n,0xfff8000000000123n];
+  for (const pattern of patterns) {
+    const payload = new Uint8Array(bits/8), view = new DataView(payload.buffer);
+    if (bits === 32) view.setUint32(0,Number(pattern),true); else view.setBigUint64(0,pattern,true);
+    rejects(() => codec.decodeRequest(frame(...payload)), 'malformed');
+  }
+}
+for (const value of [0.1, Number.MAX_VALUE, Number.MIN_VALUE]) rejects(() => probe({k:'float',bits:32}).encodeRequest(value), 'value');
+console.log('Finite-float canonical bits and rejection checks passed');

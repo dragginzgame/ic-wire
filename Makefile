@@ -7,6 +7,14 @@ export RUSTUP_AUTO_INSTALL := 0
 include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
+.PHONY: evaluate-macros check-macro-diagnostics
+
+evaluate-macros:
+	+@bash scripts/ci/evaluate-macros.sh
+
+check-macro-diagnostics:
+	+@bash scripts/ci/check-macro-diagnostics.sh
+
 .PHONY: evaluate-codecs evaluate-journey check-typed-diagnostics evaluate-canisters evaluate-replay
 .PHONY: check-release check-canister-evaluation
 .PHONY: check-typescript evaluate-browser check-browser
@@ -54,6 +62,7 @@ help:
 		'Evaluation: evaluate-codecs (JSON payload-size and round-trip report)' \
 		'Evaluation: evaluate-journey (native typed request/reply prototype)' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
+		'Evaluation: check-macro-diagnostics, evaluate-macros (local adapter proof)' \
 		'Evaluation: evaluate-canisters (requires explicit POCKET_IC_BIN)' \
 		'Evaluation: evaluate-replay (installed atomic-command/replay correctness)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
@@ -84,7 +93,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/macro-adoption.md docs/status/current.md
 
 check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"

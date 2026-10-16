@@ -1,7 +1,8 @@
 # Current handoff
 
-Updated 2026-10-16. The maintainer released/pushed 0.1.5. Workspace versions
-remain 0.1.5; the pending compatible addition is documented under 0.1.6.
+Updated 2026-10-16. Workspace versions remain 0.1.6 after the maintainer release;
+the pending batch is documented under 0.2.0 because the public Schema enum gains
+float metadata and becomes non-exhaustive. Package versions are unchanged.
 
 ## Implemented runtime
 
@@ -14,7 +15,7 @@ for the maintained public API, wire rules, supported types and Canic adapter ste
   variant IDs, independent of Rust declaration order. Generic/recursive derives
   and unbounded containers are excluded. IDs and method identity are consumer-owned.
 - Bounded List, Bytes and UTF-8 Text compose with fixed-width integers, unit,
-  bool, Option, Result, fixed arrays and derived records/enums. Principal bytes
+  bool, finite f32/f64 wrappers, Option, Result, fixed arrays and derived records/enums. Principal bytes
   use Bytes<29>; existing consumer principal validation stays at the adapter.
 - Method binds request/response types, exported name, identity and per-direction
   limits. Schema maxima bound bytes, value heap plus scratch, nodes and depth
@@ -39,9 +40,9 @@ No publication, commit, push, release or version change is part of ordinary work
 All packages remain `publish = false`. No registry name is reserved.
 
 The optional host TypeScript generator now projects the runtime envelope from
-Wire metadata. `make check-typescript` passes 65 Rust/TypeScript vectors in both
+Wire metadata. `make check-typescript` passes 83 Rust/TypeScript vectors in both
 directions plus malformed-input/value checks, using Node 24.21.0 and TypeScript
-7.0.2. Rust runtime tests (10), doctests (5), clippy and host/Wasm MSRV checks
+7.0.2. Rust runtime tests (11), doctests (6), clippy and host/Wasm MSRV checks
 qualify this addition. Saturated resource maxima now always fail admission.
 This does not measure performance or JavaScript heap usage.
 
@@ -55,17 +56,30 @@ remains unchanged. The public deterministic seed is only a disposable test ident
 fixture clippy, six native evaluation tests, the Rust 1.91 host fixture build,
 TypeScript checks, pins, documentation links and local tooling checks pass.
 
-The existing compile-fail gate now targets production Wire/Method contracts,
-not the private typed-journey prototype. It checks a valid sync/async adapter
-shape followed by 11 expected rejection cases on Rust 1.99 and 1.91.
-ShellCheck and documentation-link checks also pass. This supplies a tested type-binding
-contract for consumer macro work; it does not implement Canic macros here.
+The production diagnostic gate covers 11 invalid derive/adapter shapes. The new
+[local macro proof](../macro-adoption.md) additionally tests actual evaluation-only
+query/update attributes here while Canic changes independently. Three native
+pipeline tests, seven attribute diagnostic cases and installed Wasm checks cover
+query/sync/async exports, early rejection, typed errors, unit replies and response
+encoding failure rollback. Repeated unreceipted commands still produce new effects.
+The attribute diagnostics pass on Rust 1.99 and 1.91; the feature also compiles
+for Wasm at the Rust 1.91 floor. Clippy, ShellCheck and focused tooling checks pass.
+This is not Canic macro integration, delegated auth or external-await recovery.
+
+FiniteF32/FiniteF64 now preserve finite IEEE bits, including signed zero and
+subnormals, and reject NaN/infinity. TypeScript rejects silent f32 rounding.
+The conformance corpus includes bounded heterogeneous SQL-shaped pages, not actual
+IcyDB contracts. String/Vec still convert through existing bounded wrappers.
+Recursive values remain unsupported; rarity does not remove their admission needs.
+Current-runtime performance comparisons and full IcyDB SQL integration remain
+unmeasured/unqualified. Existing runtime/browser/macro evidence stays historical
+at its recorded source hashes; this float addition is native/Node conformance.
 
 Browser login/delegation, composite-query behavior and external-effect recovery
 remain unqualified. SDK/CDK transports allocate raw replies before codec checks;
 Canic must enforce any pre-copy allowance in its transport/callback layer.
 
-Integrate one controlled Rust-to-Rust Canic endpoint when sibling source
+Port the qualified local expansion pattern into one controlled Canic endpoint when sibling source
 changes are authorized, using the concrete runtime guide and shared contracts.
 Keep full auth/hash/client conversion coordinated; do not add compatibility lanes.
 An installed IcyDB schema comparison remains optional and separate. Database rows,
