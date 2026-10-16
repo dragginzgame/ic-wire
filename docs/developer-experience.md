@@ -3,6 +3,50 @@
 All syntax below is illustrative. Wire, endpoint integration and typed method
 bindings are not implemented. Do not present these snippets as working quickstarts.
 
+## Executable native experiment (0.1.1)
+
+Run `make evaluate-journey` for the
+[typed journey example](../crates/ic-wire/examples/typed_journey/mod.rs).
+This is a compiling native experiment using Serde derives and Postcard, not an
+implementation of the proposed Wire or Canic syntax below. `make test` includes
+four tests for this experiment alongside the six payload-screen tests.
+
+The single balance binding owns its method name, contract ID, request and reply
+types. The caller prepares a request once, passes immutable bytes to a transport
+closure, and decodes an application outcome separately from transport/codec
+errors. The endpoint adapter decodes before invoking the supplied handler.
+The closure in this example is a native loopback, not an IC transport or an
+authentication implementation. Retry tests establish byte reuse, not delivery
+deduplication or exactly-once effects.
+
+The finite layout uses explicit tuple conversions: request `(account: u64,
+at_revision: u64)`, reply `(tag: u8, amount: u64)` with tag 0 for balance and
+tag 1 for not-found (amount must be zero). An outer `(contract: u32,
+direction: u8, body)` tuple binds contract 0x4241 and direction 0/request or
+1/reply. Postcard integer encoding applies. The request for account 7 at revision
+42 is `c1 84 01 00 07 2a`; the extra four identity bytes are absent from the
+earlier unframed payload screen. There is only one experimental contract, no
+legacy reader or compatibility lane.
+
+Explicit conversions make Rust declaration reordering byte-invariant, including
+enum variant order. A future incompatible layout must receive a distinct contract
+identity; the handwritten ID is not a derived schema fingerprint. Tests do not
+establish safe independent schema evolution. Canonical re-encoding rejects
+nonminimal integers and trailing bytes. A 64-byte stack buffer bounds encoded
+output before allocation; the supported request/reply types contain only scalars
+and allocate no body collections. This does not qualify arbitrary Serde types.
+
+The existing lockfile resolves Postcard 1.1.3 for this run, on Rust 1.99.0,
+x86_64-unknown-linux-gnu, default dev/test profiles. No dependency update was
+made for this experiment. The earlier saved screen reports its historical run;
+its six vector tests still pass under the current lockfile.
+
+The result demonstrates a small concrete binding, but requires handwritten tuple
+conversions and handler/client glue. It does **not** yet meet the Candid-like
+ergonomics criterion. A custom derive, compile-fail diagnostics, installed IC
+endpoint behavior and matched Wasm/instruction measurements remain unproved.
+Do not select or adopt Postcard based on this example alone.
+
 ## Shared types
 
 ```rust,ignore

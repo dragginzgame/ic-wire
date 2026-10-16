@@ -21,6 +21,10 @@ No runtime codec, derive, endpoint adapter or wire contract is implemented.
 An evaluation-only example compares four encodings on seven synthetic fixtures;
 see [the payload screen](../codec-screen.md) for results and reproducibility.
 All external codec dependencies are development-only.
+The pending 0.1.1 batch adds `make evaluate-journey`: a native typed balance
+request/reply experiment with explicit layouts, identity/direction checks and
+exact-byte retry retention. See [developer experience](../developer-experience.md).
+It is not an installed IC endpoint or an accepted runtime API.
 Shared Tooling 0.15.4 is vendored at reviewed committed revision
 `879eb2b021522252a67e908dbc217a0f4efb2a6f`, with its manifest, common Make
 interface, setup catalogs/installers and formatting hook. Local Make targets and
@@ -40,8 +44,10 @@ passed for the consumer script and workflow.
 
 Native/Wasm library checks passed on Rust 1.91.0; the development Wasm check
 passed on Rust 1.99.0. These remain empty-scaffold compilation evidence.
-No full `make ci` or sibling suite was run. Native macOS execution and hosted CI
-are not observed here.
+No full local `make ci` or sibling suite was run. Initial hosted Ubuntu CI passed;
+macOS arm64 failed the Make fixture's temporary-path comparison. The failure was
+reproduced with `TMPDIR=/tmp/` on Linux and corrected by resolving the fixture's
+physical path. Hosted macOS qualification of the fix is still outstanding.
 
 At the maintainer's request, initialized local Git on `main`, activated the
 formatting hook and created the private
@@ -62,8 +68,10 @@ field-order hazard. CBOR exceeds Candid on three fixtures. The fixed comparator
 does not beat Postcard. No speed, IC instruction or Wasm-size win is established;
 no sibling changes or codec selection have been made.
 
-Continue docs/evaluation.md with one complete typed endpoint/client journey. Resolve stable
-field identities, canonical bytes and decode limits before freezing a format.
+Continue docs/evaluation.md beyond the native typed journey: evaluate generated
+layout ergonomics and installed IC endpoint/client behavior, then matched Wasm
+and instruction measurements. Explicit tuple conversions demonstrate declaration-
+order independence locally; schema identity and general bounds remain unresolved.
 Include one local IcyDB-shaped schema artifact to test the sharing hypothesis.
 Keep all candidates unpublished and compare equal-behavior Wasm builds; IcyDB
 adoption is not a prerequisite for choosing IC Wire's encoding.

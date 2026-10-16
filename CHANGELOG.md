@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1]
+
+- Add a native typed request/reply experiment with explicit wire layout,
+  contract/direction checks, bounded output and retained retry bytes. This remains
+  an evaluation example, with no selected runtime codec or IC endpoint adapter.
+- Fix the local Make fixture's path comparison for temporary directories with
+  trailing slashes or symlink aliases, as encountered by macOS CI.
+
 ## [0.1.0]
 
 - Initialize the maintainer-authorized private `dragginzgame/ic-wire` GitHub

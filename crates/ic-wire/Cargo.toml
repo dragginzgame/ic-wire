@@ -22,5 +22,10 @@ name = "codec-evaluation"
 path = "examples/codec_evaluation/mod.rs"
 test = true
 
+[[example]]
+name = "typed-journey"
+path = "examples/typed_journey/mod.rs"
+test = true
+
 [lints]
 workspace = true

@@ -5,12 +5,15 @@ set -euo pipefail
 # Requires prepared development Rust, pinned cargo-sort, Git, Bash and GNU Make.
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/ic-wire-make.XXXXXX")"
+# Make's CURDIR is physical and normalized; compare the same path identity.
+fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
 paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
 paths+=(crates/ic-wire/examples/codec_evaluation/mod.rs crates/ic-wire/examples/codec_evaluation/bounded/mod.rs crates/ic-wire/examples/codec_evaluation/fixtures/mod.rs crates/ic-wire/examples/codec_evaluation/fixed/mod.rs)
 paths+=(docs/evidence/codec-screen.json)
+paths+=(crates/ic-wire/examples/typed_journey/mod.rs)
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue
     paths+=("$path")
@@ -44,7 +47,7 @@ printf '%s|%s|%s\n' "${RUSTUP_TOOLCHAIN:-development}" "${CARGO_TARGET_DIR:-}" "
 STUB
 chmod +x "$fixture/bin/cargo"
 export CARGO_CALLS="$fixture/cargo-calls"
-for target in build check test lint check-wasm check-msrv evaluate-codecs; do
+for target in build check test lint check-wasm check-msrv evaluate-codecs evaluate-journey; do
     PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" "$target"
 done
 cat > "$fixture/expected-calls" <<EOF
@@ -56,6 +59,7 @@ development|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32
 1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib
 1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 development|$fixture/repo/target|run --quiet --locked -p ic-wire --example codec-evaluation
+development|$fixture/repo/target|run --quiet --locked -p ic-wire --example typed-journey
 EOF
 # The ambient development selection may be explicit (for example in CI).
 sed "s/^development|/${RUSTUP_TOOLCHAIN:-development}|/" "$fixture/expected-calls" > "$fixture/expected-environment"

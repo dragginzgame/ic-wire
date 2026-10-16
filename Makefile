@@ -7,10 +7,13 @@ export RUSTUP_AUTO_INSTALL := 0
 include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version release-policy-check
-.PHONY: evaluate-codecs
+.PHONY: evaluate-codecs evaluate-journey
 
 evaluate-codecs:
 	+@env cargo run --quiet --locked -p ic-wire --example codec-evaluation
+
+evaluate-journey:
+	+@env cargo run --quiet --locked -p ic-wire --example typed-journey
 
 help:
 	@printf '%s\n' \
@@ -18,6 +21,7 @@ help:
 		'Setup: install-tools, install-hooks; offline admission: tools-check' \
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: evaluate-codecs (JSON payload-size and round-trip report)' \
+		'Evaluation: evaluate-journey (native typed request/reply prototype)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
