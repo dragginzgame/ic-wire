@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.6]
+## [0.1.6] - 2026-10-16
 
 - Move the compile-fail gate from the retired private prototype to production
   Wire/Method contracts, including synchronous and async consumer-shaped handler

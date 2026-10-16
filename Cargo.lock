@@ -892,7 +892,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "candid",
  "ciborium",
@@ -906,7 +906,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-canister-evaluation"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "candid",
  "ic-cdk",
@@ -922,7 +922,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "proc-macro2",
  "quote",
