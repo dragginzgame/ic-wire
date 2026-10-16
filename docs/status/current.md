@@ -93,6 +93,8 @@ ordered keys, journals and authenticated cursor formats stay outside scope.
 The current-runtime comparison passes 72 measured calls, 120 rejection checks,
 matched export checks and two real management calls. Both codec configurations
 pass focused clippy; the default evaluation tests and Rust 1.91 Wasm check pass.
+The disposable Make/formatting fixture now includes both benchmark modules;
+`make check-tooling` qualifies the complete fixture after the missing-file fix.
 
 Historical [codec comparison](../canister-comparison.md),
 [nested authority](../nested-authority.md) and [replay](../command-replay.md) reports

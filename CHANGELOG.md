@@ -2,6 +2,9 @@
 
 ## [0.2.1]
 
+- Include the runtime benchmark modules in the disposable formatting-hook fixture,
+  fixing `check-tooling` failures caused by missing source files.
+
 - Add a reproducible installed comparison of the production runtime against
   strict Candid, covering bounded blobs, UTF-8 text and finite doubles, with
   separate internal-only and management-enabled Wasm measurements. See the
