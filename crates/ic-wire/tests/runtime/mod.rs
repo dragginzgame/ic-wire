@@ -413,3 +413,59 @@ fn finite_float_bits_and_nonfinite_rejection() {
     assert_eq!(FiniteF64::SHAPE.bytes, 8);
     assert_eq!(FiniteF64::SHAPE.heap, 0);
 }
+
+// Manual Wire implementations must not bypass the declared byte bound, and
+// serializer failures must remain distinct from noncanonical decoded values.
+#[derive(Debug, PartialEq, serde::Deserialize)]
+struct Adversarial(u8);
+impl serde::Serialize for Adversarial {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        match self.0 {
+            1 => serializer.serialize_u64(u64::MAX),
+            2 => Err(serde::ser::Error::custom("intentional serializer failure")),
+            3 => serializer.serialize_u8(4),
+            4 => serializer.serialize_unit(),
+            5 => serializer.serialize_bytes(&[0; 8]),
+            6 => serializer.serialize_u16(128),
+            _ => serializer.serialize_u8(self.0),
+        }
+    }
+}
+impl Wire for Adversarial {
+    const SHAPE: ic_wire::Shape = <u16 as Wire>::SHAPE;
+}
+struct AdversarialMethod;
+impl Method for AdversarialMethod {
+    type Request = Adversarial;
+    type Response = ();
+    const ID: u64 = 99;
+    const NAME: &'static str = "adversarial";
+    const REQUEST_LIMITS: Limits = LIMITS;
+    const RESPONSE_LIMITS: Limits = LIMITS;
+}
+#[test]
+fn custom_serializer_bounds_and_error_identity() {
+    let canonical = encode_request::<AdversarialMethod>(&Adversarial(0)).unwrap();
+    for tag in [1, 2, 5] {
+        assert_eq!(
+            encode_request::<AdversarialMethod>(&Adversarial(tag))
+                .err()
+                .unwrap(),
+            Error::Malformed
+        );
+        let mut bytes = canonical.as_bytes().to_vec();
+        *bytes.last_mut().unwrap() = tag;
+        assert_eq!(
+            decode_request::<AdversarialMethod>(&bytes),
+            Err(Error::Malformed)
+        );
+    }
+    for tag in [3, 4, 6] {
+        let mut bytes = canonical.as_bytes().to_vec();
+        *bytes.last_mut().unwrap() = tag;
+        assert_eq!(
+            decode_request::<AdversarialMethod>(&bytes),
+            Err(Error::Noncanonical)
+        );
+    }
+}

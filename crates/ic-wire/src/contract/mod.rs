@@ -1,6 +1,7 @@
 use crate::{Error, Limits, Wire};
 use alloc::vec::Vec;
 use core::marker::PhantomData;
+use postcard::ser_flavors::Flavor;
 
 const HEADER: usize = 11;
 
@@ -61,21 +62,75 @@ pub(crate) fn admit<T: Wire>(limits: Limits) -> Result<usize, Error> {
     Ok(size)
 }
 
+// Reserve fallibly once, then initialize only emitted bytes. Capacity is not
+// the schema limit: allocators may return more capacity than requested.
+struct Output {
+    bytes: Vec<u8>,
+    limit: usize,
+}
+impl Flavor for Output {
+    type Output = Vec<u8>;
+    fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
+        if self.bytes.len() == self.limit {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        self.bytes.push(byte);
+        Ok(())
+    }
+    fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+        if bytes.len() > self.limit - self.bytes.len() {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        self.bytes.extend_from_slice(bytes);
+        Ok(())
+    }
+    fn finalize(self) -> postcard::Result<Self::Output> {
+        Ok(self.bytes)
+    }
+}
+
+// Compare canonical serialization directly with the admitted payload. Continue
+// after a mismatch so serializer errors still retain their Malformed mapping.
+struct Compare<'a> {
+    remaining: &'a [u8],
+    allowance: usize,
+    equal: bool,
+}
+impl Flavor for Compare<'_> {
+    type Output = bool;
+    fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
+        self.try_extend(&[byte])
+    }
+    fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+        if bytes.len() > self.allowance {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        self.allowance -= bytes.len();
+        if let Some((prefix, rest)) = self.remaining.split_at_checked(bytes.len()) {
+            self.equal &= prefix == bytes;
+            self.remaining = rest;
+        } else {
+            self.equal = false;
+            self.remaining = &[];
+        }
+        Ok(())
+    }
+    fn finalize(self) -> postcard::Result<Self::Output> {
+        Ok(self.equal && self.remaining.is_empty())
+    }
+}
+
 fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
     let size = admit::<T>(limits)?;
     let mut bytes = Vec::new();
     bytes
         .try_reserve_exact(size)
         .map_err(|_| Error::Allocation)?;
-    bytes.resize(size, 0);
-    bytes[..2].copy_from_slice(b"IW");
-    bytes[2..10].copy_from_slice(&id.to_le_bytes());
-    bytes[10] = direction;
-    let payload = postcard::to_slice(value, &mut bytes[HEADER..])
-        .map_err(|_| Error::Malformed)?
-        .len();
-    bytes.truncate(HEADER + payload);
-    Ok(bytes)
+    bytes.extend_from_slice(b"IW");
+    bytes.extend_from_slice(&id.to_le_bytes());
+    bytes.push(direction);
+    postcard::serialize_with_flavor(value, Output { bytes, limit: size })
+        .map_err(|_| Error::Malformed)
 }
 
 fn decode<T: Wire>(id: u64, direction: u8, limits: Limits, bytes: &[u8]) -> Result<T, Error> {
@@ -94,7 +149,16 @@ fn decode<T: Wire>(id: u64, direction: u8, limits: Limits, bytes: &[u8]) -> Resu
     if !rest.is_empty() {
         return Err(Error::Trailing);
     }
-    if encode(id, direction, limits, &value)? != bytes {
+    let equal = postcard::serialize_with_flavor(
+        &value,
+        Compare {
+            remaining: &bytes[HEADER..],
+            allowance: size - HEADER,
+            equal: true,
+        },
+    )
+    .map_err(|_| Error::Malformed)?;
+    if !equal {
         return Err(Error::Noncanonical);
     }
     Ok(value)

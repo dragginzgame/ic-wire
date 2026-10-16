@@ -132,6 +132,10 @@ it. This covers zero-byte unit elements. Bytes/text check their lengths before
 copying, and text rejects invalid UTF-8. Container allocation failures and malformed
 payloads surface as Error::Malformed through Postcard; codec scratch allocation
 failure is Error::Allocation. All failures remain typed at the runtime boundary.
+Encoding reserves the admitted maximum but initializes only emitted bytes.
+Canonical validation compares emitted chunks directly with the input without a
+second output allocation. Schema admission still reserves the same conservative
+heap-plus-scratch allowance for both directions.
 
 The complete envelope is ASCII `IW`, then the method's u64 ID in little-endian,
 then direction byte 0=request or 1=response, then canonical Postcard payload.

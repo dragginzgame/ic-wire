@@ -6,7 +6,54 @@ records all samples, source/input/artifact SHA-256 hashes, compiler, flags,
 PocketIC identity, decoder parameters and exports. Historical private Postcard
 reports remain unchanged; their larger speedups do not describe this runtime.
 
-## Results
+## Scratch optimization (pending 0.2.2)
+
+A matched rerun against released 0.2.1 measures the pending runtime optimization.
+[Before evidence](evidence/runtime-scratch-before.json) and
+[after evidence](evidence/runtime-scratch-after.json) retain source and artifact
+identities. Compiler, flags, dependency lock, inputs and decoder parameters match;
+all request/reply hashes are identical and Candid instruction counts are unchanged.
+The incoming local lockfile update (schannel 0.1.30) was preserved and used on both
+sides. It is separate from this runtime change.
+
+Encoding still reserves its admitted maximum fallibly, but initializes only bytes
+actually emitted. Canonical validation now compares serialized chunks directly
+against the input instead of allocating and initializing another maximum-sized
+buffer. Both paths enforce the same byte bound; admission stays conservative over
+the full schema. No unsafe code, wire layout, schema allowance or public API changes
+are introduced. Custom serializer failures remain Malformed; canonical mismatch
+remains Noncanonical.
+
+Internal-only median strict-decode plus encode instruction counts:
+
+| Input | Before | After | Before / after | Candid / after |
+| --- | ---: | ---: | ---: | ---: |
+| Empty collections | 166,489 | 7,865 | 21.17× | 52.61× |
+| Blob 128 bytes | 171,021 | 12,169 | 14.05× | 34.46× |
+| Blob 4096 bytes | 286,087 | 123,267 | 2.32× | 4.42× |
+| UTF-8 text 256 bytes | 180,891 | 21,911 | 8.26× | 19.69× |
+| 64 finite f64 | 201,259 | 62,667 | 3.21× | 7.07× |
+| All collection bounds | 335,259 | 192,115 | 1.75× | 3.04× |
+
+This trades code size for instruction savings. Internal Wire Wasm increases from
+87,890 to 92,612 bytes (+4,722), and management-enabled Wire Wasm from 685,480 to
+689,115 bytes (+3,635). Candid remains 674,527 and 749,534 bytes respectively.
+Wire is therefore 86.27% smaller for internal-only code and 8.06% smaller with
+management Candid retained. Payload lengths are unchanged from the table below.
+These remain synthetic mixed-record results, not standalone scalar or consumer
+measurements. This measures the combined optimization, not isolated attribution
+to each change. No peak-memory or end-to-end latency claim is established.
+
+Both runs pass the same 72 measured calls, 120 rejection checks and two management
+calls. The optimized runtime also passes 12 runtime tests with the TypeScript
+feature, including custom-serializer overflow/failure and canonical length/value
+mismatch cases, six doctests and all 83 Rust/TypeScript vectors. Focused clippy,
+Rust 1.91 Wasm compilation and the disposable formatting fixture pass.
+The installed replay/rollback trial also passes with the optimized runtime.
+`make evaluate-runtime` reproduces the current implementation; the earlier report
+below remains historical.
+
+## Original 0.2.0 results
 
 Each row uses the same mixed record schema: revision u64, Bytes<4096>, Text<256>,
 List<FiniteF64,64> and Option<u64>. The handler increments revision 42 to 43.

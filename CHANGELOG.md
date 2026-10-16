@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2]
+
+- Reduce codec instruction costs by writing only emitted bytes and checking
+  canonical serialization directly against input. Preserve wire bytes, admission
+  limits and typed failures. The [matched measurements](docs/runtime-comparison.md)
+  record instruction savings alongside the modest increase in linked Wasm.
+
 ## [0.2.1] - 2026-10-16
 
 - Include the runtime benchmark modules in the disposable formatting-hook fixture,

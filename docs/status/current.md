@@ -1,7 +1,7 @@
 # Current handoff
 
-Updated 2026-10-16. The maintainer released 0.2.0; workspace versions remain
-0.2.0. The compatible benchmark-only batch is documented under pending 0.2.1.
+Updated 2026-10-16. The maintainer released 0.2.1; workspace versions remain
+0.2.1. The compatible scratch optimization is documented under pending 0.2.2.
 
 ## Implemented runtime
 
@@ -70,13 +70,15 @@ subnormals, and reject NaN/infinity. TypeScript rejects silent f32 rounding.
 The conformance corpus includes bounded heterogeneous SQL-shaped pages, not actual
 IcyDB contracts. String/Vec still convert through existing bounded wrappers.
 Recursive values remain unsupported; rarity does not remove their admission needs.
-The [current-runtime comparison](../runtime-comparison.md) now measures a bounded
-mixed record against strict Candid: 1.74–2.49× fewer codec instructions, 86.97%
-smaller internal-only Wasm and 8.55% smaller Wasm with management Candid retained.
-All rows share the same maximum schema; empty values still pay maximum scratch
-allocation costs. This is not actual IcyDB SQL integration or a scalar-only matrix.
-Earlier runtime/browser/macro evidence stays historical at its recorded hashes;
-the new benchmark adds installed float measurements to native/Node conformance.
+The [current-runtime comparison](../runtime-comparison.md) now includes matched
+before/after scratch optimization evidence. Encoding initializes emitted bytes
+only; canonical decode compares against input without a second output allocation.
+The same mixed schema now uses 1.75–21.17× fewer codec instructions than 0.2.1
+and 3.04–52.61× fewer than strict Candid. Internal Wasm grows by 4,722 bytes;
+management-enabled Wasm grows by 3,635 bytes. All request/reply hashes match.
+Admission remains conservative; bytes, typed failures and public APIs are unchanged.
+These are synthetic mixed records, not actual IcyDB SQL or scalar-only contracts.
+Historical runtime/browser/macro evidence remains at its original source hashes.
 
 Browser login/delegation, composite-query behavior and external-effect recovery
 remain unqualified. SDK/CDK transports allocate raw replies before codec checks;
@@ -91,8 +93,11 @@ ordered keys, journals and authenticated cursor formats stay outside scope.
 ## Evidence and tooling
 
 The current-runtime comparison passes 72 measured calls, 120 rejection checks,
-matched export checks and two real management calls. Both codec configurations
-pass focused clippy; the default evaluation tests and Rust 1.91 Wasm check pass.
+matched export checks and two real management calls per run. The optimized runtime
+passes 12 runtime tests with TypeScript enabled, six doctests, all 83 TypeScript
+vectors, focused clippy and the Rust 1.91 Wasm check.
+The installed replay/rollback trial also passes with the optimized codec; its
+fresh report is retained in `target/runtime-adoption-evidence/report.json`.
 The disposable Make/formatting fixture now includes both benchmark modules;
 `make check-tooling` qualifies the complete fixture after the missing-file fix.
 
