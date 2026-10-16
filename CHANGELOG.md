@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.1]
+## [0.2.1] - 2026-10-16
 
 - Include the runtime benchmark modules in the disposable formatting-hook fixture,
   fixing `check-tooling` failures caused by missing source files.
