@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.6] - Unreleased
+## [0.1.6]
 
 - Generate typed, bounded TypeScript codecs from the same explicit Rust Wire
   metadata and Method envelope. Add cross-language scalar/composition vectors
