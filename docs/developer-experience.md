@@ -31,12 +31,10 @@ nested records or impose a generic allocation budget. Enum conversion remains
 handwritten with explicit tags. No new crate or procedural derive is introduced.
 
 `Prepared<Request>` and `Prepared<Outcome>` distinguish retained requests from
-replies at the caller boundary without adding bytes. Run
-`make check-typed-diagnostics` to compile a valid isolated copy, then verify four
-rejections: unsupported String fields, wrong request type, a retained reply used
-as a request, and a handler returning the wrong response type. The test uses
-locked, previously fetched dependencies offline, retains failure logs and is
-included in CI. These are compiler checks, not string-only source inspections.
+replies in this historical prototype without adding bytes. Its earlier diagnostic
+fixture has been replaced: `make check-typed-diagnostics` now exercises the
+[production runtime](runtime.md#canic-adapter-work), not this private API. The
+prototype remains an evaluation example rather than an adoption target.
 
 The single balance binding owns its method name, contract ID, request and reply
 types. The caller prepares a request once, passes immutable bytes to a transport

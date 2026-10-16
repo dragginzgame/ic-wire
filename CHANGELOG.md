@@ -2,6 +2,10 @@
 
 ## [0.1.6]
 
+- Move the compile-fail gate from the retired private prototype to production
+  Wire/Method contracts, including synchronous and async consumer-shaped handler
+  bindings. Keep Canic macro ownership and runtime policy with the consumer.
+
 - Generate typed, bounded TypeScript codecs from the same explicit Rust Wire
   metadata and Method envelope. Add cross-language scalar/composition vectors
   and malformed-input checks. Keep generation optional and transport/auth policy

@@ -55,6 +55,12 @@ remains unchanged. The public deterministic seed is only a disposable test ident
 fixture clippy, six native evaluation tests, the Rust 1.91 host fixture build,
 TypeScript checks, pins, documentation links and local tooling checks pass.
 
+The existing compile-fail gate now targets production Wire/Method contracts,
+not the private typed-journey prototype. It checks a valid sync/async adapter
+shape followed by 11 expected rejection cases on Rust 1.99 and 1.91.
+ShellCheck and documentation-link checks also pass. This supplies a tested type-binding
+contract for consumer macro work; it does not implement Canic macros here.
+
 Browser login/delegation, composite-query behavior and external-effect recovery
 remain unqualified. SDK/CDK transports allocate raw replies before codec checks;
 Canic must enforce any pre-copy allowance in its transport/callback layer.

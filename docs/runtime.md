@@ -123,6 +123,18 @@ calls; this section does not claim Canic macros have been changed.
    codec framework is added here. This does not replace the CDK executor or
    platform APIs or alter third-party protocols.
 
+`make check-typed-diagnostics` compiles the actual runtime test contracts in an
+isolated workspace with locked, previously fetched dependencies offline. It first
+checks valid synchronous and async consumer-shaped adapters, each binding its
+handler argument and response to the same Method associated types. It then checks
+11 expected compilation failures: missing field IDs, duplicate field/variant IDs,
+unbounded String, generic and tuple contracts, wrong request/reply types, wrong
+handler argument/return types and an async handler with the wrong future output.
+Unexpected diagnostics print their logs; failed fixtures are retained for inspection.
+These are private adapter-shape checks, not implemented Canic macros, executor or
+auth policy. Canic should preserve these type relationships in its own expansions
+and run macro-owned compile-fail tests when integration begins.
+
 The installed adoption trial runs a nested ordinary query and a protected update
 using these production functions. It checks exact replay, wrong identity, malformed
 input, application failure, trap rollback and identical-contract upgrade recovery.
