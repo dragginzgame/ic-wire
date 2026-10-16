@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.0]
+## [0.2.0] - 2026-10-16
 
 - Isolate the patch-release test changelog from the real pending release, so
   minor/major release notes do not prevent validation/recovery checks from running.
