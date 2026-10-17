@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.4]
+## [0.3.4] - 2026-10-17
 
 - Add bounded native Serde payload/frame APIs with borrowed encoding, exact sizing
   and canonical decoding, sharing the existing Postcard envelope and output logic.

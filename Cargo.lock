@@ -969,7 +969,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "ic-wire-derive",
  "libfuzzer-sys",
@@ -980,7 +980,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-canister-evaluation"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "candid",
  "ic-build",
@@ -998,7 +998,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "proc-macro2",
  "quote",
