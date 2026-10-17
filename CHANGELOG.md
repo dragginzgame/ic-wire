@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.2]
+
+Pending PR integration; these changes are not yet on main.
+
+- Share the TypeScript codec with native recursive contracts through concrete
+  metadata, tuples, newtypes and explicit traversal limits. Reject sparse arrays
+  before encoding and retain consumer-owned scalar validation.
+  [PR #1 — Shared native TypeScript codec](https://github.com/dragginzgame/ic-wire/pull/1).
+- Add an unpublished CDK endpoint companion that authorizes before argument
+  sizing/copying and traps on response-encoding failure to roll back current-message
+  writes. Qualify the installed endpoint through the shared build pipeline with
+  retained build identities and stable-memory rollback evidence.
+  [PR #2 — Bounded CDK endpoints](https://github.com/dragginzgame/ic-wire/pull/2).
+
 ## [0.3.1] - 2026-10-17
 
 - Upgrade the derive parser to Syn 3 while retaining the Rust 1.91 floor and

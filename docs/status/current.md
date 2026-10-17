@@ -1,8 +1,10 @@
 # Current handoff
 
-Updated 2026-10-17. Release 0.3.0 (20bc027) and first crates.io publication are
-complete for both ic-wire-derive and ic-wire. The evaluation package remains
-unpublished. The working versions remain 0.3.0; compatible follow-up is pending 0.3.1.
+Updated 2026-10-17. Main is released at 0.3.1 (6fe0ef4); first crates.io
+publication was 0.3.0 for ic-wire-derive and ic-wire. Evaluation remains unpublished.
+The 0.3.2 changelog draft describes the open TypeScript and CDK companion PRs,
+explicitly pending integration. Their code is not yet on main; see the
+[pending notes](../../CHANGELOG.md#032) for both PR links.
 
 ## Publication and parser follow-up
 
@@ -16,8 +18,8 @@ The working derive crate now selects Syn 3.0.9. Its evaluation-only adapter uses
 Syn’s Safety enum and rejects unsupported function modifiers; an unsafe-handler
 negative fixture checks admission. Syn 2 remains transitively through other macro
 dependencies. This changes host parsing, not runtime wire bytes or Wasm behavior.
-The runtime and derive package source still targets Rust 1.91. This follow-up has
-not been released or published; 0.3.0 contains the previously qualified Syn 2 code.
+The runtime and derive package source still targets Rust 1.91. This follow-up was
+released in Git at 0.3.1; 0.3.0 contains the previously qualified Syn 2 code.
 
 Syn 3 qualification passes: 13 runtime tests, Rustdoc, three macro pipeline
 tests, all 19 negative diagnostic cases on Rust 1.99 and 1.91, Clippy, Wasm MSRV,
@@ -34,7 +36,7 @@ at `target/031-host-qualification.log` and `target/031-installed.log`; fresh rep
 and build identities remain under their existing target/browser artifact owners.
 `make check-package` verifies both current source archives with Syn 3, including
 the staged derive dependency (`target/031-package.log`). This check uploads nothing;
-the workspace still uses 0.3.0 pending maintainer release preparation for 0.3.1.
+that check preceded the maintainer's Git release of 0.3.1.
 
 ## Latest cleanup
 
