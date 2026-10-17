@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.0]
+## [0.4.0] - 2026-10-17
 
 - Adopt Shared Tooling 0.23.0, retaining the unmerged release-receipt helper under
   its own pinned snapshot. Select IC setup/checks explicitly and adopt ICP CLI
