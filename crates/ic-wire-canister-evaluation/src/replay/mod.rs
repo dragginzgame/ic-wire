@@ -1,14 +1,18 @@
-//! Postcard-only command/replay probe. Storage and policy belong to this fixture.
+//! Browser transport fixture. Durable receipt-policy qualification lives in Relay.
 use crate::commands::{Apply, Command, Failure, Inspect, Receipt, Snapshot};
 use candid::Principal;
-use ic_cdk::stable;
 use ic_wire::{Method, decode_request, encode_response};
+use std::cell::RefCell;
 
 const MAX_REQUEST: usize = Apply::REQUEST_LIMITS.bytes;
-const MAX_REPLY: usize = Apply::RESPONSE_LIMITS.bytes;
+// Bound this disposable browser fixture; no persistence or upgrade contract.
 const CAPACITY: usize = 8;
-const SLOT: usize = 2 + MAX_REQUEST + MAX_REPLY;
-const STATE_BYTES: usize = 16 + CAPACITY * SLOT;
+#[derive(Default)]
+struct State {
+    balance: u64,
+    replies: Vec<(Vec<u8>, Vec<u8>)>,
+}
+thread_local! { static STATE: RefCell<State> = RefCell::default(); }
 
 #[derive(Debug, PartialEq)]
 enum CommandError {
@@ -18,17 +22,14 @@ enum CommandError {
     Expired,
     Conflict,
     Capacity,
-    State,
 }
 
 fn request(bytes: &[u8]) -> Result<Command, CommandError> {
     decode_request::<Apply>(bytes).map_err(|_| CommandError::Codec)
 }
 
-// All checks and reply construction precede mutation. No await or external
-// effect: the IC commits the local effect and receipt in one update transaction.
 fn execute(
-    state: &mut [u8; STATE_BYTES],
+    state: &mut State,
     bytes: &[u8],
     caller: Principal,
     audience: Principal,
@@ -44,57 +45,38 @@ fn execute(
     if value.expiry <= now {
         return Err(CommandError::Expired);
     }
-    let count = u64::from_le_bytes(state[8..16].try_into().unwrap());
-    if count > CAPACITY as u64 {
-        return Err(CommandError::State);
-    }
-    for slot in state[16..]
-        .as_chunks::<SLOT>()
-        .0
-        .iter()
-        .take(count as usize)
-    {
-        let (request_len, reply_len) = (usize::from(slot[0]), usize::from(slot[1]));
-        if request_len > MAX_REQUEST || reply_len > MAX_REPLY {
-            return Err(CommandError::State);
-        }
-        let retained = &slot[2..2 + request_len];
-        let previous = request(retained).map_err(|_| CommandError::State)?;
+    for (retained, reply) in &state.replies {
+        let previous = request(retained)?;
         if previous.subject == value.subject && previous.id == value.id {
             if retained != bytes {
                 return Err(CommandError::Conflict);
             }
-            return Ok(slot[2 + MAX_REQUEST..2 + MAX_REQUEST + reply_len].to_vec());
+            return Ok(reply.clone());
         }
     }
-    if count == CAPACITY as u64 {
+    if state.replies.len() == CAPACITY {
         return Err(CommandError::Capacity);
     }
-    let balance = u64::from_le_bytes(state[..8].try_into().unwrap());
-    let next = balance.checked_add(value.amount);
+    let next = state.balance.checked_add(value.amount);
     let receipt = Receipt {
         id: value.id,
-        balance: next.unwrap_or(balance),
+        balance: next.unwrap_or(state.balance),
     };
     let response = if next.is_some() {
         Ok(receipt)
     } else {
         Err(Failure::Overflow(receipt))
     };
-    let reply = encode_response::<Apply>(&response).map_err(|_| CommandError::Codec)?;
-    let reply = reply.as_bytes();
-    let next = next.unwrap_or(balance);
-    let slot = &mut state[16 + count as usize * SLOT..16 + (count as usize + 1) * SLOT];
-    slot[0] = bytes.len() as u8;
-    slot[1] = reply.len() as u8;
-    slot[2..2 + bytes.len()].copy_from_slice(bytes);
-    slot[2 + MAX_REQUEST..2 + MAX_REQUEST + reply.len()].copy_from_slice(reply);
-    state[..8].copy_from_slice(&next.to_le_bytes());
-    state[8..16].copy_from_slice(&(count + 1).to_le_bytes());
-    Ok(reply.to_vec())
+    let reply = encode_response::<Apply>(&response)
+        .map_err(|_| CommandError::Codec)?
+        .into_bytes();
+    state.balance = next.unwrap_or(state.balance);
+    state.replies.push((bytes.to_vec(), reply.clone()));
+    Ok(reply)
 }
 
-fn run(trap_after_write: bool) {
+#[ic_cdk::update(manual_reply = true)]
+fn replay_command() {
     let caller = ic_cdk::api::msg_caller();
     if !ic_cdk::api::is_controller(&caller) {
         ic_cdk::api::msg_reject("controller required");
@@ -104,44 +86,20 @@ fn run(trap_after_write: bool) {
         ic_cdk::api::msg_reject("request limit");
         return;
     }
-    let mut state = [0; STATE_BYTES];
-    if stable::stable_size() > 0 {
-        stable::stable_read(0, &mut state);
-    }
-    match execute(
-        &mut state,
-        &ic_cdk::api::msg_arg_data(),
-        caller,
-        ic_cdk::api::canister_self(),
-        ic_cdk::api::time(),
-    ) {
-        Ok(reply) => {
-            if stable::stable_size() == 0 {
-                stable::stable_grow(1).expect("fixture stable page");
-            }
-            stable::stable_write(0, &state);
-            if trap_after_write {
-                ic_cdk::trap("injected interruption before transaction commit");
-            }
-            ic_cdk::api::msg_reply(reply);
-        }
+    let response = STATE.with_borrow_mut(|state| {
+        execute(
+            state,
+            &ic_cdk::api::msg_arg_data(),
+            caller,
+            ic_cdk::api::canister_self(),
+            ic_cdk::api::time(),
+        )
+    });
+    match response {
+        Ok(reply) => ic_cdk::api::msg_reply(reply),
         Err(error) => ic_cdk::api::msg_reject(format!("command {error:?}")),
     }
 }
-
-#[ic_cdk::update(manual_reply = true)]
-fn replay_command() {
-    run(false);
-}
-
-// Controller-only fault injection, absent from ordinary measurement artifacts.
-#[ic_cdk::update(manual_reply = true)]
-fn replay_trap() {
-    run(true);
-}
-
-#[cfg(test)]
-mod tests;
 
 // This is the complete transport adapter a Canic query macro needs to emit,
 // alongside its own startup/access stages. No codec dependency leaks into CDK.
@@ -152,12 +110,8 @@ fn runtime_inspect() {
         return;
     }
     let response = decode_request::<Inspect>(&ic_cdk::api::msg_arg_data()).and_then(|inspection| {
-        let mut bytes = [0; 8];
-        if stable::stable_size() > 0 {
-            stable::stable_read(0, &mut bytes);
-        }
         encode_response::<Inspect>(&Snapshot {
-            balance: u64::from_le_bytes(bytes),
+            balance: STATE.with_borrow(|state| state.balance),
             inspection,
         })
     });
@@ -168,7 +122,7 @@ fn runtime_inspect() {
 }
 
 // Controller-only transport probe. Retries are specific to this qualified
-// receipt-backed receiver, not automatic policy for arbitrary update methods.
+// volatile fixture receiver, not automatic policy for arbitrary update methods.
 #[ic_cdk::update(manual_reply = true)]
 async fn runtime_forward() {
     if !ic_cdk::api::is_controller(&ic_cdk::api::msg_caller()) {

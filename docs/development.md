@@ -1,6 +1,6 @@
 # Local development
 
-IC Wire provides an unpublished no_std + alloc Postcard runtime. See the
+IC Wire provides a no_std + alloc Postcard runtime. See the
 [runtime guide](runtime.md) for its contract and [adoption evidence](runtime-adoption.md)
 for installed correctness checks. Compilation alone establishes no performance win.
 
@@ -61,17 +61,15 @@ The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
 | `check-release` | Disposable Git release, validation-failure and recovery fixture |
 | `check-tooling` | Local Make routing and real formatting-hook fixture |
 | `check-canister-evaluation` | Lint the evaluation package and compile both Wasm feature extremes; no emulator |
-| `evaluate-canisters` | Build four artifacts and verify them in local PocketIC; requires explicit `POCKET_IC_BIN` |
 | `check-macro-diagnostics`, `evaluate-macros` | Evaluation-only macro compilation and installed query/update proof; the latter requires PocketIC |
 | `check-typed-diagnostics` | Isolated offline production derive, caller and sync/async adapter diagnostics; requires fetched locked dependencies |
 | `cloc`, `version` | Workspace source counts and canonical workspace version |
 | `ci` | Complete scaffold/tooling gate; explicit local invocation or hosted CI |
 
 Use focused checks under the shared [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
-`make evaluate-codecs` prints the evaluation-only JSON report. Run
-`cargo test --locked -p ic-wire --example codec-evaluation` for its focused tests;
-`make test` also includes these tests. See [the payload screen](codec-screen.md)
-for parameters and limitations. The library itself still has no codec API.
+The retired [payload screen](codec-screen.md) retains historical evidence only.
+`make test`, `make check-typescript` and `make evaluate-runtime` exercise the
+selected production codec; the last target requires prepared PocketIC.
 The local tooling fixture checks
 its actual Make callers and hook; upstream owns the common helper regression
 matrix. Dependency preparation uses locked fetching when needed; to explicitly
@@ -98,7 +96,7 @@ The maintainer-operated `release-patch`, `release-minor`, `release-major` and
 They validate, bump the coordinated Cargo workspace version and local lockfile
 entries, finalize the changelog, commit, create an annotated tag and atomically
 push the branch and that tag. They do not publish packages, create a GitHub Release
-object or deploy anything. Every crate retains `publish = false`.
+object or deploy anything. The evaluation crate retains `publish = false`.
 
 Commit intended source changes before invoking a release. Preflight requires a
 clean index/worktree, checks the pending changelog against the computed candidate,
@@ -129,3 +127,102 @@ establish live GitHub permissions or hosted macOS qualification.
 Release execution, package publication and registry name reservation remain
 separately authorized maintainer actions. Preparing this tooling changes no
 workspace version and performs no release in the working repository.
+
+## Coverage-guided runtime fuzzing
+
+`make fuzz-runtime` runs 100,000 libFuzzer inputs with seed 42, address/leak
+sanitizers, a 2,048-byte maximum input, a five-second per-input timeout and a
+2,048 MiB RSS ceiling. `FUZZ_RUNS=1000000 make fuzz-runtime` extends the run.
+This is an explicit experiment, separate from ordinary CI. Prepare prerequisites
+explicitly: `rustup toolchain install nightly-2026-07-29 --profile minimal`, a
+native C++ compiler (Xcode command-line tools on macOS), and `cargo fetch --locked`.
+The target uses offline Cargo and disables automatic toolchain installation.
+It needs no installed cargo-fuzz command: the example uses the upstream
+[libfuzzer-sys harness](https://github.com/rust-fuzz/libfuzzer) directly.
+
+The harness checks arbitrary frames and inserts arbitrary payloads behind valid
+request/reply headers. This reaches bounded nested containers, explicit variants,
+UTF-8, 128-bit integers, finite floats and canonical serialization without first
+requiring discovery of the method identity. Accepted frames must reproduce exact
+bytes, match the length helpers and reject the opposite direction. This supplements
+the Rust/TypeScript differential corpus; it does not fuzz JavaScript or prove
+allocation budgets, complete branch coverage or absence of defects.
+
+Instrumented builds, reusable corpus and failure artifacts live under
+`target/fuzz-runtime/`, separate from ordinary builds. The script supplies sanitizer
+flags explicitly and selects the host target to isolate build scripts/proc macros.
+The input sequence depends on the retained corpus; a seed alone does not identify
+a replay. Pass an artifact filename directly to the built `fuzz-runtime` executable
+under `target/fuzz-runtime/<host>/release/examples/` to replay that input.
+Retain any reproducible failure as a focused regression before repairing it.
+Run outside ptrace/restrictive process sandboxes when LeakSanitizer cannot inspect
+threads; a sanitizer shutdown failure is not evidence of a codec defect.
+
+Qualified here on Linux x86_64 with Rust 1.99.0-nightly (26ae60a9e), LLVM 22.1.8,
+libfuzzer-sys 0.4.13 and release profile: 100,000 inputs, no codec assertion or
+sanitizer failures. The smoke run ended at 780 coverage counters and 2,009 features;
+these are engine observations, not a source coverage percentage. Native macOS
+execution and sustained campaigns remain unqualified. The normal runtime dependency
+graph and its Rust 1.91 Wasm floor are unchanged; libfuzzer-sys is dev-only.
+
+## Explicit diagnostics and managed PocketIC
+
+`make check-typed-diagnostics` and `make check-macro-diagnostics` use one offline
+runner with explicit Rust cases under each owning crate’s `tests/ui/`. A valid
+control compiles first; each negative must fail with its expected diagnostic.
+The runner selects exact Cargo artifact paths from JSON, retains per-case logs
+under `target/ui-diagnostics/`, and never edits or copies production source.
+Prepared Rust and the shared jq tool are required. The same targets run under
+`RUSTUP_TOOLCHAIN=1.91.0` for the floor check. Normal Cargo tests compile the valid
+cases; the focused Make targets own negative-case execution.
+
+Evaluation hosts use published Testkit 0.50.0 for bounded startup, owned server
+lifetime and create/fund/install operations. Each experiment still starts a fresh
+instance; topology, 10-trillion-cycle top-ups, raw calls and measurement policies
+remain local. Startup has a 60-second deadline. Explicit `POCKET_IC_BIN` selection
+and recorded server versions/hashes remain required; no automatic tool setup is
+introduced. The browser host retains its owner through live-server shutdown.
+Testkit 0.50 uses Host 0.23 internally alongside the explicit Wasm inspector’s
+Host 0.24; both are host dev dependencies, not runtime/canister dependencies.
+
+Runtime, macro and browser evaluations use IC Build 0.12 retained artifact records, with exact
+build/input digests and matching Wasm hashes in its report. Keep source files
+unchanged throughout an installed evaluation; persistent changes refuse report
+finalization. Before/after guards cannot detect a transient edit that is reverted.
+The old `evaluate-canisters` prototype is retired; its historical reports identify
+the source checkout needed for reproduction.
+
+Durable command/replay qualification has moved to Relay’s opt-in receipt probe
+([Relay #1 — Own durable receipt-policy qualification](https://github.com/dragginzgame/ic-relay/issues/1)).
+`evaluate-replay` is retired here; `evaluate-browser` keeps volatile transport
+checks and the runtime tests keep exact request/reply-byte coverage.
+
+## First publication
+
+0.3.0 is the first published crates.io release of `ic-wire` and `ic-wire-derive`.
+After committing subsequent reviewed changes, the maintainer runs the selected
+Git release command; Shared Tooling updates the
+workspace version, local dependency requirements, lockfile and changelog together.
+Git delivery remains separate from registry publication.
+
+`make check-package` assembles and builds both archives, including all features,
+without uploading. It permits dirty inputs for local review and may access the
+registry; it is separate from offline CI. Cargo stages the local derive package
+while verifying the runtime. Package allowlists exclude tests, fuzz harnesses and
+evaluation artifacts; LICENSE and package-local README files are included.
+
+After Git release delivery, check the clean selected release source and credentials, then
+run the first command below to rehearse. The second command uploads both packages
+and is a separate maintainer action; Cargo orders the derive before the runtime.
+
+```sh
+cargo publish --dry-run --locked -p ic-wire-derive -p ic-wire --all-features
+make publish
+```
+
+Publication must use Cargo 1.99 (the prepared development toolchain). Library
+consumers retain the Rust 1.91 floor. The repository remains private; packaged
+README/Rustdoc and LICENSE are self-contained, while supplemental GitHub links
+require repository access. Preparation does not change visibility or reserve
+names. Authentication, name ownership and upload acceptance are checked by the
+registry at publication time.

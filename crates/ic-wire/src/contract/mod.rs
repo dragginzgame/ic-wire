@@ -89,6 +89,40 @@ impl Flavor for Output {
     }
 }
 
+// Count with the same admitted byte ceiling as encoding, without output storage.
+struct Size {
+    bytes: usize,
+    limit: usize,
+}
+impl Flavor for Size {
+    type Output = usize;
+    fn try_push(&mut self, _: u8) -> postcard::Result<()> {
+        self.try_extend(&[0])
+    }
+    fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+        if bytes.len() > self.limit - self.bytes {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        self.bytes += bytes.len();
+        Ok(())
+    }
+    fn finalize(self) -> postcard::Result<usize> {
+        Ok(self.bytes)
+    }
+}
+
+fn encoded_len<T: Wire>(limits: Limits, value: &T) -> Result<usize, Error> {
+    let limit = admit::<T>(limits)?;
+    postcard::serialize_with_flavor(
+        value,
+        Size {
+            bytes: HEADER,
+            limit,
+        },
+    )
+    .map_err(|_| Error::Malformed)
+}
+
 // Compare canonical serialization directly with the admitted payload. Continue
 // after a mismatch so serializer errors still retain their Malformed mapping.
 struct Compare<'a> {
@@ -170,6 +204,18 @@ pub fn encode_request<M: Method>(value: &M::Request) -> Result<RequestBytes<M>, 
         bytes: encode(M::ID, 0, M::REQUEST_LIMITS, value)?,
         method: PhantomData,
     })
+}
+/// Measure the complete request envelope without allocating an output buffer.
+/// Uses the same schema admission as encoding. Custom serializers must be
+/// deterministic; sizing does not retain bytes for retries.
+pub fn encoded_request_len<M: Method>(value: &M::Request) -> Result<usize, Error> {
+    encoded_len(M::REQUEST_LIMITS, value)
+}
+/// Measure the complete response envelope without allocating an output buffer.
+/// Consumers can compare this with a delivery allowance before encoding. Schema
+/// admission still applies to the entire type, not just this value.
+pub fn encoded_response_len<M: Method>(value: &M::Response) -> Result<usize, Error> {
+    encoded_len(M::RESPONSE_LIMITS, value)
 }
 /// Decode a request only after method, direction, canonical and resource checks.
 pub fn decode_request<M: Method>(bytes: &[u8]) -> Result<M::Request, Error> {

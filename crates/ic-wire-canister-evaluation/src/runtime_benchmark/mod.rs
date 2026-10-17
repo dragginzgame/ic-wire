@@ -1,4 +1,5 @@
 //! Matched logical payloads using the production runtime and ordinary Candid DTOs.
+pub mod shapes;
 use candid::CandidType;
 use ic_wire::{Bytes, FiniteF64, Limits, List, Method, Text, Wire};
 use serde::{Deserialize, Serialize};

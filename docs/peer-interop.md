@@ -35,7 +35,7 @@ const b = await viaPeer.evaluateViaPeer(request);
 // Both replies carry revision 43n and the same account/payload.
 ```
 
-The [peer module](../crates/ic-wire-canister-evaluation/src/peer/mod.rs) is behind
+The [peer module](https://github.com/dragginzgame/ic-wire/blob/226a11fce6d5cdd59a77d9a006c91f5a46c58b42/crates/ic-wire-canister-evaluation/src/peer/mod.rs) is behind
 the evaluation-only `peer` feature. The historical browser command enabled it; matched
 size/instruction experiments do not. Fixture configuration requires the actual IC
 caller to be a controller. The recipient exposes a bounded observation containing

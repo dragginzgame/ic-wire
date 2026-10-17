@@ -1,76 +1,16 @@
 # Proposed developer experience
 
-The Wire and Canic syntax below is illustrative. The explicitly labeled native
-experiment compiles, but is not a public library API or installed IC endpoint.
+The syntax below is historical design discussion, not the maintained API. Use
+the [runtime guide](runtime.md) for compiling contracts and consumer adapters.
 
-## Executable native experiment (0.1.2)
+## Retired native experiment
 
-Run `make evaluate-journey` for the
-[typed journey example](../crates/ic-wire/examples/typed_journey/mod.rs).
-This is a compiling native experiment using Serde derives and Postcard, not an
-implementation of the proposed Wire or Canic syntax below. `make test` includes
-five tests for this experiment alongside the six payload-screen tests.
-
-The request now uses the private `wire_record!` schema macro:
-
-```rust,ignore
-wire_record! {
-    struct Request {
-        account: u64,
-        at_revision: u64,
-    }
-}
-```
-
-This exact declaration compiles in the example. It generates the struct and
-Serde tuple implementations; there are no handwritten request conversions.
-The schema field list is authoritative wire order, not incidental Rust order.
-Reordering that list changes the contract. The macro supports nonempty records
-of `u64`, `u32` and `bool` only; it does not derive stable field IDs, support
-nested records or impose a generic allocation budget. Enum conversion remains
-handwritten with explicit tags. No new crate or procedural derive is introduced.
-
-`Prepared<Request>` and `Prepared<Outcome>` distinguish retained requests from
-replies in this historical prototype without adding bytes. Its earlier diagnostic
-fixture has been replaced: `make check-typed-diagnostics` now exercises the
-[production runtime](runtime.md#canic-adapter-work), not this private API. The
-prototype remains an evaluation example rather than an adoption target.
-
-The single balance binding owns its method name, contract ID, request and reply
-types. The caller prepares a request once, passes immutable bytes to a transport
-closure, and decodes an application outcome separately from transport/codec
-errors. The endpoint adapter decodes before invoking the supplied handler.
-The closure in this example is a native loopback, not an IC transport or an
-authentication implementation. Retry tests establish byte reuse, not delivery
-deduplication or exactly-once effects.
-
-The finite layout uses explicit tuples: request `(account: u64,
-at_revision: u64)`, reply `(tag: u8, amount: u64)` with tag 0 for balance and
-tag 1 for not-found (amount must be zero). An outer `(contract: u32,
-direction: u8, body)` tuple binds contract 0x4241 and direction 0/request or
-1/reply. Postcard integer encoding applies. The request for account 7 at revision
-42 is `c1 84 01 00 07 2a`; the extra four identity bytes are absent from the
-earlier unframed payload screen. There is only one experimental contract, no
-legacy reader or compatibility lane.
-
-Explicit conversions make Rust declaration reordering byte-invariant, including
-enum variant order. A future incompatible layout must receive a distinct contract
-identity; the handwritten ID is not a derived schema fingerprint. Tests do not
-establish safe independent schema evolution. Canonical re-encoding rejects
-nonminimal integers and trailing bytes. A 64-byte stack buffer bounds encoded
-output before allocation; the supported request/reply types contain only scalars
-and allocate no body collections. This does not qualify arbitrary Serde types.
-
-The existing lockfile resolves Postcard 1.1.3 for this run, on Rust 1.99.0,
-x86_64-unknown-linux-gnu, default dev/test profiles. No dependency update was
-made for this experiment. The earlier saved screen reports its historical run;
-its six vector tests still pass under the current lockfile.
-
-The result removes record conversion boilerplate, but still requires explicit
-schema ordering, enum conversion and handler/client glue. It does **not** yet
-meet the Candid-like ergonomics criterion. A general derive, installed IC endpoint
-behavior and matched Wasm/instruction measurements remain unproved.
-Do not select or adopt Postcard based on this example alone.
+The 0.1.2 typed journey and its private `wire_record!`, envelope and method binding
+were removed in pending 0.2.3. Their original source remains in Git history.
+Production runtime tests now cover retained retry bytes, transport/application
+error separation, explicit field order, canonical encoding and malformed input.
+`make test` and `make check-typed-diagnostics` exercise the maintained implementation.
+Historical measurements retain their original source identities and bytes.
 
 ## Shared types
 

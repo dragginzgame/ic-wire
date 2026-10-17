@@ -139,7 +139,11 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (s.k === 'tuple' && values.length !== s.items.length) fail('value');
       budget.length(values.length);
       if (s.k === 'list') out.varint(BigInt(values.length));
-      values.forEach((item, i) => child(s.k === 'tuple' ? s.items[i] : s.item, item)); return;
+      for (let i = 0; i < values.length; i++) {
+        if (!Object.hasOwn(values, i)) fail('value');
+        child(s.k === 'tuple' ? s.items[i] : s.item, values[i]);
+      }
+      return;
     }
     case 'option': {
       if (value === null) { out.byte(0); return; }

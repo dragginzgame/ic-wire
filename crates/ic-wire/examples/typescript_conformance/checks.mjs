@@ -91,3 +91,14 @@ rejects(()=>scalar.encodeRequest('bad'),'value');
 rejects(()=>scalar.decodeRequest(frame(3,98,97,100)),'value');
 rejects(()=>createCodec(checked).encodeRequest('ok'),'value');
 console.log('Recursive native metadata, tuples, aliases, scalar validation and explicit traversal refusal passed');
+
+for (const schema of [{k:'list',item:{k:'unit'}}, {k:'array',max:1,item:{k:'unit'}}, {k:'tuple',items:[{k:'unit'}]}]) {
+  rejects(() => createCodec({...nativeMeta,request:schema},{}).encodeRequest(new Array(1)), 'value');
+}
+function mutation(codec, direction, bytes, accepted) {
+  const input = Uint8Array.from(bytes);
+  const decode = direction === 0 ? codec.decodeRequest : codec.decodeResponse;
+  const encode = direction === 0 ? codec.encodeRequest : codec.encodeResponse;
+  if (!accepted) assert.throws(() => decode(input), WireError);
+  else assert.deepEqual(encode(decode(input)), input);
+}

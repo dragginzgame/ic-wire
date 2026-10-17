@@ -3,7 +3,7 @@
 //! Transport, authentication, semantic validation and replay policy belong to
 //! consumers. See the runtime guide for maintained wire rules.
 #![no_std]
-#![doc = include_str!("../../../docs/runtime.md")]
+#![doc = include_str!("../README.md")]
 extern crate alloc;
 mod bounded;
 mod contract;
@@ -16,7 +16,7 @@ pub mod typescript;
 pub use bounded::{Bytes, List, Text};
 pub use contract::{
     Method, RequestBytes, ResponseBytes, decode_request, decode_response, encode_request,
-    encode_response,
+    encode_response, encoded_request_len, encoded_response_len,
 };
 pub use float::{FiniteF32, FiniteF64};
 pub use ic_wire_derive::Wire;

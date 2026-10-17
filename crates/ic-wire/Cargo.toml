@@ -1,12 +1,14 @@
 [package]
 name = "ic-wire"
-description = "Unpublished investigation of bounded binary contracts for Rust IC applications"
+description = "Bounded canonical Postcard contracts for controlled Internet Computer endpoints"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
-readme = "../../README.md"
-publish = false
+repository.workspace = true
+publish = ["crates-io"]
+readme = "README.md"
+include = ["src/**", "README.md", "Cargo.toml"]
 
 [features]
 typescript = ["dep:serde_json"]
@@ -18,25 +20,21 @@ serde.workspace = true
 serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
-candid.workspace = true
-ciborium.workspace = true
-ic_principal.workspace = true
+libfuzzer-sys.workspace = true
 serde_json.workspace = true
-sha2.workspace = true
 
 [[test]]
 name = "runtime"
 path = "tests/runtime/mod.rs"
 
-[[example]]
-name = "codec-evaluation"
-path = "examples/codec_evaluation/mod.rs"
-test = true
+[[test]]
+name = "ui"
+path = "tests/ui/mod.rs"
 
 [[example]]
-name = "typed-journey"
-path = "examples/typed_journey/mod.rs"
-test = true
+name = "fuzz-runtime"
+path = "examples/fuzz_runtime/mod.rs"
+test = false
 
 [[example]]
 name = "typescript-conformance"
