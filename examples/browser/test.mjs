@@ -47,7 +47,7 @@ try {
   }, { connection, vectors });
   await page.screenshot({ path: 'artifacts/browser.png' });
   const hashes = {};
-  for (const path of ['test.mjs','package.json','package-lock.json','tsconfig.json','dist/main.js','generated/apply.ts','generated/inspect.ts','generated/wire-runtime.ts','generated/vectors.json','src/client.ts','src/main.ts','src/typechecks.ts','../../Cargo.toml','../../Cargo.lock','../../crates/ic-wire/Cargo.toml','../../crates/ic-wire/src/lib.rs','../../crates/ic-wire/src/bounded/mod.rs','../../crates/ic-wire/src/shape/mod.rs','../../crates/ic-wire-canister-evaluation/src/lib.rs','../../crates/ic-wire-canister-evaluation/src/replay/mod.rs','../../crates/ic-wire-canister-evaluation/src/commands/mod.rs','../../crates/ic-wire/src/typescript/mod.rs','../../crates/ic-wire/src/typescript/runtime.ts','../../crates/ic-wire/src/contract/mod.rs','../../crates/ic-wire/src/schema/mod.rs','../../crates/ic-wire-derive/src/lib.rs','../../crates/ic-wire-canister-evaluation/Cargo.toml','../../scripts/ci/evaluate-browser.sh','../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs',process.env.IC_WIRE_BROWSER_WASM]) {
+  for (const path of ['test.mjs','package.json','package-lock.json','tsconfig.json','dist/main.js','generated/apply.ts','generated/inspect.ts','generated/wire-runtime.ts','generated/vectors.json','src/client.ts','src/main.ts','src/typechecks.ts','../../Cargo.toml','../../Cargo.lock','../../crates/ic-wire/Cargo.toml','../../crates/ic-wire/src/lib.rs','../../crates/ic-wire/src/bounded/mod.rs','../../crates/ic-wire/src/shape/mod.rs','../../crates/ic-wire-canister-evaluation/src/lib.rs','../../crates/ic-wire-canister-evaluation/src/browser/mod.rs','../../crates/ic-wire-canister-evaluation/src/commands/mod.rs','../../crates/ic-wire/src/typescript/mod.rs','../../crates/ic-wire/src/typescript/runtime.ts','../../crates/ic-wire/src/contract/mod.rs','../../crates/ic-wire/src/schema/mod.rs','../../crates/ic-wire-derive/src/lib.rs','../../crates/ic-wire-canister-evaluation/Cargo.toml','../../scripts/ci/evaluate-browser.sh','../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs',process.env.IC_WIRE_BROWSER_WASM]) {
     hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex');
   }
   hashes['PocketIC binary'] = createHash('sha256').update(await readFile(process.env.POCKET_IC_BIN)).digest('hex');
@@ -55,7 +55,7 @@ try {
   const report = { ...result, vectors, browser: browser.version(), node: process.version,
     rustc: execFileSync('rustc', ['-vV'], { encoding: 'utf8' }),
     pocketIc: execFileSync(process.env.POCKET_IC_BIN, ['--version'], { encoding: 'utf8' }).trim(),
-    sdk, generator: 'ic-wire Wire::SCHEMA', canisterFeatures: ['replay'],
+    sdk, generator: 'ic-wire Wire::SCHEMA', canisterFeatures: ['browser-fixture'],
     target: 'wasm32-unknown-unknown', profile: 'canister-evaluation', bundleBytes: bundle.length, hashes };
   await writeFile('artifacts/report.json', JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));

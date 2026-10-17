@@ -1,26 +1,17 @@
 //! Shared contracts consumed unchanged by the canister and its typed caller.
-use ic_wire::{Bytes, Limits, List, Method, Text, Wire};
+use ic_wire::{Limits, List, Method, Text, Wire};
 
-/// A caller-bound command; principal validation remains with the adapter.
+/// Disposable browser update input.
 #[derive(Debug, PartialEq, Wire)]
 pub struct Command {
-    /// Original caller's principal bytes.
-    #[wire(id = 1)]
-    pub subject: Bytes<29>,
-    /// Receiving canister's principal bytes.
-    #[wire(id = 2)]
-    pub audience: Bytes<29>,
-    /// Exclusive expiry, in IC nanoseconds.
-    #[wire(id = 3)]
-    pub expiry: u64,
-    /// Caller-scoped request identity.
+    /// Caller-selected correlation identity.
     #[wire(id = 4)]
     pub id: u64,
     /// Amount added to the local counter.
     #[wire(id = 5)]
     pub amount: u64,
 }
-/// Durable application receipt.
+/// Typed application response.
 #[derive(Debug, PartialEq, Wire)]
 pub struct Receipt {
     /// Request identity.
@@ -43,8 +34,8 @@ impl Method for Apply {
     type Request = Command;
     type Response = Result<Receipt, Failure>;
     // This is a new experimental contract, not a reader for the old tuple probe.
-    const ID: u64 = 0x49435752504c;
-    const NAME: &'static str = "replay_command";
+    const ID: u64 = 0x494357425250;
+    const NAME: &'static str = "runtime_apply";
     const REQUEST_LIMITS: Limits = Limits {
         bytes: 128,
         allocation: 512,

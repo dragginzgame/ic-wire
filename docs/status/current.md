@@ -12,6 +12,22 @@ and package versions are unchanged.
 Focused runtime tests verify buffer identity on recovery; library Clippy and
 the Rust 1.91 Wasm check pass. The log is `target/033-ownership.log`.
 
+## Evaluation cleanup
+
+The current browser fixture uses one canister for signed query/update round trips,
+typed application errors and malformed replies. Its cache, expiry/audience checks
+and peer retry path are removed. Disposable fixture contracts change together;
+frozen browser evidence retains its original identities. Runtime/Candid benchmarks
+remain. Canic PR #591 now covers synchronous raw entrypoints, but explicitly
+retains this repository’s async macro proof, so that fixture stays.
+All three evaluation installers use the selected Testkit 0.51 InstallSpec fields.
+The installed browser trial passes five Rust vectors, 68 truncated replies,
+signed updates, application failures and certificate rejection. Retained runtime
+and macro trials pass too, including the 16 macro rejection/rollback cases.
+Evaluation-example Clippy and Rust 1.91 host/browser-Wasm checks pass. Fresh
+logs are retained at `target/browser-trim-installed.log` and
+`target/browser-trim-clippy.log`; frozen evidence remains unchanged.
+
 ## Publication and parser follow-up
 
 The explicitly requested `make publish` completed successfully, including registry
@@ -203,8 +219,9 @@ Three evaluation hosts now use published `ic-host-artifacts` 0.24.0 for bounded
 Wasm facts; only the host dev-dependency graph changes. Historical evidence stays
 at its original source identities. Canic macro-proof relocation is coordinated on
 [Canic #590](https://github.com/dragginzgame/canic/issues/590#issuecomment-6231405790).
-Its current draft PR is design-only, so the local adapter proof remains until
-Canic's production pipeline has equivalent installed qualification.
+Its [current PR](https://github.com/dragginzgame/canic/pull/591) implements synchronous
+entrypoints and installed rollback checks, but explicitly leaves the asynchronous
+macro proof here. The local fixture remains until that coverage has an owner.
 The cleanup passes 13 runtime tests with TypeScript, evaluation-example clippy
 and Rust 1.91 checks, local tooling checks, and installed runtime/macro proofs.
 The shared inspector remains dev-only; no codec or canister dependency changes.

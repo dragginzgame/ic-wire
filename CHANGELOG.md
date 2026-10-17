@@ -2,6 +2,11 @@
 
 ## [0.3.3]
 
+- Simplify the browser evaluation to one canister and generated-codec transport
+  checks. Remove fixture receipt caching, expiry/audience policy and peer retries;
+  retain runtime benchmarks and the asynchronous macro proof. Adapt evaluation
+  installation to the selected Testkit 0.51 API.
+
 - Add `Bytes::into_vec` and `Text::into_string` so consumers can recover owned
   buffers without copying or allocating. Wire bytes and admission limits are unchanged.
 

@@ -8,11 +8,11 @@ pub mod macro_fixture;
 pub mod runtime_benchmark;
 
 /// Shared runtime contracts used by the installed adoption trial.
-#[cfg(feature = "replay")]
+#[cfg(feature = "browser-fixture")]
 pub mod commands;
 
-#[cfg(feature = "replay")]
-mod replay;
+#[cfg(feature = "browser-fixture")]
+mod browser;
 
 use candid::CandidType;
 use serde::{Deserialize, Serialize, de};

@@ -104,7 +104,13 @@ fn main() {
             expected_exports.sort();
             assert_eq!(exports, expected_exports);
             let id = pic
-                .try_create_and_install(InstallSpec::new(wasm.clone(), vec![], 10_000_000_000_000))
+                .try_create_and_install(InstallSpec {
+                    wasm: wasm.clone(),
+                    init_bytes: vec![],
+                    cycles: 10_000_000_000_000,
+                    install_sender: None,
+                    label: None,
+                })
                 .unwrap();
             if management {
                 assert_eq!(

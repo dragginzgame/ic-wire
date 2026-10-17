@@ -151,7 +151,7 @@ Encoding is deterministic for the supplied types, not a general signature policy
 
 ## Canic adapter work
 
-The installed fixture's shared contracts and replay module demonstrate these exact
+The installed fixture's shared contracts and browser module demonstrate these exact
 calls. A separate [local macro proof](https://github.com/dragginzgame/ic-wire/blob/main/docs/macro-adoption.md) tests actual evaluation-only
 query/update attributes; neither changes Canic macros.
 
@@ -199,7 +199,7 @@ allocation. Its direct-caller auth and local atomic effect do not qualify delega
 composite queries, async external-effect recovery or Canic's whole RPC surface.
 
 The [installed browser fixture](https://github.com/dragginzgame/ic-wire/blob/main/docs/browser-interop.md) now uses this runtime envelope
-and generated clients for queries, protected updates and a peer path. Controlled
+and generated clients for queries, protected updates and typed replies. Controlled
 direct-caller auth is qualified; login/delegation and coordinated frontend rollout
 still need consumer qualification. Do not claim fleet-wide rollout readiness.
 

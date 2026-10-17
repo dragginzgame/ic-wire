@@ -34,7 +34,7 @@ fn main() {
             ("wire-management", "runtime-benchmark,management"),
         ],
         "macros" => vec![("macros", "macro-fixture")],
-        "browser" => vec![("browser", "replay")],
+        "browser" => vec![("browser", "browser-fixture")],
         _ => panic!("unknown trial"),
     };
     for (name, features) in recipes {
