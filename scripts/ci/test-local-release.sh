@@ -13,7 +13,7 @@ status=0
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else echo "Release fixture retained: $fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo"
 # Export current authored inputs, including this untracked adapter during adoption.
-(cd "$root" && git ls-files --cached --others --exclude-standard -z | tar --null -T - -cf -) | tar -xf - -C "$fixture/repo"
+(cd "$root" && git ls-files --cached --others --exclude-standard -z | while IFS= read -r -d '' path; do [[ ! -f "$path" ]] || printf '%s\0' "$path"; done | tar --null -T - -cf -) | tar -xf - -C "$fixture/repo"
 export PATH="$root/.tools/host/bin:$root/.tools/rust/common/bin:$PATH"
 cd "$fixture/repo"
 cat >> Makefile <<'MAKE'
@@ -88,9 +88,10 @@ commit="$(git rev-parse HEAD)"
 [[ "$(git --git-dir="$fixture/remote.git" rev-parse "refs/tags/v$candidate^{}")" == "$commit" ]]
 [[ "$(git diff-tree --no-commit-id --name-only -r HEAD)" == $'CHANGELOG.md\nCargo.lock\nCargo.toml' ]]
 [[ -z "$(git status --porcelain)" ]]
-for manifest in crates/*/Cargo.toml; do
-    yq -p toml -o json '.' "$manifest" | jq -e '.package.publish == false' >/dev/null
+for package in ic-wire ic-wire-derive; do
+    yq -p toml -o json '.' "crates/$package/Cargo.toml" | jq -e '.package.publish == ["crates-io"]' >/dev/null
 done
+yq -p toml -o json '.' crates/ic-wire-canister-evaluation/Cargo.toml | jq -e '.package.publish == false' >/dev/null
 make release-resume "VERSION=$candidate" > "$fixture/resume.log" 2>&1
 [[ "$(git rev-parse HEAD)" == "$commit" ]]
 complete=true

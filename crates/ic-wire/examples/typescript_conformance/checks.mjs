@@ -57,3 +57,11 @@ for (const bits of [32,64]) {
 }
 for (const value of [0.1, Number.MAX_VALUE, Number.MIN_VALUE]) rejects(() => probe({k:'float',bits:32}).encodeRequest(value), 'value');
 console.log('Finite-float canonical bits and rejection checks passed');
+
+function mutation(codec, direction, bytes, accepted) {
+  const input = Uint8Array.from(bytes);
+  const decode = direction === 0 ? codec.decodeRequest : codec.decodeResponse;
+  const encode = direction === 0 ? codec.encodeRequest : codec.encodeResponse;
+  if (!accepted) assert.throws(() => decode(input), WireError);
+  else assert.deepEqual(encode(decode(input)), input);
+}

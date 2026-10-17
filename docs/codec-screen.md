@@ -39,7 +39,12 @@ ordinary Postcard derives. Successful decoding and canonical re-encoding cannot
 detect this. The fixed comparator has an explicit handwritten field list, but no
 validated schema identity mechanism. Neither is a selected IC Wire contract.
 
-## Reproduction and parameters
+## Historical reproduction and parameters
+
+The screening implementation and its Make target were retired in pending 0.2.3.
+The following commands apply to the historical checkout at
+`226a11fce6d5cdd59a77d9a006c91f5a46c58b42`, not the current tree. Saved measurements
+and hashes remain unchanged. Current comparisons use the production runtime.
 
 ```sh
 make evaluate-codecs > /tmp/codec-screen.json
@@ -48,9 +53,9 @@ cargo test --locked -p ic-wire --example codec-evaluation
 
 The [saved JSON](evidence/codec-screen.json) records 28 lengths and payload SHA-256
 values, semantic JSON hashes, source hashes, lockfile hash and observed compiler.
-[Fixture source](../crates/ic-wire/examples/codec_evaluation/fixtures/mod.rs)
+[Fixture source](https://github.com/dragginzgame/ic-wire/blob/226a11fce6d5cdd59a77d9a006c91f5a46c58b42/crates/ic-wire/examples/codec_evaluation/fixtures/mod.rs)
 freezes all values, principal bytes, ordering and the deterministic blob pattern.
-The test suite checks the saved payload vectors and semantic hashes. These JSON
+The historical test suite checked the saved payload vectors and semantic hashes. These JSON
 hashes identify evaluation inputs; they are not a production hashing contract.
 
 This run used Rust 1.99.0 (b940084d7), x86_64-unknown-linux-gnu, default dev profile,

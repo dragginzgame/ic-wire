@@ -1,4 +1,5 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
+mod consumer;
 use ic_wire::{Bytes, Limits, List, Method, Text, Wire, encode_request, encode_response};
 use std::{fmt::Write, fs, marker::PhantomData, path::PathBuf};
 
@@ -65,6 +66,7 @@ struct Fixture {
     directory: PathBuf,
     checks: String,
     count: usize,
+    mutations: usize,
 }
 impl Fixture {
     fn add<T: Wire>(&mut self, value: T, javascript: &str) {
@@ -77,6 +79,62 @@ impl Fixture {
         let request = encode_request::<Contract<T>>(&value).unwrap();
         let response = encode_response::<Contract<T>>(&value).unwrap();
         writeln!(self.checks, "import * as {name} from './compiled/{name}.js';\ncheck({name}, {javascript}, {:?}, {:?});", request.as_bytes(), response.as_bytes()).unwrap();
+        assert_eq!(
+            ic_wire::encoded_request_len::<Contract<T>>(&value).unwrap(),
+            request.as_bytes().len()
+        );
+        assert_eq!(
+            ic_wire::encoded_response_len::<Contract<T>>(&value).unwrap(),
+            response.as_bytes().len()
+        );
+        for (direction, original) in [(0, request.as_bytes()), (1, response.as_bytes())] {
+            let mut candidates = Vec::new();
+            for offset in 0..original.len() {
+                for bit in [1, 128] {
+                    let mut bytes = original.to_vec();
+                    bytes[offset] ^= bit;
+                    candidates.push(bytes);
+                }
+            }
+            // Fixed xorshift stream: reproducible mutation testing, not coverage-guided fuzzing.
+            let mut seed = 0x92d6_8ca2_u32;
+            for length in 0..64 {
+                let mut bytes = original[..11].to_vec();
+                for _ in 0..length {
+                    seed ^= seed << 13;
+                    seed ^= seed >> 17;
+                    seed ^= seed << 5;
+                    bytes.push(seed as u8);
+                }
+                candidates.push(bytes);
+            }
+            for bytes in candidates {
+                let accepted = if direction == 0 {
+                    ic_wire::decode_request::<Contract<T>>(&bytes).map(|v| {
+                        ic_wire::encode_request::<Contract<T>>(&v)
+                            .unwrap()
+                            .into_bytes()
+                    })
+                } else {
+                    ic_wire::decode_response::<Contract<T>>(&bytes).map(|v| {
+                        ic_wire::encode_response::<Contract<T>>(&v)
+                            .unwrap()
+                            .into_bytes()
+                    })
+                };
+                if let Ok(encoded) = &accepted {
+                    assert_eq!(encoded, &bytes);
+                }
+                writeln!(
+                    self.checks,
+                    "mutation({name}, {direction}, {:?}, {});",
+                    bytes,
+                    accepted.is_ok()
+                )
+                .unwrap();
+                self.mutations += 1;
+            }
+        }
         self.count += 1;
     }
 }
@@ -93,7 +151,9 @@ fn main() {
         directory,
         checks: include_str!("checks.mjs").into(),
         count: 0,
+        mutations: 0,
     };
+    consumer::check(&mut f);
     f.add((), "null");
     f.add(false, "false");
     f.add(true, "true");
@@ -161,6 +221,17 @@ fn main() {
         Bytes::<8>::new(vec![0, 128, 255]).unwrap(),
         "new Uint8Array([0,128,255])",
     );
+    // Retain the retired screen's principal-byte nesting and maximum length.
+    // These are bytes, not a replacement for consumer principal validation.
+    f.add(
+        List::<Bytes<29>, 8>::new(vec![
+            Bytes::new(vec![]).unwrap(),
+            Bytes::new(vec![2; 10]).unwrap(),
+            Bytes::new(vec![3; 29]).unwrap(),
+        ])
+        .unwrap(),
+        "[new Uint8Array([]),new Uint8Array(10).fill(2),new Uint8Array(29).fill(3)]",
+    );
     for text in ["", "é🦀", "\u{feff}text", "12345678"] {
         f.add(
             Text::<16>::new(text.into()).unwrap(),
@@ -183,5 +254,6 @@ fn main() {
     f.add(Choice::Empty, "{tag:'Empty',value:null}");
     f.add(Choice::Payload(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) }), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
     writeln!(f.checks, "console.log('Rust/TypeScript conformance: {} vectors, both directions, truncation and identity rejection passed');", f.count).unwrap();
+    writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and canonical re-encode checks passed');", f.mutations).unwrap();
     fs::write(f.directory.join("checks.mjs"), f.checks).unwrap();
 }

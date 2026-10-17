@@ -1,7 +1,50 @@
 # Current handoff
 
-Updated 2026-10-16. The maintainer released 0.2.1; workspace versions remain
-0.2.1. The compatible scratch optimization is documented under pending 0.2.2.
+Updated 2026-10-17. The maintainer released 0.2.2; workspace versions remain
+0.2.2. The compatible benchmark and consumer-qualification additions are under pending 0.3.0.
+
+## First-publication preparation
+
+The selected release is 0.3.0; working workspace versions remain 0.2.2 until the
+maintainer runs `make release-minor`. Registry-compatible workspace dependencies
+are updated by the existing shared release renderer. The runtime guide now lives
+in the runtime package and supplies Rustdoc; both archives contain their license
+and README. Macro UI tests live in the evaluation package, removing the derive
+package’s dev-dependency cycle. The public codec and wire bytes are unchanged.
+
+Prospective 0.3.0 `cargo publish --dry-run --locked` passes for both packages
+with all features in a disposable release-prepared copy; no upload occurred.
+The archived payloads pass Rust 1.91 host/all-feature and Wasm checks with the
+archived derive supplied as a local patch (not registry adoption). Package builds,
+Rustdoc, relocated diagnostics, macro UI Clippy, pins, formatting, doc links and
+disposable Make/release fixtures pass. An offline multi-package Cargo verification
+attempt failed in its temporary registry; online archive verification and dry run
+passed. Registry authentication/ownership and native macOS remain unverified.
+Rehearsal archives and logs are retained under `target/publication-0.3.0/`.
+
+## Latest cleanup
+
+The historical installed tuple/authority/peer codec experiment and
+`evaluate-canisters` are retired; frozen evidence remains reproducible from its
+recorded checkout. Current comparisons retain the required strict Candid helpers.
+IC Build 0.12 now builds all three installed trials and retains artifact records
+through consumption; reports retain digests and Wasm identities. Source must stay
+unchanged during each run; before/after checks do not detect reverted edits.
+
+Durable receipt-policy scenarios are relocated into an isolated Relay contribution
+([Relay #1 — Own durable receipt-policy qualification](https://github.com/dragginzgame/ic-relay/issues/1)).
+The sibling working checkout remains untouched. IC Wire's `evaluate-replay` and
+stable receipt layout are removed; its browser fixture uses bounded volatile state.
+Historical adoption/browser reports keep their original identities. This is a
+compatible contributor-tooling cleanup under pending 0.3.0; no public codec,
+wire bytes, MSRV or package version changes. Relay integration remains owner-reviewed in [Relay PR #2](https://github.com/dragginzgame/ic-relay/pull/2).
+
+All three installed trials pass through the shared build pipeline on Linux.
+Focused canister tests/Clippy and Rust 1.91 host/Wasm checks pass; 12 codec
+runtime tests, formatting, pins, documentation links and the disposable Make
+fixture pass. Relay’s isolated probe passes nine native tests, focused Clippy,
+Rust 1.91 host/Wasm checks and the installed receipt scenarios. No full CI or
+native macOS execution was run. IC Wire staging, commits and versions are untouched.
 
 ## Implemented runtime
 
@@ -23,7 +66,7 @@ for the maintained public API, wire rules, supported types and Canic adapter ste
   rejects trailing/noncanonical bytes; immutable typed buffers retain exact bytes.
   There is no Candid mode or runtime-owned retry/auth/storage policy.
 
-The [installed adoption proof](../runtime-adoption.md) uses these same production
+The historical [installed adoption proof](../runtime-adoption.md) used these same production
 functions in a nested query, a protected command and two real peer deliveries.
 It checks retained success/failure responses, conflicting requests, trap rollback,
 capacity refusal and same-contract upgrade replay. The private 0.1.4 tuple replay
@@ -34,9 +77,11 @@ This qualifies initial controlled Rust endpoint integration, not full Canic roll
 
 Canic owns query/update macros, dispatch, auth, replay policy, transport callbacks,
 metadata and exported-method validation. The [consumer assessment](../consumer-adoption.md)
-traces those committed source owners. Siblings remain read-only and unmodified.
+traces those committed source owners. The ordinary sibling working checkouts remain unmodified.
 No publication, commit, push, release or version change is part of ordinary work.
-All packages remain `publish = false`. No registry name is reserved.
+The maintainer selected 0.3.0 as the first publication. The library and derive
+packages now permit crates.io publication; evaluation remains `publish = false`.
+No package has been uploaded.
 
 The optional host TypeScript generator now projects the runtime envelope from
 Wire metadata. `make check-typescript` passes 83 Rust/TypeScript vectors in both
@@ -77,7 +122,10 @@ The same mixed schema now uses 1.75–21.17× fewer codec instructions than 0.2.
 and 3.04–52.61× fewer than strict Candid. Internal Wasm grows by 4,722 bytes;
 management-enabled Wasm grows by 3,635 bytes. All request/reply hashes match.
 Admission remains conservative; bytes, typed failures and public APIs are unchanged.
-These are synthetic mixed records, not actual IcyDB SQL or scalar-only contracts.
+The expanded matrix now also covers standalone u64 endpoints and heterogeneous
+SQL-shaped pages: 43.79–61.64× and 6.64–33.45× fewer codec instructions than strict
+Candid respectively, in internal-only builds. The eight-row page is 914 versus
+987 bytes. These are synthetic local contracts, not actual IcyDB SQL adoption.
 Historical runtime/browser/macro evidence remains at its original source hashes.
 
 Browser login/delegation, composite-query behavior and external-effect recovery
@@ -90,15 +138,64 @@ Keep full auth/hash/client conversion coordinated; do not add compatibility lane
 An installed IcyDB schema comparison remains optional and separate. Database rows,
 ordered keys, journals and authenticated cursor formats stay outside scope.
 
+## Consumer qualification
+
+[Source-matched IcyDB fixtures](../consumer-fixtures.md) now cover native SQL text,
+Count/Grouped successes and public-error layouts, bounded conversions and display-string
+fidelity. These are a source-hashed subset of an actively changing sibling, not
+full endpoint adoption. Its dynamic native Payload adapter remains opaque to
+TypeScript generation; recursive/native browser projections remain unqualified.
+Exact request/response length helpers include the header without allocating output
+storage. The offline viewer decodes using trusted generated contract modules.
+The current conformance gate passes 87 vectors and 17,320 Rust/TypeScript mutation
+comparisons, with canonical re-encoding of accepted inputs. This is deterministic
+mutation testing. A separate `make fuzz-runtime` coverage-guided harness now passes
+100,000 inputs with address/leak sanitizers on Linux. It covers malformed frames,
+bounded payloads, canonical re-encoding and exact length helpers. See
+[development](../development.md#coverage-guided-runtime-fuzzing) for prepared-tool
+requirements, corpus/replay handling and qualification limits. Sustained campaigns
+and native macOS fuzz execution remain unqualified. Runtime tests, clippy, Wasm MSRV,
+the disposable formatting fixture and installed macro rollback checks pass.
+The IcyDB response-encoding reject path needs consumer review for mutating calls;
+the local macro proof retains trap-based rollback. Sibling files remain untouched.
+
 ## Evidence and tooling
 
-The current-runtime comparison passes 72 measured calls, 120 rejection checks,
-matched export checks and two real management calls per run. The optimized runtime
+The four-codec screening executable and `evaluate-codecs` are retired; its saved
+evidence remains historical. Production conformance retains nested principal-byte
+length cases and now passes 88 vectors and 17,664 mutations. The runtime crate no
+longer has Candid, Ciborium, ic_principal or SHA-256 dev dependencies. Candid remains
+in the separate comparison canister. Five evaluation hosts use published Testkit
+0.50 startup ownership and installation, preserving fresh topology and funding.
+Explicit UI modules replace source-rewriting diagnostic scripts; all 18 negative
+cases and valid controls pass on Rust 1.99 and 1.91. Host dependencies stay dev-only.
+Before this cleanup, all five installed experiments passed with the managed lifecycle: current/historical
+codec comparisons, macro rollback, replay/peer delivery and signed browser calls.
+Fresh reports stay under target/ and browser artifacts; frozen evidence is unchanged.
+Runtime tests, clippy, host/Wasm MSRV and tooling checks pass on Linux. Native macOS
+qualification remains with the configured hosted matrix.
+
+The private typed-journey implementation and `evaluate-journey` target are retired.
+Its retry assertion now uses production RequestBytes and typed application errors;
+existing runtime tests own identity, field-order and malformed-input coverage.
+Three evaluation hosts now use published `ic-host-artifacts` 0.24.0 for bounded
+Wasm facts; only the host dev-dependency graph changes. Historical evidence stays
+at its original source identities. Canic macro-proof relocation is coordinated on
+[Canic #590](https://github.com/dragginzgame/canic/issues/590#issuecomment-6231405790).
+Its current draft PR is design-only, so the local adapter proof remains until
+Canic's production pipeline has equivalent installed qualification.
+The cleanup passes 13 runtime tests with TypeScript, evaluation-example clippy
+and Rust 1.91 checks, local tooling checks, and installed runtime/macro proofs.
+The shared inspector remains dev-only; no codec or canister dependency changes.
+
+The expanded current-runtime comparison passes 144 measured calls, 248 rejection
+checks, matched export checks and two real management calls. New fixtures pass
+clippy with both codecs, Rust 1.91 host/Wasm checks and the disposable Make fixture. The optimized runtime
 passes 12 runtime tests with TypeScript enabled, six doctests, all 83 TypeScript
 vectors, focused clippy and the Rust 1.91 Wasm check.
 The installed replay/rollback trial also passes with the optimized codec; its
 fresh report is retained in `target/runtime-adoption-evidence/report.json`.
-The disposable Make/formatting fixture now includes both benchmark modules;
+The disposable Make/formatting fixture includes the benchmark modules and shapes;
 `make check-tooling` qualifies the complete fixture after the missing-file fix.
 
 Historical [codec comparison](../canister-comparison.md),

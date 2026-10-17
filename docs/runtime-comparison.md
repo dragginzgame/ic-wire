@@ -6,7 +6,60 @@ records all samples, source/input/artifact SHA-256 hashes, compiler, flags,
 PocketIC identity, decoder parameters and exports. Historical private Postcard
 reports remain unchanged; their larger speedups do not describe this runtime.
 
-## Scratch optimization (pending 0.2.2)
+## Scalar and SQL-shaped extension (pending 0.2.3)
+
+The [expanded installed report](evidence/runtime-shapes.json) measures the released
+0.2.2 runtime with three endpoints linked in each matched artifact: the original
+mixed record, a standalone u64, and a bounded heterogeneous page. This is a new
+artifact matrix; compare codecs within this run, not its Wasm sizes against the
+older one-endpoint builds below. All earlier evidence remains unchanged.
+
+The scalar method admits just 21 wire bytes, 21 allocation bytes, one node and
+depth one. Its handler wraps an increment; cases cover zero, the 127/128 varint
+boundary and u64::MAX wrapping to zero. The Candid control is a record carrying
+method, direction and u64 value. Its transport allowance remains 5120 bytes for
+Candid headers; quota and canonical checks remain as documented below.
+
+The page echoes a reply-shaped value, incrementing a synthetic page counter.
+It permits eight columns of at most 32 UTF-8 bytes and eight rows of eight cells.
+Each nonempty row covers null, bool, near-minimum i64, near-maximum u64, finite
+f32/f64 (including negative zero), 32 UTF-8 text bytes and 32 opaque bytes. Wire
+uses explicit cell tags 1–8. Page allowances are 5120 frame bytes, 16384 allocation
+bytes, 256 nodes and depth eight. Candid uses ordinary record/variant projections;
+page length and finite-float checks occur after quota-limited decoding. There is
+no DTO conversion inside either measured region. This is an update-based echo
+for measuring both page decoding and encoding, not query latency or SQL execution.
+
+Internal-only median strict-decode plus response-encode instruction counts:
+
+| Input | Request bytes Candid / Wire | Reply bytes Candid / Wire | Instructions Candid / Wire | Candid / Wire |
+| --- | ---: | ---: | ---: | ---: |
+| Scalar 0 | 43 / 12 | 43 / 12 | 172,849 / 2,804 | 61.64× |
+| Scalar 127 | 43 / 12 | 43 / 13 | 172,849 / 2,838 | 60.91× |
+| Scalar u64::MAX | 43 / 21 | 43 / 12 | 172,849 / 3,947 | 43.79× |
+| Page, zero rows | 155 / 50 | 155 / 50 | 783,418 / 23,421 | 33.45× |
+| Page, one row | 259 / 158 | 259 / 158 | 850,108 / 45,879 | 18.53× |
+| Page, eight rows | 987 / 914 | 987 / 914 | 1,332,805 / 200,669 | 6.64× |
+
+Three sequential samples per case include the first call. Counter overhead is
+included, handler work is separate, and argument copying/reply delivery are outside
+the measured region. The management-enabled ratios are 43.77–61.09× for scalars
+and 6.64–33.40× for pages. These observations are not confidence intervals.
+
+| Three-endpoint artifact | Complete Wasm Candid / Wire | Reduction | Code-section payload Candid / Wire |
+| --- | ---: | ---: | ---: |
+| Internal-only | 814,894 / 124,739 bytes | 84.69% | 421,282 / 57,377 bytes |
+| Also real management raw_rand | 851,614 / 720,114 bytes | 15.44% | 437,263 / 357,682 bytes |
+
+The expanded run passes 144 measured calls, 248 rejected calls and two real
+management calls. Rejections cover truncation, oversize, trailing data, wrong
+identity/direction and page row/cell overflow. The runner checks matching exports
+and byte-identical independently encoded expected replies for each call. The
+original six mixed-record cases are retained in the raw report. Native time,
+compression, peak memory, recursive values and real IcyDB contract adoption remain
+unmeasured. Use the same `make evaluate-runtime` command below to reproduce.
+
+## Scratch optimization (0.2.2)
 
 A matched rerun against released 0.2.1 measures the pending runtime optimization.
 [Before evidence](evidence/runtime-scratch-before.json) and
@@ -139,3 +192,9 @@ It uses the locked dependencies (Postcard 1.1.3, Candid 0.10.38), Rust 1.99.0,
 optimization, LTO, one codegen unit, abort panic and stripped debug information.
 The saved run is Linux/PocketIC 16.0.0; macOS execution is not established by it.
 Runtime source and package versions are unchanged by this benchmark batch.
+
+The maintained runner now uses IC Build 0.12 to select and retain each artifact
+through measurement. Fresh reports include build/input/validation digests and
+verify Wasm hashes against the retained build records. Keep sources unchanged
+until the command exits; persistent mutation refuses report finalization.
+Saved reports above retain their original schemas and source identities.

@@ -1,8 +1,9 @@
 //! Installed qualification of the evaluation-only query/update attributes.
 use candid::Principal;
+use ic_host_artifacts::wasm::{InspectionLimits, inspect};
+use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
 use ic_wire::{Method, decode_response, encode_request};
 use ic_wire_canister_evaluation::macro_fixture::{Add, BadReply, Read, Reset};
-use pocket_ic::PocketIcBuilder;
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{env, fs, process::Command};
@@ -10,14 +11,21 @@ use std::{env, fs, process::Command};
 fn main() {
     let wasm_path = env::args_os().nth(1).expect("Wasm path");
     let wasm = fs::read(&wasm_path).unwrap();
-    let mut exports = Vec::new();
-    for payload in wasmparser::Parser::new(0).parse_all(&wasm) {
-        if let wasmparser::Payload::ExportSection(section) = payload.unwrap() {
-            for export in section {
-                exports.push(export.unwrap().name.to_owned());
-            }
-        }
-    }
+    let facts = inspect(
+        &wasm,
+        InspectionLimits {
+            module_bytes: 16 * 1024 * 1024,
+            sections: 128,
+            exports: 128,
+            custom_sections: 64,
+        },
+    )
+    .unwrap();
+    let exports: Vec<_> = facts
+        .exports
+        .keys()
+        .map(|name| (*name).to_owned())
+        .collect();
     for expected in [
         format!("canister_query {}", Read::NAME),
         format!("canister_update {}", Add::NAME),
@@ -28,13 +36,13 @@ fn main() {
     assert!(!exports.contains(&format!("canister_update {}", Read::NAME)));
     assert!(!exports.contains(&format!("canister_query {}", Add::NAME)));
     let server = env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server");
-    let pic = PocketIcBuilder::new()
-        .with_server_binary(server.clone().into())
-        .with_application_subnet()
-        .build();
-    let id = pic.create_canister();
-    pic.add_cycles(id, 10_000_000_000_000);
-    pic.install_canister(id, wasm.clone(), vec![], None);
+    let owned = PocketIcStartupConfig::spawn(server.clone(), std::time::Duration::from_secs(60))
+        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .unwrap();
+    let pic = &owned.instance;
+    let id = pic
+        .try_create_and_install(InstallSpec::new(wasm.clone(), vec![], 10_000_000_000_000))
+        .unwrap();
     let caller = Principal::anonymous();
     let query = |value| {
         let bytes = encode_request::<Read>(&value).unwrap();

@@ -12,18 +12,19 @@ fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
-paths+=(crates/ic-wire/examples/codec_evaluation/mod.rs crates/ic-wire/examples/codec_evaluation/bounded/mod.rs crates/ic-wire/examples/codec_evaluation/fixtures/mod.rs crates/ic-wire/examples/codec_evaluation/fixed/mod.rs)
-paths+=(docs/evidence/codec-screen.json)
-paths+=(crates/ic-wire/examples/typed_journey/mod.rs)
-paths+=(crates/ic-wire/examples/typed_journey/schema/mod.rs)
-paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs crates/ic-wire-canister-evaluation/examples/measure/mod.rs)
+paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
+paths+=(crates/ic-wire/examples/fuzz_runtime/mod.rs scripts/ci/fuzz-runtime.sh)
+paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs)
 paths+=(crates/ic-wire-canister-evaluation/src/runtime_benchmark/mod.rs crates/ic-wire-canister-evaluation/examples/runtime_measure/mod.rs)
-paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs crates/ic-wire-canister-evaluation/src/authority/mod.rs crates/ic-wire-canister-evaluation/src/peer/mod.rs)
-paths+=(crates/ic-wire-canister-evaluation/examples/replay_fixture/mod.rs crates/ic-wire-canister-evaluation/src/replay/mod.rs crates/ic-wire-canister-evaluation/src/replay/tests/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/src/runtime_benchmark/shapes/mod.rs crates/ic-wire-canister-evaluation/examples/build_evaluation/mod.rs)
+paths+=(crates/ic-wire/examples/typescript_conformance/consumer/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/src/replay/mod.rs)
 paths+=(crates/ic-wire/src/float/mod.rs crates/ic-wire/src/schema/mod.rs crates/ic-wire/src/typescript/mod.rs crates/ic-wire/src/typescript/runtime.ts crates/ic-wire/examples/typescript_conformance/mod.rs crates/ic-wire/examples/typescript_conformance/checks.mjs)
 paths+=(crates/ic-wire-derive/src/adapter_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/tests/mod.rs crates/ic-wire-canister-evaluation/examples/macro_fixture/mod.rs)
 paths+=(docs/runtime.md crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/lib.rs crates/ic-wire/src/contract/mod.rs crates/ic-wire/src/bounded/mod.rs crates/ic-wire/src/shape/mod.rs crates/ic-wire/tests/runtime/mod.rs crates/ic-wire-canister-evaluation/src/commands/mod.rs)
+paths+=(scripts/ci/check-diagnostics.sh)
+while IFS= read -r path; do paths+=("$path"); done < <(cd "$root" && find crates/ic-wire/tests/ui crates/ic-wire-canister-evaluation/tests/macro_ui -type f)
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue
     paths+=("$path")
@@ -59,7 +60,7 @@ printf '%s|%s|%s\n' "${RUSTUP_TOOLCHAIN:-development}" "${CARGO_TARGET_DIR:-}" "
 STUB
 chmod +x "$fixture/bin/cargo"
 export CARGO_CALLS="$fixture/cargo-calls"
-for target in build check test lint check-wasm check-msrv evaluate-codecs evaluate-journey; do
+for target in build check test lint check-wasm check-msrv; do
     PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" "$target"
 done
 cat > "$fixture/expected-calls" <<EOF
@@ -70,8 +71,6 @@ development|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive --
 development|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib
 1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
-development|$fixture/repo/target|run --quiet --locked -p ic-wire --example codec-evaluation
-development|$fixture/repo/target|run --quiet --locked -p ic-wire --example typed-journey
 EOF
 # The ambient development selection may be explicit (for example in CI).
 sed "s/^development|/${RUSTUP_TOOLCHAIN:-development}|/" "$fixture/expected-calls" > "$fixture/expected-environment"

@@ -1,5 +1,10 @@
 # Generated runtime browser integration
 
+Current browser checks use a bounded volatile reply cache. Durable receipt layout,
+rollback and upgrade qualification now belong to the Relay receipt probe. The
+saved JSON retains its historical source identity; fresh browser reports qualify
+transport, generated codecs and same-instance exact-byte responses only.
+
 The browser now uses the same explicit `Wire` and `Method` declarations as the
 installed Rust endpoints. The current fixture replaces its old private Message
 layout and hand-written preflight guards with the optional IC Wire generator.

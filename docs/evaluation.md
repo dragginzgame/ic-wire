@@ -1,5 +1,10 @@
 # First implementation batch
 
+Current executable comparisons use `evaluate-runtime`. The old installed codec
+experiment and `evaluate-canisters` are retired; their reports below are historical.
+Durable receipt qualification moves to Relay; IC Wire retains browser transport
+and codec byte conformance rather than a stable receipt store.
+
 ## Outcome
 
 The [Postcard runtime](runtime.md) and [installed adoption proof](runtime-adoption.md)
@@ -9,7 +14,7 @@ of the new runtime envelope. The [current-runtime comparison](runtime-comparison
 now measures that envelope and its bounds on a mixed bounded schema. Optional
 TypeScript generation and installed browser correctness are also qualified.
 
-The initial [payload screen](codec-screen.md) implements steps 1–2 with bounded
+The initial [payload screen](codec-screen.md) implemented steps 1–2 with bounded
 synthetic fixtures and partial rejection evidence. It does not complete the typed
 developer journey. The [matched canister experiment](canister-comparison.md)
 now covers installed scalar/blob calls, linked Wasm and IC instructions for both

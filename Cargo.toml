@@ -12,16 +12,18 @@ version = "0.2.2"
 edition = "2024"
 rust-version = "1.91"
 license-file = "LICENSE"
+repository = "https://github.com/dragginzgame/ic-wire"
 
 [workspace.dependencies]
 candid = "0.10.38"
-ciborium = "0.2.2"
+ic-build = "0.12"
 ic-cdk = "0.20.3"
-ic-wire = { path = "crates/ic-wire" }
-ic-wire-derive = { path = "crates/ic-wire-derive" }
+ic-host-artifacts = { version = "0.24", default-features = false }
+ic-testkit = "0.50"
+ic-wire = { path = "crates/ic-wire", version = "0.2.2" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.2.2" }
 ic0 = "1.2.0"
-ic_principal = { version = "0.1.5", features = ["serde"] }
-pocket-ic = "16.1.0"
+libfuzzer-sys = "0.4.13"
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
@@ -29,7 +31,6 @@ serde = { version = "1.0", default-features = false, features = ["derive", "allo
 serde_json = "1.0"
 sha2 = "0.10.9"
 syn = { version = "2.0.119", features = ["full"] }
-wasmparser = "0.245.1"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

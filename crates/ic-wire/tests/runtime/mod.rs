@@ -71,6 +71,34 @@ fn nested_roundtrip_and_typed_failures() {
     trailing.push(0);
     assert_eq!(decode_request::<Read>(&trailing), Err(Error::Trailing));
 }
+#[test]
+fn retry_retains_exact_request_and_separates_transport_failure() {
+    let value = Request {
+        expiry: Some(42),
+        grants: List::new(vec![]).unwrap(),
+    };
+    let request = encode_request::<Read>(&value).unwrap();
+    let retained = request.as_bytes().to_vec();
+    // A consumer retries the same owned frame; the codec owns no retry policy.
+    let transport = |bytes: &[u8], fail: bool| -> Result<Vec<u8>, &'static str> {
+        assert_eq!(bytes, retained);
+        if fail {
+            return Err("transport unavailable");
+        }
+        assert_eq!(decode_request::<Read>(bytes).unwrap(), value);
+        Ok(encode_response::<Read>(&Err(Failure::Denied))
+            .unwrap()
+            .into_bytes())
+    };
+    assert_eq!(
+        transport(request.as_bytes(), true),
+        Err("transport unavailable")
+    );
+    let reply = transport(request.as_bytes(), false).unwrap();
+    assert_eq!(decode_response::<Read>(&reply), Ok(Err(Failure::Denied)));
+    assert_eq!(request.into_bytes(), retained);
+}
+
 #[derive(Debug, PartialEq, Wire)]
 struct First {
     #[wire(id = 1)]
@@ -127,6 +155,8 @@ fn frozen_envelope_empty_reply_and_noncanonical_rejection() {
         &[b'I', b'W', 8, 0, 0, 0, 0, 0, 0, 0, 0, 1]
     );
     let response = encode_response::<Scalar>(&()).unwrap();
+    assert_eq!(ic_wire::encoded_request_len::<Scalar>(&1), Ok(12));
+    assert_eq!(ic_wire::encoded_response_len::<Scalar>(&()), Ok(11));
     assert_eq!(
         response.as_bytes(),
         &[b'I', b'W', 8, 0, 0, 0, 0, 0, 0, 0, 1]
@@ -180,6 +210,10 @@ fn all_schema_budgets_precede_decode() {
         Err(Error::SchemaLimit)
     );
     let request = List::new(vec![(); 4]).unwrap();
+    assert_eq!(
+        ic_wire::encoded_request_len::<Budget<20, 100, 8, 4>>(&request),
+        Err(Error::SchemaLimit)
+    );
     let bytes = encode_request::<Budget<100, 100, 8, 4>>(&request).unwrap();
     assert_eq!(
         decode_request::<Budget<100, 100, 8, 4>>(bytes.as_bytes()),
@@ -447,6 +481,10 @@ impl Method for AdversarialMethod {
 fn custom_serializer_bounds_and_error_identity() {
     let canonical = encode_request::<AdversarialMethod>(&Adversarial(0)).unwrap();
     for tag in [1, 2, 5] {
+        assert_eq!(
+            ic_wire::encoded_request_len::<AdversarialMethod>(&Adversarial(tag)),
+            Err(Error::Malformed)
+        );
         assert_eq!(
             encode_request::<AdversarialMethod>(&Adversarial(tag))
                 .err()

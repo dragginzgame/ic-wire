@@ -1,10 +1,10 @@
 //! Generate runtime clients and serve a controller-bound local browser fixture.
 use candid::Principal;
+use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
 use ic_wire::{Bytes, List, Method, Text, encode_request, encode_response};
 use ic_wire_canister_evaluation::commands::{
     Apply, Command, Failure, Inspect, Inspection, Receipt, Snapshot,
 };
-use pocket_ic::PocketIcBuilder;
 use serde_json::json;
 use std::{env, fs, io, path::PathBuf};
 
@@ -36,15 +36,19 @@ fn main() {
     let server = PathBuf::from(env::var_os("POCKET_IC_BIN").expect("prepared PocketIC binary"));
     let wasm =
         fs::read(env::var_os("IC_WIRE_BROWSER_WASM").expect("runtime fixture Wasm path")).unwrap();
-    let mut pic = PocketIcBuilder::new()
-        .with_server_binary(server)
-        .with_application_subnet()
-        .build();
-    let id = pic.create_canister();
-    let sender = pic.create_canister();
+    let mut owned =
+        PocketIcStartupConfig::spawn(server.clone(), std::time::Duration::from_secs(60))
+            .build_instance(PocketIcBuilder::new().with_application_subnet())
+            .unwrap();
+    let pic = &mut owned.instance;
+    let [id, sender]: [_; 2] = pic
+        .try_create_and_install_many(
+            (0..2).map(|_| InstallSpec::new(wasm.clone(), vec![], 10_000_000_000_000)),
+        )
+        .unwrap()
+        .try_into()
+        .unwrap();
     for target in [id, sender] {
-        pic.add_cycles(target, 10_000_000_000_000);
-        pic.install_canister(target, wasm.clone(), vec![], None);
         pic.set_controllers(target, None, vec![Principal::anonymous(), caller, sender])
             .unwrap();
     }
