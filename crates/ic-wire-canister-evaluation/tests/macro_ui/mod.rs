@@ -15,4 +15,6 @@ mod request;
 #[cfg(ui_case = "response")]
 mod response;
 mod support;
+#[cfg(ui_case = "unsafe_handler")]
+mod unsafe_handler;
 mod valid;

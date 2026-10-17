@@ -1,6 +1,6 @@
 # Local development
 
-IC Wire provides an unpublished no_std + alloc Postcard runtime. See the
+IC Wire provides a no_std + alloc Postcard runtime. See the
 [runtime guide](runtime.md) for its contract and [adoption evidence](runtime-adoption.md)
 for installed correctness checks. Compilation alone establishes no performance win.
 
@@ -199,9 +199,9 @@ checks and the runtime tests keep exact request/reply-byte coverage.
 
 ## First publication
 
-0.3.0 is the selected first crates.io release of `ic-wire` and `ic-wire-derive`.
-The main checkout stays at 0.2.2 during preparation. After committing the reviewed
-changes, the maintainer runs `make release-minor`; Shared Tooling updates the
+0.3.0 is the first published crates.io release of `ic-wire` and `ic-wire-derive`.
+After committing subsequent reviewed changes, the maintainer runs the selected
+Git release command; Shared Tooling updates the
 workspace version, local dependency requirements, lockfile and changelog together.
 Git delivery remains separate from registry publication.
 
@@ -211,13 +211,13 @@ registry; it is separate from offline CI. Cargo stages the local derive package
 while verifying the runtime. Package allowlists exclude tests, fuzz harnesses and
 evaluation artifacts; LICENSE and package-local README files are included.
 
-After Git release delivery, check the clean v0.3.0 source and credentials, then
+After Git release delivery, check the clean selected release source and credentials, then
 run the first command below to rehearse. The second command uploads both packages
 and is a separate maintainer action; Cargo orders the derive before the runtime.
 
 ```sh
 cargo publish --dry-run --locked -p ic-wire-derive -p ic-wire --all-features
-cargo publish --locked -p ic-wire-derive -p ic-wire
+make publish
 ```
 
 Publication must use Cargo 1.99 (the prepared development toolchain). Library

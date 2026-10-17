@@ -8,7 +8,10 @@ include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
 .PHONY: evaluate-runtime evaluate-macros check-macro-diagnostics
-.PHONY: check-package
+.PHONY: publish check-package
+publish:
+	+@env cargo publish --locked -p ic-wire-derive -p ic-wire
+
 check-package:
 	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
 
@@ -55,7 +58,7 @@ check-typed-diagnostics:
 
 help:
 	@printf '%s\n' \
-		'IC Wire — unpublished bounded Postcard runtime' \
+		'IC Wire — bounded Postcard runtime' \
 		'Setup: install-tools, install-hooks; offline admission: tools-check' \
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
@@ -65,7 +68,7 @@ help:
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Evaluation: check-browser, evaluate-browser (prepared Node/npm/Chromium)' \
 		'Evaluation: check-canister-evaluation (compile and lint; no emulator)' \
-		'Publication preparation: check-package (no upload; registry access)' \
+		'Registry: publish (uploads); check-package (no upload; registry access)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \

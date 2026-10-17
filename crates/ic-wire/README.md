@@ -2,7 +2,7 @@
 
 IC Wire now provides a Postcard-only `no_std` + `alloc` runtime and a host-side
 `Wire` derive. The runtime has no Candid, CDK or host-tooling dependency. Packages
-are prepared for their first crates.io release at 0.3.0. Canic can integrate a controlled Rust endpoint against this
+are published on crates.io starting at 0.3.0. Canic can integrate a controlled Rust endpoint against this
 API; its query/update macros, auth policy and rollout remain Canic-owned.
 
 ## Shared contract
@@ -310,7 +310,7 @@ packet viewer](https://github.com/dragginzgame/ic-wire/blob/main/docs/consumer-f
 
 ## Package and license
 
-The intended first registry dependency is `ic-wire = "0.3"` after publication.
+Use the registry dependency `ic-wire = "0.3"`.
 Enable `features = ["typescript"]` only when generating client codecs on the host.
 The runtime supports Rust 1.91 and `wasm32-unknown-unknown`.
 

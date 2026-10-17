@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1]
+
+- Upgrade the derive parser to Syn 3 while retaining the Rust 1.91 floor and
+  existing wire format. Preserve safe-handler admission in the macro fixture.
+- Add `make publish` for explicit crates.io delivery of the runtime and derive
+  packages, separate from Git release commands.
+- Qualify IC Build 0.13 and Host Artifacts 0.25 in the evaluation hosts, including
+  installed runtime, macro and browser trials. Keep these dependencies dev-only.
+
 ## [0.3.0] - 2026-10-17
 
 - Prepare the first crates.io publication of `ic-wire` and `ic-wire-derive`, with

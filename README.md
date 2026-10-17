@@ -1,11 +1,11 @@
 # IC Wire
 
-A bounded implementation of a small, bounded binary protocol for Rust
+A small, bounded binary protocol for Rust
 applications on the Internet Computer. The goal is Candid-like developer ease
 with substantially less Wasm code and serialization work for communication whose
 producers and consumers we control.
 
-**Status: preparing 0.3.0 as the first crates.io release.**
+**Status: 0.3.0 published on crates.io.**
 The library supplies explicit-layout derives, bounded containers, typed method
 bindings, finite float wrappers and canonical request/reply envelopes. Its normal dependency graph has
 no Candid, CDK or host tooling. Start with the [runtime guide](docs/runtime.md)
@@ -17,7 +17,9 @@ controlled queries, protected updates, replay and peer calls. Production browser
 login/delegation and Canic integration still need consumer qualification.
 The library and derive packages are configured for crates.io; the evaluation
 package remains unpublished. See [publication preparation](docs/development.md#first-publication)
-for the separate Git release and registry steps. No package has been published yet.
+for the separate Git release and registry steps. Both
+[`ic-wire`](https://crates.io/crates/ic-wire/0.3.0) and
+[`ic-wire-derive`](https://crates.io/crates/ic-wire-derive/0.3.0) are published.
 
 Start with [the handoff](docs/status/current.md), [design](docs/design.md),
 [proposed developer experience](docs/developer-experience.md) and

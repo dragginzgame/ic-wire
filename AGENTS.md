@@ -1,7 +1,7 @@
 # IC Wire contributor instructions
 
 Read docs/status/current.md first, then README.md, docs/design.md and
- docs/evaluation.md. The unpublished Postcard runtime is qualified for bounded
+ docs/evaluation.md. The Postcard runtime is qualified for bounded
 Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
@@ -12,8 +12,8 @@ moving sibling checkout or patch snapshot-owned files in place.
 
 ## Maintainer decisions
 
-- Prepare ic-wire and ic-wire-derive for their first crates.io publication at
-  0.3.0. Keep the evaluation package `publish = false`. Actual publication,
+- ic-wire and ic-wire-derive were first published at 0.3.0.
+  Keep the evaluation package `publish = false`. Subsequent publication,
   remote creation, pushes and releases require explicit authorization.
 - Establish a reusable Rust developer experience and a substantial measured win
   before broad adoption. Postcard is selected for controlled RPC and owned user

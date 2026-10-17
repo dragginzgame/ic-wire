@@ -27,12 +27,13 @@ pub(crate) fn expand(
     let method = method.ok_or_else(|| syn::Error::new_spanned(&item, "method binding required"))?;
     let guard = guard.ok_or_else(|| syn::Error::new_spanned(&item, "request guard required"))?;
     let function: ItemFn = syn::parse2(item)?;
+    function.modifiers.require_empty()?;
     let sig = &function.sig;
     if !sig.generics.params.is_empty()
         || sig.generics.where_clause.is_some()
         || sig.inputs.len() != 1
         || !matches!(sig.inputs.first(), Some(syn::FnArg::Typed(_)))
-        || sig.unsafety.is_some()
+        || !matches!(sig.safety, syn::Safety::Default)
         || sig.constness.is_some()
         || sig.abi.is_some()
         || sig.variadic.is_some()

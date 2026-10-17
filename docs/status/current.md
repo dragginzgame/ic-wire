@@ -1,26 +1,40 @@
 # Current handoff
 
-Updated 2026-10-17. The maintainer released 0.2.2; workspace versions remain
-0.2.2. The compatible benchmark and consumer-qualification additions are under pending 0.3.0.
+Updated 2026-10-17. Release 0.3.0 (20bc027) and first crates.io publication are
+complete for both ic-wire-derive and ic-wire. The evaluation package remains
+unpublished. The working versions remain 0.3.0; compatible follow-up is pending 0.3.1.
 
-## First-publication preparation
+## Publication and parser follow-up
 
-The selected release is 0.3.0; working workspace versions remain 0.2.2 until the
-maintainer runs `make release-minor`. Registry-compatible workspace dependencies
-are updated by the existing shared release renderer. The runtime guide now lives
-in the runtime package and supplies Rustdoc; both archives contain their license
-and README. Macro UI tests live in the evaluation package, removing the derive
-package’s dev-dependency cycle. The public codec and wire bytes are unchanged.
+The explicitly requested `make publish` completed successfully, including registry
+availability confirmation for both 0.3.0 packages. The new Make target delegates
+to Cargo’s ordered workspace publication; Git release delivery stays separate.
+The publication log is retained at `target/publish-0.3.0.log`. No Git staging,
+commit, tag, release or visibility change was performed by the publication task.
 
-Prospective 0.3.0 `cargo publish --dry-run --locked` passes for both packages
-with all features in a disposable release-prepared copy; no upload occurred.
-The archived payloads pass Rust 1.91 host/all-feature and Wasm checks with the
-archived derive supplied as a local patch (not registry adoption). Package builds,
-Rustdoc, relocated diagnostics, macro UI Clippy, pins, formatting, doc links and
-disposable Make/release fixtures pass. An offline multi-package Cargo verification
-attempt failed in its temporary registry; online archive verification and dry run
-passed. Registry authentication/ownership and native macOS remain unverified.
-Rehearsal archives and logs are retained under `target/publication-0.3.0/`.
+The working derive crate now selects Syn 3.0.9. Its evaluation-only adapter uses
+Syn’s Safety enum and rejects unsupported function modifiers; an unsafe-handler
+negative fixture checks admission. Syn 2 remains transitively through other macro
+dependencies. This changes host parsing, not runtime wire bytes or Wasm behavior.
+The runtime and derive package source still targets Rust 1.91. This follow-up has
+not been released or published; 0.3.0 contains the previously qualified Syn 2 code.
+
+Syn 3 qualification passes: 13 runtime tests, Rustdoc, three macro pipeline
+tests, all 19 negative diagnostic cases on Rust 1.99 and 1.91, Clippy, Wasm MSRV,
+88 Rust/TypeScript vectors and 17,664 differential mutations. The installed macro
+trial passes query/sync/async exports, typed failures and 16 rejection/rollback
+cases. Formatting, pins, documentation links and the disposable Make fixture pass.
+No full CI or native macOS run was performed for this follow-up.
+
+The selected IC Build 0.13.0 and Host Artifacts 0.25.0 updates also pass evaluation
+example Clippy and Rust 1.91 checks without API adaptations. All three installed
+trials pass with the new host graph: runtime comparisons, macro rejection/rollback
+and signed browser calls. These dependencies remain dev-only. Logs are retained
+at `target/031-host-qualification.log` and `target/031-installed.log`; fresh reports
+and build identities remain under their existing target/browser artifact owners.
+`make check-package` verifies both current source archives with Syn 3, including
+the staged derive dependency (`target/031-package.log`). This check uploads nothing;
+the workspace still uses 0.3.0 pending maintainer release preparation for 0.3.1.
 
 ## Latest cleanup
 
@@ -48,8 +62,8 @@ native macOS execution was run. IC Wire staging, commits and versions are untouc
 
 ## Implemented runtime
 
-The unpublished `ic-wire` library now provides a no_std + alloc Postcard runtime,
-with the unpublished host-side `ic-wire-derive` crate. Its normal dependency graph
+The `ic-wire` library now provides a no_std + alloc Postcard runtime,
+with the host-side `ic-wire-derive` crate. Its normal dependency graph
 excludes Candid, CDK and host tooling. Read [the runtime guide](../runtime.md)
 for the maintained public API, wire rules, supported types and Canic adapter steps.
 
@@ -79,9 +93,8 @@ Canic owns query/update macros, dispatch, auth, replay policy, transport callbac
 metadata and exported-method validation. The [consumer assessment](../consumer-adoption.md)
 traces those committed source owners. The ordinary sibling working checkouts remain unmodified.
 No publication, commit, push, release or version change is part of ordinary work.
-The maintainer selected 0.3.0 as the first publication. The library and derive
-packages now permit crates.io publication; evaluation remains `publish = false`.
-No package has been uploaded.
+The runtime and derive packages are published; evaluation remains `publish = false`.
+Further publication requires explicit maintainer authorization.
 
 The optional host TypeScript generator now projects the runtime envelope from
 Wire metadata. `make check-typescript` passes 83 Rust/TypeScript vectors in both
