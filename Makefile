@@ -78,23 +78,23 @@ help:
 		'Releases: release-patch, release-minor, release-major, release-resume (Git delivery only)'
 
 build:
-	+@env cargo build --locked -p ic-wire
+	+@env cargo build --locked -p ic-wire -p ic-wire-cdk
 
 check:
-	+@env cargo check --locked -p ic-wire --all-targets
+	+@env cargo check --locked -p ic-wire -p ic-wire-cdk --all-targets
 
 test:
-	+@env cargo test --locked -p ic-wire
+	+@env cargo test --locked -p ic-wire -p ic-wire-cdk
 
 lint:
-	+@env cargo clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings
+	+@env cargo clippy --locked -p ic-wire -p ic-wire-cdk -p ic-wire-derive --all-targets -- -D warnings
 
 check-wasm:
-	+@env cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
+	+@env cargo check --locked -p ic-wire -p ic-wire-cdk --lib --target wasm32-unknown-unknown
 
 check-msrv:
-	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib
-	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
+	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire -p ic-wire-cdk --lib
+	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire -p ic-wire-cdk --lib --target wasm32-unknown-unknown
 
 check-doc-links:
 	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/macro-adoption.md docs/runtime-comparison.md docs/status/current.md

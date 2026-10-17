@@ -24,6 +24,8 @@ paths+=(crates/ic-wire-canister-evaluation/examples/replay_fixture/mod.rs crates
 paths+=(crates/ic-wire/src/float/mod.rs crates/ic-wire/src/schema/mod.rs crates/ic-wire/src/typescript/mod.rs crates/ic-wire/src/typescript/runtime.ts crates/ic-wire/examples/typescript_conformance/mod.rs crates/ic-wire/examples/typescript_conformance/checks.mjs)
 paths+=(crates/ic-wire-derive/src/adapter_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/tests/mod.rs crates/ic-wire-canister-evaluation/examples/macro_fixture/mod.rs)
 paths+=(docs/runtime.md crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/lib.rs crates/ic-wire/src/contract/mod.rs crates/ic-wire/src/bounded/mod.rs crates/ic-wire/src/shape/mod.rs crates/ic-wire/tests/runtime/mod.rs crates/ic-wire-canister-evaluation/src/commands/mod.rs)
+paths+=(crates/ic-wire-cdk/Cargo.toml crates/ic-wire-cdk/src/lib.rs crates/ic-wire-cdk/src/endpoint/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/src/cdk_fixture/mod.rs crates/ic-wire-canister-evaluation/examples/cdk_fixture/mod.rs)
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue
     paths+=("$path")
@@ -63,13 +65,13 @@ for target in build check test lint check-wasm check-msrv evaluate-codecs evalua
     PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" "$target"
 done
 cat > "$fixture/expected-calls" <<EOF
-development|$fixture/repo/target|build --locked -p ic-wire
-development|$fixture/repo/target|check --locked -p ic-wire --all-targets
-development|$fixture/repo/target|test --locked -p ic-wire
-development|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings
-development|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
-1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib
-1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
+development|$fixture/repo/target|build --locked -p ic-wire -p ic-wire-cdk
+development|$fixture/repo/target|check --locked -p ic-wire -p ic-wire-cdk --all-targets
+development|$fixture/repo/target|test --locked -p ic-wire -p ic-wire-cdk
+development|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-cdk -p ic-wire-derive --all-targets -- -D warnings
+development|$fixture/repo/target|check --locked -p ic-wire -p ic-wire-cdk --lib --target wasm32-unknown-unknown
+1.91.0|$fixture/repo/target|check --locked -p ic-wire -p ic-wire-cdk --lib
+1.91.0|$fixture/repo/target|check --locked -p ic-wire -p ic-wire-cdk --lib --target wasm32-unknown-unknown
 development|$fixture/repo/target|run --quiet --locked -p ic-wire --example codec-evaluation
 development|$fixture/repo/target|run --quiet --locked -p ic-wire --example typed-journey
 EOF
