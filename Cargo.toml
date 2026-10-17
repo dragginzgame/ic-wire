@@ -19,7 +19,7 @@ candid = "0.10.38"
 ic-build = "0.13"
 ic-cdk = "0.20.3"
 ic-host-artifacts = { version = "0.25", default-features = false }
-ic-testkit = "0.50"
+ic-testkit = "0.51"
 ic-wire = { path = "crates/ic-wire", version = "0.3.2" }
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.3.2" }
 ic0 = "1.2.0"

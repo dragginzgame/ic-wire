@@ -101,6 +101,10 @@ impl<const N: usize> Bytes<N> {
     pub fn as_slice(&self) -> &[u8] {
         &self.0
     }
+    /// Recover the admitted bytes without copying or allocating.
+    pub fn into_vec(self) -> Vec<u8> {
+        self.0
+    }
 }
 impl<const N: usize> Serialize for Bytes<N> {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
@@ -154,6 +158,10 @@ impl<const N: usize> Text<N> {
     /// Borrow the text.
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+    /// Recover the admitted text without copying or allocating.
+    pub fn into_string(self) -> String {
+        self.0
     }
 }
 impl<const N: usize> Serialize for Text<N> {

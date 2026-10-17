@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.3]
+
+- Add `Bytes::into_vec` and `Text::into_string` so consumers can recover owned
+  buffers without copying or allocating. Wire bytes and admission limits are unchanged.
+
 ## [0.3.2] - 2026-10-17
 
 Pending PR integration; these changes are not yet on main.

@@ -1,10 +1,16 @@
 # Current handoff
 
-Updated 2026-10-17. Main is released at 0.3.1 (6fe0ef4); first crates.io
+Updated 2026-10-17. Main is released at 0.3.2 (5b1ddc6); first crates.io
 publication was 0.3.0 for ic-wire-derive and ic-wire. Evaluation remains unpublished.
-The 0.3.2 changelog draft describes the open TypeScript and CDK companion PRs,
-explicitly pending integration. Their code is not yet on main; see the
-[pending notes](../../CHANGELOG.md#032) for both PR links.
+The 0.3.2 notes describe open TypeScript and CDK companion PRs, explicitly pending
+integration. Their code is not yet on main; both updated PR heads passed Linux,
+macOS ARM and macOS Intel CI. See [the notes](../../CHANGELOG.md#032) for PR links.
+
+Pending 0.3.3 adds ownership recovery for Bytes and Text without copying or
+allocating, matching List's existing ownership API. Wire bytes, admission limits
+and package versions are unchanged.
+Focused runtime tests verify buffer identity on recovery; library Clippy and
+the Rust 1.91 Wasm check pass. The log is `target/033-ownership.log`.
 
 ## Publication and parser follow-up
 

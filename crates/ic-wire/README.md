@@ -68,6 +68,9 @@ compose. Result uses Postcard's fixed tags 0=Ok, 1=Err; Option uses 0=None, 1=So
 
 Principal values cross as `Bytes<29>`; adapters convert/validate with their existing
 principal type. IC Wire adds no principal identity type or Candid dependency.
+Owned values can leave their bounded wrappers through `Bytes::into_vec`,
+`Text::into_string` and `List::into_vec` without copying or allocating. Consumers
+then own the recovered buffers; constructing another wrapper checks its bound again.
 A field of `Bytes<29>` alone establishes a byte bound, not caller authentication.
 Keep the dependency name `ic-wire` so generated paths resolve. Consumers do not
 need to depend directly on Serde or derive its traits for these records.
