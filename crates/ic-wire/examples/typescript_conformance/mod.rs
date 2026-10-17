@@ -1,5 +1,4 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
-mod consumer;
 use ic_wire::{Bytes, Limits, List, Method, Text, Wire, encode_request, encode_response};
 use std::{fmt::Write, fs, marker::PhantomData, path::PathBuf};
 
@@ -169,7 +168,6 @@ fn main() {
         count: 0,
         mutations: 0,
     };
-    consumer::check(&mut f);
     f.add((), "null");
     f.add(false, "false");
     f.add(true, "true");

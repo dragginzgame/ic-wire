@@ -788,12 +788,11 @@ dependencies = [
 
 [[package]]
 name = "ic-build"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f3e88f4805bc349ae0aa50973d016b79599dbbe273ec5a062196f96d4c2baca"
+version = "0.14.0"
+source = "git+https://github.com/dragginzgame/ic-build?rev=385bfb84128182624b0b888a8bd8415471949897#385bfb84128182624b0b888a8bd8415471949897"
 dependencies = [
  "cargo_metadata",
- "ic-host-artifacts",
+ "ic-host-artifacts 0.25.1",
  "ic-host-fs",
  "ic-host-process",
  "libc",
@@ -880,12 +879,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-host-artifacts"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c4c6f68dc69e6755bcb43f88aa2778dc8598e12cc3261314bbf49e006e7b79ce"
+dependencies = [
+ "leb128",
+ "sha2",
+ "wasmparser",
+]
+
+[[package]]
 name = "ic-host-fs"
 version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "83baf7fd8d3aefbdd364d1ed52ea302f64eb421e58041e13876078c82a8ccb7e"
 dependencies = [
- "ic-host-artifacts",
+ "ic-host-artifacts 0.25.1",
  "rustix",
 ]
 
@@ -896,7 +906,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fed8de8998dea5db718fe45db29a4cf1ad1b4159e362503a3d0617518f564ca"
 dependencies = [
  "command-fds",
- "ic-host-artifacts",
+ "ic-host-artifacts 0.25.1",
  "ic-host-fs",
  "libc",
  "rustix",
@@ -927,7 +937,7 @@ checksum = "6126b4d409a45692b71b2e336194ecf53b0a1095ba19fb072cc01403f00616ab"
 dependencies = [
  "candid",
  "ic-cdk",
- "ic-host-artifacts",
+ "ic-host-artifacts 0.25.1",
  "ic-host-fs",
  "ic-host-process",
  "ic-metrics",
@@ -985,7 +995,7 @@ dependencies = [
  "candid",
  "ic-build",
  "ic-cdk",
- "ic-host-artifacts",
+ "ic-host-artifacts 0.26.1",
  "ic-testkit",
  "ic-wire",
  "ic-wire-derive",

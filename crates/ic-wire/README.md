@@ -151,6 +151,16 @@ Encoding is deterministic for the supplied types, not a general signature policy
 
 ## Canic adapter work
 
+Keep application services callable with consumer-owned values; endpoint adapters
+own wire decoding, conversion and reply encoding. A future Candid endpoint could
+use separate DTOs and conversions to call the same services. `Wire` derives emit
+Serde implementations for IC Wire's explicit layout, and bounded wrappers express
+its contract; they are not a promise of another protocol's representation.
+Method IDs and retained canonical bytes also remain specific to IC Wire. A future
+adapter must preserve domain checks and commit semantics and qualify its own
+types, clients and hash/retry behavior. No Candid mode or codec-selection API is
+needed in this runtime to keep that extension possible.
+
 The installed fixture's shared contracts and browser module demonstrate these exact
 calls. A separate [local macro proof](https://github.com/dragginzgame/ic-wire/blob/main/docs/macro-adoption.md) tests actual evaluation-only
 query/update attributes; neither changes Canic macros.
@@ -309,7 +319,7 @@ Use `encoded_request_len::<M>(&request)` or
 output buffer. These helpers retain whole-schema admission and require
 deterministic serializers. A separate size check adds a serialization pass;
 ordinary encoding stays single-pass. See [consumer qualification and the offline
-packet viewer](https://github.com/dragginzgame/ic-wire/blob/main/docs/consumer-fixtures.md) for bounded conversions and diagnostics.
+packet viewer](https://github.com/dragginzgame/ic-wire/blob/main/docs/consumer-fixtures.md) for qualification ownership and diagnostics.
 
 ## Package and license
 

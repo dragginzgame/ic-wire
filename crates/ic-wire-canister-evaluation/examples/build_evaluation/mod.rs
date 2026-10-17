@@ -1,7 +1,9 @@
 //! Build and retain the exact benchmark artifacts through their measurement.
-use ic_build::artifacts::{WasmBuildSpec, build_wasm_canisters_cached, resolve_cargo_build_inputs};
+use ic_build::{
+    artifacts::{WasmBuildEvidence, WasmBuildSpec},
+    cargo::selection::{CargoFeatureSelection, CargoSelection},
+};
 use serde_json::json;
-use sha2::{Digest, Sha256};
 use std::{env, fs, path::PathBuf, process::Command};
 
 fn main() {
@@ -43,31 +45,27 @@ fn main() {
             &root.join("target/evaluation-builds").join(name),
             &["ic-wire-canister-evaluation"],
         )
-        .with_cargo_profile_args([
-            "--locked",
-            "--profile",
-            "canister-evaluation",
-            "--features",
-            features,
-        ])
+        .with_cargo_selection(CargoSelection {
+            profile: Some("canister-evaluation".into()),
+            features: CargoFeatureSelection {
+                features: features.split(',').map(str::to_owned).collect(),
+                ..CargoFeatureSelection::default()
+            },
+            locked: true,
+            ..CargoSelection::default()
+        })
         .with_inherited_env(["RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"]);
-        let inputs = resolve_cargo_build_inputs(&spec).unwrap();
-        let build = build_wasm_canisters_cached(&spec).unwrap();
-        assert!(
-            inputs.is_current(&spec).unwrap(),
-            "source changed during build"
+        let build = WasmBuildEvidence::acquire(spec).unwrap();
+        // Consumer-selected export cap; IC Build owns capture and provenance.
+        let mut receipt = json!(
+            build
+                .export_artifact(0, &output.join(format!("{name}.wasm")), 64 * 1024 * 1024,)
+                .unwrap()
         );
-        assert_eq!(build.record().input_digest(), inputs.input_digest());
-        let bytes = fs::read(&build.record().artifacts()[0]).unwrap();
-        let sha = format!("{:x}", Sha256::digest(&bytes));
-        fs::write(output.join(format!("{name}.wasm")), bytes).unwrap();
-        receipts.push(
-            json!({"name": name, "features": features, "wasm_sha256": sha,
-                "build_fingerprint": build.record().fingerprint().to_hex(),
-                "input_digest": inputs.input_digest().to_hex(),
-                "validation_digest": inputs.validation_digest().to_hex()}),
-        );
-        retained.push((spec, inputs, build));
+        receipt["name"] = json!(name);
+        receipt["features"] = json!(features);
+        receipts.push(receipt);
+        retained.push(build);
     }
     fs::write(
         output.join("build-records.json"),
@@ -137,11 +135,10 @@ fn main() {
             );
         }
     }
-    for (spec, inputs, _build) in &retained {
-        assert!(
-            inputs.is_current(spec).unwrap(),
-            "source changed during measurement"
-        );
+    for build in &retained {
+        build
+            .verify_current()
+            .expect("source changed during measurement");
     }
     if trial != "browser" {
         fs::rename(

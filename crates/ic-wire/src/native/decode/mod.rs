@@ -44,6 +44,30 @@ impl<'de, T: DeserializeSeed<'de>> DeserializeSeed<'de> for Seed<'_, T> {
     }
 }
 
+// Preserve the exact scalar admission and visitor-depth rule in one expansion.
+macro_rules! admit_scalar {
+    ($($method:ident),* $(,)?) => {$(
+        fn $method<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
+            if !self.budget.enter(self.depth, size_of::<V::Value>()) {
+                return Err(de::Error::custom("payload resource allowance exceeded"));
+            }
+            self.inner.$method(CheckedVisitor {
+                inner: visitor,
+                budget: self.budget,
+                depth: self.depth + 1,
+            })
+        }
+    )*};
+}
+
+macro_rules! visit_scalar {
+    ($($method:ident: $ty:ty),* $(,)?) => {$(
+        fn $method<E: de::Error>(self, value: $ty) -> Result<Self::Value, E> {
+            self.inner.$method(value)
+        }
+    )*};
+}
+
 impl<'de, D: Deserializer<'de>> Deserializer<'de> for Bounded<'_, D> {
     type Error = D::Error;
     fn deserialize_any<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
@@ -56,145 +80,21 @@ impl<'de, D: Deserializer<'de>> Deserializer<'de> for Bounded<'_, D> {
             depth: self.depth + 1,
         })
     }
-    fn deserialize_bool<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_bool(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_i8<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_i8(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_i16<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_i16(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_i32<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_i32(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_i64<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_i64(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_i128<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_i128(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_u8<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_u8(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_u16<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_u16(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_u32<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_u32(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_u64<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_u64(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_u128<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_u128(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_f32<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_f32(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_f64<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_f64(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
-    }
-    fn deserialize_char<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        if !self.budget.enter(self.depth, size_of::<V::Value>()) {
-            return Err(de::Error::custom("payload resource allowance exceeded"));
-        }
-        self.inner.deserialize_char(CheckedVisitor {
-            inner: visitor,
-            budget: self.budget,
-            depth: self.depth + 1,
-        })
+    admit_scalar! {
+        deserialize_bool,
+        deserialize_i8,
+        deserialize_i16,
+        deserialize_i32,
+        deserialize_i64,
+        deserialize_i128,
+        deserialize_u8,
+        deserialize_u16,
+        deserialize_u32,
+        deserialize_u64,
+        deserialize_u128,
+        deserialize_f32,
+        deserialize_f64,
+        deserialize_char,
     }
     fn deserialize_str<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
         if !self.budget.enter(self.depth, size_of::<V::Value>()) {
@@ -414,47 +314,21 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.expecting(f)
     }
-    fn visit_bool<E: de::Error>(self, value: bool) -> Result<Self::Value, E> {
-        self.inner.visit_bool(value)
-    }
-    fn visit_i8<E: de::Error>(self, value: i8) -> Result<Self::Value, E> {
-        self.inner.visit_i8(value)
-    }
-    fn visit_i16<E: de::Error>(self, value: i16) -> Result<Self::Value, E> {
-        self.inner.visit_i16(value)
-    }
-    fn visit_i32<E: de::Error>(self, value: i32) -> Result<Self::Value, E> {
-        self.inner.visit_i32(value)
-    }
-    fn visit_i64<E: de::Error>(self, value: i64) -> Result<Self::Value, E> {
-        self.inner.visit_i64(value)
-    }
-    fn visit_i128<E: de::Error>(self, value: i128) -> Result<Self::Value, E> {
-        self.inner.visit_i128(value)
-    }
-    fn visit_u8<E: de::Error>(self, value: u8) -> Result<Self::Value, E> {
-        self.inner.visit_u8(value)
-    }
-    fn visit_u16<E: de::Error>(self, value: u16) -> Result<Self::Value, E> {
-        self.inner.visit_u16(value)
-    }
-    fn visit_u32<E: de::Error>(self, value: u32) -> Result<Self::Value, E> {
-        self.inner.visit_u32(value)
-    }
-    fn visit_u64<E: de::Error>(self, value: u64) -> Result<Self::Value, E> {
-        self.inner.visit_u64(value)
-    }
-    fn visit_u128<E: de::Error>(self, value: u128) -> Result<Self::Value, E> {
-        self.inner.visit_u128(value)
-    }
-    fn visit_f32<E: de::Error>(self, value: f32) -> Result<Self::Value, E> {
-        self.inner.visit_f32(value)
-    }
-    fn visit_f64<E: de::Error>(self, value: f64) -> Result<Self::Value, E> {
-        self.inner.visit_f64(value)
-    }
-    fn visit_char<E: de::Error>(self, value: char) -> Result<Self::Value, E> {
-        self.inner.visit_char(value)
+    visit_scalar! {
+        visit_bool: bool,
+        visit_i8: i8,
+        visit_i16: i16,
+        visit_i32: i32,
+        visit_i64: i64,
+        visit_i128: i128,
+        visit_u8: u8,
+        visit_u16: u16,
+        visit_u32: u32,
+        visit_u64: u64,
+        visit_u128: u128,
+        visit_f32: f32,
+        visit_f64: f64,
+        visit_char: char,
     }
     fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
         if !self.budget.bytes(value.len()) {

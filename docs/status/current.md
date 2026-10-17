@@ -1,6 +1,30 @@
 # Current handoff
 
-## Pending 0.3.4 native adoption
+The maintainer clarified that Candid is a possible future consumer adapter, not
+current implementation work. Design/runtime guidance now keeps protocol DTOs,
+identities and bytes at endpoint boundaries, with reusable consumer-owned business
+logic. No codec selector, Candid dependency or public API change was added.
+
+## Pending 0.3.5 ownership cuts
+
+The IcyDB-specific replica module is removed; actual SQL vectors/conversion policy
+remain with IcyDB's wire-bindings/browser tests and issue #372. Generic native and
+finite coverage remains: 84 vectors and 16,384 differential mutations pass.
+Scalar forwarding macros preserve the original admission/depth operations; all
+16 native/finite tests, strict Clippy and Rust 1.91 native/Wasm checks pass.
+
+The evaluation driver uses IC Build's retained evidence owner at immutable
+385bfb84128182624b0b888a8bd8415471949897, prepared in an isolated upstream PR
+as [IC Build PR #59](https://github.com/dragginzgame/ic-build/pull/59). The selected revision
+is not a registry release. IC Wire retains recipes, a 64 MiB Wasm export cap,
+source custody and post-measurement acceptance. Incoming Host 0.26 dependency
+edits are preserved. Main Git staging, own versions and releases remain untouched.
+All three installed trials pass through the shared owner: macro rejection/rollback,
+runtime comparisons and Chromium finite/native queries. Formatting, links, pins
+and the disposable Make fixture pass. Logs: `target/cuts-*.log`. Upstream native
+Linux/macOS checks are running; lint/security passed. No full local CI was run.
+
+## Released 0.3.4 native adoption
 
 The follow-up audit fixed skipped TypeScript checks on named references and
 frame-sized scratch allocation for short strings. Alias-chain checks now apply
@@ -12,19 +36,31 @@ All 88 conformance vectors and 17,664 mutations pass, as do three native and
 keys as noncanonical. Logs: `target/audit-typescript.log`, `target/audit-rust.log`.
 This audit did not repeat installed-browser or native macOS qualification.
 
-Working on released main 0.3.3 (94bac2e), with package versions unchanged.
+Main is released at 0.3.4 (164088d); both runtime and derive packages are published.
 The native Serde module provides payload/frame encoding, sizing and canonical
 decoding under caller-supplied budgets. Shared frame/output/comparison owners
 preserve the finite Wire API. IcyDB traversal code was adapted with its MIT notice;
-sibling working files remain untouched. PR #1’s native TypeScript source is included
-locally with strict indexed-access fixes; the PR itself is still open.
+sibling working files were untouched by that producer batch. PR #1’s native
+TypeScript source is included with strict indexed-access fixes; the PR is closed
+as superseded by main.
 
 Adoption remains coordinated through [IC Wire #5](https://github.com/dragginzgame/ic-wire/issues/5)
-and [IcyDB #372](https://github.com/dragginzgame/icydb/issues/372). IcyDB must replace
-its wrapper/prefix writer only after publication and its own endpoint/browser
-qualification; schema reflection, scalar rules and precommit checks stay there.
-Canic retains transport/auth/lifecycle. No sibling code, versions or publication
-are changed by this batch. Earlier sections below retain prior batch evidence.
+and [IcyDB #372](https://github.com/dragginzgame/icydb/issues/372). IcyDB reports a
+local registry-based hard cut with byte parity across twelve endpoint families;
+installed replay qualification remains pending. Its report is consumer evidence,
+not an IC Wire claim of delivered IcyDB adoption. Schema reflection, scalar rules
+and precommit checks stay there; Canic retains transport/auth/lifecycle.
+
+Auth closed issues #3 and #4 after qualifying the published TypeScript and owned
+extraction APIs. The remaining producer acceptance gate for #5 is the complete
+[0.3.4 CI matrix](https://github.com/dragginzgame/ic-wire/actions/runs/39031765826);
+Linux and macOS ARM passed at this inspection, with macOS Intel still running.
+
+[CDK PR #2](https://github.com/dragginzgame/ic-wire/pull/2) is refreshed against
+0.3.4 at 617d7e5 and remains open. Focused tests, Clippy, Rust 1.91 host/Wasm,
+tooling and installed authorization/rollback checks pass. Its new hosted matrix
+is running; the companion remains unpublished. Production code and release effects
+are unchanged by this issue/PR maintenance pass.
 
 Qualification passes: three native admission tests (including deterministic frame
 mutations), 13 finite runtime tests, source-matched SQL Count/Grouped oracles,
@@ -37,14 +73,16 @@ Logs are under `target/native-*`, with the passing installed retry recorded in
 qualification were not run. The initial installed attempt exposed a vector-file
 read typo in the test runner; it was corrected before the passing run.
 
-Updated 2026-10-17. Main is released at 0.3.2 (5b1ddc6); first crates.io
-publication was 0.3.0 for ic-wire-derive and ic-wire. Evaluation remains unpublished.
+## Earlier release evidence
+
+At the earlier 0.3.2 checkpoint (5b1ddc6), the first crates.io publication was
+0.3.0 for ic-wire-derive and ic-wire. Evaluation remains unpublished.
 The 0.3.2 notes describe open TypeScript and CDK companion PRs, explicitly pending
-integration. Their code is not yet on main; both updated PR heads passed Linux,
+integration. Their code was not yet on main; both updated PR heads passed Linux,
 macOS ARM and macOS Intel CI. See [the notes](../../CHANGELOG.md#032) for PR links.
 
-Pending 0.3.3 adds ownership recovery for Bytes and Text without copying or
-allocating, matching List's existing ownership API. Wire bytes, admission limits
+The subsequently delivered 0.3.3 adds ownership recovery for Bytes and Text without
+copying or allocating, matching List's existing ownership API. Wire bytes, admission limits
 and package versions are unchanged.
 Focused runtime tests verify buffer identity on recovery; library Clippy and
 the Rust 1.91 Wasm check pass. The log is `target/033-ownership.log`.

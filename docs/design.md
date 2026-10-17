@@ -30,6 +30,16 @@ evaluate the existing standalone principal representation without importing Cand
 
 ## Initial protocol requirements and current resolution
 
+The current runtime selects Postcard only. Future consumer support for another
+protocol belongs in an endpoint adapter that converts its own request/reply DTOs
+and invokes the same application services. Business rules, authorization and
+commit policy remain consumer-owned across those adapters. IC Wire method IDs,
+canonical bytes and retry buffers describe this protocol, not a universal service
+identity or a format-independent hash. Preserve those boundaries without adding
+a codec selector, fallback decoding or speculative alternate-protocol traits.
+This leaves room for future Candid endpoints without promising schema or byte
+compatibility; their DTO mappings and client bindings would need qualification.
+
 - Define integer widths, signed encoding, lengths, endianness, booleans, strings,
   principal bytes, options, arrays, sequences, records and enums exactly.
 - Select explicit stable identities or a documented positional schema discipline;

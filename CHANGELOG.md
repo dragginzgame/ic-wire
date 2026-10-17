@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.5]
+
+- Retire copied IcyDB SQL contract projections; actual endpoint and conversion
+  qualification stays in [IcyDB #372](https://github.com/dragginzgame/icydb/issues/372).
+  Retain generic codec and cross-language conformance coverage.
+- Consolidate native scalar forwarding while preserving admission accounting,
+  allocation-sensitive handlers and canonical wire bytes.
+- Use IC Build's retained evidence export for evaluation artifacts, replacing
+  local copy/hash/provenance plumbing. Select an immutable upstream revision
+  pending [IC Build #58](https://github.com/dragginzgame/ic-build/issues/58)
+  delivery; evaluations retain recipe, source custody and measurement ownership.
+
 ## [0.3.4] - 2026-10-17
 
 - Add bounded native Serde payload/frame APIs with borrowed encoding, exact sizing
