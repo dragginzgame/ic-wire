@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.3]
+## [0.3.3] - 2026-10-17
 
 - Simplify the browser evaluation to one canister and generated-codec transport
   checks. Remove fixture receipt caching, expiry/audience policy and peer retries;
