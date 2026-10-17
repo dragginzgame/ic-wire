@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.1]
+## [0.3.1] - 2026-10-17
 
 - Upgrade the derive parser to Syn 3 while retaining the Rust 1.91 floor and
   existing wire format. Preserve safe-handler admission in the macro fixture.
