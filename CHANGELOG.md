@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.3]
+
+- Share the TypeScript codec with native Serde consumers through concrete recursive metadata, tuples, transparent newtypes, explicit traversal limits and caller-owned scalar validation. Finite generated contracts use the same encoder, decoder and envelope. Rust derives still require finite metadata.
+
 ## [0.2.2] - 2026-10-16
 
 - Reduce codec instruction costs by writing only emitted bytes and checking

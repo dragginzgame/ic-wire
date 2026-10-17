@@ -298,3 +298,26 @@ impl Method for Read {
 }
 let _ = ic_wire::encode_request::<Read>(&true);
 ```
+
+## Concrete native TypeScript metadata
+
+`typescript::RUNTIME` also accepts consumer-generated concrete Serde metadata in
+`createCodec(method, types, checks)`. The same codec supports named `ref` nodes,
+`tuple` items and transparent `newtype` wrappers. Method metadata must explicitly
+supply per-direction byte, node and depth allowances. Dynamic text/bytes/list
+sizes remain bounded by the enclosing byte/traversal allowance; optional schema
+`max` and byte `min` or integer `min`/`max` tighten that contract. Lengths are
+admitted before copying, allocating lists or descending. Alias cycles/missing
+names refuse; recursive values spend concrete nodes and depth.
+
+A concrete node may name a `check` in the caller's trusted validation map. The
+callback runs before encode and after decode. Consumers own scalar semantics,
+method IDs, metadata extraction, TypeScript types, SDK transport and all auth.
+Metadata and validators are trusted code, not an untrusted schema input format.
+No static Rust resource maximum or JavaScript heap bound is inferred from them.
+The finite Rust generator still refuses `Schema::Opaque`; native Rust decoding
+and its allocation limits remain the consumer's responsibility.
+
+The focused conformance fixture compares a native recursive Serde tree, tuples
+and a newtype against Rust Postcard bytes, and checks traversal refusal, missing
+aliases, alias cycles and scalar validation alongside finite generated vectors.

@@ -57,3 +57,37 @@ for (const bits of [32,64]) {
 }
 for (const value of [0.1, Number.MAX_VALUE, Number.MIN_VALUE]) rejects(() => probe({k:'float',bits:32}).encodeRequest(value), 'value');
 console.log('Finite-float canonical bits and rejection checks passed');
+
+// Native Serde consumers supply concrete recursive metadata and explicit traversal
+// allowances. They share the finite codec's primitives and envelope.
+const nativeTypes = {
+  Node: { k:'enum', variants:[
+    {name:'Leaf',id:0,value:{k:'tuple',items:[{k:'text'},{k:'newtype',item:{k:'u',bits:64}}]}},
+    {name:'Branch',id:1,value:{k:'list',item:{k:'ref',name:'Node'}}},
+  ]},
+};
+const nativeMeta = {id:'1',request:{k:'ref',name:'Node'},response:{k:'ref',name:'Node'},requestBytes:128,responseBytes:128,requestNodes:32,responseNodes:32,requestDepth:8,responseDepth:8};
+const native = createCodec(nativeMeta,nativeTypes);
+const tree = {tag:'Branch',value:[{tag:'Leaf',value:['é',128n]}]};
+const treeBytes = frame(...nativePayload);
+assert.deepEqual(native.encodeRequest(tree),treeBytes);
+assert.deepEqual(normalize(native.decodeRequest(treeBytes)),tree);
+assert.deepEqual(native.encodeRequest(native.decodeRequest(treeBytes)),treeBytes);
+for (let end=0;end<treeBytes.length;end++) assert.throws(()=>native.decodeRequest(treeBytes.slice(0,end)),WireError);
+rejects(()=>createCodec({...nativeMeta,requestNodes:undefined},nativeTypes),'value');
+rejects(()=>createCodec({...nativeMeta,requestNodes:2},nativeTypes).decodeRequest(treeBytes),'limit');
+rejects(()=>createCodec({...nativeMeta,requestDepth:2},nativeTypes).decodeRequest(treeBytes),'limit');
+rejects(()=>native.decodeRequest(frame(1,255,255,255,255,15)),'limit');
+rejects(()=>native.encodeRequest({tag:'Leaf',value:['é']}),'value');
+for (const types of [{Node:{k:'ref',name:'Node'}},{Node:{k:'ref',name:'Missing'}}]) {
+  rejects(()=>createCodec(nativeMeta,types).encodeRequest(tree),'value');
+  rejects(()=>createCodec(nativeMeta,types).decodeRequest(treeBytes),'value');
+}
+const checked = {...nativeMeta,request:{k:'text',check:'consumer'},response:{k:'text',check:'consumer'}};
+const checks = {consumer(value) { if(value !== 'ok') throw new WireError('value'); }};
+const scalar = createCodec(checked,{},checks);
+assert.equal(scalar.decodeRequest(scalar.encodeRequest('ok')),'ok');
+rejects(()=>scalar.encodeRequest('bad'),'value');
+rejects(()=>scalar.decodeRequest(frame(3,98,97,100)),'value');
+rejects(()=>createCodec(checked).encodeRequest('ok'),'value');
+console.log('Recursive native metadata, tuples, aliases, scalar validation and explicit traversal refusal passed');

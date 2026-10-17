@@ -114,3 +114,10 @@ package publication. The disposable patch-release test now owns its synthetic
 changelog, so minor-release notes do not block its recovery scenarios. Hosted macOS qualification of the earlier temporary-path
 fix remains unverified here. No broad local CI or sibling suite is required or run
 for this batch; focused runtime/adapter results are recorded in the adoption proof.
+
+Native browser sharing now extends the existing TypeScript codec with concrete
+recursive metadata and explicit traversal allowances. Consumer metadata/scalar
+rules stay local; Rust finite derives and Opaque refusal are unchanged. The
+focused fixture passes 83 finite Rust vectors plus a native recursive Rust oracle
+and malformed/limit/scalar controls. Native macOS and installed consumer adoption
+remain separately qualified; no Wasm/cycle/instruction delta is claimed.
