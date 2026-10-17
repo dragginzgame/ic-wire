@@ -58,6 +58,68 @@ for (const bits of [32,64]) {
 for (const value of [0.1, Number.MAX_VALUE, Number.MIN_VALUE]) rejects(() => probe({k:'float',bits:32}).encodeRequest(value), 'value');
 console.log('Finite-float canonical bits and rejection checks passed');
 
+// Native Serde consumers supply concrete recursive metadata and explicit traversal
+// allowances. They share the finite codec's primitives and envelope.
+const nativeTypes = {
+  Node: { k:'enum', variants:[
+    {name:'Leaf',id:0,value:{k:'tuple',items:[{k:'text'},{k:'newtype',item:{k:'u',bits:64}}]}},
+    {name:'Branch',id:1,value:{k:'list',item:{k:'ref',name:'Node'}}},
+  ]},
+};
+const nativeMeta = {id:'1',request:{k:'ref',name:'Node'},response:{k:'ref',name:'Node'},requestBytes:128,responseBytes:128,requestNodes:32,responseNodes:32,requestDepth:8,responseDepth:8};
+const native = createCodec(nativeMeta,nativeTypes);
+const tree = {tag:'Branch',value:[{tag:'Leaf',value:['é',128n]}]};
+const treeBytes = frame(...nativePayload);
+assert.deepEqual(native.encodeRequest(tree),treeBytes);
+assert.deepEqual(normalize(native.decodeRequest(treeBytes)),tree);
+assert.deepEqual(native.encodeRequest(native.decodeRequest(treeBytes)),treeBytes);
+for (let end=0;end<treeBytes.length;end++) assert.throws(()=>native.decodeRequest(treeBytes.slice(0,end)),WireError);
+rejects(()=>createCodec({...nativeMeta,requestNodes:undefined},nativeTypes),'value');
+rejects(()=>createCodec({...nativeMeta,requestNodes:2},nativeTypes).decodeRequest(treeBytes),'limit');
+rejects(()=>createCodec({...nativeMeta,requestDepth:2},nativeTypes).decodeRequest(treeBytes),'limit');
+rejects(()=>native.decodeRequest(frame(1,255,255,255,255,15)),'limit');
+rejects(()=>native.encodeRequest({tag:'Leaf',value:['é']}),'value');
+for (const types of [{Node:{k:'ref',name:'Node'}},{Node:{k:'ref',name:'Missing'}}]) {
+  rejects(()=>createCodec(nativeMeta,types).encodeRequest(tree),'value');
+  rejects(()=>createCodec(nativeMeta,types).decodeRequest(treeBytes),'value');
+}
+const checked = {...nativeMeta,request:{k:'text',check:'consumer'},response:{k:'text',check:'consumer'}};
+const checks = {consumer(value) { if(value !== 'ok') throw new WireError('value'); }};
+const scalar = createCodec(checked,{},checks);
+assert.equal(scalar.decodeRequest(scalar.encodeRequest('ok')),'ok');
+rejects(()=>scalar.encodeRequest('bad'),'value');
+rejects(()=>scalar.decodeRequest(frame(3,98,97,100)),'value');
+rejects(()=>createCodec(checked).encodeRequest('ok'),'value');
+// Reference-level checks must survive every alias, including missing validators.
+for (const location of ['request', 'alias', 'concrete']) {
+  const request = {k:'ref',name:'Alias'};
+  const types = {Alias:{k:'ref',name:'Text'},Text:{k:'text'}};
+  (location === 'request' ? request : location === 'alias' ? types.Alias : types.Text).check = 'consumer';
+  const codec = createCodec({...nativeMeta,request},types,checks);
+  assert.equal(codec.decodeRequest(codec.encodeRequest('ok')),'ok');
+  rejects(()=>codec.encodeRequest('bad'),'value');
+  rejects(()=>codec.decodeRequest(frame(3,98,97,100)),'value');
+  rejects(()=>createCodec({...nativeMeta,request},types).encodeRequest('ok'),'value');
+  rejects(()=>createCodec({...nativeMeta,request},types).decodeRequest(frame(2,111,107)),'value');
+}
+// Short strings must not allocate a frame-sized UTF-8 scratch buffer per item.
+const encodeInto = TextEncoder.prototype.encodeInto;
+try {
+  TextEncoder.prototype.encodeInto = function(text, buffer) {
+    assert.ok(buffer.length <= text.length * 3);
+    return encodeInto.call(this,text,buffer);
+  };
+  const codec = probe({k:'list',item:{k:'text'}});
+  const strings = ['', 'a', 'é', '🦀', '\ufeff'];
+  assert.deepEqual(codec.decodeRequest(codec.encodeRequest(strings)),strings);
+} finally {
+  TextEncoder.prototype.encodeInto = encodeInto;
+}
+console.log('Recursive native metadata, tuples, aliases, scalar validation and explicit traversal refusal passed');
+
+for (const schema of [{k:'list',item:{k:'unit'}}, {k:'array',max:1,item:{k:'unit'}}, {k:'tuple',items:[{k:'unit'}]}]) {
+  rejects(() => createCodec({...nativeMeta,request:schema},{}).encodeRequest(new Array(1)), 'value');
+}
 function mutation(codec, direction, bytes, accepted) {
   const input = Uint8Array.from(bytes);
   const decode = direction === 0 ? codec.decodeRequest : codec.decodeResponse;

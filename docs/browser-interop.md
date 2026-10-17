@@ -40,6 +40,11 @@ enables TypeScript generation. The host emits `apply.ts`, `inspect.ts`,
 bundle in Chromium and retains `examples/browser/artifacts/report.json` with
 source/artifact hashes, compiler, SDK, browser and emulator identities.
 
+A native recursive echo query additionally compares browser metadata with an
+independent Rust Serde tree, wide integers and canonical frame bytes. Its host
+probe rejects excessive recursive depth. This tests the generic native API, not
+IcyDB endpoint contracts.
+
 ## Maintained checks
 
 - Nested queries preserve Unicode text, bounded lists and optional u64 values.

@@ -1,5 +1,42 @@
 # Current handoff
 
+## Pending 0.3.4 native adoption
+
+The follow-up audit fixed skipped TypeScript checks on named references and
+frame-sized scratch allocation for short strings. Alias-chain checks now apply
+in both directions, including missing-validator refusal. Concrete nodes skip
+registry enumeration. The new alias regression failed before repair; text scratch
+coverage checks its size against the input, including empty and Unicode strings.
+All 88 conformance vectors and 17,664 mutations pass, as do three native and
+13 finite Rust tests. Native map probes additionally reject duplicate/out-of-order
+keys as noncanonical. Logs: `target/audit-typescript.log`, `target/audit-rust.log`.
+This audit did not repeat installed-browser or native macOS qualification.
+
+Working on released main 0.3.3 (94bac2e), with package versions unchanged.
+The native Serde module provides payload/frame encoding, sizing and canonical
+decoding under caller-supplied budgets. Shared frame/output/comparison owners
+preserve the finite Wire API. IcyDB traversal code was adapted with its MIT notice;
+sibling working files remain untouched. PR #1’s native TypeScript source is included
+locally with strict indexed-access fixes; the PR itself is still open.
+
+Adoption remains coordinated through [IC Wire #5](https://github.com/dragginzgame/ic-wire/issues/5)
+and [IcyDB #372](https://github.com/dragginzgame/icydb/issues/372). IcyDB must replace
+its wrapper/prefix writer only after publication and its own endpoint/browser
+qualification; schema reflection, scalar rules and precommit checks stay there.
+Canic retains transport/auth/lifecycle. No sibling code, versions or publication
+are changed by this batch. Earlier sections below retain prior batch evidence.
+
+Qualification passes: three native admission tests (including deterministic frame
+mutations), 13 finite runtime tests, source-matched SQL Count/Grouped oracles,
+88 Rust/TypeScript vectors and 17,664 differential mutations under strict indexed
+access. Rustdoc, Clippy, Rust 1.91 native/Wasm checks and the installed Chromium
+recursive query pass. The installed probe also rejects excessive recursive depth.
+Packaging includes the native adapter and its MIT notice; no upload occurred.
+Logs are under `target/native-*`, with the passing installed retry recorded in
+`target/native-installed-retry.log`. Full CI/native macOS and actual IcyDB endpoint
+qualification were not run. The initial installed attempt exposed a vector-file
+read typo in the test runner; it was corrected before the passing run.
+
 Updated 2026-10-17. Main is released at 0.3.2 (5b1ddc6); first crates.io
 publication was 0.3.0 for ic-wire-derive and ic-wire. Evaluation remains unpublished.
 The 0.3.2 notes describe open TypeScript and CDK companion PRs, explicitly pending

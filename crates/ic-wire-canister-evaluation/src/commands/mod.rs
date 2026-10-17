@@ -84,3 +84,21 @@ impl Method for Inspect {
     };
     const RESPONSE_LIMITS: Limits = Self::REQUEST_LIMITS;
 }
+
+/// Native recursive Serde fixture; no finite Wire implementation is inferred.
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+pub enum NativeTree {
+    /// Native text and wide integer tuple.
+    Leaf(String, u128),
+    /// Native dynamic recursive sequence.
+    Branch(Vec<Self>),
+}
+/// Consumer-owned identity of the disposable native echo query.
+pub const NATIVE_ID: u64 = 0x4943574e4154;
+/// Explicit allowances for the native echo fixture, including its frame.
+pub const NATIVE_LIMITS: Limits = Limits {
+    bytes: 4096,
+    allocation: 65536,
+    nodes: 4096,
+    depth: 64,
+};

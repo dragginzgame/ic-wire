@@ -31,6 +31,7 @@ try {
   }
   if (!connection) throw new Error('Fixture readiness timeout; see artifacts/fixture.log');
   const vectors = JSON.parse(await readFile('generated/vectors.json', 'utf8'));
+  const nativeVectors = JSON.parse(await readFile('generated/native-vectors.json','utf8'));
   const bundle = await readFile('dist/main.js');
   server = createServer((request, response) => {
     if (request.url === '/main.js') { response.setHeader('Content-Type', 'text/javascript'); response.end(bundle); }
@@ -41,18 +42,18 @@ try {
   const page = await browser.newPage();
   page.on('console', message => console.log(`browser: ${message.text()}`));
   await page.goto(`http://127.0.0.1:${server.address().port}`);
-  const result = await page.evaluate(async ({ connection, vectors }) => {
+  const result = await page.evaluate(async ({ connection, vectors, nativeVectors }) => {
     const { run } = await import('/main.js');
-    return run(connection, vectors);
-  }, { connection, vectors });
+    return run(connection, vectors, nativeVectors);
+  }, { connection, vectors, nativeVectors });
   await page.screenshot({ path: 'artifacts/browser.png' });
   const hashes = {};
-  for (const path of ['test.mjs','package.json','package-lock.json','tsconfig.json','dist/main.js','generated/apply.ts','generated/inspect.ts','generated/wire-runtime.ts','generated/vectors.json','src/client.ts','src/main.ts','src/typechecks.ts','../../Cargo.toml','../../Cargo.lock','../../crates/ic-wire/Cargo.toml','../../crates/ic-wire/src/lib.rs','../../crates/ic-wire/src/bounded/mod.rs','../../crates/ic-wire/src/shape/mod.rs','../../crates/ic-wire-canister-evaluation/src/lib.rs','../../crates/ic-wire-canister-evaluation/src/browser/mod.rs','../../crates/ic-wire-canister-evaluation/src/commands/mod.rs','../../crates/ic-wire/src/typescript/mod.rs','../../crates/ic-wire/src/typescript/runtime.ts','../../crates/ic-wire/src/contract/mod.rs','../../crates/ic-wire/src/schema/mod.rs','../../crates/ic-wire-derive/src/lib.rs','../../crates/ic-wire-canister-evaluation/Cargo.toml','../../scripts/ci/evaluate-browser.sh','../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs',process.env.IC_WIRE_BROWSER_WASM]) {
+  for (const path of ['test.mjs','package.json','package-lock.json','tsconfig.json','dist/main.js','generated/apply.ts','generated/inspect.ts','generated/wire-runtime.ts','generated/vectors.json','src/client.ts','src/main.ts','src/typechecks.ts','../../Cargo.toml','../../Cargo.lock','../../crates/ic-wire/Cargo.toml','../../crates/ic-wire/src/lib.rs','../../crates/ic-wire/src/bounded/mod.rs','../../crates/ic-wire/src/native/mod.rs','../../crates/ic-wire/src/native/encode/mod.rs','../../crates/ic-wire/src/native/decode/mod.rs','../../crates/ic-wire/src/shape/mod.rs','../../crates/ic-wire-canister-evaluation/src/lib.rs','../../crates/ic-wire-canister-evaluation/src/browser/mod.rs','../../crates/ic-wire-canister-evaluation/src/commands/mod.rs','../../crates/ic-wire/src/typescript/mod.rs','../../crates/ic-wire/src/typescript/runtime.ts','../../crates/ic-wire/src/contract/mod.rs','../../crates/ic-wire/src/schema/mod.rs','../../crates/ic-wire-derive/src/lib.rs','../../crates/ic-wire-canister-evaluation/Cargo.toml','../../scripts/ci/evaluate-browser.sh','../../crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs',process.env.IC_WIRE_BROWSER_WASM]) {
     hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex');
   }
   hashes['PocketIC binary'] = createHash('sha256').update(await readFile(process.env.POCKET_IC_BIN)).digest('hex');
   const sdk = JSON.parse(await readFile('node_modules/@icp-sdk/core/package.json', 'utf8')).version;
-  const report = { ...result, vectors, browser: browser.version(), node: process.version,
+  const report = { ...result, vectors, nativeVectors, browser: browser.version(), node: process.version,
     rustc: execFileSync('rustc', ['-vV'], { encoding: 'utf8' }),
     pocketIc: execFileSync(process.env.POCKET_IC_BIN, ['--version'], { encoding: 'utf8' }).trim(),
     sdk, generator: 'ic-wire Wire::SCHEMA', canisterFeatures: ['browser-fixture'],

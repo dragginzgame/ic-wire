@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use core::marker::PhantomData;
 use postcard::ser_flavors::Flavor;
 
-const HEADER: usize = 11;
+pub(crate) const HEADER: usize = 11;
 
 /// One consumer-owned endpoint contract. IDs must be unique across incompatible
 /// layouts and methods. A source rename alone must not change its identity.
@@ -64,9 +64,9 @@ pub(crate) fn admit<T: Wire>(limits: Limits) -> Result<usize, Error> {
 
 // Reserve fallibly once, then initialize only emitted bytes. Capacity is not
 // the schema limit: allocators may return more capacity than requested.
-struct Output {
-    bytes: Vec<u8>,
-    limit: usize,
+pub(crate) struct Output {
+    pub(crate) bytes: Vec<u8>,
+    pub(crate) limit: usize,
 }
 impl Flavor for Output {
     type Output = Vec<u8>;
@@ -125,10 +125,10 @@ fn encoded_len<T: Wire>(limits: Limits, value: &T) -> Result<usize, Error> {
 
 // Compare canonical serialization directly with the admitted payload. Continue
 // after a mismatch so serializer errors still retain their Malformed mapping.
-struct Compare<'a> {
-    remaining: &'a [u8],
-    allowance: usize,
-    equal: bool,
+pub(crate) struct Compare<'a> {
+    pub(crate) remaining: &'a [u8],
+    pub(crate) allowance: usize,
+    pub(crate) equal: bool,
 }
 impl Flavor for Compare<'_> {
     type Output = bool;
@@ -160,9 +160,7 @@ fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<
     bytes
         .try_reserve_exact(size)
         .map_err(|_| Error::Allocation)?;
-    bytes.extend_from_slice(b"IW");
-    bytes.extend_from_slice(&id.to_le_bytes());
-    bytes.push(direction);
+    bytes.extend_from_slice(&header(id, direction));
     postcard::serialize_with_flavor(value, Output { bytes, limit: size })
         .map_err(|_| Error::Malformed)
 }
@@ -172,21 +170,15 @@ fn decode<T: Wire>(id: u64, direction: u8, limits: Limits, bytes: &[u8]) -> Resu
     if bytes.len() > size || bytes.len() > limits.bytes {
         return Err(Error::Limit);
     }
-    if bytes.len() < HEADER {
-        return Err(Error::Malformed);
-    }
-    if &bytes[..2] != b"IW" || bytes[2..10] != id.to_le_bytes() || bytes[10] != direction {
-        return Err(Error::Identity);
-    }
-    let (value, rest) =
-        postcard::take_from_bytes::<T>(&bytes[HEADER..]).map_err(|_| Error::Malformed)?;
+    let payload = payload(id, direction, bytes)?;
+    let (value, rest) = postcard::take_from_bytes::<T>(payload).map_err(|_| Error::Malformed)?;
     if !rest.is_empty() {
         return Err(Error::Trailing);
     }
     let equal = postcard::serialize_with_flavor(
         &value,
         Compare {
-            remaining: &bytes[HEADER..],
+            remaining: payload,
             allowance: size - HEADER,
             equal: true,
         },
@@ -231,4 +223,21 @@ pub fn encode_response<M: Method>(value: &M::Response) -> Result<ResponseBytes<M
 /// Decode a reply under the selected method's response contract.
 pub fn decode_response<M: Method>(bytes: &[u8]) -> Result<M::Response, Error> {
     decode(M::ID, 1, M::RESPONSE_LIMITS, bytes)
+}
+
+pub(crate) fn header(id: u64, direction: u8) -> [u8; HEADER] {
+    let mut header = [0; HEADER];
+    header[..2].copy_from_slice(b"IW");
+    header[2..10].copy_from_slice(&id.to_le_bytes());
+    header[10] = direction;
+    header
+}
+pub(crate) fn payload(id: u64, direction: u8, bytes: &[u8]) -> Result<&[u8], Error> {
+    if bytes.len() < HEADER {
+        return Err(Error::Malformed);
+    }
+    if &bytes[..2] != b"IW" || bytes[2..10] != id.to_le_bytes() || bytes[10] != direction {
+        return Err(Error::Identity);
+    }
+    Ok(&bytes[HEADER..])
 }

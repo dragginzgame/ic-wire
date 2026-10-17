@@ -4,6 +4,10 @@ The 0.2.3 work adds source-matched IcyDB success/error projections, deterministi
 Rust/TypeScript mutation checks, exact frame sizing and an offline packet viewer.
 It does not change sibling repositories or replace their adapters.
 
+The native API now also checks the source-matched Count/Grouped payloads against
+the independent Postcard oracle. This remains a subset fixture, not a rerun of
+IcyDB’s real endpoint/browser suite.
+
 ## IcyDB source boundary
 
 Read-only inspection on 2026-10-17 observed IcyDB HEAD

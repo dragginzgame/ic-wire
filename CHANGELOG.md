@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.4]
+
+- Add bounded native Serde payload/frame APIs with borrowed encoding, exact sizing
+  and canonical decoding, sharing the existing Postcard envelope and output logic.
+  Consumers retain explicit limits and schema/domain ownership.
+  [IC Wire #5 — Native IcyDB admission](https://github.com/dragginzgame/ic-wire/issues/5).
+- Include the shared native TypeScript codec from
+  [PR #1](https://github.com/dragginzgame/ic-wire/pull/1), with recursive metadata,
+  tuples, newtypes and sparse-array refusal. Support strict indexed-access checks
+  without consumer patches ([#3](https://github.com/dragginzgame/ic-wire/issues/3)).
+- Preserve TypeScript scalar checks through named aliases and bound text scratch
+  buffers by the string's UTF-8 maximum instead of the remaining frame allowance.
+  Concrete values no longer enumerate the type registry during alias resolution.
+
 ## [0.3.3] - 2026-10-17
 
 - Simplify the browser evaluation to one canister and generated-codec transport

@@ -5,5 +5,5 @@ cd "$root"
 [[ "$(node --version)" == "v$(cat examples/browser/.nvmrc)" ]] || { echo 'Select the Node version in examples/browser/.nvmrc' >&2; exit 1; }
 out="$root/target/typescript-conformance"
 cargo run --locked -p ic-wire --features typescript --example typescript-conformance -- "$out"
-"$root/examples/browser/node_modules/.bin/tsc" --ignoreConfig --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck --outDir "$out/compiled" "$out"/*.ts
+"$root/examples/browser/node_modules/.bin/tsc" --ignoreConfig --strict --noUncheckedIndexedAccess --exactOptionalPropertyTypes --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck --outDir "$out/compiled" "$out"/*.ts
 node "$out/checks.mjs"

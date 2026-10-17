@@ -3,7 +3,8 @@ use candid::Principal;
 use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
 use ic_wire::{List, Method, Text, encode_request, encode_response};
 use ic_wire_canister_evaluation::commands::{
-    Apply, Command, Failure, Inspect, Inspection, Receipt, Snapshot,
+    Apply, Command, Failure, Inspect, Inspection, NATIVE_ID, NATIVE_LIMITS, NativeTree, Receipt,
+    Snapshot,
 };
 use serde_json::json;
 use std::{env, fs, io, path::PathBuf};
@@ -77,6 +78,29 @@ fn main() {
     let failure =
         encode_response::<Apply>(&Err(Failure::Overflow(Receipt { id: 2, balance: 7 }))).unwrap();
     fs::write(generated.join("vectors.json"), serde_json::to_vec_pretty(&json!({"query":query.as_bytes(),"queryReply":query_reply.as_bytes(),"request":request.as_bytes(),"success":success.as_bytes(),"failure":failure.as_bytes()})).unwrap()).unwrap();
+    let tree = NativeTree::Branch(vec![NativeTree::Leaf("é".into(), u128::MAX)]);
+    let native_request = ic_wire::native::encode_request(NATIVE_ID, &tree, NATIVE_LIMITS).unwrap();
+    let native_reply = ic_wire::native::encode_response(NATIVE_ID, &tree, NATIVE_LIMITS).unwrap();
+    assert_eq!(
+        pic.query_call(id, caller, "native_echo", native_request.clone())
+            .unwrap(),
+        native_reply
+    );
+    fs::write(
+        generated.join("native-vectors.json"),
+        serde_json::to_vec_pretty(
+            &json!({"id":NATIVE_ID.to_string(),"request":native_request,"response":native_reply}),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let mut deep = tree;
+    for _ in 0..64 {
+        deep = NativeTree::Branch(vec![deep]);
+    }
+    let mut forged = native_request[..11].to_vec();
+    forged.extend(postcard::to_allocvec(&deep).unwrap());
+    assert!(pic.query_call(id, caller, "native_echo", forged).is_err());
     let host = pic.make_live(None);
     fs::create_dir_all(root.join("artifacts")).unwrap();
     fs::write(

@@ -3,7 +3,7 @@ import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { createClient } from './client.js';
 import * as apply from '../generated/apply.js';
 import * as inspect from '../generated/inspect.js';
-import { WireError } from '../generated/wire-runtime.js';
+import { createCodec, WireError } from '../generated/wire-runtime.js';
 
 interface Connection { host: string; canisterId: string; caller: string }
 interface Vectors { query: number[]; queryReply: number[]; request: number[]; success: number[]; failure: number[] }
@@ -13,7 +13,7 @@ async function rejected(action: () => unknown, pattern: RegExp): Promise<void> {
   try { await action(); } catch (error) { assert(pattern.test(String(error)), `unexpected rejection: ${error}`); return; }
   throw new Error('expected rejection');
 }
-export async function run(connection: Connection, vectors: Vectors) {
+export async function run(connection: Connection, vectors: Vectors, nativeVectors: {id: string; request: number[]; response: number[]}) {
   const host = new URL(connection.host);
   assert(host.protocol === 'http:' && ['127.0.0.1', 'localhost'].includes(host.hostname), 'local fixture only');
   // Public deterministic seed belongs only to this disposable local test.
@@ -21,6 +21,14 @@ export async function run(connection: Connection, vectors: Vectors) {
   assert(identity.getPrincipal().toText() === connection.caller, 'fixture controller matches browser identity');
   const agent = await HttpAgent.create({ host: host.href, identity, shouldFetchRootKey: true });
   const client = createClient(agent, connection.canisterId);
+  const tree = {tag:'Branch',value:[{tag:'Leaf',value:['é',(1n<<128n)-1n]}]};
+  const native = createCodec({id:nativeVectors.id,request:{k:'ref',name:'Tree'},response:{k:'ref',name:'Tree'},requestBytes:4096,responseBytes:4096,requestNodes:4096,responseNodes:4096,requestDepth:64,responseDepth:64}, {Tree:{k:'enum',variants:[{name:'Leaf',id:0,value:{k:'tuple',items:[{k:'text'},{k:'u',bits:128}]}},{name:'Branch',id:1,value:{k:'list',item:{k:'ref',name:'Tree'}}}]}});
+  assert(equal(native.encodeRequest(tree), nativeVectors.request), 'native recursive Rust request');
+  const nativeResult = await agent.query(connection.canisterId, {methodName:'native_echo',arg:native.encodeRequest(tree)});
+  assert(nativeResult.status === 'replied', 'native query replied');
+  const nativeReply = new Uint8Array(nativeResult.reply.arg);
+  assert(equal(nativeReply,nativeVectors.response), 'native recursive Rust reply');
+  assert(equal(native.encodeResponse(native.decodeResponse(nativeReply)),nativeReply), 'native canonical browser roundtrip');
   const query: inspect.Request = { labels: ['é🦀', '\ufefftext'], correlation: { some: (1n << 64n)-1n } };
   assert(equal(inspect.encodeRequest(query), vectors.query), 'Rust query request bytes');
   const initial = await client.inspect(query);
@@ -55,7 +63,7 @@ export async function run(connection: Connection, vectors: Vectors) {
   const wrongRoot = await HttpAgent.create({ host: host.href, identity, shouldFetchRootKey: false });
   await rejected(() => createClient(wrongRoot, connection.canisterId).apply({id: 99n, amount: 0n}), /certificate|signature|verify|verification/i);
   assert((await client.inspect(query)).balance === 7n, 'final balance');
-  const result = { runtimeEnvelope: true, rustVectors: 5, queryVerified: true, successVerified: true, applicationFailureVerified: true, authRejectionsVerified: true, invalidInputNoMutation: true, certificateRejected: true, truncatedRepliesRejected: truncations, finalBalance: '7', identity: connection.caller, selectedEndpoints: [inspect.methodName, apply.methodName] };
+  const result = { runtimeEnvelope: true, nativeRecursiveQueryVerified: true, rustVectors: 5, queryVerified: true, successVerified: true, applicationFailureVerified: true, authRejectionsVerified: true, invalidInputNoMutation: true, certificateRejected: true, truncatedRepliesRejected: truncations, finalBalance: '7', identity: connection.caller, selectedEndpoints: [inspect.methodName, apply.methodName, "native_echo"] };
   document.querySelector('output')!.textContent = JSON.stringify(result, null, 2);
   return result;
 }

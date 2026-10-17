@@ -49,3 +49,22 @@ fn runtime_inspect() {
         Err(error) => ic_cdk::api::msg_reject(error.to_string()),
     }
 }
+
+#[ic_cdk::query(manual_reply = true)]
+fn native_echo() {
+    use crate::commands::{NATIVE_ID, NATIVE_LIMITS, NativeTree};
+    if ic0::msg_arg_data_size() > NATIVE_LIMITS.bytes {
+        ic_cdk::api::msg_reject("request limit");
+        return;
+    }
+    let response = ic_wire::native::decode_request::<NativeTree>(
+        NATIVE_ID,
+        &ic_cdk::api::msg_arg_data(),
+        NATIVE_LIMITS,
+    )
+    .and_then(|value| ic_wire::native::encode_response(NATIVE_ID, &value, NATIVE_LIMITS));
+    match response {
+        Ok(reply) => ic_cdk::api::msg_reply(reply),
+        Err(error) => ic_cdk::api::msg_reject(error.to_string()),
+    }
+}
