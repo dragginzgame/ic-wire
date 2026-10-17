@@ -8,6 +8,20 @@ include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
 .PHONY: evaluate-runtime evaluate-macros check-macro-diagnostics
+.PHONY: evaluate-cdk
+evaluate-cdk:
+	+@env cargo run --quiet --locked -p ic-wire-canister-evaluation --example build-evaluation -- cdk "$(CURDIR)/target/cdk-adoption-evidence"
+.PHONY: publish check-package
+publish:
+	+@env cargo publish --locked -p ic-wire-derive -p ic-wire
+
+check-package:
+	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
+
+.PHONY: fuzz-runtime
+
+fuzz-runtime:
+	+@bash scripts/ci/fuzz-runtime.sh
 
 evaluate-runtime:
 	+@bash scripts/ci/evaluate-runtime.sh
@@ -16,9 +30,9 @@ evaluate-macros:
 	+@bash scripts/ci/evaluate-macros.sh
 
 check-macro-diagnostics:
-	+@bash scripts/ci/check-macro-diagnostics.sh
+	+@bash scripts/ci/check-diagnostics.sh macro
 
-.PHONY: evaluate-codecs evaluate-journey check-typed-diagnostics evaluate-canisters evaluate-replay
+.PHONY: check-typed-diagnostics
 .PHONY: check-release check-canister-evaluation
 .PHONY: check-typescript evaluate-browser check-browser
 
@@ -34,44 +48,31 @@ check-browser:
 	+@env npm --prefix examples/browser run build
 
 check-canister-evaluation:
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features peer,replay
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features candid-codec,peer
+	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features replay
+	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features candid-codec,runtime-benchmark
 	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
 	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown
 	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --all-features
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-canister-evaluation --all-targets --all-features
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --all-features
 
-evaluate-canisters:
-	+@bash scripts/ci/evaluate-canisters.sh
-
-evaluate-replay:
-	+@bash scripts/ci/evaluate-replay.sh
-
 check-typed-diagnostics:
-	+@bash scripts/ci/test-typed-diagnostics.sh
-
-evaluate-codecs:
-	+@env cargo run --quiet --locked -p ic-wire --example codec-evaluation
-
-evaluate-journey:
-	+@env cargo run --quiet --locked -p ic-wire --example typed-journey
+	+@bash scripts/ci/check-diagnostics.sh wire
 
 help:
 	@printf '%s\n' \
-		'IC Wire — unpublished bounded Postcard runtime' \
+		'IC Wire — bounded Postcard runtime' \
 		'Setup: install-tools, install-hooks; offline admission: tools-check' \
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
-		'Evaluation: evaluate-codecs (JSON payload-size and round-trip report)' \
-		'Evaluation: evaluate-journey (native typed request/reply prototype)' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-macro-diagnostics, evaluate-macros (local adapter proof)' \
-		'Evaluation: evaluate-canisters (requires explicit POCKET_IC_BIN)' \
+		'Evaluation: evaluate-cdk (prepared PocketIC; raw endpoint rollback)' \
 		'Evaluation: evaluate-runtime (production runtime versus Candid)' \
-		'Evaluation: evaluate-replay (installed atomic-command/replay correctness)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
+		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Evaluation: check-browser, evaluate-browser (prepared Node/npm/Chromium)' \
 		'Evaluation: check-canister-evaluation (compile and lint; no emulator)' \
+		'Registry: publish (uploads); check-package (no upload; registry access)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
@@ -97,7 +98,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire -p ic-wire-cdk --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/macro-adoption.md docs/runtime-comparison.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/macro-adoption.md docs/runtime-comparison.md docs/consumer-fixtures.md docs/status/current.md
 
 check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"

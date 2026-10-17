@@ -25,8 +25,7 @@ Focused checks from the repository root:
 cargo test --locked -p ic-wire-cdk
 cargo clippy --locked -p ic-wire-cdk --all-targets -- -D warnings
 cargo +1.91.0 check --locked -p ic-wire-cdk --target wasm32-unknown-unknown
-cargo build --locked -p ic-wire-canister-evaluation --lib --release --features cdk-fixture --target wasm32-unknown-unknown
-POCKET_IC_BIN=/absolute/path/to/prepared/pocket-ic cargo run --locked -p ic-wire-canister-evaluation --example cdk-fixture --features cdk-fixture -- target/wasm32-unknown-unknown/release/ic_wire_canister_evaluation.wasm
+POCKET_IC_BIN=/absolute/path/to/prepared/pocket-ic make evaluate-cdk
 ```
 
 The installed fixture checks typed query replies, malformed and over-limit input,

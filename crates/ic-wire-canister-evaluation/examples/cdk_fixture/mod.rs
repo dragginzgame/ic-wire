@@ -59,4 +59,15 @@ fn main() {
     println!(
         "PASS: raw CDK query, authorization before size/copy, method limits and malformed input; reply encoding failure rolled back stable growth and writes."
     );
+    fs::write(
+        env::args_os().nth(2).expect("report path"),
+        serde_json::to_vec_pretty(&serde_json::json!({
+            "query": true,
+            "authorization_before_admission": true,
+            "malformed_and_oversized_rejected": true,
+            "stable_growth_and_write_rollback": true,
+        }))
+        .unwrap(),
+    )
+    .unwrap();
 }

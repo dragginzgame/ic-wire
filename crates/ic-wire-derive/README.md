@@ -1,0 +1,15 @@
+# IC Wire derives
+
+The `Wire` derive implements explicit-layout bounded contracts for
+[`ic-wire`](https://crates.io/crates/ic-wire). Applications should depend on
+`ic-wire` and use its re-exported `Wire` derive.
+
+Fields and enum variants require explicit `#[wire(id = N)]` identities. Generic
+and recursive derives, unbounded containers and unsupported field shapes are
+rejected. See the [runtime guide](https://github.com/dragginzgame/ic-wire/blob/main/crates/ic-wire/README.md).
+
+The `adapter-fixture` feature exposes evaluation-only query/update attributes.
+Those attributes are not a supported endpoint API; Canic owns endpoint integration.
+
+Licensed under the Dragginz Source Available License — Verifiable ICP Burn,
+Version 1.0. See the packaged LICENSE file. This is not an OSI-approved license.

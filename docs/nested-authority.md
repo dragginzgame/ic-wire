@@ -1,5 +1,10 @@
 # Installed nested authority evaluation
 
+This experiment is retired from current source. Reproduce it from commit
+`226a11fce6d5cdd59a77d9a006c91f5a46c58b42` or the source identity in its saved
+report. Use `make evaluate-runtime` for the maintained production-codec comparison.
+Commands below apply to the historical checkout.
+
 The pending 0.1.3 experiment adds a synthetic authority update to the existing
 matched canisters. It exercises two bounded collection levels and optional expiry.
 It is not a Canic authentication contract or a production IC Wire API.

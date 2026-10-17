@@ -15,7 +15,6 @@ bindings = ["replay", "ic-wire/typescript"]
 candid-codec = []
 management = []
 macro-fixture = ["dep:ic-wire", "dep:ic-wire-derive", "ic-wire-derive/adapter-fixture"]
-peer = []
 replay = ["dep:ic-wire"]
 runtime-benchmark = ["dep:ic-wire"]
 
@@ -26,29 +25,20 @@ ic-wire = { workspace = true, optional = true }
 ic-wire-cdk = { workspace = true, optional = true }
 ic-wire-derive = { workspace = true, optional = true }
 ic0.workspace = true
-postcard.workspace = true
 serde.workspace = true
 
 [dev-dependencies]
+ic-build.workspace = true
+ic-host-artifacts = { workspace = true, features = ["wasm"] }
 ic-testkit.workspace = true
-pocket-ic.workspace = true
+postcard.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-wasmparser.workspace = true
 
 [[example]]
 name = "runtime-measure"
 path = "examples/runtime_measure/mod.rs"
 required-features = ["runtime-benchmark"]
-
-[[example]]
-name = "measure-canisters"
-path = "examples/measure/mod.rs"
-
-[[example]]
-name = "replay-fixture"
-path = "examples/replay_fixture/mod.rs"
-required-features = ["replay"]
 
 [[example]]
 name = "browser-fixture"
@@ -61,9 +51,18 @@ path = "examples/macro_fixture/mod.rs"
 required-features = ["macro-fixture"]
 
 [[example]]
+name = "build-evaluation"
+path = "examples/build_evaluation/mod.rs"
+
+[[example]]
 name = "cdk-fixture"
 path = "examples/cdk_fixture/mod.rs"
 required-features = ["cdk-fixture"]
 
 [lints]
 workspace = true
+
+[[test]]
+name = "macro-ui"
+path = "tests/macro_ui/mod.rs"
+required-features = ["macro-fixture"]

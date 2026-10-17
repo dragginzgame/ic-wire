@@ -1,5 +1,10 @@
 # Matched canister experiment
 
+This experiment is retired from current source. Reproduce it from commit
+`226a11fce6d5cdd59a77d9a006c91f5a46c58b42` or the source identity in its saved
+report. Use `make evaluate-runtime` for the maintained production-codec comparison.
+Commands below apply to the historical checkout.
+
 Measured 2026-10-16 in local PocketIC. These are installed canister results for a
 small controlled fixture, not projected savings for Canic, Relay or IcyDB.
 Postcard is a promising encoding engine; this does not select a production format.
@@ -59,7 +64,7 @@ or guaranteed steady-state costs. No native wall-clock timing was measured.
 
 ## Equivalent behavior and rejection evidence
 
-One [canister source](../crates/ic-wire-canister-evaluation/src/lib.rs) builds four
+One [historical canister source](https://github.com/dragginzgame/ic-wire/blob/226a11fce6d5cdd59a77d9a006c91f5a46c58b42/crates/ic-wire-canister-evaluation/src/lib.rs) builds four
 artifacts with compile-time codec/management selection. Each artifact contains
 only one application encoding. This is experiment configuration, not a runtime
 codec framework or parallel compatibility lanes.

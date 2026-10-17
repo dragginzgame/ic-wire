@@ -1,0 +1,1411 @@
+{
+  "artifacts": [
+    {
+      "code_section_payload_bytes": 421282,
+      "exports": [
+        "canister_query measurements",
+        "canister_update benchmark_page",
+        "canister_update benchmark_scalar",
+        "canister_update runtime_benchmark"
+      ],
+      "management_call_verified": false,
+      "name": "candid-internal",
+      "page_bound_rejections": 2,
+      "page_rows": [
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              618921,
+              207,
+              287427
+            ],
+            [
+              495410,
+              207,
+              287068
+            ],
+            [
+              496154,
+              207,
+              287264
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 155,
+          "request_sha256": "82e4aff30766574820b3fdbbbaa84c04287ad1da9f635c07b9e229b8524ddd75",
+          "response_bytes": 155,
+          "response_sha256": "5e226e10acdb39dec573cdb0d1e338a162e4d4dea3b49daecbbca9445c7ad8cd",
+          "row_count": 0
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              553942,
+              207,
+              294537
+            ],
+            [
+              556190,
+              207,
+              294716
+            ],
+            [
+              555483,
+              207,
+              294625
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 259,
+          "request_sha256": "725e7142cb8288cbb9d7827b1761b26f29d53d49a385afb0eced6849448b4108",
+          "response_bytes": 259,
+          "response_sha256": "f3d07aa907bcaca78772a6cf44f7c795229b1fcbb935fd1da3ba12144504fa26",
+          "row_count": 1
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              983249,
+              207,
+              350260
+            ],
+            [
+              982719,
+              207,
+              349715
+            ],
+            [
+              983092,
+              207,
+              349713
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 987,
+          "request_sha256": "236eda1a07cfe044b558b5aa06a95dd2f6a0d1383e1cd5856b90213084c017ea",
+          "response_bytes": 987,
+          "response_sha256": "6c29c5a3040e88b0aa0d99b8bb8e8ae6fff150faaf0ca0e7c8fcc9d9793c2cbd",
+          "row_count": 8
+        }
+      ],
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "case": "empty collections",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              325239,
+              207,
+              147899
+            ],
+            [
+              267318,
+              207,
+              146506
+            ],
+            [
+              266471,
+              207,
+              146506
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 85,
+          "request_sha256": "3a44e00152e7b2fe45a7e0088d0b0d5648fc584d909b3c1c5f78e53c660d9cd8",
+          "response_bytes": 85,
+          "response_sha256": "efbfc1f6e8d8d67efdef1dc20fb94e4dc87177fdc90c6d1b5f593a80dab0d92a",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 128,
+          "case": "blob 128",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              271285,
+              207,
+              147882
+            ],
+            [
+              271550,
+              207,
+              147882
+            ],
+            [
+              271550,
+              207,
+              147882
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 214,
+          "request_sha256": "670d55f45b365fda8b8b9715afedaf5febb0be1a8e960e003468cbf0108ac34a",
+          "response_bytes": 214,
+          "response_sha256": "5d70a05f702ce03f5bb6587e7ae6d6757f73eb8187078de3fbfb3d5677e85e4f",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "blob 4096",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              389221,
+              207,
+              156293
+            ],
+            [
+              388698,
+              207,
+              155999
+            ],
+            [
+              386902,
+              207,
+              156473
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4182,
+          "request_sha256": "bcb357e6e75f37436ae3f4c8710aec637abdbed0652dac6fcc7d1d4aca0b2ff8",
+          "response_bytes": 4182,
+          "response_sha256": "e953c9c31a090606073895fbc319f4d97d0a7a8ec74dc0ea504b7c677c344e6a",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 0,
+          "case": "UTF-8 text 256",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              282926,
+              207,
+              148637
+            ],
+            [
+              283224,
+              207,
+              149128
+            ],
+            [
+              280201,
+              207,
+              147417
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 342,
+          "request_sha256": "af439117968cd3dd34d6b1ba63945564ec6c4338d447f642fcc368653d784672",
+          "response_bytes": 342,
+          "response_sha256": "8f72108fccd50d9491dd16a796539ee69666048360e8c7a951a4f5315fb1ef57",
+          "text_utf8_bytes": 256
+        },
+        {
+          "blob_bytes": 0,
+          "case": "64 finite f64",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              295429,
+              207,
+              149336
+            ],
+            [
+              293776,
+              207,
+              149477
+            ],
+            [
+              291980,
+              207,
+              149894
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 597,
+          "request_sha256": "ab3eb8d72eeeca299d967a856e0a3607f7612f80a049378fdf4c736e36658edc",
+          "response_bytes": 597,
+          "response_sha256": "20a8b48b08cf3235b4ef0b7e7f72fa2f9e4e775e1bee8e801ddadbe0afd39ce1",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "all bounds",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              426806,
+              207,
+              157956
+            ],
+            [
+              426551,
+              207,
+              158058
+            ],
+            [
+              426551,
+              207,
+              158058
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4951,
+          "request_sha256": "bae9e9cf87686a746d9373d84059c5d06d4f1f37c7d2e683de0ee33680845306",
+          "response_bytes": 4951,
+          "response_sha256": "47f99c6c924faf27156eb416c5a29c27db5b1ed140e650bc7012f1a54b3a864f",
+          "text_utf8_bytes": 256
+        }
+      ],
+      "scalar_rows": [
+        {
+          "input_u64": "0",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              142969,
+              207,
+              63319
+            ],
+            [
+              109335,
+              207,
+              63514
+            ],
+            [
+              109335,
+              207,
+              63514
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 43,
+          "request_sha256": "8eb70570d68d699ce40af70b1a1231db3ad47b1f70bbb14255d46056e09b503e",
+          "response_bytes": 43,
+          "response_sha256": "9be21b8729bb12341e5d2f265e83f92acbd9f17e44c63cd7e099a0b8b8c03b21"
+        },
+        {
+          "input_u64": "127",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              109342,
+              207,
+              63514
+            ],
+            [
+              109335,
+              207,
+              63514
+            ],
+            [
+              109335,
+              207,
+              63514
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 43,
+          "request_sha256": "69f02aae75257eeff25accad1db3cf436c2be8ecc89d56942d3c33da0bf565cf",
+          "response_bytes": 43,
+          "response_sha256": "99d0788410a0888c07672f9dc27695a4040ae3390ed07f5cc5df140362ca2c85"
+        },
+        {
+          "input_u64": "18446744073709551615",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              109342,
+              207,
+              63514
+            ],
+            [
+              109335,
+              207,
+              63514
+            ],
+            [
+              109335,
+              207,
+              63514
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 43,
+          "request_sha256": "8eb84806d9bf232f1f83de9b30b3a4a0dae5f5207713cafdd91d76ef43810824",
+          "response_bytes": 43,
+          "response_sha256": "282b75e91d7bbf80392936465195af17ba84afe4d0b73f58f3366503c1160292"
+        }
+      ],
+      "wasm_bytes": 814894,
+      "wasm_sha256": "72b384b6acc419436d508968ba13fc7cce7148781dc966896b81f4849e2d0d2a"
+    },
+    {
+      "code_section_payload_bytes": 57377,
+      "exports": [
+        "canister_query measurements",
+        "canister_update benchmark_page",
+        "canister_update benchmark_scalar",
+        "canister_update runtime_benchmark"
+      ],
+      "management_call_verified": false,
+      "name": "wire-internal",
+      "page_bound_rejections": 2,
+      "page_rows": [
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              16156,
+              207,
+              7265
+            ],
+            [
+              16156,
+              207,
+              7265
+            ],
+            [
+              16156,
+              207,
+              7265
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 50,
+          "request_sha256": "bf9832cde02b24d1e651b68635bf27837e348faeecf6bf8dfebf9c9fa3fb8916",
+          "response_bytes": 50,
+          "response_sha256": "2bc789f8ae30fb0411bb4896bda254ab99c139ea9fce4e96228f032c2189242e",
+          "row_count": 0
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              31828,
+              207,
+              14051
+            ],
+            [
+              31828,
+              207,
+              14051
+            ],
+            [
+              31828,
+              207,
+              14051
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 158,
+          "request_sha256": "f1062d8a711c368c455f796bb230bb1e6879a0ae89692fb4e14e54610a1eeed6",
+          "response_bytes": 158,
+          "response_sha256": "0139cc8fb8faca96972849cf6b58d30b8496101ea95d9dd8ef8cd149dd5cff03",
+          "row_count": 1
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              139116,
+              207,
+              61553
+            ],
+            [
+              139116,
+              207,
+              61553
+            ],
+            [
+              139116,
+              207,
+              61553
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 914,
+          "request_sha256": "3b5fefd0960ce2584846f038ccdfdb173aa9a99e1c1ff115a5d6cbe32315c81d",
+          "response_bytes": 914,
+          "response_sha256": "85f31cdf79d906bada770e609f6cc5ce78d0128a2421b789ebbca72060fdd85e",
+          "row_count": 8
+        }
+      ],
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "case": "empty collections",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              5062,
+              207,
+              3479
+            ],
+            [
+              5062,
+              207,
+              3479
+            ],
+            [
+              5062,
+              207,
+              3479
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 17,
+          "request_sha256": "11c6f9dfdaeec40b79ee8cab85e6f67e21e00737bca292ef4497a4de843f17e8",
+          "response_bytes": 17,
+          "response_sha256": "c7258a4150f0e1dbaafdb37b385257fd62ed2d87944983cfd2a8d4f707b7df9c",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 128,
+          "case": "blob 128",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              9093,
+              207,
+              3752
+            ],
+            [
+              9093,
+              207,
+              3752
+            ],
+            [
+              9093,
+              207,
+              3752
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 146,
+          "request_sha256": "d46f087791bec314453bc422aea586a91bc5eb3a05c6e4e9724e8a8ece3b7c97",
+          "response_bytes": 146,
+          "response_sha256": "1b7da24ecba0ffe886c4272573087607adaf069cf9f1faad4819d073655deffb",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "blob 4096",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              116223,
+              207,
+              7720
+            ],
+            [
+              116223,
+              207,
+              7720
+            ],
+            [
+              116223,
+              207,
+              7720
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4114,
+          "request_sha256": "4f948f29ba88f59a1fc20883010548882419f3d674504beb38da723bf20b4523",
+          "response_bytes": 4114,
+          "response_sha256": "e97e967ed03831021607c4b1dff743be056a4368446621afcf42ec563f55deb7",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 0,
+          "case": "UTF-8 text 256",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              18707,
+              207,
+              3880
+            ],
+            [
+              18707,
+              207,
+              3880
+            ],
+            [
+              18707,
+              207,
+              3880
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 274,
+          "request_sha256": "6ea7b66e0ff175e259cfe0b3f836b88d81b2ca04b7796e7a84c9e794ecf4c1a3",
+          "response_bytes": 274,
+          "response_sha256": "df141a43a492a641446ac36cdff16e6c30ba15b64bf7d0e16d28cca954600fa0",
+          "text_utf8_bytes": 256
+        },
+        {
+          "blob_bytes": 0,
+          "case": "64 finite f64",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              46702,
+              207,
+              19607
+            ],
+            [
+              46702,
+              207,
+              19607
+            ],
+            [
+              46702,
+              207,
+              19607
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 529,
+          "request_sha256": "7268e9f4ef73bacf55c512ce47c28b848d356ed4ffb2fe28cfaf577a2886bbd7",
+          "response_bytes": 529,
+          "response_sha256": "dcae239dc646be21b4899e474330276589e52070df2cb6525458454ae00c3673",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "all bounds",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              171508,
+              207,
+              24249
+            ],
+            [
+              171508,
+              207,
+              24249
+            ],
+            [
+              171508,
+              207,
+              24249
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4883,
+          "request_sha256": "a39593e9adca6130df1b9b0c2e6d0bb7cfe388d0b77a4c73424844736eec4014",
+          "response_bytes": 4883,
+          "response_sha256": "88f86fe428f87d7a12747b9b12bac3a96971a292b1726f1745ba0a0156dca263",
+          "text_utf8_bytes": 256
+        }
+      ],
+      "scalar_rows": [
+        {
+          "input_u64": "0",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              1077,
+              207,
+              1727
+            ],
+            [
+              1077,
+              207,
+              1727
+            ],
+            [
+              1077,
+              207,
+              1727
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 12,
+          "request_sha256": "163cf2a0902c0054b2d0a58fb6754f1fd139c64f396b8f52e5dedfb8eabadecd",
+          "response_bytes": 12,
+          "response_sha256": "a919c126e7f2f832227dfad9b938a8b7142cec3ee037d0106dd3a4ac19ed1285"
+        },
+        {
+          "input_u64": "127",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              1077,
+              207,
+              1761
+            ],
+            [
+              1077,
+              207,
+              1761
+            ],
+            [
+              1077,
+              207,
+              1761
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 12,
+          "request_sha256": "7eb6cb511991eaec5df8e0b80fad511d0a374cc90ac52a863422292fa78731ed",
+          "response_bytes": 13,
+          "response_sha256": "7f25546888a1cfe3ee8bf856c2a9f2f7483ce8c9310fdd3ca8e839d3a6054c9b"
+        },
+        {
+          "input_u64": "18446744073709551615",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              2220,
+              207,
+              1727
+            ],
+            [
+              2220,
+              207,
+              1727
+            ],
+            [
+              2220,
+              207,
+              1727
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 21,
+          "request_sha256": "65a492b332196c1f3a2ddb6340844345d65c648d0e55df2c25b41d134badbdef",
+          "response_bytes": 12,
+          "response_sha256": "91a79316f57352178a584deeed765d0226b181b4f07acfcb5daee7e71d2f7d07"
+        }
+      ],
+      "wasm_bytes": 124739,
+      "wasm_sha256": "a03111c6c6ee233cb6ff80a418c57181535cb3b2f7536bb1c5bc7831b97b731f"
+    },
+    {
+      "code_section_payload_bytes": 437263,
+      "exports": [
+        "canister_query measurements",
+        "canister_update benchmark_page",
+        "canister_update benchmark_scalar",
+        "canister_update management_probe",
+        "canister_update runtime_benchmark"
+      ],
+      "management_call_verified": true,
+      "name": "candid-management",
+      "page_bound_rejections": 2,
+      "page_rows": [
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              619232,
+              207,
+              285628
+            ],
+            [
+              496617,
+              207,
+              286353
+            ],
+            [
+              495787,
+              207,
+              285130
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 155,
+          "request_sha256": "82e4aff30766574820b3fdbbbaa84c04287ad1da9f635c07b9e229b8524ddd75",
+          "response_bytes": 155,
+          "response_sha256": "5e226e10acdb39dec573cdb0d1e338a162e4d4dea3b49daecbbca9445c7ad8cd",
+          "row_count": 0
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              553882,
+              207,
+              293009
+            ],
+            [
+              556292,
+              207,
+              295635
+            ],
+            [
+              554058,
+              207,
+              293921
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 259,
+          "request_sha256": "725e7142cb8288cbb9d7827b1761b26f29d53d49a385afb0eced6849448b4108",
+          "response_bytes": 259,
+          "response_sha256": "f3d07aa907bcaca78772a6cf44f7c795229b1fcbb935fd1da3ba12144504fa26",
+          "row_count": 1
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              984581,
+              207,
+              349992
+            ],
+            [
+              984989,
+              207,
+              349189
+            ],
+            [
+              982714,
+              207,
+              348557
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 987,
+          "request_sha256": "236eda1a07cfe044b558b5aa06a95dd2f6a0d1383e1cd5856b90213084c017ea",
+          "response_bytes": 987,
+          "response_sha256": "6c29c5a3040e88b0aa0d99b8bb8e8ae6fff150faaf0ca0e7c8fcc9d9793c2cbd",
+          "row_count": 8
+        }
+      ],
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "case": "empty collections",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              316136,
+              207,
+              146601
+            ],
+            [
+              267247,
+              207,
+              146475
+            ],
+            [
+              267247,
+              207,
+              146475
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 85,
+          "request_sha256": "3a44e00152e7b2fe45a7e0088d0b0d5648fc584d909b3c1c5f78e53c660d9cd8",
+          "response_bytes": 85,
+          "response_sha256": "efbfc1f6e8d8d67efdef1dc20fb94e4dc87177fdc90c6d1b5f593a80dab0d92a",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 128,
+          "case": "blob 128",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              271127,
+              207,
+              147518
+            ],
+            [
+              271270,
+              207,
+              147305
+            ],
+            [
+              271659,
+              207,
+              148230
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 214,
+          "request_sha256": "670d55f45b365fda8b8b9715afedaf5febb0be1a8e960e003468cbf0108ac34a",
+          "response_bytes": 214,
+          "response_sha256": "5d70a05f702ce03f5bb6587e7ae6d6757f73eb8187078de3fbfb3d5677e85e4f",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "blob 4096",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              387340,
+              207,
+              155868
+            ],
+            [
+              386017,
+              207,
+              155774
+            ],
+            [
+              386075,
+              207,
+              155774
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4182,
+          "request_sha256": "bcb357e6e75f37436ae3f4c8710aec637abdbed0652dac6fcc7d1d4aca0b2ff8",
+          "response_bytes": 4182,
+          "response_sha256": "e953c9c31a090606073895fbc319f4d97d0a7a8ec74dc0ea504b7c677c344e6a",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 0,
+          "case": "UTF-8 text 256",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              282528,
+              207,
+              148273
+            ],
+            [
+              283256,
+              207,
+              148112
+            ],
+            [
+              279999,
+              207,
+              147260
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 342,
+          "request_sha256": "af439117968cd3dd34d6b1ba63945564ec6c4338d447f642fcc368653d784672",
+          "response_bytes": 342,
+          "response_sha256": "8f72108fccd50d9491dd16a796539ee69666048360e8c7a951a4f5315fb1ef57",
+          "text_utf8_bytes": 256
+        },
+        {
+          "blob_bytes": 0,
+          "case": "64 finite f64",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              294315,
+              207,
+              149808
+            ],
+            [
+              293616,
+              207,
+              149775
+            ],
+            [
+              293616,
+              207,
+              149775
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 597,
+          "request_sha256": "ab3eb8d72eeeca299d967a856e0a3607f7612f80a049378fdf4c736e36658edc",
+          "response_bytes": 597,
+          "response_sha256": "20a8b48b08cf3235b4ef0b7e7f72fa2f9e4e775e1bee8e801ddadbe0afd39ce1",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "all bounds",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              427269,
+              207,
+              158071
+            ],
+            [
+              427269,
+              207,
+              158071
+            ],
+            [
+              427269,
+              207,
+              158071
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4951,
+          "request_sha256": "bae9e9cf87686a746d9373d84059c5d06d4f1f37c7d2e683de0ee33680845306",
+          "response_bytes": 4951,
+          "response_sha256": "47f99c6c924faf27156eb416c5a29c27db5b1ed140e650bc7012f1a54b3a864f",
+          "text_utf8_bytes": 256
+        }
+      ],
+      "scalar_rows": [
+        {
+          "input_u64": "0",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              142284,
+              207,
+              62563
+            ],
+            [
+              108257,
+              207,
+              61747
+            ],
+            [
+              107874,
+              207,
+              63104
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 43,
+          "request_sha256": "8eb70570d68d699ce40af70b1a1231db3ad47b1f70bbb14255d46056e09b503e",
+          "response_bytes": 43,
+          "response_sha256": "9be21b8729bb12341e5d2f265e83f92acbd9f17e44c63cd7e099a0b8b8c03b21"
+        },
+        {
+          "input_u64": "127",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              107865,
+              207,
+              63104
+            ],
+            [
+              107988,
+              207,
+              62541
+            ],
+            [
+              110033,
+              207,
+              61830
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 43,
+          "request_sha256": "69f02aae75257eeff25accad1db3cf436c2be8ecc89d56942d3c33da0bf565cf",
+          "response_bytes": 43,
+          "response_sha256": "99d0788410a0888c07672f9dc27695a4040ae3390ed07f5cc5df140362ca2c85"
+        },
+        {
+          "input_u64": "18446744073709551615",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              109502,
+              207,
+              62698
+            ],
+            [
+              109834,
+              207,
+              62703
+            ],
+            [
+              109834,
+              207,
+              62703
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 43,
+          "request_sha256": "8eb84806d9bf232f1f83de9b30b3a4a0dae5f5207713cafdd91d76ef43810824",
+          "response_bytes": 43,
+          "response_sha256": "282b75e91d7bbf80392936465195af17ba84afe4d0b73f58f3366503c1160292"
+        }
+      ],
+      "wasm_bytes": 851614,
+      "wasm_sha256": "a4ba885462a6641ebc1c876db202ab92f60733265a2434280882ba151bc80fb8"
+    },
+    {
+      "code_section_payload_bytes": 357682,
+      "exports": [
+        "canister_query measurements",
+        "canister_update benchmark_page",
+        "canister_update benchmark_scalar",
+        "canister_update management_probe",
+        "canister_update runtime_benchmark"
+      ],
+      "management_call_verified": true,
+      "name": "wire-management",
+      "page_bound_rejections": 2,
+      "page_rows": [
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              16108,
+              207,
+              7332
+            ],
+            [
+              16108,
+              207,
+              7332
+            ],
+            [
+              16108,
+              207,
+              7332
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 50,
+          "request_sha256": "bf9832cde02b24d1e651b68635bf27837e348faeecf6bf8dfebf9c9fa3fb8916",
+          "response_bytes": 50,
+          "response_sha256": "2bc789f8ae30fb0411bb4896bda254ab99c139ea9fce4e96228f032c2189242e",
+          "row_count": 0
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              31848,
+              207,
+              14051
+            ],
+            [
+              31890,
+              207,
+              14051
+            ],
+            [
+              31848,
+              207,
+              14051
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 158,
+          "request_sha256": "f1062d8a711c368c455f796bb230bb1e6879a0ae89692fb4e14e54610a1eeed6",
+          "response_bytes": 158,
+          "response_sha256": "0139cc8fb8faca96972849cf6b58d30b8496101ea95d9dd8ef8cd149dd5cff03",
+          "row_count": 1
+        },
+        {
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              139228,
+              207,
+              61553
+            ],
+            [
+              139390,
+              207,
+              61553
+            ],
+            [
+              139344,
+              207,
+              61553
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 914,
+          "request_sha256": "3b5fefd0960ce2584846f038ccdfdb173aa9a99e1c1ff115a5d6cbe32315c81d",
+          "response_bytes": 914,
+          "response_sha256": "85f31cdf79d906bada770e609f6cc5ce78d0128a2421b789ebbca72060fdd85e",
+          "row_count": 8
+        }
+      ],
+      "rows": [
+        {
+          "blob_bytes": 0,
+          "case": "empty collections",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              5062,
+              207,
+              3546
+            ],
+            [
+              5062,
+              207,
+              3546
+            ],
+            [
+              5062,
+              207,
+              3546
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 17,
+          "request_sha256": "11c6f9dfdaeec40b79ee8cab85e6f67e21e00737bca292ef4497a4de843f17e8",
+          "response_bytes": 17,
+          "response_sha256": "c7258a4150f0e1dbaafdb37b385257fd62ed2d87944983cfd2a8d4f707b7df9c",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 128,
+          "case": "blob 128",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              9088,
+              207,
+              3819
+            ],
+            [
+              9088,
+              207,
+              3819
+            ],
+            [
+              9088,
+              207,
+              3819
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 146,
+          "request_sha256": "d46f087791bec314453bc422aea586a91bc5eb3a05c6e4e9724e8a8ece3b7c97",
+          "response_bytes": 146,
+          "response_sha256": "1b7da24ecba0ffe886c4272573087607adaf069cf9f1faad4819d073655deffb",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "blob 4096",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              116290,
+              207,
+              7787
+            ],
+            [
+              116290,
+              207,
+              7787
+            ],
+            [
+              116290,
+              207,
+              7787
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4114,
+          "request_sha256": "4f948f29ba88f59a1fc20883010548882419f3d674504beb38da723bf20b4523",
+          "response_bytes": 4114,
+          "response_sha256": "e97e967ed03831021607c4b1dff743be056a4368446621afcf42ec563f55deb7",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 0,
+          "case": "UTF-8 text 256",
+          "f64_count": 0,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              18933,
+              207,
+              3880
+            ],
+            [
+              18933,
+              207,
+              3880
+            ],
+            [
+              18933,
+              207,
+              3880
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 274,
+          "request_sha256": "6ea7b66e0ff175e259cfe0b3f836b88d81b2ca04b7796e7a84c9e794ecf4c1a3",
+          "response_bytes": 274,
+          "response_sha256": "df141a43a492a641446ac36cdff16e6c30ba15b64bf7d0e16d28cca954600fa0",
+          "text_utf8_bytes": 256
+        },
+        {
+          "blob_bytes": 0,
+          "case": "64 finite f64",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              46769,
+              207,
+              19674
+            ],
+            [
+              46769,
+              207,
+              19674
+            ],
+            [
+              46769,
+              207,
+              19674
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 529,
+          "request_sha256": "7268e9f4ef73bacf55c512ce47c28b848d356ed4ffb2fe28cfaf577a2886bbd7",
+          "response_bytes": 529,
+          "response_sha256": "dcae239dc646be21b4899e474330276589e52070df2cb6525458454ae00c3673",
+          "text_utf8_bytes": 0
+        },
+        {
+          "blob_bytes": 4096,
+          "case": "all bounds",
+          "f64_count": 64,
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              171791,
+              207,
+              24316
+            ],
+            [
+              171791,
+              207,
+              24316
+            ],
+            [
+              171791,
+              207,
+              24316
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 4883,
+          "request_sha256": "a39593e9adca6130df1b9b0c2e6d0bb7cfe388d0b77a4c73424844736eec4014",
+          "response_bytes": 4883,
+          "response_sha256": "88f86fe428f87d7a12747b9b12bac3a96971a292b1726f1745ba0a0156dca263",
+          "text_utf8_bytes": 256
+        }
+      ],
+      "scalar_rows": [
+        {
+          "input_u64": "0",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              1077,
+              207,
+              1722
+            ],
+            [
+              1077,
+              207,
+              1722
+            ],
+            [
+              1077,
+              207,
+              1722
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 12,
+          "request_sha256": "163cf2a0902c0054b2d0a58fb6754f1fd139c64f396b8f52e5dedfb8eabadecd",
+          "response_bytes": 12,
+          "response_sha256": "a919c126e7f2f832227dfad9b938a8b7142cec3ee037d0106dd3a4ac19ed1285"
+        },
+        {
+          "input_u64": "127",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              1077,
+              207,
+              1756
+            ],
+            [
+              1077,
+              207,
+              1756
+            ],
+            [
+              1077,
+              207,
+              1756
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 12,
+          "request_sha256": "7eb6cb511991eaec5df8e0b80fad511d0a374cc90ac52a863422292fa78731ed",
+          "response_bytes": 13,
+          "response_sha256": "7f25546888a1cfe3ee8bf856c2a9f2f7483ce8c9310fdd3ca8e839d3a6054c9b"
+        },
+        {
+          "input_u64": "18446744073709551615",
+          "instruction_samples_decode_strict_handler_encode": [
+            [
+              2220,
+              207,
+              1722
+            ],
+            [
+              2220,
+              207,
+              1722
+            ],
+            [
+              2220,
+              207,
+              1722
+            ]
+          ],
+          "rejected_calls": 5,
+          "request_bytes": 21,
+          "request_sha256": "65a492b332196c1f3a2ddb6340844345d65c648d0e55df2c25b41d134badbdef",
+          "response_bytes": 12,
+          "response_sha256": "91a79316f57352178a584deeed765d0226b181b4f07acfcb5daee7e71d2f7d07"
+        }
+      ],
+      "wasm_bytes": 720114,
+      "wasm_sha256": "414ff750a1775170335d210c57242f588832783aea49e17391a2b061e5854166"
+    }
+  ],
+  "candid_decoder": {
+    "collection_bounds": "blob before copy; text/f64 count and finiteness after decode; canonical re-encode required",
+    "decoding_quota": 100000,
+    "max_frame_bytes": 5120,
+    "max_header_len": 1024,
+    "max_type_len": 64,
+    "skipping_quota": 1000
+  },
+  "compiler_recorded_at_build": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "flags_recorded_at_build": "RUSTFLAGS=\nCARGO_ENCODED_RUSTFLAGS=\n",
+  "page_candid_bounds": "8 columns, 8 rows, 8 cells/row, 32 UTF-8/blob bytes, finite floats; checked after quota-limited decode",
+  "page_wire_limits": {
+    "allocation": 16384,
+    "bytes": 5120,
+    "depth": 8,
+    "nodes": 256
+  },
+  "pocket_ic_server_sha256": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792",
+  "pocket_ic_server_version": "pocket-ic-server 16.0.0\n",
+  "profile": "canister-evaluation: release, opt-level=z, lto=true, codegen-units=1, panic=abort, strip=debuginfo",
+  "scalar_wire_limits": {
+    "allocation": 21,
+    "bytes": 21,
+    "depth": 1,
+    "nodes": 1
+  },
+  "scope": "IC performance_counter(0) deltas: strict decode including canonical re-encoding; handler; response encode. Counter overhead included. Argument copy, reply delivery and scheduling excluded. No native-time or compression measurements.",
+  "source_sha256": {
+    "Cargo.lock": "55e63bf9de772e985037e1f28fb95612e8383a3a44d9211fd91aabedb6d89c13",
+    "Cargo.toml": "a4996bc6a216e10e0b5fa841cb363a9aea477a565ce8f8caefc6728e64e02d53",
+    "crates/ic-wire-canister-evaluation/Cargo.toml": "521b80252b0ddac594616166b612d981b747a5ddfd740edc13b42f8ed4eedade",
+    "crates/ic-wire-canister-evaluation/examples/runtime_measure/mod.rs": "a1ab350282af5b2cded1c97084e97189e0ca9f2f9ef72ac947192375a2a4db2d",
+    "crates/ic-wire-canister-evaluation/src/authority/mod.rs": "0466e75ded105d57db7011b2069655c727656509016be750a4b773b532a4f567",
+    "crates/ic-wire-canister-evaluation/src/lib.rs": "d410186634b23d1e04578264f1c9fbcde4eafb5d9e16771e63143ddc4a7de3ac",
+    "crates/ic-wire-canister-evaluation/src/runtime_benchmark/mod.rs": "f7c0e660255a826d81aa0196ea58bcb126b4ff4b200b37956844c397ecdf0665",
+    "crates/ic-wire-canister-evaluation/src/runtime_benchmark/shapes/mod.rs": "d150e027f787d37e9bbe2b8f6ba4e060684cdc600ef0ff653d7d506fe39cacf8",
+    "crates/ic-wire-derive/src/lib.rs": "d2b30abfc8203f4107c680c7871caaf989fbc0b30c85bd4429a84df64a1bc202",
+    "crates/ic-wire/src/bounded/mod.rs": "06adcc2fc06b7e20ae8d930b5ec2a9d42f2119c6dc10074e7829bc079fdcb9d2",
+    "crates/ic-wire/src/contract/mod.rs": "526ed845d7a14d81e5ccba4af0c2652e0038e664efc02a1a3f6bce3f1432f269",
+    "crates/ic-wire/src/float/mod.rs": "ed8eb372a3a69f4f1b27a47ec37426ac56232d812bfe94763150530c51f2ea04",
+    "crates/ic-wire/src/lib.rs": "59c7fb583ce45ff446927d8c5b9c6a2670c55aead76a00a734bc755dad5338ca",
+    "crates/ic-wire/src/schema/mod.rs": "e177ff609382eff2aaa687013506d963465782120f6e9896d1af150ea15e6ba8",
+    "crates/ic-wire/src/shape/mod.rs": "9026af4e33f7de8ee2834bb133227ed0992f1282e5bd9a2c7a2fe4cfcd03ed06",
+    "scripts/ci/evaluate-runtime.sh": "ab6242088a1062d523f3b2814192a9aac12c3a7e4eef92c5ce5bda0638bd5623"
+  },
+  "subnet": "application; PocketIC defaults",
+  "target": "wasm32-unknown-unknown",
+  "wire_limits": {
+    "allocation": 16384,
+    "bytes": 5120,
+    "depth": 8,
+    "nodes": 128
+  }
+}

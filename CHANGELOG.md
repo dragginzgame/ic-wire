@@ -1,11 +1,57 @@
 # Changelog
 
-## [0.2.3]
+## [0.3.2]
 
-- Add an unpublished `ic-wire-cdk` companion for raw typed endpoints. Authorize
-  before argument sizing/copying, apply each method's request limit and trap on
-  response-encoding failure. Keep CDK dependencies outside the codec crate and
-  application auth, dispatch and lifecycle with consumers.
+- Add an unpublished CDK endpoint companion for authorization before raw argument
+  admission and trap-based response failures. Keep endpoint and retry policy
+  consumer-owned; qualify current-message stable-memory rollback.
+
+## [0.3.1] - 2026-10-17
+
+- Upgrade the derive parser to Syn 3 while retaining the Rust 1.91 floor and
+  existing wire format. Preserve safe-handler admission in the macro fixture.
+- Add `make publish` for explicit crates.io delivery of the runtime and derive
+  packages, separate from Git release commands.
+- Qualify IC Build 0.13 and Host Artifacts 0.25 in the evaluation hosts, including
+  installed runtime, macro and browser trials. Keep these dependencies dev-only.
+
+## [0.3.0] - 2026-10-17
+
+- Prepare the first crates.io publication of `ic-wire` and `ic-wire-derive`, with
+  self-contained runtime documentation, registry dependency requirements and
+  package metadata. Keep evaluation tooling unpublished. Publication is separate
+  from the maintainer-operated Git release.
+
+- Retire historical canister benchmarks and use IC Build artifact records for
+  maintained installed evaluations. Preserve saved measurement provenance.
+- Relocate durable receipt-policy qualification to Relay; keep IC Wire’s browser
+  fixture volatile and retire `evaluate-replay`. See [Relay #1 — Own durable
+  receipt-policy qualification](https://github.com/dragginzgame/ic-relay/issues/1).
+
+- Retire the four-codec screen and its private fixed/CBOR implementations; retain
+  historical evidence and principal-byte nesting in production conformance.
+  Remove screen-only runtime dev dependencies. Adopt Testkit 0.50 host startup
+  and installation, and replace source-mutating diagnostic scripts with explicit
+  pass/fail Rust fixtures and one locked offline runner.
+
+- Retire the private typed-journey codec and Make target; qualify exact retry
+  bytes and transport/application error separation against the production runtime.
+  Use published Host artifact inspection in all three Wasm-reporting fixtures,
+  with explicit artifact bounds and unchanged local export/measurement policy.
+
+- Add an offline, explicitly invoked libFuzzer runtime harness and Make target,
+  with bounded nested/float inputs, canonical round-trip assertions and sanitizer
+  checks. Keep fuzz dependencies dev-only and instrumented builds isolated.
+
+- Add exact request/reply frame-length helpers without output allocation,
+  source-matched bounded IcyDB success fixtures and Rust/TypeScript differential
+  mutation checks. Add offline inspection through generated contract modules;
+  see [consumer qualification](docs/consumer-fixtures.md) for scope and limits.
+
+- Extend installed codec measurements with tightly bounded scalar endpoints and
+  heterogeneous SQL-shaped pages, including row/cell overflow rejection. Preserve
+  prior reports and record the expanded matched Wasm and instruction matrix in
+  [the runtime comparison](docs/runtime-comparison.md).
 
 ## [0.2.2] - 2026-10-16
 

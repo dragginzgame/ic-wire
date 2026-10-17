@@ -7,8 +7,8 @@ writing serialization plumbing. Internal Canic traffic should avoid Candid type
 tables and generic decoding while retaining bounded input handling, exact retries
 and deterministic bytes wherever values are hashed or signed.
 
-The maintainer approved setting up this investigation on 2026-10-16. The name is
-provisional and must not be reserved on crates.io. Success requires developer
+The maintainer approved setting up this investigation on 2026-10-16. The maintainer selected 0.3.0 for the first registry publication on 2026-10-17.
+Preparation does not execute publication. Success requires developer
 ease, documentation and a meaningful measured advantage, not merely another codec.
 
 ## Ownership

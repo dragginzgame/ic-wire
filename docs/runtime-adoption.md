@@ -1,5 +1,13 @@
 # Installed runtime adoption evidence
 
+The durable receipt experiment described below is now historical in IC Wire. Its
+scenarios move to Relay's opt-in persistence probe; see [Relay #1 — Own durable
+receipt-policy qualification](https://github.com/dragginzgame/ic-relay/issues/1). Current IC Wire keeps
+a volatile browser transport fixture and production-codec exact-byte tests.
+`evaluate-replay` is retired here. Reproduce the saved evidence from its recorded
+source identity; run `make receipt-probe` in the Relay contribution for current
+durable-policy qualification. No automatic retry or durable storage API was added.
+
 This trial qualifies the [implemented Rust API](runtime.md) for an initial
 controlled Canic integration. It is not a claim that Canic source has adopted it.
 Both the installed canister and native Rust caller compile against the same

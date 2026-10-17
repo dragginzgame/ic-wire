@@ -1,11 +1,11 @@
 # IC Wire
 
-An unpublished implementation of a small, bounded binary protocol for Rust
+A small, bounded binary protocol for Rust
 applications on the Internet Computer. The goal is Candid-like developer ease
 with substantially less Wasm code and serialization work for communication whose
 producers and consumers we control.
 
-**Status: unpublished bounded Postcard runtime for controlled Rust endpoints.**
+**Status: 0.3.0 published on crates.io.**
 The library supplies explicit-layout derives, bounded containers, typed method
 bindings, finite float wrappers and canonical request/reply envelopes. Its normal dependency graph has
 no Candid, CDK or host tooling. Start with the [runtime guide](docs/runtime.md)
@@ -15,10 +15,14 @@ expansion pattern here. An optional host generator now emits bounded TypeScript
 codecs from those same wire declarations. Installed Chromium tests qualify
 controlled queries, protected updates, replay and peer calls. Production browser
 login/delegation and Canic integration still need consumer qualification.
-The separate [CDK endpoint companion](crates/ic-wire-cdk/README.md) supplies
+The library and derive packages are configured for crates.io; the evaluation
+package remains unpublished. See [publication preparation](docs/development.md#first-publication)
+for the separate Git release and registry steps. Both
+[`ic-wire`](https://crates.io/crates/ic-wire/0.3.0) and
+[`ic-wire-derive`](https://crates.io/crates/ic-wire-derive/0.3.0) are published.
+
+The unpublished [CDK endpoint companion](crates/ic-wire-cdk/README.md) supplies
 raw argument admission and trap-based replies for consumer-owned exports.
-The package has `publish = false`. Do not reserve the crates.io name or publish
-until the maintainer explicitly approves the direction and publication.
 
 Start with [the handoff](docs/status/current.md), [design](docs/design.md),
 [proposed developer experience](docs/developer-experience.md) and
@@ -28,18 +32,20 @@ The [shared-codec assessment](docs/shared-codec-evaluation.md) evaluates optiona
 reuse with IcyDB and identifies the database contracts that remain separate.
 The [payload screen](docs/codec-screen.md) records reproducible sizes and the
 remaining obstacles to selecting a shared encoding.
-The [matched canister experiment](docs/canister-comparison.md) adds measured
+The historical [matched canister experiment](docs/canister-comparison.md) adds measured
 Wasm and IC instruction evidence, including retained Candid management traffic.
 The [production runtime comparison](docs/runtime-comparison.md) measures the
 current envelopes, bounds and finite floats against strict Candid.
-The [nested authority extension](docs/nested-authority.md) adds bounded delegate
+The historical [nested authority extension](docs/nested-authority.md) adds bounded delegate
 and grant collections with new installed measurements.
 The [browser trial](docs/browser-interop.md) demonstrates a typed TypeScript client
 using generated Postcard bindings in real Chromium against local PocketIC.
 The [peer extension](docs/peer-interop.md) exercises those same bytes through a
 forwarding canister and verifies the actual recipient caller.
-The [protected-command trial](docs/command-replay.md) qualifies direct-caller
+The historical [protected-command trial](docs/command-replay.md) qualified direct-caller
 authorization, atomic local effects and stable exact-byte replay across upgrades.
+Durable receipt-policy qualification now lives in [Relay’s receipt probe PR](https://github.com/dragginzgame/ic-relay/pull/2);
+the current browser fixture retains only volatile replay state.
 The [consumer adoption assessment](docs/consumer-adoption.md) maps Canic and sibling
 integration work and the remaining prerequisites.
 

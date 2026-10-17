@@ -1,7 +1,7 @@
 # IC Wire contributor instructions
 
 Read docs/status/current.md first, then README.md, docs/design.md and
- docs/evaluation.md. The unpublished Postcard runtime is qualified for bounded
+ docs/evaluation.md. The Postcard runtime is qualified for bounded
 Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
@@ -12,8 +12,9 @@ moving sibling checkout or patch snapshot-owned files in place.
 
 ## Maintainer decisions
 
-- Keep every package unpublished (`publish = false`). Do not reserve a registry
-  name, publish, create a remote, push or release without explicit authorization.
+- ic-wire and ic-wire-derive were first published at 0.3.0.
+  Keep the evaluation package `publish = false`. Subsequent publication,
+  remote creation, pushes and releases require explicit authorization.
 - Establish a reusable Rust developer experience and a substantial measured win
   before broad adoption. Postcard is selected for controlled RPC and owned user
   endpoints. Preserve the explicit runtime contract in docs/runtime.md; no Candid
@@ -23,8 +24,8 @@ moving sibling checkout or patch snapshot-owned files in place.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
 - Maintainer-operated releases use direct Git delivery to origin/main through
-  Shared Tooling. Versioning, tags and pushes do not publish packages; keep
-  `publish = false`. Ordinary agent work does not execute releases.
+  Shared Tooling. Versioning, tags and pushes do not publish packages.
+  Ordinary agent work does not execute releases.
 
 ## Development and validation
 
@@ -41,7 +42,7 @@ Use the virtual root Cargo workspace, crates/ic-wire for the library, inherited
 package metadata/lints and root workspace.dependencies for future dependencies.
 Use directory modules with mod.rs. No placeholder public APIs or speculative
 crate splits. A derive crate can be added when the selected design needs it;
-any such crate must also have publish = false.
+additional experimental crates must remain unpublished.
 
 Preserve dirty work. Ordinary work leaves staging, commits, own versions and
 releases to the maintainer. The accepted next task is the bounded evaluation in
