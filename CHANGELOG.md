@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.0]
+## [0.3.0] - 2026-10-17
 
 - Prepare the first crates.io publication of `ic-wire` and `ic-wire-derive`, with
   self-contained runtime documentation, registry dependency requirements and
