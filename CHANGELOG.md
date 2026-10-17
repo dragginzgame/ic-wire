@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.5]
+## [0.3.5] - 2026-10-17
 
 - Retire copied IcyDB SQL contract projections; actual endpoint and conversion
   qualification stays in [IcyDB #372](https://github.com/dragginzgame/icydb/issues/372).
