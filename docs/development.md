@@ -194,8 +194,8 @@ the source checkout needed for reproduction.
 
 Durable command/replay qualification has moved to Relay’s opt-in receipt probe
 ([Relay #1 — Own durable receipt-policy qualification](https://github.com/dragginzgame/ic-relay/issues/1)).
-`evaluate-replay` is retired here; `evaluate-browser` keeps volatile transport
-checks and the runtime tests keep exact request/reply-byte coverage.
+`evaluate-replay` is retired here; `evaluate-browser` keeps single-canister transport
+checks without receipt caching, expiry/audience policy or peer forwarding and the runtime tests keep exact request/reply-byte coverage.
 
 ## First publication
 

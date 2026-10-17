@@ -1,9 +1,10 @@
 //! Generate runtime clients and serve a controller-bound local browser fixture.
 use candid::Principal;
 use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
-use ic_wire::{Bytes, List, Method, Text, encode_request, encode_response};
+use ic_wire::{List, Method, Text, encode_request, encode_response};
 use ic_wire_canister_evaluation::commands::{
-    Apply, Command, Failure, Inspect, Inspection, Receipt, Snapshot,
+    Apply, Command, Failure, Inspect, Inspection, NATIVE_ID, NATIVE_LIMITS, NativeTree, Receipt,
+    Snapshot,
 };
 use serde_json::json;
 use std::{env, fs, io, path::PathBuf};
@@ -41,17 +42,17 @@ fn main() {
             .build_instance(PocketIcBuilder::new().with_application_subnet())
             .unwrap();
     let pic = &mut owned.instance;
-    let [id, sender]: [_; 2] = pic
-        .try_create_and_install_many(
-            (0..2).map(|_| InstallSpec::new(wasm.clone(), vec![], 10_000_000_000_000)),
-        )
-        .unwrap()
-        .try_into()
+    let id = pic
+        .try_create_and_install(InstallSpec {
+            wasm,
+            init_bytes: vec![],
+            cycles: 10_000_000_000_000,
+            install_sender: None,
+            label: None,
+        })
         .unwrap();
-    for target in [id, sender] {
-        pic.set_controllers(target, None, vec![Principal::anonymous(), caller, sender])
-            .unwrap();
-    }
+    pic.set_controllers(id, None, vec![Principal::anonymous(), caller])
+        .unwrap();
     let inspection = Inspection {
         labels: List::new(vec![
             Text::new("é🦀".into()).unwrap(),
@@ -71,22 +72,45 @@ fn main() {
             .unwrap(),
         query_reply.as_bytes()
     );
-    let command = Command {
-        subject: Bytes::new(caller.as_slice().to_vec()).unwrap(),
-        audience: Bytes::new(id.as_slice().to_vec()).unwrap(),
-        expiry: u64::MAX,
-        id: 1,
-        amount: 7,
-    };
+    let command = Command { id: 1, amount: 7 };
     let request = encode_request::<Apply>(&command).unwrap();
     let success = encode_response::<Apply>(&Ok(Receipt { id: 1, balance: 7 })).unwrap();
     let failure =
         encode_response::<Apply>(&Err(Failure::Overflow(Receipt { id: 2, balance: 7 }))).unwrap();
     fs::write(generated.join("vectors.json"), serde_json::to_vec_pretty(&json!({"query":query.as_bytes(),"queryReply":query_reply.as_bytes(),"request":request.as_bytes(),"success":success.as_bytes(),"failure":failure.as_bytes()})).unwrap()).unwrap();
-    let unavailable = pic.create_canister();
+    let tree = NativeTree::Branch(vec![NativeTree::Leaf("é".into(), u128::MAX)]);
+    let native_request = ic_wire::native::encode_request(NATIVE_ID, &tree, NATIVE_LIMITS).unwrap();
+    let native_reply = ic_wire::native::encode_response(NATIVE_ID, &tree, NATIVE_LIMITS).unwrap();
+    assert_eq!(
+        pic.query_call(id, caller, "native_echo", native_request.clone())
+            .unwrap(),
+        native_reply
+    );
+    fs::write(
+        generated.join("native-vectors.json"),
+        serde_json::to_vec_pretty(
+            &json!({"id":NATIVE_ID.to_string(),"request":native_request,"response":native_reply}),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let mut deep = tree;
+    for _ in 0..64 {
+        deep = NativeTree::Branch(vec![deep]);
+    }
+    let mut forged = native_request[..11].to_vec();
+    forged.extend(postcard::to_allocvec(&deep).unwrap());
+    assert!(pic.query_call(id, caller, "native_echo", forged).is_err());
     let host = pic.make_live(None);
     fs::create_dir_all(root.join("artifacts")).unwrap();
-    fs::write(root.join("artifacts/connection.json"), serde_json::to_vec_pretty(&json!({"host":host.as_str(),"canisterId":id.to_text(),"senderId":sender.to_text(),"caller":caller.to_text(),"unavailableId":unavailable.to_text()})).unwrap()).unwrap();
+    fs::write(
+        root.join("artifacts/connection.json"),
+        serde_json::to_vec_pretty(
+            &json!({"host":host.as_str(),"canisterId":id.to_text(),"caller":caller.to_text()}),
+        )
+        .unwrap(),
+    )
+    .unwrap();
     println!("Local runtime browser fixture ready; close stdin to stop it.");
     let mut line = String::new();
     io::stdin().read_line(&mut line).unwrap();

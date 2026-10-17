@@ -78,10 +78,10 @@ pub trait Wire: Serialize + DeserializeOwned {
     const SCHEMA: crate::schema::Schema = crate::schema::Schema::Opaque;
 }
 
-/// Consumer-selected allowances, checked against the schema before decoding.
+/// Consumer-selected allowances for finite schema or explicit native admission.
 #[derive(Clone, Copy, Debug)]
 pub struct Limits {
-    /// Maximum complete envelope bytes, including its 11-byte header.
+    /// Maximum encoding bytes; framed APIs include the 11-byte header.
     pub bytes: usize,
     /// Maximum value heap plus codec scratch (excludes caller input).
     pub allocation: usize,

@@ -62,6 +62,14 @@ struct SqlPage {
     #[wire(id = 3)]
     next: Option<Bytes<16>>,
 }
+// Native Serde shape oracle, independent of the JavaScript descriptor.
+#[derive(serde::Serialize)]
+struct NativeCount(u64);
+#[derive(serde::Serialize)]
+enum NativeNode {
+    Leaf(String, NativeCount),
+    Branch(Vec<Self>),
+}
 struct Fixture {
     directory: PathBuf,
     checks: String,
@@ -149,7 +157,15 @@ fn main() {
     fs::write(directory.join("package.json"), "{\"type\":\"module\"}").unwrap();
     let mut f = Fixture {
         directory,
-        checks: include_str!("checks.mjs").into(),
+        checks: format!(
+            "const nativePayload = {:?};\n{}",
+            postcard::to_allocvec(&NativeNode::Branch(vec![NativeNode::Leaf(
+                "é".into(),
+                NativeCount(128)
+            )]))
+            .unwrap(),
+            include_str!("checks.mjs")
+        ),
         count: 0,
         mutations: 0,
     };

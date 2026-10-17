@@ -3,7 +3,7 @@
 Current executable comparisons use `evaluate-runtime`. The old installed codec
 experiment and `evaluate-canisters` are retired; their reports below are historical.
 Durable receipt qualification moves to Relay; IC Wire retains browser transport
-and codec byte conformance rather than a stable receipt store.
+and codec byte conformance without receipt caching or peer-delivery policy.
 
 ## Outcome
 

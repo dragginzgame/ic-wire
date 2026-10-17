@@ -68,6 +68,9 @@ compose. Result uses Postcard's fixed tags 0=Ok, 1=Err; Option uses 0=None, 1=So
 
 Principal values cross as `Bytes<29>`; adapters convert/validate with their existing
 principal type. IC Wire adds no principal identity type or Candid dependency.
+Owned values can leave their bounded wrappers through `Bytes::into_vec`,
+`Text::into_string` and `List::into_vec` without copying or allocating. Consumers
+then own the recovered buffers; constructing another wrapper checks its bound again.
 A field of `Bytes<29>` alone establishes a byte bound, not caller authentication.
 Keep the dependency name `ic-wire` so generated paths resolve. Consumers do not
 need to depend directly on Serde or derive its traits for these records.
@@ -148,7 +151,7 @@ Encoding is deterministic for the supplied types, not a general signature policy
 
 ## Canic adapter work
 
-The installed fixture's shared contracts and replay module demonstrate these exact
+The installed fixture's shared contracts and browser module demonstrate these exact
 calls. A separate [local macro proof](https://github.com/dragginzgame/ic-wire/blob/main/docs/macro-adoption.md) tests actual evaluation-only
 query/update attributes; neither changes Canic macros.
 
@@ -196,7 +199,7 @@ allocation. Its direct-caller auth and local atomic effect do not qualify delega
 composite queries, async external-effect recovery or Canic's whole RPC surface.
 
 The [installed browser fixture](https://github.com/dragginzgame/ic-wire/blob/main/docs/browser-interop.md) now uses this runtime envelope
-and generated clients for queries, protected updates and a peer path. Controlled
+and generated clients for queries, protected updates and typed replies. Controlled
 direct-caller auth is qualified; login/delegation and coordinated frontend rollout
 still need consumer qualification. Do not claim fleet-wide rollout readiness.
 
@@ -316,3 +319,70 @@ The runtime supports Rust 1.91 and `wasm32-unknown-unknown`.
 
 Licensed under the Dragginz Source Available License — Verifiable ICP Burn,
 Version 1.0; see the packaged LICENSE. This is not an OSI-approved license.
+
+## Native Serde payloads
+
+`ic_wire::native` handles consumer-owned Serde types, including String, Vec,
+tuples, maps and recursive enums, using the same Postcard encoding and envelope.
+It does not infer `Wire`, static maxima or TypeScript metadata for those types.
+Consumers own declaration order, compatible method IDs, deterministic serializers
+and domain validation (including finite floats where required). Unordered maps
+are unsuitable unless their serializer establishes deterministic ordering.
+
+```rust
+use ic_wire::{Limits, native};
+use serde::{Deserialize, Serialize};
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+struct Request { text: String, values: Vec<u64> }
+let limits = Limits { bytes: 4096, allocation: 65536, nodes: 4096, depth: 64 };
+let request = Request { text: "hello".into(), values: vec![1, 2] };
+let bytes = native::encode_request(7, &request, limits)?;
+assert_eq!(native::encoded_frame_len(&request, limits)?, bytes.len());
+assert_eq!(native::decode_request::<Request>(7, &bytes, limits)?, request);
+# Ok::<(), ic_wire::Error>(())
+```
+
+`encode`/`decode` and `encoded_len` operate on payloads without headers.
+`encode_request`/`encode_response` accept borrowed Serialize values without an
+owned Deserialize requirement. Their decode counterparts require owned values.
+`encoded_frame_len` includes the 11-byte header for either direction. Retain the
+returned bytes unchanged for any consumer-authorized retry; IDs alone do not
+establish idempotency. Sizing does not retain a serialization for later delivery.
+
+Limits are explicit per operation. Native `bytes` bounds the payload or full
+frame, respectively. `allocation` reserves that entire byte allowance for output
+scratch before admitting value storage. The remaining allowance charges eight
+times visited value sizes and text/byte lengths; node and depth accounting follows
+Serde traversal, including seeds and enum wrappers. It is deliberately conservative,
+not an allocator/peak-memory measurement. Unlike finite Wire schema admission,
+it follows actual values. Different borrowed/owned representations may require
+different traversal allowances. Native decoding suppresses collection size hints
+and admits elements before their visitors can allocate. Canonical checking streams
+serialization against the input without allocating a second output buffer.
+
+Custom Serde code is trusted: work and allocations outside these visited boundaries
+must be bounded by its owner. Standard/custom Deserialize allocations may abort on
+allocator exhaustion; the adapter does not make arbitrary Serde allocation fallible.
+The codec's own output reserve is fallible. Resource refusals are `Error::Limit`;
+invalid payloads, trailing bytes, identity and noncanonical encodings retain typed
+errors. Caller input custody is excluded. Native depth allowances must fit the
+consumer's stack budget. No schema-independent performance claim is made.
+
+The traversal adapters are adapted from IcyDB's native admission implementation;
+its MIT notice is retained in `src/native/LICENSE-MIT`. IcyDB's numeric policies,
+SQL semantics, endpoint roster and storage encodings are not imported.
+
+## Concrete native TypeScript metadata
+
+`typescript::RUNTIME` accepts trusted concrete metadata through
+`createCodec(method, types, checks)`, including named recursive `ref` nodes,
+`tuple` items and transparent `newtype` wrappers. Consumers supply byte, node and
+depth allowances for both directions. Dynamic lengths are checked before copying
+or descending. Missing/cyclic aliases and sparse arrays reject. Concrete nodes
+and named references can name trusted scalar checks that run before encoding and
+after decoding; every check along an alias chain applies.
+
+Metadata extraction, domain validation and endpoint identities remain consumer-owned.
+The finite Rust generator still rejects `Schema::Opaque`; it does not infer native
+metadata or JavaScript heap bounds. The shared runtime compiles with strict
+TypeScript, `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.

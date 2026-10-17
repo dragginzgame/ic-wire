@@ -48,7 +48,7 @@ check-browser:
 	+@env npm --prefix examples/browser run build
 
 check-canister-evaluation:
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features replay
+	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features browser-fixture
 	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features candid-codec,runtime-benchmark
 	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
 	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown

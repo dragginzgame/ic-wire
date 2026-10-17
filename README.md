@@ -13,7 +13,7 @@ and [installed adoption proof](docs/runtime-adoption.md). Canic macro integratio
 remains consumer work; a [local macro fixture](docs/macro-adoption.md) tests the
 expansion pattern here. An optional host generator now emits bounded TypeScript
 codecs from those same wire declarations. Installed Chromium tests qualify
-controlled queries, protected updates, replay and peer calls. Production browser
+controlled queries, protected updates and typed application replies. Production browser
 login/delegation and Canic integration still need consumer qualification.
 The library and derive packages are configured for crates.io; the evaluation
 package remains unpublished. See [publication preparation](docs/development.md#first-publication)

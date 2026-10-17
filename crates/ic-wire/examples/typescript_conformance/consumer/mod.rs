@@ -1,7 +1,7 @@
 //! Source-matched IcyDB success projections. See docs/consumer-fixtures.md.
 use super::{Contract, Fixture};
 use ic_wire::{List, Text, Wire};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Wire)]
 struct Count {
@@ -58,7 +58,7 @@ struct PublicError {
     query_field: Option<QueryField>,
 }
 // Retain native declaration order for the independent Postcard byte oracle.
-#[derive(Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct NativeGrouped {
     entity: String,
     columns: Vec<String>,
@@ -66,7 +66,7 @@ struct NativeGrouped {
     row_count: u32,
     next_cursor: Option<String>,
 }
-#[derive(Serialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 enum NativeReply {
     Count { entity: String, row_count: u32 },
     // The real enum's Projection occupies ordinal 1. This oracle never emits it.
@@ -134,6 +134,19 @@ fn native_grouped() -> NativeGrouped {
     }
 }
 fn payload_matches(projected: &Result<Reply, PublicError>, native: &NativeReply) {
+    let limits = ic_wire::Limits {
+        bytes: 4096,
+        allocation: 65536,
+        nodes: 4096,
+        depth: 64,
+    };
+    let payload = ic_wire::native::encode(&Ok::<_, ()>(native), limits).unwrap();
+    assert_eq!(
+        payload,
+        postcard::to_allocvec(&Ok::<_, ()>(native)).unwrap()
+    );
+    let decoded: Result<NativeReply, ()> = ic_wire::native::decode(&payload, limits).unwrap();
+    assert_eq!(decoded.as_ref().unwrap(), native);
     let bytes =
         ic_wire::encode_response::<Contract<Result<Reply, PublicError>>>(projected).unwrap();
     assert_eq!(

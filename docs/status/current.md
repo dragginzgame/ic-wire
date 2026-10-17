@@ -1,15 +1,88 @@
 # Current handoff
 
-Updated 2026-10-17. This PR incorporates released main 0.3.1 (6fe0ef4).
-The unpublished CDK companion is pending 0.3.2; package versions are unchanged.
-Its installed trial uses the shared IC Build pipeline through `make evaluate-cdk`,
-retaining source/build digests and a rollback report under target/cdk-adoption-evidence.
-The first runtime/derive publication was 0.3.0; this PR does not publish packages.
+## Pending 0.3.5 CDK companion
 
-Updated Linux qualification passes companion tests/Clippy, Rust 1.91 Wasm and
-host fixture checks, host Clippy, the disposable Make fixture, links and pins.
-The installed CDK trial passes authorization ordering and stable growth/write
-rollback. Hosted checks for the updated PR remain separate from earlier results.
+PR #2 incorporates released main 0.3.4 (164088d). The companion remains
+unpublished and package versions follow main unchanged. Its installed trial uses
+the shared IC Build pipeline through `make evaluate-cdk`; consumers retain
+endpoint exports, permissions, lifecycle and retry policy.
+
+Updated Linux qualification passes three companion tests, companion and host
+Clippy, Rust 1.91 Wasm/host checks, formatting, links, pins and the disposable
+Make fixture. The installed PocketIC trial passes query decoding, authorization
+before admission, malformed/oversized rejection and stable growth/write rollback.
+Logs are retained at `/tmp/ic-wire-pr2-refresh-*.log`; artifact identities and the
+report are under `target/cdk-adoption-evidence`. Hosted checks for the updated
+PR remain pending; earlier green PR checks do not qualify this commit.
+
+Main 0.3.4 includes the native TypeScript work, so PR #1 is closed as superseded.
+Both runtime/derive 0.3.4 packages are available in the registry. Main CI is still
+running; issues #3/#4/#5 retain acceptance tracking. Earlier evidence follows.
+
+## Pending 0.3.4 native adoption
+
+The follow-up audit fixed skipped TypeScript checks on named references and
+frame-sized scratch allocation for short strings. Alias-chain checks now apply
+in both directions, including missing-validator refusal. Concrete nodes skip
+registry enumeration. The new alias regression failed before repair; text scratch
+coverage checks its size against the input, including empty and Unicode strings.
+All 88 conformance vectors and 17,664 mutations pass, as do three native and
+13 finite Rust tests. Native map probes additionally reject duplicate/out-of-order
+keys as noncanonical. Logs: `target/audit-typescript.log`, `target/audit-rust.log`.
+This audit did not repeat installed-browser or native macOS qualification.
+
+Working on released main 0.3.3 (94bac2e), with package versions unchanged.
+The native Serde module provides payload/frame encoding, sizing and canonical
+decoding under caller-supplied budgets. Shared frame/output/comparison owners
+preserve the finite Wire API. IcyDB traversal code was adapted with its MIT notice;
+sibling working files remain untouched. PR #1’s native TypeScript source is included
+locally with strict indexed-access fixes; the PR itself is still open.
+
+Adoption remains coordinated through [IC Wire #5](https://github.com/dragginzgame/ic-wire/issues/5)
+and [IcyDB #372](https://github.com/dragginzgame/icydb/issues/372). IcyDB must replace
+its wrapper/prefix writer only after publication and its own endpoint/browser
+qualification; schema reflection, scalar rules and precommit checks stay there.
+Canic retains transport/auth/lifecycle. No sibling code, versions or publication
+are changed by this batch. Earlier sections below retain prior batch evidence.
+
+Qualification passes: three native admission tests (including deterministic frame
+mutations), 13 finite runtime tests, source-matched SQL Count/Grouped oracles,
+88 Rust/TypeScript vectors and 17,664 differential mutations under strict indexed
+access. Rustdoc, Clippy, Rust 1.91 native/Wasm checks and the installed Chromium
+recursive query pass. The installed probe also rejects excessive recursive depth.
+Packaging includes the native adapter and its MIT notice; no upload occurred.
+Logs are under `target/native-*`, with the passing installed retry recorded in
+`target/native-installed-retry.log`. Full CI/native macOS and actual IcyDB endpoint
+qualification were not run. The initial installed attempt exposed a vector-file
+read typo in the test runner; it was corrected before the passing run.
+
+Updated 2026-10-17. Main is released at 0.3.2 (5b1ddc6); first crates.io
+publication was 0.3.0 for ic-wire-derive and ic-wire. Evaluation remains unpublished.
+The 0.3.2 notes describe open TypeScript and CDK companion PRs, explicitly pending
+integration. Their code is not yet on main; both updated PR heads passed Linux,
+macOS ARM and macOS Intel CI. See [the notes](../../CHANGELOG.md#032) for PR links.
+
+Pending 0.3.3 adds ownership recovery for Bytes and Text without copying or
+allocating, matching List's existing ownership API. Wire bytes, admission limits
+and package versions are unchanged.
+Focused runtime tests verify buffer identity on recovery; library Clippy and
+the Rust 1.91 Wasm check pass. The log is `target/033-ownership.log`.
+
+## Evaluation cleanup
+
+The current browser fixture uses one canister for signed query/update round trips,
+typed application errors and malformed replies. Its cache, expiry/audience checks
+and peer retry path are removed. Disposable fixture contracts change together;
+frozen browser evidence retains its original identities. Runtime/Candid benchmarks
+remain. Canic PR #591 now covers synchronous raw entrypoints, but explicitly
+retains this repository’s async macro proof, so that fixture stays.
+All three evaluation installers use the selected Testkit 0.51 InstallSpec fields.
+The installed browser trial passes five Rust vectors, 68 truncated replies,
+signed updates, application failures and certificate rejection. Retained runtime
+and macro trials pass too, including the 16 macro rejection/rollback cases.
+Evaluation-example Clippy and Rust 1.91 host/browser-Wasm checks pass. Fresh
+logs are retained at `target/browser-trim-installed.log` and
+`target/browser-trim-clippy.log`; frozen evidence remains unchanged.
 
 ## Publication and parser follow-up
 
@@ -23,8 +96,8 @@ The working derive crate now selects Syn 3.0.9. Its evaluation-only adapter uses
 Syn’s Safety enum and rejects unsupported function modifiers; an unsafe-handler
 negative fixture checks admission. Syn 2 remains transitively through other macro
 dependencies. This changes host parsing, not runtime wire bytes or Wasm behavior.
-The runtime and derive package source still targets Rust 1.91. This follow-up has
-not been released or published; 0.3.0 contains the previously qualified Syn 2 code.
+The runtime and derive package source still targets Rust 1.91. This follow-up was
+released in Git at 0.3.1; 0.3.0 contains the previously qualified Syn 2 code.
 
 Syn 3 qualification passes: 13 runtime tests, Rustdoc, three macro pipeline
 tests, all 19 negative diagnostic cases on Rust 1.99 and 1.91, Clippy, Wasm MSRV,
@@ -41,7 +114,7 @@ at `target/031-host-qualification.log` and `target/031-installed.log`; fresh rep
 and build identities remain under their existing target/browser artifact owners.
 `make check-package` verifies both current source archives with Syn 3, including
 the staged derive dependency (`target/031-package.log`). This check uploads nothing;
-the workspace still uses 0.3.0 pending maintainer release preparation for 0.3.1.
+that check preceded the maintainer's Git release of 0.3.1.
 
 ## Latest cleanup
 
@@ -93,16 +166,6 @@ It checks retained success/failure responses, conflicting requests, trap rollbac
 capacity refusal and same-contract upgrade replay. The private 0.1.4 tuple replay
 probe is retired from current source; its historical evidence remains labeled.
 This qualifies initial controlled Rust endpoint integration, not full Canic rollout.
-
-## Raw endpoint companion
-
-The unpublished `ic-wire-cdk` companion now owns method-specific raw argument
-admission and trap-based response encoding for consumer-owned CDK exports.
-Its [usage and focused checks](../../crates/ic-wire-cdk/README.md) keep the codec
-CDK-free and permissions, dispatch and lifecycle with consumers. Native tests
-check ordering and malformed input; the installed fixture qualifies query replies,
-size/auth rejection and stable growth/write rollback on response codec failure.
-This does not replace Canic macros or qualify async external-effect recovery.
 
 ## Scope and remaining work
 
@@ -212,8 +275,9 @@ Three evaluation hosts now use published `ic-host-artifacts` 0.24.0 for bounded
 Wasm facts; only the host dev-dependency graph changes. Historical evidence stays
 at its original source identities. Canic macro-proof relocation is coordinated on
 [Canic #590](https://github.com/dragginzgame/canic/issues/590#issuecomment-6231405790).
-Its current draft PR is design-only, so the local adapter proof remains until
-Canic's production pipeline has equivalent installed qualification.
+Its [current PR](https://github.com/dragginzgame/canic/pull/591) implements synchronous
+entrypoints and installed rollback checks, but explicitly leaves the asynchronous
+macro proof here. The local fixture remains until that coverage has an owner.
 The cleanup passes 13 runtime tests with TypeScript, evaluation-example clippy
 and Rust 1.91 checks, local tooling checks, and installed runtime/macro proofs.
 The shared inspector remains dev-only; no codec or canister dependency changes.

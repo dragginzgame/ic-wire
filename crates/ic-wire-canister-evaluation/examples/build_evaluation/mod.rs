@@ -35,7 +35,7 @@ fn main() {
         ],
         "macros" => vec![("macros", "macro-fixture")],
         "cdk" => vec![("cdk", "cdk-fixture")],
-        "browser" => vec![("browser", "replay")],
+        "browser" => vec![("browser", "browser-fixture")],
         _ => panic!("unknown trial"),
     };
     for (name, features) in recipes {

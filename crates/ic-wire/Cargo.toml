@@ -31,6 +31,10 @@ path = "tests/runtime/mod.rs"
 name = "ui"
 path = "tests/ui/mod.rs"
 
+[[test]]
+name = "native"
+path = "tests/native/mod.rs"
+
 [[example]]
 name = "fuzz-runtime"
 path = "examples/fuzz_runtime/mod.rs"

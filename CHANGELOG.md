@@ -1,10 +1,49 @@
 # Changelog
 
-## [0.3.2]
+## [0.3.5]
 
 - Add an unpublished CDK endpoint companion for authorization before raw argument
   admission and trap-based response failures. Keep endpoint and retry policy
   consumer-owned; qualify current-message stable-memory rollback.
+  [PR #2](https://github.com/dragginzgame/ic-wire/pull/2).
+
+## [0.3.4] - 2026-10-17
+
+- Add bounded native Serde payload/frame APIs with borrowed encoding, exact sizing
+  and canonical decoding, sharing the existing Postcard envelope and output logic.
+  Consumers retain explicit limits and schema/domain ownership.
+  [IC Wire #5 — Native IcyDB admission](https://github.com/dragginzgame/ic-wire/issues/5).
+- Include the shared native TypeScript codec from
+  [PR #1](https://github.com/dragginzgame/ic-wire/pull/1), with recursive metadata,
+  tuples, newtypes and sparse-array refusal. Support strict indexed-access checks
+  without consumer patches ([#3](https://github.com/dragginzgame/ic-wire/issues/3)).
+- Preserve TypeScript scalar checks through named aliases and bound text scratch
+  buffers by the string's UTF-8 maximum instead of the remaining frame allowance.
+  Concrete values no longer enumerate the type registry during alias resolution.
+
+## [0.3.3] - 2026-10-17
+
+- Simplify the browser evaluation to one canister and generated-codec transport
+  checks. Remove fixture receipt caching, expiry/audience policy and peer retries;
+  retain runtime benchmarks and the asynchronous macro proof. Adapt evaluation
+  installation to the selected Testkit 0.51 API.
+
+- Add `Bytes::into_vec` and `Text::into_string` so consumers can recover owned
+  buffers without copying or allocating. Wire bytes and admission limits are unchanged.
+
+## [0.3.2] - 2026-10-17
+
+Pending PR integration; these changes are not yet on main.
+
+- Share the TypeScript codec with native recursive contracts through concrete
+  metadata, tuples, newtypes and explicit traversal limits. Reject sparse arrays
+  before encoding and retain consumer-owned scalar validation.
+  [PR #1 — Shared native TypeScript codec](https://github.com/dragginzgame/ic-wire/pull/1).
+- Add an unpublished CDK endpoint companion that authorizes before argument
+  sizing/copying and traps on response-encoding failure to roll back current-message
+  writes. Qualify the installed endpoint through the shared build pipeline with
+  retained build identities and stable-memory rollback evidence.
+  [PR #2 — Bounded CDK endpoints](https://github.com/dragginzgame/ic-wire/pull/2).
 
 ## [0.3.1] - 2026-10-17
 

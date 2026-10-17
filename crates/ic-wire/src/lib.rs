@@ -8,6 +8,7 @@ extern crate alloc;
 mod bounded;
 mod contract;
 mod float;
+pub mod native;
 pub mod schema;
 mod shape;
 /// Optional host-side TypeScript generation; never required by a canister.

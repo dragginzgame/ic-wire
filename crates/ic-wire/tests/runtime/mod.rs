@@ -131,6 +131,16 @@ fn declaration_order_does_not_own_wire_order() {
 }
 #[test]
 fn bounds_and_malformed_lengths_reject() {
+    let bytes = vec![1, 2, 3];
+    let original = bytes.as_ptr();
+    let recovered = Bytes::<3>::new(bytes).unwrap().into_vec();
+    assert_eq!(recovered, [1, 2, 3]);
+    assert_eq!(recovered.as_ptr(), original);
+    let text = String::from("é");
+    let original = text.as_ptr();
+    let recovered = Text::<2>::new(text).unwrap().into_string();
+    assert_eq!(recovered, "é");
+    assert_eq!(recovered.as_ptr(), original);
     assert!(List::<(), 2>::new(vec![(); 3]).is_err());
     assert!(postcard::from_bytes::<List<(), 2>>(&[3]).is_err());
     assert!(postcard::from_bytes::<Bytes<2>>(&[3, 1, 2, 3]).is_err());

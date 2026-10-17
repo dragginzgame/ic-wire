@@ -11,11 +11,11 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 cdk-fixture = ["dep:ic-wire", "dep:ic-wire-cdk"]
-bindings = ["replay", "ic-wire/typescript"]
+bindings = ["browser-fixture", "ic-wire/typescript"]
 candid-codec = []
 management = []
 macro-fixture = ["dep:ic-wire", "dep:ic-wire-derive", "ic-wire-derive/adapter-fixture"]
-replay = ["dep:ic-wire"]
+browser-fixture = ["dep:ic-wire"]
 runtime-benchmark = ["dep:ic-wire"]
 
 [dependencies]
