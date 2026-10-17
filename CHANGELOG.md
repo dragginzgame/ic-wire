@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.2]
+## [0.3.2] - 2026-10-17
 
 Pending PR integration; these changes are not yet on main.
 
