@@ -30,6 +30,16 @@ capacity refusal and same-contract upgrade replay. The private 0.1.4 tuple repla
 probe is retired from current source; its historical evidence remains labeled.
 This qualifies initial controlled Rust endpoint integration, not full Canic rollout.
 
+## Raw endpoint companion
+
+The unpublished `ic-wire-cdk` companion now owns method-specific raw argument
+admission and trap-based response encoding for consumer-owned CDK exports.
+Its [usage and focused checks](../../crates/ic-wire-cdk/README.md) keep the codec
+CDK-free and permissions, dispatch and lifecycle with consumers. Native tests
+check ordering and malformed input; the installed fixture qualifies query replies,
+size/auth rejection and stable growth/write rollback on response codec failure.
+This does not replace Canic macros or qualify async external-effect recovery.
+
 ## Scope and remaining work
 
 Canic owns query/update macros, dispatch, auth, replay policy, transport callbacks,

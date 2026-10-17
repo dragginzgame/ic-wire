@@ -15,6 +15,8 @@ expansion pattern here. An optional host generator now emits bounded TypeScript
 codecs from those same wire declarations. Installed Chromium tests qualify
 controlled queries, protected updates, replay and peer calls. Production browser
 login/delegation and Canic integration still need consumer qualification.
+The separate [CDK endpoint companion](crates/ic-wire-cdk/README.md) supplies
+raw argument admission and trap-based replies for consumer-owned exports.
 The package has `publish = false`. Do not reserve the crates.io name or publish
 until the maintainer explicitly approves the direction and publication.
 

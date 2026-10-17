@@ -1,0 +1,15 @@
+[package]
+name = "ic-wire-cdk"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+
+[dependencies]
+ic-cdk.workspace = true
+ic-wire.workspace = true
+ic0.workspace = true
+
+[lints]
+workspace = true

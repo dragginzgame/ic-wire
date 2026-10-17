@@ -146,6 +146,16 @@ immutable and method-bound; retain their exact bytes for retry or hashing.
 Consumer hash domains, semantic ordering and excluded fields remain consumer-owned.
 Encoding is deterministic for the supplied types, not a general signature policy.
 
+## Raw CDK endpoint companion
+
+The separate [ic-wire-cdk crate](../crates/ic-wire-cdk/README.md) factors out
+method-specific input admission and response encoding. It authorizes before
+argument sizing/copying and traps on response encoding failure. It does not add
+CDK dependencies to `ic-wire`, generate endpoint exports or own permission,
+replay, handler or lifecycle policy. The installed `cdk-fixture` checks stable
+growth/write rollback on a response codec failure. Consumer macros and callback
+allocation remain separate integration work.
+
 ## Canic adapter work
 
 The installed fixture's shared contracts and replay module demonstrate these exact

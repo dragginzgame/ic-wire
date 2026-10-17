@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3]
+
+- Add an unpublished `ic-wire-cdk` companion for raw typed endpoints. Authorize
+  before argument sizing/copying, apply each method's request limit and trap on
+  response-encoding failure. Keep CDK dependencies outside the codec crate and
+  application auth, dispatch and lifecycle with consumers.
+
 ## [0.2.2] - 2026-10-16
 
 - Reduce codec instruction costs by writing only emitted bytes and checking

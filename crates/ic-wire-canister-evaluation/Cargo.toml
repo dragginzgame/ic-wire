@@ -10,6 +10,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [features]
+cdk-fixture = ["dep:ic-wire", "dep:ic-wire-cdk"]
 bindings = ["replay", "ic-wire/typescript"]
 candid-codec = []
 management = []
@@ -22,12 +23,14 @@ runtime-benchmark = ["dep:ic-wire"]
 candid.workspace = true
 ic-cdk.workspace = true
 ic-wire = { workspace = true, optional = true }
+ic-wire-cdk = { workspace = true, optional = true }
 ic-wire-derive = { workspace = true, optional = true }
 ic0.workspace = true
 postcard.workspace = true
 serde.workspace = true
 
 [dev-dependencies]
+ic-testkit.workspace = true
 pocket-ic.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
@@ -56,6 +59,11 @@ required-features = ["bindings"]
 name = "macro-fixture"
 path = "examples/macro_fixture/mod.rs"
 required-features = ["macro-fixture"]
+
+[[example]]
+name = "cdk-fixture"
+path = "examples/cdk_fixture/mod.rs"
+required-features = ["cdk-fixture"]
 
 [lints]
 workspace = true

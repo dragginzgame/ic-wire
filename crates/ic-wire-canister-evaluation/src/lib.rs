@@ -1,4 +1,8 @@
 //! Finite, unpublished matched canister fixture; not the IC Wire runtime.
+/// Installed proof of the raw CDK endpoint companion.
+#[cfg(feature = "cdk-fixture")]
+pub mod cdk_fixture;
+
 /// Evaluation-only Canic-shaped macro integration fixture.
 #[cfg(feature = "macro-fixture")]
 pub mod macro_fixture;
