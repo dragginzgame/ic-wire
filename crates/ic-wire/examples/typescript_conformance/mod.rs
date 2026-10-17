@@ -1,6 +1,12 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
 use ic_wire::{Bytes, Limits, List, Method, Text, Wire, encode_request, encode_response};
-use std::{fmt::Write, fs, marker::PhantomData, path::PathBuf};
+use std::{
+    fmt::Write as _,
+    fs,
+    io::{BufWriter, Write as _},
+    marker::PhantomData,
+    path::PathBuf,
+};
 
 struct Contract<T>(PhantomData<T>);
 impl<T: Wire> Method for Contract<T> {
@@ -74,6 +80,7 @@ struct Fixture {
     checks: String,
     count: usize,
     mutations: usize,
+    mutation_data: BufWriter<fs::File>,
 }
 impl Fixture {
     fn add<T: Wire>(&mut self, value: T, javascript: &str) {
@@ -132,13 +139,17 @@ impl Fixture {
                 if let Ok(encoded) = &accepted {
                     assert_eq!(encoded, &bytes);
                 }
-                writeln!(
-                    self.checks,
-                    "mutation({name}, {direction}, {:?}, {});",
-                    bytes,
-                    accepted.is_ok()
+                serde_json::to_writer(
+                    &mut self.mutation_data,
+                    &serde_json::json!({
+                        "codec": name,
+                        "direction": direction,
+                        "bytes": bytes,
+                        "accepted": accepted.is_ok(),
+                    }),
                 )
                 .unwrap();
+                writeln!(self.mutation_data).unwrap();
                 self.mutations += 1;
             }
         }
@@ -155,6 +166,7 @@ fn main() {
     .unwrap();
     fs::write(directory.join("package.json"), "{\"type\":\"module\"}").unwrap();
     let mut f = Fixture {
+        mutation_data: BufWriter::new(fs::File::create(directory.join("mutations.jsonl")).unwrap()),
         directory,
         checks: format!(
             "const nativePayload = {:?};\n{}",
@@ -267,6 +279,17 @@ fn main() {
     );
     f.add(Choice::Empty, "{tag:'Empty',value:null}");
     f.add(Choice::Payload(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) }), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
+    f.mutation_data.flush().unwrap();
+    let codecs = (0..f.count)
+        .map(|index| format!("m{index}"))
+        .collect::<Vec<_>>()
+        .join(",");
+    writeln!(
+        f.checks,
+        "await checkMutations({{{codecs}}}, {});",
+        f.mutations
+    )
+    .unwrap();
     writeln!(f.checks, "console.log('Rust/TypeScript conformance: {} vectors, both directions, truncation and identity rejection passed');", f.count).unwrap();
     writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and canonical re-encode checks passed');", f.mutations).unwrap();
     fs::write(f.directory.join("checks.mjs"), f.checks).unwrap();

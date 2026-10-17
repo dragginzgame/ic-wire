@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.4.0]
+
+- Adopt Shared Tooling 0.23.0, retaining the unmerged release-receipt helper under
+  its own pinned snapshot. Select IC setup/checks explicitly and adopt ICP CLI
+  1.7.0. Evaluation hosts use IC Host Artifacts/FS 0.27.1; runtime dependencies
+  and wire contracts are unchanged.
+
+- **Breaking:** remove the evaluation-only `adapter-fixture` Cargo feature and
+  query/update attributes from `ic-wire-derive`. Workspace qualification now uses
+  the unpublished `ic-wire-adapter-fixture` package; external callers must supply
+  their own endpoint adapter. Canic remains the production macro owner.
+- Stream deterministic conformance mutations from JSON Lines and share enum
+  expansion across unit/newtype variants. Wire bytes, schemas and runtime APIs
+  stay unchanged; no retained-data conversion or canister reset is required.
+
+- Share the benchmark sampling/rejection path and native frame-budget calculation,
+  preserving typed replies, admission order and canonical bytes.
+- Consolidate fresh evaluation report identities under `provenance`, with bounded
+  streaming file hashes and one compiler/server probe in the build driver. Browser
+  reports become final only after retained-build verification. Historical evidence
+  keeps its original format. Evaluation hosts accommodate Testkit 0.52 startup.
+
+- Move browser fixture lifecycle to IC Testkit, compiler diagnostic mechanics to
+  IC Build, and atomic release receipts to Shared Tooling. IC Wire keeps its
+  test contracts, compiler recipes and release policy; upstream contributions
+  are selected by immutable Git revisions.
+- Bound browser fixture shutdown through forced termination and require every
+  expected compiler diagnostic after a passing control. Release receipt checks
+  reject symlinks and exact-byte tampering while preserving prior evidence on
+  failed writes. Runtime APIs, wire bytes and package versions are unchanged.
+
 ## [0.3.5] - 2026-10-17
 
 - Retire copied IcyDB SQL contract projections; actual endpoint and conversion

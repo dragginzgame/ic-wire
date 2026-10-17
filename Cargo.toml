@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/ic-wire",
+    "crates/ic-wire-adapter-fixture",
     "crates/ic-wire-canister-evaluation",
     "crates/ic-wire-derive",
 ]
@@ -16,11 +17,13 @@ repository = "https://github.com/dragginzgame/ic-wire"
 
 [workspace.dependencies]
 candid = "0.10.38"
-ic-build = { version = "0.14", git = "https://github.com/dragginzgame/ic-build", rev = "385bfb84128182624b0b888a8bd8415471949897" }
+ic-build = { version = "0.14", git = "https://github.com/dragginzgame/ic-build", rev = "4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4" }
 ic-cdk = "0.20.3"
-ic-host-artifacts = { version = "0.26", default-features = false }
-ic-testkit = "0.51"
+ic-host-artifacts = { version = "0.27", default-features = false }
+ic-host-fs = { version = "0.27", default-features = false }
+ic-testkit = "0.52"
 ic-wire = { path = "crates/ic-wire", version = "0.3.5" }
+ic-wire-adapter-fixture = { path = "crates/ic-wire-adapter-fixture" }
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.3.5" }
 ic0 = "1.2.0"
 libfuzzer-sys = "0.4.13"
@@ -30,7 +33,7 @@ quote = "1.0.47"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde_json = "1.0"
 sha2 = "0.10.9"
-syn = { version = "3.0.9", features = ["full"] }
+syn = "3.0.9"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

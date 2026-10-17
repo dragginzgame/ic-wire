@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { createReadStream } from 'node:fs';
+import { createInterface } from 'node:readline';
 import { WireError } from './compiled/wire-runtime.js';
 const normalize = value => value instanceof Uint8Array ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
 function check(codec, value, request, response) {
@@ -126,4 +128,26 @@ function mutation(codec, direction, bytes, accepted) {
   const encode = direction === 0 ? codec.encodeRequest : codec.encodeResponse;
   if (!accepted) assert.throws(() => decode(input), WireError);
   else assert.deepEqual(encode(decode(input)), input);
+}
+
+// Records are replayable data; keep assertion logic independent of generation.
+async function checkMutations(codecs, expected) {
+  const lines = createInterface({
+    input: createReadStream(new URL('./mutations.jsonl', import.meta.url)),
+    crlfDelay: Infinity,
+  });
+  let count = 0;
+  for await (const line of lines) {
+    count++;
+    try {
+      const { codec, direction, bytes, accepted } = JSON.parse(line);
+      assert.ok(Object.hasOwn(codecs, codec), 'unknown mutation codec');
+      assert.ok(direction === 0 || direction === 1, 'invalid mutation direction');
+      assert.equal(typeof accepted, 'boolean');
+      mutation(codecs[codec], direction, bytes, accepted);
+    } catch (cause) {
+      throw new Error(`mutation line ${count}`, { cause });
+    }
+  }
+  assert.equal(count, expected, 'mutation record count');
 }

@@ -3,6 +3,8 @@ set -euo pipefail
 # Local policy only; the shared runner owns all staging, commit, tag and push effects.
 operation="${1:?release adapter operation}"
 files=(Cargo.toml Cargo.lock CHANGELOG.md)
+# shellcheck source=scripts/ci/release-receipts.sh
+source scripts/ci/release-receipts.sh
 fail() { echo "IC Wire release refused: $*" >&2; exit 1; }
 [[ "${RELEASE_DELIVERY:-direct}" == direct ]] || fail 'only direct delivery is configured'
 if [[ "$operation" == version ]]; then
@@ -16,32 +18,14 @@ perl scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" >/dev/
 perl scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
 [[ "${RELEASE_SOURCE:?}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail 'invalid source identity'
 state="$(git rev-parse --git-path release-state)/ic-wire-$RELEASE_VERSION"
-identity() {
-    printf '%s\n' "$RELEASE_SOURCE" "$RELEASE_PREVIOUS" "$RELEASE_VERSION" "$RELEASE_DATE" "$RELEASE_REMOTE" "$RELEASE_BRANCH"
-    git remote get-url --push --all "$RELEASE_REMOTE"
-}
-evidence() {
-    [[ -f "$state/validated" && ! -L "$state/validated" ]] || fail 'missing validation receipt'
-    [[ "$(cat "$state/validated")" == "$(identity)" ]] || fail 'validation identity changed'
-}
 metadata() { bash scripts/ci/cargo-release-metadata.sh "$1" ic-wire; }
 source_check() {
     bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
 }
-payload() {
-    local path
-    for path in "${files[@]}"; do
-        if [[ -n "${RELEASE_COMMIT:-}" ]]; then
-            git rev-parse "$RELEASE_COMMIT:$path"
-        else
-            git hash-object -- "$path"
-        fi
-    done
-}
 prepared() {
-    evidence
+    release_receipt_check "$state/validated" release_receipt_identity || fail 'validation receipt missing or changed'
     metadata check
-    [[ -f "$state/prepared" && "$(cat "$state/prepared")" == "$(payload)" ]] || fail 'prepared bytes differ from receipt'
+    release_receipt_check "$state/prepared" release_receipt_payload "${RELEASE_COMMIT:-}" "${files[@]}" || fail 'prepared bytes differ from receipt'
 }
 case "$operation" in
     preflight)
@@ -63,15 +47,13 @@ case "$operation" in
         # Same complete scaffold gate for every release kind; no publication.
         bash scripts/ci/run-validation-targets.sh --fail-fast ci
         bash scripts/ci/check-release-source.sh
-        identity > "$state/validated.tmp"
-        mv "$state/validated.tmp" "$state/validated"
+        release_receipt_write "$state/validated" release_receipt_identity || fail 'cannot retain validation receipt'
         ;;
     prepare)
-        evidence
+        release_receipt_check "$state/validated" release_receipt_identity || fail 'validation receipt missing or changed'
         bash scripts/ci/check-release-source.sh
         metadata prepare
-        payload > "$state/prepared.tmp"
-        mv "$state/prepared.tmp" "$state/prepared"
+        release_receipt_write "$state/prepared" release_receipt_payload '' "${files[@]}" || fail 'cannot retain prepared receipt'
         ;;
     prepared)
         source_check

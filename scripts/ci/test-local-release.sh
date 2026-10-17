@@ -77,7 +77,7 @@ if make release-patch > "$fixture/release.log" 2>&1; then exit 1; fi
 cp ".git/release-state/ic-wire-$candidate/validated" "$fixture/validated"
 printf 'wrong source\n' > ".git/release-state/ic-wire-$candidate/validated"
 if make release-resume "VERSION=$candidate" > "$fixture/receipt.log" 2>&1; then exit 1; fi
-grep -F 'validation identity changed' "$fixture/receipt.log" >/dev/null
+grep -F 'validation receipt missing or changed' "$fixture/receipt.log" >/dev/null
 cp "$fixture/validated" ".git/release-state/ic-wire-$candidate/validated"
 rm .git/hold-push
 make release-resume "VERSION=$candidate" > "$fixture/recovered.log" 2>&1

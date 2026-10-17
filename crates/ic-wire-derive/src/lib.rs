@@ -1,8 +1,10 @@
 //! Explicit-layout derives for IC Wire contracts.
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 use std::collections::BTreeSet;
 use syn::{Data, DeriveInput, Fields, parse_macro_input};
+
+mod enum_expansion;
 
 /// Derive a bounded record or tagged enum. Fields/variants require `#[wire(id = N)]`.
 #[proc_macro_derive(Wire, attributes(wire))]
@@ -89,75 +91,7 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                 quote! { ::ic_wire::schema::Schema::Record(&[#(::ic_wire::schema::Field { name: #labels, id: #field_ids, value: &<#types as ::ic_wire::Wire>::SCHEMA },)*]) },
             )
         }
-        Data::Enum(data) => {
-            if data.variants.is_empty() {
-                return Err(syn::Error::new_spanned(name, "empty enum is unsupported"));
-            }
-            let visitor = format_ident!("__IcWireVisitorFor{}", name);
-            let mut serializers = Vec::new();
-            let mut decoders = Vec::new();
-            let mut shapes = Vec::new();
-            let mut variants = Vec::new();
-            for variant in data.variants {
-                let id = identity(&variant.attrs)?;
-                if !ids.insert(id) {
-                    return Err(syn::Error::new_spanned(&variant, "duplicate wire id"));
-                }
-                if variant.discriminant.is_some() {
-                    return Err(syn::Error::new_spanned(
-                        &variant,
-                        "use wire id, not Rust discriminants",
-                    ));
-                }
-                let v = variant.ident;
-                let label = v.to_string().trim_start_matches("r#").to_owned();
-                match variant.fields {
-                    Fields::Unit => {
-                        serializers.push(quote! { Self::#v => ::ic_wire::__private::serde::Serialize::serialize(&(#id, ()), serializer) });
-                        decoders.push(quote! { #id => { let _: () = seq.next_element()?.ok_or_else(|| ::ic_wire::__private::serde::de::Error::custom("missing variant payload"))?; Ok(#name::#v) } });
-                        shapes.push(quote! { <() as ::ic_wire::Wire>::SHAPE });
-                        variants.push(quote! { ::ic_wire::schema::Variant { name: #label, id: #id, value: &<() as ::ic_wire::Wire>::SCHEMA } });
-                    }
-                    Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-                        let field = &fields.unnamed[0];
-                        if field.attrs.iter().any(|a| a.path().is_ident("wire")) {
-                            return Err(syn::Error::new_spanned(
-                                field,
-                                "variant payload inherits its variant id",
-                            ));
-                        }
-                        let ty = &field.ty;
-                        serializers.push(quote! { Self::#v(value) => ::ic_wire::__private::serde::Serialize::serialize(&(#id, value), serializer) });
-                        decoders.push(quote! { #id => Ok(#name::#v(seq.next_element::<#ty>()?.ok_or_else(|| ::ic_wire::__private::serde::de::Error::custom("missing variant payload"))?)) });
-                        shapes.push(quote! { <#ty as ::ic_wire::Wire>::SHAPE });
-                        variants.push(quote! { ::ic_wire::schema::Variant { name: #label, id: #id, value: &<#ty as ::ic_wire::Wire>::SCHEMA } });
-                    }
-                    _ => {
-                        return Err(syn::Error::new_spanned(
-                            v,
-                            "use unit variants or one named-record payload",
-                        ));
-                    }
-                }
-            }
-            (
-                quote! { match self { #(#serializers,)* } },
-                quote! {
-                    struct #visitor;
-                    impl<'de> ::ic_wire::__private::serde::de::Visitor<'de> for #visitor {
-                        type Value = #name;
-                        fn expecting(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result { f.write_str("explicit wire variant") }
-                        fn visit_seq<A: ::ic_wire::__private::serde::de::SeqAccess<'de>>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error> {
-                            let tag: u32 = seq.next_element()?.ok_or_else(|| ::ic_wire::__private::serde::de::Error::custom("missing variant id"))?;
-                            match tag { #(#decoders,)* _ => Err(::ic_wire::__private::serde::de::Error::custom("unknown variant id")) }
-                        }
-                    }
-                    deserializer.deserialize_tuple(2, #visitor)
-                },
-                quote! { ::ic_wire::Shape::choice(5, &[#(#shapes,)*]) },
-                quote! { ::ic_wire::schema::Schema::Enum(&[#(#variants,)*]) },
-            )
-        }
+        Data::Enum(data) => enum_expansion::expand(&name, data)?,
         Data::Union(_) => return Err(syn::Error::new_spanned(name, "unions are unsupported")),
     };
     Ok(quote! {
@@ -172,25 +106,4 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
             const SCHEMA: ::ic_wire::schema::Schema = #schema;
         }
     })
-}
-
-#[cfg(feature = "adapter-fixture")]
-mod adapter_fixture;
-
-/// Evaluation-only query adapter; not a supported Canic macro API.
-#[cfg(feature = "adapter-fixture")]
-#[proc_macro_attribute]
-pub fn query(args: TokenStream, item: TokenStream) -> TokenStream {
-    adapter_fixture::expand(args.into(), item.into(), false)
-        .unwrap_or_else(syn::Error::into_compile_error)
-        .into()
-}
-
-/// Evaluation-only sync/async update adapter; not a supported Canic macro API.
-#[cfg(feature = "adapter-fixture")]
-#[proc_macro_attribute]
-pub fn update(args: TokenStream, item: TokenStream) -> TokenStream {
-    adapter_fixture::expand(args.into(), item.into(), true)
-        .unwrap_or_else(syn::Error::into_compile_error)
-        .into()
 }

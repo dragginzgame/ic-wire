@@ -12,5 +12,5 @@
     "prepare-browser": "playwright install chromium"
   },
   "dependencies": { "@icp-sdk/core": "6.1.1" },
-  "devDependencies": { "esbuild": "0.28.2", "playwright": "1.64.1", "typescript": "7.0.2" }
+  "devDependencies": { "@dragginzgame/ic-testkit-browser": "git+https://github.com/dragginzgame/ic-testkit.git#26fc0b062aebf208cc71e0e55dcd9f5880bbf663", "esbuild": "0.28.2", "playwright": "1.64.1", "typescript": "7.0.2" }
 }

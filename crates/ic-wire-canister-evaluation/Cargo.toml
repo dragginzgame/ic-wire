@@ -13,7 +13,7 @@ crate-type = ["cdylib", "rlib"]
 bindings = ["browser-fixture", "ic-wire/typescript"]
 candid-codec = []
 management = []
-macro-fixture = ["dep:ic-wire", "dep:ic-wire-derive", "ic-wire-derive/adapter-fixture"]
+macro-fixture = ["dep:ic-wire", "dep:ic-wire-adapter-fixture"]
 browser-fixture = ["dep:ic-wire"]
 runtime-benchmark = ["dep:ic-wire"]
 
@@ -21,13 +21,14 @@ runtime-benchmark = ["dep:ic-wire"]
 candid.workspace = true
 ic-cdk.workspace = true
 ic-wire = { workspace = true, optional = true }
-ic-wire-derive = { workspace = true, optional = true }
+ic-wire-adapter-fixture = { workspace = true, optional = true }
 ic0.workspace = true
 serde.workspace = true
 
 [dev-dependencies]
 ic-build.workspace = true
 ic-host-artifacts = { workspace = true, features = ["wasm"] }
+ic-host-fs.workspace = true
 ic-testkit.workspace = true
 postcard.workspace = true
 serde_json.workspace = true
@@ -51,6 +52,10 @@ required-features = ["macro-fixture"]
 [[example]]
 name = "build-evaluation"
 path = "examples/build_evaluation/mod.rs"
+
+[[example]]
+name = "check-diagnostics"
+path = "examples/check_diagnostics/mod.rs"
 
 [lints]
 workspace = true

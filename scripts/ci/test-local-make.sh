@@ -12,16 +12,16 @@ fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
+paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md scripts/ci/release-receipts.sh .shared-tooling-receipts.snapshot Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
 paths+=(crates/ic-wire/examples/fuzz_runtime/mod.rs scripts/ci/fuzz-runtime.sh)
 paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs)
 paths+=(crates/ic-wire-canister-evaluation/src/runtime_benchmark/mod.rs crates/ic-wire-canister-evaluation/examples/runtime_measure/mod.rs)
 paths+=(crates/ic-wire-canister-evaluation/src/runtime_benchmark/shapes/mod.rs crates/ic-wire-canister-evaluation/examples/build_evaluation/mod.rs)
-paths+=(crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/examples/evidence/mod.rs crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs crates/ic-wire-canister-evaluation/examples/check_diagnostics/mod.rs)
 paths+=(crates/ic-wire-canister-evaluation/src/browser/mod.rs)
 paths+=(crates/ic-wire/src/float/mod.rs crates/ic-wire/src/schema/mod.rs crates/ic-wire/src/typescript/mod.rs crates/ic-wire/src/typescript/runtime.ts crates/ic-wire/examples/typescript_conformance/mod.rs crates/ic-wire/examples/typescript_conformance/checks.mjs)
-paths+=(crates/ic-wire-derive/src/adapter_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/tests/mod.rs crates/ic-wire-canister-evaluation/examples/macro_fixture/mod.rs)
-paths+=(docs/runtime.md crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/lib.rs crates/ic-wire/src/contract/mod.rs crates/ic-wire/src/bounded/mod.rs crates/ic-wire/src/shape/mod.rs crates/ic-wire/tests/runtime/mod.rs crates/ic-wire-canister-evaluation/src/commands/mod.rs)
+paths+=(crates/ic-wire-adapter-fixture/Cargo.toml crates/ic-wire-adapter-fixture/src/lib.rs crates/ic-wire-adapter-fixture/src/adapter_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs crates/ic-wire-canister-evaluation/src/macro_fixture/tests/mod.rs crates/ic-wire-canister-evaluation/examples/macro_fixture/mod.rs)
+paths+=(docs/runtime.md crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/lib.rs crates/ic-wire-derive/src/enum_expansion/mod.rs crates/ic-wire/src/contract/mod.rs crates/ic-wire/src/bounded/mod.rs crates/ic-wire/src/shape/mod.rs crates/ic-wire/tests/runtime/mod.rs crates/ic-wire-canister-evaluation/src/commands/mod.rs)
 paths+=(crates/ic-wire/src/native/mod.rs crates/ic-wire/src/native/encode/mod.rs crates/ic-wire/src/native/decode/mod.rs crates/ic-wire/src/native/LICENSE-MIT crates/ic-wire/tests/native/mod.rs)
 paths+=(scripts/ci/check-diagnostics.sh)
 while IFS= read -r path; do paths+=("$path"); done < <(cd "$root" && find crates/ic-wire/tests/ui crates/ic-wire-canister-evaluation/tests/macro_ui -type f)

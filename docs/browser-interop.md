@@ -68,3 +68,16 @@ receipt/replay and peer fixture. The [original browser report](evidence/browser-
 and [peer report](evidence/peer-interop.json) cover the earlier private Message
 layout and postcard-bindgen. These files remain unchanged. Their recorded source
 identities, rather than current source, reproduce those retired experiments.
+
+## Fixture lifecycle owner
+
+The browser runner uses the private Node helper from
+[IC Testkit PR #121](https://github.com/dragginzgame/ic-testkit/pull/121), selected
+at `26fc0b062aebf208cc71e0e55dcd9f5880bbf663` in the npm manifest and lockfile.
+The project npm configuration allows only root-declared Git dependencies.
+Normal `npm ci` prepares that selection; the helper has no install scripts.
+Testkit owns JSON readiness, append-only fixture logs and bounded stdin/TERM/KILL
+cleanup. IC Wire retains the Rust fixture, browser/HTTP lifecycle, contract vectors
+and report assertions. The build driver hashes the selected helper source and lock under report
+`provenance.sources`, alongside retained Wasm receipts.
+This is an unreleased upstream contribution, separate from the Rust Testkit pin.

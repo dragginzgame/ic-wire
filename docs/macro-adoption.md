@@ -2,18 +2,18 @@
 
 This fixture tests query/update attributes in IC Wire's own workspace while Canic
 is changing independently. No sibling source is read as implementation authority
-or modified. The attributes are evaluation-only, gated by `adapter-fixture` in
-the existing proc-macro crate. They are not re-exported by `ic-wire` or enabled in
+or modified. The attributes are evaluation-only, in the unpublished
+`ic-wire-adapter-fixture` proc-macro crate. They are not re-exported by `ic-wire` or enabled in
 its default dependency graph. Canic remains the production macro owner.
 
 The following syntax compiles in
 [the fixture](../crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs):
 
 ```rust,ignore
-#[ic_wire_derive::query(method = Read, guard = guard)]
+#[ic_wire_adapter_fixture::query(method = Read, guard = guard)]
 fn macro_read(correlation: u64) -> u64 { /* fixture handler */ }
 
-#[ic_wire_derive::update(method = Add, guard = guard)]
+#[ic_wire_adapter_fixture::update(method = Add, guard = guard)]
 async fn macro_add(amount: u64) -> Result<u64, u8> { /* fixture handler */ }
 ```
 

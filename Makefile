@@ -2,6 +2,9 @@
 
 override SHARED_TOOLING_ROOT := $(CURDIR)
 SHARED_TOOLING_RUST := 1
+LOCAL_TOOL_INSTALL_TARGETS += install-ic-tools
+LOCAL_TOOL_CHECK_TARGETS += ic-tools-check
+export PATH := $(CURDIR)/.tools/ic/bin:$(PATH)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 include make/consumer.mk
@@ -103,6 +106,7 @@ check-release:
 	+@bash scripts/ci/test-local-release.sh
 
 check-tooling:
+	+@bash scripts/ci/verify-shared-tooling-snapshot.sh --consumer "$(CURDIR)" --manifest .shared-tooling-receipts.snapshot
 	+@bash scripts/ci/test-local-make.sh
 
 version: host-tools-check

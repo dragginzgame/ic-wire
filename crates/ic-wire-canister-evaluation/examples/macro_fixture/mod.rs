@@ -6,7 +6,7 @@ use ic_wire::{Method, decode_response, encode_request};
 use ic_wire_canister_evaluation::macro_fixture::{Add, BadReply, Read, Reset};
 use serde_json::json;
 use sha2::{Digest, Sha256};
-use std::{env, fs, process::Command};
+use std::{env, fs};
 
 fn main() {
     let wasm_path = env::args_os().nth(1).expect("Wasm path");
@@ -36,9 +36,15 @@ fn main() {
     assert!(!exports.contains(&format!("canister_update {}", Read::NAME)));
     assert!(!exports.contains(&format!("canister_query {}", Add::NAME)));
     let server = env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server");
-    let owned = PocketIcStartupConfig::spawn(server.clone(), std::time::Duration::from_secs(60))
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
-        .unwrap();
+    let owned = PocketIcStartupConfig::Spawn {
+        server_binary: server.clone().into(),
+        timeout: std::time::Duration::from_secs(60),
+        server_hard_ttl: None,
+        server_idle_ttl: None,
+        server_output_files: None,
+    }
+    .build_instance(PocketIcBuilder::new().with_application_subnet())
+    .unwrap();
     let pic = &owned.instance;
     let id = pic
         .try_create_and_install(InstallSpec {
@@ -144,33 +150,7 @@ fn main() {
     decode_response::<Reset>(&unit).unwrap();
     assert_eq!(unit.len(), 11);
     assert_eq!(query(0), 0);
-    let mut sources = serde_json::Map::new();
-    for path in [
-        "Cargo.toml",
-        "Cargo.lock",
-        "crates/ic-wire-derive/Cargo.toml",
-        "crates/ic-wire-derive/src/lib.rs",
-        "crates/ic-wire-derive/src/adapter_fixture/mod.rs",
-        "crates/ic-wire-canister-evaluation/Cargo.toml",
-        "crates/ic-wire-canister-evaluation/src/lib.rs",
-        "crates/ic-wire-canister-evaluation/src/macro_fixture/mod.rs",
-        "crates/ic-wire-canister-evaluation/src/macro_fixture/tests/mod.rs",
-        "crates/ic-wire-canister-evaluation/examples/macro_fixture/mod.rs",
-        "crates/ic-wire/src/contract/mod.rs",
-        "crates/ic-wire/src/shape/mod.rs",
-        "scripts/ci/evaluate-macros.sh",
-    ] {
-        sources.insert(
-            path.into(),
-            json!(format!("{:x}", Sha256::digest(fs::read(path).unwrap()))),
-        );
-    }
-    let version = |program: &std::ffi::OsStr, args: &[&str]| {
-        let output = Command::new(program).args(args).output().unwrap();
-        assert!(output.status.success());
-        String::from_utf8(output.stdout).unwrap()
-    };
-    let report = json!({"scope":"evaluation-only macro expansion; no Canic source changes","rustc":version(std::ffi::OsStr::new("rustc"), &["-vV"]),"pocketIc":version(&server,&["--version"]),"target":"wasm32-unknown-unknown","profile":"canister-evaluation","features":["macro-fixture"],"exports":exports,"request":request,"success":reply,"applicationFailure":failure,"rejectionsWithoutMutation":rejected,"updateViaQueryRejected":true,"replicatedQueryVerified":true,"repeatIsNewEffect":true,"replyFailureRolledBack":true,"finalBalance":0,"syncUnitReply":unit,"wasmSha256":format!("{:x}",Sha256::digest(&wasm)),"serverSha256":format!("{:x}",Sha256::digest(fs::read(server).unwrap())),"sources":sources});
+    let report = json!({"scope":"evaluation-only macro expansion; no Canic source changes","target":"wasm32-unknown-unknown","profile":"canister-evaluation","features":["macro-fixture"],"exports":exports,"request":request,"success":reply,"applicationFailure":failure,"rejectionsWithoutMutation":rejected,"updateViaQueryRejected":true,"replicatedQueryVerified":true,"repeatIsNewEffect":true,"replyFailureRolledBack":true,"finalBalance":0,"syncUnitReply":unit,"wasmSha256":format!("{:x}",Sha256::digest(&wasm))});
     fs::write(
         env::args_os().nth(2).expect("report path"),
         serde_json::to_string_pretty(&report).unwrap() + "\n",

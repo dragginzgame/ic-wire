@@ -37,10 +37,15 @@ fn main() {
     let server = PathBuf::from(env::var_os("POCKET_IC_BIN").expect("prepared PocketIC binary"));
     let wasm =
         fs::read(env::var_os("IC_WIRE_BROWSER_WASM").expect("runtime fixture Wasm path")).unwrap();
-    let mut owned =
-        PocketIcStartupConfig::spawn(server.clone(), std::time::Duration::from_secs(60))
-            .build_instance(PocketIcBuilder::new().with_application_subnet())
-            .unwrap();
+    let mut owned = PocketIcStartupConfig::Spawn {
+        server_binary: server.clone(),
+        timeout: std::time::Duration::from_secs(60),
+        server_hard_ttl: None,
+        server_idle_ttl: None,
+        server_output_files: None,
+    }
+    .build_instance(PocketIcBuilder::new().with_application_subnet())
+    .unwrap();
     let pic = &mut owned.instance;
     let id = pic
         .try_create_and_install(InstallSpec {

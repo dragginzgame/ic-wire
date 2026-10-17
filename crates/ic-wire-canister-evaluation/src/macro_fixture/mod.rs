@@ -50,7 +50,7 @@ impl Method for BadReply {
         ..LIMITS
     };
 }
-#[ic_wire_derive::update(method = BadReply, guard = unit_guard)]
+#[ic_wire_adapter_fixture::update(method = BadReply, guard = unit_guard)]
 fn macro_bad_reply(_: ()) -> u64 {
     transport::set_balance(999);
     999
@@ -59,7 +59,7 @@ fn unit_guard(_: &()) -> Result<(), &'static str> {
     transport::event("guard");
     Ok(())
 }
-#[ic_wire_derive::update(method = Reset, guard = unit_guard)]
+#[ic_wire_adapter_fixture::update(method = Reset, guard = unit_guard)]
 fn macro_reset(_: ()) {
     transport::event("handler");
     transport::set_balance(0);
@@ -72,12 +72,12 @@ fn guard(value: &u64) -> Result<(), &'static str> {
         Ok(())
     }
 }
-#[ic_wire_derive::query(method = Read, guard = guard)]
+#[ic_wire_adapter_fixture::query(method = Read, guard = guard)]
 fn macro_read(correlation: u64) -> u64 {
     transport::event("handler");
     transport::balance().wrapping_add(correlation)
 }
-#[ic_wire_derive::update(method = Add, guard = guard)]
+#[ic_wire_adapter_fixture::update(method = Add, guard = guard)]
 async fn macro_add(amount: u64) -> Result<u64, u8> {
     transport::event("handler");
     // Exercise async expansion without claiming external-await recovery.

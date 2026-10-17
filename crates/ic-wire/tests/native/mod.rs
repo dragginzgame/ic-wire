@@ -211,3 +211,58 @@ fn every_allowance_is_enforced_and_empty_values_remain_valid() {
     let decoded: [f64; 3] = native::decode(&bytes, LIMITS).unwrap();
     assert_eq!(decoded.map(f64::to_bits), floats.map(f64::to_bits));
 }
+
+#[test]
+fn frame_budgets_agree_at_header_boundary_and_preserve_error_precedence() {
+    let exact = Limits {
+        bytes: 11,
+        allocation: 11,
+        ..LIMITS
+    };
+    let request = native::encode_request(7, &(), exact).unwrap();
+    let response = native::encode_response(7, &(), exact).unwrap();
+    assert_eq!(native::encoded_frame_len(&(), exact), Ok(11));
+    assert_eq!(native::decode_request::<()>(7, &request, exact), Ok(()));
+    assert_eq!(native::decode_response::<()>(7, &response, exact), Ok(()));
+    for short in 0..11 {
+        let bytes = Limits {
+            bytes: short,
+            ..exact
+        };
+        assert_eq!(native::encoded_frame_len(&(), bytes), Err(Error::Limit));
+        assert_eq!(native::encode_request(7, &(), bytes), Err(Error::Limit));
+        assert_eq!(
+            native::decode_request::<()>(7, &request, bytes),
+            Err(Error::Limit)
+        );
+        let allocation = Limits {
+            allocation: short,
+            ..exact
+        };
+        assert_eq!(
+            native::encoded_frame_len(&(), allocation),
+            Err(Error::Limit)
+        );
+        assert_eq!(
+            native::encode_response(7, &(), allocation),
+            Err(Error::Limit)
+        );
+        assert_eq!(
+            native::decode_request::<()>(7, &request, allocation),
+            Err(Error::Limit)
+        );
+        // Identity and malformed-header checks still precede allocation admission.
+        assert_eq!(
+            native::decode_request::<()>(8, &request, allocation),
+            Err(Error::Identity)
+        );
+        assert_eq!(
+            native::decode_response::<()>(7, &request, allocation),
+            Err(Error::Identity)
+        );
+        assert_eq!(
+            native::decode_request::<()>(7, &request[..short], allocation),
+            Err(Error::Malformed)
+        );
+    }
+}

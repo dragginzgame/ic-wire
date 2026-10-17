@@ -1,5 +1,84 @@
 # Current handoff
 
+## Pending 0.4.0 host/tooling adoption
+
+Shared Tooling 0.23.0 is pinned at
+`0b351cd2ba2bcd8927b783a5fec89afc8013f708`. The receipt helper remains
+separately exported from PR #279 at `35775234560bd08f7e67f4feeaf339dc25fbd9e0`;
+its companion verifiers match the main snapshot. IC setup/checks are explicitly
+selected by the local Make adapter. ICP CLI advances to 1.7.0.
+Incoming IC Host Artifacts/FS 0.27.1 manifest/lock selections are retained.
+Explicit installation, offline tool checks, both snapshot checks, pins, links,
+formatting and disposable Make/release recovery fixtures pass. Evaluation-example
+Clippy and Rust 1.91 checks pass. All three installed trials pass: macro rollback,
+runtime comparison and Chromium finite/native interop. Fresh report source hashes
+were independently verified. Logs: `target/adopt-*.log`. No broad CI or native
+macOS qualification was run. Own versions, staging and Git refs are unchanged.
+
+## Pending 0.4.0 fixture isolation
+
+The evaluation query/update attributes now live in the unpublished
+`ic-wire-adapter-fixture` crate. The published derive no longer selects Syn full
+or exposes the old `adapter-fixture` feature. This removal needs a minor release;
+pending notes are now 0.4.0, with own manifest versions unchanged.
+Conformance mutations stream as JSON Lines; all 16,384 records, 84 value/frame
+checks and generated TypeScript match the pre-edit baseline exactly.
+Enum expansion shares payload handling while preserving tags and schema order.
+
+Seventeen finite/native tests, seven doctests, three macro pipeline tests and all
+19 diagnostics plus passing controls pass. Diagnostics pass on Rust 1.99 and 1.91;
+the macro fixture compiles for Wasm at Rust 1.91. Strict Clippy, formatting,
+links, pins, the disposable Make fixture and isolated derive packaging pass.
+The installed macro trial
+retains query/sync/async exports and 16 rejection/rollback cases.
+Logs: `target/fixture-cut-*.log`; fresh installed evidence is under
+`target/macro-adoption-evidence/`. No broad CI/native macOS qualification,
+staging, commits, release or publication occurred. Incoming work is preserved.
+
+## Pending 0.4.0 consolidation
+
+Packet/scalar/page benchmarks now share one measurement/rejection path, retaining
+typed packet checks. Native frame sizing/encoding/decoding share checked byte and
+allocation adjustment; new boundary coverage preserves malformed/identity error
+precedence. Four native and twelve finite tests, strict Clippy, and Rust 1.91
+runtime-Wasm/evaluation-host checks pass.
+
+The build driver owns fresh report `provenance`: compiler/server identities,
+streamed source hashes and retained Wasm receipts. All reports, including Chromium,
+become final after retained-build checks. Historical evidence is unchanged.
+The concurrent Testkit 0.52/Host 0.26.2 dependency update is preserved; evaluation
+startup uses its explicit Spawn configuration with the same prior settings.
+
+All three installed trials pass. Runtime comparison retains 48 rows, 144 measured
+calls and 248 rejections; all request/reply hashes match frozen shape evidence.
+Macro rollback and browser finite/native vectors pass. Final source hashes were
+independently verified; browser vectors/server digest match the preceding trial.
+Formatting, pins, links and disposable Make checks pass. Logs:
+`target/consolidation-*.log`. No performance gain or native macOS qualification
+is claimed. No broad local CI, staging, commits, releases or publication occurred.
+
+## Pending 0.4.0 shared plumbing
+
+IC Wire now uses the private Node fixture-session helper from
+[Testkit PR #121](https://github.com/dragginzgame/ic-testkit/pull/121), compile
+diagnostics from [IC Build PR #67](https://github.com/dragginzgame/ic-build/pull/67),
+and receipt mechanics from
+[Shared Tooling PR #279](https://github.com/dragginzgame/shared-tooling/pull/279).
+Manifest/lock pins select the tested commits. The receipt helper was initially
+added to the 0.15.4 baseline; the later adoption above separates that contribution
+from the 0.23.0 main snapshot. Contracts, compiler recipes and release policy remain local.
+
+All 19 negative cases and both passing controls pass on Rust 1.99 and 1.91.
+The installed Chromium/PocketIC trial, strict adapter Clippy, snapshot/pin/link
+checks and disposable Make/release fixtures pass. Logs: `target/plumbing-*.log`.
+Testkit's Node session matrix passes on Linux and both macOS architectures;
+remaining upstream suites/reviews are not yet complete. Testkit's existing
+archive fixture fails on an incomplete synthetic host catalog, tracked in
+[Testkit #122](https://github.com/dragginzgame/ic-testkit/issues/122). No full local
+CI ran.
+Runtime APIs, wire bytes and own versions are unchanged. Main staging, commits,
+releases and publication remain maintainer-owned; sibling checkouts are untouched.
+
 The maintainer clarified that Candid is a possible future consumer adapter, not
 current implementation work. Design/runtime guidance now keeps protocol DTOs,
 identities and bytes at endpoint boundaries, with reusable consumer-owned business
@@ -317,8 +396,9 @@ retain their original source/build identities. They do not measure the new runti
 header or generic bounds overhead. No production Canic savings are established.
 The runtime adoption report is correctness evidence, not a performance comparison.
 
-Shared Tooling 0.15.4 remains pinned at
-`879eb2b021522252a67e908dbc217a0f4efb2a6f`. See [development](../development.md)
+Shared Tooling 0.23.0 is pinned at
+`0b351cd2ba2bcd8927b783a5fec89afc8013f708`, with the receipt contribution
+in its separate manifest. See [development](../development.md)
 for setup, focused checks and maintainer-operated Git releases, separate from
 package publication. The disposable patch-release test now owns its synthetic
 changelog, so minor-release notes do not block its recovery scenarios. Hosted macOS qualification of the earlier temporary-path

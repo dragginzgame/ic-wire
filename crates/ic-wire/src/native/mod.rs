@@ -87,18 +87,7 @@ fn encode_prefixed<T: Serialize + ?Sized>(
     limits: Limits,
     prefix: &[u8],
 ) -> Result<Vec<u8>, Error> {
-    let payload_limit = limits.bytes.checked_sub(prefix.len()).ok_or(Error::Limit)?;
-    let size = encoded_len(
-        value,
-        Limits {
-            bytes: payload_limit,
-            allocation: limits
-                .allocation
-                .checked_sub(prefix.len())
-                .ok_or(Error::Limit)?,
-            ..limits
-        },
-    )?;
+    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
     let mut bytes = Vec::new();
     bytes
         .try_reserve_exact(size + prefix.len())
@@ -173,22 +162,8 @@ pub fn encode_response<T: Serialize + ?Sized>(
 }
 /// Measure a request or response frame; both directions have equal header length.
 pub fn encoded_frame_len<T: Serialize + ?Sized>(value: &T, limits: Limits) -> Result<usize, Error> {
-    let bytes = limits
-        .bytes
-        .checked_sub(contract::HEADER)
-        .ok_or(Error::Limit)?;
-    encoded_len(
-        value,
-        Limits {
-            bytes,
-            allocation: limits
-                .allocation
-                .checked_sub(contract::HEADER)
-                .ok_or(Error::Limit)?,
-            ..limits
-        },
-    )
-    .map(|size| size + contract::HEADER)
+    encoded_len(value, payload_limits(limits, contract::HEADER)?)
+        .map(|size| size + contract::HEADER)
 }
 /// Check request identity and direction before decoding its bounded native value.
 pub fn decode_request<T: Serialize + DeserializeOwned>(
@@ -216,15 +191,13 @@ fn decode_frame<T: Serialize + DeserializeOwned>(
         return Err(Error::Limit);
     }
     let payload = contract::payload(id, direction, bytes)?;
-    decode(
-        payload,
-        Limits {
-            bytes: limits.bytes - contract::HEADER,
-            allocation: limits
-                .allocation
-                .checked_sub(contract::HEADER)
-                .ok_or(Error::Limit)?,
-            ..limits
-        },
-    )
+    decode(payload, payload_limits(limits, contract::HEADER)?)
+}
+
+fn payload_limits(limits: Limits, prefix: usize) -> Result<Limits, Error> {
+    Ok(Limits {
+        bytes: limits.bytes.checked_sub(prefix).ok_or(Error::Limit)?,
+        allocation: limits.allocation.checked_sub(prefix).ok_or(Error::Limit)?,
+        ..limits
+    })
 }

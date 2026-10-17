@@ -24,9 +24,10 @@ make install-hooks
 Installation is explicit and may download verified executables or build pinned
 Cargo tools. `tools-check` is offline and installs nothing. Common pins come only
 from the reviewed `ci/tool-versions.env` and `ci/ic-tools.tsv`; there are no local
-pin exceptions. The common host, IC and Cargo toolsets are installed even when
-the scaffold does not use every executable. This does not add runtime crate
-dependencies. Shared storage retains prior installations and failed evidence.
+pin exceptions. IC Wire explicitly includes IC executables in its ordered local
+setup/check targets alongside the common host and Cargo toolsets. The reviewed
+IC catalog now selects ICP CLI 1.7.0. This adds no runtime crate dependencies.
+Shared storage retains prior installations and failed evidence.
 See [storage configuration](local-setup.md#shared-executable-storage) before
 selecting an alternative `SHARED_TOOLING_STORE`; use the same selection for
 setup, checking and evidence collection.
@@ -70,6 +71,10 @@ Use focused checks under the shared [validation policy](../DRAGGINZGAME.md#valid
 The retired [payload screen](codec-screen.md) retains historical evidence only.
 `make test`, `make check-typescript` and `make evaluate-runtime` exercise the
 selected production codec; the last target requires prepared PocketIC.
+The conformance generator writes `target/typescript-conformance/mutations.jsonl`
+with codec, direction, bytes and Rust acceptance per record. The JavaScript runner
+streams those records and reports the failing line for replay; independent value
+oracles (including bigint and signed zero) remain executable checks.
 The local tooling fixture checks
 its actual Make callers and hook; upstream owns the common helper regression
 matrix. Dependency preparation uses locked fetching when needed; to explicitly
@@ -85,10 +90,16 @@ and retains failed tool/build logs through the reviewed evidence action.
 ## Snapshot maintenance and release boundary
 
 [.shared-tooling.snapshot](../.shared-tooling.snapshot) records Shared Tooling
-0.15.4 at `879eb2b021522252a67e908dbc217a0f4efb2a6f`. Runtime commands use only
-this snapshot. Refresh from a clean, reviewed source checkout with its canonical
-exporter, following [snapshot adoption](consuming-snapshots.md). Preserve the
-recorded entrypoints on refresh and review the preview before applying it.
+0.23.0 at `0b351cd2ba2bcd8927b783a5fec89afc8013f708`.
+The unmerged [receipt contribution](https://github.com/dragginzgame/shared-tooling/pull/279)
+is exported separately in [.shared-tooling-receipts.snapshot](../.shared-tooling-receipts.snapshot)
+at `35775234560bd08f7e67f4feeaf339dc25fbd9e0`; only its receipt helper
+is selected. Its required integrity helpers are byte-identical to the main
+snapshot, and `check-tooling` verifies the contribution receipt too.
+Refresh both manifests through the canonical exporter until that contribution
+is integrated; never edit their ownership records or payloads in place. Then
+consolidate the contribution with `--takeover-snapshot` as described in
+[snapshot adoption](consuming-snapshots.md). Review each preview before applying it.
 Do not copy uncommitted sibling edits or edit snapshot-owned payloads.
 
 The maintainer-operated `release-patch`, `release-minor`, `release-major` and
@@ -169,10 +180,15 @@ graph and its Rust 1.91 Wasm floor are unchanged; libfuzzer-sys is dev-only.
 
 `make check-typed-diagnostics` and `make check-macro-diagnostics` use one offline
 runner with explicit Rust cases under each owning crate’s `tests/ui/`. A valid
-control compiles first; each negative must fail with its expected diagnostic.
-The runner selects exact Cargo artifact paths from JSON, retains per-case logs
-under `target/ui-diagnostics/`, and never edits or copies production source.
-Prepared Rust and the shared jq tool are required. The same targets run under
+control compiles first; every negative must exit with compiler code 1 and include
+all expected literal diagnostics. The local Rust example supplies cases and
+compiler flags to [IC Build PR #67](https://github.com/dragginzgame/ic-build/pull/67),
+pinned at `4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4`. IC Build selects exact
+host library artifacts from bounded Cargo JSON and owns bounded process capture.
+Logs remain under `target/ui-diagnostics/`: `cases.txt` maps zero-based
+negative-case log names; `control.stderr` records the passing control. No source
+is copied or rewritten. Prepared Rust and fetched locked host dependencies are
+required; artifact selection no longer uses jq. The same targets run under
 `RUSTUP_TOOLCHAIN=1.91.0` for the floor check. Normal Cargo tests compile the valid
 cases; the focused Make targets own negative-case execution.
 
@@ -226,3 +242,21 @@ README/Rustdoc and LICENSE are self-contained, while supplemental GitHub links
 require repository access. Preparation does not change visibility or reserve
 names. Authentication, name ownership and upload acceptance are checked by the
 registry at publication time.
+
+## Evaluation report provenance
+
+Fresh runtime, macro and browser reports share a `provenance` object containing
+`rustc`, `rustflags`, `encoded_rustflags`, `pocket_ic_version`,
+`pocket_ic_sha256`, `sources` and `build_records`. The build driver captures
+compiler/server identity once, owns source inventories, and uses IC Host FS bounded
+streaming hashes (16 MiB per source, 512 MiB for the server). Wasm hashes come from
+IC Build's retained export receipts under the existing 64 MiB export cap. The
+selected `RUSTC` supplies the compiler probe when configured.
+
+All trials write a pending report; the driver adds provenance and promotes it to
+`report.json` after measurements and retained-build freshness checks succeed.
+Browser source inventory includes native vectors and the selected session helper.
+This replaces the prior per-runner compiler/server/hash fields in fresh reports;
+there is no compatibility reader. Frozen `docs/evidence/` reports are unchanged.
+Runtime reports retain codec parameters, separate instruction phases and measured
+bytes; this consolidation makes no performance improvement claim.

@@ -9,7 +9,7 @@ use ic_wire_canister_evaluation::runtime_benchmark::shapes::{Frame, Page, PageEc
 use ic_wire_canister_evaluation::runtime_benchmark::{Exchange, Packet};
 use serde_json::json;
 use sha2::{Digest, Sha256};
-use std::{env, fs, path::PathBuf, process::Command};
+use std::{env, fs, path::PathBuf};
 
 fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
@@ -60,11 +60,15 @@ fn measure_shape(
 fn main() {
     let directory = PathBuf::from(env::args_os().nth(1).expect("artifact directory"));
     let server = PathBuf::from(env::var_os("POCKET_IC_BIN").expect("prepared PocketIC"));
-    let version = Command::new(&server).arg("--version").output().unwrap();
-    assert!(version.status.success());
-    let owned = PocketIcStartupConfig::spawn(server.clone(), std::time::Duration::from_secs(60))
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
-        .unwrap();
+    let owned = PocketIcStartupConfig::Spawn {
+        server_binary: server.clone(),
+        timeout: std::time::Duration::from_secs(60),
+        server_hard_ttl: None,
+        server_idle_ttl: None,
+        server_output_files: None,
+    }
+    .build_instance(PocketIcBuilder::new().with_application_subnet())
+    .unwrap();
     let pic = &owned.instance;
     let mut artifacts = Vec::new();
     for management in [false, true] {
@@ -141,37 +145,17 @@ fn main() {
                 } else {
                     encode_response::<Exchange>(&expected).unwrap().into_bytes()
                 };
-                let mut counts = Vec::new();
-                for _ in 0..3 {
-                    let reply = pic
-                        .update_call(id, Principal::anonymous(), Exchange::NAME, request.clone())
-                        .unwrap();
-                    assert_eq!(reply, response);
-                    if candid {
-                        assert_eq!(
-                            candid::decode_one::<
-                                ic_wire_canister_evaluation::runtime_benchmark::CandidPacket,
-                            >(&reply)
-                            .unwrap(),
-                            expected.candid(1)
-                        );
-                    } else {
-                        assert_eq!(decode_response::<Exchange>(&reply).unwrap(), expected);
-                    }
-                    let raw = pic
-                        .query_call(id, Principal::anonymous(), "measurements", vec![])
-                        .unwrap();
-                    assert_eq!(raw.len(), 24);
-                    counts.push(
-                        raw.as_chunks::<8>()
-                            .0
-                            .iter()
-                            .map(|b| u64::from_le_bytes(*b))
-                            .collect::<Vec<_>>(),
+                if candid {
+                    assert_eq!(
+                        candid::decode_one::<
+                            ic_wire_canister_evaluation::runtime_benchmark::CandidPacket,
+                        >(&response)
+                        .unwrap(),
+                        expected.candid(1)
                     );
+                } else {
+                    assert_eq!(decode_response::<Exchange>(&response).unwrap(), expected);
                 }
-                let mut trailing = request.clone();
-                trailing.push(0);
                 let wrong_identity = if candid {
                     let mut bad = value.candid(0);
                     bad.method += 1;
@@ -181,21 +165,13 @@ fn main() {
                     bad[2] ^= 1;
                     bad
                 };
-                for bad in [
-                    vec![0; 5121],
-                    request[..request.len() - 1].to_vec(),
-                    trailing,
-                    response.clone(),
-                    wrong_identity,
-                ] {
-                    assert!(
-                        pic.update_call(id, Principal::anonymous(), Exchange::NAME, bad)
-                            .is_err()
-                    );
-                }
-                rows.push(json!({"case": case, "blob_bytes": blob, "text_utf8_bytes": text, "f64_count": samples,
-                    "request_bytes": request.len(), "response_bytes": response.len(), "request_sha256": hash(&request), "response_sha256": hash(&response),
-                    "instruction_samples_decode_strict_handler_encode": counts, "rejected_calls": 5}));
+                let mut row =
+                    measure_shape(pic, id, Exchange::NAME, request, response, wrong_identity);
+                row["case"] = json!(case);
+                row["blob_bytes"] = json!(blob);
+                row["text_utf8_bytes"] = json!(text);
+                row["f64_count"] = json!(samples);
+                rows.push(row);
             }
             let mut scalar_rows = Vec::new();
             for value in [0_u64, 127, u64::MAX] {
@@ -330,11 +306,8 @@ fn main() {
         assert_eq!(receipt["wasm_sha256"], artifact["wasm_sha256"]);
     }
     let report = json!({
-        "compiler_recorded_at_build": fs::read_to_string(directory.join("build-rustc.txt")).unwrap(),
-        "flags_recorded_at_build": fs::read_to_string(directory.join("build-flags.txt")).unwrap(),
-        "build_records": builds, "target": "wasm32-unknown-unknown",
+        "target": "wasm32-unknown-unknown",
         "profile": "canister-evaluation: release, opt-level=z, lto=true, codegen-units=1, panic=abort, strip=debuginfo",
-        "pocket_ic_server_version": String::from_utf8(version.stdout).unwrap(), "pocket_ic_server_sha256": hash(&fs::read(server).unwrap()),
         "subnet": "application; PocketIC defaults",
         "scope": "IC performance_counter(0) deltas: strict decode including canonical re-encoding; handler; response encode. Counter overhead included. Argument copy, reply delivery and scheduling excluded. No native-time or compression measurements.",
         "candid_decoder": {"decoding_quota":100000, "skipping_quota":1000, "max_type_len":64, "max_header_len":1024, "max_frame_bytes":5120, "collection_bounds":"blob before copy; text/f64 count and finiteness after decode; canonical re-encode required"},

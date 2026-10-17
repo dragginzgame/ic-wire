@@ -1,4 +1,7 @@
 //! Build and retain the exact benchmark artifacts through their measurement.
+#[path = "../evidence/mod.rs"]
+mod evidence;
+
 use ic_build::{
     artifacts::{WasmBuildEvidence, WasmBuildSpec},
     cargo::selection::{CargoFeatureSelection, CargoSelection},
@@ -11,18 +14,8 @@ fn main() {
     let trial = env::args().nth(1).expect("runtime, macros or browser");
     let output = PathBuf::from(env::args_os().nth(2).expect("output directory"));
     fs::create_dir_all(&output).unwrap();
-    let compiler = Command::new("rustc").arg("-vV").output().unwrap();
-    assert!(compiler.status.success());
-    fs::write(output.join("build-rustc.txt"), &compiler.stdout).unwrap();
-    fs::write(
-        output.join("build-flags.txt"),
-        format!(
-            "RUSTFLAGS={}\nCARGO_ENCODED_RUSTFLAGS={}\n",
-            env::var("RUSTFLAGS").unwrap_or_default(),
-            env::var("CARGO_ENCODED_RUSTFLAGS").unwrap_or_default()
-        ),
-    )
-    .unwrap();
+    let server = PathBuf::from(env::var_os("POCKET_IC_BIN").expect("prepared PocketIC"));
+    let mut provenance = evidence::capture(&server);
     let mut retained = Vec::new();
     let mut receipts = Vec::new();
     let recipes = match trial.as_str() {
@@ -140,11 +133,17 @@ fn main() {
             .verify_current()
             .expect("source changed during measurement");
     }
-    if trial != "browser" {
-        fs::rename(
-            output.join("report.pending.json"),
-            output.join("report.json"),
-        )
-        .unwrap();
-    }
+    provenance["sources"] = evidence::sources(&trial);
+    provenance["build_records"] = json!(receipts);
+    let report_dir = if trial == "browser" {
+        root.join("examples/browser/artifacts")
+    } else {
+        output
+    };
+    let pending = report_dir.join("report.pending.json");
+    let mut report: serde_json::Value =
+        serde_json::from_slice(&fs::read(&pending).unwrap()).unwrap();
+    report["provenance"] = provenance;
+    fs::write(&pending, serde_json::to_vec_pretty(&report).unwrap()).unwrap();
+    fs::rename(pending, report_dir.join("report.json")).unwrap();
 }
