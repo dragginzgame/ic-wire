@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5]
+
+- Select authored crate files automatically in the local Make fixture, including
+  untracked modules and excluding ignored build output. New source modules no
+  longer require a second hand-maintained file list for formatting qualification.
+  Shared Tooling and the published library contract are unchanged.
+
 ## [0.4.4] - 2026-10-18
 
 - Reduce canonical-comparison work on Wasm and combine dynamic admission charges,

@@ -2,17 +2,29 @@
 
 ## Baseline and incoming work
 
-Main and origin/main now point to merge `0ac920f`, retaining tagged 0.4.3
-(`d4d9a9a`) and package metadata while integrating `5f204e5`. The original three
-conflict files were marked resolved; the merge was subsequently committed and
-delivered externally during this task. The agent executed no commit, version
-change, tag, push, release or publication. Final docs/evidence and the local Make
-fixture's new source-copy paths remain ordinary pending work.
-Published Build 0.17.3 and Shared Tooling 0.24.2 integration are preserved, along
-with incoming Host 0.27.6, Testkit 0.54.1, Metrics 0.14.3 and Platform 0.1.13 lock
-selections. Earlier installed evidence below retains its original dependencies.
+Main and origin/main point to `3c57886` (Release 0.4.4). Incoming Cargo manifest
+and lockfile work selecting Build 0.18.0 and Platform 0.1.14 is preserved unchanged;
+this tooling batch does not qualify those dependency upgrades. Shared Tooling
+remains pinned at 0.24.2. Earlier installed evidence below retains its original
+source and dependencies.
 The released 0.4.2 source has [Linux/macOS acceptance](https://github.com/dragginzgame/ic-wire/actions/runs/39138236119);
-that run does not qualify this pending graph. Compatible new notes select 0.4.4.
+that run does not qualify this pending graph. Compatible contributor-only notes
+select 0.4.5; library APIs, package versions and release delivery are unchanged.
+
+## Local Make fixture source selection
+
+Wire owns `scripts/ci/test-local-make.sh`; Shared Tooling owns the formatter and
+hook implementations it exercises. The fixture now selects authored files under
+`crates/` through Git, including untracked additions and skipping deleted or
+ignored inputs, instead of maintaining a parallel module inventory. Local script
+selection and snapshot-owned tooling selection remain explicit. No upstream
+change or snapshot refresh is needed.
+
+`make check-tooling` passes, including formatting idempotence, grouped manifest
+repair and staged/partially-staged hook behavior. A separate disposable source
+copy with a new untracked nested module passes the updated fixture; the previous
+fixture fails to resolve that module. All Git/index and release-routing sentinel
+effects stay inside disposable repositories. No runtime code changed.
 
 ## Current performance batch
 

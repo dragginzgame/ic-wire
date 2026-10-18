@@ -824,9 +824,9 @@ dependencies = [
 
 [[package]]
 name = "ic-build"
-version = "0.17.6"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bb1f84823467432a477ed2e48e301b0fe310e0227e11acfe710f0cf335af8f1"
+checksum = "a746945b51515800a3051b2f8dc3794215035bbcc8cfe6b952f9673dc289dc74"
 dependencies = [
  "cargo_metadata",
  "ic-host-artifacts",
@@ -838,6 +838,7 @@ dependencies = [
  "sha2",
  "thiserror 2.0.18",
  "toml",
+ "toml_edit",
 ]
 
 [[package]]
@@ -958,9 +959,9 @@ checksum = "23aaf066e17070c30de460ebd986b92f3b45c708639678255bdae436b0d023f7"
 
 [[package]]
 name = "ic-platform"
-version = "0.1.13"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e937488147ba2b73dc880310da72f2c819352fb94f922e5edd79a0f95c2b6f2c"
+checksum = "03c2300b6d347bc1c19ba35fcf4c31069134aefe1d4ec5bf7b5a8dfbc411285f"
 dependencies = [
  "candid",
  "ic-cdk",
@@ -973,9 +974,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.1.13"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8eb491cbff9e4aa3ba3604a981232bba0494e7603d4bd6872f3d381f06b969f"
+checksum = "059cc35f51bbb884b19a986626ddf428ce53abf96f56a145dfa3cbe1f1cd8cc4"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -2473,6 +2474,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml_edit"
+version = "0.25.17+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3641d5bbb5349a79e1020a242d251efbc546ad8048d133958323ce9c40a9c9c"
+dependencies = [
+ "indexmap",
+ "toml_datetime",
+ "toml_parser",
+ "toml_writer",
+ "winnow",
+]
+
+[[package]]
 name = "toml_parser"
 version = "1.1.5+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2952,6 +2966,9 @@ name = "winnow"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "writeable"
