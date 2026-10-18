@@ -12,7 +12,7 @@ fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md scripts/ci/release-receipts.sh .shared-tooling-receipts.snapshot Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
+paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
 paths+=(crates/ic-wire/examples/fuzz_runtime/mod.rs scripts/ci/fuzz-runtime.sh)
 paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs)
 paths+=(crates/ic-wire-canister-evaluation/examples/build_evaluation/mod.rs)

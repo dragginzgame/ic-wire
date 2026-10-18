@@ -151,12 +151,18 @@ The earlier package metadata/file-list checks passed; nothing was republished.
 Release 0.4.1 selected Testkit 0.53; the independent pending 0.54 intake is
 qualified separately in the final compiler/browser run above.
 
-Shared Tooling 0.24.0 is adopted at cab12cd3dfa4fdb34846b25397f0d72881bb9ae0;
-the receipt contribution remains separately pinned at
-35775234560bd08f7e67f4feeaf339dc25fbd9e0. Role groups, paired formatting and
-selected-source release metadata checks stay in place. Common Rust tools are
-cargo-sort and cargo-sort-derives. Both snapshots and prior disposable setup,
-formatting, hook and release checks passed; native macOS remains separate evidence.
+Shared Tooling 0.24.2 is adopted at `48f5640e744512929bfba301fe734d8ea6c6e049`.
+The canonical exporter proved and transferred the receipt contribution into the
+main snapshot; one manifest owns the complete closure. The extra manifest,
+integrity dispatch and fixture copy list are removed. Grouped formatting now uses
+shared defaults; release metadata checks retain grouped ordering. The new upstream
+archive helper is not called here; receipt schemas, selected files and recovery
+policy are unchanged. Common Rust tools remain cargo-sort and cargo-sort-derives.
+Snapshot integrity, actual disposable Make/formatting hooks and release/recovery
+fixtures pass, including dirty/conflicting source refusal, retained failed
+validation, tampered receipts, exact metadata/tag/delivery and resume. No real
+release or publication is performed by those fixtures. Fresh hosted native
+qualification belongs to the updated PR head; no full local CI ran.
 
 Production diagnostics build/link only runtime and derive; the macro lane adds
 the private adapter fixture. IC Build owns diagnostic execution and build
