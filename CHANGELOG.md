@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.3]
+## [0.4.3] - 2026-10-18
 
 - Refresh the maintainer handoff against released 0.4.2's Linux/macOS acceptance.
   Retire the superseded CDK-companion proposal and identify the remaining
