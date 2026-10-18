@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.1]
+## [0.4.1] - 2026-10-18
 
 - Share TypeScript type rendering between finite schemas and consumer-supplied
   native registries. Host generators can emit typed method modules while keeping
