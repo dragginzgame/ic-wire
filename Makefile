@@ -106,7 +106,6 @@ check-release:
 	+@bash scripts/ci/test-local-release.sh
 
 check-tooling:
-	+@bash scripts/ci/verify-shared-tooling-snapshot.sh --consumer "$(CURDIR)" --manifest .shared-tooling-receipts.snapshot
 	+@bash scripts/ci/test-local-make.sh
 
 version: host-tools-check

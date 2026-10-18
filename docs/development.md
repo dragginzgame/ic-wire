@@ -55,7 +55,7 @@ The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
 | `build`, `check`, `test`, `lint` | Locked builds/checks for `ic-wire`; Clippy denies warnings |
 | `check-wasm` | Library compilation for `wasm32-unknown-unknown` |
 | `check-msrv` | Native and Wasm library compilation on Rust 1.91.0 |
-| `fmt`, `fmt-check` | Pinned cargo-sort over root/member manifests, then rustfmt |
+| `fmt`, `fmt-check` | Pinned grouped cargo-sort over root/member manifests, then rustfmt |
 | `shared-tooling-check` | Offline snapshot hashes and executable modes |
 | `check-doc-links` | Local references in IC Wire's maintained documentation |
 | `check-pins` | Shared declaration checker with Cargo inheritance checks; requires Git and prepared host tools |
@@ -90,17 +90,22 @@ and retains failed tool/build logs through the reviewed evidence action.
 ## Snapshot maintenance and release boundary
 
 [.shared-tooling.snapshot](../.shared-tooling.snapshot) records Shared Tooling
-0.23.0 at `0b351cd2ba2bcd8927b783a5fec89afc8013f708`.
-The unmerged [receipt contribution](https://github.com/dragginzgame/shared-tooling/pull/279)
-is exported separately in [.shared-tooling-receipts.snapshot](../.shared-tooling-receipts.snapshot)
-at `35775234560bd08f7e67f4feeaf339dc25fbd9e0`; only its receipt helper
-is selected. Its required integrity helpers are byte-identical to the main
-snapshot, and `check-tooling` verifies the contribution receipt too.
-Refresh both manifests through the canonical exporter until that contribution
-is integrated; never edit their ownership records or payloads in place. Then
-consolidate the contribution with `--takeover-snapshot` as described in
-[snapshot adoption](consuming-snapshots.md). Review each preview before applying it.
+0.24.1 at `6230989d9f4dc090af4e80283eda4aee75f67bfd`, including the unchanged
+receipt helper formerly selected from PR #279. The canonical exporter transferred
+the contribution's complete closure and retired its second manifest; the main
+snapshot now owns all selected files and their integrity checks. Refresh that one
+manifest as described in [snapshot adoption](consuming-snapshots.md), reviewing
+the preview before applying it.
 Do not copy uncommitted sibling edits or edit snapshot-owned payloads.
+
+Only `[workspace.dependencies]` has the two role headers. Published runtime and
+derive dependencies, including the optional TypeScript JSON dependency, belong in
+production; evaluation, canister-adapter, benchmark and fuzz dependencies belong
+in tests/tooling. The catalog's `ic-wire` entry is an evaluation/fixture reference
+to the local runtime package. Grouped formatting and selected-source release
+checks preserve this split. The comments classify intended use; they do not prove
+registry publication or add a deployment gate. This library has no deployment
+entrypoint; installed evaluation workflows retain their own build/admission policy.
 
 The maintainer-operated `release-patch`, `release-minor`, `release-major` and
 `release-resume VERSION=X.Y.Z` commands use direct Git delivery to `origin/main`.

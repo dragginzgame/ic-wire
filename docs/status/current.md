@@ -1,5 +1,25 @@
 # Current handoff
 
+## Shared 0.24.1 receipt consolidation
+
+Shared 0.24.1 is pinned at
+`6230989d9f4dc090af4e80283eda4aee75f67bfd`. One canonical snapshot owns the
+unchanged receipt helper and its complete closure; the exporter retires the
+separate contribution manifest. The release adapter keeps file selection,
+source/metadata policy and recovery, and checks grouped manifest order in saved
+and committed metadata. Two comment headers classify the workspace dependency
+catalog without changing any dependency selection or package version.
+Consumer acceptance is tracked in
+[#9 — Consolidate the receipt snapshot after canonical Shared delivery](https://github.com/dragginzgame/ic-wire/issues/9).
+Earlier sections preserve evidence for their named 0.4.0 preparation; their
+two-snapshot baseline is superseded by this adoption. Native qualification and
+maintainer integration remain separate from preparation.
+Focused Linux snapshot, Make/hook, grouped formatting, release/recovery, pin/link
+and ShellCheck qualification passes. The locked all-feature Wasm graph for the
+published runtime and derive packages was reviewed offline. Cargo declarations
+are semantically unchanged and the lockfile is untouched; no broad local gate,
+installed evaluation, release or package publication ran.
+
 ## Pending 0.4.0 host/tooling adoption
 
 Shared Tooling 0.23.0 is pinned at

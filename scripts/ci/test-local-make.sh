@@ -12,7 +12,7 @@ fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md scripts/ci/release-receipts.sh .shared-tooling-receipts.snapshot Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
+paths=(crates/ic-wire/README.md crates/ic-wire-derive/README.md Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot crates/ic-wire/Cargo.toml crates/ic-wire/src/lib.rs)
 paths+=(crates/ic-wire/examples/fuzz_runtime/mod.rs scripts/ci/fuzz-runtime.sh)
 paths+=(crates/ic-wire-canister-evaluation/Cargo.toml crates/ic-wire-canister-evaluation/src/lib.rs)
 paths+=(crates/ic-wire-canister-evaluation/src/runtime_benchmark/mod.rs crates/ic-wire-canister-evaluation/examples/runtime_measure/mod.rs)
@@ -84,7 +84,15 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
 [[ "$(git -C "$fixture/repo" config --local core.hooksPath)" == .githooks ]]
 (
     cd "$fixture/repo"
+    cp Cargo.toml "$fixture/catalog-before"
     bash .githooks/pre-commit > "$fixture/initial-hook.log" 2>&1
+    cmp "$fixture/catalog-before" Cargo.toml
+    make --no-print-directory fmt-check > "$fixture/format-check.log" 2>&1
+    # Exercise the actual catalog through CI's command: sorting within a group
+    # must still be checked, while the production/tooling boundary survives.
+    perl -0pi -e 's/^(ic-wire-derive[^\n]*\n)(postcard[^\n]*\n)/$2$1/m or die "expected production dependency pair\n"' Cargo.toml
+    if make --no-print-directory fmt-check > "$fixture/unsorted.log" 2>&1; then exit 1; fi
+    cp "$fixture/catalog-before" Cargo.toml
     git -c user.name=Fixture -c user.email=fixture@example.invalid -c core.hooksPath=/dev/null commit -qm 'Disposable formatting baseline'
     printf '\nconst _:u8=1;\n' >> crates/ic-wire/src/lib.rs
     git add -- crates/ic-wire/src/lib.rs

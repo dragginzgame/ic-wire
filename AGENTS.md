@@ -5,12 +5,11 @@ Read docs/status/current.md first, then README.md, docs/design.md and
 Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `0b351cd2ba2bcd8927b783a5fec89afc8013f708` (0.23.0).
+rules, vendored at `6230989d9f4dc090af4e80283eda4aee75f67bfd` (0.24.1).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
-moving sibling checkout or patch snapshot-owned files in place. The receipt-only
-contribution is separately pinned in [.shared-tooling-receipts.snapshot](.shared-tooling-receipts.snapshot)
-at `35775234560bd08f7e67f4feeaf339dc25fbd9e0` until upstream integration.
+moving sibling checkout or patch snapshot-owned files in place. The same snapshot
+owns the release-receipt helper; no separate contribution snapshot remains.
 
 ## Maintainer decisions
 

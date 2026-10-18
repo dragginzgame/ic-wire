@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.1]
+
+- Adopt Shared Tooling 0.24.1 and consolidate release receipts into the main
+  snapshot, retiring the separate contribution manifest and integrity dispatch
+  ([#9 — Consolidate the receipt snapshot after canonical Shared delivery](https://github.com/dragginzgame/ic-wire/issues/9)).
+  Keep release policy and recovery checks local. Use two dependency-role sections
+  with matching grouped formatting and selected-source release checks; runtime
+  dependencies, wire contracts and supported Rust versions are unchanged.
+
 ## [0.4.0] - 2026-10-17
 
 - Adopt Shared Tooling 0.23.0, retaining the unmerged release-receipt helper under
