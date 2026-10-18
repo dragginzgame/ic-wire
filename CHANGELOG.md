@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.1] - Pending
+## [0.4.1]
 
 - Share TypeScript type rendering between finite schemas and consumer-supplied
   native registries. Host generators can emit typed method modules while keeping
