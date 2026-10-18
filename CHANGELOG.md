@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.3]
+
+- Use published IC Build 0.17.3 for retained evaluation builds and compiler
+  diagnostics. Supply complete environments and explicit child custody; retire
+  the Git pin and its older Host dependency family.
+
 ## [0.4.2] - 2026-10-18
 
 - Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.

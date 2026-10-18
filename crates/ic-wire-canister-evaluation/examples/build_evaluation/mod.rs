@@ -29,6 +29,7 @@ fn main() {
             &root,
             &root.join("target/evaluation-builds").join(name),
             &["ic-wire-canister-evaluation"],
+            env::vars_os().filter(|(key, _)| key != "CARGO_TARGET_DIR"),
         )
         .with_cargo_selection(CargoSelection {
             profile: Some("canister-evaluation".into()),
@@ -38,9 +39,10 @@ fn main() {
             },
             locked: true,
             ..CargoSelection::default()
-        })
-        .with_inherited_env(["RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"]);
-        let build = WasmBuildEvidence::acquire(spec).unwrap();
+        });
+        let build =
+            WasmBuildEvidence::acquire(spec, ic_host_process::child::OwnedChild::spawn_direct)
+                .unwrap();
         let artifact_path = output.join(format!("{name}.wasm"));
         // Consumer-selected export cap; IC Build owns capture and provenance.
         let mut receipt = json!(
