@@ -1,4 +1,6 @@
 [workspace]
+# Production packages: ic-wire, ic-wire-derive
+# Tests and tooling packages: ic-wire-adapter-fixture, ic-wire-canister-evaluation
 members = [
     "crates/ic-wire",
     "crates/ic-wire-adapter-fixture",
@@ -12,28 +14,31 @@ resolver = "3"
 version = "0.4.0"
 edition = "2024"
 rust-version = "1.91"
+license = "MIT"
 license-file = "LICENSE"
 repository = "https://github.com/dragginzgame/ic-wire"
 
 [workspace.dependencies]
-candid = "0.10.38"
-ic-build = { version = "0.14", git = "https://github.com/dragginzgame/ic-build", rev = "4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4" }
-ic-cdk = "0.20.3"
-ic-host-artifacts = { version = "0.27", default-features = false }
-ic-host-fs = { version = "0.27", default-features = false }
-ic-testkit = "0.52"
-ic-wire = { path = "crates/ic-wire", version = "0.4.0" }
-ic-wire-adapter-fixture = { path = "crates/ic-wire-adapter-fixture" }
+# Production dependencies
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.4.0" }
-ic0 = "1.2.0"
-libfuzzer-sys = "0.4.13"
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde_json = "1.0"
-sha2 = "0.10.9"
 syn = "3.0.9"
+
+# Tests and tooling only
+ic-build = { version = "0.14", git = "https://github.com/dragginzgame/ic-build", rev = "4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4" }
+ic-cdk = "0.20.3"
+ic-host-artifacts = { version = "0.27", default-features = false }
+ic-host-fs = { version = "0.27", default-features = false }
+ic-platform = { version = "0.1.9", default-features = false }
+ic-testkit = "0.53"
+ic-wire = { path = "crates/ic-wire", version = "0.4.0" }
+ic-wire-adapter-fixture = { path = "crates/ic-wire-adapter-fixture" }
+libfuzzer-sys = "0.4.13"
+sha2 = "0.10.9"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

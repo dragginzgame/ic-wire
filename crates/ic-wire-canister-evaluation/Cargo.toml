@@ -3,6 +3,7 @@ name = "ic-wire-canister-evaluation"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+license.workspace = true
 license-file.workspace = true
 publish = false
 
@@ -11,18 +12,15 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 bindings = ["browser-fixture", "ic-wire/typescript"]
-candid-codec = []
-management = []
 macro-fixture = ["dep:ic-wire", "dep:ic-wire-adapter-fixture"]
 browser-fixture = ["dep:ic-wire"]
-runtime-benchmark = ["dep:ic-wire"]
 
 [dependencies]
-candid.workspace = true
+# Platform 0.1.9 lacks CDK entries, checked/allocating helpers and stable read/write/grow (#1).
 ic-cdk.workspace = true
+ic-platform = { workspace = true, features = ["ic0"] }
 ic-wire = { workspace = true, optional = true }
 ic-wire-adapter-fixture = { workspace = true, optional = true }
-ic0.workspace = true
 serde.workspace = true
 
 [dev-dependencies]
@@ -33,11 +31,6 @@ ic-testkit.workspace = true
 postcard.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-
-[[example]]
-name = "runtime-measure"
-path = "examples/runtime_measure/mod.rs"
-required-features = ["runtime-benchmark"]
 
 [[example]]
 name = "browser-fixture"

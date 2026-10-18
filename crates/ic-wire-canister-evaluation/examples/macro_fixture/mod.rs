@@ -1,6 +1,6 @@
 //! Installed qualification of the evaluation-only query/update attributes.
-use candid::Principal;
 use ic_host_artifacts::wasm::{InspectionLimits, inspect};
+use ic_platform::Principal;
 use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
 use ic_wire::{Method, decode_response, encode_request};
 use ic_wire_canister_evaluation::macro_fixture::{Add, BadReply, Read, Reset};

@@ -1,5 +1,5 @@
 //! Generate runtime clients and serve a controller-bound local browser fixture.
-use candid::Principal;
+use ic_platform::Principal;
 use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
 use ic_wire::{List, Method, Text, encode_request, encode_response};
 use ic_wire_canister_evaluation::commands::{

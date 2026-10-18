@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { WireError } from './compiled/wire-runtime.js';
+import { nativeTree, prototypeName } from './compiled/native.js';
 const normalize = value => value instanceof Uint8Array ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
 function check(codec, value, request, response) {
   for (const [encode, decode, bytes] of [[codec.encodeRequest, codec.decodeRequest, request], [codec.encodeResponse, codec.decodeResponse, response]]) {
@@ -24,6 +25,8 @@ function probe(schema, nodes = 32, depth = 8) {
 }
 const header = [73,87,1,0,0,0,0,0,0,0,0];
 const frame = (...payload) => Uint8Array.from([...header,...payload]);
+assert.deepEqual(prototypeName.encodeRequest(null), frame());
+assert.equal(prototypeName.decodeRequest(frame()), null);
 const rejects = (action, code) => assert.throws(action, error => error instanceof WireError && error.code === code);
 for (const payload of [[128,0],[255,255,4],[128,128,128]]) rejects(() => probe({k:'u',bits:16}).decodeRequest(frame(...payload)), 'malformed');
 rejects(() => probe({k:'bool'}).decodeRequest(frame(2)), 'malformed');
@@ -72,6 +75,7 @@ const nativeMeta = {id:'1',request:{k:'ref',name:'Node'},response:{k:'ref',name:
 const native = createCodec(nativeMeta,nativeTypes);
 const tree = {tag:'Branch',value:[{tag:'Leaf',value:['é',128n]}]};
 const treeBytes = frame(...nativePayload);
+check(nativeTree, tree, [...treeBytes], [...treeBytes.subarray(0, 10), 1, ...nativePayload]);
 assert.deepEqual(native.encodeRequest(tree),treeBytes);
 assert.deepEqual(normalize(native.decodeRequest(treeBytes)),tree);
 assert.deepEqual(native.encodeRequest(native.decodeRequest(treeBytes)),treeBytes);

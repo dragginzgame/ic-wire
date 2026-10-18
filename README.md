@@ -5,10 +5,15 @@ applications on the Internet Computer. The goal is Candid-like developer ease
 with substantially less Wasm code and serialization work for communication whose
 producers and consumers we control.
 
-**Status: 0.3.0 published on crates.io.**
+**Status: maintained Postcard runtime; first published at 0.3.0.**
 The library supplies explicit-layout derives, bounded containers, typed method
-bindings, finite float wrappers and canonical request/reply envelopes. Its normal dependency graph has
-no Candid, CDK or host tooling. Start with the [runtime guide](docs/runtime.md)
+bindings, finite float wrappers and canonical request/reply envelopes. The native
+Serde API also admits ordinary containers and recursive values under explicit
+resource limits. Its normal dependency graph has
+no Candid, CDK or host tooling. All owned codecs and browser endpoint payloads
+use IC Wire; no direct Candid dependency or comparison implementation remains.
+The private CDK/SDK/PocketIC integration harness still reaches Candid transitively.
+Start with the [runtime guide](docs/runtime.md)
 and [installed adoption proof](docs/runtime-adoption.md). Canic macro integration
 remains consumer work; a [local macro fixture](docs/macro-adoption.md) tests the
 expansion pattern here. An optional host generator now emits bounded TypeScript
@@ -31,18 +36,19 @@ The [payload screen](docs/codec-screen.md) records reproducible sizes and the
 remaining obstacles to selecting a shared encoding.
 The historical [matched canister experiment](docs/canister-comparison.md) adds measured
 Wasm and IC instruction evidence, including retained Candid management traffic.
-The [production runtime comparison](docs/runtime-comparison.md) measures the
-current envelopes, bounds and finite floats against strict Candid.
+The [recorded runtime comparison](docs/runtime-comparison.md) measures the
+then-selected envelopes, bounds and finite floats against strict Candid.
 The historical [nested authority extension](docs/nested-authority.md) adds bounded delegate
 and grant collections with new installed measurements.
 The [browser trial](docs/browser-interop.md) demonstrates a typed TypeScript client
 using generated Postcard bindings in real Chromium against local PocketIC.
-The [peer extension](docs/peer-interop.md) exercises those same bytes through a
+The historical [peer extension](docs/peer-interop.md) exercised those bytes through a
 forwarding canister and verifies the actual recipient caller.
 The historical [protected-command trial](docs/command-replay.md) qualified direct-caller
 authorization, atomic local effects and stable exact-byte replay across upgrades.
 Durable receipt-policy qualification now lives in [Relay’s receipt probe PR](https://github.com/dragginzgame/ic-relay/pull/2);
-the current browser fixture retains only volatile replay state.
+the current browser fixture tests codec/transport behavior without receipt caching
+or peer-delivery policy.
 The [consumer adoption assessment](docs/consumer-adoption.md) maps Canic and sibling
 integration work and the remaining prerequisites.
 
@@ -82,6 +88,4 @@ publish packages. See the [release workflow](docs/development.md#snapshot-mainte
 
 ## License
 
-[Dragginz Source Available License — Verifiable ICP Burn, Version 1.0](LICENSE),
-using the same license text as IC Relay with this project's copyright notice.
-This is source-available, not an OSI-approved open-source license.
+Licensed under the [MIT License](LICENSE).

@@ -5,14 +5,14 @@ use std::cell::Cell;
 
 thread_local! { static BALANCE: Cell<u64> = const { Cell::new(0) }; }
 
-#[ic_cdk::update(manual_reply = true)]
+#[ic_cdk::update(manual_reply = true, hidden = true)]
 fn runtime_apply() {
     if !ic_cdk::api::is_controller(&ic_cdk::api::msg_caller()) {
-        ic_cdk::api::msg_reject("controller required");
+        ic_platform::ic0::msg_reject(b"controller required");
         return;
     }
-    if ic0::msg_arg_data_size() > Apply::REQUEST_LIMITS.bytes {
-        ic_cdk::api::msg_reject("request limit");
+    if ic_platform::ic0::msg_arg_data_size() > Apply::REQUEST_LIMITS.bytes {
+        ic_platform::ic0::msg_reject(b"request limit");
         return;
     }
     let request = decode_request::<Apply>(&ic_cdk::api::msg_arg_data()).expect("request codec");
@@ -29,13 +29,14 @@ fn runtime_apply() {
     };
     let reply = encode_response::<Apply>(&response).expect("response codec");
     BALANCE.set(next.unwrap_or(balance));
-    ic_cdk::api::msg_reply(reply.as_bytes());
+    ic_platform::ic0::msg_reply_data_append(reply.as_bytes());
+    ic_platform::ic0::msg_reply();
 }
 
-#[ic_cdk::query(manual_reply = true)]
+#[ic_cdk::query(manual_reply = true, hidden = true)]
 fn runtime_inspect() {
-    if ic0::msg_arg_data_size() > Inspect::REQUEST_LIMITS.bytes {
-        ic_cdk::api::msg_reject("request limit");
+    if ic_platform::ic0::msg_arg_data_size() > Inspect::REQUEST_LIMITS.bytes {
+        ic_platform::ic0::msg_reject(b"request limit");
         return;
     }
     let response = decode_request::<Inspect>(&ic_cdk::api::msg_arg_data()).and_then(|inspection| {
@@ -45,16 +46,19 @@ fn runtime_inspect() {
         })
     });
     match response {
-        Ok(reply) => ic_cdk::api::msg_reply(reply.as_bytes()),
-        Err(error) => ic_cdk::api::msg_reject(error.to_string()),
+        Ok(reply) => {
+            ic_platform::ic0::msg_reply_data_append(reply.as_bytes());
+            ic_platform::ic0::msg_reply();
+        }
+        Err(error) => ic_platform::ic0::msg_reject(error.to_string().as_bytes()),
     }
 }
 
-#[ic_cdk::query(manual_reply = true)]
+#[ic_cdk::query(manual_reply = true, hidden = true)]
 fn native_echo() {
     use crate::commands::{NATIVE_ID, NATIVE_LIMITS, NativeTree};
-    if ic0::msg_arg_data_size() > NATIVE_LIMITS.bytes {
-        ic_cdk::api::msg_reject("request limit");
+    if ic_platform::ic0::msg_arg_data_size() > NATIVE_LIMITS.bytes {
+        ic_platform::ic0::msg_reject(b"request limit");
         return;
     }
     let response = ic_wire::native::decode_request::<NativeTree>(
@@ -64,7 +68,10 @@ fn native_echo() {
     )
     .and_then(|value| ic_wire::native::encode_response(NATIVE_ID, &value, NATIVE_LIMITS));
     match response {
-        Ok(reply) => ic_cdk::api::msg_reply(reply),
-        Err(error) => ic_cdk::api::msg_reject(error.to_string()),
+        Ok(reply) => {
+            ic_platform::ic0::msg_reply_data_append(&reply);
+            ic_platform::ic0::msg_reply();
+        }
+        Err(error) => ic_platform::ic0::msg_reject(error.to_string().as_bytes()),
     }
 }

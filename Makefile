@@ -7,10 +7,12 @@ LOCAL_TOOL_CHECK_TARGETS += ic-tools-check
 export PATH := $(CURDIR)/.tools/ic/bin:$(PATH)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
+FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all' -- "$(FORMAT_CARGO)"
+FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check' -- "$(FORMAT_CARGO)"
 include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
-.PHONY: evaluate-runtime evaluate-macros check-macro-diagnostics
+.PHONY: evaluate-macros check-macro-diagnostics
 .PHONY: publish check-package
 publish:
 	+@env cargo publish --locked -p ic-wire-derive -p ic-wire
@@ -22,9 +24,6 @@ check-package:
 
 fuzz-runtime:
 	+@bash scripts/ci/fuzz-runtime.sh
-
-evaluate-runtime:
-	+@bash scripts/ci/evaluate-runtime.sh
 
 evaluate-macros:
 	+@bash scripts/ci/evaluate-macros.sh
@@ -49,7 +48,7 @@ check-browser:
 
 check-canister-evaluation:
 	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features browser-fixture
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features candid-codec,runtime-benchmark
+	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features macro-fixture
 	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
 	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown
 	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --all-features
@@ -66,13 +65,12 @@ help:
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-macro-diagnostics, evaluate-macros (local adapter proof)' \
-		'Evaluation: evaluate-runtime (production runtime versus Candid)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Evaluation: check-browser, evaluate-browser (prepared Node/npm/Chromium)' \
 		'Evaluation: check-canister-evaluation (compile and lint; no emulator)' \
 		'Registry: publish (uploads); check-package (no upload; registry access)' \
-		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-tooling' \
+		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
 		'Releases: release-patch, release-minor, release-major, release-resume (Git delivery only)'
@@ -99,6 +97,10 @@ check-msrv:
 check-doc-links:
 	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/macro-adoption.md docs/runtime-comparison.md docs/consumer-fixtures.md docs/status/current.md
 
+.PHONY: check-boundary
+check-boundary:
+	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)"
+
 check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"
 
@@ -113,7 +115,7 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-doc-links check-tooling check-release fmt-check check lint test check-typed-diagnostics check-canister-evaluation check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check lint test check-typed-diagnostics check-macro-diagnostics check-canister-evaluation check-wasm check-msrv
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

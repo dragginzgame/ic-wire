@@ -1,4 +1,8 @@
-# Consumer adoption assessment
+# Historical consumer adoption assessment
+
+This is a frozen planning assessment, not a current sibling migration checklist.
+Current codec ownership is documented in [design](design.md#ownership); verify
+the selected consumer revision before using the integration work below.
 
 Evaluated 2026-10-16 against committed source exports. A single Canic endpoint is
 now supported by a usable Rust runtime and installed adapter fixture. Replacing

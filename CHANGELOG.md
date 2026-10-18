@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.4.1] - Pending
+
+- Share TypeScript type rendering between finite schemas and consumer-supplied
+  native registries. Host generators can emit typed method modules while keeping
+  reflection, endpoint contracts and scalar checks at their consumer.
+
+- Replace the custom Dragginz license with the standard MIT License for all
+  workspace packages, including published runtime and derive crates.
+
+- Keep owned codecs and endpoint payloads IC Wire-only. Retire Candid comparison
+  code, the management probe and `evaluate-runtime`; preserve recorded measurements.
+  Remove direct Candid dependencies, retaining browser and installed Wire tests.
+  Suppress unused Candid service metadata without changing callable Wasm exports.
+  SDK/CDK/PocketIC still contain Candid transitively in the private test harness.
+- Adopt published IC Platform 0.1.9 for Principals, raw argument-size and
+  stable-page checks, byte-exact traps, replies and rejects, removing the direct
+  ic0 dependency. Preserve reply append/finalization order and UTF-8 reject bytes.
+  Direct dependency checks now run in CI.
+  CDK entrypoints/system helpers remain an evaluation-only exception under
+  [#1 — Support the CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+
+- Adopt Shared Tooling 0.24.0 with dependency-role labels and matching grouped
+  formatting and release metadata checks. Dependency selections are unchanged;
+  role labels do not provide automated deployment exclusion enforcement.
+- Isolate production codec diagnostics from the extracted endpoint-adapter fixture.
+  Keep compiler diagnostics at IC Build and include adapter qualification in CI.
+- Correct current ownership guidance and archive superseded migration handoffs;
+  preserve historical reports without presenting retired replay or codec-selection
+  experiments as active workflows. Runtime APIs and wire bytes are unchanged.
+
 ## [0.4.0] - 2026-10-17
 
 - Adopt Shared Tooling 0.23.0, retaining the unmerged release-receipt helper under

@@ -47,6 +47,10 @@ handler awaits an immediately ready future; external-call recovery is unqualifie
 The attributes emit CDK entrypoints for this experiment. They do not implement a
 replacement executor or platform APIs. Native tests call the same expansion with
 a mock transport; installed tests use real IC APIs and the CDK executor.
+The generated entry has no Rust arguments and uses `manual_reply = true` plus
+`hidden = true`. This suppresses Candid service metadata while preserving callable
+Wasm exports and the original executor contexts. There is no direct Candid crate;
+CDK still contains Candid transitively. The full export roster is checked on Wasm.
 Controller checks are the fixture's auth policy, not Canic authorization/delegation.
 No automatic replay policy is inserted. The Add command has no receipts, so
 repeating it produces another effect. The separate receipt-backed runtime trial owns

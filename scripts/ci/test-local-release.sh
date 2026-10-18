@@ -94,5 +94,16 @@ done
 yq -p toml -o json '.' crates/ic-wire-canister-evaluation/Cargo.toml | jq -e '.package.publish == false' >/dev/null
 make release-resume "VERSION=$candidate" > "$fixture/resume.log" 2>&1
 [[ "$(git rev-parse HEAD)" == "$commit" ]]
+# Current-source ordering refuses disorder, while committed-source admission
+# must read the selected release rather than the surrounding dirty worktree.
+cp Cargo.toml "$fixture/grouped-manifest"
+perl -0pi -e 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' Cargo.toml
+export RELEASE_VERSION="$candidate"
+RELEASE_DATE="$(sed -n 's/^## \[[^]]*\] - \([0-9-]*\)$/\1/p' CHANGELOG.md | head -n 1)"
+export RELEASE_DATE
+if RELEASE_COMMIT='' bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped > "$fixture/grouped-current.log" 2>&1; then exit 1; fi
+RELEASE_COMMIT="$commit" bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped > "$fixture/grouped-committed.log" 2>&1
+cmp Cargo.toml <(perl -0pe 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' "$fixture/grouped-manifest")
+cp "$fixture/grouped-manifest" Cargo.toml
 complete=true
 printf '%s\n' 'Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.'

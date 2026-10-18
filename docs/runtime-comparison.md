@@ -1,5 +1,11 @@
 # Production runtime versus Candid
 
+This comparison is retired. Its control implementation and `evaluate-runtime`
+command were removed after codec selection; current integration tests use Wire
+only. Measurements and source identities below are historical evidence, not a
+claim that every schema or end-to-end request is ten times faster. Reproduction
+requires the original source identified by the report and repository history.
+
 Measured locally on 2026-10-16 using the released 0.2.0 runtime and the new
 `runtime-benchmark` fixture. [Raw evidence](evidence/runtime-comparison.json)
 records all samples, source/input/artifact SHA-256 hashes, compiler, flags,
@@ -57,7 +63,7 @@ identity/direction and page row/cell overflow. The runner checks matching export
 and byte-identical independently encoded expected replies for each call. The
 original six mixed-record cases are retained in the raw report. Native time,
 compression, peak memory, recursive values and real IcyDB contract adoption remain
-unmeasured. Use the same `make evaluate-runtime` command below to reproduce.
+unmeasured. The reproduction commands below apply to the original checkout.
 
 ## Scratch optimization (0.2.2)
 
@@ -103,8 +109,8 @@ feature, including custom-serializer overflow/failure and canonical length/value
 mismatch cases, six doctests and all 83 Rust/TypeScript vectors. Focused clippy,
 Rust 1.91 Wasm compilation and the disposable formatting fixture pass.
 The installed replay/rollback trial also passes with the optimized runtime.
-`make evaluate-runtime` reproduces the current implementation; the earlier report
-below remains historical.
+The original `make evaluate-runtime` command reproduced that implementation;
+all reports here remain historical.
 
 ## Original 0.2.0 results
 
@@ -176,7 +182,7 @@ and wrong identity), plus two management calls. This is a stateless benchmark,
 not retry deduplication or authentication evidence. SQL unions, recursive values,
 f32, standalone scalar schemas and actual consumer contracts are not measured.
 
-## Reproduce
+## Historical reproduction
 
 Use the prepared Rust/Wasm and PocketIC dependencies described in
 [development](development.md). No tool installation happens implicitly:
@@ -193,7 +199,7 @@ optimization, LTO, one codegen unit, abort panic and stripped debug information.
 The saved run is Linux/PocketIC 16.0.0; macOS execution is not established by it.
 Runtime source and package versions are unchanged by this benchmark batch.
 
-The maintained runner now uses IC Build 0.12 to select and retain each artifact
+The later runner used IC Build 0.12 to select and retain each artifact
 through measurement. Fresh reports include build/input/validation digests and
 verify Wasm hashes against the retained build records. Keep sources unchanged
 until the command exits; persistent mutation refuses report finalization.

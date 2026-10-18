@@ -368,6 +368,75 @@ fn typescript_projects_explicit_id_order_and_rejects_opaque_metadata() {
     assert_eq!(generate::<Opaque>(), Err(GenerationError::Schema));
 }
 
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
+    use ic_wire::typescript::{GenerationError, generate_registry};
+    use serde_json::json;
+    use std::collections::BTreeMap;
+    let method = json!({"name":"echo","mode":"query","id":"1",
+        "request":{"k":"ref","name":"Atom"},"response":{"k":"ref","name":"Atom"},
+        "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
+        "requestDepth":8,"responseDepth":8});
+    let types = BTreeMap::from([(
+        "Atom".into(),
+        json!({"k":"text","check":"decimal","max":32}),
+    )]);
+    let source =
+        generate_registry(&types, std::slice::from_ref(&method), "./native-runtime.js").unwrap();
+    assert!(source.contains("\\\"check\\\":\\\"decimal\\\""));
+    assert!(source.contains("export type Atom = string;"));
+    for name in ["bad-name", "default", "string", "createCodec"] {
+        let mut invalid = method.clone();
+        invalid["name"] = json!(name);
+        assert_eq!(
+            generate_registry(&types, &[invalid], "./runtime.js"),
+            Err(GenerationError::Schema)
+        );
+        let invalid = BTreeMap::from([(name.into(), json!({"k":"unit"}))]);
+        assert_eq!(
+            generate_registry(&invalid, &[], "./runtime.js"),
+            Err(GenerationError::Schema)
+        );
+    }
+    for node in [
+        json!({"k":"ref","name":"Missing"}),
+        json!({"k":"u","bits":7}),
+        json!({"k":"float","bits":16}),
+        json!({"k":"tuple"}),
+        json!({"k":"enum","variants":[]}),
+        json!({"k":"record","fields":[{"name":"x","value":{"k":"unit"}},{"name":"x","value":{"k":"unit"}}]}),
+    ] {
+        let invalid = BTreeMap::from([("Atom".into(), node)]);
+        assert_eq!(
+            generate_registry(&invalid, &[], "./runtime.js"),
+            Err(GenerationError::Schema)
+        );
+    }
+    assert_eq!(
+        generate_registry(&types, &[method.clone(), method.clone()], "./runtime.js"),
+        Err(GenerationError::Schema)
+    );
+    let mut invalid = method;
+    invalid["requestNodes"] = json!(1_u64 << 53);
+    assert_eq!(
+        generate_registry(&types, &[invalid], "./runtime.js"),
+        Err(GenerationError::Complexity)
+    );
+    let mut deep = json!({"k":"unit"});
+    for _ in 0..66 {
+        deep = json!({"k":"option","item":deep});
+    }
+    assert_eq!(
+        generate_registry(
+            &BTreeMap::from([("Deep".into(), deep)]),
+            &[],
+            "./runtime.js"
+        ),
+        Err(GenerationError::Complexity)
+    );
+}
+
 #[test]
 fn finite_float_bits_and_nonfinite_rejection() {
     use ic_wire::{FiniteF32, FiniteF64};

@@ -18,7 +18,13 @@ perl scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" >/dev/
 perl scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
 [[ "${RELEASE_SOURCE:?}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail 'invalid source identity'
 state="$(git rev-parse --git-path release-state)/ic-wire-$RELEASE_VERSION"
-metadata() { bash scripts/ci/cargo-release-metadata.sh "$1" ic-wire; }
+metadata() {
+    if [[ "$1" == check ]]; then
+        bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped
+    else
+        bash scripts/ci/cargo-release-metadata.sh "$1" ic-wire
+    fi
+}
 source_check() {
     bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
 }

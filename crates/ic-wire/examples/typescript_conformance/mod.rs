@@ -165,6 +165,30 @@ fn main() {
     )
     .unwrap();
     fs::write(directory.join("package.json"), "{\"type\":\"module\"}").unwrap();
+    let mut types = std::collections::BTreeMap::from([(
+        "Node".into(),
+        serde_json::json!({
+            "k":"enum","variants":[
+                {"name":"Leaf","id":0,"value":{"k":"tuple","items":[{"k":"text"},{"k":"newtype","item":{"k":"u","bits":64}}]}},
+                {"name":"Branch","id":1,"value":{"k":"list","item":{"k":"ref","name":"Node"}}}
+            ]
+        }),
+    )]);
+    types.insert("__proto__".into(), serde_json::json!({"k":"unit"}));
+    let method = serde_json::json!({"name":"nativeTree","mode":"query","id":"1",
+        "request":{"k":"ref","name":"Node"},"response":{"k":"ref","name":"Node"},
+        "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
+        "requestDepth":8,"responseDepth":8});
+    let mut proto = method.clone();
+    proto["name"] = serde_json::json!("prototypeName");
+    proto["request"] = serde_json::json!({"k":"ref","name":"__proto__"});
+    proto["response"] = proto["request"].clone();
+    fs::write(
+        directory.join("native.ts"),
+        ic_wire::typescript::generate_registry(&types, &[method, proto], "./wire-runtime.js")
+            .unwrap(),
+    )
+    .unwrap();
     let mut f = Fixture {
         mutation_data: BufWriter::new(fs::File::create(directory.join("mutations.jsonl")).unwrap()),
         directory,

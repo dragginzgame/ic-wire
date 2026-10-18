@@ -1,7 +1,8 @@
-# First implementation batch
+# Evaluation scope and historical plan
 
-Current executable comparisons use `evaluate-runtime`. The old installed codec
-experiment and `evaluate-canisters` are retired; their reports below are historical.
+Codec comparisons, `evaluate-runtime` and the old `evaluate-canisters` experiment
+are retired. Reports below preserve their original source/build identities.
+Current `evaluate-browser` and `evaluate-macros` test IC Wire endpoints only.
 Durable receipt qualification moves to Relay; IC Wire retains browser transport
 and codec byte conformance without receipt caching or peer-delivery policy.
 
@@ -10,8 +11,8 @@ and codec byte conformance without receipt caching or peer-delivery policy.
 The [Postcard runtime](runtime.md) and [installed adoption proof](runtime-adoption.md)
 now qualify a controlled Rust-to-Rust adoption path. Historical comparisons below
 retain their original bytes and build identities; their savings are not measurements
-of the new runtime envelope. The [current-runtime comparison](runtime-comparison.md)
-now measures that envelope and its bounds on a mixed bounded schema. Optional
+of every current runtime or consumer. The [recorded runtime comparison](runtime-comparison.md)
+measured its selected envelope and bounds on a mixed bounded schema. Optional
 TypeScript generation and installed browser correctness are also qualified.
 
 The initial [payload screen](codec-screen.md) implemented steps 1–2 with bounded
@@ -26,22 +27,22 @@ outside that measured subset. The subsequent
 client against the installed Postcard fixture. Postcard is now the selected
 engine for controlled RPC and owned user endpoints; adoption remains bounded
 by the unresolved protocol requirements.
-The [protected-command trial](command-replay.md) now qualifies bounded stable
+The historical [protected-command trial](command-replay.md) qualified bounded stable
 receipts for synchronous local effects, including trap rollback and replay after
 an identical Wasm upgrade. Delegated auth and external effects remain separate.
 
-Produce a reproducible codec comparison and one complete typed developer journey.
-Do not adopt a codec or promise savings solely from source size or symbol names.
-The maintainer must accept the resulting direction before registry publication.
+The sequence below records the original selection experiment, completed before
+the first publication. It is not a request to reintroduce candidate codecs or
+consumer replicas. Current work preserves the selected runtime and reproducible
+comparisons without deriving savings from source size or symbol names.
 
-The [shared-codec assessment](shared-codec-evaluation.md) treats reuse by IcyDB
-as an optional hypothesis. Include an IcyDB-shaped schema artifact in the local
-fixtures and evaluate its bounded binary approach as a candidate alongside the
-existing-codec control. Sharing must earn its place through measured benefit and
-reduced consumer implementation; it is not a selection requirement. Database
-storage and ordered-key formats remain outside initial implementation scope.
+The historical [shared-codec assessment](shared-codec-evaluation.md) investigated
+IcyDB reuse. Its consumer-specific SQL projections have since been retired here;
+IcyDB owns actual contracts, scalar validation and endpoint qualification. IC Wire
+keeps generic finite/native conformance fixtures. Database storage and ordered-key
+formats remain outside this repository.
 
-## Work sequence
+## Historical work sequence
 
 1. Freeze representative local fixtures: a small request/result, a bounded nested
    Canic-shaped authority payload, a byte-heavy payload and a relay batch/ACK.

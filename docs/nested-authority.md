@@ -2,7 +2,7 @@
 
 This experiment is retired from current source. Reproduce it from commit
 `226a11fce6d5cdd59a77d9a006c91f5a46c58b42` or the source identity in its saved
-report. Use `make evaluate-runtime` for the maintained production-codec comparison.
+report. The [later runtime comparison](runtime-comparison.md) is also retired.
 Commands below apply to the historical checkout.
 
 The pending 0.1.3 experiment adds a synthetic authority update to the existing
