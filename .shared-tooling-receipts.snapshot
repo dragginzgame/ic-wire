@@ -1,9 +1,0 @@
-# Shared Tooling snapshot v1
-# version	0.22.1
-format	1
-source	https://github.com/dragginzgame/shared-tooling
-revision	35775234560bd08f7e67f4feeaf339dc25fbd9e0
-# entrypoint	scripts/ci/release-receipts.sh
-file	53f1623cf491ebbb38391b123bcdf5868e3a38c83bfb53678b9d9ef9e3c29826	-	scripts/ci/release-receipts.sh
-file	4c981184847462ab3c01cac087e28309f8e054253fd95c7bbe56f643877aa708	x	scripts/ci/verify-file-checksum.sh
-file	a4682503812f210b951aede536cdd65642bfe266b02ab532853a1aeff64f9742	x	scripts/ci/verify-shared-tooling-snapshot.sh

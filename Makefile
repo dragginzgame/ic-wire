@@ -7,8 +7,6 @@ LOCAL_TOOL_CHECK_TARGETS += ic-tools-check
 export PATH := $(CURDIR)/.tools/ic/bin:$(PATH)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
-FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all' -- "$(FORMAT_CARGO)"
-FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check' -- "$(FORMAT_CARGO)"
 include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
@@ -108,7 +106,6 @@ check-release:
 	+@bash scripts/ci/test-local-release.sh
 
 check-tooling:
-	+@bash scripts/ci/verify-shared-tooling-snapshot.sh --consumer "$(CURDIR)" --manifest .shared-tooling-receipts.snapshot
 	+@bash scripts/ci/test-local-make.sh
 
 version: host-tools-check

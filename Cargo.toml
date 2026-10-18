@@ -1,6 +1,4 @@
 [workspace]
-# Production packages: ic-wire, ic-wire-derive
-# Tests and tooling packages: ic-wire-adapter-fixture, ic-wire-canister-evaluation
 members = [
     "crates/ic-wire",
     "crates/ic-wire-adapter-fixture",

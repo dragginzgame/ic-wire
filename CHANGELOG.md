@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3]
+
+- Consolidate release receipts into the main Shared Tooling snapshot at reviewed
+  0.24.2 source. Retire the supplementary snapshot and its separate integrity
+  dispatch; use canonical grouped-formatting defaults. Preserve release receipts,
+  selected files and recovery policy ([#9](https://github.com/dragginzgame/ic-wire/issues/9)).
+
 ## [0.4.2] - 2026-10-18
 
 - Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.
