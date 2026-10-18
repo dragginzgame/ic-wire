@@ -266,3 +266,29 @@ fn frame_budgets_agree_at_header_boundary_and_preserve_error_precedence() {
         );
     }
 }
+
+#[test]
+fn scalar_admission_preserves_exact_resource_boundaries() {
+    let limits = Limits {
+        bytes: 10,
+        allocation: 138,
+        nodes: 4,
+        depth: 3,
+    };
+    let bytes = postcard::to_allocvec(&u64::MAX).unwrap();
+    assert_eq!(native::encoded_len(&u64::MAX, limits), Ok(10));
+    assert_eq!(native::encode(&u64::MAX, limits).unwrap(), bytes);
+    assert_eq!(native::decode::<u64>(&bytes, limits), Ok(u64::MAX));
+    for refused in [
+        Limits { nodes: 3, ..limits },
+        Limits {
+            allocation: 137,
+            ..limits
+        },
+        Limits { depth: 2, ..limits },
+    ] {
+        assert_eq!(native::encoded_len(&u64::MAX, refused), Err(Error::Limit));
+        assert_eq!(native::encode(&u64::MAX, refused), Err(Error::Limit));
+        assert_eq!(native::decode::<u64>(&bytes, refused), Err(Error::Limit));
+    }
+}

@@ -12,7 +12,7 @@ use std::{env, fs, path::PathBuf, process::Command};
 
 fn main() {
     let root = env::current_dir().unwrap();
-    let trial = env::args().nth(1).expect("macros or browser");
+    let trial = env::args().nth(1).expect("macros, browser or performance");
     let output = PathBuf::from(env::args_os().nth(2).expect("output directory"));
     fs::create_dir_all(&output).unwrap();
     let server = PathBuf::from(env::var_os("POCKET_IC_BIN").expect("prepared PocketIC"));
@@ -22,6 +22,12 @@ fn main() {
     let recipes = match trial.as_str() {
         "macros" => vec![("macros", "macro-fixture")],
         "browser" => vec![("browser", "browser-fixture")],
+        "performance" => vec![
+            ("wire", "performance-wire"),
+            ("postcard", "performance-postcard"),
+            ("bitcode", "performance-bitcode"),
+            ("wincode", "performance-wincode"),
+        ],
         _ => panic!("unknown trial"),
     };
     for (name, features) in recipes {
@@ -29,6 +35,7 @@ fn main() {
             &root,
             &root.join("target/evaluation-builds").join(name),
             &["ic-wire-canister-evaluation"],
+            env::vars_os().filter(|(key, _)| key != "CARGO_TARGET_DIR"),
         )
         .with_cargo_selection(CargoSelection {
             profile: Some("canister-evaluation".into()),
@@ -38,9 +45,10 @@ fn main() {
             },
             locked: true,
             ..CargoSelection::default()
-        })
-        .with_inherited_env(["RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"]);
-        let build = WasmBuildEvidence::acquire(spec).unwrap();
+        });
+        let build =
+            WasmBuildEvidence::acquire(spec, ic_host_process::child::OwnedChild::spawn_direct)
+                .unwrap();
         let artifact_path = output.join(format!("{name}.wasm"));
         // Consumer-selected export cap; IC Build owns capture and provenance.
         let mut receipt = json!(
@@ -74,6 +82,7 @@ fn main() {
                     "canister_update macro_bad_reply",
                     "canister_update macro_reset",
                 ],
+                "performance" => vec!["canister_query performance"],
                 _ => unreachable!(),
             };
             expected.sort_unstable();
@@ -128,6 +137,18 @@ fn main() {
                 "examples/browser",
                 "--generate-only",
             ]);
+        }
+        "performance" => {
+            host.args([
+                "--profile",
+                "canister-evaluation",
+                "--features",
+                "performance-postcard,performance-bitcode,performance-wincode",
+                "--example",
+                "performance",
+                "--",
+            ])
+            .arg(&output);
         }
         _ => unreachable!(),
     }

@@ -51,6 +51,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
 
 [[package]]
+name = "arrayvec"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56"
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -124,6 +130,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6df92e0e9baae4dc82c7bad7715ca40c0a5c71539057bf2ea04a5c29c980410b"
 dependencies = [
  "either",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "bitcode"
+version = "0.6.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a6ed1b54d8dc333e7be604d00fa9262f4635485ffea923647b6521a5fff045d"
+dependencies = [
+ "arrayvec 0.7.8",
+ "bitcode_derive",
+ "bytemuck",
+ "glam",
+ "serde",
+]
+
+[[package]]
+name = "bitcode_derive"
+version = "0.6.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "238b90427dfad9da4a9abd60f3ec1cdee6b80454bde49ed37f1781dd8e9dc7f9"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
@@ -642,6 +672,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "glam"
+version = "0.34.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc148d4ddd3930c52f9e5ae79b89805c6f07e9ff417e7b083e0348cea60a5aba"
+
+[[package]]
 name = "h2"
 version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -788,18 +824,19 @@ dependencies = [
 
 [[package]]
 name = "ic-build"
-version = "0.14.0"
-source = "git+https://github.com/dragginzgame/ic-build?rev=4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4#4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4"
+version = "0.17.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bb1f84823467432a477ed2e48e301b0fe310e0227e11acfe710f0cf335af8f1"
 dependencies = [
  "cargo_metadata",
- "ic-host-artifacts 0.25.1",
- "ic-host-fs 0.25.1",
- "ic-host-process 0.25.1",
- "libc",
+ "ic-host-artifacts",
+ "ic-host-fs",
+ "ic-host-process",
  "rustix",
  "serde",
  "serde_json",
  "sha2",
+ "thiserror 2.0.18",
  "toml",
 ]
 
@@ -868,17 +905,6 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.25.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e73f38c222f0af0d43bd3cd2d7d6f02780de9a9aa8dcb9816c88015c0cbbcd5"
-dependencies = [
- "leb128",
- "sha2",
- "wasmparser",
-]
-
-[[package]]
-name = "ic-host-artifacts"
 version = "0.27.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "084e1515b33acfcc64e75bb730b5bdf65869e619ee64513efa423d30fc6d6099"
@@ -891,36 +917,13 @@ dependencies = [
 
 [[package]]
 name = "ic-host-fs"
-version = "0.25.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83baf7fd8d3aefbdd364d1ed52ea302f64eb421e58041e13876078c82a8ccb7e"
-dependencies = [
- "ic-host-artifacts 0.25.1",
- "rustix",
-]
-
-[[package]]
-name = "ic-host-fs"
 version = "0.27.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c32654120b530ced534af7fca1cf979df573b5addcf3af59cfebbde63b58f555"
 dependencies = [
- "ic-host-artifacts 0.27.6",
+ "ic-host-artifacts",
  "rustix",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-host-process"
-version = "0.25.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fed8de8998dea5db718fe45db29a4cf1ad1b4159e362503a3d0617518f564ca"
-dependencies = [
- "command-fds",
- "ic-host-artifacts 0.25.1",
- "ic-host-fs 0.25.1",
- "libc",
- "rustix",
 ]
 
 [[package]]
@@ -930,8 +933,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a139f4beff95d0b843b6ce9d542fb1e1d62537341d2ffb10bed531cee93a485"
 dependencies = [
  "command-fds",
- "ic-host-artifacts 0.27.6",
- "ic-host-fs 0.27.6",
+ "ic-host-artifacts",
+ "ic-host-fs",
  "libc",
  "rustix",
 ]
@@ -986,9 +989,9 @@ version = "0.54.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a49a99670baf7b563b83a667912bd9720a70e15aa54da44da1f814f6a2cc4a1"
 dependencies = [
- "ic-host-artifacts 0.27.6",
- "ic-host-fs 0.27.6",
- "ic-host-process 0.27.6",
+ "ic-host-artifacts",
+ "ic-host-fs",
+ "ic-host-process",
  "ic-metrics",
  "ic-platform",
  "libc",
@@ -1040,9 +1043,11 @@ dependencies = [
 name = "ic-wire-canister-evaluation"
 version = "0.4.3"
 dependencies = [
+ "bitcode",
  "ic-build",
- "ic-host-artifacts 0.27.6",
- "ic-host-fs 0.27.6",
+ "ic-host-artifacts",
+ "ic-host-fs",
+ "ic-host-process",
  "ic-platform",
  "ic-testkit",
  "ic-wire",
@@ -1051,6 +1056,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "wincode",
 ]
 
 [[package]]
@@ -1503,6 +1509,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
+name = "pastey"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ee67f1008b1ba2321834326597b8e186293b049a023cdef258527550b9935b4"
+
+[[package]]
 name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1585,7 +1597,7 @@ version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d22152487193190344590e4f30e219cf3fe140d9e7a3fdb683d82aa2c5f4156"
 dependencies = [
- "arrayvec",
+ "arrayvec 0.5.2",
  "typed-arena",
  "unicode-width",
 ]
@@ -2820,6 +2832,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "wincode"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "063b5affe63fb4e584a33101d8808f01f2348b4f533db6223bf27263a0fdb9e9"
+dependencies = [
+ "pastey",
+ "proc-macro2",
+ "quote",
+ "thiserror 2.0.18",
+ "wincode-derive",
+]
+
+[[package]]
+name = "wincode-derive"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11d582d9fc9d813264407a9e16bfa16846ccf15ef032f9bbcd700741bdc00255"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]

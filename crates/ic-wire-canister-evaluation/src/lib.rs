@@ -12,3 +12,7 @@ pub mod commands;
 
 #[cfg(feature = "browser-fixture")]
 mod browser;
+
+/// Private measurement cases; alternate codecs are controls, never runtime modes.
+#[cfg(feature = "performance-fixture")]
+pub mod performance;

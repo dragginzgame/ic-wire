@@ -28,10 +28,13 @@ impl Budget {
         }
     }
     fn enter(&self, depth: usize, size: usize) -> bool {
+        self.enter_many(depth, size, 1)
+    }
+    fn enter_many(&self, depth: usize, size: usize, count: usize) -> bool {
         if self.refused.get() {
             return false;
         }
-        let Some(nodes) = self.nodes.get().checked_sub(1) else {
+        let Some(nodes) = self.nodes.get().checked_sub(count) else {
             self.refused.set(true);
             return false;
         };

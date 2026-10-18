@@ -14,17 +14,26 @@ crate-type = ["cdylib", "rlib"]
 bindings = ["browser-fixture", "ic-wire/typescript"]
 macro-fixture = ["dep:ic-wire", "dep:ic-wire-adapter-fixture"]
 browser-fixture = ["dep:ic-wire"]
+performance-fixture = ["dep:ic-wire"]
+performance-wire = ["performance-fixture"]
+performance-postcard = ["performance-fixture", "dep:postcard"]
+performance-bitcode = ["performance-fixture", "dep:bitcode"]
+performance-wincode = ["performance-fixture", "dep:wincode"]
 
 [dependencies]
+bitcode = { workspace = true, optional = true }
 ic-platform = { workspace = true, features = ["cdk"] }
 ic-wire = { workspace = true, optional = true }
 ic-wire-adapter-fixture = { workspace = true, optional = true }
+postcard = { workspace = true, optional = true }
 serde.workspace = true
+wincode = { workspace = true, optional = true, features = ["derive"] }
 
 [dev-dependencies]
 ic-build.workspace = true
 ic-host-artifacts = { workspace = true, features = ["wasm"] }
 ic-host-fs.workspace = true
+ic-host-process.workspace = true
 ic-testkit.workspace = true
 postcard.workspace = true
 serde_json.workspace = true
@@ -47,6 +56,11 @@ path = "examples/build_evaluation/mod.rs"
 [[example]]
 name = "check-diagnostics"
 path = "examples/check_diagnostics/mod.rs"
+
+[[example]]
+name = "performance"
+path = "examples/performance/mod.rs"
+required-features = ["performance-postcard", "performance-bitcode", "performance-wincode"]
 
 [lints]
 workspace = true

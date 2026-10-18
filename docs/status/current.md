@@ -12,6 +12,14 @@ changes, release or publication effects were performed in this cleanup pass.
 Incoming Host 0.27.6, Testkit 0.54.1 and Metrics 0.14.3 lock changes are preserved
 byte-for-byte; that dirty graph has no hosted qualification from the release run.
 Earlier installed Box/Platform evidence below retains its recorded dependencies.
+The release baseline is Git version 0.4.2 (`c2ea9e6`).
+Runtime and derive packages were first published at 0.3.0; evaluation and
+adapter-fixture packages remain private. Compatible pending notes select 0.4.3;
+package metadata remains 0.4.2. No own version changes, release
+or publication effects were performed in this issue batch. Independent Host
+0.27.4 lock work and concurrent Testkit 0.54 manifest/lock work are retained and
+excluded from this batch's changes. Early Box evidence uses Testkit 0.53; the final
+Rust 1.99.1 installed run uses the current 0.54 graph.
 
 ## Bounded boxes — delivered 0.4.2
 
@@ -87,12 +95,23 @@ The isolated Testkit patch reuses its existing prepared contribution, selects
 published Build 0.17.2 and passes nineteen driver tests plus strict Clippy.
 Reviewable source patches and before-images are under `/tmp/ic-wire-consolidation-*`.
 
-Published Build 0.17.3 supplies the retained evidence/diagnostics migration in
-[PR #11](https://github.com/dragginzgame/ic-wire/pull/11). The current Git pin
-remains until that PR is refreshed against 0.4.2 and integrated; preserve the
-source/freshness/export checks. Historical producer requirements are recorded in
+Published Build 0.17.3 now supplies the retained evidence/diagnostics used by Wire.
+The evaluation adapter passes its complete environment except Build-owned
+`CARGO_TARGET_DIR` and explicitly supplies the direct-child spawner. Retained
+source/freshness/export checks, recipes, report schemas and simulator/browser
+lifecycle remain unchanged. The Git pin and all three Host 0.25 packages are
+removed; Process is a private evaluation development dependency. Platform 0.1.12,
+Box support, Rust 1.99.1/MSRV 1.91 and all released wire contracts are preserved.
+Historical producer requirements are recorded in
 [Build #58](https://github.com/dragginzgame/ic-build/issues/58) and
 [Build #66](https://github.com/dragginzgame/ic-build/issues/66).
+The refreshed contribution over released 0.4.2 passes strict evaluation Clippy,
+native tests, Rust 1.91 host/Wasm, twelve codec and eight macro diagnostics with
+passing controls, formatting and dependency/doc checks. Installed PocketIC 16.0.0
+macro and Chromium trials pass, including initial growth/write rollback and
+retained freshness verification. The registry lock preserves every unrelated
+version selection. New hosted native checks qualify the pushed PR head separately;
+no full local CI, native macOS execution or live IC is claimed by these local runs.
 The maintainer-authorized [consumer feedback on #58](https://github.com/dragginzgame/ic-build/issues/58#issuecomment-6249237464)
 records the published API gaps, retained-facts requirement and acceptance checks.
 
@@ -151,12 +170,18 @@ The earlier package metadata/file-list checks passed; nothing was republished.
 Release 0.4.1 selected Testkit 0.53; the independent pending 0.54 intake is
 qualified separately in the final compiler/browser run above.
 
-Shared Tooling 0.24.0 is adopted at cab12cd3dfa4fdb34846b25397f0d72881bb9ae0;
-the receipt contribution remains separately pinned at
-35775234560bd08f7e67f4feeaf339dc25fbd9e0. Role groups, paired formatting and
-selected-source release metadata checks stay in place. Common Rust tools are
-cargo-sort and cargo-sort-derives. Both snapshots and prior disposable setup,
-formatting, hook and release checks passed; native macOS remains separate evidence.
+Shared Tooling 0.24.2 is adopted at `48f5640e744512929bfba301fe734d8ea6c6e049`.
+The canonical exporter proved and transferred the receipt contribution into the
+main snapshot; one manifest owns the complete closure. The extra manifest,
+integrity dispatch and fixture copy list are removed. Grouped formatting now uses
+shared defaults; release metadata checks retain grouped ordering. The new upstream
+archive helper is not called here; receipt schemas, selected files and recovery
+policy are unchanged. Common Rust tools remain cargo-sort and cargo-sort-derives.
+Snapshot integrity, actual disposable Make/formatting hooks and release/recovery
+fixtures pass, including dirty/conflicting source refusal, retained failed
+validation, tampered receipts, exact metadata/tag/delivery and resume. No real
+release or publication is performed by those fixtures. Fresh hosted native
+qualification belongs to the updated PR head; no full local CI ran.
 
 Production diagnostics build/link only runtime and derive; the macro lane adds
 the private adapter fixture. IC Build owns diagnostic execution and build

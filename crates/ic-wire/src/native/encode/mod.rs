@@ -13,10 +13,11 @@ pub(super) struct Bounded<'a, T: ?Sized> {
 impl<T: Serialize + ?Sized> Serialize for Bounded<'_, T> {
     fn serialize<S: Serializer>(&self, inner: S) -> Result<S::Ok, S::Error> {
         if self.depth.saturating_add(2) > self.budget.depth
-            || !self.budget.enter(self.depth, size_of_val(self.value))
-            || !self.budget.enter(self.depth, size_of_val(self.value))
-            || !self.budget.enter(self.depth, 0)
-            || !self.budget.enter(self.depth, 0)
+            // Preserve four node charges and two value-size charges, but admit
+            // them together. Refusal is sticky; no serializer runs on failure.
+            || !size_of_val(self.value)
+                .checked_mul(2)
+                .is_some_and(|size| self.budget.enter_many(self.depth, size, 4))
         {
             self.budget.refused.set(true);
             return Err(ser::Error::custom("payload resource allowance exceeded"));

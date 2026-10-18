@@ -47,3 +47,30 @@ release_receipt_check() {
     rm -f -- "$temporary" || return
     return "$result"
 }
+
+# Preserve a previous attempt before any append/replacement. Admit the complete
+# set first; absent files are allowed, but links, directories and basename
+# collisions refuse. A failed copy leaves active evidence and its archive intact.
+# Caller owns exclusive custody of the trusted containing directories.
+release_receipt_archive() {
+    local template="$1" file other archive='' name
+    shift
+    [[ $# -gt 0 ]] || return 1
+    local names=()
+    for file in "$@"; do
+        [[ ! -L "$file" && ( ! -e "$file" || -f "$file" ) ]] || return 1
+        name="${file##*/}"
+        [[ -n "$name" ]] || return 1
+        for other in ${names[@]+"${names[@]}"}; do [[ "$other" != "$name" ]] || return 1; done
+        names+=("$name")
+    done
+    for file in "$@"; do
+        [[ -e "$file" ]] || continue
+        if [[ -z "$archive" ]]; then
+            archive="$(mktemp -d "$template")" || return
+            printf 'Release evidence archive: %s\n' "$archive" >&2
+        fi
+        cp -p -- "$file" "$archive/${file##*/}" || return
+        cmp -- "$file" "$archive/${file##*/}" || return
+    done
+}

@@ -91,16 +91,15 @@ and retains failed tool/build logs through the reviewed evidence action.
 ## Snapshot maintenance and release boundary
 
 [.shared-tooling.snapshot](../.shared-tooling.snapshot) records Shared Tooling
-0.24.0 at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
-The unmerged [receipt contribution](https://github.com/dragginzgame/shared-tooling/pull/279)
-is exported separately in [.shared-tooling-receipts.snapshot](../.shared-tooling-receipts.snapshot)
-at `35775234560bd08f7e67f4feeaf339dc25fbd9e0`; only its receipt helper
-is selected. Its required integrity helpers are byte-identical to the main
-snapshot, and `check-tooling` verifies the contribution receipt too.
-Refresh both manifests through the canonical exporter until that contribution
-is integrated; never edit their ownership records or payloads in place. Then
-consolidate the contribution with `--takeover-snapshot` as described in
-[snapshot adoption](consuming-snapshots.md). Review each preview before applying it.
+0.24.2 at `48f5640e744512929bfba301fe734d8ea6c6e049`, including the receipt helper.
+The canonical exporter's explicit `--takeover-snapshot` workflow transferred the
+former contribution closure into this main snapshot; the supplementary manifest
+and its separate integrity dispatch are retired. Refresh the main manifest through
+the canonical exporter as described in [snapshot adoption](consuming-snapshots.md).
+Review each preview before applying it. Grouped formatting comes from the shared
+defaults, while the local release adapter retains grouped metadata checks, file
+selection, receipt schemas and recovery policy. The supplier's new receipt archive
+helper is available but not called by this adapter; its existing behavior is unchanged.
 Do not copy uncommitted sibling edits or edit snapshot-owned payloads.
 
 ### IC Platform boundary

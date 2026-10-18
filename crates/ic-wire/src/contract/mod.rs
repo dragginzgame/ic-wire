@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use crate::{Error, Limits, Wire};
 use alloc::vec::Vec;
 use core::marker::PhantomData;
@@ -132,16 +135,42 @@ pub(crate) struct Compare<'a> {
 }
 impl Flavor for Compare<'_> {
     type Output = bool;
+    #[inline(always)]
     fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
-        self.try_extend(&[byte])
+        if self.allowance == 0 {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        self.allowance -= 1;
+        if let Some((first, rest)) = self.remaining.split_first() {
+            self.equal &= *first == byte;
+            self.remaining = rest;
+        } else {
+            self.equal = false;
+        }
+        Ok(())
     }
     fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+        if let [byte] = bytes {
+            return self.try_push(*byte);
+        }
         if bytes.len() > self.allowance {
             return Err(postcard::Error::SerializeBufferFull);
         }
         self.allowance -= bytes.len();
         if let Some((prefix, rest)) = self.remaining.split_at_checked(bytes.len()) {
-            self.equal &= prefix == bytes;
+            // Wasm's bytewise memcmp is expensive for bulk byte/text payloads.
+            // Exact unaligned word loads preserve canonical equality; no hash or
+            // scratch allocation is involved. Small scalar writes stay simple.
+            self.equal &= if cfg!(any(target_arch = "wasm32", test)) && bytes.len() >= 8 {
+                let (left, left_tail) = prefix.as_chunks::<8>();
+                let (right, right_tail) = bytes.as_chunks::<8>();
+                left.iter()
+                    .zip(right)
+                    .all(|(a, b)| u64::from_ne_bytes(*a) == u64::from_ne_bytes(*b))
+                    && left_tail == right_tail
+            } else {
+                prefix == bytes
+            };
             self.remaining = rest;
         } else {
             self.equal = false;
