@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.2]
+## [0.4.2] - 2026-10-18
 
 - Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.
   Route fixture macros, checked caller/controller, argument and stable-memory
