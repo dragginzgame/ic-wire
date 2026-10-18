@@ -97,14 +97,14 @@ mod transport {
         ic_platform::ic0::msg_arg_data_size()
     }
     pub fn authorize_caller() -> Result<(), &'static str> {
-        if ic_cdk::api::is_controller(&ic_cdk::api::msg_caller()) {
+        if ic_platform::cdk::api::is_controller(&ic_platform::cdk::api::msg_caller()) {
             Ok(())
         } else {
             Err("caller")
         }
     }
     pub fn arguments() -> Vec<u8> {
-        ic_cdk::api::msg_arg_data()
+        ic_platform::cdk::api::msg_arg_data()
     }
     pub fn reply(bytes: &[u8]) {
         if !bytes.is_empty() {
@@ -121,15 +121,15 @@ mod transport {
     pub fn balance() -> u64 {
         let mut bytes = [0; 8];
         if ic_platform::ic0::stable64_size() > 0 {
-            ic_cdk::stable::stable_read(0, &mut bytes);
+            ic_platform::cdk::stable::stable_read(0, &mut bytes);
         }
         u64::from_le_bytes(bytes)
     }
     pub fn set_balance(value: u64) {
         if ic_platform::ic0::stable64_size() == 0 {
-            ic_cdk::stable::stable_grow(1).unwrap();
+            ic_platform::cdk::stable::stable_grow(1).unwrap();
         }
-        ic_cdk::stable::stable_write(0, &value.to_le_bytes());
+        ic_platform::cdk::stable::stable_write(0, &value.to_le_bytes());
     }
 }
 #[cfg(not(target_arch = "wasm32"))]

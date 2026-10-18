@@ -1,3 +1,4 @@
+use alloc::boxed::Box;
 use serde::{Serialize, de::DeserializeOwned};
 
 /// Worst-case bounds for one finite value.
@@ -112,6 +113,16 @@ impl<T: Wire> Wire for Option<T> {
 impl<T: Wire, E: Wire> Wire for Result<T, E> {
     const SHAPE: Shape = Shape::choice(1, &[T::SHAPE, E::SHAPE]);
     const SCHEMA: Schema = Schema::Result(&T::SCHEMA, &E::SCHEMA);
+}
+
+// Serde boxes are transparent: only owned heap storage changes. Saturation
+// preserves the existing fail-closed admission rule, including nested boxes.
+impl<T: Wire> Wire for Box<T> {
+    const SHAPE: Shape = Shape {
+        heap: core::mem::size_of::<T>().saturating_add(T::SHAPE.heap),
+        ..T::SHAPE
+    };
+    const SCHEMA: Schema = T::SCHEMA;
 }
 
 impl<T: Wire, const N: usize> Wire for [T; N]

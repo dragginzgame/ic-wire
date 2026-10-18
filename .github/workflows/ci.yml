@@ -30,7 +30,7 @@ jobs:
       - name: Prepare development and minimum Rust toolchains
         uses: ./.github/actions/prepare-rust-toolchains
         with:
-          development: 1.99.0
+          development: 1.99.1
           minimum: 1.91.0
           development-target: wasm32-unknown-unknown
           minimum-target: wasm32-unknown-unknown

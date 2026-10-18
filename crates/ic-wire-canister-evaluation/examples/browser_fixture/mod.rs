@@ -58,14 +58,14 @@ fn main() {
         .unwrap();
     pic.set_controllers(id, None, vec![Principal::anonymous(), caller])
         .unwrap();
-    let inspection = Inspection {
+    let inspection = Box::new(Inspection {
         labels: List::new(vec![
             Text::new("é🦀".into()).unwrap(),
             Text::new("\u{feff}text".into()).unwrap(),
         ])
         .unwrap(),
         correlation: Some(u64::MAX),
-    };
+    });
     let query = encode_request::<Inspect>(&inspection).unwrap();
     let query_reply = encode_response::<Inspect>(&Snapshot {
         balance: 0,
@@ -80,8 +80,11 @@ fn main() {
     let command = Command { id: 1, amount: 7 };
     let request = encode_request::<Apply>(&command).unwrap();
     let success = encode_response::<Apply>(&Ok(Receipt { id: 1, balance: 7 })).unwrap();
-    let failure =
-        encode_response::<Apply>(&Err(Failure::Overflow(Receipt { id: 2, balance: 7 }))).unwrap();
+    let failure = encode_response::<Apply>(&Err(Failure::Overflow(Box::new(Receipt {
+        id: 2,
+        balance: 7,
+    }))))
+    .unwrap();
     fs::write(generated.join("vectors.json"), serde_json::to_vec_pretty(&json!({"query":query.as_bytes(),"queryReply":query_reply.as_bytes(),"request":request.as_bytes(),"success":success.as_bytes(),"failure":failure.as_bytes()})).unwrap()).unwrap();
     let tree = NativeTree::Branch(vec![NativeTree::Leaf("é".into(), u128::MAX)]);
     let native_request = ic_wire::native::encode_request(NATIVE_ID, &tree, NATIVE_LIMITS).unwrap();

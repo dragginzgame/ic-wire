@@ -1,10 +1,25 @@
 # Changelog
 
-## [0.4.2]
+## [0.4.3]
 
 - Use published IC Build 0.17.3 for retained evaluation builds and compiler
   diagnostics. Supply complete environments and explicit child custody; retire
-  the branch pin and its older Host dependency family.
+  the Git pin and its older Host dependency family.
+
+## [0.4.2] - 2026-10-18
+
+- Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.
+  Route fixture macros, checked caller/controller, argument and stable-memory
+  helpers through Platform; remove the final direct CDK dependency and reject
+  direct CDK declarations in every package. Preserve existing stable bytes and
+  rollback semantics; no storage migration or Candid codec is introduced
+  ([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)).
+- Support transparent finite `Box<T: Wire>` values with static heap admission.
+  Preserve canonical frames and TypeScript layouts; recursive/unbounded schemas
+  remain unsupported by the finite API. Boxing can reduce Rust enum storage at
+  the cost of payload allocation; it does not promise Wasm or instruction savings.
+- Select Rust 1.99.1 for development and CI; retain the Rust 1.91 library MSRV
+  and original compiler identities on historical measurements.
 
 ## [0.4.1] - 2026-10-18
 

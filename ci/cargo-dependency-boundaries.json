@@ -1,7 +1,7 @@
 [
   {"dependency":"candid","allowed_packages":[]},
   {"dependency":"candid_parser","allowed_packages":[]},
-  {"dependency":"ic-cdk","allowed_packages":["ic-wire-canister-evaluation"]},
+  {"dependency":"ic-cdk","allowed_packages":[]},
   {"dependency":"ic-cdk-macros","allowed_packages":[]},
   {"dependency":"ic-cdk-executor","allowed_packages":[]},
   {"dependency":"ic-cdk-timers","allowed_packages":[]},

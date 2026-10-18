@@ -43,10 +43,16 @@ reply. The installed fault-injection endpoint deliberately has an inadmissible
 response budget, writes state and verifies that the resulting trap rolls it back.
 This does not recover effects committed before an external await. The async
 handler awaits an immediately ready future; external-call recovery is unqualified.
+The installed trial also injects that failure before the first successful update,
+verifying that both zero-page growth and its initial write roll back.
 
-The attributes emit CDK entrypoints for this experiment. They do not implement a
+The attributes emit `ic_platform::cdk` entrypoints for this experiment. They do not implement a
 replacement executor or platform APIs. Native tests call the same expansion with
-a mock transport; installed tests use real IC APIs and the CDK executor.
+a mock transport; installed tests use real IC APIs and Platform's qualified CDK
+runtime/executor. Checked caller/controller and allocating argument helpers use
+`ic_platform::cdk::api`. The rollback fixture's stable read/write/grow use
+Platform 0.1.12's `ic_platform::cdk::stable` exports; the direct CDK dependency
+is removed ([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)).
 The generated entry has no Rust arguments and uses `manual_reply = true` plus
 `hidden = true`. This suppresses Candid service metadata while preserving callable
 Wasm exports and the original executor contexts. There is no direct Candid crate;
@@ -67,7 +73,7 @@ POCKET_IC_BIN=/absolute/path/to/pocket-ic make evaluate-macros
 ```
 
 The diagnostic command builds a valid isolated workspace first, then requires
-seven failures from the actual attribute expansions: wrong request type, wrong
+the expected failures from the actual attribute expansions: wrong request type, wrong
 sync/async response, export-name mismatch, a Candid selector, missing guard and
 async query. Async/composite queries are deliberately outside this fixture.
 Failures retain logs; all compilations use locked dependencies offline.
