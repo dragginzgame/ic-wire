@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.4]
+
+- Reduce canonical-comparison work on Wasm and combine dynamic admission charges,
+  preserving wire bytes, canonical rejection and resource budgets. Matched local
+  measurements show substantial blob/text decoding gains, with a small
+  empty-blob regression; see [performance evidence](docs/performance.md).
+- Add an explicit installed performance experiment with private raw Postcard,
+  bitcode and wincode controls, retained build evidence and matching-DTO checks.
+  Production codecs and dependencies remain Wire-only and Candid-free.
+
 ## [0.4.3] - 2026-10-18
 
 - Refresh the maintainer handoff against released 0.4.2's Linux/macOS acceptance.

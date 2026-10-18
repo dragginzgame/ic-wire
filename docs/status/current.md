@@ -2,24 +2,43 @@
 
 ## Baseline and incoming work
 
-Main is released Git version 0.4.2 (`c2ea9e60da4e598477b5e84dff52cba87f81b05c`).
-Runtime and derive packages were first published at 0.3.0; evaluation and
-adapter-fixture packages remain private. Package metadata is 0.4.2; compatible
-pending documentation notes select 0.4.3. The exact released-source
-[CI run](https://github.com/dragginzgame/ic-wire/actions/runs/39138236119) passes
-Ubuntu, macOS Apple Silicon and macOS Intel. No staging, commits, own version
-changes, release or publication effects were performed in this cleanup pass.
-Incoming Host 0.27.6, Testkit 0.54.1 and Metrics 0.14.3 lock changes are preserved
-byte-for-byte; that dirty graph has no hosted qualification from the release run.
-Earlier installed Box/Platform evidence below retains its recorded dependencies.
-The release baseline is Git version 0.4.2 (`c2ea9e6`).
-Runtime and derive packages were first published at 0.3.0; evaluation and
-adapter-fixture packages remain private. Compatible pending notes select 0.4.3;
-package metadata remains 0.4.2. No own version changes, release
-or publication effects were performed in this issue batch. Independent Host
-0.27.4 lock work and concurrent Testkit 0.54 manifest/lock work are retained and
-excluded from this batch's changes. Early Box evidence uses Testkit 0.53; the final
-Rust 1.99.1 installed run uses the current 0.54 graph.
+Main and origin/main now point to merge `0ac920f`, retaining tagged 0.4.3
+(`d4d9a9a`) and package metadata while integrating `5f204e5`. The original three
+conflict files were marked resolved; the merge was subsequently committed and
+delivered externally during this task. The agent executed no commit, version
+change, tag, push, release or publication. Final docs/evidence and the local Make
+fixture's new source-copy paths remain ordinary pending work.
+Published Build 0.17.3 and Shared Tooling 0.24.2 integration are preserved, along
+with incoming Host 0.27.6, Testkit 0.54.1, Metrics 0.14.3 and Platform 0.1.13 lock
+selections. Earlier installed evidence below retains its original dependencies.
+The released 0.4.2 source has [Linux/macOS acceptance](https://github.com/dragginzgame/ic-wire/actions/runs/39138236119);
+that run does not qualify this pending graph. Compatible new notes select 0.4.4.
+
+## Current performance batch
+
+[Measured results and reproduction](../performance.md) retain separate matched
+before/after reports. Production Postcard and public APIs are unchanged. Wasm
+canonical comparison uses exact word chunks plus a single-byte fast path; native
+production comparison stays on normal slices. Dynamic precharging combines the
+same four nodes and two value-size charges, preserving rejection boundaries.
+
+The matched local Rust 1.99.1/PocketIC 16.1.0 experiment uses nine logical cases,
+seven private lanes and seven samples of 32 operations. Finite 4 KiB blob decode
+falls from 112,667 to 19,642 instructions (5.74×); UTF-8 decode improves 1.74×.
+Empty bounded-blob decode regresses by 44 instructions (~3%). Ordinary dynamic
+Vec<u8> remains far slower than the byte-specialized bounded representation.
+Raw controls have identical artifacts and counters across the matched runs;
+they do not implement Wire's admission/canonicality guarantees. No fastest-codec
+or end-to-end latency claim is made. One stale-cache baseline and intermediate
+trials are excluded; final source hashes match the retained optimized report.
+
+Development/floor runtime/native tests (22 checks), the performance roundtrip
+fixture, strict Clippy, floor host/Wasm checking, formatting, pins/boundaries,
+snapshot/docs checks and disposable Make/release fixtures pass. TypeScript passes
+90 vectors and 17,524 mutations. The normal/build Wasm graph with all runtime
+features excludes Candid/CDK/Platform, alternate controls and host tools. No broad
+CI, native macOS, installed IC or compressed-deployment qualification is claimed. Logs and original before-images:
+`/tmp/ic-wire-performance-*` and `/tmp/ic-wire-perf-merge-before`.
 
 ## Bounded boxes — delivered 0.4.2
 
@@ -52,9 +71,8 @@ admission shipped in 0.3.4 and its exact-source Linux/macOS acceptance
 [run](https://github.com/dragginzgame/ic-wire/actions/runs/39031765826) passed.
 [Receipt consolidation #9](https://github.com/dragginzgame/ic-wire/issues/9) /
 [PR #10](https://github.com/dragginzgame/ic-wire/pull/10) and published Build
-[PR #11](https://github.com/dragginzgame/ic-wire/pull/11) remain independent work.
-Both PR heads have historical green matrices but conflict with released 0.4.2;
-refresh and qualify each before integration. The unmerged CDK-companion
+[PR #11](https://github.com/dragginzgame/ic-wire/pull/11) are merged on origin/main;
+the completed local merge preserves both contributions. The unmerged CDK-companion
 [PR #2](https://github.com/dragginzgame/ic-wire/pull/2#issuecomment-6251678419) is
 closed as superseded: production endpoint integration stays consumer-owned,
 Platform supplies SDK helpers, and Wire retains its private adapter/rollback proof.

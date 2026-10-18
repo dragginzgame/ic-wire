@@ -1,8 +1,10 @@
 # Evaluation scope and historical plan
 
-Codec comparisons, `evaluate-runtime` and the old `evaluate-canisters` experiment
+Candid comparisons, `evaluate-runtime` and the old `evaluate-canisters` experiment
 are retired. Reports below preserve their original source/build identities.
 Current `evaluate-browser` and `evaluate-macros` test IC Wire endpoints only.
+The maintainer-requested [performance experiment](performance.md) uses private
+raw Postcard/bitcode/wincode controls, without adding production codec modes.
 Durable receipt qualification moves to Relay; IC Wire retains browser transport
 and codec byte conformance without receipt caching or peer-delivery policy.
 

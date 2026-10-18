@@ -1,0 +1,5477 @@
+{
+  "artifacts": [
+    {
+      "code_section_bytes": 122330,
+      "feature": "performance-wire",
+      "name": "wire",
+      "sha256": "185e7f8d35135794e319bf31cfcf317a37e104a327aa4bd98f93c7a0f7b27093",
+      "wasm_bytes": 266573
+    },
+    {
+      "code_section_bytes": 72636,
+      "feature": "performance-postcard",
+      "name": "postcard",
+      "sha256": "60554e87b4a71b24e10565c704f43e4e718189bdd56b00b94d828a065e4dbf50",
+      "wasm_bytes": 151370
+    },
+    {
+      "code_section_bytes": 73737,
+      "feature": "performance-bitcode",
+      "name": "bitcode",
+      "sha256": "5ade2b5cbbf3f2ed1d559560f86a0717510caa54502f631089ee3fabd957c613",
+      "wasm_bytes": 159663
+    },
+    {
+      "code_section_bytes": 64532,
+      "feature": "performance-wincode",
+      "name": "wincode",
+      "sha256": "391188c06a2862c920c4ac435fd8f08307c10ded2a73c72f18b01aa7fd794b71",
+      "wasm_bytes": 130986
+    }
+  ],
+  "columns": [
+    "encode",
+    "owned_decode",
+    "native_sizing"
+  ],
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "configuration": {
+    "bitcode": "default features; derived codec",
+    "postcard": "alloc; defaults disabled",
+    "wincode": "default configuration; derive; deserialize_exact"
+  },
+  "iterations_per_batch": 32,
+  "measurement": "allocations, destruction, loop and counter overhead included; value/input setup, correctness assertions, argument copy and reply delivery excluded",
+  "native_target": "x86_64",
+  "profile": "canister-evaluation",
+  "provenance": {
+    "build_records": [
+      {
+        "build_fingerprint": "989b7c224375da5adeb9d0d6109ecf88737db7b285624654efa5b35b071e4116",
+        "features": "performance-wire",
+        "input_digest": "b3ec583548a89adb1286a3827467a4f28d5cc4be0fcba3c7753fa60a0c262c75",
+        "name": "wire",
+        "validation_digest": "955b44d8ba8245b847bba130e5c9496dbc54507c643ad3ec03bbbc35f8d01dad",
+        "wasm_sha256": "185e7f8d35135794e319bf31cfcf317a37e104a327aa4bd98f93c7a0f7b27093"
+      },
+      {
+        "build_fingerprint": "25ebcb34b5cfd8f62353fc9676cd4932c6e02252ced62eec28ea0ae3bb0477e9",
+        "features": "performance-postcard",
+        "input_digest": "4ab456b0b327df91d0fd5a295c645ec3c87780dd23140f065c14bafbecadc601",
+        "name": "postcard",
+        "validation_digest": "955b44d8ba8245b847bba130e5c9496dbc54507c643ad3ec03bbbc35f8d01dad",
+        "wasm_sha256": "60554e87b4a71b24e10565c704f43e4e718189bdd56b00b94d828a065e4dbf50"
+      },
+      {
+        "build_fingerprint": "d36d967d0a55b65e85e084fc7caf548535289c156668ab2f0bfd3eddb92f3bcf",
+        "features": "performance-bitcode",
+        "input_digest": "4d2a826b6ed598a506478baf4c2b599a521eacb822b6e97765298ee1d8b19917",
+        "name": "bitcode",
+        "validation_digest": "955b44d8ba8245b847bba130e5c9496dbc54507c643ad3ec03bbbc35f8d01dad",
+        "wasm_sha256": "5ade2b5cbbf3f2ed1d559560f86a0717510caa54502f631089ee3fabd957c613"
+      },
+      {
+        "build_fingerprint": "3c3ef59e799fdcc310fef0b3bf7f6a48334c6df168749f7bf83827246d350031",
+        "features": "performance-wincode",
+        "input_digest": "79eb19f3c7bf4185774b079aefc0375275fd2c543ee6d12329589200c27be2f1",
+        "name": "wincode",
+        "validation_digest": "955b44d8ba8245b847bba130e5c9496dbc54507c643ad3ec03bbbc35f8d01dad",
+        "wasm_sha256": "391188c06a2862c920c4ac435fd8f08307c10ded2a73c72f18b01aa7fd794b71"
+      }
+    ],
+    "encoded_rustflags": "",
+    "pocket_ic_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+    "pocket_ic_version": "pocket-ic-server 16.1.0\n",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+    "rustflags": "",
+    "sources": {
+      "Cargo.lock": "e5e053d43560bcdfeac799cc55732750f938c717d7238e7a9a94a8e98660ea37",
+      "Cargo.toml": "5f5e07a0f7c39969dbe3241db48b7bba87bd04a03664a828ccc817e62b42dc5e",
+      "crates/ic-wire-canister-evaluation/Cargo.toml": "1bd1551ecda923b90567f943bc59b07de049e863033785d52eff854c41f3b2a8",
+      "crates/ic-wire-canister-evaluation/examples/build_evaluation/mod.rs": "bba1e58cc3f46e41547414244d28d0f8f926b2d3227b7b76a73b5563a5887585",
+      "crates/ic-wire-canister-evaluation/examples/evidence/mod.rs": "ee506a4a82b6a791a327aed02db4cf6569d246847e841f2769d3666e797100fb",
+      "crates/ic-wire-canister-evaluation/examples/performance/mod.rs": "6b4f349f33b855872641f3ba0d5698c0802e83e282000303cbba2fb9fd0bfe77",
+      "crates/ic-wire-canister-evaluation/src/lib.rs": "3dddf7f3a257e274e0e8a3e9c8a877e2ebba93c159734d0bc8607c55ea941c94",
+      "crates/ic-wire-canister-evaluation/src/performance/mod.rs": "456ef87ce6d0a54d9f62600099e7bc790b912d9ddc9cb42883456d2e25080ec7",
+      "crates/ic-wire-derive/Cargo.toml": "b3511ee9bb98989fd6d6857f206192f850a148450158c1fbc9504bffb42737bc",
+      "crates/ic-wire-derive/src/enum_expansion/mod.rs": "f44169254529cf925bc21900e00ee9ea543e206ad4d02c4610e49b8b537b8f46",
+      "crates/ic-wire-derive/src/lib.rs": "5738a3aafbbe5687cdb5ee7e9edc837c0a5132952b4450c338dd207decc6c33d",
+      "crates/ic-wire/Cargo.toml": "a7978e4509d8fedfa72fe73f844f0d1e938076a600531f30bd4dc880562c002d",
+      "crates/ic-wire/src/bounded/mod.rs": "227ddba85b62262afc32a77da8f7b9980d5699736130ec7cdc2892a9092ee1a5",
+      "crates/ic-wire/src/contract/mod.rs": "63fb41beac1444a830de632312244d9c52a6a39c85e349fa30e3c25a265da2c8",
+      "crates/ic-wire/src/lib.rs": "48f44219dbe2c7a21758b6a73da86b6779145c3381ba6c07ae65364918f2aa26",
+      "crates/ic-wire/src/native/decode/mod.rs": "67fb248f509704d50c5f75f48d2ececf5fe23bd466a9e455a92bce8518083569",
+      "crates/ic-wire/src/native/encode/mod.rs": "17d0e86407aa0377f2b2097420f8139b4abdeb788f9915167e27c54f3ce7f97f",
+      "crates/ic-wire/src/native/mod.rs": "5cf78f14989c165e6decac1de0a187f858a420f08032e9284e82f64e80d9d711",
+      "crates/ic-wire/src/shape/mod.rs": "cea75b0e83b55b5b3c64851e3aefcb6659470142ffe7402cddf03e2b4488a39b",
+      "rust-toolchain.toml": "c979a7d4d66b770a4d59d6d56e3c078aeab1993af658480bfd1f89f90220457d",
+      "scripts/ci/evaluate-performance.sh": "222bf479a21ac90921de1c76e9b1e8381f84a68624e0a30ab85c16ffbf4e0862"
+    }
+  },
+  "results": [
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          59164,
+          29814,
+          0
+        ],
+        [
+          59164,
+          29814,
+          0
+        ],
+        [
+          59164,
+          29814,
+          0
+        ],
+        [
+          59164,
+          29814,
+          0
+        ],
+        [
+          59164,
+          29814,
+          0
+        ],
+        [
+          59164,
+          29814,
+          0
+        ],
+        [
+          59164,
+          29814,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 931.6875,
+        "encode": 1848.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1403,
+          570,
+          0
+        ],
+        [
+          1302,
+          470,
+          0
+        ],
+        [
+          1402,
+          721,
+          0
+        ],
+        [
+          1523,
+          681,
+          0
+        ],
+        [
+          1232,
+          511,
+          0
+        ],
+        [
+          1182,
+          470,
+          0
+        ],
+        [
+          1152,
+          481,
+          0
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 21,
+      "installed_instruction_batches": [
+        [
+          68956,
+          64182,
+          0
+        ],
+        [
+          68956,
+          64182,
+          0
+        ],
+        [
+          68956,
+          64182,
+          0
+        ],
+        [
+          68956,
+          64182,
+          0
+        ],
+        [
+          68956,
+          64182,
+          0
+        ],
+        [
+          68956,
+          64182,
+          0
+        ],
+        [
+          68956,
+          64182,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 2005.6875,
+        "encode": 2154.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1332,
+          751,
+          0
+        ],
+        [
+          1342,
+          721,
+          0
+        ],
+        [
+          1332,
+          721,
+          0
+        ],
+        [
+          1372,
+          731,
+          0
+        ],
+        [
+          1332,
+          731,
+          0
+        ],
+        [
+          1423,
+          731,
+          0
+        ],
+        [
+          1352,
+          731,
+          0
+        ]
+      ],
+      "payload_sha256": "4acd51e1602c8ab93999cc7c919419db4e842fcadacd638c097eefde168c61c8"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          61948,
+          45078,
+          0
+        ],
+        [
+          61948,
+          45078,
+          0
+        ],
+        [
+          61948,
+          45078,
+          0
+        ],
+        [
+          61948,
+          45078,
+          0
+        ],
+        [
+          61948,
+          45078,
+          0
+        ],
+        [
+          61948,
+          45078,
+          0
+        ],
+        [
+          61948,
+          45078,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 1408.6875,
+        "encode": 1935.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          3075,
+          2734,
+          0
+        ],
+        [
+          1843,
+          2253,
+          0
+        ],
+        [
+          1953,
+          2204,
+          0
+        ],
+        [
+          1562,
+          2223,
+          0
+        ],
+        [
+          2103,
+          2223,
+          0
+        ],
+        [
+          2965,
+          2534,
+          0
+        ],
+        [
+          1933,
+          2204,
+          0
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4109,
+      "installed_instruction_batches": [
+        [
+          197660,
+          628534,
+          0
+        ],
+        [
+          197660,
+          628534,
+          0
+        ],
+        [
+          197660,
+          628534,
+          0
+        ],
+        [
+          197660,
+          628534,
+          0
+        ],
+        [
+          197660,
+          628534,
+          0
+        ],
+        [
+          197660,
+          628534,
+          0
+        ],
+        [
+          197660,
+          628534,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 19641.6875,
+        "encode": 6176.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          3395,
+          5989,
+          0
+        ],
+        [
+          10756,
+          5899,
+          0
+        ],
+        [
+          3435,
+          6089,
+          0
+        ],
+        [
+          10806,
+          5879,
+          0
+        ],
+        [
+          3375,
+          6089,
+          0
+        ],
+        [
+          3345,
+          6200,
+          0
+        ],
+        [
+          2714,
+          6120,
+          0
+        ]
+      ],
+      "payload_sha256": "bbc10ccefc5d5e13dd1aed83ff0fc7e4fa00e42abd6c75f382d1680463520da1"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 781,
+      "installed_instruction_batches": [
+        [
+          91164,
+          750742,
+          0
+        ],
+        [
+          91164,
+          750742,
+          0
+        ],
+        [
+          91164,
+          750742,
+          0
+        ],
+        [
+          91164,
+          750742,
+          0
+        ],
+        [
+          91164,
+          750742,
+          0
+        ],
+        [
+          91164,
+          750742,
+          0
+        ],
+        [
+          91164,
+          750742,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 23460.6875,
+        "encode": 2848.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          3755,
+          19149,
+          0
+        ],
+        [
+          3606,
+          20441,
+          0
+        ],
+        [
+          3585,
+          20181,
+          0
+        ],
+        [
+          3915,
+          20120,
+          0
+        ],
+        [
+          3486,
+          20430,
+          0
+        ],
+        [
+          3355,
+          20310,
+          0
+        ],
+        [
+          3916,
+          19860,
+          0
+        ]
+      ],
+      "payload_sha256": "953e5d7e33a95dfc86fd79ffb007fc1a888d232374c9816a6ed29d863bfc24ee"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 269,
+      "installed_instruction_batches": [
+        [
+          2855420,
+          4034998,
+          0
+        ],
+        [
+          2855420,
+          4034998,
+          0
+        ],
+        [
+          2855420,
+          4034998,
+          0
+        ],
+        [
+          2855420,
+          4034998,
+          0
+        ],
+        [
+          2855420,
+          4034998,
+          0
+        ],
+        [
+          2855420,
+          4034998,
+          0
+        ],
+        [
+          2855420,
+          4034998,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 126093.6875,
+        "encode": 89231.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          66741,
+          117457,
+          0
+        ],
+        [
+          88583,
+          81493,
+          0
+        ],
+        [
+          54893,
+          84267,
+          0
+        ],
+        [
+          65429,
+          121352,
+          0
+        ],
+        [
+          54833,
+          78929,
+          0
+        ],
+        [
+          56305,
+          78839,
+          0
+        ],
+        [
+          55253,
+          86690,
+          0
+        ]
+      ],
+      "payload_sha256": "cafed4b6e78b76955faabd707b99c14fc587103ecf50320df82bafa8896e9029"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 2573,
+      "installed_instruction_batches": [
+        [
+          5362172,
+          12833206,
+          0
+        ],
+        [
+          5362172,
+          12833206,
+          0
+        ],
+        [
+          5362172,
+          12833206,
+          0
+        ],
+        [
+          5362172,
+          12833206,
+          0
+        ],
+        [
+          5362172,
+          12833206,
+          0
+        ],
+        [
+          5362172,
+          12833206,
+          0
+        ],
+        [
+          5362172,
+          12833206,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 401037.6875,
+        "encode": 167567.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          124127,
+          250397,
+          0
+        ],
+        [
+          81273,
+          166060,
+          0
+        ],
+        [
+          79820,
+          176997,
+          0
+        ],
+        [
+          136646,
+          277258,
+          0
+        ],
+        [
+          135074,
+          262705,
+          0
+        ],
+        [
+          124047,
+          245110,
+          0
+        ],
+        [
+          116105,
+          245440,
+          0
+        ]
+      ],
+      "payload_sha256": "1ed4aa79454da8dcfecbc635b295f458cc4789d9975367e28d2b3dbba7213f96"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          60924,
+          42134,
+          0
+        ],
+        [
+          60924,
+          42134,
+          0
+        ],
+        [
+          60924,
+          42134,
+          0
+        ],
+        [
+          60924,
+          42134,
+          0
+        ],
+        [
+          60924,
+          42134,
+          0
+        ],
+        [
+          60924,
+          42134,
+          0
+        ],
+        [
+          60924,
+          42134,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 1316.6875,
+        "encode": 1903.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          2013,
+          1072,
+          0
+        ],
+        [
+          1592,
+          1022,
+          0
+        ],
+        [
+          2033,
+          1062,
+          0
+        ],
+        [
+          1582,
+          1082,
+          0
+        ],
+        [
+          2675,
+          3855,
+          0
+        ],
+        [
+          1973,
+          1282,
+          0
+        ],
+        [
+          1933,
+          1021,
+          0
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 674,
+      "installed_instruction_batches": [
+        [
+          1631420,
+          4332438,
+          0
+        ],
+        [
+          1631420,
+          4332438,
+          0
+        ],
+        [
+          1631420,
+          4332438,
+          0
+        ],
+        [
+          1631420,
+          4332438,
+          0
+        ],
+        [
+          1631420,
+          4332438,
+          0
+        ],
+        [
+          1631420,
+          4332438,
+          0
+        ],
+        [
+          1631420,
+          4332438,
+          0
+        ]
+      ],
+      "lane": "wire-finite",
+      "median_instructions": {
+        "decode": 135388.6875,
+        "encode": 50981.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          37887,
+          86741,
+          0
+        ],
+        [
+          37677,
+          85820,
+          0
+        ],
+        [
+          48884,
+          166741,
+          0
+        ],
+        [
+          50576,
+          146671,
+          0
+        ],
+        [
+          43756,
+          126841,
+          0
+        ],
+        [
+          47832,
+          148544,
+          0
+        ],
+        [
+          50105,
+          144438,
+          0
+        ]
+      ],
+      "payload_sha256": "c0ea90cea460d7093ec567a6e3e31b09b93a2a50c1a17728b82a8319676c2776"
+    },
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 1148.78125,
+        "encode": 2342.875,
+        "sizing": 554.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1883,
+          952,
+          631
+        ],
+        [
+          2093,
+          992,
+          511
+        ],
+        [
+          2003,
+          892,
+          490
+        ],
+        [
+          1973,
+          901,
+          2865
+        ],
+        [
+          1993,
+          931,
+          511
+        ],
+        [
+          1913,
+          801,
+          431
+        ],
+        [
+          2104,
+          1021,
+          501
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 21,
+      "installed_instruction_batches": [
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 2222.78125,
+        "encode": 2945.875,
+        "sizing": 851.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1603,
+          891,
+          421
+        ],
+        [
+          2164,
+          1312,
+          631
+        ],
+        [
+          1692,
+          872,
+          420
+        ],
+        [
+          1652,
+          842,
+          410
+        ],
+        [
+          2844,
+          1583,
+          791
+        ],
+        [
+          2614,
+          1592,
+          802
+        ],
+        [
+          2764,
+          1402,
+          751
+        ]
+      ],
+      "payload_sha256": "4acd51e1602c8ab93999cc7c919419db4e842fcadacd638c097eefde168c61c8"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          79900,
+          50233,
+          19605
+        ],
+        [
+          79900,
+          50233,
+          19605
+        ],
+        [
+          79900,
+          50233,
+          19605
+        ],
+        [
+          79900,
+          50233,
+          19605
+        ],
+        [
+          79900,
+          50233,
+          19605
+        ],
+        [
+          79900,
+          50233,
+          19605
+        ],
+        [
+          79900,
+          50233,
+          19605
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 1569.78125,
+        "encode": 2496.875,
+        "sizing": 612.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1462,
+          922,
+          450
+        ],
+        [
+          2124,
+          1722,
+          651
+        ],
+        [
+          1392,
+          902,
+          350
+        ],
+        [
+          1352,
+          862,
+          350
+        ],
+        [
+          1392,
+          871,
+          341
+        ],
+        [
+          1392,
+          851,
+          321
+        ],
+        [
+          1352,
+          921,
+          361
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4109,
+      "installed_instruction_batches": [
+        [
+          53296956,
+          81928089,
+          21516405
+        ],
+        [
+          53296956,
+          81928089,
+          21516405
+        ],
+        [
+          53296956,
+          81928089,
+          21516405
+        ],
+        [
+          53296956,
+          81928089,
+          21516405
+        ],
+        [
+          53296956,
+          81928089,
+          21516405
+        ],
+        [
+          53296956,
+          81928089,
+          21516405
+        ],
+        [
+          53296956,
+          81928089,
+          21516405
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 2560252.78125,
+        "encode": 1665529.875,
+        "sizing": 672387.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          653335,
+          1338436,
+          302235
+        ],
+        [
+          639504,
+          1303444,
+          517079
+        ],
+        [
+          638792,
+          1423094,
+          443608
+        ],
+        [
+          686655,
+          1386309,
+          305921
+        ],
+        [
+          657861,
+          1298666,
+          301364
+        ],
+        [
+          738042,
+          1493250,
+          339491
+        ],
+        [
+          641346,
+          1300390,
+          488816
+        ]
+      ],
+      "payload_sha256": "bbc10ccefc5d5e13dd1aed83ff0fc7e4fa00e42abd6c75f382d1680463520da1"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 781,
+      "installed_instruction_batches": [
+        [
+          110172,
+          748409,
+          19957
+        ],
+        [
+          110172,
+          748409,
+          19957
+        ],
+        [
+          110172,
+          748409,
+          19957
+        ],
+        [
+          110172,
+          748409,
+          19957
+        ],
+        [
+          110172,
+          748409,
+          19957
+        ],
+        [
+          110172,
+          748409,
+          19957
+        ],
+        [
+          110172,
+          748409,
+          19957
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 23387.78125,
+        "encode": 3442.875,
+        "sizing": 623.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          2113,
+          11297,
+          391
+        ],
+        [
+          1853,
+          10996,
+          351
+        ],
+        [
+          1882,
+          10947,
+          351
+        ],
+        [
+          1912,
+          10967,
+          391
+        ],
+        [
+          1882,
+          11007,
+          361
+        ],
+        [
+          1843,
+          10986,
+          321
+        ],
+        [
+          1813,
+          10886,
+          371
+        ]
+      ],
+      "payload_sha256": "953e5d7e33a95dfc86fd79ffb007fc1a888d232374c9816a6ed29d863bfc24ee"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 269,
+      "installed_instruction_batches": [
+        [
+          6946876,
+          7097145,
+          2642165
+        ],
+        [
+          6946876,
+          7097145,
+          2642165
+        ],
+        [
+          6946876,
+          7097145,
+          2642165
+        ],
+        [
+          6946876,
+          7097145,
+          2642165
+        ],
+        [
+          6946876,
+          7097145,
+          2642165
+        ],
+        [
+          6946876,
+          7097145,
+          2642165
+        ],
+        [
+          6946876,
+          7097145,
+          2642165
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 221785.78125,
+        "encode": 217089.875,
+        "sizing": 82567.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          162625,
+          179511,
+          58268
+        ],
+        [
+          126360,
+          142515,
+          46610
+        ],
+        [
+          129806,
+          147682,
+          48323
+        ],
+        [
+          129836,
+          148303,
+          48323
+        ],
+        [
+          129835,
+          147963,
+          48313
+        ],
+        [
+          133050,
+          149305,
+          50036
+        ],
+        [
+          121413,
+          146751,
+          45098
+        ]
+      ],
+      "payload_sha256": "cafed4b6e78b76955faabd707b99c14fc587103ecf50320df82bafa8896e9029"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 2573,
+      "installed_instruction_batches": [
+        [
+          11886652,
+          15895353,
+          5075189
+        ],
+        [
+          11886652,
+          15895353,
+          5075189
+        ],
+        [
+          11886652,
+          15895353,
+          5075189
+        ],
+        [
+          11886652,
+          15895353,
+          5075189
+        ],
+        [
+          11886652,
+          15895353,
+          5075189
+        ],
+        [
+          11886652,
+          15895353,
+          5075189
+        ],
+        [
+          11886652,
+          15895353,
+          5075189
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 496729.78125,
+        "encode": 371457.875,
+        "sizing": 158599.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          168113,
+          206411,
+          67201
+        ],
+        [
+          182796,
+          210106,
+          77407
+        ],
+        [
+          184919,
+          206962,
+          75654
+        ],
+        [
+          184989,
+          207783,
+          75674
+        ],
+        [
+          185119,
+          207062,
+          106932
+        ],
+        [
+          260953,
+          215464,
+          75734
+        ],
+        [
+          171478,
+          209556,
+          68924
+        ]
+      ],
+      "payload_sha256": "1ed4aa79454da8dcfecbc635b295f458cc4789d9975367e28d2b3dbba7213f96"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          80156,
+          50457,
+          19733
+        ],
+        [
+          80156,
+          50457,
+          19733
+        ],
+        [
+          80156,
+          50457,
+          19733
+        ],
+        [
+          80156,
+          50457,
+          19733
+        ],
+        [
+          80156,
+          50457,
+          19733
+        ],
+        [
+          80156,
+          50457,
+          19733
+        ],
+        [
+          80156,
+          50457,
+          19733
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 1576.78125,
+        "encode": 2504.875,
+        "sizing": 616.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1342,
+          991,
+          301
+        ],
+        [
+          1822,
+          1503,
+          450
+        ],
+        [
+          1302,
+          971,
+          311
+        ],
+        [
+          1332,
+          971,
+          321
+        ],
+        [
+          1302,
+          1022,
+          300
+        ],
+        [
+          1312,
+          992,
+          320
+        ],
+        [
+          1312,
+          971,
+          291
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 674,
+      "installed_instruction_batches": [
+        [
+          3912476,
+          5740761,
+          1520917
+        ],
+        [
+          3912476,
+          5740761,
+          1520917
+        ],
+        [
+          3912476,
+          5740761,
+          1520917
+        ],
+        [
+          3912476,
+          5740761,
+          1520917
+        ],
+        [
+          3912476,
+          5740761,
+          1520917
+        ],
+        [
+          3912476,
+          5740761,
+          1520917
+        ],
+        [
+          3912476,
+          5740761,
+          1520917
+        ]
+      ],
+      "lane": "wire-native",
+      "median_instructions": {
+        "decode": 179398.78125,
+        "encode": 122264.875,
+        "sizing": 47528.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          73190,
+          108504,
+          29354
+        ],
+        [
+          72890,
+          108854,
+          28943
+        ],
+        [
+          108374,
+          168123,
+          39409
+        ],
+        [
+          73901,
+          108724,
+          28924
+        ],
+        [
+          75124,
+          111207,
+          29304
+        ],
+        [
+          77818,
+          119980,
+          28994
+        ],
+        [
+          72899,
+          108454,
+          35393
+        ]
+      ],
+      "payload_sha256": "c0ea90cea460d7093ec567a6e3e31b09b93a2a50c1a17728b82a8319676c2776"
+    },
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ],
+        [
+          74972,
+          36761,
+          17749
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 1148.78125,
+        "encode": 2342.875,
+        "sizing": 554.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1482,
+          541,
+          341
+        ],
+        [
+          2133,
+          841,
+          431
+        ],
+        [
+          1382,
+          571,
+          350
+        ],
+        [
+          1843,
+          811,
+          451
+        ],
+        [
+          2053,
+          1011,
+          451
+        ],
+        [
+          2033,
+          922,
+          461
+        ],
+        [
+          2104,
+          971,
+          441
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 21,
+      "installed_instruction_batches": [
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ],
+        [
+          94268,
+          71129,
+          27253
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 2222.78125,
+        "encode": 2945.875,
+        "sizing": 851.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          2504,
+          1462,
+          742
+        ],
+        [
+          1673,
+          831,
+          391
+        ],
+        [
+          1642,
+          871,
+          391
+        ],
+        [
+          1793,
+          941,
+          601
+        ],
+        [
+          1703,
+          801,
+          401
+        ],
+        [
+          1663,
+          851,
+          391
+        ],
+        [
+          1602,
+          852,
+          390
+        ]
+      ],
+      "payload_sha256": "4acd51e1602c8ab93999cc7c919419db4e842fcadacd638c097eefde168c61c8"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          80668,
+          53849,
+          19221
+        ],
+        [
+          80668,
+          53849,
+          19221
+        ],
+        [
+          80668,
+          53849,
+          19221
+        ],
+        [
+          80668,
+          53849,
+          19221
+        ],
+        [
+          80668,
+          53849,
+          19221
+        ],
+        [
+          80668,
+          53849,
+          19221
+        ],
+        [
+          80668,
+          53849,
+          19221
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 1682.78125,
+        "encode": 2520.875,
+        "sizing": 600.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1492,
+          2094,
+          290
+        ],
+        [
+          1472,
+          2023,
+          281
+        ],
+        [
+          1523,
+          2053,
+          290
+        ],
+        [
+          1482,
+          2013,
+          281
+        ],
+        [
+          1492,
+          2073,
+          281
+        ],
+        [
+          1452,
+          2054,
+          270
+        ],
+        [
+          1462,
+          2013,
+          271
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4109,
+      "installed_instruction_batches": [
+        [
+          217180,
+          637305,
+          20213
+        ],
+        [
+          217180,
+          637305,
+          20213
+        ],
+        [
+          217180,
+          637305,
+          20213
+        ],
+        [
+          217180,
+          637305,
+          20213
+        ],
+        [
+          217180,
+          637305,
+          20213
+        ],
+        [
+          217180,
+          637305,
+          20213
+        ],
+        [
+          217180,
+          637305,
+          20213
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 19915.78125,
+        "encode": 6786.875,
+        "sizing": 631.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          3495,
+          5909,
+          271
+        ],
+        [
+          3415,
+          5999,
+          290
+        ],
+        [
+          3345,
+          6039,
+          311
+        ],
+        [
+          3545,
+          6070,
+          290
+        ],
+        [
+          3015,
+          4146,
+          291
+        ],
+        [
+          3445,
+          6049,
+          301
+        ],
+        [
+          3104,
+          4247,
+          290
+        ]
+      ],
+      "payload_sha256": "bbc10ccefc5d5e13dd1aed83ff0fc7e4fa00e42abd6c75f382d1680463520da1"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 781,
+      "installed_instruction_batches": [
+        [
+          110684,
+          759513,
+          20213
+        ],
+        [
+          110684,
+          759513,
+          20213
+        ],
+        [
+          110684,
+          759513,
+          20213
+        ],
+        [
+          110684,
+          759513,
+          20213
+        ],
+        [
+          110684,
+          759513,
+          20213
+        ],
+        [
+          110684,
+          759513,
+          20213
+        ],
+        [
+          110684,
+          759513,
+          20213
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 23734.78125,
+        "encode": 3458.875,
+        "sizing": 631.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          2234,
+          10846,
+          330
+        ],
+        [
+          2314,
+          11116,
+          431
+        ],
+        [
+          2214,
+          30656,
+          411
+        ],
+        [
+          2073,
+          10956,
+          341
+        ],
+        [
+          1943,
+          11087,
+          351
+        ],
+        [
+          1953,
+          10786,
+          350
+        ],
+        [
+          1903,
+          10966,
+          341
+        ]
+      ],
+      "payload_sha256": "953e5d7e33a95dfc86fd79ffb007fc1a888d232374c9816a6ed29d863bfc24ee"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 269,
+      "installed_instruction_batches": [
+        [
+          6946876,
+          10758201,
+          2642165
+        ],
+        [
+          6946876,
+          10758201,
+          2642165
+        ],
+        [
+          6946876,
+          10758201,
+          2642165
+        ],
+        [
+          6946876,
+          10758201,
+          2642165
+        ],
+        [
+          6946876,
+          10758201,
+          2642165
+        ],
+        [
+          6946876,
+          10758201,
+          2642165
+        ],
+        [
+          6946876,
+          10758201,
+          2642165
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 336193.78125,
+        "encode": 217089.875,
+        "sizing": 82567.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          121614,
+          233231,
+          46791
+        ],
+        [
+          121403,
+          239390,
+          45048
+        ],
+        [
+          121703,
+          223046,
+          45048
+        ],
+        [
+          123025,
+          222896,
+          44888
+        ],
+        [
+          123226,
+          222395,
+          44928
+        ],
+        [
+          123165,
+          222125,
+          60461
+        ],
+        [
+          122975,
+          230297,
+          44888
+        ]
+      ],
+      "payload_sha256": "cafed4b6e78b76955faabd707b99c14fc587103ecf50320df82bafa8896e9029"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 2573,
+      "installed_instruction_batches": [
+        [
+          11886652,
+          19556409,
+          5075189
+        ],
+        [
+          11886652,
+          19556409,
+          5075189
+        ],
+        [
+          11886652,
+          19556409,
+          5075189
+        ],
+        [
+          11886652,
+          19556409,
+          5075189
+        ],
+        [
+          11886652,
+          19556409,
+          5075189
+        ],
+        [
+          11886652,
+          19556409,
+          5075189
+        ],
+        [
+          11886652,
+          19556409,
+          5075189
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 611137.78125,
+        "encode": 371457.875,
+        "sizing": 158599.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          168394,
+          307122,
+          67272
+        ],
+        [
+          171789,
+          309737,
+          69034
+        ],
+        [
+          175985,
+          291229,
+          68233
+        ],
+        [
+          171508,
+          307053,
+          69295
+        ],
+        [
+          169245,
+          275144,
+          67943
+        ],
+        [
+          168624,
+          314695,
+          69154
+        ],
+        [
+          169225,
+          327324,
+          67722
+        ]
+      ],
+      "payload_sha256": "1ed4aa79454da8dcfecbc635b295f458cc4789d9975367e28d2b3dbba7213f96"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 12,
+      "installed_instruction_batches": [
+        [
+          80156,
+          51321,
+          19733
+        ],
+        [
+          80156,
+          51321,
+          19733
+        ],
+        [
+          80156,
+          51321,
+          19733
+        ],
+        [
+          80156,
+          51321,
+          19733
+        ],
+        [
+          80156,
+          51321,
+          19733
+        ],
+        [
+          80156,
+          51321,
+          19733
+        ],
+        [
+          80156,
+          51321,
+          19733
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 1603.78125,
+        "encode": 2504.875,
+        "sizing": 616.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          1332,
+          961,
+          311
+        ],
+        [
+          1422,
+          931,
+          280
+        ],
+        [
+          1343,
+          961,
+          310
+        ],
+        [
+          1352,
+          931,
+          311
+        ],
+        [
+          1383,
+          981,
+          301
+        ],
+        [
+          1362,
+          961,
+          301
+        ],
+        [
+          1342,
+          981,
+          300
+        ]
+      ],
+      "payload_sha256": "87b6d5b7f76419adeb9f301bbe417862603d73c3bb44d10a8fb4bdb25ebb12a1"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 674,
+      "installed_instruction_batches": [
+        [
+          3957532,
+          6633209,
+          1543445
+        ],
+        [
+          3957532,
+          6633209,
+          1543445
+        ],
+        [
+          3957532,
+          6633209,
+          1543445
+        ],
+        [
+          3957532,
+          6633209,
+          1543445
+        ],
+        [
+          3957532,
+          6633209,
+          1543445
+        ],
+        [
+          3957532,
+          6633209,
+          1543445
+        ],
+        [
+          3957532,
+          6633209,
+          1543445
+        ]
+      ],
+      "lane": "wire-native-bounded",
+      "median_instructions": {
+        "decode": 207287.78125,
+        "encode": 123672.875,
+        "sizing": 48232.65625
+      },
+      "native_nanosecond_batches": [
+        [
+          74141,
+          129075,
+          28262
+        ],
+        [
+          71789,
+          129885,
+          28033
+        ],
+        [
+          73110,
+          157347,
+          28063
+        ],
+        [
+          102955,
+          218720,
+          40791
+        ],
+        [
+          103045,
+          209306,
+          40521
+        ],
+        [
+          75193,
+          130987,
+          27882
+        ],
+        [
+          72028,
+          129105,
+          28102
+        ]
+      ],
+      "payload_sha256": "c0ea90cea460d7093ec567a6e3e31b09b93a2a50c1a17728b82a8319676c2776"
+    },
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 254.6875,
+        "encode": 1010.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1122,
+          310,
+          0
+        ],
+        [
+          952,
+          230,
+          0
+        ],
+        [
+          911,
+          220,
+          0
+        ],
+        [
+          931,
+          220,
+          0
+        ],
+        [
+          1322,
+          321,
+          0
+        ],
+        [
+          911,
+          210,
+          0
+        ],
+        [
+          902,
+          210,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 10,
+      "installed_instruction_batches": [
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 882.6875,
+        "encode": 1334.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          962,
+          330,
+          0
+        ],
+        [
+          932,
+          340,
+          0
+        ],
+        [
+          1492,
+          481,
+          0
+        ],
+        [
+          1373,
+          641,
+          0
+        ],
+        [
+          1032,
+          310,
+          0
+        ],
+        [
+          981,
+          311,
+          0
+        ],
+        [
+          992,
+          320,
+          0
+        ]
+      ],
+      "payload_sha256": "51672ea45f3539654bf9193f4ff763d90022eee7df5f5b76353d6f11a9eaccec"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          32924,
+          17110,
+          0
+        ],
+        [
+          32924,
+          17110,
+          0
+        ],
+        [
+          32924,
+          17110,
+          0
+        ],
+        [
+          32924,
+          17110,
+          0
+        ],
+        [
+          32924,
+          17110,
+          0
+        ],
+        [
+          32924,
+          17110,
+          0
+        ],
+        [
+          32924,
+          17110,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 534.6875,
+        "encode": 1028.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          911,
+          791,
+          0
+        ],
+        [
+          851,
+          731,
+          0
+        ],
+        [
+          831,
+          731,
+          0
+        ],
+        [
+          822,
+          711,
+          0
+        ],
+        [
+          872,
+          721,
+          0
+        ],
+        [
+          811,
+          691,
+          0
+        ],
+        [
+          811,
+          691,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4098,
+      "installed_instruction_batches": [
+        [
+          5617116,
+          10383606,
+          0
+        ],
+        [
+          5617116,
+          10383606,
+          0
+        ],
+        [
+          5617116,
+          10383606,
+          0
+        ],
+        [
+          5617116,
+          10383606,
+          0
+        ],
+        [
+          5617116,
+          10383606,
+          0
+        ],
+        [
+          5617116,
+          10383606,
+          0
+        ],
+        [
+          5617116,
+          10383606,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 324487.6875,
+        "encode": 175534.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          176115,
+          168764,
+          0
+        ],
+        [
+          179710,
+          171339,
+          0
+        ],
+        [
+          173321,
+          166341,
+          0
+        ],
+        [
+          216366,
+          169125,
+          0
+        ],
+        [
+          172640,
+          165519,
+          0
+        ],
+        [
+          172460,
+          165259,
+          0
+        ],
+        [
+          172931,
+          175454,
+          0
+        ]
+      ],
+      "payload_sha256": "0881a16480679af4cd8140f1b5b34550ecd3bb97f5e59aff3c1adcccc5e538aa"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 770,
+      "installed_instruction_batches": [
+        [
+          76668,
+          628246,
+          0
+        ],
+        [
+          76668,
+          628246,
+          0
+        ],
+        [
+          76668,
+          628246,
+          0
+        ],
+        [
+          76668,
+          628246,
+          0
+        ],
+        [
+          76668,
+          628246,
+          0
+        ],
+        [
+          76668,
+          628246,
+          0
+        ],
+        [
+          76668,
+          628246,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 19632.6875,
+        "encode": 2395.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          3044,
+          9805,
+          0
+        ],
+        [
+          2614,
+          9735,
+          0
+        ],
+        [
+          2554,
+          9735,
+          0
+        ],
+        [
+          2804,
+          9825,
+          0
+        ],
+        [
+          2604,
+          9845,
+          0
+        ],
+        [
+          2734,
+          9735,
+          0
+        ],
+        [
+          2554,
+          9825,
+          0
+        ]
+      ],
+      "payload_sha256": "48719d6b9c52ec159ece2241e351b20765038aced2b009fa0fc81a707dcb4291"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 258,
+      "installed_instruction_batches": [
+        [
+          2305628,
+          1676566,
+          0
+        ],
+        [
+          2305628,
+          1676566,
+          0
+        ],
+        [
+          2305628,
+          1676566,
+          0
+        ],
+        [
+          2305628,
+          1676566,
+          0
+        ],
+        [
+          2305628,
+          1676566,
+          0
+        ],
+        [
+          2305628,
+          1676566,
+          0
+        ],
+        [
+          2305628,
+          1676566,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 52392.6875,
+        "encode": 72050.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          60300,
+          42354,
+          0
+        ],
+        [
+          70005,
+          68444,
+          0
+        ],
+        [
+          60200,
+          39600,
+          0
+        ],
+        [
+          59890,
+          39650,
+          0
+        ],
+        [
+          59680,
+          39630,
+          0
+        ],
+        [
+          67131,
+          39790,
+          0
+        ],
+        [
+          62104,
+          39850,
+          0
+        ]
+      ],
+      "payload_sha256": "2d28360ee0c0c8808c350172668d570d76a56589764c51f4c2ff9115633d3312"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 2562,
+      "installed_instruction_batches": [
+        [
+          4997852,
+          6821142,
+          0
+        ],
+        [
+          4997852,
+          6821142,
+          0
+        ],
+        [
+          4997852,
+          6821142,
+          0
+        ],
+        [
+          4997852,
+          6821142,
+          0
+        ],
+        [
+          4997852,
+          6821142,
+          0
+        ],
+        [
+          4997852,
+          6821142,
+          0
+        ],
+        [
+          4997852,
+          6821142,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 213160.6875,
+        "encode": 156182.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          87311,
+          71648,
+          0
+        ],
+        [
+          87612,
+          71518,
+          0
+        ],
+        [
+          87181,
+          71368,
+          0
+        ],
+        [
+          86810,
+          71558,
+          0
+        ],
+        [
+          86371,
+          71598,
+          0
+        ],
+        [
+          86350,
+          71789,
+          0
+        ],
+        [
+          86370,
+          71638,
+          0
+        ]
+      ],
+      "payload_sha256": "ac44f262280c38657953662a8b7c142f30177e6d8e440b4d978eedab05d6c522"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          33052,
+          18166,
+          0
+        ],
+        [
+          33052,
+          18166,
+          0
+        ],
+        [
+          33052,
+          18166,
+          0
+        ],
+        [
+          33052,
+          18166,
+          0
+        ],
+        [
+          33052,
+          18166,
+          0
+        ],
+        [
+          33052,
+          18166,
+          0
+        ],
+        [
+          33052,
+          18166,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 567.6875,
+        "encode": 1032.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          842,
+          721,
+          0
+        ],
+        [
+          831,
+          731,
+          0
+        ],
+        [
+          832,
+          721,
+          0
+        ],
+        [
+          1172,
+          1042,
+          0
+        ],
+        [
+          811,
+          731,
+          0
+        ],
+        [
+          821,
+          741,
+          0
+        ],
+        [
+          851,
+          711,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 663,
+      "installed_instruction_batches": [
+        [
+          1466972,
+          2444598,
+          0
+        ],
+        [
+          1466972,
+          2444598,
+          0
+        ],
+        [
+          1466972,
+          2444598,
+          0
+        ],
+        [
+          1466972,
+          2444598,
+          0
+        ],
+        [
+          1466972,
+          2444598,
+          0
+        ],
+        [
+          1466972,
+          2444598,
+          0
+        ],
+        [
+          1466972,
+          2444598,
+          0
+        ]
+      ],
+      "lane": "postcard",
+      "median_instructions": {
+        "decode": 76393.6875,
+        "encode": 45842.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          35493,
+          57697,
+          0
+        ],
+        [
+          35734,
+          54913,
+          0
+        ],
+        [
+          34913,
+          55714,
+          0
+        ],
+        [
+          34512,
+          58378,
+          0
+        ],
+        [
+          33841,
+          58258,
+          0
+        ],
+        [
+          35994,
+          56836,
+          0
+        ],
+        [
+          35504,
+          57556,
+          0
+        ]
+      ],
+      "payload_sha256": "f471772ac1fc7322c321fd36af11c298bbaaff92ae1f2ddb8f428c4bcec46c49"
+    },
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ],
+        [
+          32348,
+          8150,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 254.6875,
+        "encode": 1010.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1032,
+          200,
+          0
+        ],
+        [
+          902,
+          200,
+          0
+        ],
+        [
+          951,
+          201,
+          0
+        ],
+        [
+          922,
+          200,
+          0
+        ],
+        [
+          902,
+          200,
+          0
+        ],
+        [
+          921,
+          190,
+          0
+        ],
+        [
+          902,
+          200,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 10,
+      "installed_instruction_batches": [
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ],
+        [
+          42716,
+          28246,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 882.6875,
+        "encode": 1334.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1011,
+          311,
+          0
+        ],
+        [
+          972,
+          310,
+          0
+        ],
+        [
+          941,
+          301,
+          0
+        ],
+        [
+          981,
+          321,
+          0
+        ],
+        [
+          951,
+          331,
+          0
+        ],
+        [
+          951,
+          310,
+          0
+        ],
+        [
+          931,
+          301,
+          0
+        ]
+      ],
+      "payload_sha256": "51672ea45f3539654bf9193f4ff763d90022eee7df5f5b76353d6f11a9eaccec"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          34524,
+          18742,
+          0
+        ],
+        [
+          34524,
+          18742,
+          0
+        ],
+        [
+          34524,
+          18742,
+          0
+        ],
+        [
+          34524,
+          18742,
+          0
+        ],
+        [
+          34524,
+          18742,
+          0
+        ],
+        [
+          34524,
+          18742,
+          0
+        ],
+        [
+          34524,
+          18742,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 585.6875,
+        "encode": 1078.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          931,
+          751,
+          0
+        ],
+        [
+          982,
+          701,
+          0
+        ],
+        [
+          961,
+          751,
+          0
+        ],
+        [
+          982,
+          721,
+          0
+        ],
+        [
+          1332,
+          1011,
+          0
+        ],
+        [
+          1002,
+          751,
+          0
+        ],
+        [
+          1392,
+          1142,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4098,
+      "installed_instruction_batches": [
+        [
+          182972,
+          170774,
+          0
+        ],
+        [
+          182972,
+          170774,
+          0
+        ],
+        [
+          182972,
+          170774,
+          0
+        ],
+        [
+          182972,
+          170774,
+          0
+        ],
+        [
+          182972,
+          170774,
+          0
+        ],
+        [
+          182972,
+          170774,
+          0
+        ],
+        [
+          182972,
+          170774,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 5336.6875,
+        "encode": 5717.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          4326,
+          3636,
+          0
+        ],
+        [
+          3495,
+          30296,
+          0
+        ],
+        [
+          4576,
+          4006,
+          0
+        ],
+        [
+          3375,
+          3315,
+          0
+        ],
+        [
+          3696,
+          45488,
+          0
+        ],
+        [
+          4106,
+          3035,
+          0
+        ],
+        [
+          3526,
+          30195,
+          0
+        ]
+      ],
+      "payload_sha256": "0881a16480679af4cd8140f1b5b34550ecd3bb97f5e59aff3c1adcccc5e538aa"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 770,
+      "installed_instruction_batches": [
+        [
+          76668,
+          639094,
+          0
+        ],
+        [
+          76668,
+          639094,
+          0
+        ],
+        [
+          76668,
+          639094,
+          0
+        ],
+        [
+          76668,
+          639094,
+          0
+        ],
+        [
+          76668,
+          639094,
+          0
+        ],
+        [
+          76668,
+          639094,
+          0
+        ],
+        [
+          76668,
+          639094,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 19971.6875,
+        "encode": 2395.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          4587,
+          18668,
+          0
+        ],
+        [
+          5188,
+          18307,
+          0
+        ],
+        [
+          4367,
+          20110,
+          0
+        ],
+        [
+          3926,
+          17927,
+          0
+        ],
+        [
+          2805,
+          10405,
+          0
+        ],
+        [
+          2674,
+          10205,
+          0
+        ],
+        [
+          2774,
+          10286,
+          0
+        ]
+      ],
+      "payload_sha256": "48719d6b9c52ec159ece2241e351b20765038aced2b009fa0fc81a707dcb4291"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 258,
+      "installed_instruction_batches": [
+        [
+          2305628,
+          1811766,
+          0
+        ],
+        [
+          2305628,
+          1811766,
+          0
+        ],
+        [
+          2305628,
+          1811766,
+          0
+        ],
+        [
+          2305628,
+          1811766,
+          0
+        ],
+        [
+          2305628,
+          1811766,
+          0
+        ],
+        [
+          2305628,
+          1811766,
+          0
+        ],
+        [
+          2305628,
+          1811766,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 56617.6875,
+        "encode": 72050.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          59710,
+          41042,
+          0
+        ],
+        [
+          61973,
+          42233,
+          0
+        ],
+        [
+          61602,
+          41233,
+          0
+        ],
+        [
+          61543,
+          41042,
+          0
+        ],
+        [
+          60070,
+          41372,
+          0
+        ],
+        [
+          77296,
+          41323,
+          0
+        ],
+        [
+          59700,
+          41082,
+          0
+        ]
+      ],
+      "payload_sha256": "2d28360ee0c0c8808c350172668d570d76a56589764c51f4c2ff9115633d3312"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 2562,
+      "installed_instruction_batches": [
+        [
+          4997852,
+          6956342,
+          0
+        ],
+        [
+          4997852,
+          6956342,
+          0
+        ],
+        [
+          4997852,
+          6956342,
+          0
+        ],
+        [
+          4997852,
+          6956342,
+          0
+        ],
+        [
+          4997852,
+          6956342,
+          0
+        ],
+        [
+          4997852,
+          6956342,
+          0
+        ],
+        [
+          4997852,
+          6956342,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 217385.6875,
+        "encode": 156182.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          86480,
+          74332,
+          0
+        ],
+        [
+          91808,
+          73862,
+          0
+        ],
+        [
+          87322,
+          77817,
+          0
+        ],
+        [
+          85439,
+          73641,
+          0
+        ],
+        [
+          85469,
+          73691,
+          0
+        ],
+        [
+          83295,
+          73932,
+          0
+        ],
+        [
+          86821,
+          73671,
+          0
+        ]
+      ],
+      "payload_sha256": "ac44f262280c38657953662a8b7c142f30177e6d8e440b4d978eedab05d6c522"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          33052,
+          19062,
+          0
+        ],
+        [
+          33052,
+          19062,
+          0
+        ],
+        [
+          33052,
+          19062,
+          0
+        ],
+        [
+          33052,
+          19062,
+          0
+        ],
+        [
+          33052,
+          19062,
+          0
+        ],
+        [
+          33052,
+          19062,
+          0
+        ],
+        [
+          33052,
+          19062,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 595.6875,
+        "encode": 1032.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1443,
+          971,
+          0
+        ],
+        [
+          872,
+          701,
+          0
+        ],
+        [
+          821,
+          701,
+          0
+        ],
+        [
+          822,
+          741,
+          0
+        ],
+        [
+          822,
+          731,
+          0
+        ],
+        [
+          922,
+          681,
+          0
+        ],
+        [
+          811,
+          691,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 663,
+      "installed_instruction_batches": [
+        [
+          1466972,
+          2842486,
+          0
+        ],
+        [
+          1466972,
+          2842486,
+          0
+        ],
+        [
+          1466972,
+          2842486,
+          0
+        ],
+        [
+          1466972,
+          2842486,
+          0
+        ],
+        [
+          1466972,
+          2842486,
+          0
+        ],
+        [
+          1466972,
+          2842486,
+          0
+        ],
+        [
+          1466972,
+          2842486,
+          0
+        ]
+      ],
+      "lane": "postcard-bounded",
+      "median_instructions": {
+        "decode": 88827.6875,
+        "encode": 45842.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          34331,
+          64007,
+          0
+        ],
+        [
+          34182,
+          62404,
+          0
+        ],
+        [
+          49083,
+          97216,
+          0
+        ],
+        [
+          34582,
+          64147,
+          0
+        ],
+        [
+          34051,
+          63645,
+          0
+        ],
+        [
+          35354,
+          63065,
+          0
+        ],
+        [
+          44296,
+          81112,
+          0
+        ]
+      ],
+      "payload_sha256": "f471772ac1fc7322c321fd36af11c298bbaaff92ae1f2ddb8f428c4bcec46c49"
+    },
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 2,
+      "installed_instruction_batches": [
+        [
+          64700,
+          46454,
+          0
+        ],
+        [
+          64700,
+          46454,
+          0
+        ],
+        [
+          64700,
+          46454,
+          0
+        ],
+        [
+          64700,
+          46454,
+          0
+        ],
+        [
+          64700,
+          46454,
+          0
+        ],
+        [
+          64700,
+          46454,
+          0
+        ],
+        [
+          64700,
+          46454,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 1451.6875,
+        "encode": 2021.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1863,
+          911,
+          0
+        ],
+        [
+          1653,
+          831,
+          0
+        ],
+        [
+          1733,
+          841,
+          0
+        ],
+        [
+          2404,
+          1402,
+          0
+        ],
+        [
+          1582,
+          842,
+          0
+        ],
+        [
+          1642,
+          842,
+          0
+        ],
+        [
+          1602,
+          851,
+          0
+        ]
+      ],
+      "payload_sha256": "ceb827ad3d3884fd4d50ae6099d6d50c09a21e72ebd309708e8b69d93df19e55"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 9,
+      "installed_instruction_batches": [
+        [
+          72188,
+          17654,
+          0
+        ],
+        [
+          72188,
+          17654,
+          0
+        ],
+        [
+          72188,
+          17654,
+          0
+        ],
+        [
+          72188,
+          17654,
+          0
+        ],
+        [
+          72188,
+          17654,
+          0
+        ],
+        [
+          72188,
+          17654,
+          0
+        ],
+        [
+          72188,
+          17654,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 551.6875,
+        "encode": 2255.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1913,
+          351,
+          0
+        ],
+        [
+          1833,
+          360,
+          0
+        ],
+        [
+          2975,
+          511,
+          0
+        ],
+        [
+          2534,
+          441,
+          0
+        ],
+        [
+          2364,
+          551,
+          0
+        ],
+        [
+          2945,
+          611,
+          0
+        ],
+        [
+          2224,
+          520,
+          0
+        ]
+      ],
+      "payload_sha256": "9def0fa72f2e47121f76669bb34e840056e33b7cb205287c2e7b765bf6ff0a07"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          93340,
+          29590,
+          0
+        ],
+        [
+          93340,
+          29590,
+          0
+        ],
+        [
+          93340,
+          29590,
+          0
+        ],
+        [
+          93340,
+          29590,
+          0
+        ],
+        [
+          93340,
+          29590,
+          0
+        ],
+        [
+          93340,
+          29590,
+          0
+        ],
+        [
+          93340,
+          29590,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 924.6875,
+        "encode": 2916.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          2603,
+          982,
+          0
+        ],
+        [
+          2624,
+          1071,
+          0
+        ],
+        [
+          1572,
+          611,
+          0
+        ],
+        [
+          2484,
+          891,
+          0
+        ],
+        [
+          2454,
+          951,
+          0
+        ],
+        [
+          2464,
+          961,
+          0
+        ],
+        [
+          2444,
+          871,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4101,
+      "installed_instruction_batches": [
+        [
+          5175938,
+          250256,
+          0
+        ],
+        [
+          5175938,
+          250256,
+          0
+        ],
+        [
+          5175938,
+          250256,
+          0
+        ],
+        [
+          5175938,
+          250256,
+          0
+        ],
+        [
+          5175938,
+          250256,
+          0
+        ],
+        [
+          5175938,
+          250256,
+          0
+        ],
+        [
+          5175938,
+          250256,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 7820.5,
+        "encode": 161748.0625,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          91678,
+          3455,
+          0
+        ],
+        [
+          92630,
+          5228,
+          0
+        ],
+        [
+          94613,
+          3345,
+          0
+        ],
+        [
+          91558,
+          3215,
+          0
+        ],
+        [
+          92198,
+          3335,
+          0
+        ],
+        [
+          90847,
+          3295,
+          0
+        ],
+        [
+          101172,
+          3225,
+          0
+        ]
+      ],
+      "payload_sha256": "1db7fd2d001bcb74002190705178a7519fdb2f588e738ab8855cb15dfb465fc2"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 772,
+      "installed_instruction_batches": [
+        [
+          235138,
+          804304,
+          0
+        ],
+        [
+          235138,
+          804304,
+          0
+        ],
+        [
+          235138,
+          804304,
+          0
+        ],
+        [
+          235138,
+          804304,
+          0
+        ],
+        [
+          235138,
+          804304,
+          0
+        ],
+        [
+          235138,
+          804304,
+          0
+        ],
+        [
+          235138,
+          804304,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 25134.5,
+        "encode": 7348.0625,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          4738,
+          12478,
+          0
+        ],
+        [
+          5098,
+          12599,
+          0
+        ],
+        [
+          5428,
+          12319,
+          0
+        ],
+        [
+          5118,
+          12319,
+          0
+        ],
+        [
+          5278,
+          12259,
+          0
+        ],
+        [
+          5047,
+          12299,
+          0
+        ],
+        [
+          5658,
+          12309,
+          0
+        ]
+      ],
+      "payload_sha256": "e4566b9479887130dc468e3e21b00f72c3945015e8da15fd947942804d5e86b6"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 262,
+      "installed_instruction_batches": [
+        [
+          993154,
+          371408,
+          0
+        ],
+        [
+          993154,
+          371408,
+          0
+        ],
+        [
+          993154,
+          371408,
+          0
+        ],
+        [
+          993154,
+          371408,
+          0
+        ],
+        [
+          993154,
+          371408,
+          0
+        ],
+        [
+          993154,
+          371408,
+          0
+        ],
+        [
+          993154,
+          371408,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 11606.5,
+        "encode": 31036.0625,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          17627,
+          5909,
+          0
+        ],
+        [
+          16955,
+          4958,
+          0
+        ],
+        [
+          17516,
+          5849,
+          0
+        ],
+        [
+          16876,
+          5168,
+          0
+        ],
+        [
+          17506,
+          5489,
+          0
+        ],
+        [
+          16946,
+          5058,
+          0
+        ],
+        [
+          17436,
+          5529,
+          0
+        ]
+      ],
+      "payload_sha256": "cb32fc3f312a7ba274efcd6956b8ae306d030458bbcaa822b1ceea7dd069a1e7"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 270,
+      "installed_instruction_batches": [
+        [
+          1176252,
+          541942,
+          0
+        ],
+        [
+          1176252,
+          541942,
+          0
+        ],
+        [
+          1176252,
+          541942,
+          0
+        ],
+        [
+          1176252,
+          541942,
+          0
+        ],
+        [
+          1176252,
+          541942,
+          0
+        ],
+        [
+          1176252,
+          541942,
+          0
+        ],
+        [
+          1176252,
+          541942,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 16935.6875,
+        "encode": 36757.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          20150,
+          8253,
+          0
+        ],
+        [
+          30726,
+          12879,
+          0
+        ],
+        [
+          34692,
+          16245,
+          0
+        ],
+        [
+          28422,
+          11457,
+          0
+        ],
+        [
+          19830,
+          8923,
+          0
+        ],
+        [
+          19720,
+          8262,
+          0
+        ],
+        [
+          19640,
+          8142,
+          0
+        ]
+      ],
+      "payload_sha256": "d56f115d9dbef62b6f98c2821ddf7e3ea464753169484bf21f5f8981951063ae"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 1,
+      "installed_instruction_batches": [
+        [
+          137116,
+          54934,
+          0
+        ],
+        [
+          137116,
+          54934,
+          0
+        ],
+        [
+          137116,
+          54934,
+          0
+        ],
+        [
+          137116,
+          54934,
+          0
+        ],
+        [
+          137116,
+          54934,
+          0
+        ],
+        [
+          137116,
+          54934,
+          0
+        ],
+        [
+          137116,
+          54934,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 1716.6875,
+        "encode": 4284.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          2624,
+          1002,
+          0
+        ],
+        [
+          3476,
+          1692,
+          0
+        ],
+        [
+          3415,
+          1803,
+          0
+        ],
+        [
+          3055,
+          1743,
+          0
+        ],
+        [
+          2094,
+          981,
+          0
+        ],
+        [
+          2094,
+          981,
+          0
+        ],
+        [
+          2944,
+          1663,
+          0
+        ]
+      ],
+      "payload_sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 361,
+      "installed_instruction_batches": [
+        [
+          906114,
+          1634168,
+          0
+        ],
+        [
+          906114,
+          1634168,
+          0
+        ],
+        [
+          906114,
+          1634168,
+          0
+        ],
+        [
+          906114,
+          1634168,
+          0
+        ],
+        [
+          906114,
+          1634168,
+          0
+        ],
+        [
+          906114,
+          1634168,
+          0
+        ],
+        [
+          906114,
+          1634168,
+          0
+        ]
+      ],
+      "lane": "bitcode",
+      "median_instructions": {
+        "decode": 51067.75,
+        "encode": 28316.0625,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          14962,
+          42504,
+          0
+        ],
+        [
+          14733,
+          48022,
+          0
+        ],
+        [
+          14953,
+          42524,
+          0
+        ],
+        [
+          14902,
+          42684,
+          0
+        ],
+        [
+          14231,
+          42164,
+          0
+        ],
+        [
+          14562,
+          42854,
+          0
+        ],
+        [
+          14963,
+          50767,
+          0
+        ]
+      ],
+      "payload_sha256": "8565e5ae75cbe6cd36054dd14fe41379500dae44ce581b584beaa12abfa09fd1"
+    },
+    {
+      "case": "scalar-zero",
+      "encoded_bytes": 8,
+      "installed_instruction_batches": [
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 93.6875,
+        "encode": 664.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1272,
+          181,
+          0
+        ],
+        [
+          1302,
+          130,
+          0
+        ],
+        [
+          2294,
+          140,
+          0
+        ],
+        [
+          1021,
+          100,
+          0
+        ],
+        [
+          991,
+          111,
+          0
+        ],
+        [
+          951,
+          100,
+          0
+        ],
+        [
+          952,
+          100,
+          0
+        ]
+      ],
+      "payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+    },
+    {
+      "case": "scalar-max",
+      "encoded_bytes": 8,
+      "installed_instruction_batches": [
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ],
+        [
+          21276,
+          2998,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 93.6875,
+        "encode": 664.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          971,
+          100,
+          0
+        ],
+        [
+          942,
+          110,
+          0
+        ],
+        [
+          951,
+          100,
+          0
+        ],
+        [
+          951,
+          110,
+          0
+        ],
+        [
+          951,
+          180,
+          0
+        ],
+        [
+          961,
+          110,
+          0
+        ],
+        [
+          991,
+          111,
+          0
+        ]
+      ],
+      "payload_sha256": "12a3ae445661ce5dee78d0650d33362dec29c4f82af05e7e57fb595bbbacf0ca"
+    },
+    {
+      "case": "blob-empty",
+      "encoded_bytes": 8,
+      "installed_instruction_batches": [
+        [
+          24348,
+          20566,
+          0
+        ],
+        [
+          24348,
+          20566,
+          0
+        ],
+        [
+          24348,
+          20566,
+          0
+        ],
+        [
+          24348,
+          20566,
+          0
+        ],
+        [
+          24348,
+          20566,
+          0
+        ],
+        [
+          24348,
+          20566,
+          0
+        ],
+        [
+          24348,
+          20566,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 642.6875,
+        "encode": 760.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1382,
+          1152,
+          0
+        ],
+        [
+          1011,
+          711,
+          0
+        ],
+        [
+          1001,
+          751,
+          0
+        ],
+        [
+          992,
+          741,
+          0
+        ],
+        [
+          1292,
+          1262,
+          0
+        ],
+        [
+          971,
+          721,
+          0
+        ],
+        [
+          962,
+          721,
+          0
+        ]
+      ],
+      "payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+    },
+    {
+      "case": "blob-4096",
+      "encoded_bytes": 4104,
+      "installed_instruction_batches": [
+        [
+          158588,
+          164694,
+          0
+        ],
+        [
+          158588,
+          164694,
+          0
+        ],
+        [
+          158588,
+          164694,
+          0
+        ],
+        [
+          158588,
+          164694,
+          0
+        ],
+        [
+          158588,
+          164694,
+          0
+        ],
+        [
+          158588,
+          164694,
+          0
+        ],
+        [
+          158588,
+          164694,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 5146.6875,
+        "encode": 4955.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          2344,
+          3034,
+          0
+        ],
+        [
+          3015,
+          32649,
+          0
+        ],
+        [
+          2664,
+          2574,
+          0
+        ],
+        [
+          2374,
+          43946,
+          0
+        ],
+        [
+          2364,
+          2554,
+          0
+        ],
+        [
+          2404,
+          29745,
+          0
+        ],
+        [
+          2313,
+          2474,
+          0
+        ]
+      ],
+      "payload_sha256": "89317167f99ed3b68c946cba204ff0c27f9f4cdb64f51a4cb34a9973c2651bed"
+    },
+    {
+      "case": "text-utf8",
+      "encoded_bytes": 776,
+      "installed_instruction_batches": [
+        [
+          54012,
+          626582,
+          0
+        ],
+        [
+          54012,
+          626582,
+          0
+        ],
+        [
+          54012,
+          626582,
+          0
+        ],
+        [
+          54012,
+          626582,
+          0
+        ],
+        [
+          54012,
+          626582,
+          0
+        ],
+        [
+          54012,
+          626582,
+          0
+        ],
+        [
+          54012,
+          626582,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 19580.6875,
+        "encode": 1687.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1672,
+          10015,
+          0
+        ],
+        [
+          1973,
+          9925,
+          0
+        ],
+        [
+          2214,
+          13170,
+          0
+        ],
+        [
+          1502,
+          9965,
+          0
+        ],
+        [
+          1673,
+          10085,
+          0
+        ],
+        [
+          2103,
+          18087,
+          0
+        ],
+        [
+          2123,
+          17266,
+          0
+        ]
+      ],
+      "payload_sha256": "5748c9b4124c8c2ef54d0c9a3905a53203e62182ad9e5aaa2489896d44fcb2df"
+    },
+    {
+      "case": "integers-small",
+      "encoded_bytes": 2056,
+      "installed_instruction_batches": [
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 3019.6875,
+        "encode": 2912.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          2334,
+          2423,
+          0
+        ],
+        [
+          2533,
+          2333,
+          0
+        ],
+        [
+          2434,
+          2333,
+          0
+        ],
+        [
+          2413,
+          2343,
+          0
+        ],
+        [
+          1833,
+          1823,
+          0
+        ],
+        [
+          2303,
+          2334,
+          0
+        ],
+        [
+          2915,
+          3064,
+          0
+        ]
+      ],
+      "payload_sha256": "44cc6db37472526e7fea0a2de154b2e45e3adef97cbc2e08cef310c2f7d68e65"
+    },
+    {
+      "case": "integers-wide",
+      "encoded_bytes": 2056,
+      "installed_instruction_batches": [
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ],
+        [
+          93212,
+          96630,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 3019.6875,
+        "encode": 2912.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          2434,
+          2514,
+          0
+        ],
+        [
+          2494,
+          2274,
+          0
+        ],
+        [
+          1753,
+          1883,
+          0
+        ],
+        [
+          2354,
+          2293,
+          0
+        ],
+        [
+          2173,
+          2164,
+          0
+        ],
+        [
+          2454,
+          2324,
+          0
+        ],
+        [
+          1762,
+          1823,
+          0
+        ]
+      ],
+      "payload_sha256": "7369e10daaf156a3a59dc352d671719f4ed5593ea53fb6e180d22446aa820fe8"
+    },
+    {
+      "case": "page-empty",
+      "encoded_bytes": 8,
+      "installed_instruction_batches": [
+        [
+          25788,
+          15062,
+          0
+        ],
+        [
+          25788,
+          15062,
+          0
+        ],
+        [
+          25788,
+          15062,
+          0
+        ],
+        [
+          25788,
+          15062,
+          0
+        ],
+        [
+          25788,
+          15062,
+          0
+        ],
+        [
+          25788,
+          15062,
+          0
+        ],
+        [
+          25788,
+          15062,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 470.6875,
+        "encode": 805.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          1131,
+          1302,
+          0
+        ],
+        [
+          1102,
+          1222,
+          0
+        ],
+        [
+          1021,
+          1192,
+          0
+        ],
+        [
+          1021,
+          1192,
+          0
+        ],
+        [
+          1032,
+          1201,
+          0
+        ],
+        [
+          1082,
+          1221,
+          0
+        ],
+        [
+          1011,
+          1212,
+          0
+        ]
+      ],
+      "payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+    },
+    {
+      "case": "page-32",
+      "encoded_bytes": 1054,
+      "installed_instruction_batches": [
+        [
+          408252,
+          1369046,
+          0
+        ],
+        [
+          408252,
+          1369046,
+          0
+        ],
+        [
+          408252,
+          1369046,
+          0
+        ],
+        [
+          408252,
+          1369046,
+          0
+        ],
+        [
+          408252,
+          1369046,
+          0
+        ],
+        [
+          408252,
+          1369046,
+          0
+        ],
+        [
+          408252,
+          1369046,
+          0
+        ]
+      ],
+      "lane": "wincode",
+      "median_instructions": {
+        "decode": 42782.6875,
+        "encode": 12757.875,
+        "sizing": 0.0
+      },
+      "native_nanosecond_batches": [
+        [
+          7301,
+          38558,
+          0
+        ],
+        [
+          7491,
+          38708,
+          0
+        ],
+        [
+          7141,
+          38818,
+          0
+        ],
+        [
+          7351,
+          38829,
+          0
+        ],
+        [
+          7401,
+          39189,
+          0
+        ],
+        [
+          7291,
+          38989,
+          0
+        ],
+        [
+          8282,
+          46470,
+          0
+        ]
+      ],
+      "payload_sha256": "f2b698341b15839a493ee1c13e388c0c10ed08ae00a392201d40c08280f79f77"
+    }
+  ],
+  "samples": 7,
+  "scope": "valid-input microbenchmarks; raw controls do not implement Wire resource/canonicality contracts",
+  "target": "wasm32-unknown-unknown",
+  "wire_limits": {
+    "allocation": 8388608,
+    "bytes": 16384,
+    "depth": 32,
+    "nodes": 65536
+  }
+}

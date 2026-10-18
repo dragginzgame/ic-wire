@@ -25,7 +25,7 @@ ease, documentation and a meaningful measured advantage, not merely another code
 | Shared Tooling | Recorded setup, formatting, validation and release mechanics |
 
 Owned codecs and endpoint payloads use IC Wire exclusively. Direct Candid
-dependencies and codec comparisons are retired; recorded evidence remains frozen.
+dependencies and Candid comparisons are retired; recorded evidence remains frozen.
 The private browser/macro integration fixtures retain SDK/CDK/PocketIC, including
 their transitive Candid dependencies. This does not add a Candid endpoint mode.
 

@@ -24,6 +24,8 @@ paths+=(crates/ic-wire-adapter-fixture/Cargo.toml crates/ic-wire-adapter-fixture
 paths+=(docs/runtime.md crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/lib.rs crates/ic-wire-derive/src/enum_expansion/mod.rs crates/ic-wire/src/contract/mod.rs crates/ic-wire/src/bounded/mod.rs crates/ic-wire/src/shape/mod.rs crates/ic-wire/tests/runtime/mod.rs crates/ic-wire-canister-evaluation/src/commands/mod.rs)
 paths+=(crates/ic-wire/src/native/mod.rs crates/ic-wire/src/native/encode/mod.rs crates/ic-wire/src/native/decode/mod.rs crates/ic-wire/src/native/LICENSE-MIT crates/ic-wire/tests/native/mod.rs)
 paths+=(crates/ic-wire/tests/runtime/boxed/mod.rs)
+paths+=(crates/ic-wire/src/contract/tests/mod.rs crates/ic-wire/tests/runtime/canonical_bytes/mod.rs)
+paths+=(crates/ic-wire-canister-evaluation/src/performance/mod.rs crates/ic-wire-canister-evaluation/examples/performance/mod.rs scripts/ci/evaluate-performance.sh)
 paths+=(scripts/ci/check-diagnostics.sh)
 while IFS= read -r path; do paths+=("$path"); done < <(cd "$root" && find crates/ic-wire/tests/ui crates/ic-wire-canister-evaluation/tests/macro_ui -type f)
 while IFS=$'\t' read -r record _ _ path; do

@@ -23,7 +23,7 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - Keep runtime code Wasm-safe and independent of Candid, CDK and host tooling.
 - Keep owned codecs, endpoint payloads and direct dependencies Candid-free.
   Retain browser and installed Wire integration tests; their SDK/CDK/PocketIC
-  dependencies may contain Candid transitively. Do not restore comparison codecs.
+  dependencies may contain Candid transitively. Do not restore Candid comparison codecs.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
@@ -50,7 +50,8 @@ additional experimental crates must remain unpublished.
 
 Preserve dirty work. Ordinary work leaves staging, commits, own versions and
 releases to the maintainer. The selected runtime and Wire integration tests are
-maintained; codec comparison experiments are retired. Siblings are read-only unless
+maintained. Candid comparisons remain retired. The unpublished performance fixture
+may use raw Postcard, bitcode and wincode controls; these are not production modes. Siblings are read-only unless
 separately authorized; prototype consumer-shaped fixtures here instead.
 
 Use focused checks for changed code. Check for an active build sharing target/

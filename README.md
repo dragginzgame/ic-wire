@@ -11,7 +11,7 @@ bindings, finite float wrappers and canonical request/reply envelopes. The nativ
 Serde API also admits ordinary containers and recursive values under explicit
 resource limits. Its normal dependency graph has
 no Candid, CDK or host tooling. All owned codecs and browser endpoint payloads
-use IC Wire; no direct Candid dependency or comparison implementation remains.
+use IC Wire; no direct Candid dependency or Candid comparison implementation remains.
 The private CDK/SDK/PocketIC integration harness still reaches Candid transitively.
 Start with the [runtime guide](docs/runtime.md)
 and [installed adoption proof](docs/runtime-adoption.md). Canic macro integration
@@ -36,7 +36,9 @@ The [payload screen](docs/codec-screen.md) records reproducible sizes and the
 remaining obstacles to selecting a shared encoding.
 The historical [matched canister experiment](docs/canister-comparison.md) adds measured
 Wasm and IC instruction evidence, including retained Candid management traffic.
-The [recorded runtime comparison](docs/runtime-comparison.md) measures the
+The [current performance experiment](docs/performance.md) measures finite and
+dynamic Wire against private raw-codec controls, with their differing guarantees
+kept explicit. The [recorded runtime comparison](docs/runtime-comparison.md) measures the
 then-selected envelopes, bounds and finite floats against strict Candid.
 The historical [nested authority extension](docs/nested-authority.md) adds bounded delegate
 and grant collections with new installed measurements.
