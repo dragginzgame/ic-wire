@@ -94,7 +94,7 @@ pub(crate) fn expand(
         };
         #[allow(dead_code)] // Native tests invoke the same entry without IC exports.
         // Raw Wire entrypoints have no Candid service metadata; exports remain callable.
-        #[cfg_attr(target_arch = "wasm32", ::ic_cdk::#kind(name = #export, manual_reply = true, hidden = true))]
+        #[cfg_attr(target_arch = "wasm32", ::ic_platform::cdk::#kind(name = #export, manual_reply = true, hidden = true))]
         #asynchronous fn #entry() {
             let result: Result<::ic_wire::ResponseBytes<#method>, String> = #execute;
             match result {

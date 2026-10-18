@@ -14,7 +14,7 @@ Xcode Command Line Tools and xz; on Linux, install a C compiler/linker and the
 development packages required by Cargo-installed tools.
 
 ```sh
-rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
 rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
 make install-tools
 make tools-check
@@ -48,7 +48,7 @@ by setup.
 
 Run `make` for help. Check for active builds sharing `target/` before compilation
 or source edits. Make uses this checkout's `target/` and keeps its artifacts.
-The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
+The pinned development compiler is Rust 1.99.1; Rust 1.91.0 is the library MSRV.
 
 | Target | Scope |
 | --- | --- |
@@ -105,61 +105,51 @@ Do not copy uncommitted sibling edits or edit snapshot-owned payloads.
 
 ### IC Platform boundary
 
-Registry IC Platform 0.1.8 is the selected evaluation boundary (crates.io checksum
-`4a3adb6d9785133587b854b66b37dfdd8f7945555bdc59b6d0be26995187484d`).
-Cargo's refreshed registry index selected this published release; the sibling
-checkout is not the dependency. Only its `ic0` feature is enabled. Examples use
-the published `ic_platform::Principal`, which retains ic_principal 0.1.5 identity.
-Agent, Candid, ledger/management types, certification, executor and native parsing features
-are not enabled; this repository has no direct consumer of those surfaces to migrate.
-The additional Agent/Candid/parser exports have no current owned Wire consumer;
-Principal and ic0 retain their existing upstream identities.
-The published 0.1.8 ic0 module is byte-identical to 0.1.7. Its additional
-management snapshot/status DTOs have no current owned Wire consumer and stay disabled.
+Registry IC Platform 0.1.12 is the selected evaluation boundary (archive checksum
+`e0ab384614a5d8fe251bc2c27c508263d4001d776edf31382b5b985a1a4ced2d`).
+It selects the coordinated published `ic-platform-macros` 0.1.12 generator. The
+registry sources and published README were inspected; no sibling checkout is a
+consumer dependency. Examples retain `ic_platform::Principal` and its upstream
+identity. The evaluation selects `cdk`, which enables Candid, executor and ic0;
+Agent, parser, crypto, certification and ledger/management features stay disabled.
 
-All owned codecs, including browser requests/replies, use IC Wire. The retired
-Candid benchmark, its control DTOs/decoder and external management probe are
-removed; [recorded measurements](runtime-comparison.md) retain their original
-source identities. All early argument-size checks use
-`ic_platform::ic0::msg_arg_data_size`, the same upstream ic0 1.2.0 identity;
-the direct ic0 dependency and its boundary exception are removed.
-The macro fixture also routes trap bytes and stable-page counts through
-`ic_platform::ic0::{trap, stable64_size}`. CDK 0.20.3 delegates to these same
-IC 1.2.0 calls; trap UTF-8 bytes, page units and the eight-byte balance layout
-stay unchanged. Stable allocation/read/write policy remains with the test fixture.
+Owned codecs and browser payloads remain IC Wire. The private generator and
+browser entries use `ic_platform::cdk::{query, update}` with zero Rust arguments,
+`manual_reply = true` and `hidden = true`. Their callable exports, exact Wire
+bytes and original executor contexts are retained, without Candid service metadata
+or a direct Candid declaration. `cdk::api::{msg_arg_data, msg_caller, is_controller}`
+are the original CDK implementations, including allocation and controller
+0/1/unexpected-result panic behavior. Consumer byte/auth admission stays in place.
+Raw argument-size, append/finalize/reject, trap and stable-page calls remain on
+`ic_platform::ic0`; response-codec traps retain local rollback semantics.
 
-CDK 0.20.3 remains a direct evaluation dependency for entrypoint
-macros, caller/controller checks, argument copying, replies/rejections and stable read/write/grow
-operations: [Platform #1 — Support the CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1).
-The [0.1.7 consumer audit on #1 — CDK boundary](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6248552044)
-lists the exact remaining helpers and raw exports with a minimal fixture and
-installed acceptance checks. Build, hashing and simulator tooling retain their
-separate owners; those are intentional dependencies outside Platform.
-The [0.1.8 recheck on #1 — CDK boundary](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6248715562)
-confirms those requirements remain unchanged; no additional missing API was found.
-The private adapter generator emits zero-argument, manual-reply CDK entries with
-`hidden = true`. This suppresses unused Candid metadata and removes generated
-absolute Candid references; it does not hide callable Wasm exports. Browser
-entries use the same options. No direct Candid dependency is required. Exact
-exports, request/reply bytes, refusal and rollback behavior remain tested.
-No compatibility alias, replacement executor, parser or storage migration is added.
+The rollback fixture uses `ic_platform::cdk::stable::{stable_read, stable_write,
+stable_grow}`, the original CDK helpers now explicitly exported by Platform
+([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)). The final
+direct CDK declaration and its feature edge are removed. The eight-byte balance
+format, growth/read/write policy and error identities stay unchanged; no storage
+migration or local SDK implementation is added. Platform's Candid checkpoint
+helpers are unused; the fixture retains its existing raw stable bytes.
+[Platform #1](https://github.com/dragginzgame/ic-platform/issues/1)
+owns the broader runtime/generator qualification. Build, hashing, simulator and
+JavaScript SDK tooling retain their separate owners.
 
 `make check-boundary` uses the recorded Shared Tooling checker and
-`ci/cargo-dependency-boundaries.json`. CI rejects direct Candid and ic0 declarations;
-only the unpublished evaluation package may declare CDK. It checks canonical names across
-normal/build/dev/target declarations, including aliases. All current manifests
-and the root catalog were inspected; no independent Cargo workspace was found.
-The checker does not enforce unused root-catalog entries or transitive reachability.
+`ci/cargo-dependency-boundaries.json`. CI rejects direct Candid, CDK-family and ic0
+declarations in every package. Canonical names, aliases and normal/build/dev/target
+declarations are checked. There are no direct dependency exceptions. Root
+catalogs, enabled features,
+transitive reachability and final deployment exclusions need separate inspection;
+there is no independent Cargo workspace in this repository.
 
-The inspected evaluation Wasm graph still contains Candid 0.10.38, CDK/macros
-0.20.3, ic0 1.2.0 and one executor 2.0.0 identity. CDK reaches Candid and ic0;
-Platform selects only ic0/Principal. Host tests reach Candid through Testkit/PocketIC.
-The browser SDK also contains Candid internally; the client sends raw generated
-Wire bytes through HttpAgent without a Candid Actor or IDL encoding.
-These test/transport dependencies are explicitly retained; no candid_parser is selected.
-The production Wire Wasm and host TypeScript graphs remain Candid/CDK/Platform-free.
-There is no executor-only integration to migrate in this workspace. These graph
-observations are not a claim of codec absence from evaluation Wasm or size savings.
+The inspected fixture graph retains upstream CDK/macros 0.20.3, Candid 0.10.38,
+one executor 2.0.0 and ic0 1.2.0, now behind Platform's qualified frontend.
+Testkit/PocketIC and the browser SDK also reach Candid transitively. The browser
+still sends generated Wire bytes through HttpAgent without a Candid Actor or IDL
+encoding. These test/transport dependencies are intentionally retained. Production
+Wire's normal Wasm/TypeScript graph remains independent of Platform, CDK and Candid.
+No host parser or Agent is selected. These graph observations do not prove codec
+absence from fixture Wasm or measured code-size savings.
 
 ### Dependency roles and deployment boundary
 

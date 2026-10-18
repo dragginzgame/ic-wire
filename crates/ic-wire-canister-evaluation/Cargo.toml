@@ -16,9 +16,7 @@ macro-fixture = ["dep:ic-wire", "dep:ic-wire-adapter-fixture"]
 browser-fixture = ["dep:ic-wire"]
 
 [dependencies]
-# Platform 0.1.9 lacks CDK entries, checked/allocating helpers and stable read/write/grow (#1).
-ic-cdk.workspace = true
-ic-platform = { workspace = true, features = ["ic0"] }
+ic-platform = { workspace = true, features = ["cdk"] }
 ic-wire = { workspace = true, optional = true }
 ic-wire-adapter-fixture = { workspace = true, optional = true }
 serde.workspace = true

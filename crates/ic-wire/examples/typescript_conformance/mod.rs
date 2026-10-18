@@ -38,6 +38,13 @@ enum Choice {
     #[wire(id = 3)]
     Empty,
 }
+#[derive(Wire)]
+enum BoxedChoice {
+    #[wire(id = 128)]
+    Payload(Box<Record>),
+    #[wire(id = 3)]
+    Empty,
+}
 // Consumer-shaped SQL page, not IcyDB's public DTO or storage representation.
 #[derive(Wire)]
 enum SqlCell {
@@ -83,6 +90,20 @@ struct Fixture {
     mutation_data: BufWriter<fs::File>,
 }
 impl Fixture {
+    fn add_boxed<T: Wire>(&mut self, value: T, javascript: &str) {
+        let boxed = Box::new(value);
+        assert_eq!(
+            encode_request::<Contract<T>>(&boxed).unwrap().as_bytes(),
+            encode_request::<Contract<Box<T>>>(&boxed)
+                .unwrap()
+                .as_bytes(),
+        );
+        assert_eq!(
+            ic_wire::typescript::generate::<Contract<T>>().unwrap(),
+            ic_wire::typescript::generate::<Contract<Box<T>>>().unwrap(),
+        );
+        self.add(boxed, javascript);
+    }
     fn add<T: Wire>(&mut self, value: T, javascript: &str) {
         let name = format!("m{}", self.count);
         fs::write(
@@ -303,6 +324,19 @@ fn main() {
     );
     f.add(Choice::Empty, "{tag:'Empty',value:null}");
     f.add(Choice::Payload(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) }), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
+    f.add_boxed((), "null");
+    f.add_boxed(42_u64, "42n");
+    f.add_boxed(Box::new(42_u64), "42n");
+    f.add_boxed(
+        Record {
+            r#type: Text::new("hello".into()).unwrap(),
+            __proto__: Bytes::new(vec![1, 2]).unwrap(),
+            optional: Some(None),
+        },
+        "{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}",
+    );
+    f.add_boxed(Choice::Empty, "{tag:'Empty',value:null}");
+    f.add(BoxedChoice::Payload(Box::new(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) })), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
     f.mutation_data.flush().unwrap();
     let codecs = (0..f.count)
         .map(|index| format!("m{index}"))

@@ -63,8 +63,12 @@ field (use a named record for several values). Rust variant order is irrelevant.
 Records support up to 16 named fields, including an empty record. Generic derives,
 recursive graphs, maps, raw f32/f64 and architecture-dependent integers are
 excluded. Supported leaves are unit, bool, fixed-width signed/unsigned integers
-through 128 bits, and FiniteF32/FiniteF64. Option, Result, bounded List/Bytes/Text and Serde-supported fixed arrays
-compose. Result uses Postcard's fixed tags 0=Ok, 1=Err; Option uses 0=None, 1=Some.
+through 128 bits, and FiniteF32/FiniteF64. Option, Result, bounded List/Bytes/Text,
+Serde-supported fixed arrays and `Box<T: Wire>` compose. Boxes are transparent:
+bytes, schema, node count and depth match T, while the heap bound includes
+`size_of::<T>()` plus T's nested heap. Zero-sized boxes add no allocation.
+Boxing does not make recursive or unbounded types finite. Result uses Postcard's
+fixed tags 0=Ok, 1=Err; Option uses 0=None, 1=Some.
 
 Principal values cross as `Bytes<29>`; adapters convert/validate with their existing
 principal type. IC Wire adds no principal identity type or Candid dependency.
@@ -134,7 +138,9 @@ decode visits at most N elements and rejects an extra element without decoding
 it. This covers zero-byte unit elements. Bytes/text check their lengths before
 copying, and text rejects invalid UTF-8. Container allocation failures and malformed
 payloads surface as Error::Malformed through Postcard; codec scratch allocation
-failure is Error::Allocation. All failures remain typed at the runtime boundary.
+failure is Error::Allocation. Box uses Serde's standard allocation after schema
+admission; allocator exhaustion may abort rather than return a typed error. Static
+admission bounds requested storage, not general out-of-memory recovery.
 Encoding reserves the admitted maximum but initializes only emitted bytes.
 Canonical validation compares emitted chunks directly with the input without a
 second output allocation. Schema admission still reserves the same conservative
@@ -266,7 +272,7 @@ unbounded work/allocation. JavaScript engine heap usage is not the Rust allocati
 budget: object overhead, temporary buffers and engine limits differ.
 
 `make check-typescript` uses prepared browser-harness Node and TypeScript tools.
-It generates 84 Rust vectors covering every supported primitive and composition,
+It generates 90 Rust vectors covering every supported primitive and composition,
 type-checks the emitted modules, and checks both directions in Node, including
 truncation, identity errors and hostile input/value cases. This is codec
 conformance; the separate installed browser fixture qualifies transport and

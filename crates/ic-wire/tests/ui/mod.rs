@@ -8,6 +8,8 @@ mod duplicate_variant_id;
 mod generic_contract;
 #[cfg(ui_case = "missing_id")]
 mod missing_id;
+#[cfg(ui_case = "recursive_box")]
+mod recursive_box;
 mod support;
 #[cfg(ui_case = "tuple_record")]
 mod tuple_record;

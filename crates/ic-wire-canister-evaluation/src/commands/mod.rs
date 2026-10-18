@@ -26,7 +26,7 @@ pub struct Receipt {
 pub enum Failure {
     /// Addition did not fit; the unchanged balance is retained.
     #[wire(id = 7)]
-    Overflow(Receipt),
+    Overflow(Box<Receipt>),
 }
 /// Typed update binding.
 pub struct Apply;
@@ -67,12 +67,12 @@ pub struct Snapshot {
     pub balance: u64,
     /// Echo of the bounded query.
     #[wire(id = 2)]
-    pub inspection: Inspection,
+    pub inspection: Box<Inspection>,
 }
 /// Typed ordinary query binding.
 pub struct Inspect;
 impl Method for Inspect {
-    type Request = Inspection;
+    type Request = Box<Inspection>;
     type Response = Snapshot;
     const ID: u64 = 0x49435752454144;
     const NAME: &'static str = "runtime_inspect";
