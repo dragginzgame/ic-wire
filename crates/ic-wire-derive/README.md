@@ -11,5 +11,4 @@ rejected. See the [runtime guide](https://github.com/dragginzgame/ic-wire/blob/m
 Endpoint qualification attributes live in the unpublished
 `ic-wire-adapter-fixture` workspace package. Canic owns endpoint integration.
 
-Licensed under the Dragginz Source Available License — Verifiable ICP Burn,
-Version 1.0. See the packaged LICENSE file. This is not an OSI-approved license.
+Licensed under the MIT License; see the packaged LICENSE.

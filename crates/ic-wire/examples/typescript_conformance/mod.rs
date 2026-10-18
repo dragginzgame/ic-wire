@@ -38,6 +38,13 @@ enum Choice {
     #[wire(id = 3)]
     Empty,
 }
+#[derive(Wire)]
+enum BoxedChoice {
+    #[wire(id = 128)]
+    Payload(Box<Record>),
+    #[wire(id = 3)]
+    Empty,
+}
 // Consumer-shaped SQL page, not IcyDB's public DTO or storage representation.
 #[derive(Wire)]
 enum SqlCell {
@@ -83,6 +90,20 @@ struct Fixture {
     mutation_data: BufWriter<fs::File>,
 }
 impl Fixture {
+    fn add_boxed<T: Wire>(&mut self, value: T, javascript: &str) {
+        let boxed = Box::new(value);
+        assert_eq!(
+            encode_request::<Contract<T>>(&boxed).unwrap().as_bytes(),
+            encode_request::<Contract<Box<T>>>(&boxed)
+                .unwrap()
+                .as_bytes(),
+        );
+        assert_eq!(
+            ic_wire::typescript::generate::<Contract<T>>().unwrap(),
+            ic_wire::typescript::generate::<Contract<Box<T>>>().unwrap(),
+        );
+        self.add(boxed, javascript);
+    }
     fn add<T: Wire>(&mut self, value: T, javascript: &str) {
         let name = format!("m{}", self.count);
         fs::write(
@@ -165,6 +186,30 @@ fn main() {
     )
     .unwrap();
     fs::write(directory.join("package.json"), "{\"type\":\"module\"}").unwrap();
+    let mut types = std::collections::BTreeMap::from([(
+        "Node".into(),
+        serde_json::json!({
+            "k":"enum","variants":[
+                {"name":"Leaf","id":0,"value":{"k":"tuple","items":[{"k":"text"},{"k":"newtype","item":{"k":"u","bits":64}}]}},
+                {"name":"Branch","id":1,"value":{"k":"list","item":{"k":"ref","name":"Node"}}}
+            ]
+        }),
+    )]);
+    types.insert("__proto__".into(), serde_json::json!({"k":"unit"}));
+    let method = serde_json::json!({"name":"nativeTree","mode":"query","id":"1",
+        "request":{"k":"ref","name":"Node"},"response":{"k":"ref","name":"Node"},
+        "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
+        "requestDepth":8,"responseDepth":8});
+    let mut proto = method.clone();
+    proto["name"] = serde_json::json!("prototypeName");
+    proto["request"] = serde_json::json!({"k":"ref","name":"__proto__"});
+    proto["response"] = proto["request"].clone();
+    fs::write(
+        directory.join("native.ts"),
+        ic_wire::typescript::generate_registry(&types, &[method, proto], "./wire-runtime.js")
+            .unwrap(),
+    )
+    .unwrap();
     let mut f = Fixture {
         mutation_data: BufWriter::new(fs::File::create(directory.join("mutations.jsonl")).unwrap()),
         directory,
@@ -279,6 +324,19 @@ fn main() {
     );
     f.add(Choice::Empty, "{tag:'Empty',value:null}");
     f.add(Choice::Payload(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) }), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
+    f.add_boxed((), "null");
+    f.add_boxed(42_u64, "42n");
+    f.add_boxed(Box::new(42_u64), "42n");
+    f.add_boxed(
+        Record {
+            r#type: Text::new("hello".into()).unwrap(),
+            __proto__: Bytes::new(vec![1, 2]).unwrap(),
+            optional: Some(None),
+        },
+        "{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}",
+    );
+    f.add_boxed(Choice::Empty, "{tag:'Empty',value:null}");
+    f.add(BoxedChoice::Payload(Box::new(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) })), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
     f.mutation_data.flush().unwrap();
     let codecs = (0..f.count)
         .map(|index| format!("m{index}"))

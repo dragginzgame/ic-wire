@@ -15,12 +15,19 @@ ease, documentation and a meaningful measured advantage, not merely another code
 
 | Owner | Responsibility |
 | --- | --- |
-| IC Wire | One binary encoding, bounded encode/decode, typed errors, canonical rules and shared test vectors |
+| IC Wire | Postcard encoding, bounded finite/native APIs, derives, typed errors, canonical rules, TypeScript codecs and shared test vectors |
 | Consumer contract crate | Requests, responses, field/variant identities and semantic validation |
 | Canic | Authentication, endpoint macros, runtime dispatch and fleet policy |
 | IC Relay | Delivery envelopes, queues, addressing, ACKs and exact-byte retry |
 | IcyDB | Database semantics, persistence and ordered-key formats |
-| Optional future host tooling | Schema inspection and client generation, only after demonstrated need |
+| IC Build / IC Host | Cargo/Wasm build evidence, compiler diagnostics, artifact inspection and bounded filesystem operations |
+| IC Testkit | PocketIC admission/lifecycle and browser fixture sessions |
+| Shared Tooling | Recorded setup, formatting, validation and release mechanics |
+
+Owned codecs and endpoint payloads use IC Wire exclusively. Direct Candid
+dependencies and codec comparisons are retired; recorded evidence remains frozen.
+The private browser/macro integration fixtures retain SDK/CDK/PocketIC, including
+their transitive Candid dependencies. This does not add a Candid endpoint mode.
 
 IC Host Tooling's current documented boundary is execution outside canisters.
 The runtime codec therefore belongs here, not in ic-host-tools or ic-host-idl.
@@ -59,8 +66,10 @@ compatibility; their DTO mappings and client bindings would need qualification.
 
 The [runtime contract](runtime.md) now resolves the Rust subset with explicit
 field/variant IDs, finite schema budgets, method/direction identity and canonical
-Postcard envelopes. It has no Candid mode. General browser generation and
-consumer-specific hash/auth policies remain outside that qualified subset.
+Postcard envelopes. The native Serde API adds bounded dynamic and recursive
+values; consumers own their positional layout and metadata. Optional TypeScript
+codecs support both paths. There is no Candid mode; consumer-specific hash/auth
+policies remain outside the codec.
 
 The maintainer selected Postcard for controlled inter-canister calls and owned
 user endpoints after the payload and installed-canister experiments. This selects

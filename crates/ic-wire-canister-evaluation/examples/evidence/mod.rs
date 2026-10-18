@@ -65,6 +65,7 @@ pub fn sources(trial: &str) -> Value {
             "crates/ic-wire-canister-evaluation/src/browser/mod.rs",
             "crates/ic-wire-canister-evaluation/src/commands/mod.rs",
             "crates/ic-wire/src/typescript/mod.rs",
+            "crates/ic-wire/src/typescript/metadata/mod.rs",
             "crates/ic-wire/src/typescript/runtime.ts",
             "crates/ic-wire/src/contract/mod.rs",
             "crates/ic-wire/src/schema/mod.rs",
@@ -74,12 +75,6 @@ pub fn sources(trial: &str) -> Value {
             "scripts/ci/evaluate-browser.sh",
             "crates/ic-wire-canister-evaluation/examples/browser_fixture/mod.rs",
             "examples/browser/generated/native-vectors.json",
-        ],
-        "runtime" => &[
-            "Cargo.toml",
-            "Cargo.lock",
-            "crates/ic-wire-canister-evaluation/examples/runtime_measure/mod.rs",
-            "scripts/ci/evaluate-runtime.sh",
         ],
         _ => panic!("unknown evidence trial"),
     };

@@ -4,6 +4,7 @@ description = "Explicit-layout Wire derives for ic-wire bounded contracts"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+license.workspace = true
 license-file.workspace = true
 repository.workspace = true
 publish = ["crates-io"]

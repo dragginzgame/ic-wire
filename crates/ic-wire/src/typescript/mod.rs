@@ -7,6 +7,9 @@ use alloc::{
 };
 use serde_json::{Value, json};
 
+mod metadata;
+pub use metadata::generate_registry;
+
 /// Shared bounded Postcard implementation. Write beside generated method modules
 /// as `wire-runtime.ts`; it imports no SDK and owns no transport/auth policy.
 pub const RUNTIME: &str = include_str!("runtime.ts");
@@ -26,7 +29,7 @@ fn describe(
     schema: &Schema,
     depth: usize,
     remaining: &mut usize,
-) -> Result<(Value, String), GenerationError> {
+) -> Result<Value, GenerationError> {
     if depth > 64 || *remaining == 0 {
         return Err(GenerationError::Complexity);
     }
@@ -34,61 +37,24 @@ fn describe(
     let mut child = |schema| describe(schema, depth + 1, remaining);
     Ok(match schema {
         Schema::Opaque => return Err(GenerationError::Schema),
-        Schema::Unit => (json!({"k":"unit"}), "null".into()),
-        Schema::Bool => (json!({"k":"bool"}), "boolean".into()),
-        Schema::Float(bits) => {
-            if ![32, 64].contains(bits) {
-                return Err(GenerationError::Schema);
-            }
-            (json!({"k":"float","bits":bits}), "number".into())
-        }
+        Schema::Unit => json!({"k":"unit"}),
+        Schema::Bool => json!({"k":"bool"}),
+        Schema::Float(bits) => json!({"k":"float","bits":bits}),
         Schema::Unsigned(bits) | Schema::Signed(bits) => {
-            if ![8, 16, 32, 64, 128].contains(bits) {
-                return Err(GenerationError::Schema);
-            }
-            (
-                json!({"k":if matches!(schema, Schema::Signed(_)) {"i"} else {"u"},"bits":bits}),
-                if *bits <= 32 { "number" } else { "bigint" }.into(),
-            )
+            json!({"k":if matches!(schema, Schema::Signed(_)) {"i"} else {"u"},"bits":bits})
         }
         Schema::Bytes(max) | Schema::Text(max) => {
             exact(*max)?;
-            (
-                json!({"k":if matches!(schema, Schema::Bytes(_)) {"bytes"} else {"text"},"max":max}),
-                if matches!(schema, Schema::Bytes(_)) {
-                    "Uint8Array"
-                } else {
-                    "string"
-                }
-                .into(),
-            )
+            json!({"k":if matches!(schema, Schema::Bytes(_)) {"bytes"} else {"text"},"max":max})
         }
         Schema::List(value, max) | Schema::Array(value, max) => {
             exact(*max)?;
-            let (node, ty) = child(value)?;
-            (
-                json!({"k":if matches!(schema, Schema::List(..)) {"list"} else {"array"},"max":max,"item":node}),
-                format!("ReadonlyArray<{ty}>"),
-            )
+            json!({"k":if matches!(schema, Schema::List(..)) {"list"} else {"array"},"max":max,"item":child(value)?})
         }
-        Schema::Option(value) => {
-            let (node, ty) = child(value)?;
-            (
-                json!({"k":"option","item":node}),
-                format!("null | {{ readonly some: {ty} }}"),
-            )
-        }
-        Schema::Result(ok, err) => {
-            let (ok_node, ok_ty) = child(ok)?;
-            let (err_node, err_ty) = child(err)?;
-            (
-                json!({"k":"result","ok":ok_node,"err":err_node}),
-                format!("{{ readonly ok: {ok_ty} }} | {{ readonly err: {err_ty} }}"),
-            )
-        }
+        Schema::Option(value) => json!({"k":"option","item":child(value)?}),
+        Schema::Result(ok, err) => json!({"k":"result","ok":child(ok)?,"err":child(err)?}),
         Schema::Record(fields) => {
             let mut nodes = Vec::new();
-            let mut types = Vec::new();
             for (index, field) in fields.iter().enumerate() {
                 if fields[..index]
                     .iter()
@@ -96,14 +62,9 @@ fn describe(
                 {
                     return Err(GenerationError::Schema);
                 }
-                let (node, ty) = child(field.value)?;
-                nodes.push(json!({"name":field.name,"id":field.id,"value":node}));
-                types.push(format!("readonly {}: {ty}", json!(field.name)));
+                nodes.push(json!({"name":field.name,"id":field.id,"value":child(field.value)?}));
             }
-            (
-                json!({"k":"record","fields":nodes}),
-                format!("{{ {} }}", types.join("; ")),
-            )
+            json!({"k":"record","fields":nodes})
         }
         Schema::Enum(variants) => {
             if variants.is_empty() {
@@ -112,7 +73,6 @@ fn describe(
             let mut variants: Vec<_> = variants.iter().collect();
             variants.sort_by_key(|v| v.id);
             let mut nodes = Vec::new();
-            let mut types = Vec::new();
             for (index, variant) in variants.iter().enumerate() {
                 if variants[..index]
                     .iter()
@@ -120,14 +80,11 @@ fn describe(
                 {
                     return Err(GenerationError::Schema);
                 }
-                let (node, ty) = child(variant.value)?;
-                nodes.push(json!({"name":variant.name,"id":variant.id,"value":node}));
-                types.push(format!(
-                    "{{ readonly tag: {}; readonly value: {ty} }}",
-                    json!(variant.name)
-                ));
+                nodes.push(
+                    json!({"name":variant.name,"id":variant.id,"value":child(variant.value)?}),
+                );
             }
-            (json!({"k":"enum","variants":nodes}), types.join(" | "))
+            json!({"k":"enum","variants":nodes})
         }
     })
 }
@@ -158,8 +115,10 @@ pub fn generate<M: Method>() -> Result<String, GenerationError> {
     ] {
         exact(n)?;
     }
-    let (request, request_ty) = describe(&M::Request::SCHEMA, 0, &mut 4096)?;
-    let (response, response_ty) = describe(&M::Response::SCHEMA, 0, &mut 4096)?;
+    let request = describe(&M::Request::SCHEMA, 0, &mut 4096)?;
+    let request_ty = metadata::ty(&request, &Default::default(), 0, &mut 4096)?;
+    let response = describe(&M::Response::SCHEMA, 0, &mut 4096)?;
+    let response_ty = metadata::ty(&response, &Default::default(), 0, &mut 4096)?;
     let metadata = json!({"id":M::ID.to_string(),"request":request,"response":response,"requestBytes":request_bytes,"responseBytes":response_bytes,"requestNodes":M::REQUEST_LIMITS.nodes,"responseNodes":M::RESPONSE_LIMITS.nodes,"requestDepth":M::REQUEST_LIMITS.depth,"responseDepth":M::RESPONSE_LIMITS.depth});
     Ok(format!(
         "// Generated from IC Wire schema; edit the Rust contract, not this file.\nimport {{ createCodec }} from './wire-runtime.js';\nexport type Request = {request_ty};\nexport type Response = {response_ty};\nexport const methodName = {};\nconst codec = createCodec({metadata});\nexport const encodeRequest = (value: Request): Uint8Array => codec.encodeRequest(value);\nexport const decodeRequest = (bytes: Uint8Array): Request => codec.decodeRequest(bytes) as Request;\nexport const encodeResponse = (value: Response): Uint8Array => codec.encodeResponse(value);\nexport const decodeResponse = (bytes: Uint8Array): Response => codec.decodeResponse(bytes) as Response;\n",

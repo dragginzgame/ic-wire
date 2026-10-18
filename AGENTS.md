@@ -5,11 +5,12 @@ Read docs/status/current.md first, then README.md, docs/design.md and
 Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `6230989d9f4dc090af4e80283eda4aee75f67bfd` (0.24.1).
+rules, vendored at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0` (0.24.0).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
-moving sibling checkout or patch snapshot-owned files in place. The same snapshot
-owns the release-receipt helper; no separate contribution snapshot remains.
+moving sibling checkout or patch snapshot-owned files in place. The receipt-only
+contribution is separately pinned in [.shared-tooling-receipts.snapshot](.shared-tooling-receipts.snapshot)
+at `35775234560bd08f7e67f4feeaf339dc25fbd9e0` until upstream integration.
 
 ## Maintainer decisions
 
@@ -21,6 +22,9 @@ owns the release-receipt helper; no separate contribution snapshot remains.
   endpoints. Preserve the explicit runtime contract in docs/runtime.md; no Candid
   mode is part of the production API.
 - Keep runtime code Wasm-safe and independent of Candid, CDK and host tooling.
+- Keep owned codecs, endpoint payloads and direct dependencies Candid-free.
+  Retain browser and installed Wire integration tests; their SDK/CDK/PocketIC
+  dependencies may contain Candid transitively. Do not restore comparison codecs.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
@@ -46,8 +50,8 @@ crate splits. A derive crate can be added when the selected design needs it;
 additional experimental crates must remain unpublished.
 
 Preserve dirty work. Ordinary work leaves staging, commits, own versions and
-releases to the maintainer. The accepted next task is the bounded evaluation in
- docs/evaluation.md, not cross-repository adoption. Siblings are read-only unless
+releases to the maintainer. The selected runtime and Wire integration tests are
+maintained; codec comparison experiments are retired. Siblings are read-only unless
 separately authorized; prototype consumer-shaped fixtures here instead.
 
 Use focused checks for changed code. Check for an active build sharing target/

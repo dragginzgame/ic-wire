@@ -1,13 +1,49 @@
 # Changelog
 
-## [0.4.1]
+## [0.4.2] - 2026-10-18
 
-- Adopt Shared Tooling 0.24.1 and consolidate release receipts into the main
-  snapshot, retiring the separate contribution manifest and integrity dispatch
-  ([#9 — Consolidate the receipt snapshot after canonical Shared delivery](https://github.com/dragginzgame/ic-wire/issues/9)).
-  Keep release policy and recovery checks local. Use two dependency-role sections
-  with matching grouped formatting and selected-source release checks; runtime
-  dependencies, wire contracts and supported Rust versions are unchanged.
+- Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.
+  Route fixture macros, checked caller/controller, argument and stable-memory
+  helpers through Platform; remove the final direct CDK dependency and reject
+  direct CDK declarations in every package. Preserve existing stable bytes and
+  rollback semantics; no storage migration or Candid codec is introduced
+  ([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)).
+- Support transparent finite `Box<T: Wire>` values with static heap admission.
+  Preserve canonical frames and TypeScript layouts; recursive/unbounded schemas
+  remain unsupported by the finite API. Boxing can reduce Rust enum storage at
+  the cost of payload allocation; it does not promise Wasm or instruction savings.
+- Select Rust 1.99.1 for development and CI; retain the Rust 1.91 library MSRV
+  and original compiler identities on historical measurements.
+
+## [0.4.1] - 2026-10-18
+
+- Share TypeScript type rendering between finite schemas and consumer-supplied
+  native registries. Host generators can emit typed method modules while keeping
+  reflection, endpoint contracts and scalar checks at their consumer.
+
+- Replace the custom Dragginz license with the standard MIT License for all
+  workspace packages, including published runtime and derive crates.
+
+- Keep owned codecs and endpoint payloads IC Wire-only. Retire Candid comparison
+  code, the management probe and `evaluate-runtime`; preserve recorded measurements.
+  Remove direct Candid dependencies, retaining browser and installed Wire tests.
+  Suppress unused Candid service metadata without changing callable Wasm exports.
+  SDK/CDK/PocketIC still contain Candid transitively in the private test harness.
+- Adopt published IC Platform 0.1.9 for Principals, raw argument-size and
+  stable-page checks, byte-exact traps, replies and rejects, removing the direct
+  ic0 dependency. Preserve reply append/finalization order and UTF-8 reject bytes.
+  Direct dependency checks now run in CI.
+  CDK entrypoints/system helpers remain an evaluation-only exception under
+  [#1 — Support the CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+
+- Adopt Shared Tooling 0.24.0 with dependency-role labels and matching grouped
+  formatting and release metadata checks. Dependency selections are unchanged;
+  role labels do not provide automated deployment exclusion enforcement.
+- Isolate production codec diagnostics from the extracted endpoint-adapter fixture.
+  Keep compiler diagnostics at IC Build and include adapter qualification in CI.
+- Correct current ownership guidance and archive superseded migration handoffs;
+  preserve historical reports without presenting retired replay or codec-selection
+  experiments as active workflows. Runtime APIs and wire bytes are unchanged.
 
 ## [0.4.0] - 2026-10-17
 

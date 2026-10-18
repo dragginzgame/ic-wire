@@ -14,7 +14,9 @@ run="$(mktemp -d "$output/$1.XXXXXX")"
 printf 'Diagnostic logs: %s\n' "$run"
 status=0
 trap 'status=$?; if [[ "$status" != 0 ]]; then printf "Diagnostic failure logs: %s\n" "$run" >&2; fi' EXIT
-cargo build --offline --locked -p ic-wire -p ic-wire-adapter-fixture \
+packages=(-p ic-wire)
+if [[ "$1" == macro ]]; then packages+=(-p ic-wire-adapter-fixture); fi
+cargo build --offline --locked "${packages[@]}" \
     --message-format=json > "$run/artifacts.jsonl"
 cargo run --quiet --offline --locked -p ic-wire-canister-evaluation \
     --example check-diagnostics -- "$1" "$run"

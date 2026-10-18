@@ -1,6 +1,6 @@
 //! Installed qualification of the evaluation-only query/update attributes.
-use candid::Principal;
 use ic_host_artifacts::wasm::{InspectionLimits, inspect};
+use ic_platform::Principal;
 use ic_testkit::pic::{CanisterInstallExt, InstallSpec, PocketIcBuilder, PocketIcStartupConfig};
 use ic_wire::{Method, decode_response, encode_request};
 use ic_wire_canister_evaluation::macro_fixture::{Add, BadReply, Read, Reset};
@@ -64,6 +64,19 @@ fn main() {
         decode_response::<Read>(&reply).unwrap()
     };
     let request = encode_request::<Add>(&7).unwrap().into_bytes();
+    assert_eq!(query(0), 0);
+    // A reply trap must roll back both the first page growth and its write.
+    assert!(pic.get_stable_memory(id).is_empty());
+    let error = pic
+        .update_call(
+            id,
+            caller,
+            BadReply::NAME,
+            encode_request::<BadReply>(&()).unwrap().into_bytes(),
+        )
+        .unwrap_err();
+    assert!(format!("{error:?}").contains("response codec"));
+    assert!(pic.get_stable_memory(id).is_empty());
     assert_eq!(query(0), 0);
     let reply = pic
         .update_call(id, caller, Add::NAME, request.clone())

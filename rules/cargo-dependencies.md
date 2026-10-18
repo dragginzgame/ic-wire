@@ -48,13 +48,10 @@ exact constraints, immutable Git revisions, lockfiles and external path inputs.
 
 ## Dependency roles and deployment checks
 
-Organize the root `[workspace.dependencies]` catalog into two sections headed
-`# Production dependencies` and `# Tests and tooling only`. Put each header once
-above its section, with a blank line between sections and alphabetical order
-within each. Do not repeat role annotations after individual dependencies.
-These headers belong only inside `[workspace.dependencies]`; do not add them
-to `[workspace]`, its `members` array or other manifest tables. They describe use
-within this workspace, not whether a selected version is published to a registry.
+When annotating the root catalog, use `Production dependencies` and
+`Tests and tooling only`. These describe use within this workspace, not whether
+a dependency's selected version has been published to a registry. Use
+`Production packages` and `Tests and tooling packages` for member annotations.
 
 - A production dependency is needed by a production package through normal or
   build dependencies, including supported optional features and targets. Put an
@@ -65,9 +62,9 @@ within this workspace, not whether a selected version is published to a registry
   only this role here. Workspace membership and `package.publish` do not prove
   deployment use or successful registry publication.
 - Keep one catalog and child inheritance. Annotations do not select dependencies;
-  Cargo's manifests and resolved graph remain authoritative. Preserve the sections
-  through the [formatting contract](git-hooks.md), using Cargo sort's grouped mode
-  consistently in formatting, hooks, CI and release checks.
+  Cargo's manifests and resolved graph remain authoritative. Preserve annotations
+  through the [formatting contract](git-hooks.md), with matching write/check
+  behavior if a consumer selects Cargo sort's grouped mode.
 
 Before deployment, inspect the production package's locked graph with the same
 target and feature selection as its build. For example, for a default-feature
@@ -278,13 +275,10 @@ Root `Cargo.toml`:
 
 ```toml
 [workspace.dependencies]
-# Production dependencies
-cc = "1"
-rustix = { version = "1", features = ["fs"] }
-serde = "1"
-
-# Tests and tooling only
-tempfile = "3"
+cc = "1" # Production dependencies: native build support.
+rustix = { version = "1", features = ["fs"] } # Production dependencies.
+serde = "1" # Production dependencies.
+tempfile = "3" # Tests and tooling only.
 ```
 
 Child `Cargo.toml`:

@@ -25,12 +25,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &TargetKind::Lib,
         4 * 1024 * 1024,
     )?;
-    let adapter = library_artifact(
-        File::open(run.join("artifacts.jsonl"))?,
-        "ic_wire_adapter_fixture",
-        &TargetKind::ProcMacro,
-        4 * 1024 * 1024,
-    )?;
+    let adapter = if mode == "macro" {
+        Some(library_artifact(
+            File::open(run.join("artifacts.jsonl"))?,
+            "ic_wire_adapter_fixture",
+            &TargetKind::ProcMacro,
+            4 * 1024 * 1024,
+        )?)
+    } else {
+        None
+    };
     let mut cases = fs::read_dir(&source)?
         .map(|entry| entry.map(|entry| entry.path()))
         .collect::<Result<Vec<_>, _>>()?;
@@ -61,8 +65,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ])
             .arg("--extern")
             .arg(format!("ic_wire={}", wire.display()))
-            .arg("--extern")
-            .arg(format!("ic_wire_adapter_fixture={}", adapter.display()))
             .arg("-L")
             .arg(format!(
                 "dependency={}/deps",
@@ -73,6 +75,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .arg(source.join("mod.rs"))
             .arg("-o")
             .arg(run.join(format!("{name}.rmeta")));
+        if let Some(adapter) = &adapter {
+            command
+                .arg("--extern")
+                .arg(format!("ic_wire_adapter_fixture={}", adapter.display()));
+        }
         command
     })?;
     println!(

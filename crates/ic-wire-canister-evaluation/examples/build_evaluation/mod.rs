@@ -1,4 +1,4 @@
-//! Build and retain the exact benchmark artifacts through their measurement.
+//! Build and retain the exact integration artifacts through their installed tests.
 #[path = "../evidence/mod.rs"]
 mod evidence;
 
@@ -6,12 +6,13 @@ use ic_build::{
     artifacts::{WasmBuildEvidence, WasmBuildSpec},
     cargo::selection::{CargoFeatureSelection, CargoSelection},
 };
+use ic_host_artifacts::wasm::{InspectionLimits, inspect};
 use serde_json::json;
 use std::{env, fs, path::PathBuf, process::Command};
 
 fn main() {
     let root = env::current_dir().unwrap();
-    let trial = env::args().nth(1).expect("runtime, macros or browser");
+    let trial = env::args().nth(1).expect("macros or browser");
     let output = PathBuf::from(env::args_os().nth(2).expect("output directory"));
     fs::create_dir_all(&output).unwrap();
     let server = PathBuf::from(env::var_os("POCKET_IC_BIN").expect("prepared PocketIC"));
@@ -19,15 +20,6 @@ fn main() {
     let mut retained = Vec::new();
     let mut receipts = Vec::new();
     let recipes = match trial.as_str() {
-        "runtime" => vec![
-            ("candid-internal", "runtime-benchmark,candid-codec"),
-            ("wire-internal", "runtime-benchmark"),
-            (
-                "candid-management",
-                "runtime-benchmark,candid-codec,management",
-            ),
-            ("wire-management", "runtime-benchmark,management"),
-        ],
         "macros" => vec![("macros", "macro-fixture")],
         "browser" => vec![("browser", "browser-fixture")],
         _ => panic!("unknown trial"),
@@ -49,12 +41,51 @@ fn main() {
         })
         .with_inherited_env(["RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"]);
         let build = WasmBuildEvidence::acquire(spec).unwrap();
+        let artifact_path = output.join(format!("{name}.wasm"));
         // Consumer-selected export cap; IC Build owns capture and provenance.
         let mut receipt = json!(
             build
-                .export_artifact(0, &output.join(format!("{name}.wasm")), 64 * 1024 * 1024,)
+                .export_artifact(0, &artifact_path, 64 * 1024 * 1024)
                 .unwrap()
         );
+        {
+            // Fixtures must expose only their own callable surface. CDK's
+            // hidden attribute suppresses Candid metadata, not Wasm exports.
+            let wasm = fs::read(&artifact_path).unwrap();
+            let facts = inspect(
+                &wasm,
+                InspectionLimits {
+                    module_bytes: 64 * 1024 * 1024,
+                    sections: 128,
+                    exports: 128,
+                    custom_sections: 64,
+                },
+            )
+            .unwrap();
+            let mut expected = match trial.as_str() {
+                "browser" => vec![
+                    "canister_query native_echo",
+                    "canister_query runtime_inspect",
+                    "canister_update runtime_apply",
+                ],
+                "macros" => vec![
+                    "canister_query macro_read",
+                    "canister_update macro_add",
+                    "canister_update macro_bad_reply",
+                    "canister_update macro_reset",
+                ],
+                _ => unreachable!(),
+            };
+            expected.sort_unstable();
+            let mut actual: Vec<_> = facts
+                .exports
+                .keys()
+                .copied()
+                .filter(|name| name.starts_with("canister_"))
+                .collect();
+            actual.sort_unstable();
+            assert_eq!(actual, expected, "unexpected {name} fixture exports");
+        }
         receipt["name"] = json!(name);
         receipt["features"] = json!(features);
         receipts.push(receipt);
@@ -76,16 +107,6 @@ fn main() {
         "ic-wire-canister-evaluation",
     ]);
     match trial.as_str() {
-        "runtime" => {
-            host.args([
-                "--features",
-                "runtime-benchmark",
-                "--example",
-                "runtime-measure",
-                "--",
-            ])
-            .arg(&output);
-        }
         "macros" => {
             host.args([
                 "--features",

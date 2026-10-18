@@ -19,16 +19,18 @@ perl scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
 [[ "${RELEASE_SOURCE:?}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail 'invalid source identity'
 state="$(git rev-parse --git-path release-state)/ic-wire-$RELEASE_VERSION"
 metadata() {
-    local operation="$1"
-    shift
-    bash scripts/ci/cargo-release-metadata.sh "$operation" ic-wire "$@"
+    if [[ "$1" == check ]]; then
+        bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped
+    else
+        bash scripts/ci/cargo-release-metadata.sh "$1" ic-wire
+    fi
 }
 source_check() {
     bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
 }
 prepared() {
     release_receipt_check "$state/validated" release_receipt_identity || fail 'validation receipt missing or changed'
-    metadata check --manifest-order-grouped
+    metadata check
     release_receipt_check "$state/prepared" release_receipt_payload "${RELEASE_COMMIT:-}" "${files[@]}" || fail 'prepared bytes differ from receipt'
 }
 case "$operation" in

@@ -14,7 +14,7 @@ Xcode Command Line Tools and xz; on Linux, install a C compiler/linker and the
 development packages required by Cargo-installed tools.
 
 ```sh
-rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
 rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
 make install-tools
 make tools-check
@@ -48,20 +48,20 @@ by setup.
 
 Run `make` for help. Check for active builds sharing `target/` before compilation
 or source edits. Make uses this checkout's `target/` and keeps its artifacts.
-The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
+The pinned development compiler is Rust 1.99.1; Rust 1.91.0 is the library MSRV.
 
 | Target | Scope |
 | --- | --- |
 | `build`, `check`, `test`, `lint` | Locked builds/checks for `ic-wire`; Clippy denies warnings |
 | `check-wasm` | Library compilation for `wasm32-unknown-unknown` |
 | `check-msrv` | Native and Wasm library compilation on Rust 1.91.0 |
-| `fmt`, `fmt-check` | Pinned grouped cargo-sort over root/member manifests, then rustfmt |
+| `fmt`, `fmt-check` | Pinned cargo-sort over root/member manifests, then rustfmt |
 | `shared-tooling-check` | Offline snapshot hashes and executable modes |
 | `check-doc-links` | Local references in IC Wire's maintained documentation |
 | `check-pins` | Shared declaration checker with Cargo inheritance checks; requires Git and prepared host tools |
 | `check-release` | Disposable Git release, validation-failure and recovery fixture |
 | `check-tooling` | Local Make routing and real formatting-hook fixture |
-| `check-canister-evaluation` | Lint the evaluation package and compile both Wasm feature extremes; no emulator |
+| `check-canister-evaluation` | Test Wire browser/macro fixtures, lint and compile host/Wasm; no emulator |
 | `check-macro-diagnostics`, `evaluate-macros` | Evaluation-only macro compilation and installed query/update proof; the latter requires PocketIC |
 | `check-typed-diagnostics` | Isolated offline production derive, caller and sync/async adapter diagnostics; requires fetched locked dependencies |
 | `cloc`, `version` | Workspace source counts and canonical workspace version |
@@ -69,8 +69,9 @@ The pinned development compiler is Rust 1.99.0; Rust 1.91.0 is the library MSRV.
 
 Use focused checks under the shared [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
 The retired [payload screen](codec-screen.md) retains historical evidence only.
-`make test`, `make check-typescript` and `make evaluate-runtime` exercise the
-selected production codec; the last target requires prepared PocketIC.
+`make test` and `make check-typescript` exercise the selected production codec.
+`make evaluate-browser` and `make evaluate-macros` retain installed Wire integration
+tests and require prepared PocketIC. The Candid comparison runner is retired.
 The conformance generator writes `target/typescript-conformance/mutations.jsonl`
 with codec, direction, bytes and Rust acceptance per record. The JavaScript runner
 streams those records and reports the failing line for replay; independent value
@@ -90,22 +91,92 @@ and retains failed tool/build logs through the reviewed evidence action.
 ## Snapshot maintenance and release boundary
 
 [.shared-tooling.snapshot](../.shared-tooling.snapshot) records Shared Tooling
-0.24.1 at `6230989d9f4dc090af4e80283eda4aee75f67bfd`, including the unchanged
-receipt helper formerly selected from PR #279. The canonical exporter transferred
-the contribution's complete closure and retired its second manifest; the main
-snapshot now owns all selected files and their integrity checks. Refresh that one
-manifest as described in [snapshot adoption](consuming-snapshots.md), reviewing
-the preview before applying it.
+0.24.0 at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
+The unmerged [receipt contribution](https://github.com/dragginzgame/shared-tooling/pull/279)
+is exported separately in [.shared-tooling-receipts.snapshot](../.shared-tooling-receipts.snapshot)
+at `35775234560bd08f7e67f4feeaf339dc25fbd9e0`; only its receipt helper
+is selected. Its required integrity helpers are byte-identical to the main
+snapshot, and `check-tooling` verifies the contribution receipt too.
+Refresh both manifests through the canonical exporter until that contribution
+is integrated; never edit their ownership records or payloads in place. Then
+consolidate the contribution with `--takeover-snapshot` as described in
+[snapshot adoption](consuming-snapshots.md). Review each preview before applying it.
 Do not copy uncommitted sibling edits or edit snapshot-owned payloads.
 
-Only `[workspace.dependencies]` has the two role headers. Published runtime and
-derive dependencies, including the optional TypeScript JSON dependency, belong in
-production; evaluation, canister-adapter, benchmark and fuzz dependencies belong
-in tests/tooling. The catalog's `ic-wire` entry is an evaluation/fixture reference
-to the local runtime package. Grouped formatting and selected-source release
-checks preserve this split. The comments classify intended use; they do not prove
-registry publication or add a deployment gate. This library has no deployment
-entrypoint; installed evaluation workflows retain their own build/admission policy.
+### IC Platform boundary
+
+Registry IC Platform 0.1.12 is the selected evaluation boundary (archive checksum
+`e0ab384614a5d8fe251bc2c27c508263d4001d776edf31382b5b985a1a4ced2d`).
+It selects the coordinated published `ic-platform-macros` 0.1.12 generator. The
+registry sources and published README were inspected; no sibling checkout is a
+consumer dependency. Examples retain `ic_platform::Principal` and its upstream
+identity. The evaluation selects `cdk`, which enables Candid, executor and ic0;
+Agent, parser, crypto, certification and ledger/management features stay disabled.
+
+Owned codecs and browser payloads remain IC Wire. The private generator and
+browser entries use `ic_platform::cdk::{query, update}` with zero Rust arguments,
+`manual_reply = true` and `hidden = true`. Their callable exports, exact Wire
+bytes and original executor contexts are retained, without Candid service metadata
+or a direct Candid declaration. `cdk::api::{msg_arg_data, msg_caller, is_controller}`
+are the original CDK implementations, including allocation and controller
+0/1/unexpected-result panic behavior. Consumer byte/auth admission stays in place.
+Raw argument-size, append/finalize/reject, trap and stable-page calls remain on
+`ic_platform::ic0`; response-codec traps retain local rollback semantics.
+
+The rollback fixture uses `ic_platform::cdk::stable::{stable_read, stable_write,
+stable_grow}`, the original CDK helpers now explicitly exported by Platform
+([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)). The final
+direct CDK declaration and its feature edge are removed. The eight-byte balance
+format, growth/read/write policy and error identities stay unchanged; no storage
+migration or local SDK implementation is added. Platform's Candid checkpoint
+helpers are unused; the fixture retains its existing raw stable bytes.
+[Platform #1](https://github.com/dragginzgame/ic-platform/issues/1)
+owns the broader runtime/generator qualification. Build, hashing, simulator and
+JavaScript SDK tooling retain their separate owners.
+
+`make check-boundary` uses the recorded Shared Tooling checker and
+`ci/cargo-dependency-boundaries.json`. CI rejects direct Candid, CDK-family and ic0
+declarations in every package. Canonical names, aliases and normal/build/dev/target
+declarations are checked. There are no direct dependency exceptions. Root
+catalogs, enabled features,
+transitive reachability and final deployment exclusions need separate inspection;
+there is no independent Cargo workspace in this repository.
+
+The inspected fixture graph retains upstream CDK/macros 0.20.3, Candid 0.10.38,
+one executor 2.0.0 and ic0 1.2.0, now behind Platform's qualified frontend.
+Testkit/PocketIC and the browser SDK also reach Candid transitively. The browser
+still sends generated Wire bytes through HttpAgent without a Candid Actor or IDL
+encoding. These test/transport dependencies are intentionally retained. Production
+Wire's normal Wasm/TypeScript graph remains independent of Platform, CDK and Candid.
+No host parser or Agent is selected. These graph observations do not prove codec
+absence from fixture Wasm or measured code-size savings.
+
+### Dependency roles and deployment boundary
+
+The root catalog separates `Production dependencies` from `Tests and tooling only`.
+Syn, Quote and Proc Macro 2 are production build-time dependencies of the derive;
+Serde JSON is production through the optional TypeScript feature. The `ic-wire`
+catalog entry is used by evaluation consumers; the production package itself is
+selected as the graph root, not treated as a forbidden dependency on itself.
+Member comments separately identify production and test/tooling packages.
+
+Both formatting commands use grouped sorting. Release preparation checks and
+committed-source checks use the same grouped policy. Disposable adapter fixtures
+verify idempotence, rejection of disorder within a group, and admission of the
+selected commit despite disorder in the surrounding working tree.
+
+The 0.24.0 adoption inspected locked normal/build graphs and passed library checks
+for `ic-wire` on `wasm32-unknown-unknown` with default features, `ic-wire` on
+`x86_64-unknown-linux-gnu` with `typescript`, and `ic-wire-derive` on that host.
+No test/tooling-only catalog entry was reachable, excluding the selected root.
+These checks qualify those selections, not every target/feature combination.
+
+**Enforcement gap:** CI checks pins/inheritance, direct package boundaries and
+builds, but does not enforce transitive role exclusions. This library repository has no production canister
+deployment pipeline. Downstream deployment owners must enforce their selected
+graph and bind source, lockfile, target/features and artifact digest to deployment.
+Snapshot integrity, sorting and registry publication are separate claims; none
+constitutes deployment admission. Graph logs: `/tmp/ic-wire-tooling024-*-tree.txt`.
 
 The maintainer-operated `release-patch`, `release-minor`, `release-major` and
 `release-resume VERSION=X.Y.Z` commands use direct Git delivery to `origin/main`.
@@ -195,18 +266,19 @@ negative-case log names; `control.stderr` records the passing control. No source
 is copied or rewritten. Prepared Rust and fetched locked host dependencies are
 required; artifact selection no longer uses jq. The same targets run under
 `RUSTUP_TOOLCHAIN=1.91.0` for the floor check. Normal Cargo tests compile the valid
-cases; the focused Make targets own negative-case execution.
+cases; the focused Make targets own negative-case execution. Both diagnostic
+lanes are included in the CI target.
 
-Evaluation hosts use published Testkit 0.50.0 for bounded startup, owned server
+Evaluation hosts use the workspace-selected Testkit 0.53 for bounded startup, owned server
 lifetime and create/fund/install operations. Each experiment still starts a fresh
 instance; topology, 10-trillion-cycle top-ups, raw calls and measurement policies
 remain local. Startup has a 60-second deadline. Explicit `POCKET_IC_BIN` selection
 and recorded server versions/hashes remain required; no automatic tool setup is
 introduced. The browser host retains its owner through live-server shutdown.
-Testkit 0.50 uses Host 0.23 internally alongside the explicit Wasm inspector’s
-Host 0.24; both are host dev dependencies, not runtime/canister dependencies.
+Testkit and the explicit IC Host Wasm inspector are host development dependencies,
+not dependencies of the published codec. The lockfile records their exact versions.
 
-Runtime, macro and browser evaluations use IC Build 0.12 retained artifact records, with exact
+Macro and browser evaluations use the pinned IC Build retained artifact API, with exact
 build/input digests and matching Wasm hashes in its report. Keep source files
 unchanged throughout an installed evaluation; persistent changes refuse report
 finalization. Before/after guards cannot detect a transient edit that is reverted.
@@ -250,7 +322,7 @@ registry at publication time.
 
 ## Evaluation report provenance
 
-Fresh runtime, macro and browser reports share a `provenance` object containing
+Fresh macro and browser reports share a `provenance` object containing
 `rustc`, `rustflags`, `encoded_rustflags`, `pocket_ic_version`,
 `pocket_ic_sha256`, `sources` and `build_records`. The build driver captures
 compiler/server identity once, owns source inventories, and uses IC Host FS bounded
