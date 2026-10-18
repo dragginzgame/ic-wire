@@ -2,10 +2,10 @@
 
 ## Baseline and incoming work
 
-Main is released Git version 0.4.1 (3f5748f), reported live by the maintainer.
+The release baseline is Git version 0.4.2 (`c2ea9e6`).
 Runtime and derive packages were first published at 0.3.0; evaluation and
-adapter-fixture packages remain private. Compatible pending notes select 0.4.2;
-package metadata remains 0.4.1. No staging, commits, own version changes, release
+adapter-fixture packages remain private. Compatible pending notes select 0.4.3;
+package metadata remains 0.4.2. No own version changes, release
 or publication effects were performed in this issue batch. Independent Host
 0.27.4 lock work and concurrent Testkit 0.54 manifest/lock work are retained and
 excluded from this batch's changes. Early Box evidence uses Testkit 0.53; the final
@@ -76,11 +76,23 @@ The isolated Testkit patch reuses its existing prepared contribution, selects
 published Build 0.17.2 and passes nineteen driver tests plus strict Clippy.
 Reviewable source patches and before-images are under `/tmp/ic-wire-consolidation-*`.
 
-Published Build 0.17.2 lacks both retained evidence and diagnostics used by Wire.
-Keep the existing Git pin and source/freshness/export checks until those APIs
-and borrowed retained compiler facts ship. Existing owners are
+Published Build 0.17.3 now supplies the retained evidence/diagnostics used by Wire.
+The evaluation adapter passes its complete environment except Build-owned
+`CARGO_TARGET_DIR` and explicitly supplies the direct-child spawner. Retained
+source/freshness/export checks, recipes, report schemas and simulator/browser
+lifecycle remain unchanged. The Git pin and all three Host 0.25 packages are
+removed; Process is a private evaluation development dependency. Platform 0.1.12,
+Box support, Rust 1.99.1/MSRV 1.91 and all released wire contracts are preserved.
+Historical producer requirements are recorded in
 [Build #58](https://github.com/dragginzgame/ic-build/issues/58) and
 [Build #66](https://github.com/dragginzgame/ic-build/issues/66).
+The refreshed contribution over released 0.4.2 passes strict evaluation Clippy,
+native tests, Rust 1.91 host/Wasm, twelve codec and eight macro diagnostics with
+passing controls, formatting and dependency/doc checks. Installed PocketIC 16.0.0
+macro and Chromium trials pass, including initial growth/write rollback and
+retained freshness verification. The registry lock preserves every unrelated
+version selection. New hosted native checks qualify the pushed PR head separately;
+no full local CI, native macOS execution or live IC is claimed by these local runs.
 The maintainer-authorized [consumer feedback on #58](https://github.com/dragginzgame/ic-build/issues/58#issuecomment-6249237464)
 records the published API gaps, retained-facts requirement and acceptance checks.
 

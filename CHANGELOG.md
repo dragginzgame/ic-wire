@@ -6,6 +6,9 @@
   0.24.2 source. Retire the supplementary snapshot and its separate integrity
   dispatch; use canonical grouped-formatting defaults. Preserve release receipts,
   selected files and recovery policy ([#9](https://github.com/dragginzgame/ic-wire/issues/9)).
+- Use published IC Build 0.17.3 for retained evaluation builds and compiler
+  diagnostics. Supply complete environments and explicit child custody; retire
+  the Git pin and its older Host dependency family.
 
 ## [0.4.2] - 2026-10-18
 

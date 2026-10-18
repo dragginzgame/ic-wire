@@ -27,9 +27,10 @@ serde_json = "1.0"
 syn = "3.0.9"
 
 # Tests and tooling only
-ic-build = { version = "0.14", git = "https://github.com/dragginzgame/ic-build", rev = "4d8549a14c8cb41b09a9c69ea15e5c0fda88a9f4" }
+ic-build = "0.17.3"
 ic-host-artifacts = { version = "0.27", default-features = false }
 ic-host-fs = { version = "0.27", default-features = false }
+ic-host-process = { version = "0.27", default-features = false }
 ic-platform = { version = "0.1.12", default-features = false }
 ic-testkit = "0.54"
 ic-wire = { path = "crates/ic-wire", version = "0.4.2" }
