@@ -27,6 +27,7 @@ serde.workspace = true
 ic-build.workspace = true
 ic-host-artifacts = { workspace = true, features = ["wasm"] }
 ic-host-fs.workspace = true
+ic-host-process.workspace = true
 ic-testkit.workspace = true
 postcard.workspace = true
 serde_json.workspace = true

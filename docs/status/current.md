@@ -1,5 +1,27 @@
 # Current handoff
 
+## Published Build boundary — pending 0.4.2
+
+This isolated contribution starts at released `3f5748f` (0.4.1), without the
+normal checkout's unrelated pending runtime/compiler changes. Evaluation now uses
+published, non-yanked IC Build 0.17.3 from crates.io rather than the diagnostics
+branch at `4d8549a`. Its source requires the complete environment and explicit
+child custody; both are supplied by the evaluation adapter. Cargo.lock removes
+the old engine source and all three Host 0.25 packages, retaining the other
+selected dependencies. The new direct Process edge is evaluation-only. Runtime
+bytes, endpoint contracts, budgets and report schemas are unchanged.
+
+Rust 1.91 passes all-feature example checking, eleven codec and eight macro
+negative diagnostics with passing controls. Strict development example Clippy,
+formatting, dependency pins/boundaries and changed-document links pass. Prepared
+PocketIC 16.1.0 runs pass installed query/sync/async macro calls, typed failure and
+sixteen rejections, plus the Chromium browser trial on the actual registry graph.
+Browser dependencies reuse the exact unchanged package lock and prepared modules;
+no installation occurs. Local listeners require an elevated execution context.
+These Linux focused checks do not establish full CI, native macOS or live-IC
+qualification. Own package versions remain 0.4.1; integration/release are separate.
+Evidence: `/tmp/ic-build-consumer-finish-20261018/`.
+
 ## Baseline and incoming work
 
 Main is released Git version 0.4.0 (ce56d5e). Runtime and derive packages were
@@ -30,13 +52,11 @@ The isolated Testkit patch reuses its existing prepared contribution, selects
 published Build 0.17.2 and passes nineteen driver tests plus strict Clippy.
 Reviewable source patches and before-images are under `/tmp/ic-wire-consolidation-*`.
 
-Published Build 0.17.2 lacks both retained evidence and diagnostics used by Wire.
-Keep the existing Git pin and source/freshness/export checks until those APIs
-and borrowed retained compiler facts ship. Existing owners are
-[Build #58](https://github.com/dragginzgame/ic-build/issues/58) and
-[Build #66](https://github.com/dragginzgame/ic-build/issues/66).
-The maintainer-authorized [consumer feedback on #58](https://github.com/dragginzgame/ic-build/issues/58#issuecomment-6249237464)
-records the published API gaps, retained-facts requirement and acceptance checks.
+Build 0.17.3 now supplies the retained evidence and diagnostic APIs required
+by these evaluation consumers; the published-boundary entry above records the
+registry adoption and current qualification. Build remains the canonical owner
+under [#58](https://github.com/dragginzgame/ic-build/issues/58) and
+[#66](https://github.com/dragginzgame/ic-build/issues/66).
 
 Focused checks pass: strict runtime Clippy, fourteen Rust 1.91 runtime tests,
 Wasm with TypeScript enabled, 84 TypeScript vectors and 16,384 differential

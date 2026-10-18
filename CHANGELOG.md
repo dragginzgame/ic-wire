@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.2]
+
+- Use published IC Build 0.17.3 for retained evaluation builds and compiler
+  diagnostics. Supply complete environments and explicit child custody; retire
+  the branch pin and its older Host dependency family.
+
 ## [0.4.1] - 2026-10-18
 
 - Share TypeScript type rendering between finite schemas and consumer-supplied
