@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.3]
+
+- Refresh the maintainer handoff against released 0.4.2's Linux/macOS acceptance.
+  Retire the superseded CDK-companion proposal and identify the remaining
+  independent tooling-adoption PRs without changing runtime behavior.
+
 ## [0.4.2] - 2026-10-18
 
 - Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.

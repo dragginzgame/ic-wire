@@ -2,19 +2,21 @@
 
 ## Baseline and incoming work
 
-Main is released Git version 0.4.1 (3f5748f), reported live by the maintainer.
+Main is released Git version 0.4.2 (`c2ea9e60da4e598477b5e84dff52cba87f81b05c`).
 Runtime and derive packages were first published at 0.3.0; evaluation and
-adapter-fixture packages remain private. Compatible pending notes select 0.4.2;
-package metadata remains 0.4.1. No staging, commits, own version changes, release
-or publication effects were performed in this issue batch. Independent Host
-0.27.4 lock work and concurrent Testkit 0.54 manifest/lock work are retained and
-excluded from this batch's changes. Early Box evidence uses Testkit 0.53; the final
-Rust 1.99.1 installed run uses the current 0.54 graph.
+adapter-fixture packages remain private. Package metadata is 0.4.2; compatible
+pending documentation notes select 0.4.3. The exact released-source
+[CI run](https://github.com/dragginzgame/ic-wire/actions/runs/39138236119) passes
+Ubuntu, macOS Apple Silicon and macOS Intel. No staging, commits, own version
+changes, release or publication effects were performed in this cleanup pass.
+Incoming Host 0.27.6, Testkit 0.54.1 and Metrics 0.14.3 lock changes are preserved
+byte-for-byte; that dirty graph has no hosted qualification from the release run.
+Earlier installed Box/Platform evidence below retains its recorded dependencies.
 
-## Bounded boxes — pending 0.4.2
+## Bounded boxes — delivered 0.4.2
 
-[Issue #7](https://github.com/dragginzgame/ic-wire/issues/7#issuecomment-6249690535)
-now has a local implementation: `Box<T: Wire>` reuses T's schema, bytes, nodes
+[Issue #7](https://github.com/dragginzgame/ic-wire/issues/7#issuecomment-6251677674)
+is closed with released-source native CI acceptance: `Box<T: Wire>` reuses T's schema, bytes, nodes
 and depth, adding `size_of::<T>()` plus nested heap to static admission. Overflow
 refuses and zero-sized boxes add no allocation. Serde's ordinary Box allocation
 can still abort on allocator exhaustion; no general OOM recovery is promised.
@@ -30,20 +32,28 @@ TypeScript passes ninety vectors and 17,524 differential mutations.
 The existing browser fixture uses boxed query records/response fields and an
 overflow enum payload. Its Chromium/PocketIC 16.0.0 report matches every prior
 non-provenance field, including exact vectors and bundle size; retained-build
-freshness checks pass. No full CI, native macOS or Auth acceptance ran. Auth's
-source-breaking adoption awaits producer publication and its own qualification;
+freshness checks pass. Those earlier local runs did not include full CI, native
+macOS or Auth acceptance; the later released-source matrix above qualifies Wire's
+native gates. Auth's source-breaking adoption requires its own selected published
+producer and qualification;
 no sibling was edited and no cycle/instruction/Wasm savings is claimed.
 Logs and task before-images are under `/tmp/ic-wire-box-*`.
 
 [Issue #5](https://github.com/dragginzgame/ic-wire/issues/5) is closed: native
 admission shipped in 0.3.4 and its exact-source Linux/macOS acceptance
 [run](https://github.com/dragginzgame/ic-wire/actions/runs/39031765826) passed.
-Receipt consolidation #9/PR #10 remains separate work; its three hosted jobs pass,
-but it has not been merged here.
+[Receipt consolidation #9](https://github.com/dragginzgame/ic-wire/issues/9) /
+[PR #10](https://github.com/dragginzgame/ic-wire/pull/10) and published Build
+[PR #11](https://github.com/dragginzgame/ic-wire/pull/11) remain independent work.
+Both PR heads have historical green matrices but conflict with released 0.4.2;
+refresh and qualify each before integration. The unmerged CDK-companion
+[PR #2](https://github.com/dragginzgame/ic-wire/pull/2#issuecomment-6251678419) is
+closed as superseded: production endpoint integration stays consumer-owned,
+Platform supplies SDK helpers, and Wire retains its private adapter/rollback proof.
 
-## Development compiler — pending 0.4.2
+## Development compiler — delivered 0.4.2
 
-[Issue #8](https://github.com/dragginzgame/ic-wire/issues/8#issuecomment-6249741285)
+[Issue #8](https://github.com/dragginzgame/ic-wire/issues/8#issuecomment-6251678039)
 selects Rust 1.99.1 (`58cf8f9c3`) in the development file, explicit CI input and
 setup guide. Rust 1.91 remains the package/CI floor; historical measurements and
 snapshot-owned illustrative versions are unchanged. Existing installed components
@@ -52,8 +62,9 @@ tests, Wasm, twelve diagnostic subjects/control, ninety TypeScript vectors and
 17,524 mutations, formatting, local Make, boundaries/pins and doc checks pass.
 The installed Chromium/PocketIC report records 1.99.1 and matches all unboxed
 non-provenance fields on the current Testkit 0.54 graph. Rust 1.91 host checking
-also passes on that graph. No full local CI or native macOS execution ran; #8
-stays open for delivery and the new hosted matrix. Logs: `/tmp/ic-wire-rust1991-*`.
+also passes on that graph. Those local runs did not include full CI or native
+macOS. The later released-source matrix above confirms 1.99.1/1.91 toolchain
+selection and all native gates, completing #8. Logs: `/tmp/ic-wire-rust1991-*`.
 
 ## Shared TypeScript emission and build facts
 
@@ -76,9 +87,10 @@ The isolated Testkit patch reuses its existing prepared contribution, selects
 published Build 0.17.2 and passes nineteen driver tests plus strict Clippy.
 Reviewable source patches and before-images are under `/tmp/ic-wire-consolidation-*`.
 
-Published Build 0.17.2 lacks both retained evidence and diagnostics used by Wire.
-Keep the existing Git pin and source/freshness/export checks until those APIs
-and borrowed retained compiler facts ship. Existing owners are
+Published Build 0.17.3 supplies the retained evidence/diagnostics migration in
+[PR #11](https://github.com/dragginzgame/ic-wire/pull/11). The current Git pin
+remains until that PR is refreshed against 0.4.2 and integrated; preserve the
+source/freshness/export checks. Historical producer requirements are recorded in
 [Build #58](https://github.com/dragginzgame/ic-build/issues/58) and
 [Build #66](https://github.com/dragginzgame/ic-build/issues/66).
 The maintainer-authorized [consumer feedback on #58](https://github.com/dragginzgame/ic-build/issues/58#issuecomment-6249237464)
