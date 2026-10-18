@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.4]
+## [0.4.4] - 2026-10-18
 
 - Reduce canonical-comparison work on Wasm and combine dynamic admission charges,
   preserving wire bytes, canonical rejection and resource budgets. Matched local
