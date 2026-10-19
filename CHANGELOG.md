@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.10]
+
+- Adopt IC Build 0.22 and its IC Host 0.30 dependency family for compiler
+  diagnostics. Remove unused host dependency trees while preserving runtime
+  dependencies, codec APIs and wire bytes.
+
 ## [0.4.9] - 2026-10-19
 
 - Skip redundant Wasm canonical byte comparisons when a borrowed value emits

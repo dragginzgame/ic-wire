@@ -11,8 +11,8 @@ A subsequent maintainer request authorizes the bounded
 [MessagePack/Postcard experiment](../messagepack-comparison.md); only its pure
 codec fixture/native driver are maintained here. External IC probes stay outside
 the workspace. Production encoding remains Postcard.
-The maintainer has released 0.4.8 (`a5f3cd6`). Pending compatible notes are
-0.4.9; this task executes no release or publication.
+The maintainer has released 0.4.9 (`2d8da67`). Pending compatible notes are
+0.4.10; this task executes no release or publication.
 
 Source starts at `a3e6577` with the pending license-metadata repair preserved.
 Shared Tooling remains at reviewed 0.24.2; its generic scripts/catalogs and guides
@@ -178,3 +178,17 @@ The borrowed finite-contract hard cut saves only 147 further instructions on the
 Runtime tests, Clippy, Rust 1.91 host/Wasm and TypeScript conformance pass. Compact
 results are in `docs/evidence/borrow-savings-2026-10-19/`; full raw/source/probe
 artifacts remain in `target/borrow-savings-2026-10-19/`. Full CI/macOS were not run.
+
+## IC Build 0.22 adoption
+
+The incoming manifest/lock upgrade selects published IC Build 0.22.0 and its
+IC Host 0.30 family. The existing compiler-diagnostics driver needs no API edits.
+Unused capability and temporary-file dependencies disappear: the workspace lock
+shrinks from 123 package entries to 88. Runtime dependencies and Wire contracts
+are unchanged. The evaluation crate remains unpublished.
+
+Focused qualification uses `check-evaluation` (tests, all-target/all-feature
+Clippy and Rust 1.91 compilation) and `check-typed-diagnostics`, plus formatting,
+pins, dependency boundaries and documentation links. Logs are retained locally
+at `target/ic-build-0.22-adoption/`. Full CI and native macOS were not run; no
+staging, commit, package version change or release is part of this adoption.
