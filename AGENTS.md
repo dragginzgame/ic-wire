@@ -18,12 +18,10 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
   remote creation, pushes and releases require explicit authorization.
 - Establish a reusable Rust developer experience and a substantial measured win
   before broad adoption. Postcard is selected for controlled RPC and owned user
-  endpoints. Preserve the explicit runtime contract in docs/runtime.md; no Candid
-  mode is part of the production API.
-- Keep runtime code Wasm-safe and independent of Candid, CDK and host tooling.
-- Keep owned codecs, endpoint payloads and direct dependencies Candid-free.
-  Retain browser and installed Wire integration tests; their SDK/CDK/PocketIC
-  dependencies may contain Candid transitively. Do not restore Candid comparison codecs.
+  endpoints. Preserve the explicit runtime contract in docs/runtime.md.
+- Keep runtime code Wasm-safe and independent of platform SDKs and host tooling.
+- Keep all workspace dependency roles limited to codec qualification. Do not add
+  endpoint SDKs, simulators or browser transports; integration belongs to consumers.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
@@ -49,10 +47,10 @@ crate splits. A derive crate can be added when the selected design needs it;
 additional experimental crates must remain unpublished.
 
 Preserve dirty work. Ordinary work leaves staging, commits, own versions and
-releases to the maintainer. The selected runtime and Wire integration tests are
-maintained. Candid comparisons remain retired. The unpublished performance fixture
-may use raw Postcard, bitcode and wincode controls; these are not production modes. Siblings are read-only unless
-separately authorized; prototype consumer-shaped fixtures here instead.
+releases to the maintainer. Maintain runtime/native codec tests, compile-fail
+diagnostics and standalone Rust/TypeScript conformance. The unpublished native
+performance fixture may use raw Postcard, bitcode and wincode controls; these are
+not production modes. Siblings are read-only unless separately authorized.
 
 Use focused checks for changed code. Check for an active build sharing target/
 before compiling. Do not run broad Canic or sibling suites. Keep compiler, target,

@@ -2,6 +2,19 @@
 
 ## [0.4.5]
 
+- Qualify 1 MiB opaque buffers across finite Rust, native Rust and generated
+  TypeScript, including exact frames and bounded malformed-input refusal. Blob
+  service contracts remain consumer-owned; no runtime API or encoding changes.
+
+- Remove endpoint SDKs, simulators, browser transport and the private adapter
+  harness from every dependency role. Retain codec diagnostics, standalone
+  Rust/TypeScript conformance and native raw-codec controls. Endpoint qualification
+  belongs to consumers; the published codec API and wire bytes are unchanged.
+- Retire format-comparison reports and obsolete integration instructions.
+
+- Remove Cargo's duplicate license metadata warnings while retaining MIT metadata
+  and identical regular LICENSE files in both publishable packages, compatible
+  with the formatting hook. Preserve file types in its disposable test fixture.
 - Select authored crate files automatically in the local Make fixture, including
   untracked modules and excluding ignored build output. New source modules no
   longer require a second hand-maintained file list for formatting qualification.
@@ -13,10 +26,6 @@
   preserving wire bytes, canonical rejection and resource budgets. Matched local
   measurements show substantial blob/text decoding gains, with a small
   empty-blob regression; see [performance evidence](docs/performance.md).
-- Add an explicit installed performance experiment with private raw Postcard,
-  bitcode and wincode controls, retained build evidence and matching-DTO checks.
-  Production codecs and dependencies remain Wire-only and Candid-free.
-
 ## [0.4.3] - 2026-10-18
 
 - Refresh the maintainer handoff against released 0.4.2's Linux/macOS acceptance.
@@ -32,12 +41,6 @@
 
 ## [0.4.2] - 2026-10-18
 
-- Adopt published IC Platform 0.1.12 and its coordinated entrypoint generator.
-  Route fixture macros, checked caller/controller, argument and stable-memory
-  helpers through Platform; remove the final direct CDK dependency and reject
-  direct CDK declarations in every package. Preserve existing stable bytes and
-  rollback semantics; no storage migration or Candid codec is introduced
-  ([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)).
 - Support transparent finite `Box<T: Wire>` values with static heap admission.
   Preserve canonical frames and TypeScript layouts; recursive/unbounded schemas
   remain unsupported by the finite API. Boxing can reduce Rust enum storage at
@@ -54,11 +57,6 @@
 - Replace the custom Dragginz license with the standard MIT License for all
   workspace packages, including published runtime and derive crates.
 
-- Keep owned codecs and endpoint payloads IC Wire-only. Retire Candid comparison
-  code, the management probe and `evaluate-runtime`; preserve recorded measurements.
-  Remove direct Candid dependencies, retaining browser and installed Wire tests.
-  Suppress unused Candid service metadata without changing callable Wasm exports.
-  SDK/CDK/PocketIC still contain Candid transitively in the private test harness.
 - Adopt published IC Platform 0.1.9 for Principals, raw argument-size and
   stable-page checks, byte-exact traps, replies and rejects, removing the direct
   ic0 dependency. Preserve reply append/finalization order and UTF-8 reject bytes.
@@ -198,27 +196,14 @@ Pending PR integration; these changes are not yet on main.
   mutation checks. Add offline inspection through generated contract modules;
   see [consumer qualification](docs/consumer-fixtures.md) for scope and limits.
 
-- Extend installed codec measurements with tightly bounded scalar endpoints and
-  heterogeneous SQL-shaped pages, including row/cell overflow rejection. Preserve
-  prior reports and record the expanded matched Wasm and instruction matrix in
-  [the runtime comparison](docs/runtime-comparison.md).
-
 ## [0.2.2] - 2026-10-16
 
-- Reduce codec instruction costs by writing only emitted bytes and checking
-  canonical serialization directly against input. Preserve wire bytes, admission
-  limits and typed failures. The [matched measurements](docs/runtime-comparison.md)
-  record instruction savings alongside the modest increase in linked Wasm.
+Historical implementation details remain in Git history.
 
 ## [0.2.1] - 2026-10-16
 
 - Include the runtime benchmark modules in the disposable formatting-hook fixture,
   fixing `check-tooling` failures caused by missing source files.
-
-- Add a reproducible installed comparison of the production runtime against
-  strict Candid, covering bounded blobs, UTF-8 text and finite doubles, with
-  separate internal-only and management-enabled Wasm measurements. See the
-  [measured results and limitations](docs/runtime-comparison.md).
 
 ## [0.2.0] - 2026-10-16
 
@@ -258,15 +243,10 @@ Pending PR integration; these changes are not yet on main.
 
 ## [0.1.5] - 2026-10-16
 
-- Add the unpublished Postcard-only Rust runtime: explicit field/variant derives,
-  bounded collections/text/bytes, finite schema budgets, canonical typed method
-  envelopes and immutable retry bytes. Keep Candid and CDK out of its dependency
-  graph. Document the concrete Canic adapter contract and unsupported types.
 - Qualify the runtime through installed nested queries, state-changing updates,
   two inter-canister deliveries, exact replay and same-contract upgrade recovery.
   Retire the private tuple replay fixture in current source; fresh fixture state
   uses a distinct contract identity. Preserve historical measurements separately.
-
 
 ## [0.1.4] - 2026-10-16
 
@@ -289,11 +269,6 @@ Pending PR integration; these changes are not yet on main.
   Add concrete consumer implementation/retirement steps, readiness checks and
   supporting-library boundaries, including cases requiring no codec dependency.
 
-- Extend the installed Candid/Postcard comparison with bounded nested authority
-  trees, optional expiries and maximum collection fixtures. Check list limits
-  before element decoding, retain exact request/reply evidence and report new
-  matched Wasm/instruction measurements without changing production APIs.
-
 ## [0.1.2] - 2026-10-16
 
 - Enable maintainer-operated Git releases through Shared Tooling, with coordinated
@@ -305,10 +280,6 @@ Pending PR integration; these changes are not yet on main.
   bounded TypeScript client and signed Chromium/PocketIC updates. Verify u64
   precision, malformed input and certificate rejection; public API remains open.
 
-- Add matched installed Candid/Postcard canister experiments with optional real
-  management traffic. Record payloads, complete Wasm/code-section sizes and IC
-  instruction counters with reproducible artifacts and rejection checks; keep
-  the production library independent of the evaluation dependencies.
 - Generate the native experiment's scalar record serialization from one explicit
   wire-order declaration, preserving its existing request bytes. Type retained
   request/reply buffers and add compile-fail checks for invalid callers and
@@ -329,11 +300,6 @@ Pending PR integration; these changes are not yet on main.
 - Initialize the maintainer-authorized private `dragginzgame/ic-wire` GitHub
   repository and activate the local formatting hook; package publication remains
   disabled.
-- Add an evaluation-only comparison of Candid, Postcard, CBOR and an independently
-  authored fixed-layout comparator across seven synthetic fixtures, including an
-  IcyDB-shaped schema artifact. Record payload sizes/hashes, strict round trips,
-  malformed-input tests and the positional field-identity limitation. Keep the
-  runtime library dependency-free; no codec selection or adoption is implied.
 - Establish an unpublished, dependency-free Rust workspace and no_std scaffold.
 - Record scope, proposed endpoint ergonomics, codec evaluation criteria and
   preliminary Canic code-size attribution. No codec or protocol is implemented.

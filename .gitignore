@@ -2,6 +2,3 @@
 /.tmp/
 /.tools/
 /examples/browser/node_modules/
-/examples/browser/dist/
-/examples/browser/generated/
-/examples/browser/artifacts/

@@ -59,8 +59,6 @@ local generated modules: importing JavaScript executes that module.
 
 ## Remaining adoption work
 
-The existing macro fixture supplies the compiled local Canic expansion pattern;
-production Canic changes remain with that repository. Full IcyDB projections,
-recursive browser metadata, coverage-guided fuzzing and actual consumer performance
-still need their own qualification. Keep storage, keys, journals and authenticated
-cursor formats with their current owners. No compatibility lane is introduced.
+Endpoint integration and full consumer projections require qualification at their
+owner. Keep storage, keys, journals and authenticated cursor formats with their
+current owners. No compatibility lane is introduced.

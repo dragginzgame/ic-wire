@@ -1,4 +1,5 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
+mod large_bytes;
 use ic_wire::{Bytes, Limits, List, Method, Text, Wire, encode_request, encode_response};
 use std::{
     fmt::Write as _,
@@ -350,5 +351,6 @@ fn main() {
     .unwrap();
     writeln!(f.checks, "console.log('Rust/TypeScript conformance: {} vectors, both directions, truncation and identity rejection passed');", f.count).unwrap();
     writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and canonical re-encode checks passed');", f.mutations).unwrap();
+    f.checks.push_str(&large_bytes::generate(&f.directory));
     fs::write(f.directory.join("checks.mjs"), f.checks).unwrap();
 }

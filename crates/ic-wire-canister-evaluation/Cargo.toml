@@ -4,16 +4,9 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-license-file.workspace = true
 publish = false
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [features]
-bindings = ["browser-fixture", "ic-wire/typescript"]
-macro-fixture = ["dep:ic-wire", "dep:ic-wire-adapter-fixture"]
-browser-fixture = ["dep:ic-wire"]
 performance-fixture = ["dep:ic-wire"]
 performance-wire = ["performance-fixture"]
 performance-postcard = ["performance-fixture", "dep:postcard"]
@@ -22,36 +15,16 @@ performance-wincode = ["performance-fixture", "dep:wincode"]
 
 [dependencies]
 bitcode = { workspace = true, optional = true }
-ic-platform = { workspace = true, features = ["cdk"] }
 ic-wire = { workspace = true, optional = true }
-ic-wire-adapter-fixture = { workspace = true, optional = true }
 postcard = { workspace = true, optional = true }
 serde.workspace = true
 wincode = { workspace = true, optional = true, features = ["derive"] }
 
 [dev-dependencies]
 ic-build.workspace = true
-ic-host-artifacts = { workspace = true, features = ["wasm"] }
-ic-host-fs.workspace = true
-ic-host-process.workspace = true
-ic-testkit.workspace = true
 postcard.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-
-[[example]]
-name = "browser-fixture"
-path = "examples/browser_fixture/mod.rs"
-required-features = ["bindings"]
-
-[[example]]
-name = "macro-fixture"
-path = "examples/macro_fixture/mod.rs"
-required-features = ["macro-fixture"]
-
-[[example]]
-name = "build-evaluation"
-path = "examples/build_evaluation/mod.rs"
 
 [[example]]
 name = "check-diagnostics"
@@ -64,8 +37,3 @@ required-features = ["performance-postcard", "performance-bitcode", "performance
 
 [lints]
 workspace = true
-
-[[test]]
-name = "macro-ui"
-path = "tests/macro_ui/mod.rs"
-required-features = ["macro-fixture"]

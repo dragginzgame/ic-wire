@@ -13,7 +13,7 @@ complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
 paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md)
-paths+=(scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/evaluate-performance.sh)
+paths+=(scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh)
 # Include authored crate inputs automatically, including new untracked modules.
 # Git exclusions keep ignored build/cache output out of the disposable export.
 git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ > "$fixture/crate-paths"
@@ -26,7 +26,7 @@ while IFS=$'\t' read -r record _ _ path; do
 done < "$root/.shared-tooling.snapshot"
 for path in "${paths[@]}"; do
     mkdir -p "$fixture/repo/$(dirname "$path")"
-    cp -p "$root/$path" "$fixture/repo/$path"
+    cp -pP "$root/$path" "$fixture/repo/$path"
 done
 
 # Check the real include graph and release admission, with an effect sentinel.

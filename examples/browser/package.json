@@ -1,16 +1,14 @@
 {
-  "name": "ic-wire-browser-evaluation",
+  "name": "ic-wire-typescript-conformance",
   "version": "0.1.1",
   "private": true,
   "type": "module",
   "packageManager": "npm@12.2.0",
-  "engines": { "node": "24.21.0", "npm": "12.2.0" },
-  "scripts": {
-    "check": "tsc --noEmit",
-    "build": "esbuild src/main.ts --bundle --format=esm --platform=browser --outfile=dist/main.js",
-    "test": "node test.mjs",
-    "prepare-browser": "playwright install chromium"
+  "engines": {
+    "node": "24.21.0",
+    "npm": "12.2.0"
   },
-  "dependencies": { "@icp-sdk/core": "6.1.1" },
-  "devDependencies": { "@dragginzgame/ic-testkit-browser": "git+https://github.com/dragginzgame/ic-testkit.git#26fc0b062aebf208cc71e0e55dcd9f5880bbf663", "esbuild": "0.28.2", "playwright": "1.64.1", "typescript": "7.0.2" }
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
 }

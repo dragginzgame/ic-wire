@@ -1,4 +1,4 @@
-//! Matched logical values for installed, owned-decode performance measurements.
+//! Matched logical values for native, owned-decode performance measurements.
 //! Alternate encodings are private controls with different admission guarantees.
 #[cfg(any(
     feature = "performance-wire",
@@ -24,13 +24,6 @@ pub const CASES: &[&str] = &[
     "integers-wide",
     "page-empty",
     "page-32",
-];
-/// Installed feature, selected lane IDs and names for the host driver.
-pub const RECIPES: &[(&str, &[u8])] = &[
-    ("performance-wire", &[0, 1, 6]),
-    ("performance-postcard", &[2, 5]),
-    ("performance-bitcode", &[3]),
-    ("performance-wincode", &[4]),
 ];
 /// Names in the report; native means dynamic Serde, not native CPU execution.
 pub const LANES: &[&str] = &[
@@ -97,9 +90,9 @@ struct Row {
 /// Counter deltas include a batch loop, allocation and destruction, not setup.
 #[derive(Debug)]
 pub struct Sample {
-    /// Encode batch instructions (Wasm) or nanoseconds (host).
+    /// Encode batch nanoseconds.
     pub encode: u64,
-    /// Owned decode batch instructions (Wasm) or nanoseconds (host).
+    /// Owned decode batch nanoseconds.
     pub decode: u64,
     /// Dynamic admission/sizing batch; zero for other lanes.
     pub sizing: u64,
@@ -262,24 +255,6 @@ pub fn run_case(lane: u8, case: u8, clock: &mut impl FnMut() -> u64) -> Sample {
         }
         _ => panic!("unknown case"),
     }
-}
-
-#[cfg(target_arch = "wasm32")]
-#[ic_platform::cdk::query(manual_reply = true, hidden = true)]
-fn performance() {
-    assert_eq!(ic_platform::ic0::msg_arg_data_size(), 2);
-    let args = ic_platform::cdk::api::msg_arg_data();
-    assert_eq!(args.len(), 2);
-    let sample = run_case(
-        args[0],
-        args[1],
-        &mut ic_platform::cdk::api::instruction_counter,
-    );
-    for counter in [sample.encode, sample.decode, sample.sizing] {
-        ic_platform::ic0::msg_reply_data_append(&counter.to_le_bytes());
-    }
-    ic_platform::ic0::msg_reply_data_append(&sample.bytes);
-    ic_platform::ic0::msg_reply();
 }
 
 #[cfg(test)]

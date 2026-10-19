@@ -1,1 +1,0 @@
-async query is outside this fixture

@@ -8,7 +8,6 @@ Fields and enum variants require explicit `#[wire(id = N)]` identities. Generic
 and recursive derives, unbounded containers and unsupported field shapes are
 rejected. See the [runtime guide](https://github.com/dragginzgame/ic-wire/blob/main/crates/ic-wire/README.md).
 
-Endpoint qualification attributes live in the unpublished
-`ic-wire-adapter-fixture` workspace package. Canic owns endpoint integration.
+Consumers own endpoint integration and its qualification.
 
 Licensed under the MIT License; see the packaged LICENSE.

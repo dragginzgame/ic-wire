@@ -1,1 +1,0 @@
-one concrete safe request handler required

@@ -2,15 +2,11 @@
 
 override SHARED_TOOLING_ROOT := $(CURDIR)
 SHARED_TOOLING_RUST := 1
-LOCAL_TOOL_INSTALL_TARGETS += install-ic-tools
-LOCAL_TOOL_CHECK_TARGETS += ic-tools-check
-export PATH := $(CURDIR)/.tools/ic/bin:$(PATH)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 include make/consumer.mk
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
-.PHONY: evaluate-macros check-macro-diagnostics
 .PHONY: publish check-package
 publish:
 	+@env cargo publish --locked -p ic-wire-derive -p ic-wire
@@ -20,46 +16,27 @@ check-package:
 
 .PHONY: evaluate-performance
 evaluate-performance:
-	+@bash scripts/ci/evaluate-performance.sh
+	+@env cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example performance --features performance-postcard,performance-bitcode,performance-wincode -- target/native-performance
 
 .PHONY: fuzz-runtime
 
 fuzz-runtime:
 	+@bash scripts/ci/fuzz-runtime.sh
 
-evaluate-macros:
-	+@bash scripts/ci/evaluate-macros.sh
-
-check-macro-diagnostics:
-	+@bash scripts/ci/check-diagnostics.sh macro
-
 .PHONY: check-typed-diagnostics
-.PHONY: check-release check-canister-evaluation
-.PHONY: check-typescript evaluate-browser check-browser
+.PHONY: check-release check-evaluation
+.PHONY: check-typescript
 
 check-typescript:
 	+@bash scripts/ci/check-typescript.sh
 
-evaluate-browser:
-	+@bash scripts/ci/evaluate-browser.sh
-
-check-browser:
-	+@env cargo run --quiet --locked -p ic-wire-canister-evaluation --example browser-fixture --features bindings -- examples/browser --generate-only
-	+@env npm --prefix examples/browser run check
-	+@env npm --prefix examples/browser run build
-
-check-canister-evaluation:
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features browser-fixture
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features macro-fixture
+check-evaluation:
 	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features performance-wire,performance-postcard,performance-bitcode,performance-wincode
 	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
-	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown
-	+@env cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --all-features
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-canister-evaluation --all-targets --all-features
-	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-canister-evaluation --lib --target wasm32-unknown-unknown --all-features
 
 check-typed-diagnostics:
-	+@bash scripts/ci/check-diagnostics.sh wire
+	+@bash scripts/ci/check-diagnostics.sh
 
 help:
 	@printf '%s\n' \
@@ -67,12 +44,10 @@ help:
 		'Setup: install-tools, install-hooks; offline admission: tools-check' \
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
-		'Evaluation: check-macro-diagnostics, evaluate-macros (local adapter proof)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
-		'Evaluation: evaluate-performance (prepared PocketIC; private raw codec controls)' \
+		'Evaluation: evaluate-performance (native timing only; fresh target/native-performance output)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
-		'Evaluation: check-browser, evaluate-browser (prepared Node/npm/Chromium)' \
-		'Evaluation: check-canister-evaluation (compile and lint; no emulator)' \
+		'Evaluation: check-evaluation (native codec controls and compiler support)' \
 		'Registry: publish (uploads); check-package (no upload; registry access)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
@@ -99,7 +74,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/developer-experience.md docs/evaluation.md docs/evidence.md docs/scaffold-validation.md docs/development.md docs/shared-codec-evaluation.md docs/codec-screen.md docs/canister-comparison.md docs/nested-authority.md docs/consumer-adoption.md docs/browser-interop.md docs/peer-interop.md docs/command-replay.md docs/runtime.md docs/runtime-adoption.md docs/macro-adoption.md docs/runtime-comparison.md docs/performance.md docs/consumer-fixtures.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/consumer-fixtures.md docs/status/current.md
 
 .PHONY: check-boundary
 check-boundary:
@@ -118,7 +93,7 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check lint test check-typed-diagnostics check-macro-diagnostics check-canister-evaluation check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check lint test check-typed-diagnostics check-evaluation check-wasm check-msrv
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

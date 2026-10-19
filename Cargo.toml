@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "crates/ic-wire",
-    "crates/ic-wire-adapter-fixture",
     "crates/ic-wire-canister-evaluation",
     "crates/ic-wire-derive",
 ]
@@ -13,7 +12,6 @@ version = "0.4.4"
 edition = "2024"
 rust-version = "1.91"
 license = "MIT"
-license-file = "LICENSE"
 repository = "https://github.com/dragginzgame/ic-wire"
 
 [workspace.dependencies]
@@ -28,14 +26,8 @@ syn = "3.0.9"
 
 # Tests and tooling only
 bitcode = "0.6.9"
-ic-build = "0.18"
-ic-host-artifacts = { version = "0.27", default-features = false }
-ic-host-fs = { version = "0.27", default-features = false }
-ic-host-process = { version = "0.27", default-features = false }
-ic-platform = { version = "0.1.12", default-features = false }
-ic-testkit = "0.54"
+ic-build = "0.19"
 ic-wire = { path = "crates/ic-wire", version = "0.4.4" }
-ic-wire-adapter-fixture = { path = "crates/ic-wire-adapter-fixture" }
 libfuzzer-sys = "0.4.13"
 sha2 = "0.10.9"
 wincode = "0.6.2"
@@ -44,7 +36,7 @@ wincode = "0.6.2"
 unsafe_code = "forbid"
 missing_docs = "warn"
 
-[profile.canister-evaluation]
+[profile.evaluation]
 inherits = "release"
 opt-level = "z"
 lto = true

@@ -588,3 +588,4 @@ fn custom_serializer_bounds_and_error_identity() {
         );
     }
 }
+mod large_bytes;

@@ -1,319 +1,65 @@
 # Current handoff
 
-## Baseline and incoming work
+## Scope
 
-Main and origin/main point to `3c57886` (Release 0.4.4). Incoming Cargo manifest
-and lockfile work selecting Build 0.18.0 and Platform 0.1.14 is preserved unchanged;
-this tooling batch does not qualify those dependency upgrades. Shared Tooling
-remains pinned at 0.24.2. Earlier installed evidence below retains its original
-source and dependencies.
-The released 0.4.2 source has [Linux/macOS acceptance](https://github.com/dragginzgame/ic-wire/actions/runs/39138236119);
-that run does not qualify this pending graph. Compatible contributor-only notes
-select 0.4.5; library APIs, package versions and release delivery are unchanged.
+The maintainer selected a codec-only repository on 2026-10-19. Endpoint SDKs,
+simulators, installed canister drivers, browser transport, the private adapter
+crate and format-comparison evidence are retired. Native codec controls,
+compiler diagnostics and standalone Rust/TypeScript byte conformance remain.
+Published runtime APIs, wire bytes, limits and package versions are unchanged.
+The pending compatible notes remain 0.4.5; release and publication were not run.
 
-## Local Make fixture source selection
+Source starts at `a3e6577` with the pending license-metadata repair preserved.
+Shared Tooling remains at reviewed 0.24.2; its generic scripts/catalogs and guides
+are intact. Product setup no longer selects its platform executable bundle.
+The full pre-change source, retired reports, browser dependencies and previous
+build artifacts are preserved outside this checkout at
+`/tmp/ic-wire-format-removal.hbmMHv/`.
 
-Wire owns `scripts/ci/test-local-make.sh`; Shared Tooling owns the formatter and
-hook implementations it exercises. The fixture now selects authored files under
-`crates/` through Git, including untracked additions and skipping deleted or
-ignored inputs, instead of maintaining a parallel module inventory. Local script
-selection and snapshot-owned tooling selection remain explicit. No upstream
-change or snapshot refresh is needed.
+## Maintained qualification
 
-`make check-tooling` passes, including formatting idempotence, grouped manifest
-repair and staged/partially-staged hook behavior. A separate disposable source
-copy with a new untracked nested module passes the updated fixture; the previous
-fixture fails to resolve that module. All Git/index and release-routing sentinel
-effects stay inside disposable repositories. No runtime code changed.
+The Blob adoption hard cut is delivered independently in
+[PR #90](https://github.com/dragginzgame/ic-blob-storage/pull/90), commit `2967298`,
+from `/tmp/ic-blob-wire-cut`. All owned methods/lifecycle use Wire; installed
+client/browser and recovery checks pass against local substitutes. Wire gains 1 MiB finite/native
+Rust and generated TypeScript conformance cases, with exact frame equality,
+truncation, identity/direction, trailing bytes, noncanonical lengths and allocation
+refusal. These focused cases pass; the consumer uses published Wire 0.4.4 without
+new runtime functionality. Provider transports and persistent records remain
+consumer contracts.
 
-## Current performance batch
+See [local development](../development.md), [evaluation scope](../evaluation.md),
+[runtime contract](../runtime.md) and [native timing controls](../performance.md).
+The evaluation package stays unpublished. IC Build retains ownership of compiler
+diagnostic execution. Private raw Postcard/bitcode/wincode controls retain their
+different guarantees; they are not production modes or installed measurements.
 
-[Measured results and reproduction](../performance.md) retain separate matched
-before/after reports. Production Postcard and public APIs are unchanged. Wasm
-canonical comparison uses exact word chunks plus a single-byte fast path; native
-production comparison stays on normal slices. Dynamic precharging combines the
-same four nodes and two value-size charges, preserving rejection boundaries.
+Focused Linux checks pass: 22 runtime/native tests and seven doctests, native
+raw-codec roundtrips, strict evaluation Clippy and Rust 1.91 host checking,
+twelve compiler-diagnostic subjects/control, ninety TypeScript vectors and
+17,524 differential mutations, runtime Wasm/floor checks, formatting, pins,
+dependency boundaries, snapshot integrity and documentation links. Disposable
+Make/release fixtures and common-tool admission pass without platform executables.
+All-feature/all-target dependency inspection retains 79 original package
+identities and prunes 234 packages. Both offline archives retain the exact MIT
+LICENSE; archive preparation used `--no-verify` and uploaded nothing.
 
-The matched local Rust 1.99.1/PocketIC 16.1.0 experiment uses nine logical cases,
-seven private lanes and seven samples of 32 operations. Finite 4 KiB blob decode
-falls from 112,667 to 19,642 instructions (5.74×); UTF-8 decode improves 1.74×.
-Empty bounded-blob decode regresses by 44 instructions (~3%). Ordinary dynamic
-Vec<u8> remains far slower than the byte-specialized bounded representation.
-Raw controls have identical artifacts and counters across the matched runs;
-they do not implement Wire's admission/canonicality guarantees. No fastest-codec
-or end-to-end latency claim is made. One stale-cache baseline and intermediate
-trials are excluded; final source hashes match the retained optimized report.
+The native timing driver runs all 63 case/lane pairs and refuses existing output
+without overwriting it. Its final report is `target/native-performance-verified/report.json`;
+lock/case/driver hashes match the checked source. Earlier draft failures and
+focused logs remain under `/tmp/ic-wire-removal-*`. No full local CI, installed
+endpoint, native macOS, compressed size or IC instruction qualification is claimed.
 
-Development/floor runtime/native tests (22 checks), the performance roundtrip
-fixture, strict Clippy, floor host/Wasm checking, formatting, pins/boundaries,
-snapshot/docs checks and disposable Make/release fixtures pass. TypeScript passes
-90 vectors and 17,524 mutations. The normal/build Wasm graph with all runtime
-features excludes Candid/CDK/Platform, alternate controls and host tools. No broad
-CI, native macOS, installed IC or compressed-deployment qualification is claimed. Logs and original before-images:
-`/tmp/ic-wire-performance-*` and `/tmp/ic-wire-perf-merge-before`.
+## Preserved contributor work
 
-## Bounded boxes — delivered 0.4.2
+All packages inherit only the MIT SPDX license. Publishable crates include the
+root LICENSE as identical package-local regular files. The formatting hook refuses
+tracked symlinks; the local fixture now preserves file types so it exercises that
+admission rule. Earlier locked metadata and offline
+archive checks passed without duplicate-license warnings; both archives contain
+the exact root text. Existing packaging warnings concern excluded tests/examples.
 
-[Issue #7](https://github.com/dragginzgame/ic-wire/issues/7#issuecomment-6251677674)
-is closed with released-source native CI acceptance: `Box<T: Wire>` reuses T's schema, bytes, nodes
-and depth, adding `size_of::<T>()` plus nested heap to static admission. Overflow
-refuses and zero-sized boxes add no allocation. Serde's ordinary Box allocation
-can still abort on allocator exhaustion; no general OOM recovery is promised.
-No new schema case, derive path, runtime dependency or TypeScript wrapper is added.
-
-Sixteen finite tests pass on Rust 1.99.1 and 1.91.0, including exact boxed/unboxed
-frames, nested boxes, early heap refusal, malformed/trailing input and saturation.
-Both compilers pass twelve diagnostic subjects and a positive control; recursive
-boxed schemas and Box<String> refuse. Strict runtime/evaluation Clippy, Rust 1.91
-Wasm, local Make/formatting, pins/boundaries and documentation checks pass.
-TypeScript passes ninety vectors and 17,524 differential mutations.
-
-The existing browser fixture uses boxed query records/response fields and an
-overflow enum payload. Its Chromium/PocketIC 16.0.0 report matches every prior
-non-provenance field, including exact vectors and bundle size; retained-build
-freshness checks pass. Those earlier local runs did not include full CI, native
-macOS or Auth acceptance; the later released-source matrix above qualifies Wire's
-native gates. Auth's source-breaking adoption requires its own selected published
-producer and qualification;
-no sibling was edited and no cycle/instruction/Wasm savings is claimed.
-Logs and task before-images are under `/tmp/ic-wire-box-*`.
-
-[Issue #5](https://github.com/dragginzgame/ic-wire/issues/5) is closed: native
-admission shipped in 0.3.4 and its exact-source Linux/macOS acceptance
-[run](https://github.com/dragginzgame/ic-wire/actions/runs/39031765826) passed.
-[Receipt consolidation #9](https://github.com/dragginzgame/ic-wire/issues/9) /
-[PR #10](https://github.com/dragginzgame/ic-wire/pull/10) and published Build
-[PR #11](https://github.com/dragginzgame/ic-wire/pull/11) are merged on origin/main;
-the completed local merge preserves both contributions. The unmerged CDK-companion
-[PR #2](https://github.com/dragginzgame/ic-wire/pull/2#issuecomment-6251678419) is
-closed as superseded: production endpoint integration stays consumer-owned,
-Platform supplies SDK helpers, and Wire retains its private adapter/rollback proof.
-
-## Development compiler — delivered 0.4.2
-
-[Issue #8](https://github.com/dragginzgame/ic-wire/issues/8#issuecomment-6251678039)
-selects Rust 1.99.1 (`58cf8f9c3`) in the development file, explicit CI input and
-setup guide. Rust 1.91 remains the package/CI floor; historical measurements and
-snapshot-owned illustrative versions are unchanged. Existing installed components
-were reused. Strict runtime/evaluation Clippy, sixteen finite/three pipeline
-tests, Wasm, twelve diagnostic subjects/control, ninety TypeScript vectors and
-17,524 mutations, formatting, local Make, boundaries/pins and doc checks pass.
-The installed Chromium/PocketIC report records 1.99.1 and matches all unboxed
-non-provenance fields on the current Testkit 0.54 graph. Rust 1.91 host checking
-also passes on that graph. Those local runs did not include full CI or native
-macOS. The later released-source matrix above confirms 1.99.1/1.91 toolchain
-selection and all native gates, completing #8. Logs: `/tmp/ic-wire-rust1991-*`.
-
-## Shared TypeScript emission and build facts
-
-The host-only `typescript::generate_registry` emits native registry aliases and
-typed method objects with the same type renderer as finite `generate`. Reflection,
-endpoint identities, resource allowances and scalar checks remain consumer-owned.
-Registry serialization preserves own `__proto__` names. No runtime bytes,
-production dependencies or finite admission rules change.
-
-IcyDB's isolated caller removes its duplicate type/emission code, retaining all
-reflection and scalar overlays. Actual metadata, both runtimes and 90 vectors
-are byte-identical before/after; strict TypeScript and all twelve endpoints pass
-3,111 truncations plus scalar/malformed/limit controls. This used the real generator
-source in a temporary package: the captured baseline's normal build helper failed
-against the selected Build constructor/environment API. Independent sibling work
-subsequently changed that helper; its moving workspace is not qualified here.
-Wire 0.4.1 now delivers the shared emitter; the isolated IcyDB caller still needs
-owner integration and fresh registry-only qualification. No sibling was edited.
-The isolated Testkit patch reuses its existing prepared contribution, selects
-published Build 0.17.2 and passes nineteen driver tests plus strict Clippy.
-Reviewable source patches and before-images are under `/tmp/ic-wire-consolidation-*`.
-
-Published Build 0.17.3 now supplies the retained evidence/diagnostics used by Wire.
-The evaluation adapter passes its complete environment except Build-owned
-`CARGO_TARGET_DIR` and explicitly supplies the direct-child spawner. Retained
-source/freshness/export checks, recipes, report schemas and simulator/browser
-lifecycle remain unchanged. The Git pin and all three Host 0.25 packages are
-removed; Process is a private evaluation development dependency. Platform 0.1.12,
-Box support, Rust 1.99.1/MSRV 1.91 and all released wire contracts are preserved.
-Historical producer requirements are recorded in
-[Build #58](https://github.com/dragginzgame/ic-build/issues/58) and
-[Build #66](https://github.com/dragginzgame/ic-build/issues/66).
-The refreshed contribution over released 0.4.2 passes strict evaluation Clippy,
-native tests, Rust 1.91 host/Wasm, twelve codec and eight macro diagnostics with
-passing controls, formatting and dependency/doc checks. Installed PocketIC 16.0.0
-macro and Chromium trials pass, including initial growth/write rollback and
-retained freshness verification. The registry lock preserves every unrelated
-version selection. New hosted native checks qualify the pushed PR head separately;
-no full local CI, native macOS execution or live IC is claimed by these local runs.
-The maintainer-authorized [consumer feedback on #58](https://github.com/dragginzgame/ic-build/issues/58#issuecomment-6249237464)
-records the published API gaps, retained-facts requirement and acceptance checks.
-
-Focused checks pass: strict runtime Clippy, fourteen Rust 1.91 runtime tests,
-Wasm with TypeScript enabled, 84 TypeScript vectors and 16,384 differential
-mutations, direct boundaries/pins and document links. No broad CI, installed
-PocketIC/browser rerun, native macOS or live-IC qualification is claimed.
-The disposable local Make/formatting fixture passes with the shared emitter included.
-
-## Wire-only codec and retained integration
-
-The maintainer selected no owned Candid code or direct dependencies, while
-explicitly retaining browser and installed Wire tests. Candid control DTOs,
-staged comparison decoding, measurement endpoints, the raw_rand management probe,
-comparison host and `evaluate-runtime` are removed. Recorded reports retain their
-original identities and measurements; their reproduction commands are historical.
-There is no universal ten-times-faster or current benchmark claim.
-
-All owned codecs and browser endpoint payloads use IC Wire. Generated browser
-clients send raw Wire bytes through HttpAgent. Zero-argument/manual-reply CDK
-entries now select `hidden = true` to suppress unused Candid service metadata,
-including in the private generator. This keeps callable Wasm exports and CDK
-executor contexts. Direct Candid and its policy exception are removed.
-
-Published registry Platform 0.1.12 and its coordinated macros 0.1.12 now own
-fixture entrypoint generation and qualified CDK helpers. Browser attributes and
-the private adapter generator use `ic_platform::cdk::{query, update}`; allocating
-argument/caller and checked controller helpers use `cdk::api`. Their original
-CDK implementations, 0/1/panic behavior, executor contexts and manual/hidden
-exports are preserved. Owned codecs remain Wire-only. The selected `cdk` feature
-also enables `candid`, `executor`, `ic0`; no parser, Agent or crypto is selected.
-
-The rollback fixture's stable read/write/grow now use `ic_platform::cdk::stable`,
-whose published exports are the original CDK 0.20.3 helpers. Root/member direct
-CDK declarations and the feature edge are removed; the shared package policy now
-rejects direct CDK-family dependencies everywhere. The existing eight-byte format,
-growth policy and error/trap semantics are unchanged
-([Platform #20](https://github.com/dragginzgame/ic-platform/issues/20)).
-No storage implementation/migration, SDK copy or runtime facade was introduced.
-The [0.1.10 adoption on #1](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6250235797)
-records the completed generator/helper work and installed consumer evidence;
-fleet-wide acceptance remains owned upstream.
-
-Candid remains transitive in CDK, the browser SDK and Testkit/PocketIC. This is the
-explicitly selected test/transport exception, not a production codec mode.
-The normal runtime/derive graphs remain independent of Candid, CDK and Platform.
-Shared Tooling checks direct aliases and normal/build/dev/target declarations;
-unused-root catalogs, enabled features, transitive and deployment exclusions still
-require separate inspection. No local dependency facade or executor was added.
-
-## Delivered 0.4.1 ownership
-
-The custom license is replaced with standard MIT in all four workspace packages,
-metadata and current READMEs. Existing IcyDB MIT attribution remains intact.
-The earlier package metadata/file-list checks passed; nothing was republished.
-Release 0.4.1 selected Testkit 0.53; the independent pending 0.54 intake is
-qualified separately in the final compiler/browser run above.
-
-Shared Tooling 0.24.2 is adopted at `48f5640e744512929bfba301fe734d8ea6c6e049`.
-The canonical exporter proved and transferred the receipt contribution into the
-main snapshot; one manifest owns the complete closure. The extra manifest,
-integrity dispatch and fixture copy list are removed. Grouped formatting now uses
-shared defaults; release metadata checks retain grouped ordering. The new upstream
-archive helper is not called here; receipt schemas, selected files and recovery
-policy are unchanged. Common Rust tools remain cargo-sort and cargo-sort-derives.
-Snapshot integrity, actual disposable Make/formatting hooks and release/recovery
-fixtures pass, including dirty/conflicting source refusal, retained failed
-validation, tampered receipts, exact metadata/tag/delivery and resume. No real
-release or publication is performed by those fixtures. Fresh hosted native
-qualification belongs to the updated PR head; no full local CI ran.
-
-Production diagnostics build/link only runtime and derive; the macro lane adds
-the private adapter fixture. IC Build owns diagnostic execution and build
-provenance; IC Host owns artifact inspection and bounded hashing; Testkit owns
-PocketIC/browser sessions. IC Wire owns codec cases and integration expectations.
-Earlier handoffs are [archived](through-0.4.0.md). Prior Platform migration logs
-remain at `/tmp/ic-wire-platform*`; pre-retirement source is retained outside the
-checkout at `/tmp/ic-wire-no-candid-before/`.
-
-## Platform 0.1.12 intake
-
-Both registry archives select 0.1.12 at `338b14baf97690abdfc0e386d6d5261b309a3ac8`.
-Facade/macros SHA-256s are respectively
-`e0ab384614a5d8fe251bc2c27c508263d4001d776edf31382b5b985a1a4ced2d` and
-`9b5de9771169e34ca8da9bbb04c9c6196b1d2de8d2d0d21bc79d5921984ce6be`.
-Published source/README confirm upstream stable-helper/error reexports; the
-generator source and CDK/executor/ic0 requirements are unchanged. Only the three
-stable-helper call paths change; no storage conversion or Candid checkpoint
-helper is used. Unrelated pending work and package versions remain unchanged.
-
-The incoming lockfile already selected both 0.1.12 registry packages; the final
-lock change removes only the fixture's direct CDK edge. Manifests now require
-0.1.12, with no direct Candid, CDK-family or ic0 declaration in any dependency
-role, target or feature. The production Wire Wasm/TypeScript graph remains free
-of Platform/CDK/Candid; the integration graph retains one CDK 0.20.3, executor
-2.0.0, ic0 1.2.0 and Candid 0.10.38 through Platform and test tooling. Platform
-features remain exactly `candid`, `cdk`, `executor`, `ic0`.
-
-Focused evaluation tests/strict Clippy, development and Rust 1.91 host/Wasm,
-eight macro diagnostic subjects/control, formatting, boundaries/pins and document
-links pass. Installed PocketIC 16.0.0/Chromium trials pass with retained freshness
-checks. Macro/browser report fields match 0.1.11 except provenance/Wasm identity.
-The macro fixture now additionally proves first-page growth/write rollback when
-a response codec trap occurs before any successful update; all sixteen existing
-rejection cases and rollback of writes to an existing page still pass. Shared
-checks enforce direct boundaries, not transitive deployed-Wasm exclusions;
-the graph was separately inspected. No full CI, native macOS, live IC or unowned
-callback/timer/cancellation qualification ran. Logs/before-images:
-`/tmp/ic-wire-platform0112-*`.
-
-## Earlier 0.1.11 intake
-
-Registry search and both published archives select 0.1.11 at `ffc36b63`.
-The facade adds upstream cycle and instruction/context-counter helpers, unused
-by Wire's maintained fixtures. The macro generator source is identical to 0.1.10;
-CDK/executor/ic0 requirements and feature selections are unchanged. No further
-owned calls can migrate in this release; the existing stable-helper issue remains
-the only direct CDK exception. No sibling checkout is a dependency or was edited.
-
-The published facade/macros archive SHA-256s are respectively
-`8d55106ea1d1ccd65bd67c7d2a681b7d8199f3c0206ae990e24589b3ce502bdf` and
-`a2a7652251d6eee2c67653a8110cba93da8662b82e633325a125e710d2e0c25f`.
-Only those two package identities change in the lockfile; unrelated pending
-Host/Testkit and Box/compiler work is preserved. Owned Rust implementation and
-wire contracts are unchanged.
-
-`make check-canister-evaluation` passes native tests, strict all-feature Clippy,
-development host/Wasm and Rust 1.91 host/Wasm checking. Eight macro diagnostic
-subjects/control, formatting, direct boundaries/pins and document links pass.
-Installed Testkit 0.54/PocketIC 16.0.0 macro and Chromium trials pass, with final
-retained-build freshness verification. Macro behavior matches the retained
-0.1.10 report except provenance/Wasm hash; browser results match the prior report
-except provenance. Sixteen rejection/rollback cases remain covered. The first
-sandboxed macro run could not bind localhost; the permitted rerun passes.
-
-Locked metadata confirms one Platform/macros 0.1.11, CDK 0.20.3, executor 2.0.0,
-ic0 1.2.0 and Candid 0.10.38. Platform features remain exactly `candid`, `cdk`,
-`executor`, `ic0`; native and browser-only graphs have no direct fixture-CDK edge.
-Wire's normal Wasm/TypeScript graph remains Platform/CDK/Candid-free. Shared
-checks still do not enforce feature/target restrictions or transitive deployment
-exclusions; those were inspected separately. No full CI, native macOS, live IC or
-unowned callback/timer/cancellation qualification ran. Logs and before-images:
-`/tmp/ic-wire-platform0111-*`.
-
-## Earlier 0.1.10 validation
-
-Published facade 0.1.10 and macros 0.1.10 identify registry source `4bf73410`.
-Archive SHA-256s are respectively
-`1d3eaa384ad518116caaece25b1aca069473b7010e46e17d2fa23f0a3e1d2898` and
-`1f1157909c578de096910a18013d49f31772e039417032fe66b8e6639283cd9e`.
-Actual published APIs/features/README were inspected. The lockfile changes only
-Platform's version/dependency edges and the coordinated macro package; unrelated
-pre-existing records and pending Box/compiler/Testkit work are preserved.
-
-Strict evaluation Clippy, three native pipeline tests, Rust 1.91 host/Wasm,
-eight macro diagnostic subjects/control on 1.99.1 and 1.91, formatting, local Make,
-direct boundaries/pins and documentation checks pass. The first disposable Make
-fixture exposed target-table ordering; canonical formatting fixed it and the
-rerun passes. The missing stable API probe fails as expected with E0432.
-
-Installed Testkit 0.54/PocketIC 16.0.0 macro and Chromium trials pass, including
-sixteen rejection/rollback cases. Browser results match the immediately prior
-non-provenance fields. Macro results match the retained 0.1.9-era baseline except
-provenance/Wasm hash; the immediate target report had been cleaned. Exact bytes,
-auth/refusal order, sync/async contexts and exports are preserved. Retained-build
-freshness checks finish successfully. No full CI, native macOS, live IC or
-unowned awaited-call/timer/cancellation qualification is claimed.
-
-Metadata/declaration scans cover aliases, build/dev/target edges and features;
-one CDK 0.20.3, executor 2.0.0 and ic0 1.2.0 identity remain. The normal Wire
-Wasm/TypeScript graph stays Platform/CDK/Candid-free. Shared checks enforce the
-package exception, not its optional/target restrictions or transitive deployment
-exclusions; those were inspected separately. Candid remains transitive in fixtures.
-Logs and before-images: `/tmp/ic-wire-platform0110-*`. Earlier Platform records
-are [archived](platform-through-0.1.9.md).
+The local Make fixture selects authored crate inputs through Git, including
+untracked modules and excluding ignored output. Shared Tooling owns the formatter
+and hook implementation. The fixture confines all Git/index/release-routing
+effects to disposable repositories.

@@ -12,29 +12,14 @@ use std::{
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = env::current_dir()?;
-    let mode = env::args().nth(1).ok_or("expected wire or macro")?;
-    let run = PathBuf::from(env::args_os().nth(2).ok_or("expected log directory")?);
-    let source = root.join(match mode.as_str() {
-        "wire" => "crates/ic-wire/tests/ui",
-        "macro" => "crates/ic-wire-canister-evaluation/tests/macro_ui",
-        _ => return Err("expected wire or macro".into()),
-    });
+    let run = PathBuf::from(env::args_os().nth(1).ok_or("expected log directory")?);
+    let source = root.join("crates/ic-wire/tests/ui");
     let wire = library_artifact(
         File::open(run.join("artifacts.jsonl"))?,
         "ic_wire",
         &TargetKind::Lib,
         4 * 1024 * 1024,
     )?;
-    let adapter = if mode == "macro" {
-        Some(library_artifact(
-            File::open(run.join("artifacts.jsonl"))?,
-            "ic_wire_adapter_fixture",
-            &TargetKind::ProcMacro,
-            4 * 1024 * 1024,
-        )?)
-    } else {
-        None
-    };
     let mut cases = fs::read_dir(&source)?
         .map(|entry| entry.map(|entry| entry.path()))
         .collect::<Result<Vec<_>, _>>()?;
@@ -75,11 +60,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .arg(source.join("mod.rs"))
             .arg("-o")
             .arg(run.join(format!("{name}.rmeta")));
-        if let Some(adapter) = &adapter {
-            command
-                .arg("--extern")
-                .arg(format!("ic_wire_adapter_fixture={}", adapter.display()));
-        }
         command
     })?;
     println!(
