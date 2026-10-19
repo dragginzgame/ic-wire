@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.7] - Unreleased
+## [0.4.7]
 
 - Allow native decoding to borrow input bytes/strings and add reusable-output
   encoding APIs, preserving canonical validation, admission and existing frames.
