@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.8]
+
+- Grow bounded lists geometrically within their declared maximum when decode
+  length hints are hidden, avoiding repeated one-element reallocations.
+- Investigate exact-size encoding and borrowed finite contracts; retain current
+  APIs and allocation defaults based on the [measured tradeoffs](docs/bounded-allocation-study.md).
+
 ## [0.4.7] - 2026-10-19
 
 - Allow native decoding to borrow input bytes/strings and add reusable-output

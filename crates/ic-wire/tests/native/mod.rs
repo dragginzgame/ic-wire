@@ -405,3 +405,38 @@ fn reusable_output_keeps_capacity_and_clears_all_failure_paths() {
     native::encode_request_into(7, &42_u64, LIMITS, &mut output).unwrap();
     assert_eq!(native::decode_request::<u64>(7, &output, LIMITS), Ok(42));
 }
+
+#[test]
+fn hidden_list_lengths_preserve_bounds_and_zero_sized_values() {
+    // Native admission deliberately hides size hints from collection visitors.
+    fn check<const N: usize>() {
+        for count in 0..=N {
+            let values: Vec<u32> = (0..count as u32).collect();
+            let bytes = native::encode(&values, LIMITS).unwrap();
+            let decoded = native::decode::<ic_wire::List<u32, N>>(&bytes, LIMITS).unwrap();
+            assert_eq!(decoded.as_slice(), values);
+            assert_eq!(native::encode(&decoded, LIMITS).unwrap(), bytes);
+        }
+        let excess = native::encode(&vec![0_u32; N + 1], LIMITS).unwrap();
+        assert_eq!(
+            native::decode::<ic_wire::List<u32, N>>(&excess, LIMITS),
+            Err(Error::Malformed)
+        );
+    }
+    check::<0>();
+    check::<1>();
+    check::<3>();
+    check::<33>();
+    let bytes = native::encode(&vec![(); 33], LIMITS).unwrap();
+    assert_eq!(
+        native::decode::<ic_wire::List<(), 33>>(&bytes, LIMITS)
+            .unwrap()
+            .as_slice()
+            .len(),
+        33
+    );
+    assert_eq!(
+        native::decode::<ic_wire::List<(), 33>>(&bytes, Limits { nodes: 8, ..LIMITS }),
+        Err(Error::Limit)
+    );
+}

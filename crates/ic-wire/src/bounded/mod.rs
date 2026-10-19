@@ -53,8 +53,11 @@ impl<'de, T: Deserialize<'de>, const N: usize> Deserialize<'de> for List<T, N> {
                         return Ok(List(values));
                     };
                     if values.len() == values.capacity() {
+                        // Hidden lengths need amortized growth, capped by the
+                        // declared element bound rather than Vec's growth policy.
+                        let next = values.len().saturating_mul(2).max(1).min(N);
                         values
-                            .try_reserve_exact(1)
+                            .try_reserve_exact(next - values.len())
                             .map_err(|_| de::Error::custom("allocation"))?;
                     }
                     values.push(value);

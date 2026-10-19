@@ -1,0 +1,31 @@
+experiment,case,baseline_capacity,candidate_capacity,baseline_value,candidate_value,unit
+native exact-size,manifest-0-finite-array,32943,108,143.164794921875,170.37744140625,encode ns
+native exact-size,manifest-0-finite-packed,32943,108,150.55322265625,174.9613037109375,encode ns
+native exact-size,manifest-1-finite-array,32943,142,201.25396728515625,221.3372802734375,encode ns
+native exact-size,manifest-32-finite-array,32943,1135,1628.6728515625,1830.3291015625,encode ns
+native exact-size,manifest-1024-finite-array,32943,32881,47663.953125,53398.21875,encode ns
+native exact-size,manifest-1024-finite-packed,32943,32882,664.843994140625,709.029052734375,encode ns
+native exact-size,blob-0-finite-owned,1048597,12,43.34773254394531,37.55670166015625,encode ns
+native exact-size,blob-32-finite-owned,1048597,44,44.66700744628906,38.69610595703125,encode ns
+native exact-size,blob-4096-finite-owned,1048597,4109,81.49691772460938,97.82427978515625,encode ns
+native exact-size,blob-1048576-finite-owned,1048597,1048590,21000.6875,20347.046875,encode ns
+IC exact-size,manifest-0-finite-array,32943,108,26438.25,9483.5,encode instructions
+IC exact-size,manifest-0-finite-packed,32943,108,26515.25,9584.5,encode instructions
+IC exact-size,manifest-1-finite-array,32943,142,28433.25,12258.5,encode instructions
+IC exact-size,manifest-32-finite-array,32943,1135,88204.25,94184.5,encode instructions
+IC exact-size,manifest-1024-finite-array,32943,32881,1979734.5,2714186.5,encode instructions
+IC exact-size,manifest-1024-finite-packed,32943,32882,39473.5,42844.5,encode instructions
+IC exact-size,blob-0-finite-owned,1048597,12,41403.25,1476.5,encode instructions
+IC exact-size,blob-32-finite-owned,1048597,44,41545.25,1618.5,encode instructions
+IC exact-size,blob-4096-finite-owned,1048597,4109,45641.25,5733.5,encode instructions
+IC exact-size,blob-1048576-finite-owned,1048597,1048590,1370153.25,1370396.25,encode instructions
+hidden-length growth,0 u32 elements,,,0,0,reallocations per decode
+hidden-length growth,0 u32 elements,,,23,18,decode median ns
+hidden-length growth,1 u32 elements,,,0,0,reallocations per decode
+hidden-length growth,1 u32 elements,,,53,36,decode median ns
+hidden-length growth,32 u32 elements,,,31,5,reallocations per decode
+hidden-length growth,32 u32 elements,,,800,336,decode median ns
+hidden-length growth,1024 u32 elements,,,1023,10,reallocations per decode
+hidden-length growth,1024 u32 elements,,,18494,11712,decode median ns
+hidden-length growth,4096 u32 elements,,,4095,12,reallocations per decode
+hidden-length growth,4096 u32 elements,,,75619,47880,decode median ns

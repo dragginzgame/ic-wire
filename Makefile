@@ -84,7 +84,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/consumer-fixtures.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md
 
 .PHONY: check-boundary
 check-boundary:

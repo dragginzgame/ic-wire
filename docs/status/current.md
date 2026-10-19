@@ -11,8 +11,8 @@ A subsequent maintainer request authorizes the bounded
 [MessagePack/Postcard experiment](../messagepack-comparison.md); only its pure
 codec fixture/native driver are maintained here. External IC probes stay outside
 the workspace. Production encoding remains Postcard.
-The maintainer subsequently released 0.4.5 (`9e336f4`). The maintainer has since released 0.4.6 (`45a05b7`). Pending compatible
-notes are 0.4.7; this task executes no release or publication.
+The maintainer subsequently released 0.4.5 (`9e336f4`). The maintainer has since released 0.4.6 (`45a05b7`). The maintainer has released 0.4.7 (`48a016f`). Pending compatible
+notes are 0.4.8; this task executes no release or publication.
 
 Source starts at `a3e6577` with the pending license-metadata repair preserved.
 Shared Tooling remains at reviewed 0.24.2; its generic scripts/catalogs and guides
@@ -149,3 +149,18 @@ Focused runtime/evaluation tests, strict Clippy, Rust 1.91 host/Wasm and the
 are under `target/allocation-2026-10-19/`. Native macOS and full CI were not run.
 Concurrent IC Build 0.21 dependency edits are preserved and excluded from this
 task's source metrics. No staging, commit, release or publication was performed.
+
+## Bounded allocation follow-up
+
+The [focused study](../bounded-allocation-study.md) selects capped geometric growth
+for hidden-length lists: 4,096 u32 elements drop from 4,095 reallocations to 12
+and native decode improves 36.7%. Existing bytes and public APIs are unchanged.
+Exact-size finite encoding is rejected as a blanket default: empty-byte IC
+encoding improves 96.4%, but full array manifests regress 37.1% at opt-z.
+An isolated borrowed finite contract compiles using the existing Method trait;
+production derive/lifetime qualification remains outside the shipped change.
+
+Runtime tests, Clippy, Rust 1.91 host/Wasm and Rust/TypeScript conformance pass.
+Compact measurements are in `docs/evidence/hardcut-2026-10-19/`; full source, raw
+reports and external probe artifacts remain in `target/hardcut-2026-10-19/`.
+No full CI, native macOS, staging, commit or release was performed.
