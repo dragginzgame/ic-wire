@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.0]
+## [0.5.0] - 2026-10-19
 
 - **Breaking Rust API:** `Wire` no longer implies owned deserialization. Generic
   decode callers must supply the appropriate Serde decode bound; encoding-only
