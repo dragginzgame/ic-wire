@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.6]
+## [0.4.6] - 2026-10-19
 
 - Reduce Wasm budget-check and bulk canonical-comparison costs without changing
   bytes or resource admission. Blob-shaped probes show 30–39% fewer manifest
