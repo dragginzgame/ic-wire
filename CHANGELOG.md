@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.10]
+## [0.4.10] - 2026-10-19
 
 - Adopt IC Build 0.22 and its IC Host 0.30 dependency family for compiler
   diagnostics. Remove unused host dependency trees while preserving runtime
