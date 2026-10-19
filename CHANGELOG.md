@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.9]
+## [0.4.9] - 2026-10-19
 
 - Skip redundant Wasm canonical byte comparisons when a borrowed value emits
   the exact input slice, preserving limits and rejection behavior. Large borrowed
