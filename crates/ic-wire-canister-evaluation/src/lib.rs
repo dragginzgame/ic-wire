@@ -8,3 +8,7 @@ pub mod performance;
 /// Maintainer-requested raw MessagePack/Postcard experiment and bounded Wire control.
 #[cfg(feature = "comparison")]
 pub mod messagepack;
+
+/// Admission, borrowing, storage reuse and packed-hash experiment.
+#[cfg(feature = "allocation-fixture")]
+pub mod allocation;

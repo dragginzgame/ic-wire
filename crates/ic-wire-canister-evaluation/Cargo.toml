@@ -20,6 +20,8 @@ comparison-array = ["comparison", "dep:rmp-serde"]
 comparison-map = ["comparison", "dep:rmp-serde"]
 comparison-wire = ["comparison", "dep:ic-wire"]
 
+allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
+
 [dependencies]
 bitcode = { workspace = true, optional = true }
 ic-wire = { workspace = true, optional = true }
@@ -48,6 +50,16 @@ required-features = ["performance-postcard", "performance-bitcode", "performance
 name = "messagepack"
 path = "examples/messagepack/mod.rs"
 required-features = ["comparison-postcard", "comparison-messagepack", "comparison-wire"]
+
+[[example]]
+name = "allocation"
+path = "examples/allocation/mod.rs"
+required-features = ["allocation-fixture"]
+
+[[test]]
+name = "packed-projection"
+path = "tests/packed_projection/mod.rs"
+required-features = ["allocation-fixture"]
 
 [lints]
 workspace = true

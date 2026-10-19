@@ -8,7 +8,7 @@ const LIMITS: Limits = Limits {
     nodes: 4096,
     depth: 64,
 };
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 enum Tree {
     Leaf(String, u128),
     Branch(Vec<Self>),
@@ -18,7 +18,7 @@ struct Borrowed<'a> {
     label: &'a str,
     values: &'a [u64],
 }
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 struct Owned {
     label: String,
     values: Vec<u64>,
@@ -291,4 +291,117 @@ fn scalar_admission_preserves_exact_resource_boundaries() {
         assert_eq!(native::encode(&u64::MAX, refused), Err(Error::Limit));
         assert_eq!(native::decode::<u64>(&bytes, refused), Err(Error::Limit));
     }
+}
+
+#[test]
+fn borrowed_decode_points_into_the_frame_and_preserves_rejections() {
+    #[derive(Debug, Deserialize, PartialEq, Serialize)]
+    struct View<'a> {
+        text: &'a str,
+        bytes: &'a [u8],
+    }
+    let value = View {
+        text: "é🦀",
+        bytes: &[0, 127, 255],
+    };
+    let frame = native::encode_request(7, &value, LIMITS).unwrap();
+    let view: View<'_> = native::decode_request(7, &frame, LIMITS).unwrap();
+    assert_eq!(view, value);
+    let range = frame.as_ptr() as usize..frame.as_ptr() as usize + frame.len();
+    assert!(range.contains(&(view.text.as_ptr() as usize)));
+    assert!(range.contains(&(view.bytes.as_ptr() as usize)));
+    for end in 0..frame.len() {
+        assert!(native::decode_request::<View<'_>>(7, &frame[..end], LIMITS).is_err());
+    }
+    for limits in [
+        Limits { nodes: 0, ..LIMITS },
+        Limits {
+            allocation: 0,
+            ..LIMITS
+        },
+        Limits { depth: 0, ..LIMITS },
+    ] {
+        assert_eq!(
+            native::decode_request::<View<'_>>(7, &frame, limits),
+            Err(Error::Limit)
+        );
+    }
+    let mut trailing = frame.clone();
+    trailing.push(0);
+    assert_eq!(
+        native::decode_request::<View<'_>>(7, &trailing, LIMITS),
+        Err(Error::Trailing)
+    );
+    assert_eq!(
+        native::decode_response::<View<'_>>(7, &frame, LIMITS),
+        Err(Error::Identity)
+    );
+    let mut overlong = frame[..11].to_vec();
+    overlong.extend_from_slice(&[frame[11] | 0x80, 0]);
+    overlong.extend_from_slice(&frame[12..]);
+    assert_eq!(
+        native::decode_request::<View<'_>>(7, &overlong, LIMITS),
+        Err(Error::Noncanonical)
+    );
+    let reply = native::encode_response(7, &value, LIMITS).unwrap();
+    assert_eq!(
+        native::decode_response::<View<'_>>(7, &reply, LIMITS).unwrap(),
+        value
+    );
+    assert_eq!(
+        native::decode::<&str>(&[1, 0xff], LIMITS),
+        Err(Error::Malformed)
+    );
+}
+
+#[test]
+fn reusable_output_keeps_capacity_and_clears_all_failure_paths() {
+    let mut output = Vec::with_capacity(4096);
+    let original_pointer = output.as_ptr();
+    for value in [0, u64::MAX, 128, 1] {
+        native::encode_request_into(7, &value, LIMITS, &mut output).unwrap();
+        assert_eq!(output, native::encode_request(7, &value, LIMITS).unwrap());
+        assert_eq!(output.as_ptr(), original_pointer);
+        assert_eq!(output.capacity(), 4096);
+    }
+    let retained = output.clone();
+    native::encode_response_into(7, &42_u64, LIMITS, &mut output).unwrap();
+    assert_eq!(output, native::encode_response(7, &42_u64, LIMITS).unwrap());
+    assert_eq!(retained, native::encode_request(7, &1_u64, LIMITS).unwrap());
+    for limits in [
+        Limits { bytes: 0, ..LIMITS },
+        Limits {
+            allocation: 0,
+            ..LIMITS
+        },
+        Limits { nodes: 0, ..LIMITS },
+    ] {
+        assert_eq!(
+            native::encode_request_into(7, &42_u64, limits, &mut output),
+            Err(Error::Limit)
+        );
+        assert!(output.is_empty());
+        native::encode_into(&42_u64, LIMITS, &mut output).unwrap();
+        assert_eq!(output, native::encode(&42_u64, LIMITS).unwrap());
+    }
+    struct FailSecond(core::cell::Cell<bool>);
+    impl Serialize for FailSecond {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            if self.0.replace(true) {
+                return Err(serde::ser::Error::custom("second pass fails"));
+            }
+            serializer.serialize_u8(0)
+        }
+    }
+    assert_eq!(
+        native::encode_into(
+            &FailSecond(core::cell::Cell::new(false)),
+            LIMITS,
+            &mut output
+        ),
+        Err(Error::Malformed)
+    );
+    assert!(output.is_empty());
+    native::encode_request_into(7, &42_u64, LIMITS, &mut output).unwrap();
+    assert_eq!(native::decode_request::<u64>(7, &output, LIMITS), Ok(42));
 }

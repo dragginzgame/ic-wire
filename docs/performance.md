@@ -36,3 +36,6 @@ optional native portion into a fresh `target/messagepack-comparison` directory.
 The subsequent [Wasm runtime optimization](runtime-optimization.md) retains
 per-candidate instruction and size evidence, including regressions and rejected
 native inlining attempts. Its baseline is the completed comparison above.
+
+See [borrowing, buffers and bounded layouts](allocation-comparison.md) for the
+44-case native/IC experiment and its consumer-schema tradeoffs.

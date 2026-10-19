@@ -329,10 +329,46 @@ assert_eq!(native::decode_request::<Request>(7, &bytes, limits)?, request);
 
 `encode`/`decode` and `encoded_len` operate on payloads without headers.
 `encode_request`/`encode_response` accept borrowed Serialize values without an
-owned Deserialize requirement. Their decode counterparts require owned values.
+owned Deserialize requirement. Native decode accepts `Deserialize<'de>` values:
+strings and explicit byte views can borrow directly from the input. Ordinary
+owned callers remain supported; finite `Wire` contracts remain owned. Borrowing
+does not skip resource admission or canonical verification, and does not make
+arbitrary integer sequences borrowable. The decoded value cannot outlive its input.
 `encoded_frame_len` includes the 11-byte header for either direction. Retain the
 returned bytes unchanged for any consumer-authorized retry; IDs alone do not
 establish idempotency. Sizing does not retain a serialization for later delivery.
+
+`encode_into`, `encode_request_into` and `encode_response_into` write into a
+caller-owned `Vec<u8>` and return `Result<(), Error>`. They clear previous contents
+on entry and leave the buffer empty on error. Successful calls retain capacity;
+serialization failures may discard capacity. They preserve the two-pass native
+admission/sizing contract and the existing frame bytes. Existing capacity never
+relaxes byte limits. Oversized retained capacity is caller-owned storage, not a
+measurement of this operation's allocation allowance; shrink or drop it according
+to the caller's memory policy. Keep separate immutable bytes for retries before
+reusing a buffer.
+
+```rust
+use ic_wire::{Limits, native};
+let limits = Limits { bytes: 4096, allocation: 65536, nodes: 4096, depth: 32 };
+let mut output = Vec::new();
+native::encode_request_into(7, &"hello", limits, &mut output)?;
+let text: &str = native::decode_request(7, &output, limits)?;
+assert_eq!(text, "hello");
+// Once the borrowed view is no longer used, the buffer can be reused.
+native::encode_response_into(7, &"world", limits, &mut output)?;
+# Ok::<(), ic_wire::Error>(())
+```
+
+```compile_fail
+use ic_wire::{Limits, native};
+let limits = Limits { bytes: 64, allocation: 1024, nodes: 64, depth: 16 };
+let text: &str = {
+    let frame = native::encode_request(7, &"hello", limits).unwrap();
+    native::decode_request(7, &frame, limits).unwrap()
+}; // The input storage cannot be dropped while its decoded view is used.
+println!("{text}");
+```
 
 Limits are explicit per operation. Native `bytes` bounds the payload or full
 frame, respectively. `allocation` reserves that entire byte allowance for output

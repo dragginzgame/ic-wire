@@ -29,3 +29,6 @@ Run focused checks under the shared [validation policy](../DRAGGINZGAME.md#valid
 The complete `make ci` scaffold gate is reserved for an explicit local request
 or the maintainer's release flow. Wire does not qualify sibling endpoints,
 authentication, storage formats or delivery policy.
+
+See [borrowing, buffers and bounded layouts](allocation-comparison.md) for the
+44-case native/IC experiment and its consumer-schema tradeoffs.

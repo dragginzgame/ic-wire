@@ -10,7 +10,7 @@ mod encode;
 use crate::{Error, Limits, contract};
 use alloc::vec::Vec;
 use core::cell::Cell;
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize};
 
 struct Budget {
     nodes: Cell<usize>,
@@ -93,29 +93,76 @@ fn encode_prefixed<T: Serialize + ?Sized>(
     limits: Limits,
     prefix: &[u8],
 ) -> Result<Vec<u8>, Error> {
-    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
     let mut bytes = Vec::new();
+    encode_prefixed_into(value, limits, prefix, &mut bytes)?;
+    Ok(bytes)
+}
+
+/// Encode into reusable caller storage. Previous contents are cleared, including on error.
+/// Capacity may be lost on serialization failure; successful calls retain it.
+/// Retain a separate immutable frame when bytes must survive subsequent calls for retries.
+pub fn encode_into<T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_prefixed_into(value, limits, &[], bytes)
+}
+fn encode_prefixed_into<T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    prefix: &[u8],
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    bytes.clear();
+    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
     bytes
         .try_reserve_exact(size + prefix.len())
         .map_err(|_| Error::Allocation)?;
     bytes.extend_from_slice(prefix);
     let budget = Budget::new(limits);
-    postcard::serialize_with_flavor(
+    *bytes = postcard::serialize_with_flavor(
         &encode::Bounded {
             value,
             budget: &budget,
             depth: 1,
         },
         contract::Output {
-            bytes,
+            bytes: core::mem::take(bytes),
             limit: size + prefix.len(),
         },
     )
-    .map_err(|_| budget.error())
+    .map_err(|_| budget.error())?;
+    Ok(())
+}
+
+/// Encode a request into reusable storage; follows [`encode_into`] failure semantics.
+pub fn encode_request_into<T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_prefixed_into(value, limits, &contract::header(id, 0), bytes)
+}
+
+/// Encode a response into reusable storage; follows [`encode_into`] failure semantics.
+pub fn encode_response_into<T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_prefixed_into(value, limits, &contract::header(id, 1), bytes)
 }
 
 /// Decode a complete canonical payload; allocation admission precedes visitor calls.
-pub fn decode<T: Serialize + DeserializeOwned>(bytes: &[u8], limits: Limits) -> Result<T, Error> {
+/// Borrowed bytes and strings may refer directly to the input for its lifetime.
+/// Canonical verification and conservative resource charges also apply to borrowed values.
+pub fn decode<'de, T: Serialize + Deserialize<'de>>(
+    bytes: &'de [u8],
+    limits: Limits,
+) -> Result<T, Error> {
     if bytes.len() > limits.bytes {
         return Err(Error::Limit);
     }
@@ -172,25 +219,25 @@ pub fn encoded_frame_len<T: Serialize + ?Sized>(value: &T, limits: Limits) -> Re
         .map(|size| size + contract::HEADER)
 }
 /// Check request identity and direction before decoding its bounded native value.
-pub fn decode_request<T: Serialize + DeserializeOwned>(
+pub fn decode_request<'de, T: Serialize + Deserialize<'de>>(
     id: u64,
-    bytes: &[u8],
+    bytes: &'de [u8],
     limits: Limits,
 ) -> Result<T, Error> {
     decode_frame(id, 0, bytes, limits)
 }
 /// Check response identity and direction before decoding its bounded native value.
-pub fn decode_response<T: Serialize + DeserializeOwned>(
+pub fn decode_response<'de, T: Serialize + Deserialize<'de>>(
     id: u64,
-    bytes: &[u8],
+    bytes: &'de [u8],
     limits: Limits,
 ) -> Result<T, Error> {
     decode_frame(id, 1, bytes, limits)
 }
-fn decode_frame<T: Serialize + DeserializeOwned>(
+fn decode_frame<'de, T: Serialize + Deserialize<'de>>(
     id: u64,
     direction: u8,
-    bytes: &[u8],
+    bytes: &'de [u8],
     limits: Limits,
 ) -> Result<T, Error> {
     if bytes.len() > limits.bytes {

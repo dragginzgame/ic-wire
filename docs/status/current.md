@@ -11,8 +11,8 @@ A subsequent maintainer request authorizes the bounded
 [MessagePack/Postcard experiment](../messagepack-comparison.md); only its pure
 codec fixture/native driver are maintained here. External IC probes stay outside
 the workspace. Production encoding remains Postcard.
-The maintainer subsequently released 0.4.5 (`9e336f4`). The pending compatible
-notes are 0.4.6; this task executes no release or publication.
+The maintainer subsequently released 0.4.5 (`9e336f4`). The maintainer has since released 0.4.6 (`45a05b7`). Pending compatible
+notes are 0.4.7; this task executes no release or publication.
 
 Source starts at `a3e6577` with the pending license-metadata repair preserved.
 Shared Tooling remains at reviewed 0.24.2; its generic scripts/catalogs and guides
@@ -131,3 +131,21 @@ apply only to wasm32. Bytes, APIs, admission arithmetic and versions are unchang
 candidate sources, Wasms and logs remain at `target/runtime-optimization-2026-10-19/`;
 raw IC results and identities are in `docs/evidence/runtime-optimization-2026-10-19/`.
 No full CI, native macOS or whole-consumer deployment check was run.
+
+## Borrowing and allocation qualification
+
+[Measured tradeoffs](../allocation-comparison.md) cover 44 cases under opt-z/opt-3
+on native and external IC probes. Native decode now borrows input; reusable output
+APIs retain canonical checks and admission. Finite Wire remains owned. Packed
+consumer layouts have distinct identities and a tested borrowed array projection;
+no Blob schema/deployment or production encoding changes are made here. Borrowing
+saves about 10% of large-byte IC decode-plus-scan; packed hashes show much larger
+consumer-schema gains. Reuse retains high-water capacity and has no substantial
+combined encode/decode win. Finite maxima can waste memory on small messages.
+
+Focused runtime/evaluation tests, strict Clippy, Rust 1.91 host/Wasm and the
+90 TypeScript vectors/17,524 differential mutations pass. Raw evidence is under
+`docs/evidence/allocation-2026-10-19/`; source/harness/lock/measurement archives
+are under `target/allocation-2026-10-19/`. Native macOS and full CI were not run.
+Concurrent IC Build 0.21 dependency edits are preserved and excluded from this
+task's source metrics. No staging, commit, release or publication was performed.

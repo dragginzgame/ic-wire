@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.7] - Unreleased
+
+- Allow native decoding to borrow input bytes/strings and add reusable-output
+  encoding APIs, preserving canonical validation, admission and existing frames.
+- Qualify bounded contracts, packed consumer layouts, borrowing and buffer reuse
+  with native/IC measurements; see the [tradeoffs](docs/allocation-comparison.md).
+
 ## [0.4.6] - 2026-10-19
 
 - Reduce Wasm budget-check and bulk canonical-comparison costs without changing

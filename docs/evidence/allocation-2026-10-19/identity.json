@@ -1,0 +1,26 @@
+{
+  "baseline": "45a05b7 (0.4.6); working tree runtime additions",
+  "host": "Linux x86_64, AMD Ryzen Threadripper 7970X, taskset CPU 8, not exclusive",
+  "profiles": {
+    "evaluation": "opt-level=z, lto=true, codegen-units=1, panic=abort",
+    "speed": "opt-level=3; other settings identical"
+  },
+  "wasm": {
+    "evaluation": {
+      "bytes": 108102,
+      "gzip_9_mtime_0_bytes": 33240,
+      "sha256": "ea0d513144cb68210dc2d3103fe2e7d438f78949961f233e93844dc6a1c681ea"
+    },
+    "speed": {
+      "bytes": 119281,
+      "gzip_9_mtime_0_bytes": 37347,
+      "sha256": "46158723697d07b30ccd63220eb0be3ab169e5234125c6079eb39985df690ea7"
+    }
+  },
+  "source_sha256": {
+    "Cargo.lock": "ff074f54d3e0202a1ecc5afe0eccf5ad3a5adca008431392d6509fe4038e6e03",
+    "crates/ic-wire/src/native/mod.rs": "6164c7387c62eec12af79faa2259331372b77be0d4456ba9118f49432e61d654",
+    "crates/ic-wire-canister-evaluation/src/allocation/mod.rs": "93cdb925965dc759b3e350beac213ab96a0a37414f113a496621dcfa62d1ad0f",
+    "crates/ic-wire-canister-evaluation/examples/allocation/mod.rs": "7c74f77ac173206373a6c7aa8e2844ee351761ea248280e23d57df664661dd1b"
+  }
+}
