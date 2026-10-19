@@ -2,7 +2,10 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use std::collections::BTreeSet;
-use syn::{Data, DeriveInput, Fields, parse_macro_input};
+use syn::{
+    Data, DeriveInput, Fields, GenericParam, Lifetime, LifetimeParam, parse_macro_input,
+    parse_quote,
+};
 
 mod enum_expansion;
 
@@ -34,10 +37,16 @@ fn identity(attrs: &[syn::Attribute]) -> syn::Result<u32> {
 }
 
 fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
-    if !input.generics.params.is_empty() || input.generics.where_clause.is_some() {
+    if input
+        .generics
+        .params
+        .iter()
+        .any(|p| !matches!(p, GenericParam::Lifetime(_)))
+        || input.generics.where_clause.is_some()
+    {
         return Err(syn::Error::new_spanned(
             input.generics,
-            "Wire requires concrete contracts",
+            "Wire supports lifetime parameters only; type/const parameters and where clauses are unsupported",
         ));
     }
     if input.attrs.iter().any(|a| a.path().is_ident("wire")) {
@@ -46,6 +55,28 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
             "wire ids belong on fields or variants",
         ));
     }
+    let generics = input.generics;
+    let mut decode_name = "__ic_wire_de".to_owned();
+    while generics
+        .lifetimes()
+        .any(|p| p.lifetime.ident == decode_name)
+    {
+        decode_name.push('_');
+    }
+    let decode_lifetime = Lifetime::new(&format!("'{decode_name}"), proc_macro2::Span::call_site());
+    let mut decode_generics = generics.clone();
+    decode_generics.params.insert(
+        0,
+        GenericParam::Lifetime(LifetimeParam::new(decode_lifetime.clone())),
+    );
+    for lifetime in generics.lifetimes().map(|p| &p.lifetime) {
+        decode_generics
+            .make_where_clause()
+            .predicates
+            .push(parse_quote!(#decode_lifetime: #lifetime));
+    }
+    let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
+    let (decode_impl_generics, _, decode_where_clause) = decode_generics.split_for_impl();
     let name = input.ident;
     let mut ids = BTreeSet::new();
     let (serialize, deserialize, shape, schema) = match input.data {
@@ -91,17 +122,19 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                 quote! { ::ic_wire::schema::Schema::Record(&[#(::ic_wire::schema::Field { name: #labels, id: #field_ids, value: &<#types as ::ic_wire::Wire>::SCHEMA },)*]) },
             )
         }
-        Data::Enum(data) => enum_expansion::expand(&name, data)?,
+        Data::Enum(data) => {
+            enum_expansion::expand(&name, &generics, &decode_generics, &decode_lifetime, data)?
+        }
         Data::Union(_) => return Err(syn::Error::new_spanned(name, "unions are unsupported")),
     };
     Ok(quote! {
-        impl ::ic_wire::__private::serde::Serialize for #name {
+        impl #impl_generics ::ic_wire::__private::serde::Serialize for #name #type_generics #where_clause {
             fn serialize<S: ::ic_wire::__private::serde::Serializer>(&self, serializer: S) -> ::core::result::Result<S::Ok, S::Error> { #serialize }
         }
-        impl<'de> ::ic_wire::__private::serde::Deserialize<'de> for #name {
-            fn deserialize<D: ::ic_wire::__private::serde::Deserializer<'de>>(deserializer: D) -> ::core::result::Result<Self, D::Error> { #deserialize }
+        impl #decode_impl_generics ::ic_wire::__private::serde::Deserialize<#decode_lifetime> for #name #type_generics #decode_where_clause {
+            fn deserialize<D: ::ic_wire::__private::serde::Deserializer<#decode_lifetime>>(deserializer: D) -> ::core::result::Result<Self, D::Error> { #deserialize }
         }
-        impl ::ic_wire::Wire for #name {
+        impl #impl_generics ::ic_wire::Wire for #name #type_generics #where_clause {
             const SHAPE: ::ic_wire::Shape = #shape;
             const SCHEMA: ::ic_wire::schema::Schema = #schema;
         }

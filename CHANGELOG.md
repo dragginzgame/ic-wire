@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0]
+
+- **Breaking Rust API:** `Wire` no longer implies owned deserialization. Generic
+  decode callers must supply the appropriate Serde decode bound; encoding-only
+  contracts are supported. Existing Postcard bytes, framing and identities remain
+  unchanged.
+- Add bounded `BytesRef`/`TextRef` views, owned-to-borrowed projections and
+  lifetime-aware record/enum derives. Typed request/reply decoding can borrow
+  input while preserving field bounds, canonical checks and TypeScript schemas.
+  See the [migration and usage guide](crates/ic-wire/README.md#borrowed-bounded-contracts-and-the-05-api-cut).
+
+- Qualify final borrowed contracts with native timing, IC instruction and linked
+  Wasm probes; retain identical frame hashes and document full-scan tradeoffs in
+  the [evaluation evidence](docs/evaluation.md#final-05-borrowed-contract-measurements).
+
 ## [0.4.10] - 2026-10-19
 
 - Adopt IC Build 0.22 and its IC Host 0.30 dependency family for compiler

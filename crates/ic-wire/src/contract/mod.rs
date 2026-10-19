@@ -12,6 +12,7 @@ pub(crate) const HEADER: usize = 11;
 /// layouts and methods. A source rename alone must not change its identity.
 pub trait Method {
     /// Typed request, including any consumer-owned proof/envelope.
+    /// Borrowed fields can use lifetimes on the implementing method marker.
     type Request: Wire;
     /// Typed response, typically `Result<Success, ApplicationError>`.
     type Response: Wire;
@@ -209,7 +210,12 @@ fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<
         .map_err(|_| Error::Malformed)
 }
 
-fn decode<T: Wire>(id: u64, direction: u8, limits: Limits, bytes: &[u8]) -> Result<T, Error> {
+fn decode<'de, T: Wire + serde::Deserialize<'de>>(
+    id: u64,
+    direction: u8,
+    limits: Limits,
+    bytes: &'de [u8],
+) -> Result<T, Error> {
     let size = admit::<T>(limits)?;
     if bytes.len() > size || bytes.len() > limits.bytes {
         return Err(Error::Limit);
@@ -254,7 +260,10 @@ pub fn encoded_response_len<M: Method>(value: &M::Response) -> Result<usize, Err
     encoded_len(M::RESPONSE_LIMITS, value)
 }
 /// Decode a request only after method, direction, canonical and resource checks.
-pub fn decode_request<M: Method>(bytes: &[u8]) -> Result<M::Request, Error> {
+pub fn decode_request<'de, M: Method>(bytes: &'de [u8]) -> Result<M::Request, Error>
+where
+    M::Request: serde::Deserialize<'de>,
+{
     decode(M::ID, 0, M::REQUEST_LIMITS, bytes)
 }
 /// Encode a reply. Application errors belong inside `M::Response`.
@@ -265,7 +274,10 @@ pub fn encode_response<M: Method>(value: &M::Response) -> Result<ResponseBytes<M
     })
 }
 /// Decode a reply under the selected method's response contract.
-pub fn decode_response<M: Method>(bytes: &[u8]) -> Result<M::Response, Error> {
+pub fn decode_response<'de, M: Method>(bytes: &'de [u8]) -> Result<M::Response, Error>
+where
+    M::Response: serde::Deserialize<'de>,
+{
     decode(M::ID, 1, M::RESPONSE_LIMITS, bytes)
 }
 

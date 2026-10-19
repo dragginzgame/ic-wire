@@ -1,3 +1,6 @@
+mod borrowed;
+pub use borrowed::{BytesRef, TextRef};
+
 use crate::{Error, Shape, Wire};
 use alloc::{string::String, vec::Vec};
 use core::fmt;
@@ -104,6 +107,10 @@ impl<const N: usize> Bytes<N> {
     pub fn as_slice(&self) -> &[u8] {
         &self.0
     }
+    /// Borrow this bounded value without copying or repeating admission.
+    pub fn as_borrowed(&self) -> BytesRef<'_, N> {
+        BytesRef::from_owned(self)
+    }
     /// Recover the admitted bytes without copying or allocating.
     pub fn into_vec(self) -> Vec<u8> {
         self.0
@@ -161,6 +168,10 @@ impl<const N: usize> Text<N> {
     /// Borrow the text.
     pub fn as_str(&self) -> &str {
         &self.0
+    }
+    /// Borrow this bounded value without copying or repeating admission.
+    pub fn as_borrowed(&self) -> TextRef<'_, N> {
+        TextRef::from_owned(self)
     }
     /// Recover the admitted text without copying or allocating.
     pub fn into_string(self) -> String {

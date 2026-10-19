@@ -91,7 +91,7 @@ struct Fixture {
     mutation_data: BufWriter<fs::File>,
 }
 impl Fixture {
-    fn add_boxed<T: Wire>(&mut self, value: T, javascript: &str) {
+    fn add_boxed<T: Wire + serde::de::DeserializeOwned>(&mut self, value: T, javascript: &str) {
         let boxed = Box::new(value);
         assert_eq!(
             encode_request::<Contract<T>>(&boxed).unwrap().as_bytes(),
@@ -105,7 +105,7 @@ impl Fixture {
         );
         self.add(boxed, javascript);
     }
-    fn add<T: Wire>(&mut self, value: T, javascript: &str) {
+    fn add<T: Wire + serde::de::DeserializeOwned>(&mut self, value: T, javascript: &str) {
         let name = format!("m{}", self.count);
         fs::write(
             self.directory.join(format!("{name}.ts")),

@@ -1,12 +1,17 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::collections::BTreeSet;
-use syn::{DataEnum, Fields, Ident};
+use syn::{DataEnum, Fields, Generics, Ident, Lifetime};
 
 pub(super) fn expand(
     name: &Ident,
+    generics: &Generics,
+    decode_generics: &Generics,
+    decode_lifetime: &Lifetime,
     data: DataEnum,
 ) -> syn::Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
+    let (_, type_generics, _) = generics.split_for_impl();
+    let (decode_impl_generics, _, decode_where_clause) = decode_generics.split_for_impl();
     let mut ids = BTreeSet::new();
     if data.variants.is_empty() {
         return Err(syn::Error::new_spanned(name, "empty enum is unsupported"));
@@ -66,16 +71,16 @@ pub(super) fn expand(
     Ok((
         quote! { match self { #(#serializers,)* } },
         quote! {
-            struct #visitor;
-            impl<'de> ::ic_wire::__private::serde::de::Visitor<'de> for #visitor {
-                type Value = #name;
+            struct #visitor #generics (::core::marker::PhantomData<fn() -> #name #type_generics>);
+            impl #decode_impl_generics ::ic_wire::__private::serde::de::Visitor<#decode_lifetime> for #visitor #type_generics #decode_where_clause {
+                type Value = #name #type_generics;
                 fn expecting(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result { f.write_str("explicit wire variant") }
-                fn visit_seq<A: ::ic_wire::__private::serde::de::SeqAccess<'de>>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error> {
+                fn visit_seq<A: ::ic_wire::__private::serde::de::SeqAccess<#decode_lifetime>>(self, mut seq: A) -> ::core::result::Result<Self::Value, A::Error> {
                     let tag: u32 = seq.next_element()?.ok_or_else(|| ::ic_wire::__private::serde::de::Error::custom("missing variant id"))?;
                     match tag { #(#decoders,)* _ => Err(::ic_wire::__private::serde::de::Error::custom("unknown variant id")) }
                 }
             }
-            deserializer.deserialize_tuple(2, #visitor)
+            deserializer.deserialize_tuple(2, #visitor(::core::marker::PhantomData))
         },
         quote! { ::ic_wire::Shape::choice(5, &[#(#shapes,)*]) },
         quote! { ::ic_wire::schema::Schema::Enum(&[#(#variants,)*]) },

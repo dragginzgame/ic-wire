@@ -1,5 +1,8 @@
 # Borrowing, buffers and bounded layouts
 
+This report records the 0.4.6-era experiment. Finite borrowing has subsequently
+been implemented for 0.5.0; see the [current runtime guide](../crates/ic-wire/README.md).
+
 Measured 2026-10-19 against released 0.4.6 plus the native API additions in this
 working tree. Production remains Postcard. Hashes are consumer data, not a Wire
 protocol requirement. No rkyv or alternative production codec is introduced.

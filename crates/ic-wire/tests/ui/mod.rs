@@ -1,9 +1,17 @@
 //! Explicit compile-pass and compile-fail contracts. Run the owning Make diagnostic target.
 #![allow(dead_code, unused_imports, unexpected_cfgs)]
+#[cfg(ui_case = "borrow_escape")]
+mod borrow_escape;
+#[cfg(ui_case = "borrow_mutation")]
+mod borrow_mutation;
+#[cfg(ui_case = "const_contract")]
+mod const_contract;
 #[cfg(ui_case = "duplicate_field_id")]
 mod duplicate_field_id;
 #[cfg(ui_case = "duplicate_variant_id")]
 mod duplicate_variant_id;
+#[cfg(ui_case = "encode_only_decode")]
+mod encode_only_decode;
 #[cfg(ui_case = "generic_contract")]
 mod generic_contract;
 #[cfg(ui_case = "missing_id")]

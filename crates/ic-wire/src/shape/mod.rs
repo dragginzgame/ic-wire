@@ -1,5 +1,5 @@
 use alloc::boxed::Box;
-use serde::{Serialize, de::DeserializeOwned};
+use serde::Serialize;
 
 /// Worst-case bounds for one finite value.
 #[derive(Clone, Copy, Debug)]
@@ -72,7 +72,9 @@ impl Shape {
 /// Manual implementations must provide honest bounds, reject before excessive
 /// allocation/work, and serialize deterministically. Unbounded Serde types have
 /// no implementation. Recursive types are unsupported.
-pub trait Wire: Serialize + DeserializeOwned {
+/// Decoding additionally requires `Deserialize` for the input lifetime; a Wire
+/// value may borrow input or support encoding only.
+pub trait Wire: Serialize {
     /// Static resource authority for this value.
     const SHAPE: Shape;
     /// Static projection metadata; custom implementations must opt in honestly.
@@ -127,7 +129,7 @@ impl<T: Wire> Wire for Box<T> {
 
 impl<T: Wire, const N: usize> Wire for [T; N]
 where
-    [T; N]: Serialize + DeserializeOwned,
+    [T; N]: Serialize,
 {
     const SCHEMA: Schema = Schema::Array(&T::SCHEMA, N);
     const SHAPE: Shape = Shape {

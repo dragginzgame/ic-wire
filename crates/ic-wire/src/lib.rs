@@ -14,7 +14,7 @@ mod shape;
 /// Optional host-side TypeScript generation; never required by a canister.
 #[cfg(feature = "typescript")]
 pub mod typescript;
-pub use bounded::{Bytes, List, Text};
+pub use bounded::{Bytes, BytesRef, List, Text, TextRef};
 pub use contract::{
     Method, RequestBytes, ResponseBytes, decode_request, decode_response, encode_request,
     encode_response, encoded_request_len, encoded_response_len,

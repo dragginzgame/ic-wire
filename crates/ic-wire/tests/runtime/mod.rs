@@ -251,7 +251,7 @@ fn list_count_rejects_before_element_decoder() {
 
 #[test]
 fn supported_scalar_extremes_and_fixed_arrays_fit_declared_shapes() {
-    fn check<T: Wire + core::fmt::Debug + PartialEq>(value: T) {
+    fn check<T: Wire + serde::de::DeserializeOwned + core::fmt::Debug + PartialEq>(value: T) {
         let bytes = postcard::to_allocvec(&value).unwrap();
         assert!(bytes.len() <= T::SHAPE.bytes);
         assert_eq!(postcard::from_bytes::<T>(&bytes).unwrap(), value);

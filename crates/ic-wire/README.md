@@ -60,10 +60,12 @@ There is one current contract, without fallback readers or automatic migration.
 
 Enums use explicit u32 `wire(id)` tags and support unit variants or one payload
 field (use a named record for several values). Rust variant order is irrelevant.
-Records support up to 16 named fields, including an empty record. Generic derives,
-recursive graphs, maps, raw f32/f64 and architecture-dependent integers are
+Records support up to 16 named fields, including an empty record. Lifetime
+parameters and their inline outlives bounds are supported. Type/const parameters,
+where clauses, recursive graphs, maps, raw f32/f64 and architecture-dependent integers are
 excluded. Supported leaves are unit, bool, fixed-width signed/unsigned integers
 through 128 bits, and FiniteF32/FiniteF64. Option, Result, bounded List/Bytes/Text,
+borrowed BytesRef/TextRef,
 Serde-supported fixed arrays and `Box<T: Wire>` compose. Boxes are transparent:
 bytes, schema, node count and depth match T, while the heap bound includes
 `size_of::<T>()` plus T's nested heap. Zero-sized boxes add no allocation.
@@ -78,6 +80,79 @@ then own the recovered buffers; constructing another wrapper checks its bound ag
 A field of `Bytes<29>` alone establishes a byte bound, not caller authentication.
 Keep the dependency name `ic-wire` so generated paths resolve. Consumers do not
 need to depend directly on Serde or derive its traits for these records.
+
+## Borrowed bounded contracts and the 0.5 API cut
+
+`Wire` supplies finite bounds, schema metadata and serialization. Decoding requires
+`Deserialize<'de>` separately, with `'de` tied to the input frame. This is a Rust
+API break: generic helpers that previously used `T: Wire` to imply owned decoding
+must add `T: serde::de::DeserializeOwned`, or an input-specific
+`T: serde::Deserialize<'de>` bound. Existing concrete owned DTOs keep working.
+Encoding and sizing no longer require a decoder. Postcard bytes, field/variant
+IDs and framing are unchanged; native dynamic admission remains supported.
+
+`BytesRef<'a, N>` and `TextRef<'a, N>` borrow bounded bytes or UTF-8 text. Their
+`new` constructors check byte length without allocation; `Bytes::as_borrowed()`
+and `Text::as_borrowed()` project already-admitted owned storage. Accessors return
+the original storage lifetime. Their schema and representation match `Bytes<N>`
+and `Text<N>`, while their value-heap bound is zero. Lists/boxes containing views
+still account for their own container allocation. Borrowing does not change the
+finite encoder's maximum-schema output reservation.
+
+```rust
+use core::marker::PhantomData;
+use ic_wire::{BytesRef, TextRef, Limits, Method, Wire};
+#[derive(Debug, PartialEq, Wire)]
+struct Chunk<'a> {
+    #[wire(id = 1)]
+    content_type: TextRef<'a, 64>,
+    #[wire(id = 2)]
+    data: BytesRef<'a, 1048576>,
+}
+struct Upload<'a>(PhantomData<&'a ()>);
+impl<'a> Method for Upload<'a> {
+    type Request = Chunk<'a>;
+    type Response = u64;
+    const ID: u64 = 42;
+    const NAME: &'static str = "upload_chunk";
+    const REQUEST_LIMITS: Limits = Limits {
+        bytes: 2 * 1024 * 1024, allocation: 2 * 1024 * 1024,
+        nodes: 8, depth: 4,
+    };
+    const RESPONSE_LIMITS: Limits = Self::REQUEST_LIMITS;
+}
+let data = vec![42; 32];
+let request = Chunk {
+    content_type: TextRef::new("application/octet-stream")?,
+    data: BytesRef::new(&data)?,
+};
+let frame = ic_wire::encode_request::<Upload<'_>>(&request)?.into_bytes();
+let view = ic_wire::decode_request::<Upload<'_>>(&frame)?;
+assert_eq!(view, request);
+// The view references the received frame, with no owned payload copy.
+let start = frame.as_ptr() as usize;
+assert!((start..start + frame.len()).contains(&(view.data.as_slice().as_ptr() as usize)));
+# Ok::<(), ic_wire::Error>(())
+```
+
+Records and tagged enums may carry multiple lifetimes. Derives generate the
+required input-outlives-view bounds; no Serde borrow annotations are necessary.
+Use a lifetime-parameterized method marker for borrowed requests/replies. Views
+cannot escape their backing storage or coexist with mutations of that storage.
+An async handler must keep the input frame alive for as long as it uses the view;
+retaining a small view can therefore retain a much larger frame.
+
+Borrowed deserialization requires a deserializer that lends its input. There is
+no hidden owned fallback for readers or transient string/byte visitors. Invalid
+UTF-8, excess field lengths, trailing input, wrong identities and noncanonical
+representations remain rejected. Borrowed fields alone do not provide semantic
+validation or authentication.
+
+Encoded frames own their bytes. Call `into_bytes()` when a retry buffer must
+outlive a source value whose lifetime appears in the method marker. Retain those
+exact immutable bytes under the consumer's retry policy. TypeScript generation
+uses the same schema for owned and borrowed forms; its wire representation does
+not gain Rust lifetime parameters.
 
 ## Finite floats and SQL-shaped messages
 
@@ -186,7 +261,8 @@ isolated compiler invocations with locked, previously fetched dependencies offli
 checks valid synchronous and async consumer-shaped adapters, each binding its
 handler argument and response to the same Method associated types. It then checks
 expected compilation failures: missing field IDs, duplicate field/variant IDs,
-unbounded String, generic and tuple contracts, wrong request/reply types, wrong
+unbounded String, type/const-generic and tuple contracts, escaping or mutating
+borrowed input, decoding encode-only contracts, wrong request/reply types, wrong
 handler argument/return types and an async handler with the wrong future output.
 Unexpected diagnostics print their logs; failed fixtures are retained for inspection.
 These are private adapter-shape checks, not implemented Canic macros, executor or
@@ -331,7 +407,7 @@ assert_eq!(native::decode_request::<Request>(7, &bytes, limits)?, request);
 `encode_request`/`encode_response` accept borrowed Serialize values without an
 owned Deserialize requirement. Native decode accepts `Deserialize<'de>` values:
 strings and explicit byte views can borrow directly from the input. Ordinary
-owned callers remain supported; finite `Wire` contracts remain owned. Borrowing
+owned callers remain supported; finite contracts also support bounded borrowing. Borrowing
 does not skip resource admission or canonical verification, and does not make
 arbitrary integer sequences borrowable. The decoded value cannot outlive its input.
 `encoded_frame_len` includes the 11-byte header for either direction. Retain the

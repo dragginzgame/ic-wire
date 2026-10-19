@@ -1,0 +1,5 @@
+profile,lane,linked_wasm_bytes,gzip_9_mtime_0_bytes
+release,owned,41383,14638
+release,borrowed,40232,14468
+speed,owned,32331,12466
+speed,borrowed,31380,12167
