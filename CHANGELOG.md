@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.8]
+## [0.4.8] - 2026-10-19
 
 - Grow bounded lists geometrically within their declared maximum when decode
   length hints are hidden, avoiding repeated one-element reallocations.
