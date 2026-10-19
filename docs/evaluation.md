@@ -14,7 +14,12 @@ and installed canister drivers are outside this repository.
 | `check-evaluation` | Native roundtrips against private raw-codec controls and strict linting |
 | `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.91 floor |
 
-Private raw Postcard, bitcode and wincode controls have different admission and
+The maintainer-requested [MessagePack comparison](messagepack-comparison.md) adds
+an optional raw-codec experiment with retained native, external IC instruction
+and linked Wasm size evidence. `make evaluate-messagepack` reruns its native
+portion; external installed probes remain outside the maintained workspace.
+
+Private raw Postcard, MessagePack, bitcode and wincode controls have different admission and
 canonicality guarantees. They are not production codec modes. Optional
 [native timings](performance.md) must retain compiler, target, profile, inputs,
 lock selection and codec parameters. Native nanoseconds do not establish IC

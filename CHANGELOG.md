@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.6]
+
+- Reduce Wasm budget-check and bulk canonical-comparison costs without changing
+  bytes or resource admission. Blob-shaped probes show 30–39% fewer manifest
+  encode instructions across speed/size profiles; see the
+  [optimization report](docs/runtime-optimization.md) for decode gains and tradeoffs.
+
+- Add a reproducible, unpublished MessagePack/Postcard benchmark for Blob-shaped
+  workloads, with native timings, external IC instruction evidence and independent
+  Wasm sizes. Keep Postcard as the production encoding; see the
+  [comparison report](docs/messagepack-comparison.md).
+
+- Reduce Wasm canonical bulk-byte comparison instructions using exact wordwise
+  XOR/OR accumulation. Preserve bytes, resource admission and typed failures.
+  Earlier consumer-owned Blob measurements show a 31% decode-instruction reduction for
+  a 1 MiB opaque-byte control; manifest workloads remain essentially unchanged.
+
 ## [0.4.5] - 2026-10-19
 
 - Qualify 1 MiB opaque buffers across finite Rust, native Rust and generated

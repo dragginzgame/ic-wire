@@ -162,12 +162,21 @@ impl Flavor for Compare<'_> {
             // Exact unaligned word loads preserve canonical equality; no hash or
             // scratch allocation is involved. Small scalar writes stay simple.
             self.equal &= if cfg!(any(target_arch = "wasm32", test)) && bytes.len() >= 8 {
-                let (left, left_tail) = prefix.as_chunks::<8>();
-                let (right, right_tail) = bytes.as_chunks::<8>();
-                left.iter()
-                    .zip(right)
-                    .all(|(a, b)| u64::from_ne_bytes(*a) == u64::from_ne_bytes(*b))
-                    && left_tail == right_tail
+                if bytes.len() >= 64 {
+                    let (left, left_tail) = prefix.as_chunks::<16>();
+                    let (right, right_tail) = bytes.as_chunks::<16>();
+                    left.iter().zip(right).fold(0_u128, |difference, (a, b)| {
+                        difference | (u128::from_ne_bytes(*a) ^ u128::from_ne_bytes(*b))
+                    }) == 0
+                        && left_tail == right_tail
+                } else {
+                    let (left, left_tail) = prefix.as_chunks::<8>();
+                    let (right, right_tail) = bytes.as_chunks::<8>();
+                    left.iter().zip(right).fold(0_u64, |difference, (a, b)| {
+                        difference | (u64::from_ne_bytes(*a) ^ u64::from_ne_bytes(*b))
+                    }) == 0
+                        && left_tail == right_tail
+                }
             } else {
                 prefix == bytes
             };

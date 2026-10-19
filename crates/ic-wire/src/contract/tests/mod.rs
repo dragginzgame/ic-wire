@@ -4,7 +4,7 @@ use alloc::vec;
 #[test]
 fn exact_bulk_equality_covers_word_boundaries_tails_and_every_mismatch() {
     // Native unit builds exercise the same chunk branch as production Wasm.
-    for len in 0..=65 {
+    for len in 0..=97 {
         let original: Vec<_> = (0..len).map(|i| i as u8).collect();
         let compare = || Compare {
             remaining: &original,

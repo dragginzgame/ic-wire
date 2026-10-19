@@ -27,9 +27,11 @@ impl Budget {
             refused: Cell::new(limits.allocation < limits.bytes),
         }
     }
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn enter(&self, depth: usize, size: usize) -> bool {
         self.enter_many(depth, size, 1)
     }
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn enter_many(&self, depth: usize, size: usize, count: usize) -> bool {
         if self.refused.get() {
             return false;
@@ -45,6 +47,7 @@ impl Budget {
         self.nodes.set(nodes);
         true
     }
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn bytes(&self, bytes: usize) -> bool {
         let Some(cost) = bytes.checked_mul(8) else {
             self.refused.set(true);

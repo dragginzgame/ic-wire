@@ -25,3 +25,14 @@ size experiment is maintained here. Raw controls do not implement Wire's resourc
 admission and canonical validation, so the results cannot establish an equivalent
 fastest-codec claim or an end-to-end deployment saving. No timing result is claimed
 without a report bound to its actual inputs.
+
+## MessagePack comparison
+
+See the [Blob-shaped MessagePack/Postcard experiment](messagepack-comparison.md)
+for 27 workloads, two optimization profiles, raw samples, external IC instruction
+counts and independently linked Wasm sizes. `make evaluate-messagepack` runs the
+optional native portion into a fresh `target/messagepack-comparison` directory.
+
+The subsequent [Wasm runtime optimization](runtime-optimization.md) retains
+per-candidate instruction and size evidence, including regressions and rejected
+native inlining attempts. Its baseline is the completed comparison above.

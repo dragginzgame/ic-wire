@@ -1,0 +1,178 @@
+{
+  "date": "2026-10-19",
+  "base_commit": "9e336f402258cccdb1433e44f8c8b07b65f93756",
+  "source": "dirty working tree; incoming runtime canonical-byte optimization included; exact source archive retained locally",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           52 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  64\nOn-line CPU(s) list:                     0-63\nVendor ID:                               AuthenticAMD\nModel name:                              AMD Ryzen Threadripper 7970X 32-Cores\nCPU family:                              25\nModel:                                   24\nThread(s) per core:                      2\nCore(s) per socket:                      32\nSocket(s):                               1\nStepping:                                1\nFrequency boost:                         enabled\nCPU(s) scaling MHz:                      84%\nCPU max MHz:                             5356.1782\nCPU min MHz:                             419.4600\nBogoMIPS:                                7987.73\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd amd_ppin cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid overflow_recov succor smca fsrm flush_l1d debug_swap\nVirtualization:                          AMD-V\nL1d cache:                               1 MiB (32 instances)\nL1i cache:                               1 MiB (32 instances)\nL2 cache:                                32 MiB (32 instances)\nL3 cache:                                128 MiB (4 instances)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-63\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Mitigation; Clear CPU buffers\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n",
+  "native_cpu_affinity": "8; not exclusive",
+  "profiles": {
+    "evaluation": {
+      "opt_level": "z",
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "debuginfo"
+    },
+    "speed": {
+      "opt_level": 3,
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "debuginfo"
+    }
+  },
+  "gzip": "gzip 1.12",
+  "compression": "gzip -n -9",
+  "wasm_opt": false,
+  "commands": "# Maintained native experiment, opt-level z, fresh output directory:\ncargo build --locked --offline --profile evaluation -p ic-wire-canister-evaluation --example messagepack --features comparison-postcard,comparison-messagepack,comparison-wire --target-dir /tmp/ic-wire-msgpack-target\ntaskset -c 8 /tmp/ic-wire-msgpack-target/evaluation/examples/messagepack /tmp/ic-wire-msgpack-evidence/native-z-verified evaluation\n# Speed profile: otherwise identical, opt-level 3 (not default Cargo release):\nCARGO_PROFILE_EVALUATION_OPT_LEVEL=3 cargo build --locked --offline --profile evaluation -p ic-wire-canister-evaluation --example messagepack --features comparison-postcard,comparison-messagepack,comparison-wire --target-dir /tmp/ic-wire-msgpack-speed\ntaskset -c 8 /tmp/ic-wire-msgpack-speed/evaluation/examples/messagepack /tmp/ic-wire-msgpack-evidence/native-speed-verified speed\n# External, disposable IC-only harness (source archive retained with local artifacts):\nbash /tmp/ic-wire-msgpack-ic/build-probes.sh\ncargo build --locked --offline --manifest-path /tmp/ic-wire-msgpack-host/Cargo.toml -p codec-driver\n# Run for each of evaluation/speed, distinct output:\nPOCKET_IC_BIN=/tmp/ic-blob-wire-cut/.tools/testkit-server/16.1.0-x86_64-linux/pocket-ic /tmp/ic-wire-msgpack-host/target/debug/codec-driver /tmp/ic-wire-msgpack-evidence/evaluation /tmp/ic-wire-msgpack-evidence/ic-z-verified.json\nPOCKET_IC_BIN=/tmp/ic-blob-wire-cut/.tools/testkit-server/16.1.0-x86_64-linux/pocket-ic /tmp/ic-wire-msgpack-host/target/debug/codec-driver /tmp/ic-wire-msgpack-evidence/speed /tmp/ic-wire-msgpack-evidence/ic-speed-verified.json\n# Wasm compression uses gzip -n -9; no wasm-opt pass.\n",
+  "source_sha256": {
+    "crates/ic-wire/src/lib.rs": "48f44219dbe2c7a21758b6a73da86b6779145c3381ba6c07ae65364918f2aa26",
+    "crates/ic-wire/examples/typescript_conformance/mod.rs": "f222ed8608e84b3b804bd79a044910310a5629bc094566aea159125c90afd302",
+    "crates/ic-wire/examples/fuzz_runtime/mod.rs": "2c102528e421a224e2f0945a50d660d217951b6f51c59a2bd5a8103facf85bb7",
+    "crates/ic-wire/examples/typescript_conformance/large_bytes/mod.rs": "2a62be4aba9e174c4649e24cb2ccfba7eae1df32d6f3f38dd09d384eec3aeac1",
+    "crates/ic-wire/tests/runtime/mod.rs": "a7475b36ffd8e75638625e73fd936779fbd2091238eb82160a9a60d66306699c",
+    "crates/ic-wire/tests/ui/mod.rs": "08273e957ac8aba5171282404748cd3ca1b4c4ea4b60df1b64e4621312c81104",
+    "crates/ic-wire/tests/native/mod.rs": "80cf0bc25af1b72b8439998ce0df20c240306f5f4b12f97c7eb0fe8f8508242d",
+    "crates/ic-wire/tests/runtime/canonical_bytes/mod.rs": "437f6f678ed2c7cd770809f6bea618585b205b2f50e0ed7c32adfe21b13faa17",
+    "crates/ic-wire/tests/runtime/boxed/mod.rs": "fe9f04b84efbb52e1c1dfe6839b9f7699ea5e7491c7faf71f13b30815354b798",
+    "crates/ic-wire/tests/runtime/large_bytes/mod.rs": "ec1f72cdecd0f745dbd9eda1f9abf8b103ac6966d749897ea9dd05304c1af722",
+    "crates/ic-wire/tests/ui/generic_contract/mod.rs": "8f854ada940fbf3b9dc5530e47d65feccd862fef55d4921927ecb5ae723b7644",
+    "crates/ic-wire/tests/ui/duplicate_field_id/mod.rs": "46260759593be711cbf70c697577aa5c1fc19c7e39009d2b91d4e0bada267845",
+    "crates/ic-wire/tests/ui/missing_id/mod.rs": "2654d1bdab59e2b10e726cec99968b11a769b23340592fe3665c4e936edac80e",
+    "crates/ic-wire/tests/ui/recursive_box/mod.rs": "0caa3c0a8a3631ed4496065d73a80e29f589341ba8386d14cb0127da747a2db7",
+    "crates/ic-wire/tests/ui/unsupported_field/mod.rs": "fb2d1d5ac61aebe2f110c18e2db6967dd1e064c92499745628850bae4ced9f53",
+    "crates/ic-wire/tests/ui/wrong_handler_argument/mod.rs": "96243e82b09ca926c81d6050475372c3d8deb81ceb7f990f68cbd6206b9f2f82",
+    "crates/ic-wire/tests/ui/valid/mod.rs": "17680ee8d8f0f9ac5f697c9648390f3ad43e0be843b132316e51a4d7cf7c6a41",
+    "crates/ic-wire/tests/ui/wrong_reply/mod.rs": "2bfb11c71327569a3059115d0e8ca93b30965d4a2ff52f7d95c4826e95adefde",
+    "crates/ic-wire/tests/ui/wrong_async_handler/mod.rs": "88dc2e478bd8f6172dbde09b55008951f12c70eae75f445e8bcb701a018550b4",
+    "crates/ic-wire/tests/ui/tuple_record/mod.rs": "a4cc82e7603ee97d19dd967f7545a5275a215c3dcb061fe6be14ddc6454edfc7",
+    "crates/ic-wire/tests/ui/wrong_request/mod.rs": "af5225545afb36225125624cd9c1530f7324d23b1f1535d685858ccf0ea6df84",
+    "crates/ic-wire/tests/ui/duplicate_variant_id/mod.rs": "a37423e15d733fb839884a8ce2521c9b05caaad88cab7b478408b33408d541cf",
+    "crates/ic-wire/tests/ui/wrong_handler/mod.rs": "975a68df62c355302a7e3696bb0ee81e2f9de26edb457dfe697f7ffac9c81b98",
+    "crates/ic-wire/tests/ui/support/mod.rs": "7b5f8780b68dc1a2e828096ac7c800339d2683bd7c795c1e87953f7e5e613d03",
+    "crates/ic-wire/src/typescript/mod.rs": "3b115622773e3d2674158339f14cc0d5fd2b7e4e28c07f80afa93bf296b841ee",
+    "crates/ic-wire/src/native/mod.rs": "5cf78f14989c165e6decac1de0a187f858a420f08032e9284e82f64e80d9d711",
+    "crates/ic-wire/src/bounded/mod.rs": "227ddba85b62262afc32a77da8f7b9980d5699736130ec7cdc2892a9092ee1a5",
+    "crates/ic-wire/src/contract/mod.rs": "6d1bd5468c3af4d3117baae7a25058b472250933c451384fb394ed9330cd7d32",
+    "crates/ic-wire/src/shape/mod.rs": "cea75b0e83b55b5b3c64851e3aefcb6659470142ffe7402cddf03e2b4488a39b",
+    "crates/ic-wire/src/float/mod.rs": "ed8eb372a3a69f4f1b27a47ec37426ac56232d812bfe94763150530c51f2ea04",
+    "crates/ic-wire/src/schema/mod.rs": "e177ff609382eff2aaa687013506d963465782120f6e9896d1af150ea15e6ba8",
+    "crates/ic-wire/src/typescript/metadata/mod.rs": "c356d08fcebb9029ba74b8f0c8ba9de8c75d228739f6a98ddfb81625247b44b3",
+    "crates/ic-wire/src/native/encode/mod.rs": "17d0e86407aa0377f2b2097420f8139b4abdeb788f9915167e27c54f3ce7f97f",
+    "crates/ic-wire/src/native/decode/mod.rs": "67fb248f509704d50c5f75f48d2ececf5fe23bd466a9e455a92bce8518083569",
+    "crates/ic-wire/src/contract/tests/mod.rs": "f31fa930a0bf1e672b7ef1142c4651d0ca297836d7c88d41ed35e527f402d5ac",
+    "crates/ic-wire-derive/src/lib.rs": "5738a3aafbbe5687cdb5ee7e9edc837c0a5132952b4450c338dd207decc6c33d",
+    "crates/ic-wire-derive/src/enum_expansion/mod.rs": "f44169254529cf925bc21900e00ee9ea543e206ad4d02c4610e49b8b537b8f46",
+    "crates/ic-wire-canister-evaluation/src/lib.rs": "dec9cf9fa1be230eab39ecfcc8cc0065aaf48a0b577a45df1a3ad028de1ad1ae",
+    "crates/ic-wire-canister-evaluation/examples/messagepack/mod.rs": "e6d788b901c411ffccc0be82a2f574a6712522b39f5cb9844210b52748cd765a",
+    "crates/ic-wire-canister-evaluation/examples/check_diagnostics/mod.rs": "5cba3db3bf1a3be320e7a85ca9c1a7a221b620a6903b60889c5033aee98b1a96",
+    "crates/ic-wire-canister-evaluation/examples/performance/mod.rs": "615939ada155019132785f7fb1c9f6539720aa63f772d9d70b4755f8e0afe832",
+    "crates/ic-wire-canister-evaluation/src/messagepack/mod.rs": "f0f3a004164f4991ff4fb25eb5da6629de7ebf2be60409b615394f6484bba924",
+    "crates/ic-wire-canister-evaluation/src/performance/mod.rs": "4612fb901349645a433bb87e39c8cd0e7c8a4176e28e913a7733b68cb2d67799",
+    "Cargo.toml": "286c52169e303b49388b5533f0b6c1aa17cf8eb6351fe679e0935583a0df192e",
+    "Cargo.lock": "6e39e36d01cbd08066ee2e987a9c22722479ba9bc8c94e622e8a991ce1a96fd3",
+    "crates/ic-wire-canister-evaluation/Cargo.toml": "9d31398ee3d6375cf10be5a9fcaa0ec7f4cd3a22f996f558de81899eb18b58a0"
+  },
+  "wasm": [
+    {
+      "profile": "evaluation",
+      "lane": "empty",
+      "wasm_bytes": 19901,
+      "gzip_bytes": 7606,
+      "wasm_sha256": "afd236d78c915898e74ab60c72d5ed531b532f6b2432265c88a5521d830ea1d7",
+      "gzip_sha256": "525cf758e4326b39e61e2a8fc67b4e589f8a03e3e0a60a3504dbe5fa72189201"
+    },
+    {
+      "profile": "evaluation",
+      "lane": "postcard",
+      "wasm_bytes": 92179,
+      "gzip_bytes": 28866,
+      "wasm_sha256": "e73af822684200f652686aa267db00c0de09c22619f19e104b8a62fca2150291",
+      "gzip_sha256": "3cd35cf66f6f5a2ce30416b76f76b67fece9bb2e5ba7f69ba73d0d48492bcf15"
+    },
+    {
+      "profile": "evaluation",
+      "lane": "messagepack-array",
+      "wasm_bytes": 341462,
+      "gzip_bytes": 77252,
+      "wasm_sha256": "e9746d0b6f111d491e2c8925fc59a894f518305d89bad6e8147361a7807ed453",
+      "gzip_sha256": "644183d4032e57e9a4bdf0467c6c9843c5a998532c343f8f7477f8a69d3beaf1"
+    },
+    {
+      "profile": "evaluation",
+      "lane": "messagepack-map",
+      "wasm_bytes": 341480,
+      "gzip_bytes": 77224,
+      "wasm_sha256": "b6f1ef5e0178491a6f02fb63599f8897eb2067b34af46a87d1dc72e066624480",
+      "gzip_sha256": "15a221b582d51c6133ce7d4efd90324f17a4b3f9e961e16082335cf58897643a"
+    },
+    {
+      "profile": "evaluation",
+      "lane": "wire-native",
+      "wasm_bytes": 121640,
+      "gzip_bytes": 34584,
+      "wasm_sha256": "71cf8cc9430f1774418c4826496903461b37a01895fabedfa081f8ad750fc467",
+      "gzip_sha256": "f7957bb12a4c40f8681f2f5c099f87885357d72f8efa473f63496e0d3d6239d1"
+    },
+    {
+      "profile": "speed",
+      "lane": "empty",
+      "wasm_bytes": 20800,
+      "gzip_bytes": 7804,
+      "wasm_sha256": "1f41f6f0e2a53b8d859d2629bce77e47f586d77cb85447d8300f26da231a3743",
+      "gzip_sha256": "2e08381a8f4593bcb6167287263971bd93538ecc1781adb9845d0e1983360149"
+    },
+    {
+      "profile": "speed",
+      "lane": "postcard",
+      "wasm_bytes": 115407,
+      "gzip_bytes": 33371,
+      "wasm_sha256": "1488f33a71d62eb2b3f2ea93f4b30882322a2f7dec7e7936cf0125240d7dfec2",
+      "gzip_sha256": "33ee60e9e3cf21eaf5e22dfaf0d5443ea5495d4ba10dfdb973906fe7391d55ad"
+    },
+    {
+      "profile": "speed",
+      "lane": "messagepack-array",
+      "wasm_bytes": 357133,
+      "gzip_bytes": 82937,
+      "wasm_sha256": "6e04505fcc901d6dfb3298d25c335cce7ec3540fc41c47403bb5bcece1608dd6",
+      "gzip_sha256": "09a58299c8cfcddea55003a23e0a3ae28de1758a1732abba50605377d316b0f0"
+    },
+    {
+      "profile": "speed",
+      "lane": "messagepack-map",
+      "wasm_bytes": 357565,
+      "gzip_bytes": 83044,
+      "wasm_sha256": "3f7a9e8b4ad63db0a923e30e84e0976a3bccef2b9ccbea89f86d847828015670",
+      "gzip_sha256": "67e055188e7d9c5f4b81ebe2b9adbead4e2218068731df7509f4fb74f2a0b6f1"
+    },
+    {
+      "profile": "speed",
+      "lane": "wire-native",
+      "wasm_bytes": 149529,
+      "gzip_bytes": 42928,
+      "wasm_sha256": "b31454006d1585b64ee51ead40ec0c234e8fea197c36ae254fb49f1cfe4bdb1d",
+      "gzip_sha256": "ddfcbc20e81f5369494522ff2432b060beef339650f4b27484a308fc0c11be3c"
+    }
+  ],
+  "wire_limits": {
+    "bytes": 2097152,
+    "allocation_allowance": 67108864,
+    "nodes": 262144,
+    "depth": 32
+  },
+  "parity": "All 108 inputs match by length and SHA-256 across native, IC and both profiles.",
+  "measurement_scope": "Fresh allocated encode/owned decode/drop, setup and checks excluded; raw codecs lack Wire admission/canonicality.",
+  "clock": "native nanoseconds or ic0.performance_counter(0), separately labelled",
+  "native_statistics": "15 calibrated rotating batches; p10 = sorted sample[1], p90 = sorted sample[13]; not confidence intervals",
+  "ic_statistics": "5 queries of 4 operations, no whole-call latency claim",
+  "external_probe_lock_sha256": "2097f0a0d7f1c04027fc7b176afe7ca70a42b6124e52498e8ed23ded273a0842",
+  "external_host_lock_sha256": "e239e4d2df7f0b013c45bf7488798907ff085f4dbd079ae2e46d10b2947b0f5e",
+  "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+  "local_artifacts": {
+    "target/messagepack-2026-10-19/source.tar.gz": "45323212db08b669d81a0a015559df273302e7bed18bfa8feaef705f87b8d411",
+    "target/messagepack-2026-10-19/external-harnesses.tar.gz": "d5971708f5587235b077ac54a521abbad3a943c5710fca5e1813bd02f366e5fa",
+    "target/messagepack-2026-10-19/native-evaluation": "23a0d40b68903a9e145b94e5abf3124b790bbeed353bd48eae5aa6999609093e",
+    "target/messagepack-2026-10-19/native-speed": "4ee9cfb696ca7efd384255c83fc3ddd5c8ab2e955d52680072873a11d61b3f29"
+  }
+}

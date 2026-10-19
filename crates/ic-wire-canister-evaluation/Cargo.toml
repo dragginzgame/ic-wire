@@ -13,11 +13,20 @@ performance-postcard = ["performance-fixture", "dep:postcard"]
 performance-bitcode = ["performance-fixture", "dep:bitcode"]
 performance-wincode = ["performance-fixture", "dep:wincode"]
 
+comparison = ["dep:serde_bytes"]
+comparison-postcard = ["comparison", "dep:postcard"]
+comparison-messagepack = ["comparison-array", "comparison-map"]
+comparison-array = ["comparison", "dep:rmp-serde"]
+comparison-map = ["comparison", "dep:rmp-serde"]
+comparison-wire = ["comparison", "dep:ic-wire"]
+
 [dependencies]
 bitcode = { workspace = true, optional = true }
 ic-wire = { workspace = true, optional = true }
 postcard = { workspace = true, optional = true }
+rmp-serde = { workspace = true, optional = true }
 serde.workspace = true
+serde_bytes = { workspace = true, optional = true }
 wincode = { workspace = true, optional = true, features = ["derive"] }
 
 [dev-dependencies]
@@ -34,6 +43,11 @@ path = "examples/check_diagnostics/mod.rs"
 name = "performance"
 path = "examples/performance/mod.rs"
 required-features = ["performance-postcard", "performance-bitcode", "performance-wincode"]
+
+[[example]]
+name = "messagepack"
+path = "examples/messagepack/mod.rs"
+required-features = ["comparison-postcard", "comparison-messagepack", "comparison-wire"]
 
 [lints]
 workspace = true

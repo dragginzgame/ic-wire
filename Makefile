@@ -18,6 +18,10 @@ check-package:
 evaluate-performance:
 	+@env cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example performance --features performance-postcard,performance-bitcode,performance-wincode -- target/native-performance
 
+.PHONY: evaluate-messagepack
+evaluate-messagepack:
+	+@env cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example messagepack --features comparison-postcard,comparison-messagepack,comparison-wire -- target/messagepack-comparison evaluation
+
 .PHONY: fuzz-runtime
 
 fuzz-runtime:
@@ -31,7 +35,7 @@ check-typescript:
 	+@bash scripts/ci/check-typescript.sh
 
 check-evaluation:
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features performance-wire,performance-postcard,performance-bitcode,performance-wincode
+	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --features performance-wire,performance-postcard,performance-bitcode,performance-wincode,comparison-postcard,comparison-messagepack,comparison-wire
 	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-canister-evaluation --all-targets --all-features
 
@@ -46,6 +50,7 @@ help:
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
 		'Evaluation: evaluate-performance (native timing only; fresh target/native-performance output)' \
+		'Evaluation: evaluate-messagepack (native comparison; fresh target/messagepack-comparison output)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Evaluation: check-evaluation (native codec controls and compiler support)' \
 		'Registry: publish (uploads); check-package (no upload; registry access)' \
@@ -74,7 +79,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/consumer-fixtures.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/consumer-fixtures.md docs/status/current.md
 
 .PHONY: check-boundary
 check-boundary:
