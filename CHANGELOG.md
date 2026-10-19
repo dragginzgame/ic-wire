@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.5]
+## [0.4.5] - 2026-10-19
 
 - Qualify 1 MiB opaque buffers across finite Rust, native Rust and generated
   TypeScript, including exact frames and bounded malformed-input refusal. Blob
