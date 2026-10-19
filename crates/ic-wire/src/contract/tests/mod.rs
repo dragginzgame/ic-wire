@@ -14,6 +14,10 @@ fn exact_bulk_equality_covers_word_boundaries_tails_and_every_mismatch() {
         let mut equal = compare();
         equal.try_extend(&original).unwrap();
         assert!(equal.finalize().unwrap());
+        let copy = original.clone();
+        let mut separate = compare();
+        separate.try_extend(&copy).unwrap();
+        assert!(separate.finalize().unwrap());
         for position in 0..len {
             let mut different = original.clone();
             different[position] ^= 1;
@@ -37,6 +41,41 @@ fn exact_bulk_equality_covers_word_boundaries_tails_and_every_mismatch() {
             assert!(!unequal.finalize().unwrap());
         }
     }
+}
+
+#[test]
+fn identical_slice_still_checks_budget_length_and_previous_mismatch() {
+    let bytes = [42; 64];
+    let mut limited = Compare {
+        remaining: &bytes,
+        allowance: 63,
+        equal: true,
+    };
+    assert_eq!(
+        limited.try_extend(&bytes),
+        Err(postcard::Error::SerializeBufferFull)
+    );
+    let mut mismatch = Compare {
+        remaining: &bytes,
+        allowance: 64,
+        equal: false,
+    };
+    mismatch.try_extend(&bytes).unwrap();
+    assert!(!mismatch.finalize().unwrap());
+    let mut short = Compare {
+        remaining: &bytes[..32],
+        allowance: 64,
+        equal: true,
+    };
+    short.try_extend(&bytes).unwrap();
+    assert!(!short.finalize().unwrap());
+    let mut trailing = Compare {
+        remaining: &bytes,
+        allowance: 64,
+        equal: true,
+    };
+    trailing.try_extend(&bytes[..32]).unwrap();
+    assert!(!trailing.finalize().unwrap());
 }
 
 #[test]

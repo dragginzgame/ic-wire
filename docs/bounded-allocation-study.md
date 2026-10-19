@@ -105,3 +105,72 @@ Only opt-z was measured in this study; no whole-consumer Wasm-size or deployment
 claim is made. Focused runtime tests, strict Clippy, Rust 1.91 host/Wasm and
 Rust/TypeScript conformance qualify the selected growth change. Full CI and
 native macOS measurements were not run.
+
+## Follow-up: where a hard cut would help
+
+A second investigation starts at released 0.4.8, commit
+`a5f3cd66f2afb9650b7028944e4d88ebab04c967`. A concrete API hard cut would remove
+the owned-deserialization requirement from `Wire`, place lifetime-aware decode
+bounds on the consuming functions, and add bounded borrowed byte/text types with
+lifetime-aware derives. Generic callers relying on the old implied bound must
+change. This would require a pre-1.0 minor release (0.5.0 from this baseline),
+even if explicit identities and encoded bytes stay unchanged. This is still an
+experimental API direction; native dynamic admission remains useful.
+
+The measured saving instead comes from a compatible canonical-comparison change.
+A borrowed value can serialize the exact slice being compared. After checking
+allowance and matching slice length, identical pointers prove byte equality
+without scanning that region again. A different address still takes the existing
+exact comparison path. Previous mismatches remain failures; trailing bytes,
+length limits and noncanonical scalar/length representations remain checked.
+No canonical-validation bypass or new decoder mode is introduced.
+
+The selected shortcut applies only on Wasm (and native unit tests for coverage).
+An initial all-target candidate produced substantial native timing regressions,
+including a 1 MiB borrowed case from 260,839 to 584,545 ns. That candidate is
+rejected. With the shortcut restricted to Wasm, the native benchmark executable's
+entire `.text` section is byte-identical to baseline. A repeat native run puts
+large byte cases within about 3%; no native speedup is claimed.
+
+| Borrowed decode + full scan | opt-z before | opt-z selected | opt-3 before | opt-3 selected |
+| --- | ---: | ---: | ---: | ---: |
+| 32 KiB packed manifest | 581,074 | 511,251 | 309,764 | 256,397 |
+| 4 KiB opaque bytes | 71,323 | 62,549 | 39,231 | 32,518 |
+| 1 MiB opaque bytes | 17,958,169 | 15,729,875 | 9,831,299 | 8,127,306 |
+
+Units are IC instructions per operation. Savings are about 12% at opt-z and
+17% at opt-3. Owned decoding pays a small branch cost: empty finite bytes increase
+from 399 to 403 instructions at opt-3 (1%); large owned byte cases increase by
+5–12 instructions. The combined opt-z probe grows from 108,170 to 108,172 linked
+Wasm bytes, while gzip-9 stays 33,308. Opt-3 shrinks from 119,762 to 119,746 linked
+bytes and 37,580 to 37,578 gzip bytes. These are whole-probe measurements, not a
+consumer deployment qualification or individual symbol-size attribution.
+
+For the potential hard cut, a separate manually implemented bounded borrowed
+byte type uses the finite decoder plus the selected shortcut. Its 1 MiB opt-z
+case costs 15,729,727.5 instructions, only 147 fewer than native borrowing with
+the shortcut (0.00094%). Empty bytes fall from 907.5 to 760.5 instructions,
+16.2% or 147 instructions. This supports investigating more expressive bounded
+borrowed DTOs, but does not justify a trait redesign for bulk speed alone. It
+avoids an owned payload copy, as existing native borrowing already does. Borrowed
+values must still keep their backing frame alive.
+
+All 44 frame hashes agree across the original, selected and experimental finite
+builds. The finite prototype passes three fixture tests, including field bounds,
+input pointer identity, method identity, trailing and noncanonical lengths. It
+has no production derive or public borrowed type implementation. Its measured
+source differs from the tested source only by added test-only code.
+
+Measurements reuse the compiler, profiles, native calibration and external IC
+protocol described above. Both IC profiles were rerun after restricting the
+shortcut to Wasm, with exactly identical instruction samples. Raw results,
+source/lock hashes, original rejected candidate, Wasms and source archives are
+retained under `target/borrow-savings-2026-10-19/`. Only the compact
+[summary](evidence/borrow-savings-2026-10-19/summary.csv) is checked in. This batch
+changes no workspace dependencies, framing, public APIs or canonical rules.
+
+Runtime tests, strict Clippy, Rust 1.91 host/Wasm and 90 TypeScript vectors plus
+17,524 differential mutations pass. Unit checks cover equal separate buffers,
+identical slices, every differing byte, exhausted allowance, shorter input,
+trailing input and an already-failed comparison. Full CI and native macOS were
+not run. A breaking API release is not selected by this investigation.

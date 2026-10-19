@@ -11,8 +11,8 @@ A subsequent maintainer request authorizes the bounded
 [MessagePack/Postcard experiment](../messagepack-comparison.md); only its pure
 codec fixture/native driver are maintained here. External IC probes stay outside
 the workspace. Production encoding remains Postcard.
-The maintainer subsequently released 0.4.5 (`9e336f4`). The maintainer has since released 0.4.6 (`45a05b7`). The maintainer has released 0.4.7 (`48a016f`). Pending compatible
-notes are 0.4.8; this task executes no release or publication.
+The maintainer has released 0.4.8 (`a5f3cd6`). Pending compatible notes are
+0.4.9; this task executes no release or publication.
 
 Source starts at `a3e6577` with the pending license-metadata repair preserved.
 Shared Tooling remains at reviewed 0.24.2; its generic scripts/catalogs and guides
@@ -164,3 +164,17 @@ Runtime tests, Clippy, Rust 1.91 host/Wasm and Rust/TypeScript conformance pass.
 Compact measurements are in `docs/evidence/hardcut-2026-10-19/`; full source, raw
 reports and external probe artifacts remain in `target/hardcut-2026-10-19/`.
 No full CI, native macOS, staging, commit or release was performed.
+
+## Borrowed canonical comparison
+
+The [follow-up study](../bounded-allocation-study.md#follow-up-where-a-hard-cut-would-help)
+selects a Wasm-only same-slice comparison shortcut: large borrowed decode-plus-scan
+uses 12% fewer instructions at opt-z and 17% fewer at opt-3. Native executable
+code remains identical; the initial all-target candidate was rejected after
+native regressions. Owned short-message overhead is small but measured.
+The borrowed finite-contract hard cut saves only 147 further instructions on the
+1 MiB case and remains a prototype. No public API or wire-format cut is selected.
+
+Runtime tests, Clippy, Rust 1.91 host/Wasm and TypeScript conformance pass. Compact
+results are in `docs/evidence/borrow-savings-2026-10-19/`; full raw/source/probe
+artifacts remain in `target/borrow-savings-2026-10-19/`. Full CI/macOS were not run.

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.9]
+
+- Skip redundant Wasm canonical byte comparisons when a borrowed value emits
+  the exact input slice, preserving limits and rejection behavior. Large borrowed
+  decode-plus-scan probes use 12–17% fewer IC instructions; see the
+  [qualification and hard-cut assessment](docs/bounded-allocation-study.md#follow-up-where-a-hard-cut-would-help).
+
 ## [0.4.8] - 2026-10-19
 
 - Grow bounded lists geometrically within their declared maximum when decode
