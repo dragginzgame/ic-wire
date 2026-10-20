@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.3]
+
+- Adopt IC Build 0.24.0 for diagnostic tooling and the pinned release metadata
+  editor, aligning its transitive Host dependencies with 0.32. Runtime codec
+  dependencies and wire behavior remain unchanged.
+
 ## [0.5.2] - 2026-10-20
 
 - Retain the [native pointer-comparison experiment](docs/evaluation.md#native-borrowed-pointer-equality-experiment)
