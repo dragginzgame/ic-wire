@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.4]
+## [0.5.4] - 2026-10-20
 
 - Update the diagnostic tooling dependency to IC Build 0.62.0 and its transitive
   Host Artifacts, FS and Process dependencies to 0.62.0. The separately pinned
