@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.3]
+## [0.5.3] - 2026-10-20
 
 - Adopt IC Build 0.24.0 for diagnostic tooling and the pinned release metadata
   editor, aligning its transitive Host dependencies with 0.32. Runtime codec
