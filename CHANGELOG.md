@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.4]
+
+- Update the diagnostic tooling dependency to IC Build 0.62.0 and its transitive
+  Host Artifacts, FS and Process dependencies to 0.62.0. The separately pinned
+  release metadata editor remains at 0.24.0.
+
 ## [0.5.3] - 2026-10-20
 
 - Adopt IC Build 0.24.0 for diagnostic tooling and the pinned release metadata
