@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.2]
+## [0.5.2] - 2026-10-20
 
 - Retain the [native pointer-comparison experiment](docs/evaluation.md#native-borrowed-pointer-equality-experiment)
   as rejected evidence: borrowed blob gains came with packed-manifest regressions.
