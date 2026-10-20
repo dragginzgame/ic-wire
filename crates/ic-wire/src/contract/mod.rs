@@ -265,17 +265,18 @@ impl Flavor for Compare<'_> {
 
 fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
     let size = admit::<T>(limits)?;
+    // The fixed header always fits after admission. Initialize the same bounded
+    // starting capacity directly, leaving the cold growth path for payloads.
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(size.min(64))
+        .map_err(|_| Error::Allocation)?;
+    bytes.extend_from_slice(&header(id, direction));
     let allocation_failed = Cell::new(false);
-    let mut output = GrowingOutput {
-        output: Output {
-            bytes: Vec::new(),
-            limit: size,
-        },
+    let output = GrowingOutput {
+        output: Output { bytes, limit: size },
         allocation_failed: &allocation_failed,
     };
-    output
-        .try_extend(&header(id, direction))
-        .map_err(|_| Error::Allocation)?;
     postcard::serialize_with_flavor(value, output).map_err(|_| {
         if allocation_failed.get() {
             Error::Allocation

@@ -179,7 +179,14 @@ impl Fixture {
     }
 }
 fn main() {
-    let directory = PathBuf::from(std::env::args().nth(1).expect("output directory"));
+    let mut arguments = clap::Command::new("typescript-conformance")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .get_matches();
+    let directory = arguments.remove_one::<PathBuf>("directory").unwrap();
     fs::create_dir_all(&directory).unwrap();
     fs::write(
         directory.join("wire-runtime.ts"),

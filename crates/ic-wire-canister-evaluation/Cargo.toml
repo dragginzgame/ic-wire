@@ -32,6 +32,7 @@ serde_bytes = { workspace = true, optional = true }
 wincode = { workspace = true, optional = true, features = ["derive"] }
 
 [dev-dependencies]
+clap.workspace = true
 ic-build.workspace = true
 postcard.workspace = true
 serde_json.workspace = true

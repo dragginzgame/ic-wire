@@ -1,0 +1,5 @@
+profile,variant,linked_bytes,gzip_bytes
+z,baseline,117800,36067
+z,candidate,117660,35965
+speed,baseline,130786,40967
+speed,candidate,129890,40663

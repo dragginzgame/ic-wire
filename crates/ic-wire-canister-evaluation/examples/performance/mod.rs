@@ -5,9 +5,16 @@ use sha2::{Digest, Sha256};
 use std::{env, fs, path::PathBuf, process::Command, time::Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let directory = PathBuf::from(env::args_os().nth(1).expect("fresh output directory"));
+    let arguments = clap::Command::new("performance")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .get_matches();
+    let directory = arguments.get_one::<PathBuf>("directory").unwrap();
     // Refuse to overwrite a retained experiment.
-    fs::create_dir(&directory)?;
+    fs::create_dir(directory)?;
     let mut results = Vec::new();
     for (lane, lane_name) in LANES.iter().enumerate() {
         for (case, case_name) in CASES.iter().enumerate() {

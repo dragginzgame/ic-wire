@@ -352,3 +352,65 @@ unknown, duplicate and misplaced preferences. The selected traversal also checke
 on Rust 1.91 native/Wasm. Source snapshots, raw samples, locks and probe artifacts
 are retained at `target/codegen-adapter/`. No sibling source or production
 dependency selection was changed; incoming lockfile edits were preserved.
+
+## Direct header initialization
+
+Against released 0.5.1 (`cdd47c3`), initialize the finite encoder's header using
+`try_reserve_exact(min(schema_ceiling, 64))` and a direct copy. This is the same
+initial reservation chosen by the general growth routine for the 11-byte header.
+Admission proves it fits. Payload growth, allocation failures, canonical bytes
+and public APIs remain unchanged; no new helper or traversal is introduced.
+
+The matched 50-case probe covers 44 allocation-study lanes and six Relay batches.
+All frame hashes, lengths and retained output capacities match across both
+profiles. Eighteen finite encode cases improve; the other 32 cases and every
+decode instruction sample are unchanged. Tiny Relay cases (empty, 1×3, 3×4 bytes)
+save 1.4–2.6% encode instructions under opt-z and 5.8–11.5% under opt-3. Full Relay
+batches save 80 instructions under opt-z and 189 under opt-3, a much smaller
+relative gain. No measured encode case regresses.
+
+| Profile | Baseline linked / gzip bytes | Direct header linked / gzip bytes |
+| --- | ---: | ---: |
+| opt-z | 117,800 / 36,067 | 117,660 / 35,965 |
+| opt-3 | 130,786 / 40,967 | 129,890 / 40,663 |
+
+[Per-case instruction results](evidence/header-initialization/ic.csv) and
+[whole-probe size results](evidence/header-initialization/size.csv) retain the
+matched controls. Rust 1.99.1/LLVM 23.1.1, wasm32-unknown-unknown, Postcard 1.1.3,
+LTO, one codegen unit, panic abort and stripped debug information were used.
+The probe profiles are `evaluation` (opt-z) and `speed` (opt-3). PocketIC 16.1.0
+runs five queries of four repetitions; values are median counters divided by
+four, without subtracting harness overhead. gzip uses level 9 and mtime 0.
+Allocation-study decoding includes its existing application byte checksum;
+Relay decoding includes result destruction without that scan. Input construction,
+transport and storage are outside the clock. These are IC instruction and
+whole-probe size measurements, not native timing or installed endpoint latency.
+
+An initial cached host driver only exercised 18 cases; those samples were
+superseded by the corrected 50-case runs. Source archives, exact locks, corrected
+host/probe sources, binaries and raw final samples are retained at
+`target/header-initialization/`. Existing tests cover single-pass encoding,
+bounded growth, capacity overflow and limits despite spare allocator capacity.
+
+## Native borrowed-pointer equality experiment
+
+Rejected: removing the Wasm-only condition on the canonical comparator's
+same-pointer shortcut improves the 1 MiB borrowed blob's native decode time by
+5.4% and 6.2% in two paired runs, but regresses the 1,024-hash borrowed packed
+manifest by 11.9% and 13.0%. Small packed manifests also regress. The change
+was reverted; the existing Wasm shortcut and pending header optimization remain.
+These results do not establish the cause of the regression.
+
+[All 44 cases in both pairs](evidence/native-pointer-identity/native.csv) retain
+encode/decode medians. Baseline is the task-entry working tree after header
+initialization and Shared Tooling adoption; the candidate removes only the target
+condition on pointer equality. Both use Rust 1.99.1/LLVM 23.1.1, x86_64 Linux,
+Postcard 1.1.3, opt-z, LTO, one codegen unit, panic abort and stripped debug info.
+The existing allocation driver calibrates batches to at least 2 ms (or its
+repetition cap), then runs 11 rotating samples per case. Runs alternate baseline
+and candidate twice, pinned to CPU 0; reported values are median nanoseconds per
+operation. Decoding includes the fixture's application checksum and destruction.
+Frame hashes, lengths, capacities and reuse history match. Native binary file
+sizes are both 843,064 bytes. No new IC instruction, Wasm-size or installed
+endpoint measurements were made. Raw runs, driver/fixture sources, lockfile and
+both comparator sources are retained at `target/native-pointer-identity/`.

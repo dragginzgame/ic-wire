@@ -2,12 +2,23 @@
 use ic_wire_canister_evaluation::allocation::{CASE_COUNT, name, run};
 use serde_json::json;
 use sha2::{Digest, Sha256};
-use std::{env, fs, path::PathBuf, process::Command, time::Instant};
+use std::{fs, path::PathBuf, process::Command, time::Instant};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let output = PathBuf::from(env::args_os().nth(1).expect("fresh output directory"));
-    let profile = env::args().nth(2).expect("profile label");
-    assert!(matches!(profile.as_str(), "evaluation" | "speed"));
-    fs::create_dir(&output)?;
+    let arguments = clap::Command::new("allocation")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .arg(
+            clap::Arg::new("profile")
+                .required(true)
+                .value_parser(["evaluation", "speed"]),
+        )
+        .get_matches();
+    let output = arguments.get_one::<PathBuf>("directory").unwrap();
+    let profile = arguments.get_one::<String>("profile").unwrap();
+    fs::create_dir(output)?;
     let mut results = Vec::new();
     let mut repetitions = vec![1_u64; CASE_COUNT];
     let reference = (0..CASE_COUNT)

@@ -5,12 +5,21 @@ use sha2::{Digest, Sha256};
 use std::{env, fs, path::PathBuf, process::Command, time::Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let directory = PathBuf::from(env::args_os().nth(1).expect("fresh output directory"));
-    let profile = env::args()
-        .nth(2)
-        .expect("profile label (evaluation or speed)");
-    assert!(matches!(profile.as_str(), "evaluation" | "speed"));
-    fs::create_dir(&directory)?;
+    let arguments = clap::Command::new("messagepack")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .arg(
+            clap::Arg::new("profile")
+                .required(true)
+                .value_parser(["evaluation", "speed"]),
+        )
+        .get_matches();
+    let directory = arguments.get_one::<PathBuf>("directory").unwrap();
+    let profile = arguments.get_one::<String>("profile").unwrap();
+    fs::create_dir(directory)?;
     let mut rows = Vec::new();
     for (case, name) in CASES.iter().enumerate() {
         let mut repetitions = [1_u64; 4];

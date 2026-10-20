@@ -359,6 +359,7 @@ dependencies = [
 name = "ic-wire"
 version = "0.5.1"
 dependencies = [
+ "clap",
  "ic-wire-derive",
  "libfuzzer-sys",
  "postcard",
@@ -371,6 +372,7 @@ name = "ic-wire-canister-evaluation"
 version = "0.5.1"
 dependencies = [
  "bitcode",
+ "clap",
  "ic-build",
  "ic-wire",
  "postcard",

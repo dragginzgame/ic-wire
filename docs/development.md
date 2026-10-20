@@ -20,6 +20,11 @@ make tools-check
 make install-hooks
 ```
 
+`make install-tools` also prepares IC Build 0.23.0's release metadata editor.
+`make release-editor-check` verifies its selected executable offline. The release
+adapter selects that path automatically; metadata inputs are limited to 8 MiB
+per document. This tooling executable is separate from runtime dependencies.
+
 Installation is explicit; checks install nothing. IC Wire selects only the
 reviewed common host and Cargo toolsets. Platform executables are not part of its
 setup/check aggregates. The vendored generic catalogs and installer remain owned
@@ -86,8 +91,8 @@ No platform SDK or simulator is selected in any workspace dependency role.
 
 ## Snapshot maintenance and release boundary
 
-Shared Tooling is pinned at 0.24.2, revision
-`48f5640e744512929bfba301fe734d8ea6c6e049`.
+Shared Tooling is pinned at 0.25.8, revision
+`0a2d2ee3b5e0ae77755c2915ac28836d4d5ba359`.
 The main snapshot owns the common setup, formatting, hooks, release runner and
 receipt helper. Update through the canonical exporter and reviewed adoption;
 do not patch snapshot-owned files. Product adapters stay local.
@@ -97,6 +102,10 @@ targets use one workflow: preflight, complete validation, version preparation,
 receipt checks, commit, tag and direct Git delivery to origin/main. They do not
 publish packages. Ordinary development leaves package versions, staging, commits,
 refs and release execution to the maintainer.
+
+The release gate runs the existing Clippy target after tool admission and before
+expensive checks. Package checks and publication also run Clippy first, with
+sequential recipes that stop on failure under parallel Make.
 
 The local release fixture uses disposable repositories and a local remote. It
 checks dirty/conflicting-source refusal, failed-validation retention, exact

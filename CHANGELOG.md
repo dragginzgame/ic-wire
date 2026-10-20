@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.2]
+
+- Retain the [native pointer-comparison experiment](docs/evaluation.md#native-borrowed-pointer-equality-experiment)
+  as rejected evidence: borrowed blob gains came with packed-manifest regressions.
+  Keep the existing runtime behavior.
+
+- Adopt Shared Tooling 0.25.8 at `0a2d2ee`, including numbered Unreleased
+  changelog handling and retained metadata failure evidence. Select the pinned
+  IC Build release editor automatically, run Clippy before expensive release
+  checks or package effects, and use Clap for evaluation and conformance command-line parsing.
+
+- Initialize the finite encoder header directly in its bounded starting buffer.
+  Preserve output bytes, capacity and fallible allocation while avoiding the
+  general growth path on every encode. Tiny Relay probe messages use 5.8–11.5%
+  fewer encode instructions under opt-3; both measured profiles shrink linked
+  Wasm. See [matched evidence](docs/evaluation.md#direct-header-initialization).
+
 ## [0.5.1] - 2026-10-20
 
 - Evaluate and reject per-type codec preferences: mixed opt-3 saves 1.8% linked

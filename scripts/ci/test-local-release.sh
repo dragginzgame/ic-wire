@@ -3,7 +3,10 @@ set -euo pipefail
 # Real local adapters/runner and Git delivery; expensive gate/setup substituted.
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
-unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND
+unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND CARGO_RELEASE_METADATA_EDITOR
+# Reuse the offline-admitted real editor; fixture tool setup is substituted.
+FIXTURE_RELEASE_EDITOR="$(make --no-print-directory -s -C "$root" release-editor-check)"
+export FIXTURE_RELEASE_EDITOR
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 export RELEASE_CACHE_PREPARE=0
 unset VALIDATION_REPOSITORY_ROOT VALIDATION_RUNNER_SNAPSHOT_PATH VALIDATION_LOG_DIR
@@ -21,7 +24,9 @@ cat >> Makefile <<'MAKE'
 include fixture-gates.mk
 MAKE
 cat > fixture-gates.mk <<'MAKE'
-.PHONY: install-tools tools-check ci
+.PHONY: install-tools tools-check ci release-editor-check
+release-editor-check:
+	@printf '%s\n' "$$FIXTURE_RELEASE_EDITOR"
 install-tools tools-check:
 	@printf '%s\n' '$@' >> .git/fixture-gates
 ci:
