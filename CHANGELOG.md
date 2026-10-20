@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.4]
+
+- Adopt Shared Tooling 0.25.9: refuse a new release increment past an
+  undelivered committed preparation, preserving its saved plan and evidence.
+  Tool pins, package APIs and dependency selections are unchanged.
+
 ## [0.5.3] - 2026-10-20
 
 - Adopt IC Build 0.24.0 for diagnostic tooling and the pinned release metadata
