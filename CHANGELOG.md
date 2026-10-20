@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.1]
+## [0.5.1] - 2026-10-20
 
 - Evaluate and reject per-type codec preferences: mixed opt-3 saves 1.8% linked
   and 4.2% compressed Wasm, but opt-z linked size grows 3.9%. The maintenance
