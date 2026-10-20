@@ -111,7 +111,7 @@ impl GrowingOutput<'_> {
         if required > bytes.capacity() {
             // Once a message is substantial relative to its ceiling, reserve
             // the remainder to avoid repeated copies of large batch payloads.
-            let capacity = if required > self.output.limit / 4 {
+            let capacity = if self.output.limit <= 128 || required > self.output.limit / 4 {
                 self.output.limit
             } else {
                 required

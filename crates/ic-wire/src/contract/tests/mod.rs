@@ -190,3 +190,31 @@ fn a_mismatch_still_checks_later_bytes_and_the_output_allowance() {
     exhausted.try_push(0).unwrap();
     assert!(!exhausted.finalize().unwrap());
 }
+
+#[test]
+fn small_schema_output_keeps_its_initial_allocation_through_the_ceiling() {
+    for limit in [65, 101, 128] {
+        let failed = Cell::new(false);
+        let mut output = GrowingOutput {
+            output: Output {
+                bytes: Vec::new(),
+                limit,
+            },
+            allocation_failed: &failed,
+        };
+        output.try_extend(&header(1, 1)).unwrap();
+        let capacity = output.output.bytes.capacity();
+        let pointer = output.output.bytes.as_ptr();
+        while output.output.bytes.len() < limit {
+            output.try_push(0).unwrap();
+        }
+        assert_eq!(output.output.bytes.capacity(), capacity);
+        assert_eq!(output.output.bytes.as_ptr(), pointer);
+        assert_eq!(
+            output.try_push(0),
+            Err(postcard::Error::SerializeBufferFull)
+        );
+        assert_eq!(output.output.bytes.capacity(), capacity);
+        assert!(!failed.get());
+    }
+}

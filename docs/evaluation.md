@@ -149,6 +149,27 @@ raw samples and rejected candidates are retained at
 under a large schema, growth boundaries, spare capacity, and deterministic
 capacity-overflow refusal. No sibling source or production dependency changed.
 
+### Small finite schema reservation
+
+The pending 0.5.2 refinement reserves the whole admitted output ceiling on first
+growth when that ceiling is at most 128 bytes, including framing. Schemas above
+that threshold retain 0.5.1's emitted-byte growth. A bounded small response can
+therefore cross the initial 64-byte boundary without another reservation/copy.
+There is no new mode, setting, wire identity or serialization pass.
+
+Regression cases at ceilings 65, 101 and 128 fill the frame after its header and
+check that capacity and pointer remain unchanged, then refuse an excess byte
+without changing capacity. The check fails on 0.5.1 and passes with the change;
+it does not assume allocators return an exact requested capacity. Existing tests
+retain overflow/allocation failure mapping, single serialization and large-schema
+tiny-output checks.
+
+For a tiny value under these small schemas, the first request may be up to 64
+bytes larger than 0.5.1's first request. This is a requested-buffer tradeoff, not
+an allocator or peak-memory guarantee. Installed application instructions and
+whole-application size remain consumer-owned measurements; the runtime change
+does not establish a general speedup for every frame/profile.
+
 ## Per-type code generation preference experiment
 
 A requested speed/size selector was prototyped outside the maintained runtime.

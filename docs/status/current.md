@@ -2,18 +2,20 @@
 
 ## Current batch
 
-Released 0.5.0 (`fe7ab95`) is the baseline. Pending 0.5.1 fixes finite encoder
-maximum-schema reservation costs reported by Relay. Incoming manifest/lock edits
-were preserved, including ic-build 0.23. Historical benchmarks retain their own
-measured dependency selections. Versions,
-staging, commits, tags, pushes and publication remain maintainer-owned.
+Released 0.5.1 (`cdd47c3`) is the baseline. Pending 0.5.2 refines initial
+reservation for finite schema ceilings of at most 128 bytes. Larger schemas keep
+the released growth policy. Historical benchmarks retain their own measured
+dependency selections; no dependency or package versions change in this batch.
+Merging, tags, releases and publication remain maintainer-owned.
 
-Finite encoding now serializes once into fallibly growing output. Requests start
-at up to 64 bytes, grow within the admitted ceiling, and reserve the remainder
+Finite encoding serializes once into fallibly growing output. In 0.5.1 requests
+start at up to 64 bytes, grow within the admitted ceiling, and reserve the remainder
 when a growth exceeds a quarter of that ceiling. Allocation failures remain
 `Error::Allocation`; schema/serializer refusal identities, canonical framing,
 method/direction binding and conservative admission are unchanged. Native
-sizing/reuse remains unchanged. No new public API or codec mode was added.
+sizing/reuse remains unchanged. No new public API or codec mode was added. The 0.5.2 refinement requests the full
+small-schema ceiling on first growth, avoiding another reservation for control
+replies that cross 64 bytes; tiny values may initially request up to 64 more bytes.
 
 ## Evidence and tradeoffs
 
@@ -41,11 +43,13 @@ remain source-bound evidence for the released redesign.
 
 ## Qualification
 
-All 38 runtime/native/borrowed tests and 10 doctests pass, together with strict
-all-target/all-feature runtime Clippy and Rust 1.91 Wasm compilation. TypeScript
-conformance passes 90 vectors, 17,524 mutations and 1 MiB boundary checks.
-Formatting, documentation links and diff checks pass. Full CI, native macOS and
-installed Relay endpoint tests were not run; the sibling checkout stayed read-only.
+This batch passes 36 library/runtime/native/borrowed tests on Rust 1.91, strict
+all-target/all-feature runtime Clippy, Rust 1.91 Wasm compilation, formatting,
+documentation links and diff checks. The new small-schema allocation regression
+fails on 0.5.1 and passes with the refinement. Retained 0.5.1 TypeScript evidence
+covers 90 vectors, 17,524 mutations and 1 MiB boundaries; this batch does not
+regenerate its unchanged schemas. These are focused Linux checks, not full CI
+or native macOS qualification.
 
 ## Code generation preference investigation
 

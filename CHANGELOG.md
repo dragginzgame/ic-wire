@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2]
+
+- Reserve small finite output ceilings once so control replies can cross the
+  initial 64-byte boundary without another buffer reservation. Keep larger-schema
+  growth, canonical frames and typed failures unchanged. Fixes
+  [#14 — Avoid a second buffer reservation for small finite schemas](https://github.com/dragginzgame/ic-wire/issues/14).
+
 ## [0.5.1] - 2026-10-20
 
 - Evaluate and reject per-type codec preferences: mixed opt-3 saves 1.8% linked
