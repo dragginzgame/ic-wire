@@ -1,68 +1,58 @@
 # Current handoff
 
-## Scope and release boundary
+## Current batch
 
-The maintainer authorized the 0.5.0 borrowed bounded-contract redesign. Source
-started clean at released 0.4.10 (`67aced4`). Pending notes select 0.5.0 because
-generic callers can no longer infer owned deserialization from `T: Wire`.
-Package versions, staging, commits, tags, pushes and publication remain maintainer
-owned; this task performs none of them.
+Released 0.5.0 (`fe7ab95`) is the baseline. Pending 0.5.1 fixes finite encoder
+maximum-schema reservation costs reported by Relay. Incoming manifest/lock edits
+were preserved, including ic-build 0.23. Historical benchmarks retain their own
+measured dependency selections. Versions,
+staging, commits, tags, pushes and publication remain maintainer-owned.
 
-IC Wire remains one bounded canonical Postcard message codec. Transport, auth,
-retry decisions, persistence and recovery belong to consumers. Native dynamic
-Serde admission remains available. The workspace has no endpoint SDK/simulator
-integration; installed consumer qualification stays with its owner.
+Finite encoding now serializes once into fallibly growing output. Requests start
+at up to 64 bytes, grow within the admitted ceiling, and reserve the remainder
+when a growth exceeds a quarter of that ceiling. Allocation failures remain
+`Error::Allocation`; schema/serializer refusal identities, canonical framing,
+method/direction binding and conservative admission are unchanged. Native
+sizing/reuse remains unchanged. No new public API or codec mode was added.
 
-## Implemented 0.5 contract
+## Evidence and tradeoffs
 
-`Wire` supplies serialization, finite bounds and schema metadata. Finite decode
-adds `Deserialize<'de>` at the input boundary. `BytesRef<'a, N>` and
-`TextRef<'a, N>` borrow bounded input; owned Bytes/Text expose `as_borrowed`.
-Record and enum derives support lifetime parameters and inline outlives bounds.
-Type/const parameters, where clauses and recursive derives remain unsupported.
+The 44 allocation fixtures plus six Relay-shaped batches have identical frame
+hashes before/after under opt-z and opt-3. Tiny Relay batches use 88–96% fewer IC
+encode instructions and retain 64 rather than 196,783 output bytes. Full Relay
+cases cost at most 0.61% more instructions. The full array manifest changes by
++0.19%/-12.32% across the profiles; the full packed manifest costs up to 2.14% more.
+Native fresh 4 KiB blob encoding adds about 38 ns (45%) from another reservation.
+Combined probe Wasm grows 931/537 bytes, gzip 590/323 bytes. These are codec
+measurements, not installed Relay latency or peak memory guarantees.
+See [methodology and complete results](../evaluation.md#bounded-finite-output-growth).
+Source snapshots, raw samples, locks and probes are retained at `target/output-growth/`.
+No sibling checkout was modified. Consumer integration remains consumer-owned.
 
-Owned and borrowed forms preserve field IDs, frame bytes and TypeScript output.
-Views have no owned payload heap; nested List/Box allocations remain accounted
-for. Encoded frames still own their output. Use `into_bytes()` when retained
-retry bytes must outlive a lifetime-parameterized method's source value.
-Consumers needing owned generic decode add `DeserializeOwned`; borrowed generic
-decode uses an input-lifetime bound. See the [migration guide](../../crates/ic-wire/README.md#borrowed-bounded-contracts-and-the-05-api-cut).
+## Retained 0.5 contract
 
-The new consumer-shaped test covers 0/1/32/4,096/1,048,576-byte chunks, multiple
-lifetimes, enums and nested collections, exact retries, UTF-8 and malformed input.
-An isolated native allocation probe observes zero decode allocation requests for
-borrowed chunks, versus two requests totaling 1,048,581 bytes for an owned 1 MiB
-chunk plus its five-byte name. Input/fixture construction is excluded. This is
-allocation-request evidence, not peak heap, latency or deployed Blob performance.
-Final derived-contract probes now also measure native timing, IC instructions
-and separately linked Wasm size under opt-z and opt-3. For 1 MiB decode plus a
-full scan, borrowing reduces IC instructions by 17–25% and native median time
-by 10–17% relative to the owned form of the same candidate. Frame hashes match.
-See [methodology and limits](../evaluation.md#final-05-borrowed-contract-measurements).
-These are isolated codec measurements; no sibling repository was changed.
+Wire supplies serialization, finite bounds and schema metadata; finite decode
+adds `Deserialize<'de>`. BytesRef/TextRef and lifetime-aware derives support
+borrowed bounded contracts with the same owned-form bytes and TypeScript output.
+Use `into_bytes()` when retries must outlive a borrowed method's source value.
+See the [migration guide](../../crates/ic-wire/README.md#borrowed-bounded-contracts-and-the-05-api-cut).
+The [earlier borrowed measurements](../evaluation.md#final-05-borrowed-contract-measurements)
+remain source-bound evidence for the released redesign.
 
 ## Qualification
 
-Runtime/all-feature tests and doctests, strict runtime/derive/evaluation Clippy,
-16 compiler-diagnostic cases with a passing control, evaluation tests and Rust
-1.91 checks pass. The borrowed integration tests also run on Rust 1.91; the
-consumer-shaped borrowed allocation probe checks for Wasm on that floor.
-Rust/TypeScript conformance retains 90 vectors and 17,524 differential mutations;
-new assertions prove generated owned/borrowed codecs are identical.
-Formatting, pins, dependency boundaries and documentation links are checked.
-Full CI, native macOS and installed consumer suites were not run.
+All 38 runtime/native/borrowed tests and 10 doctests pass, together with strict
+all-target/all-feature runtime Clippy and Rust 1.91 Wasm compilation. TypeScript
+conformance passes 90 vectors, 17,524 mutations and 1 MiB boundary checks.
+Formatting, documentation links and diff checks pass. Full CI, native macOS and
+installed Relay endpoint tests were not run; the sibling checkout stayed read-only.
 
-Source snapshots, logs, allocation-probe source/lock and its compact CSV are
-retained locally at `target/borrowed-contracts-0.5/`. Runtime dependencies are
-unchanged; the previously adopted IC Build 0.22/Host 0.30 remain tooling-only.
-The reviewed Shared Tooling snapshot remains 0.24.2 and is unchanged.
+## Code generation preference investigation
 
-## Earlier evidence
-
-See the [allocation comparison](../allocation-comparison.md),
-[bounded allocation study](../bounded-allocation-study.md),
-[Wasm optimization report](../runtime-optimization.md) and
-[MessagePack comparison](../messagepack-comparison.md) for source-bound prior
-measurements. Their isolated borrowed prototypes describe those historical
-experiments; the current API is now implemented in the runtime and derive crate.
-The reusable native buffers and Wasm same-slice canonical comparison are retained.
+The public-API adapter was measured and then rejected: mixed opt-3 saved 1.8%
+linked and 4.2% compressed Wasm, but opt-z linked size grew 3.9%. These gains did
+not justify the Serde forwarding code, tests and permanent API. The adapter,
+optimization attribute, root setting and dedicated tests have been removed.
+No per-type preference is supported. The output-growth fix remains intact.
+See [retained experimental evidence](../evaluation.md#public-api-code-generation-adapter).
+Source snapshots, locks, raw samples and probes remain at `target/codegen-adapter/`.

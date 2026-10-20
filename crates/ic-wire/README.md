@@ -97,7 +97,7 @@ and `Text::as_borrowed()` project already-admitted owned storage. Accessors retu
 the original storage lifetime. Their schema and representation match `Bytes<N>`
 and `Text<N>`, while their value-heap bound is zero. Lists/boxes containing views
 still account for their own container allocation. Borrowing does not change the
-finite encoder's maximum-schema output reservation.
+finite encoder's conservative schema admission budget.
 
 ```rust
 use core::marker::PhantomData;
@@ -216,7 +216,16 @@ payloads surface as Error::Malformed through Postcard; codec scratch allocation
 failure is Error::Allocation. Box uses Serde's standard allocation after schema
 admission; allocator exhaustion may abort rather than return a typed error. Static
 admission bounds requested storage, not general out-of-memory recovery.
-Encoding reserves the admitted maximum but initializes only emitted bytes.
+Finite encoding visits the value once and reserves output as bytes are emitted.
+The initial request is at most 64 bytes; growth doubles capacity or accommodates
+an emitted chunk, capped by the admitted maximum. When a growth request exceeds
+one quarter of that maximum, it reserves the remaining ceiling to avoid repeated
+large-payload copies. Every growth is fallible and checked against the byte limit
+before allocation. Allocators may supply more capacity than requested; spare
+capacity never permits bytes beyond the admitted limit. Tiny messages therefore
+avoid maximum-schema output reservations, while larger messages may still reserve
+the full ceiling. Growth can temporarily retain old and new allocator blocks;
+the budget is not a peak resident-memory guarantee.
 Canonical validation compares emitted chunks directly with the input without a
 second output allocation. Schema admission still reserves the same conservative
 heap-plus-scratch allowance for both directions.

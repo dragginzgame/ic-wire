@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.1]
+
+- Evaluate and reject per-type codec preferences: mixed opt-3 saves 1.8% linked
+  and 4.2% compressed Wasm, but opt-z linked size grows 3.9%. The maintenance
+  cost does not justify adoption; no preference API is shipped. Retain the
+  [experimental measurements](docs/evaluation.md#public-api-code-generation-adapter).
+
+- Grow finite encoder output fallibly within the admitted schema ceiling instead
+  of reserving the maximum for every tiny message. Preserve one-pass encoding,
+  canonical bytes, typed failures and conservative admission. Relay-shaped small
+  batches use 88–96% fewer encode instructions in isolated IC probes; document
+  large-message, native-time and linked-size tradeoffs in the
+  [evaluation evidence](docs/evaluation.md#bounded-finite-output-growth).
+
 ## [0.5.0] - 2026-10-19
 
 - **Breaking Rust API:** `Wire` no longer implies owned deserialization. Generic

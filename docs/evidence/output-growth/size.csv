@@ -1,0 +1,5 @@
+profile,selection,linked_wasm_bytes,gzip_9_mtime_0_bytes
+evaluation,baseline,116869,35467
+evaluation,selected,117800,36057
+speed,baseline,130221,40654
+speed,selected,130758,40977

@@ -3,7 +3,7 @@ mod tests;
 
 use crate::{Error, Limits, Wire};
 use alloc::vec::Vec;
-use core::marker::PhantomData;
+use core::{cell::Cell, marker::PhantomData};
 use postcard::ser_flavors::Flavor;
 
 pub(crate) const HEADER: usize = 11;
@@ -90,6 +90,70 @@ impl Flavor for Output {
     }
     fn finalize(self) -> postcard::Result<Self::Output> {
         Ok(self.bytes)
+    }
+}
+
+// Finite encoding visits the value once. Grow only for emitted bytes, keeping
+// allocation requests within the schema ceiling even when Vec has spare capacity.
+struct GrowingOutput<'a> {
+    output: Output,
+    allocation_failed: &'a Cell<bool>,
+}
+impl GrowingOutput<'_> {
+    #[cold]
+    #[inline(never)]
+    fn reserve(&mut self, additional: usize) -> postcard::Result<()> {
+        let bytes = &mut self.output.bytes;
+        if additional > self.output.limit - bytes.len() {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        let required = bytes.len() + additional;
+        if required > bytes.capacity() {
+            // Once a message is substantial relative to its ceiling, reserve
+            // the remainder to avoid repeated copies of large batch payloads.
+            let capacity = if required > self.output.limit / 4 {
+                self.output.limit
+            } else {
+                required
+                    .max(bytes.capacity().saturating_mul(2).max(64))
+                    .min(self.output.limit)
+            };
+            bytes
+                .try_reserve_exact(capacity - bytes.len())
+                .map_err(|_| {
+                    self.allocation_failed.set(true);
+                    postcard::Error::SerializeBufferFull
+                })?;
+        }
+        Ok(())
+    }
+}
+impl Flavor for GrowingOutput<'_> {
+    type Output = Vec<u8>;
+    #[inline(always)]
+    fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
+        if self.output.bytes.len() == self.output.limit {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        if self.output.bytes.len() == self.output.bytes.capacity() {
+            self.reserve(1)?;
+        }
+        self.output.bytes.push(byte);
+        Ok(())
+    }
+    #[inline(always)]
+    fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+        if bytes.len() > self.output.limit - self.output.bytes.len() {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        if bytes.len() > self.output.bytes.capacity() - self.output.bytes.len() {
+            self.reserve(bytes.len())?;
+        }
+        self.output.bytes.extend_from_slice(bytes);
+        Ok(())
+    }
+    fn finalize(self) -> postcard::Result<Self::Output> {
+        Ok(self.output.bytes)
     }
 }
 
@@ -201,13 +265,24 @@ impl Flavor for Compare<'_> {
 
 fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
     let size = admit::<T>(limits)?;
-    let mut bytes = Vec::new();
-    bytes
-        .try_reserve_exact(size)
+    let allocation_failed = Cell::new(false);
+    let mut output = GrowingOutput {
+        output: Output {
+            bytes: Vec::new(),
+            limit: size,
+        },
+        allocation_failed: &allocation_failed,
+    };
+    output
+        .try_extend(&header(id, direction))
         .map_err(|_| Error::Allocation)?;
-    bytes.extend_from_slice(&header(id, direction));
-    postcard::serialize_with_flavor(value, Output { bytes, limit: size })
-        .map_err(|_| Error::Malformed)
+    postcard::serialize_with_flavor(value, output).map_err(|_| {
+        if allocation_failed.get() {
+            Error::Allocation
+        } else {
+            Error::Malformed
+        }
+    })
 }
 
 fn decode<'de, T: Wire + serde::Deserialize<'de>>(

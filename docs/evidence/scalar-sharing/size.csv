@@ -1,0 +1,7 @@
+profile,strategy,linked_wasm_bytes,gzip_9_mtime_0_bytes
+release,specialized,105689,25474
+release,shared,105384,24726
+release,mixed,107406,25292
+speed,specialized,71088,23402
+speed,shared,61600,19326
+speed,mixed,67597,21263
