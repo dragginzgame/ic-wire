@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.18]
+## [0.5.18] - 2026-10-21
 
 - Centralize native decoder admission, byte/text budget checks and compound encoder
   forwarding, reducing duplicated checks while preserving protocol and error behavior.
