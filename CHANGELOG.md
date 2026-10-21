@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.10]
+## [0.5.10] - 2026-10-21
 
 - Reserve finite output ceilings up to 128 bytes before writing the header,
   avoiding a second reservation for small control messages crossing 64 bytes.
