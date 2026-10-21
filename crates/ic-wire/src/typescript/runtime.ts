@@ -248,7 +248,7 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
     case 'bytes': {
       const length = input.length(s.max ?? input.bytes.length - input.offset);
       if (s.min !== undefined && length < s.min) fail('malformed');
-      return input.raw(length).slice();
+      return new Uint8Array(input.raw(length));
     }
     case 'text': {
       const text = utf8.decode(input.raw(input.length(Math.min(s.max ?? input.bytes.length, input.bytes.length - input.offset))));

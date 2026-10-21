@@ -16,6 +16,10 @@ function check(codec, value, request, response) {
     const padded = new Uint8Array(input.length+4); padded.set(input,2);
     const decoded = decode(padded.subarray(2,-2)); padded.fill(0);
     assert.deepEqual(normalize(decoded), normalize(value));
+    // Node Buffer.slice() aliases storage; decoded bytes must still be owned.
+    const nodeInput = Buffer.alloc(input.length+4); nodeInput.set(input,2);
+    const nodeDecoded = decode(nodeInput.subarray(2,-2)); nodeInput.fill(0);
+    assert.deepEqual(normalize(nodeDecoded), normalize(value));
   }
 }
 // The descriptor here exercises hostile inputs without duplicating Rust schemas.
@@ -25,6 +29,14 @@ function probe(schema, nodes = 32, depth = 8) {
 }
 const header = [73,87,1,0,0,0,0,0,0,0,0];
 const frame = (...payload) => Uint8Array.from([...header,...payload]);
+// Mutating an owned decode result must not change the original Buffer frame.
+for (const direction of ['Request','Response']) {
+  const codec = probe({k:'bytes',max:8});
+  const bytes = Buffer.from(codec['encode'+direction](new Uint8Array([1,2,3])));
+  const original = Uint8Array.from(bytes);
+  codec['decode'+direction](bytes).fill(0);
+  assert.deepEqual(Uint8Array.from(bytes),original);
+}
 assert.deepEqual(prototypeName.encodeRequest(null), frame());
 assert.equal(prototypeName.decodeRequest(frame()), null);
 const rejects = (action, code) => assert.throws(action, error => error instanceof WireError && error.code === code);
@@ -35,6 +47,27 @@ rejects(() => probe({k:'result',ok:{k:'unit'},err:{k:'unit'}}).decodeRequest(fra
 rejects(() => probe({k:'enum',variants:[{name:'Unit',id:128,value:{k:'unit'}}]}).decodeRequest(frame(3)), 'malformed');
 for (const payload of [[1,255],[2,192,128],[3,237,160,128],[1,239]]) rejects(() => probe({k:'text',max:8}).decodeRequest(frame(...payload)), 'malformed');
 for (const k of ['bytes','text','list']) rejects(() => probe({k,max:4,item:{k:'unit'}}).decodeRequest(frame(5)), 'limit');
+// Length fast paths must preserve bounds and the full u64 prefix error contract.
+for (const k of ['bytes','text','list']) {
+  for (let length = 0; length < 128; length++) {
+    const schema = {k,max:length,item:{k:'unit'}};
+    const codec = createCodec({id:'1',request:schema,response:schema,requestBytes:256,responseBytes:256,requestNodes:256,responseNodes:256,requestDepth:8,responseDepth:8});
+    const payload = k === 'list' ? [] : Array(length).fill(97);
+    for (const direction of ['Request','Response']) {
+      const bytes = frame(length,...payload); bytes[10] = direction === 'Request' ? 0 : 1;
+      assert.equal(codec['decode'+direction](bytes).length,length);
+      const excessive = frame(...(length === 127 ? [128,1] : [length+1])); excessive[10] = bytes[10];
+      rejects(() => codec['decode'+direction](excessive),'limit');
+    }
+  }
+  const codec = probe({k,max:127,item:{k:'unit'}});
+  for (const payload of [[],[128],[128,0],[255,255,255,255,255,255,255,255,255,2],Array(10).fill(128)]) {
+    rejects(() => codec.decodeRequest(frame(...payload)),'malformed');
+  }
+  for (const payload of [[128,1],[255,255,255,255,255,255,255,255,255,1]]) {
+    rejects(() => codec.decodeRequest(frame(...payload)),'limit');
+  }
+}
 rejects(() => probe({k:'list',max:4,item:{k:'unit'}},3).decodeRequest(frame(4)), 'limit');
 rejects(() => probe({k:'option',item:{k:'unit'}},32,1).decodeRequest(frame(1)), 'limit');
 for (const bits of [8,16,32]) for (const value of [-1,2**bits,0.5,NaN,Infinity]) rejects(() => probe({k:'u',bits}).encodeRequest(value), Number.isSafeInteger(value) ? 'limit' : 'value');

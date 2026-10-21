@@ -747,3 +747,91 @@ comment; measured executable logic is identical. Probe SHA-256 identities:
 - `baseline.ts`: `3e41cfee7cf7a3f1d0cc1137fce6108d80e01f8b64b6972df7d9a31899f90b7a`.
 - `selected.ts`: `e359c4e2ec92636650cd48bc7a1e4bfd78de88cbb0414b6beafbcf4822ab1491`.
 - `bench.cjs`: `c7bb3a0651b73f57df51435f20369be08e19ab9149c49d561c031cc96da9cc2c`.
+
+## TypeScript short-length decoding experiment
+
+Against 0.5.13 (`752a308`), a rejected prototype made `Reader.length` peek at the
+next byte and return a checked number for prefixes below 128. Other prefixes
+used the unchanged u64 bigint decoder. This preserved successful bytes/values and
+typed errors, including nonminimal, truncated and overflowing prefixes. It is
+not retained: longer-text controls repeatedly regressed despite short-value wins.
+
+[All native results](evidence/typescript-length-prefixes/rejected.csv) include
+four runs. Runs 1–2 use 1,000 warm-up operations, independent calibration to at
+least 5 ms (65,536-call cap), and medians of 11 batches. Runs 3–4 increase warm-up
+to 10,000, calibration to 20 ms with the same cap, and samples to 21 batches.
+Each case runs in its own process with both variants; their measurement order
+alternates and explicit GC occurs outside timing. Allocation and incidental GC
+remain inside timing. Setup, hashing and equality checks are outside timing.
+
+Environment: Node 24.21.0 / V8 13.6.233.17-node.53, TypeScript 7.0.2 strict ES2022
+CommonJS, Linux x86_64, AMD Threadripper 7970X, CPU 0 affinity. Only request decode
+is timed. Byte inputs contain 42; text inputs contain ASCII `a`. Both use lengths
+0, 32, 127, 128 and 4,096, schema maximum 4,096 and frame allowance length + 32.
+The nested-list case is a fixed array of 128 lists, each `[1,2,3,4]` with u8
+items, list maximum 8 and frame allowance 1,024. Every case uses method ID 1,
+4,096 nodes, depth 16 and identical request/response schemas. CSV frame hashes
+identify inputs. Runs 3–4 repeat bytes-32, text-32/128/4096 and nested lists.
+
+In longer runs, 32-byte blobs improve 17–25%, 32-byte text 18–19% and nested lists
+28–33%. However, 4 KiB text regresses 13–32%; 128-byte text ranges from 1% faster
+to 5% slower. This does not justify changing the default decoder. These are native
+Node timings, not browser, IC instruction, Wasm size or application-wide claims.
+
+The maintained checks cover every one-byte length for bytes/text/lists, exact
+and exceeded schema bounds in both directions, and malformed u64 prefixes.
+An external deterministic probe additionally compares 150,000 inputs across the
+prototype and baseline, including typed errors (LCG seed 1, multiplier 1664525,
+increment 1013904223; high bytes, lengths below 32; maxima 0/1/127/128/4096).
+The retained runtime remains identical to 0.5.13. Raw scripts, sources, compiled
+variants and samples are in `/tmp/ic-wire-0514/` and
+`target/typescript-length-prefixes/`. SHA-256 identities:
+
+- `baseline.ts`: `8f8e8fea4e26d40b1efdfb153bc35382be9c8162776ace3d72db58381f34c945`.
+- `selected.ts` (rejected): `42f3a0867a492a9e607347d9b53b3bb3085c397d2ca59db702f0884299dd49fe`.
+- `bench.cjs`: `ad23ccf27e80275e8113f6505d96ad791e9eebd4604a3e2719c49fb6477fa961`.
+- `bench-long.cjs`: `f1edce0e2351215d2bded6ada75f6b87a38516cb8c07f258239f4da86fcd73e3`.
+- `parity.cjs`: `92a8c1202392bb80ecc83fe0f147ba0d8668de7a2eda93c0009d2f8df86d1dfb`.
+
+## TypeScript byte ownership correction
+
+The 0.5.13 decoder used `input.raw(length).slice()`, which aliases input storage
+when a Node Buffer is supplied: Buffer overrides `slice` with view semantics.
+The retained correction constructs `new Uint8Array(input.raw(length))` instead.
+This explicitly copies byte elements into owned storage without adding a runtime
+mode or changing wire bytes. Existing bounds are checked before copying.
+
+The conformance fixture now decodes every Rust vector from an offset Buffer view
+and overwrites the source before checking decoded values, in both directions.
+Separate checks mutate decoded bytes and confirm the source frame is unchanged.
+The aliasing failure was reproduced against 0.5.13 and is absent with the fix.
+Focused qualification passes 146 vectors, 29,560 differential mutations and the
+existing 1 MiB frame checks. Node imports remain confined to the test fixture.
+
+[Native measurements](evidence/typescript-byte-ownership/native.csv) compare two
+runs against 0.5.13 (`752a308`). Inputs are Uint8Array blobs filled with 42 at
+lengths 0, 32, 4,096 and 1,048,576, with ASCII text controls of 32 and 4,096 bytes.
+Schema maxima are 1 MiB; frame allowances are length + 32, method ID 1, 4,096
+nodes and depth 16. Request/response schemas are identical; request decode alone
+is timed. These measurements use ordinary Uint8Array inputs; Buffer inputs are
+covered by correctness checks, not speed claims.
+
+Environment: Node 24.21.0 / V8 13.6.233.17-node.53, TypeScript 7.0.2 strict ES2022
+CommonJS, Linux x86_64, AMD Threadripper 7970X, CPU 0 affinity. Each case runs in a
+separate process with both variants, 10,000 warm-up operations, independent 20 ms
+calibration (65,536-call cap), and median of 21 batches with alternating variant
+order. Explicit GC is outside timing; incidental GC and allocations are inside.
+Setup, equality checks and hashes are outside timing. CSV records frame identity.
+
+The 4 KiB blob improves about 24% and 1 MiB improves 6–12%; 32-byte blobs regress
+2–6%. Text controls improve 1–9%, showing timing variation. This is a correctness
+fix with a small-copy tradeoff, not a universal speedup, browser result, IC
+instruction or Wasm size claim. An earlier direct-slice prototype still inherited
+Buffer aliasing and was discarded; its raw data remain in `/tmp/ic-wire-blob-copy/`.
+
+Retained-fix sources, script and raw samples are in `/tmp/ic-wire-blob-owned/`
+and `target/typescript-byte-ownership/`. SHA-256 identities:
+
+- `baseline.ts`: `8f8e8fea4e26d40b1efdfb153bc35382be9c8162776ace3d72db58381f34c945`.
+- `selected.ts`: `ea8e64c5b84b1ba8429acdd0bdc2e64122f06da8a37a05e237e7479e3f296a15`.
+- `bench-long.cjs`: `bc2dfed5fffad041468f1399fb90a305f0512a7904c1d91e724454257d2822c7`.

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.14]
+
+- Fix TypeScript byte decoding from Node Buffer inputs to return owned storage,
+  preserving isolation when either the input frame or decoded bytes are mutated.
+- Expand TypeScript length-prefix checks across the full one-byte domain and
+  malformed u64 prefixes, preserving typed limit and malformed-input errors.
+- Evaluate and reject a short-length decoding fast path after repeated
+  longer-text regressions; retain the existing runtime implementation.
+
 ## [0.5.13] - 2026-10-21
 
 - Reuse number-based varints for TypeScript enum tags, preserving canonical u32
