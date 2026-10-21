@@ -2,41 +2,34 @@
 
 ## Current batch
 
-Released 0.5.17 (`f8e43cf`) is the baseline. Pending 0.5.18 consolidates six
-native decoder methods into the existing admission macro. Methods with names,
-lengths and field/variant lists now share the same budget check and visitor-depth
-setup as scalar and collection methods. Seven compound encoder implementations
-now share one local macro for child-value forwarding and completion. Container
-setup stays explicit; child admission and depth are unchanged. Six owned/borrowed
-byte/text visitor methods also share their existing conservative byte-charge
-check, with no ownership conversion or new runtime mode.
-Protocol bytes, identities, resource charges, error precedence and accepted
-inputs are unchanged. Package versions, dependencies, staging and Git refs remain
-untouched.
+Released 0.5.18 (`bd9e5bc`) is the baseline. Pending 0.5.19 renames the unpublished
+`ic-wire-canister-evaluation` package/directory to `ic-wire-qualification` and the
+CI target to `check-qualification`. No compatibility aliases are retained.
+The allocation fixture, its packed-projection test and compiler diagnostics remain.
+The standalone nine-case codec comparison and MessagePack comparison suites are
+removed along with their features, drivers and bitcode/wincode/rmp-serde dependencies.
+`evaluate-performance` and `evaluate-messagepack` are retired; allocation, protocol
+and generator probes remain. Historical reports and raw evidence are preserved,
+with old reproduction commands explicitly tied to historical source checkouts.
+
+Production Rust code, protocol bytes, identities, admission and borrowed/owned
+semantics are unchanged. This reduces maintained test/tooling scope, not payload
+or Wasm size. Package versions, staging and Git refs remain untouched; Cargo.lock
+is pruned for the renamed package and removed dependency graph.
 
 ## Evidence and qualification
 
-The before/after expanded crate is textually identical after excluding the edited
-macro definitions themselves. Generated methods, signatures and bodies are unchanged.
-This is source maintenance, not a runtime cost optimization; no timing or artifact
-size saving is claimed and a performance benchmark is not applicable.
+Focused validation covers the renamed package's tests, all-target Clippy and Rust
+1.91 check, compile-fail diagnostics, dependency boundaries, documentation links
+and the disposable release adapter. No runtime performance claim is made: production
+code and retained allocation workloads are unchanged. Full CI and fresh timing
+experiments are outside this tooling-retirement batch.
 
-Reproduce the expansion inspection with the baseline and working-tree sources:
-`RUSTC_BOOTSTRAP=ic_wire cargo rustc --offline --locked -p ic-wire --lib -- -Zunpretty=expanded`.
-The temporary compiler override enables inspection only, not ordinary builds.
-Rust 1.99.1 expansion files and their diff are retained locally in
-`/tmp/ic-wire-admission-cleanup/`. Compare after removing the `admit_visitor`
-macro definition, leaving all generated implementations intact. The encoder
-follow-up uses the preceding working tree as its baseline; its files and diff are
-in `/tmp/ic-wire-compound-cleanup/`. Excluding the new `compound` definition
-also leaves a textually identical expanded crate. The byte/text follow-up repeats
-this comparison against the preceding working tree, excluding only `visit_buffer`;
-its identical expansion and check logs are in `/tmp/ic-wire-buffer-cleanup/`.
-
-`make test` passes runtime/native coverage and doctests. Focused checks also cover
-strict Clippy, Wasm compilation, Rust 1.91 native/Wasm compilation, formatting,
-documentation links and whitespace. No new tests mirror the unchanged expansion.
-Full CI, browser conformance and sibling suites are outside this source-only batch.
+The last complete comparison source/lockfile is revision
+`bd9e5bc0ac2c6a057570ae5aae55e0c1f431488b`; use a separate checkout to rerun retired
+commands. Historical hashes, data and original package paths in evidence are not
+rewritten to imply they came from the renamed crate. Details are in
+[performance](../performance.md#retired-alternative-codec-comparisons).
 
 ## Retained decisions
 

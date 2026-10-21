@@ -11,19 +11,16 @@ and installed canister drivers are outside this repository.
 | `test` | Runtime/native bounds, canonical bytes, typed failures and retry buffers |
 | `check-typed-diagnostics` | Actual compile-fail subjects and a passing control |
 | `check-typescript` | Generated types, Rust vectors and differential malformed-input checks |
-| `check-evaluation` | Native roundtrips against private raw-codec controls and strict linting |
+| `check-qualification` | Allocation/borrowing fixture tests, strict linting and compiler-floor checks |
 | `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.91 floor |
 
-The maintainer-requested [MessagePack comparison](messagepack-comparison.md) adds
-an optional raw-codec experiment with retained native, external IC instruction
-and linked Wasm size evidence. `make evaluate-messagepack` reruns its native
-portion; external installed probes remain outside the maintained workspace.
-
-Private raw Postcard, MessagePack, bitcode and wincode controls have different admission and
-canonicality guarantees. They are not production codec modes. Optional
-[native timings](performance.md) must retain compiler, target, profile, inputs,
-lock selection and codec parameters. Native nanoseconds do not establish IC
-instruction counts, deployment size or end-to-end latency.
+The unpublished `ic-wire-qualification` package owns the maintained allocation,
+borrowing and buffer-reuse fixtures plus the IC Build compiler-diagnostic runner.
+Alternative-codec suites were retired in 0.5.19; their reports and raw evidence
+remain historical. See [retired comparisons](performance.md#retired-alternative-codec-comparisons)
+for the last source revision and reproduction boundary. Raw Postcard controls in
+the retained protocol probes omit Wire admission/canonicality and are not runtime
+modes. Native timings, IC instructions and artifact sizes remain distinct evidence.
 
 Run focused checks under the shared [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
 The complete `make ci` scaffold gate is reserved for an explicit local request

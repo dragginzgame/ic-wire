@@ -14,7 +14,7 @@ importing a transport or SDK.
 Start with the [runtime guide](docs/runtime.md), [design](docs/design.md),
 [evaluation scope](docs/evaluation.md) and [current handoff](docs/status/current.md).
 The runtime and derive crates were first published at 0.3.0; the private
-evaluation package remains unpublished.
+`ic-wire-qualification` package remains unpublished.
 
 ## Development
 

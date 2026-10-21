@@ -1,9 +1,5 @@
 [workspace]
-members = [
-    "crates/ic-wire",
-    "crates/ic-wire-canister-evaluation",
-    "crates/ic-wire-derive",
-]
+members = ["crates/ic-wire", "crates/ic-wire-derive", "crates/ic-wire-qualification"]
 default-members = ["crates/ic-wire"]
 resolver = "3"
 
@@ -25,15 +21,12 @@ serde_json = "1.0"
 syn = "3.0.9"
 
 # Tests and tooling only
-bitcode = "0.6.9"
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 ic-build = { version = "0.63", default-features = false }
 ic-wire = { path = "crates/ic-wire", version = "0.5.18" }
 libfuzzer-sys = "0.4.13"
-rmp-serde = "1.3.1"
 serde_bytes = "0.11.19"
 sha2 = "0.10.9"
-wincode = "0.6.2"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

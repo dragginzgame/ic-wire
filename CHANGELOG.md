@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.19]
+
+- Rename the unpublished tooling crate to `ic-wire-qualification` and its check
+  target to `check-qualification`; retain allocation/borrowing and diagnostic checks.
+- Retire alternative-codec comparison suites, their benchmark targets and
+  bitcode/wincode/MessagePack dependencies. Preserve historical reports and evidence.
+
 ## [0.5.18] - 2026-10-21
 
 - Centralize native decoder admission, byte/text budget checks and compound encoder

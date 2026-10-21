@@ -96,7 +96,7 @@ commit="$(git rev-parse HEAD)"
 for package in ic-wire ic-wire-derive; do
     yq -p toml -o json '.' "crates/$package/Cargo.toml" | jq -e '.package.publish == ["crates-io"]' >/dev/null
 done
-yq -p toml -o json '.' crates/ic-wire-canister-evaluation/Cargo.toml | jq -e '.package.publish == false' >/dev/null
+yq -p toml -o json '.' crates/ic-wire-qualification/Cargo.toml | jq -e '.package.publish == false' >/dev/null
 make release-resume "VERSION=$candidate" > "$fixture/resume.log" 2>&1
 [[ "$(git rev-parse HEAD)" == "$commit" ]]
 # Current-source ordering refuses disorder, while committed-source admission

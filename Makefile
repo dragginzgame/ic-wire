@@ -28,17 +28,9 @@ check-package:
 	+@$(MAKE) lint
 	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
 
-.PHONY: evaluate-performance
-evaluate-performance:
-	+@env cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example performance --features performance-postcard,performance-bitcode,performance-wincode -- target/native-performance
-
-.PHONY: evaluate-messagepack
-evaluate-messagepack:
-	+@env cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example messagepack --features comparison-postcard,comparison-messagepack,comparison-wire -- target/messagepack-comparison evaluation
-
 .PHONY: evaluate-allocation
 evaluate-allocation:
-	+@env cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example allocation --features allocation-fixture -- target/allocation-comparison evaluation
+	+@env cargo run --locked --profile evaluation -p ic-wire-qualification --example allocation --features allocation-fixture -- target/allocation-comparison evaluation
 
 .PHONY: fuzz-runtime
 
@@ -46,16 +38,16 @@ fuzz-runtime:
 	+@bash scripts/ci/fuzz-runtime.sh
 
 .PHONY: check-typed-diagnostics
-.PHONY: check-release check-evaluation
+.PHONY: check-release check-qualification
 .PHONY: check-typescript
 
 check-typescript:
 	+@bash scripts/ci/check-typescript.sh
 
-check-evaluation:
-	+@env cargo test --locked -p ic-wire-canister-evaluation --lib --tests --features performance-wire,performance-postcard,performance-bitcode,performance-wincode,comparison-postcard,comparison-messagepack,comparison-wire,allocation-fixture
-	+@env cargo clippy --locked -p ic-wire-canister-evaluation --all-targets --all-features -- -D warnings
-	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-canister-evaluation --all-targets --all-features
+check-qualification:
+	+@env cargo test --locked -p ic-wire-qualification --lib --tests --features allocation-fixture
+	+@env cargo clippy --locked -p ic-wire-qualification --all-targets --all-features -- -D warnings
+	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-qualification --all-targets --all-features
 
 check-typed-diagnostics:
 	+@bash scripts/ci/check-diagnostics.sh
@@ -67,11 +59,9 @@ help:
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
-		'Evaluation: evaluate-performance (native timing only; fresh target/native-performance output)' \
-		'Evaluation: evaluate-messagepack (native comparison; fresh target/messagepack-comparison output)' \
 		'Evaluation: evaluate-allocation (borrowing, buffers and bounded/packed layouts)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
-		'Evaluation: check-evaluation (native codec controls and compiler support)' \
+		'Qualification: check-qualification (allocation fixtures and compiler support)' \
 		'Registry: publish (uploads); check-package (no upload; registry access)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
@@ -117,7 +107,7 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-evaluation check-typescript check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-typescript check-wasm check-msrv
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

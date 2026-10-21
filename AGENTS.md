@@ -14,7 +14,7 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 ## Maintainer decisions
 
 - ic-wire and ic-wire-derive were first published at 0.3.0.
-  Keep the evaluation package `publish = false`. Subsequent publication,
+  Keep the qualification package `publish = false`. Subsequent publication,
   remote creation, pushes and releases require explicit authorization.
 - Establish a reusable Rust developer experience and a substantial measured win
   before broad adoption. Postcard is selected for controlled RPC and owned user
@@ -48,9 +48,11 @@ additional experimental crates must remain unpublished.
 
 Preserve dirty work. Ordinary work leaves staging, commits, own versions and
 releases to the maintainer. Maintain runtime/native codec tests, compile-fail
-diagnostics and standalone Rust/TypeScript conformance. The unpublished native
-performance fixture may use raw Postcard, bitcode and wincode controls; these are
-not production modes. Siblings are read-only unless separately authorized.
+diagnostics and standalone Rust/TypeScript conformance. The unpublished
+qualification package owns allocation/borrowing fixtures and compiler diagnostics.
+Alternative-codec comparison suites are retired; retained raw Postcard probes are
+diagnostic controls, not production modes. Siblings are read-only unless separately
+authorized.
 
 Use focused checks for changed code. Check for an active build sharing target/
 before compiling. Do not run broad Canic or sibling suites. Keep compiler, target,

@@ -1,0 +1,38 @@
+[package]
+name = "ic-wire-qualification"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[features]
+allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
+
+[dependencies]
+ic-wire = { workspace = true, optional = true }
+serde.workspace = true
+serde_bytes = { workspace = true, optional = true }
+
+[dev-dependencies]
+clap.workspace = true
+ic-build.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[[example]]
+name = "check-diagnostics"
+path = "examples/check_diagnostics/mod.rs"
+
+[[example]]
+name = "allocation"
+path = "examples/allocation/mod.rs"
+required-features = ["allocation-fixture"]
+
+[[test]]
+name = "packed-projection"
+path = "tests/packed_projection/mod.rs"
+required-features = ["allocation-fixture"]
+
+[lints]
+workspace = true

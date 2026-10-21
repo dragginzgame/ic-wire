@@ -1,7 +1,15 @@
 [
-  {"dependency":"clap","allowed_packages":["ic-wire","ic-wire-canister-evaluation"]},
-  {"dependency":"ic-build","allowed_packages":["ic-wire-canister-evaluation"]},
-  {"dependency":"rmp-serde","allowed_packages":["ic-wire-canister-evaluation"]},
-  {"dependency":"bitcode","allowed_packages":["ic-wire-canister-evaluation"]},
-  {"dependency":"wincode","allowed_packages":["ic-wire-canister-evaluation"]}
+  {
+    "dependency": "clap",
+    "allowed_packages": [
+      "ic-wire",
+      "ic-wire-qualification"
+    ]
+  },
+  {
+    "dependency": "ic-build",
+    "allowed_packages": [
+      "ic-wire-qualification"
+    ]
+  }
 ]

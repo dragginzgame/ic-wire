@@ -1,5 +1,9 @@
 # MessagePack versus Postcard: Blob-shaped codec experiment
 
+Historical experiment: the comparison runner and alternative-codec dependencies
+were retired in 0.5.19. Reports and evidence below describe the recorded source
+versions. See [retirement and reproduction](performance.md#retired-alternative-codec-comparisons).
+
 Measured on 2026-10-19 at the maintainer's request. This is an experimental
 comparison, not a new production codec mode. The fixture and native driver live
 in the unpublished evaluation package; no platform SDK or simulator dependency
@@ -177,9 +181,9 @@ would add work and needs separate qualification. No such implementation was buil
 
 ## Reproduction and evidence
 
-`make evaluate-messagepack` runs the maintained size-optimized native comparison
-and refuses an existing output directory. Run it on an otherwise quiet host for
-fresh timings. The complete commands, raw samples, per-operation CSV and identities
+In the historical checkout, `make evaluate-messagepack` runs the size-optimized
+native comparison and refuses an existing output directory. This target is no
+longer present in the current workspace. The complete commands, raw samples, per-operation CSV and identities
 are in [the evidence directory](evidence/messagepack-2026-10-19/metadata.json).
 Native profiles and IC reports retain all measurements, not just the rows selected
 below. Local binaries, external harness source/locks and logs are retained at

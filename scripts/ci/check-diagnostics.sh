@@ -12,5 +12,5 @@ status=0
 trap 'status=$?; if [[ "$status" != 0 ]]; then printf "Diagnostic failure logs: %s\n" "$run" >&2; fi' EXIT
 cargo build --offline --locked -p ic-wire \
     --message-format=json > "$run/artifacts.jsonl"
-cargo run --quiet --offline --locked -p ic-wire-canister-evaluation \
+cargo run --quiet --offline --locked -p ic-wire-qualification \
     --example check-diagnostics -- "$run"

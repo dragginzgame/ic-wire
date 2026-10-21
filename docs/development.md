@@ -52,9 +52,9 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `build`, `check`, `test`, `lint` | Locked runtime builds, behavior and strict Clippy |
 | `check-wasm`, `check-msrv` | Runtime Wasm and minimum-toolchain checks |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
-| `check-evaluation` | Native raw-codec roundtrips and evaluation lint/floor checks |
+| `check-qualification` | Allocation/borrowing fixtures and qualification lint/floor checks |
 | `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
-| `evaluate-performance` | Explicit [native timing experiment](performance.md) |
+| `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
 | `fmt-check` | Grouped manifests, derive order and Rust formatting |
 | `check-pins`, `check-boundary` | Dependency inheritance/pins and private-control ownership |
@@ -95,7 +95,7 @@ See [consumer fixtures and packet inspection](consumer-fixtures.md).
 default. To isolate codec work, select a fresh output directory:
 
 ```sh
-cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example allocation --features allocation-fixture -- target/allocation-codec evaluation --codec-only
+cargo run --locked --profile evaluation -p ic-wire-qualification --example allocation --features allocation-fixture -- target/allocation-codec evaluation --codec-only
 ```
 
 Both modes include canonical validation and result destruction. Codec-only mode
@@ -109,8 +109,9 @@ at least 2 ms or the repetition cap. Historical format-1 results remain unchange
 
 Keep `Cargo.lock` selected and use locked builds. Prepare missing dependency
 sources with `cargo fetch --locked` before explicitly offline gates. Runtime
-normal/build dependencies remain separate from the private evaluation package;
-raw bitcode/wincode and IC Build are restricted to that unpublished package.
+normal/build dependencies remain separate from the private qualification package;
+IC Build is restricted to that unpublished package. Alternative-codec dependencies
+are retired.
 No platform SDK or simulator is selected in any workspace dependency role.
 
 ## Snapshot maintenance and release boundary
@@ -156,7 +157,7 @@ make publish
 ```
 
 Consumers retain Rust 1.91. Registry identity, credentials, publication status and
-repository visibility remain maintainer concerns. The evaluation package remains
+repository visibility remain maintainer concerns. The qualification package remains
 `publish = false`.
 
 ## Supported hosts

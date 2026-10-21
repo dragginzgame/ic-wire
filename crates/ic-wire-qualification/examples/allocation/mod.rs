@@ -1,5 +1,5 @@
 //! Native allocation/admission experiment with calibrated batches and raw samples.
-use ic_wire_canister_evaluation::allocation::{CASE_COUNT, name, run_with_scan};
+use ic_wire_qualification::allocation::{CASE_COUNT, name, run_with_scan};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{fs, path::PathBuf, process::Command, time::Instant};
