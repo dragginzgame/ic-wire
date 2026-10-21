@@ -524,3 +524,51 @@ including fresh. Each initially-empty cycle drops the preceding scratch buffer
 inside the timed interval. Native time and peak memory were not measured.
 Sources, locks, raw runs, rejected revisions and logs are retained under
 `target/finite-scratch/`; the baseline source contains only the isolated prototype.
+
+
+## TypeScript bounded-growth experiment
+
+Against released 0.5.8 (`1894d0a`), an isolated writer started with at most 64
+bytes and doubled capacity as needed, capped at the method's byte allowance.
+Bulk writes could grow directly to their required size. Growth copied only the
+written prefix and refreshed the float DataView. Text admission used the full
+allowance, independent of current capacity; the final independent slice stayed.
+**This prototype was rejected; the maintained writer is unchanged.**
+
+[Matched native results](evidence/typescript-buffer-growth/native.csv) cover
+20 cases in two runs. With a 2 MiB allowance, a 13-byte scalar frame went from
+2,097,165 requested buffer bytes to 77, and median encode time fell about 98.5%.
+With tight allowances, 4 KiB blobs slowed 48–59%, 1,024 f64 values slowed 20–67%,
+and 1,024 u64 values slowed 10–11%. The tight f64 case requested 32,726 buffer
+bytes instead of 16,406 due to intermediate growth and copying. These regressions
+rule out adopting this implementation as a general speed improvement. The 1 MiB
+blob timings varied substantially; do not infer a stable large-blob speedup.
+
+Measurement used Node 24.21.0 / V8 13.6.233.17-node.53, TypeScript 7.0.2,
+ES2022 CommonJS with strict checking, Linux x86_64, AMD Threadripper 7970X.
+No CPU affinity was set. Each case warmed 100 encodes, calibrated each variant
+independently to at least 5 ms (16,384-call cap), then took the median of 11
+batches. Case order rotated and variant order alternated. Explicit GC ran before
+each sample outside timing; allocation and incidental GC remained inside timing.
+Setup and decode verification were outside timing. These are native Node results,
+not browser, IC-instruction, peak-memory or Wasm/deployment-size measurements.
+Requested buffer bytes count explicit numeric Uint8Array construction plus the
+final slice, separately from timing; they do not measure total engine allocation.
+
+Inputs were scalar u32 128; zero/32/4,096/1,048,576 bytes filled with 42;
+32 ASCII `a` characters; 2,048 `é` characters; 4/1,024 f64 values `i + 0.5`;
+and 1,024 u64 values `i`. Each used method ID 1, node allowance 4,096, depth 16,
+and equal request/response schemas. Wide frame allowances were 2,097,152 bytes;
+tight controls used exact frame length (scalar: 16 bytes). Byte/text maxima were
+1,048,576 and fixed-array maxima matched element counts. Frames and decoded
+values matched for every timed case. Another 450 comparisons covered both
+directions, growth thresholds, Unicode, floats and insufficient/exact allowances,
+preserving successful bytes and typed errors.
+
+Local sources, compiled variants, scripts and raw samples are retained under
+`target/typescript-buffer-growth/`. Both matched runs used source SHA-256:
+
+- Baseline: `caf41dabcfdcc401dc2cb90bd4ce6e92843b404c6131af2462c46b74a808f2a8`.
+- Candidate: `20e74baf919a4a922ef7d57cadfd094a1a510e34402777c8724449156c3c5b7b`.
+
+Benchmark script SHA-256: `e4e65a41c07ef227651b1efb63317415c177a7038c7be3e6ca4a8205cd5220b5`.

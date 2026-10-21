@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.9]
+
+- Record the TypeScript bounded-growth writer experiment: large frame allowances
+  benefit, but tight blob/array regressions leave the existing writer unchanged.
+
 ## [0.5.8] - 2026-10-21
 
 - Enforce declared TypeScript float bounds when encoding and decoding, and
