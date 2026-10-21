@@ -5,6 +5,9 @@
 - Adopt Shared Tooling 0.25.9: refuse a new release increment past an
   undelivered committed preparation, preserving its saved plan and evidence.
   Tool pins, package APIs and dependency selections are unchanged.
+- Reserve finite output ceilings up to 128 bytes before writing the header,
+  avoiding a second reservation for small control messages crossing 64 bytes.
+  Tiny values may retain up to 64 additional requested bytes. Fixes #14.
 
 ## [0.5.9] - 2026-10-21
 

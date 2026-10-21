@@ -149,6 +149,66 @@ raw samples and rejected candidates are retained at
 under a large schema, growth boundaries, spare capacity, and deterministic
 capacity-overflow refusal. No sibling source or production dependency changed.
 
+### Small finite schema reservation
+
+PR #15 is refreshed against released 0.5.8 (`1894d0a`). Fresh encoding requests
+the full admitted frame ceiling when it is at most 128 bytes. Larger ceilings retain the 64-byte start and existing growth
+policy. This must happen in the direct header initialization paths introduced
+since the original PR; changing only the cold growth routine is insufficient.
+There is no new setting, wire identity or serialization pass.
+
+The new regression fails on 0.5.8 and passes with the change. It checks fresh
+initialization and warmed scratch reuse for Bytes ceilings 53, 80 and 107
+(frame ceilings 74, 101 and 128), stable scratch capacity/pointer across payload growth, and exact bytes.
+Existing tests retain typed allocation failure, logical limits despite spare
+capacity, single serialization and large-schema tiny-output checks.
+
+[IC instruction results](evidence/small-schema-reservation/ic.csv) cover 64
+cases in opt-z and opt-3. For fresh Bytes<80>/Bytes<107> payloads crossing 64
+frame bytes, encoding saves 322 instructions (18.1–19.0%) in opt-z and 274
+(24.8–26.2%) in opt-3. Every other measured encode case and every decode case
+retains its baseline instruction count. All frame lengths and SHA-256 identities
+match. This qualifies fresh encoding only: an initial prototype also changing
+scratch reservation regressed warmed reuse by 5–8%, so scratch policy is unchanged.
+
+[Native allocation/timing results](evidence/small-schema-reservation/native.csv)
+show affected fresh frames dropping from two allocation requests to one. Tiny
+frames can request 101 or 128 bytes instead of 64; this is a bounded retained
+capacity tradeoff, not a peak-memory guarantee. Native timings are supporting
+observations, not IC measurements or universal speedup claims.
+[Whole-probe sizes](evidence/small-schema-reservation/size.csv) change from
+42,499 to 42,536 linked bytes in opt-z (+37), with gzip-9 +2 bytes. Opt-3 linked
+size remains 48,303 bytes, with gzip-9 +27 bytes. These are complete linked probe
+comparisons, not symbol-attributed savings or installed-consumer measurements.
+
+Both builds use Rust 1.99.1 (`58cf8f9c3`, LLVM 23.1.1), Postcard 1.1.3, LTO,
+one codegen unit and panic abort.
+IC builds target wasm32-unknown-unknown, with opt-z/opt-3 and stripped debuginfo;
+the external PocketIC 16.1.0 driver takes five queries of four repetitions per
+case using ic0.performance_counter(0), reporting median instructions per encode
+or decode. Input setup, frame identity and capacity reporting are outside the
+timed loops. Warm reuse prepares an exact-length buffer before timing.
+IC cases are seven byte bounds (43, 44, 80, 107, 108, 4,096, 1,048,576), four
+payload lengths (0, 32, min(53,bound), bound), and both directions, plus eight
+warm-reuse Bytes<80> controls. Inputs are bytes filled with 42, method ID 1,
+frame allowance bound+21, allocation allowance 2*bound+21, one node/depth.
+
+Native builds target x86_64 Linux on a Threadripper 7970X, opt-3, pinned to CPU 0.
+They use the same seven bounds and directions with lengths 0/32/52/53/bound
+(excluding lengths above the bound), 1,000 warmups and medians of nine batches
+of 100,000 encodes (1,000 for the 1 MiB bound). Allocation counting runs separately
+from timing; the counter-disabled allocator wrapper remains in both timed builds.
+Two baseline runs and a final candidate run are retained in the compact table.
+Local scripts, sources, dependency locks, raw samples, rejected scratch results
+and logs remain at `/tmp/ic-wire-pr15-probe/`. No runtime dependencies or sibling
+sources were added or changed for the external qualification.
+
+Probe source SHA-256 identities:
+
+- Native: `b2b4fdc6beb151023182dcd5cc8593146889083bb11d8e00f330b0f88d0b0096`.
+- IC: `dd69b54aae1de5e70a7e7a0514cd95d14e24b2c5e065a8569115f68f7082cfff`.
+- IC probe lock: `91615bb5d30d5826138dfd8d03b6525985ff04c872756eb08d8f86f675094266`.
+
 ## Per-type code generation preference experiment
 
 A requested speed/size selector was prototyped outside the maintained runtime.
