@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.12]
+## [0.5.12] - 2026-10-21
 
 - Encode and decode TypeScript 8/16/32-bit integers with number arithmetic,
   preserving canonical Postcard bytes and bigint handling for wider integers.

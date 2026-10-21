@@ -356,7 +356,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.5.11"
+version = "0.5.12"
 dependencies = [
  "clap",
  "ic-wire-derive",
@@ -368,7 +368,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-canister-evaluation"
-version = "0.5.11"
+version = "0.5.12"
 dependencies = [
  "bitcode",
  "clap",
@@ -385,7 +385,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.5.11"
+version = "0.5.12"
 dependencies = [
  "proc-macro2",
  "quote",
