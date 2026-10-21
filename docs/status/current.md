@@ -2,44 +2,40 @@
 
 ## Current batch
 
-Released 0.5.8 (`1894d0a`) is the baseline. The bounded-growth TypeScript writer
-experiment is complete and rejected. Production source is unchanged; the pending
-0.5.9 changelog records evaluation evidence only. Package versions, staging and
-Git refs remain untouched.
-
-The prototype allocated at most 64 bytes initially, grew geometrically within
-method limits and kept the final independent copy. Small frames under a 2 MiB
-allowance benefited substantially, but tight 4 KiB blobs slowed 48–59% and tight
-1,024-float arrays slowed 20–67% across two matched native Node runs. The latter
-also requested roughly twice as many buffer bytes. Do not adopt this version.
-See the [experiment](../evaluation.md#typescript-bounded-growth-experiment) for
-inputs, environment, methodology, source hashes, limitations and retained data.
+Released 0.5.9 (`007b3f4`) is the integration baseline. PR #15 refreshes the small finite
+schema reservation proposal (#14). Fresh encoders request the full
+admitted ceiling when it is at most 128 bytes, before initializing the header.
+Larger ceilings and scratch reuse keep their existing reservation policy.
+Tiny values under small schemas may retain up to 64 additional requested bytes.
+Wire identity, single-pass serialization and typed failures remain unchanged.
+Package versions are unchanged; pending notes target 0.5.10. Merge and release
+remain maintainer-owned. The separate TypeScript growth experiment is unrelated.
 
 ## Qualification
 
-Both variants compiled with TypeScript 7.0.2 strict checks. Twenty timed cases
-matched exact frames and decoded values. Another 450 baseline/candidate boundary
-comparisons passed across both directions, Unicode, growth thresholds, floats,
-and insufficient/exact frame allowances. These checks exercised only the isolated
-prototype; the maintained runtime was not edited.
+The new regression fails on released 0.5.8 and passes with the fix. Focused
+library/runtime/native/borrowed tests pass on Rust 1.99.1 and 1.91, as do strict
+all-target/all-feature Clippy and Rust 1.91 Wasm compilation. The regression
+checks fresh initialization, byte parity and warmed scratch stability.
+Existing checks retain oversized output and allocation-failure identities.
 
-Raw runs, source variants, compiled JavaScript and the boundary probe are under
-`target/typescript-buffer-growth/`, also retained at `/tmp/ic-wire-ts-growth/`.
-The compact native result table is maintained under
-`docs/evidence/typescript-buffer-growth/native.csv`.
-No browser, IC instruction, deployment-size or peak-memory claim follows from
-this native Node experiment. Full CI and consumer suites were not run.
+Matched native and isolated IC measurements are recorded in
+[evaluation](../evaluation.md#small-finite-schema-reservation). Raw probes, locks,
+compiler outputs and runs remain under `/tmp/ic-wire-pr15-probe/`.
+No full local CI or sibling suites ran. Hosted checks must qualify the refreshed
+PR commit independently of the original PR's green checks.
 
 ## Retained decisions
 
-0.5.8 enforces TypeScript numeric metadata bounds and removes per-float scratch
-buffers/views. Its released qualification and implementation are in `1894d0a`.
-Production remains bounded Postcard; JSON is optional generation/tooling metadata.
-TypeScript qualification runs in CI/release gates; see
-[development](../development.md) for local Node/npm preparation.
+0.5.7 adopted IC Tooling 0.63.0, with the release editor selecting `cli` separately
+from the diagnostic library. It also bounds registry enumeration to once per
+operation and validates optional collection lengths. TypeScript qualification
+runs in CI/release gates; see [development](../development.md) for local Node/npm
+preparation before offline release validation.
 
-Finite scratch reuse shipped in 0.5.5. Fresh Rust encoding stays separate because
-sharing the mutable-buffer path regressed small-message instruction cost.
+Production remains bounded Postcard; JSON is optional generation/tooling metadata.
+Finite scratch reuse shipped in 0.5.5. Fresh encoding remains separate because
+sharing its mutable-buffer path regressed small-message instruction cost.
 The [scratch-buffer study](../evaluation.md#finite-scratch-buffer-follow-up)
 retains byte parity, capacity/retry tradeoffs and measured evidence.
 Caller-owned scratch capacity may outlive large messages; retain immutable retry

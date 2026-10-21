@@ -190,3 +190,36 @@ fn a_mismatch_still_checks_later_bytes_and_the_output_allowance() {
     exhausted.try_push(0).unwrap();
     assert!(!exhausted.finalize().unwrap());
 }
+
+#[test]
+fn small_fresh_frames_reserve_the_ceiling_and_preserve_scratch_reuse() {
+    fn check<const N: usize>() {
+        let limits = Limits {
+            bytes: 1024,
+            allocation: 2048,
+            nodes: 8,
+            depth: 8,
+        };
+        let size = admit::<crate::Bytes<N>>(limits).unwrap();
+        let empty = crate::Bytes::<N>::new(vec![]).unwrap();
+        let fresh = encode(1, 0, limits, &empty).unwrap();
+        assert!(fresh.capacity() >= size);
+        let mut scratch = Vec::new();
+        let largest = crate::Bytes::<N>::new(vec![42; N]).unwrap();
+        encode_into(1, 0, limits, &largest, &mut scratch).unwrap();
+        assert!(scratch.capacity() >= size);
+        let capacity = scratch.capacity();
+        let pointer = scratch.as_ptr();
+        for len in [0, 32, 52, 53, N] {
+            let value = crate::Bytes::<N>::new(vec![42; len]).unwrap();
+            encode_into(1, 0, limits, &value, &mut scratch).unwrap();
+            assert_eq!(scratch.capacity(), capacity);
+            assert_eq!(scratch.as_ptr(), pointer);
+            assert_eq!(scratch, encode(1, 0, limits, &value).unwrap());
+            assert_eq!(&scratch[HEADER..], postcard::to_allocvec(&value).unwrap());
+        }
+    }
+    check::<53>();
+    check::<80>();
+    check::<107>();
+}

@@ -269,7 +269,7 @@ fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<
     // starting capacity directly, leaving the cold growth path for payloads.
     let mut bytes = Vec::new();
     bytes
-        .try_reserve_exact(size.min(64))
+        .try_reserve_exact(if size <= 128 { size } else { 64 })
         .map_err(|_| Error::Allocation)?;
     bytes.extend_from_slice(&header(id, direction));
     let allocation_failed = Cell::new(false);
