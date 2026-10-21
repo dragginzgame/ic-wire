@@ -12,7 +12,14 @@ use std::{
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = env::current_dir()?;
-    let run = PathBuf::from(env::args_os().nth(1).ok_or("expected log directory")?);
+    let arguments = clap::Command::new("check-diagnostics")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .get_matches();
+    let run = arguments.get_one::<PathBuf>("directory").unwrap();
     let source = root.join("crates/ic-wire/tests/ui");
     let wire = library_artifact(
         File::open(run.join("artifacts.jsonl"))?,
@@ -37,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .map(|text| text.lines().map(str::to_owned).collect())
         })
         .collect::<Result<Vec<_>, _>>()?;
-    check_suite(&expected, &run, 1024 * 1024, |case| {
+    check_suite(&expected, run, 1024 * 1024, |case| {
         let name = case.map_or("valid", |index| names[index].as_str());
         let mut command = Command::new("rustc");
         command

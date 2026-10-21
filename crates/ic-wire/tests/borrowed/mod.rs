@@ -47,6 +47,8 @@ fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
             view.data.as_slice().as_ptr(),
             owned.data.as_slice().as_ptr()
         );
+        let mut scratch = Vec::with_capacity(2 * 1024 * 1024);
+        ic_wire::encode_request_into::<Contract<Chunk<'_, '_>>>(&view, &mut scratch).unwrap();
         let frame = ic_wire::encode_request::<Contract<Chunk<'_, '_>>>(&view)
             .unwrap()
             .into_bytes();
@@ -56,6 +58,7 @@ fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
                 .unwrap()
                 .into_bytes()
         );
+        assert_eq!(scratch, frame);
         let decoded = ic_wire::decode_request::<Contract<Chunk<'_, '_>>>(&frame).unwrap();
         assert_eq!(decoded, view);
         let range = frame.as_ptr() as usize..frame.as_ptr() as usize + frame.len();

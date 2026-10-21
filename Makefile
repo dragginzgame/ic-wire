@@ -4,14 +4,28 @@ override SHARED_TOOLING_ROOT := $(CURDIR)
 SHARED_TOOLING_RUST := 1
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
+LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
+LOCAL_TOOL_CHECK_TARGETS += release-editor-check
+RELEASE_EDITOR_VERSION := 0.63.0
+export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
+RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
+    --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
 include make/consumer.mk
+
+.PHONY: install-release-editor release-editor-check
+install-release-editor:
+	+@$(RELEASE_EDITOR_COMMAND)
+release-editor-check:
+	+@$(RELEASE_EDITOR_COMMAND) --check
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
 .PHONY: publish check-package
 publish:
+	+@$(MAKE) lint
 	+@env cargo publish --locked -p ic-wire-derive -p ic-wire
 
 check-package:
+	+@$(MAKE) lint
 	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
 
 .PHONY: evaluate-performance
@@ -103,7 +117,7 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check lint test check-typed-diagnostics check-evaluation check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-evaluation check-typescript check-wasm check-msrv
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

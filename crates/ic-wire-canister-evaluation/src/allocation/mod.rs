@@ -21,7 +21,7 @@ pub struct Sample {
     pub bytes: Vec<u8>,
     /// Encode time, including fresh allocation/drop or reuse as labelled.
     pub encode: u64,
-    /// Decode and full hash/blob byte checksum time, including owned-value drop.
+    /// Decode time, optionally including the application checksum, plus owned-value drop.
     pub decode: u64,
     /// Observed output capacity after one successful call, not peak heap usage.
     pub capacity: usize,
@@ -124,10 +124,14 @@ fn hash(i: usize) -> [u8; 32] {
     }
     out
 }
-fn checksum(bytes: impl Iterator<Item = u8>) -> u64 {
+fn checksum(bytes: impl Iterator<Item = u8>, scan: bool) -> u64 {
+    if !scan {
+        black_box(bytes);
+        return 0;
+    }
     bytes.fold(0, |sum, byte| sum + u64::from(byte))
 }
-fn packed_checksum(bytes: &[u8]) -> Result<u64, ic_wire::Error> {
+fn packed_checksum(bytes: &[u8], scan: bool) -> Result<u64, ic_wire::Error> {
     // Consumer-owned layout validation; never silently accept a partial hash.
     if bytes.len() > 32768 {
         return Err(ic_wire::Error::Limit);
@@ -135,12 +139,12 @@ fn packed_checksum(bytes: &[u8]) -> Result<u64, ic_wire::Error> {
     if !bytes.len().is_multiple_of(32) {
         return Err(ic_wire::Error::Malformed);
     }
-    Ok(checksum(bytes.iter().copied()))
+    Ok(checksum(bytes.iter().copied(), scan))
 }
 fn measure<T: Serialize, const ID: u64>(
     value: &T,
     mode: u8,
-    repetitions: u64,
+    repetitions: [u64; 2],
     clock: &mut impl FnMut() -> u64,
     mut decode: impl FnMut(&[u8]) -> u64,
     fresh: impl Fn() -> Vec<u8>,
@@ -152,7 +156,7 @@ fn measure<T: Serialize, const ID: u64>(
     native::encode_request_into(ID, value, LIMITS, &mut reuse).unwrap();
     assert_eq!(bytes, reuse);
     let start = clock();
-    for _ in 0..repetitions {
+    for _ in 0..repetitions[0] {
         if mode == 2 {
             native::encode_request_into(ID, black_box(value), LIMITS, &mut reuse).unwrap();
             black_box(&reuse);
@@ -162,7 +166,7 @@ fn measure<T: Serialize, const ID: u64>(
     }
     let encode = clock() - start;
     let start = clock();
-    for _ in 0..repetitions {
+    for _ in 0..repetitions[1] {
         black_box(decode(black_box(&bytes)));
     }
     let decode_time = clock() - start;
@@ -211,6 +215,21 @@ pub fn name(case: usize) -> String {
 /// # Panics
 /// Panics on an invalid case, failed admission or inconsistent roundtrip.
 pub fn run(case: usize, repetitions: u64, clock: &mut impl FnMut() -> u64) -> Sample {
+    run_with_scan(case, [repetitions; 2], clock, true)
+}
+/// Measure the same cases with independent encode/decode repetition counts.
+/// The scan switch includes or excludes the application payload checksum.
+/// Codec-only mode retains decoding, canonical checks, result destruction and
+/// constant-time packed-layout length checks. It black-boxes the byte iterator.
+///
+/// # Panics
+/// Panics for an unknown case, failed admission or inconsistent roundtrip.
+pub fn run_with_scan(
+    case: usize,
+    repetitions: [u64; 2],
+    clock: &mut impl FnMut() -> u64,
+    scan: bool,
+) -> Sample {
     assert!(case < CASE_COUNT);
     if case < 28 {
         let n = [0, 1, 32, 1024][case / 7];
@@ -233,11 +252,11 @@ pub fn run(case: usize, repetitions: u64, clock: &mut impl FnMut() -> u64) -> Sa
                     if lane == 1 {
                         let v = ic_wire::decode_request::<Binding<ArrayManifest, ARRAY>>(bytes)
                             .unwrap();
-                        checksum(v.chunks.as_slice().iter().flatten().copied())
+                        checksum(v.chunks.as_slice().iter().flatten().copied(), scan)
                     } else {
                         let v: OwnedArray = native::decode_request(ARRAY, bytes, LIMITS).unwrap();
                         assert!(v.chunks.len() <= 1024);
-                        checksum(v.chunks.iter().flatten().copied())
+                        checksum(v.chunks.iter().flatten().copied(), scan)
                     }
                 },
                 || {
@@ -280,14 +299,14 @@ pub fn run(case: usize, repetitions: u64, clock: &mut impl FnMut() -> u64) -> Sa
                     if lane == 6 {
                         let v: PackedView<'_> =
                             native::decode_request(PACKED, bytes, LIMITS).unwrap();
-                        packed_checksum(v.chunks).unwrap()
+                        packed_checksum(v.chunks, scan).unwrap()
                     } else if lane == 4 {
                         let v = ic_wire::decode_request::<Binding<PackedManifest, PACKED>>(bytes)
                             .unwrap();
-                        packed_checksum(v.chunks.as_slice()).unwrap()
+                        packed_checksum(v.chunks.as_slice(), scan).unwrap()
                     } else {
                         let v: OwnedPacked = native::decode_request(PACKED, bytes, LIMITS).unwrap();
-                        packed_checksum(&v.chunks).unwrap()
+                        packed_checksum(&v.chunks, scan).unwrap()
                     }
                 },
                 || {
@@ -340,15 +359,15 @@ pub fn run(case: usize, repetitions: u64, clock: &mut impl FnMut() -> u64) -> Sa
                 if lane == 3 {
                     let v: &serde_bytes::Bytes =
                         native::decode_request(BLOB, bytes, LIMITS).unwrap();
-                    checksum(v.iter().copied())
+                    checksum(v.iter().copied(), scan)
                 } else if lane == 1 {
                     let v =
                         ic_wire::decode_request::<Binding<Bytes<1048576>, BLOB>>(bytes).unwrap();
-                    checksum(v.as_slice().iter().copied())
+                    checksum(v.as_slice().iter().copied(), scan)
                 } else {
                     let v: serde_bytes::ByteBuf =
                         native::decode_request(BLOB, bytes, LIMITS).unwrap();
-                    checksum(v.iter().copied())
+                    checksum(v.iter().copied(), scan)
                 }
             },
             || {
@@ -374,18 +393,36 @@ mod tests {
     #[test]
     fn packed_hash_shape_refuses_partial_and_oversized_elements() {
         assert_eq!(
-            super::packed_checksum(&[0; 31]),
+            super::packed_checksum(&[0; 31], true),
             Err(ic_wire::Error::Malformed)
         );
         assert_eq!(
-            super::packed_checksum(&[0; 33]),
+            super::packed_checksum(&[0; 33], true),
             Err(ic_wire::Error::Malformed)
         );
         assert_eq!(
-            super::packed_checksum(&vec![0; 32769]),
+            super::packed_checksum(&vec![0; 32769], true),
             Err(ic_wire::Error::Limit)
         );
-        assert_eq!(super::packed_checksum(&[1; 32]), Ok(32));
+        assert_eq!(super::packed_checksum(&[1; 32], true), Ok(32));
+    }
+
+    #[test]
+    fn codec_only_preserves_frames_and_capacity() {
+        for case in 0..super::CASE_COUNT {
+            let full = super::run(case, 1, &mut || 0);
+            let codec = super::run_with_scan(case, [1; 2], &mut || 0, false);
+            assert_eq!(full.bytes, codec.bytes);
+            assert_eq!(full.capacity, codec.capacity);
+        }
+        assert_eq!(
+            super::packed_checksum(&[0; 31], false),
+            Err(ic_wire::Error::Malformed)
+        );
+        assert_eq!(
+            super::packed_checksum(&vec![0; 32769], false),
+            Err(ic_wire::Error::Limit)
+        );
     }
 
     #[test]

@@ -71,6 +71,22 @@ EOF
 sed "s/^development|/${RUSTUP_TOOLCHAIN:-development}|/" "$fixture/expected-calls" > "$fixture/expected-environment"
 cmp "$fixture/expected-environment" "$CARGO_CALLS"
 
+# Publication/package entrypoints must stop at lint, including parallel Make.
+cp "$fixture/bin/cargo" "$fixture/cargo-success"
+cat > "$fixture/bin/cargo" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$CARGO_CALLS"
+[[ "$1" != clippy ]] || exit 41
+exit 0
+STUB
+for target in publish check-package; do
+    : > "$CARGO_CALLS"
+    if PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
+    [[ "$(wc -l < "$CARGO_CALLS")" == 1 ]]
+    grep -Fx 'clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings' "$CARGO_CALLS" >/dev/null
+done
+cp "$fixture/cargo-success" "$fixture/bin/cargo"
+
 # Restore the reviewed runner before exercising the real formatting hook.
 cp -p "$root/scripts/ci/run-release.sh" "$fixture/repo/scripts/ci/run-release.sh"
 git -C "$fixture/repo" init -q

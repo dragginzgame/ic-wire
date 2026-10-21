@@ -1,11 +1,77 @@
 # Changelog
 
-## [0.5.2]
+## [0.5.9]
 
-- Reserve small finite output ceilings once so control replies can cross the
-  initial 64-byte boundary without another buffer reservation. Keep larger-schema
-  growth, canonical frames and typed failures unchanged. Fixes
-  [#14 — Avoid a second buffer reservation for small finite schemas](https://github.com/dragginzgame/ic-wire/issues/14).
+- Reserve finite output ceilings up to 128 bytes before writing the header,
+  avoiding a second reservation for small control messages crossing 64 bytes.
+  Tiny values may retain up to 64 additional requested bytes. Fixes #14.
+
+## [0.5.8] - 2026-10-21
+
+- Enforce declared TypeScript float bounds when encoding and decoding, and
+  reject malformed or inverted numeric bounds during registry generation.
+  Integer bounds outside JavaScript’s exact range are refused before rounding.
+- Encode and decode TypeScript floats through shared frame views, avoiding
+  temporary byte arrays and views per value while preserving exact frames,
+  buffer offsets and limits.
+- Correct the packaged dependency example to select the current 0.5 API.
+
+## [0.5.7] - 2026-10-21
+
+- Adopt IC Tooling 0.63.0 for diagnostic builds and the release metadata editor.
+  Select the editor's required `cli` feature separately from library consumers.
+
+- Avoid repeated TypeScript registry enumeration within each codec operation,
+  preserving alias checks and registry changes between calls.
+- Reject invalid optional collection bounds and inverted byte-length bounds
+  during TypeScript generation instead of relying on JavaScript coercion.
+
+## [0.5.6] - 2026-10-21
+
+- Reject TypeScript registry names that shadow generated JSON handling,
+  transparent alias cycles, invalid fixed-array lengths and method budgets
+  that cannot initialize a codec.
+- Include TypeScript conformance, generator tests, linting and minimum-Rust
+  checks in CI and release validation, with pinned Node/npm setup in hosted CI.
+
+## [0.5.5] - 2026-10-21
+
+- Separate codec-only and application-checksum allocation benchmarks with
+  `--codec-only`, independent encode/decode calibration and labelled format-2
+  reports. Retain measured finite-buffer reuse and pre-allocation UTF-8
+  experiments; text decoding remains unchanged.
+- Add finite `encode_request_into` and `encode_response_into` for reusable
+  scratch buffers, preserving admission, canonical frames and bounded output.
+  Retained retry bytes remain independent of mutable scratch storage.
+
+## [0.5.4] - 2026-10-20
+
+- Update the diagnostic tooling dependency to IC Build 0.62.0 and its transitive
+  Host Artifacts, FS and Process dependencies to 0.62.0. The separately pinned
+  release metadata editor remains at 0.24.0.
+
+## [0.5.3] - 2026-10-20
+
+- Adopt IC Build 0.24.0 for diagnostic tooling and the pinned release metadata
+  editor, aligning its transitive Host dependencies with 0.32. Runtime codec
+  dependencies and wire behavior remain unchanged.
+
+## [0.5.2] - 2026-10-20
+
+- Retain the [native pointer-comparison experiment](docs/evaluation.md#native-borrowed-pointer-equality-experiment)
+  as rejected evidence: borrowed blob gains came with packed-manifest regressions.
+  Keep the existing runtime behavior.
+
+- Adopt Shared Tooling 0.25.8 at `0a2d2ee`, including numbered Unreleased
+  changelog handling and retained metadata failure evidence. Select the pinned
+  IC Build release editor automatically, run Clippy before expensive release
+  checks or package effects, and use Clap for evaluation and conformance command-line parsing.
+
+- Initialize the finite encoder header directly in its bounded starting buffer.
+  Preserve output bytes, capacity and fallible allocation while avoiding the
+  general growth path on every encode. Tiny Relay probe messages use 5.8–11.5%
+  fewer encode instructions under opt-3; both measured profiles shrink linked
+  Wasm. See [matched evidence](docs/evaluation.md#direct-header-initialization).
 
 ## [0.5.1] - 2026-10-20
 

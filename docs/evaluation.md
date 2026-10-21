@@ -151,24 +151,63 @@ capacity-overflow refusal. No sibling source or production dependency changed.
 
 ### Small finite schema reservation
 
-The pending 0.5.2 refinement reserves the whole admitted output ceiling on first
-growth when that ceiling is at most 128 bytes, including framing. Schemas above
-that threshold retain 0.5.1's emitted-byte growth. A bounded small response can
-therefore cross the initial 64-byte boundary without another reservation/copy.
-There is no new mode, setting, wire identity or serialization pass.
+PR #15 is refreshed against released 0.5.8 (`1894d0a`). Fresh encoding requests
+the full admitted frame ceiling when it is at most 128 bytes. Larger ceilings retain the 64-byte start and existing growth
+policy. This must happen in the direct header initialization paths introduced
+since the original PR; changing only the cold growth routine is insufficient.
+There is no new setting, wire identity or serialization pass.
 
-Regression cases at ceilings 65, 101 and 128 fill the frame after its header and
-check that capacity and pointer remain unchanged, then refuse an excess byte
-without changing capacity. The check fails on 0.5.1 and passes with the change;
-it does not assume allocators return an exact requested capacity. Existing tests
-retain overflow/allocation failure mapping, single serialization and large-schema
-tiny-output checks.
+The new regression fails on 0.5.8 and passes with the change. It checks fresh
+initialization and warmed scratch reuse for Bytes ceilings 53, 80 and 107
+(frame ceilings 74, 101 and 128), stable scratch capacity/pointer across payload growth, and exact bytes.
+Existing tests retain typed allocation failure, logical limits despite spare
+capacity, single serialization and large-schema tiny-output checks.
 
-For a tiny value under these small schemas, the first request may be up to 64
-bytes larger than 0.5.1's first request. This is a requested-buffer tradeoff, not
-an allocator or peak-memory guarantee. Installed application instructions and
-whole-application size remain consumer-owned measurements; the runtime change
-does not establish a general speedup for every frame/profile.
+[IC instruction results](evidence/small-schema-reservation/ic.csv) cover 64
+cases in opt-z and opt-3. For fresh Bytes<80>/Bytes<107> payloads crossing 64
+frame bytes, encoding saves 322 instructions (18.1–19.0%) in opt-z and 274
+(24.8–26.2%) in opt-3. Every other measured encode case and every decode case
+retains its baseline instruction count. All frame lengths and SHA-256 identities
+match. This qualifies fresh encoding only: an initial prototype also changing
+scratch reservation regressed warmed reuse by 5–8%, so scratch policy is unchanged.
+
+[Native allocation/timing results](evidence/small-schema-reservation/native.csv)
+show affected fresh frames dropping from two allocation requests to one. Tiny
+frames can request 101 or 128 bytes instead of 64; this is a bounded retained
+capacity tradeoff, not a peak-memory guarantee. Native timings are supporting
+observations, not IC measurements or universal speedup claims.
+[Whole-probe sizes](evidence/small-schema-reservation/size.csv) change from
+42,499 to 42,536 linked bytes in opt-z (+37), with gzip-9 +2 bytes. Opt-3 linked
+size remains 48,303 bytes, with gzip-9 +27 bytes. These are complete linked probe
+comparisons, not symbol-attributed savings or installed-consumer measurements.
+
+Both builds use Rust 1.99.1 (`58cf8f9c3`, LLVM 23.1.1), Postcard 1.1.3, LTO,
+one codegen unit and panic abort.
+IC builds target wasm32-unknown-unknown, with opt-z/opt-3 and stripped debuginfo;
+the external PocketIC 16.1.0 driver takes five queries of four repetitions per
+case using ic0.performance_counter(0), reporting median instructions per encode
+or decode. Input setup, frame identity and capacity reporting are outside the
+timed loops. Warm reuse prepares an exact-length buffer before timing.
+IC cases are seven byte bounds (43, 44, 80, 107, 108, 4,096, 1,048,576), four
+payload lengths (0, 32, min(53,bound), bound), and both directions, plus eight
+warm-reuse Bytes<80> controls. Inputs are bytes filled with 42, method ID 1,
+frame allowance bound+21, allocation allowance 2*bound+21, one node/depth.
+
+Native builds target x86_64 Linux on a Threadripper 7970X, opt-3, pinned to CPU 0.
+They use the same seven bounds and directions with lengths 0/32/52/53/bound
+(excluding lengths above the bound), 1,000 warmups and medians of nine batches
+of 100,000 encodes (1,000 for the 1 MiB bound). Allocation counting runs separately
+from timing; the counter-disabled allocator wrapper remains in both timed builds.
+Two baseline runs and a final candidate run are retained in the compact table.
+Local scripts, sources, dependency locks, raw samples, rejected scratch results
+and logs remain at `/tmp/ic-wire-pr15-probe/`. No runtime dependencies or sibling
+sources were added or changed for the external qualification.
+
+Probe source SHA-256 identities:
+
+- Native: `b2b4fdc6beb151023182dcd5cc8593146889083bb11d8e00f330b0f88d0b0096`.
+- IC: `dd69b54aae1de5e70a7e7a0514cd95d14e24b2c5e065a8569115f68f7082cfff`.
+- IC probe lock: `91615bb5d30d5826138dfd8d03b6525985ff04c872756eb08d8f86f675094266`.
 
 ## Per-type code generation preference experiment
 
@@ -373,3 +412,175 @@ unknown, duplicate and misplaced preferences. The selected traversal also checke
 on Rust 1.91 native/Wasm. Source snapshots, raw samples, locks and probe artifacts
 are retained at `target/codegen-adapter/`. No sibling source or production
 dependency selection was changed; incoming lockfile edits were preserved.
+
+## Direct header initialization
+
+Against released 0.5.1 (`cdd47c3`), initialize the finite encoder's header using
+`try_reserve_exact(min(schema_ceiling, 64))` and a direct copy. This is the same
+initial reservation chosen by the general growth routine for the 11-byte header.
+Admission proves it fits. Payload growth, allocation failures, canonical bytes
+and public APIs remain unchanged; no new helper or traversal is introduced.
+
+The matched 50-case probe covers 44 allocation-study lanes and six Relay batches.
+All frame hashes, lengths and retained output capacities match across both
+profiles. Eighteen finite encode cases improve; the other 32 cases and every
+decode instruction sample are unchanged. Tiny Relay cases (empty, 1×3, 3×4 bytes)
+save 1.4–2.6% encode instructions under opt-z and 5.8–11.5% under opt-3. Full Relay
+batches save 80 instructions under opt-z and 189 under opt-3, a much smaller
+relative gain. No measured encode case regresses.
+
+| Profile | Baseline linked / gzip bytes | Direct header linked / gzip bytes |
+| --- | ---: | ---: |
+| opt-z | 117,800 / 36,067 | 117,660 / 35,965 |
+| opt-3 | 130,786 / 40,967 | 129,890 / 40,663 |
+
+[Per-case instruction results](evidence/header-initialization/ic.csv) and
+[whole-probe size results](evidence/header-initialization/size.csv) retain the
+matched controls. Rust 1.99.1/LLVM 23.1.1, wasm32-unknown-unknown, Postcard 1.1.3,
+LTO, one codegen unit, panic abort and stripped debug information were used.
+The probe profiles are `evaluation` (opt-z) and `speed` (opt-3). PocketIC 16.1.0
+runs five queries of four repetitions; values are median counters divided by
+four, without subtracting harness overhead. gzip uses level 9 and mtime 0.
+Allocation-study decoding includes its existing application byte checksum;
+Relay decoding includes result destruction without that scan. Input construction,
+transport and storage are outside the clock. These are IC instruction and
+whole-probe size measurements, not native timing or installed endpoint latency.
+
+An initial cached host driver only exercised 18 cases; those samples were
+superseded by the corrected 50-case runs. Source archives, exact locks, corrected
+host/probe sources, binaries and raw final samples are retained at
+`target/header-initialization/`. Existing tests cover single-pass encoding,
+bounded growth, capacity overflow and limits despite spare allocator capacity.
+
+## Native borrowed-pointer equality experiment
+
+Rejected: removing the Wasm-only condition on the canonical comparator's
+same-pointer shortcut improves the 1 MiB borrowed blob's native decode time by
+5.4% and 6.2% in two paired runs, but regresses the 1,024-hash borrowed packed
+manifest by 11.9% and 13.0%. Small packed manifests also regress. The change
+was reverted; the existing Wasm shortcut and pending header optimization remain.
+These results do not establish the cause of the regression.
+
+[All 44 cases in both pairs](evidence/native-pointer-identity/native.csv) retain
+encode/decode medians. Baseline is the task-entry working tree after header
+initialization and Shared Tooling adoption; the candidate removes only the target
+condition on pointer equality. Both use Rust 1.99.1/LLVM 23.1.1, x86_64 Linux,
+Postcard 1.1.3, opt-z, LTO, one codegen unit, panic abort and stripped debug info.
+The existing allocation driver calibrates batches to at least 2 ms (or its
+repetition cap), then runs 11 rotating samples per case. Runs alternate baseline
+and candidate twice, pinned to CPU 0; reported values are median nanoseconds per
+operation. Decoding includes the fixture's application checksum and destruction.
+Frame hashes, lengths, capacities and reuse history match. Native binary file
+sizes are both 843,064 bytes. No new IC instruction, Wasm-size or installed
+endpoint measurements were made. Raw runs, driver/fixture sources, lockfile and
+both comparator sources are retained at `target/native-pointer-identity/`.
+
+## Finite reuse, text validation and scan separation
+
+This 2026-10-21 investigation uses released 0.5.4 (`1e1ea56`) plus the incoming
+IC Build/Host 0.62.1 lockfile selection. Production runtime source was unchanged in this initial experiment.
+An isolated finite encoder prototype reuses caller storage with the existing
+bounded growth policy. It clears prior bytes before admission, maps serializer
+failure to `Malformed`, and may lose capacity on serialization failure, like the
+native reuse API. It was not yet a supported public API. Separate checks cover size
+changes, borrowed input, frozen retry copies, schema failure and oversized output
+with spare capacity. No consumer checkout was changed.
+
+The 60-case probe combines blob lengths 0, 32, 4,096 and 1,048,576 with three
+encoding modes (fresh, warmed reuse, reuse plus a retained copy), owned/borrowed
+decoding and codec-only/full-scan decoding. Twelve text cases cover lengths 32,
+4,096 and 1,048,576, using ASCII, multibyte UTF-8 and invalid first/last bytes.
+
+| Blob bytes | Fresh encode, opt-3 | Warm reuse | Reuse plus retained copy |
+| --- | ---: | ---: | ---: |
+| 0 | 644 | 420 | 819 |
+| 32 | 786 | 562 | 993 |
+| 4,096 | 5,186 | 4,643 | 9,133 |
+| 1,048,576 | 1,370,143.75 | 1,049,140 | 2,418,239.75 |
+
+These are IC instructions per operation. Warm reuse saves 10.5–34.8% under opt-3
+and 15.2–26.3% under opt-z. Reuse plus a frozen copy is slower than fresh encoding
+at every tested size. Initial buffer preparation is outside the timed interval;
+the result does not establish cold-buffer, peak-memory or installed-endpoint
+savings. Large retained capacity also survives later small messages. The useful
+next consumer qualification is a scratch-buffer path that does not need to keep
+a separate frame after reuse; this evidence does not justify replacing retained
+request bytes with mutable storage. The follow-up below qualifies finite scratch-buffer encoding.
+
+For the same isolated 1 MiB borrowed blob, opt-3 codec-only decoding measures
+553.75 instructions, versus 8,127,053.75 with the application checksum. The codec
+validates framing, bounds and canonical encoding; a byte payload has no UTF-8 or
+application-content validation. This illustrates different work, not an additional
+runtime speedup. Both timings include result destruction and harness overhead.
+
+Two text prototypes validate UTF-8 before allocating: one validates byte input
+explicitly, the other delegates string validation to Postcard. They reduce
+invalid-first-byte rejection of a 1 MiB input by over 99.9%, and invalid-last-byte
+rejection by about 26.7%. However, 32-byte valid ASCII/multibyte text costs about
+10.1%/6.5% more instructions under opt-3 for the Postcard-string candidate; the
+explicit-byte candidate has similar regressions. Opt-z improves small valid text,
+but both candidates enlarge linked Wasm in both profiles. Both were rejected;
+production `Text<N>` decoding remains unchanged.
+
+[All IC cases](evidence/reuse-text-scan/ic.csv) and
+[linked/compressed probe sizes](evidence/reuse-text-scan/size.csv) distinguish
+`baseline`, explicit-byte `candidate`, and Postcard `string` variants. Frame
+hashes, lengths and output capacities match for every variant/profile. The reuse
+prototype is linked into all three controls, so sizes do not measure the cost of
+adding a production reuse API. Rust 1.99.1/LLVM 23.1.1, wasm32-unknown-unknown,
+Postcard 1.1.3, LTO, one codegen unit, panic abort and stripped debug information
+are fixed. Profiles are opt-z (`release`) and opt-3 (`speed`). PocketIC 16.1.0
+runs five queries of four repetitions; medians are divided by four, with no
+harness subtraction. gzip uses level 9 and mtime 0. Input setup, transport and
+storage are outside the clock. Encode includes allocation/drop or the explicitly
+labelled warm reuse/copy work. These results establish no native timing claims.
+
+The maintained allocation CLI now exposes `--codec-only`, preserving the default
+full-scan mode. It independently calibrates encode/decode and labels format-2
+reports with separate repetition counts. Both modes ran all 44 maintained cases
+with identical frames/capacities. An initial isolated native attempt using one
+shared repetition count was stopped because cheap rejection caused excessive
+large-buffer encoding; its partial output is not comparative evidence. Source
+snapshots, raw IC runs, corrected native reports and isolated prototypes are
+retained at `target/reuse-text-scan/`. No runtime changes were adopted by that initial experiment.
+
+## Finite scratch-buffer follow-up
+
+The 64-case follow-up keeps the earlier 60 case identities in order and adds
+cases 60–63: a six-message chunk cycle with sequence metadata and borrowed
+payload lengths 0, 32, 4,096, 1,048,576, 32 and 0. The modes are fresh encoding,
+reuse starting empty each cycle, warmed reuse, and warmed reuse plus a copy of
+each frame. Results below are IC instructions **per six-message cycle**.
+
+| Profile | Fresh | Initially empty reuse | Warm reuse | Reuse plus copies |
+| --- | ---: | ---: | ---: | ---: |
+| opt-z | 1,388,226.5 | 1,065,207.5 | 1,063,645.25 | 2,440,585.5 |
+| opt-3 | 1,379,863.25 | 1,057,564.25 | 1,056,583 | 2,432,077.25 |
+
+Reuse saves about 23% in this cycle even when starting empty. Copying every frame
+loses the gain. The scratch high-water capacity is 1,048,607 bytes and remains
+allocated after returning to small messages. No installed consumer was changed;
+transport, durable storage and application scans are outside this measurement.
+This qualifies optional finite request/response scratch APIs, with caller-owned
+retained-memory and retry policy. It does not justify changing immutable retries.
+
+Sharing fresh encoding through the mutable-buffer helper regressed small fresh
+messages by 6–14%; forced inlining still regressed opt-z by about 4–5%. The kept
+implementation leaves the fresh path intact and uses a separate scratch helper.
+All 16 fresh blob cases and the fresh mixed cycle have identical instruction
+counts to the matched baseline in both profiles. Frame lengths and hashes match
+for all 64 cases. Request/response, borrowed inputs, schema rejection, serializer
+errors with spare capacity, retained capacity and frozen retries have focused tests.
+
+[Full instruction results](evidence/finite-scratch/ic.csv) and
+[linked and compressed sizes](evidence/finite-scratch/size.csv) use the same
+compiler, Postcard, target, profiles and five-by-four PocketIC protocol as the
+preceding experiment. The baseline already links the isolated reuse prototype;
+size differences are whole-probe differences, not the marginal cost of adding
+an API to a consumer. Final linked/gzip bytes are 75,540/24,897 for opt-z and
+58,223/22,010 for opt-3. Mixed-case frame hashes cover concatenated frames and
+reported capacity is the scratch high-water preparation value in every mode,
+including fresh. Each initially-empty cycle drops the preceding scratch buffer
+inside the timed interval. Native time and peak memory were not measured.
+Sources, locks, raw runs, rejected revisions and logs are retained under
+`target/finite-scratch/`; the baseline source contains only the isolated prototype.

@@ -2,61 +2,45 @@
 
 ## Current batch
 
-Released 0.5.1 (`cdd47c3`) is the baseline. Pending 0.5.2 refines initial
-reservation for finite schema ceilings of at most 128 bytes. Larger schemas keep
-the released growth policy. Historical benchmarks retain their own measured
-dependency selections; no dependency or package versions change in this batch.
-Merging, tags, releases and publication remain maintainer-owned.
-
-Finite encoding serializes once into fallibly growing output. In 0.5.1 requests
-start at up to 64 bytes, grow within the admitted ceiling, and reserve the remainder
-when a growth exceeds a quarter of that ceiling. Allocation failures remain
-`Error::Allocation`; schema/serializer refusal identities, canonical framing,
-method/direction binding and conservative admission are unchanged. Native
-sizing/reuse remains unchanged. No new public API or codec mode was added. The 0.5.2 refinement requests the full
-small-schema ceiling on first growth, avoiding another reservation for control
-replies that cross 64 bytes; tiny values may initially request up to 64 more bytes.
-
-## Evidence and tradeoffs
-
-The 44 allocation fixtures plus six Relay-shaped batches have identical frame
-hashes before/after under opt-z and opt-3. Tiny Relay batches use 88–96% fewer IC
-encode instructions and retain 64 rather than 196,783 output bytes. Full Relay
-cases cost at most 0.61% more instructions. The full array manifest changes by
-+0.19%/-12.32% across the profiles; the full packed manifest costs up to 2.14% more.
-Native fresh 4 KiB blob encoding adds about 38 ns (45%) from another reservation.
-Combined probe Wasm grows 931/537 bytes, gzip 590/323 bytes. These are codec
-measurements, not installed Relay latency or peak memory guarantees.
-See [methodology and complete results](../evaluation.md#bounded-finite-output-growth).
-Source snapshots, raw samples, locks and probes are retained at `target/output-growth/`.
-No sibling checkout was modified. Consumer integration remains consumer-owned.
-
-## Retained 0.5 contract
-
-Wire supplies serialization, finite bounds and schema metadata; finite decode
-adds `Deserialize<'de>`. BytesRef/TextRef and lifetime-aware derives support
-borrowed bounded contracts with the same owned-form bytes and TypeScript output.
-Use `into_bytes()` when retries must outlive a borrowed method's source value.
-See the [migration guide](../../crates/ic-wire/README.md#borrowed-bounded-contracts-and-the-05-api-cut).
-The [earlier borrowed measurements](../evaluation.md#final-05-borrowed-contract-measurements)
-remain source-bound evidence for the released redesign.
+Released 0.5.8 (`1894d0a`) is the baseline. PR #15 refreshes the small finite
+schema reservation proposal (#14). Fresh encoders request the full
+admitted ceiling when it is at most 128 bytes, before initializing the header.
+Larger ceilings and scratch reuse keep their existing reservation policy.
+Tiny values under small schemas may retain up to 64 additional requested bytes.
+Wire identity, single-pass serialization and typed failures remain unchanged.
+Package versions are unchanged; pending notes target 0.5.9. Merge and release
+remain maintainer-owned. The separate TypeScript growth experiment is unrelated.
 
 ## Qualification
 
-This batch passes 36 library/runtime/native/borrowed tests on Rust 1.91, strict
-all-target/all-feature runtime Clippy, Rust 1.91 Wasm compilation, formatting,
-documentation links and diff checks. The new small-schema allocation regression
-fails on 0.5.1 and passes with the refinement. Retained 0.5.1 TypeScript evidence
-covers 90 vectors, 17,524 mutations and 1 MiB boundaries; this batch does not
-regenerate its unchanged schemas. These are focused Linux checks, not full CI
-or native macOS qualification.
+The new regression fails on released 0.5.8 and passes with the fix. Focused
+library/runtime/native/borrowed tests pass on Rust 1.99.1 and 1.91, as do strict
+all-target/all-feature Clippy and Rust 1.91 Wasm compilation. The regression
+checks fresh initialization, byte parity and warmed scratch stability.
+Existing checks retain oversized output and allocation-failure identities.
 
-## Code generation preference investigation
+Matched native and isolated IC measurements are recorded in
+[evaluation](../evaluation.md#small-finite-schema-reservation). Raw probes, locks,
+compiler outputs and runs remain under `/tmp/ic-wire-pr15-probe/`.
+No full local CI or sibling suites ran. Hosted checks must qualify the refreshed
+PR commit independently of the original PR's green checks.
 
-The public-API adapter was measured and then rejected: mixed opt-3 saved 1.8%
-linked and 4.2% compressed Wasm, but opt-z linked size grew 3.9%. These gains did
-not justify the Serde forwarding code, tests and permanent API. The adapter,
-optimization attribute, root setting and dedicated tests have been removed.
-No per-type preference is supported. The output-growth fix remains intact.
-See [retained experimental evidence](../evaluation.md#public-api-code-generation-adapter).
-Source snapshots, locks, raw samples and probes remain at `target/codegen-adapter/`.
+## Retained decisions
+
+0.5.7 adopted IC Tooling 0.63.0, with the release editor selecting `cli` separately
+from the diagnostic library. It also bounds registry enumeration to once per
+operation and validates optional collection lengths. TypeScript qualification
+runs in CI/release gates; see [development](../development.md) for local Node/npm
+preparation before offline release validation.
+
+Production remains bounded Postcard; JSON is optional generation/tooling metadata.
+Finite scratch reuse shipped in 0.5.5. Fresh encoding remains separate because
+sharing its mutable-buffer path regressed small-message instruction cost.
+The [scratch-buffer study](../evaluation.md#finite-scratch-buffer-follow-up)
+retains byte parity, capacity/retry tradeoffs and measured evidence.
+Caller-owned scratch capacity may outlive large messages; retain immutable retry
+bytes independently. Rejected experiments remain in [evaluation](../evaluation.md).
+
+Shared Tooling remains 0.25.8. IC Build's release editor remains 0.63.0 with `cli`.
+Shared snapshots, dependency selection and Rust runtime encoding are unchanged.
+Staging, commits, versions, releases and publication remain maintainer-owned.

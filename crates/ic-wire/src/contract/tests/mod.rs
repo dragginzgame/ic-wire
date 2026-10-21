@@ -192,29 +192,34 @@ fn a_mismatch_still_checks_later_bytes_and_the_output_allowance() {
 }
 
 #[test]
-fn small_schema_output_keeps_its_initial_allocation_through_the_ceiling() {
-    for limit in [65, 101, 128] {
-        let failed = Cell::new(false);
-        let mut output = GrowingOutput {
-            output: Output {
-                bytes: Vec::new(),
-                limit,
-            },
-            allocation_failed: &failed,
+fn small_fresh_frames_reserve_the_ceiling_and_preserve_scratch_reuse() {
+    fn check<const N: usize>() {
+        let limits = Limits {
+            bytes: 1024,
+            allocation: 2048,
+            nodes: 8,
+            depth: 8,
         };
-        output.try_extend(&header(1, 1)).unwrap();
-        let capacity = output.output.bytes.capacity();
-        let pointer = output.output.bytes.as_ptr();
-        while output.output.bytes.len() < limit {
-            output.try_push(0).unwrap();
+        let size = admit::<crate::Bytes<N>>(limits).unwrap();
+        let empty = crate::Bytes::<N>::new(vec![]).unwrap();
+        let fresh = encode(1, 0, limits, &empty).unwrap();
+        assert!(fresh.capacity() >= size);
+        let mut scratch = Vec::new();
+        let largest = crate::Bytes::<N>::new(vec![42; N]).unwrap();
+        encode_into(1, 0, limits, &largest, &mut scratch).unwrap();
+        assert!(scratch.capacity() >= size);
+        let capacity = scratch.capacity();
+        let pointer = scratch.as_ptr();
+        for len in [0, 32, 52, 53, N] {
+            let value = crate::Bytes::<N>::new(vec![42; len]).unwrap();
+            encode_into(1, 0, limits, &value, &mut scratch).unwrap();
+            assert_eq!(scratch.capacity(), capacity);
+            assert_eq!(scratch.as_ptr(), pointer);
+            assert_eq!(scratch, encode(1, 0, limits, &value).unwrap());
+            assert_eq!(&scratch[HEADER..], postcard::to_allocvec(&value).unwrap());
         }
-        assert_eq!(output.output.bytes.capacity(), capacity);
-        assert_eq!(output.output.bytes.as_ptr(), pointer);
-        assert_eq!(
-            output.try_push(0),
-            Err(postcard::Error::SerializeBufferFull)
-        );
-        assert_eq!(output.output.bytes.capacity(), capacity);
-        assert!(!failed.get());
     }
+    check::<53>();
+    check::<80>();
+    check::<107>();
 }

@@ -20,6 +20,13 @@ make tools-check
 make install-hooks
 ```
 
+`make install-tools` also prepares IC Tooling's IC Build 0.63.0 release metadata
+editor with its required `cli` feature. The diagnostic library selects IC Build
+0.63 without default features; the CLI feature is only enabled for installation.
+`make release-editor-check` verifies its selected executable offline. The release
+adapter selects that path automatically; metadata inputs are limited to 8 MiB
+per document. This tooling executable is separate from runtime dependencies.
+
 Installation is explicit; checks install nothing. IC Wire selects only the
 reviewed common host and Cargo toolsets. Platform executables are not part of its
 setup/check aggregates. The vendored generic catalogs and installer remain owned
@@ -46,7 +53,7 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `check-wasm`, `check-msrv` | Runtime Wasm and minimum-toolchain checks |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
 | `check-evaluation` | Native raw-codec roundtrips and evaluation lint/floor checks |
-| `check-typescript` | Generated Rust/TypeScript vectors and differential mutations |
+| `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
 | `evaluate-performance` | Explicit [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
 | `fmt-check` | Grouped manifests, derive order and Rust formatting |
@@ -70,11 +77,33 @@ npm --prefix examples/browser ci
 make check-typescript
 ```
 
+`check-typescript` is included in `make ci` and release validation. Local release
+operators must prepare the pinned Node/npm environment and locked package above
+before starting the offline validation phase. Hosted CI prepares them on every
+supported host. The target also runs feature-enabled Rust runtime/borrowed tests,
+strict Clippy and the generator's Rust 1.91 library check.
+
 This package contains only the TypeScript compiler. The generated codec imports
 no transport or browser SDK. Rust vectors, strict typechecking and Node mutation
 checks qualify byte conformance; they do not qualify endpoint authentication,
 certificate verification, installed rollback or browser transport.
 See [consumer fixtures and packet inspection](consumer-fixtures.md).
+
+### Allocation timing modes
+
+`make evaluate-allocation` retains decoding plus the application checksum as the
+default. To isolate codec work, select a fresh output directory:
+
+```sh
+cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example allocation --features allocation-fixture -- target/allocation-codec evaluation --codec-only
+```
+
+Both modes include canonical validation and result destruction. Codec-only mode
+omits the full payload scan, while retaining constant-time packed-length checks.
+Reports use `format: 2`, label `decode_work`, and record `encode_repetitions` and
+`decode_repetitions` separately; divide each sample column by its own count.
+The old single `repetitions` field is absent. Each operation is calibrated to
+at least 2 ms or the repetition cap. Historical format-1 results remain unchanged.
 
 ### Dependency preparation
 
@@ -86,8 +115,8 @@ No platform SDK or simulator is selected in any workspace dependency role.
 
 ## Snapshot maintenance and release boundary
 
-Shared Tooling is pinned at 0.24.2, revision
-`48f5640e744512929bfba301fe734d8ea6c6e049`.
+Shared Tooling is pinned at 0.25.8, revision
+`0a2d2ee3b5e0ae77755c2915ac28836d4d5ba359`.
 The main snapshot owns the common setup, formatting, hooks, release runner and
 receipt helper. Update through the canonical exporter and reviewed adoption;
 do not patch snapshot-owned files. Product adapters stay local.
@@ -97,6 +126,10 @@ targets use one workflow: preflight, complete validation, version preparation,
 receipt checks, commit, tag and direct Git delivery to origin/main. They do not
 publish packages. Ordinary development leaves package versions, staging, commits,
 refs and release execution to the maintainer.
+
+The release gate runs the existing Clippy target after tool admission and before
+expensive checks. Package checks and publication also run Clippy first, with
+sequential recipes that stop on failure under parallel Make.
 
 The local release fixture uses disposable repositories and a local remote. It
 checks dirty/conflicting-source refusal, failed-validation retention, exact

@@ -111,7 +111,7 @@ impl GrowingOutput<'_> {
         if required > bytes.capacity() {
             // Once a message is substantial relative to its ceiling, reserve
             // the remainder to avoid repeated copies of large batch payloads.
-            let capacity = if self.output.limit <= 128 || required > self.output.limit / 4 {
+            let capacity = if required > self.output.limit / 4 {
                 self.output.limit
             } else {
                 required
@@ -265,17 +265,18 @@ impl Flavor for Compare<'_> {
 
 fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
     let size = admit::<T>(limits)?;
+    // The fixed header always fits after admission. Initialize the same bounded
+    // starting capacity directly, leaving the cold growth path for payloads.
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(if size <= 128 { size } else { 64 })
+        .map_err(|_| Error::Allocation)?;
+    bytes.extend_from_slice(&header(id, direction));
     let allocation_failed = Cell::new(false);
-    let mut output = GrowingOutput {
-        output: Output {
-            bytes: Vec::new(),
-            limit: size,
-        },
+    let output = GrowingOutput {
+        output: Output { bytes, limit: size },
         allocation_failed: &allocation_failed,
     };
-    output
-        .try_extend(&header(id, direction))
-        .map_err(|_| Error::Allocation)?;
     postcard::serialize_with_flavor(value, output).map_err(|_| {
         if allocation_failed.get() {
             Error::Allocation
@@ -283,6 +284,41 @@ fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<
             Error::Malformed
         }
     })
+}
+
+// Keep fresh encoding separate: routing it through mutable scratch regresses
+// small-message IC instruction cost, including with forced inlining.
+fn encode_into<T: Wire>(
+    id: u64,
+    direction: u8,
+    limits: Limits,
+    value: &T,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    bytes.clear();
+    let size = admit::<T>(limits)?;
+    // The fixed header always fits after admission. Initialize the same bounded
+    // starting capacity directly, leaving the cold growth path for payloads.
+    bytes
+        .try_reserve_exact(size.min(64))
+        .map_err(|_| Error::Allocation)?;
+    bytes.extend_from_slice(&header(id, direction));
+    let allocation_failed = Cell::new(false);
+    let output = GrowingOutput {
+        output: Output {
+            bytes: core::mem::take(bytes),
+            limit: size,
+        },
+        allocation_failed: &allocation_failed,
+    };
+    *bytes = postcard::serialize_with_flavor(value, output).map_err(|_| {
+        if allocation_failed.get() {
+            Error::Allocation
+        } else {
+            Error::Malformed
+        }
+    })?;
+    Ok(())
 }
 
 fn decode<'de, T: Wire + serde::Deserialize<'de>>(
@@ -322,6 +358,29 @@ pub fn encode_request<M: Method>(value: &M::Request) -> Result<RequestBytes<M>, 
         method: PhantomData,
     })
 }
+/// Encode a request into reusable scratch storage, replacing its contents.
+///
+/// Successful calls retain capacity, which may exceed this method's allowance;
+/// the encoded length remains bounded. Errors leave the buffer empty and may
+/// discard its allocation. Keep independent immutable bytes for exact retries.
+pub fn encode_request_into<M: Method>(
+    value: &M::Request,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_into(M::ID, 0, M::REQUEST_LIMITS, value, bytes)
+}
+
+/// Encode a response into reusable scratch storage, replacing its contents.
+///
+/// Capacity and error behavior match [`encode_request_into`]. Reusing scratch
+/// storage overwrites previous frames; retain retry bytes independently.
+pub fn encode_response_into<M: Method>(
+    value: &M::Response,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_into(M::ID, 1, M::RESPONSE_LIMITS, value, bytes)
+}
+
 /// Measure the complete request envelope without allocating an output buffer.
 /// Uses the same schema admission as encoding. Custom serializers must be
 /// deterministic; sizing does not retain bytes for retries.

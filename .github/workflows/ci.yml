@@ -36,6 +36,15 @@ jobs:
           minimum-target: wasm32-unknown-unknown
       - name: Install reviewed common tools
         run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
+      - name: Prepare Node for TypeScript qualification
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: examples/browser/.nvmrc
+          package-manager-cache: false
+      - name: Prepare pinned npm and TypeScript compiler
+        run: |
+          npm install --global "$(node -p 'require("./examples/browser/package.json").packageManager')"
+          npm --prefix examples/browser ci
       - name: Prepare locked workspace dependencies
         run: cargo fetch --locked
       - name: Validate scaffold and contributor tooling

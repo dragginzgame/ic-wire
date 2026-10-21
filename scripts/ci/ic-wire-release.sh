@@ -2,6 +2,8 @@
 set -euo pipefail
 # Local policy only; the shared runner owns all staging, commit, tag and push effects.
 operation="${1:?release adapter operation}"
+# Preflight admits these selected tools before metadata and validation children.
+export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 files=(Cargo.toml Cargo.lock CHANGELOG.md)
 # shellcheck source=scripts/ci/release-receipts.sh
 source scripts/ci/release-receipts.sh
@@ -19,6 +21,10 @@ perl scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
 [[ "${RELEASE_SOURCE:?}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail 'invalid source identity'
 state="$(git rev-parse --git-path release-state)/ic-wire-$RELEASE_VERSION"
 metadata() {
+    if [[ "$1" == prepare ]]; then
+        CARGO_RELEASE_METADATA_EDITOR="$("${RELEASE_MAKE:-make}" --no-print-directory -s release-editor-check)" || return
+        export CARGO_RELEASE_METADATA_EDITOR
+    fi
     if [[ "$1" == check ]]; then
         bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped
     else

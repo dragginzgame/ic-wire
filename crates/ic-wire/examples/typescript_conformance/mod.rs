@@ -179,7 +179,14 @@ impl Fixture {
     }
 }
 fn main() {
-    let directory = PathBuf::from(std::env::args().nth(1).expect("output directory"));
+    let mut arguments = clap::Command::new("typescript-conformance")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .get_matches();
+    let directory = arguments.remove_one::<PathBuf>("directory").unwrap();
     fs::create_dir_all(&directory).unwrap();
     fs::write(
         directory.join("wire-runtime.ts"),
@@ -197,8 +204,13 @@ fn main() {
         }),
     )]);
     types.insert("__proto__".into(), serde_json::json!({"k":"unit"}));
+    types.insert("Alias".into(), serde_json::json!({"k":"ref","name":"Node"}));
+    types.insert(
+        "WrappedAlias".into(),
+        serde_json::json!({"k":"newtype","item":{"k":"ref","name":"Alias"}}),
+    );
     let method = serde_json::json!({"name":"nativeTree","mode":"query","id":"1",
-        "request":{"k":"ref","name":"Node"},"response":{"k":"ref","name":"Node"},
+        "request":{"k":"ref","name":"WrappedAlias"},"response":{"k":"ref","name":"Alias"},
         "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
         "requestDepth":8,"responseDepth":8});
     let mut proto = method.clone();

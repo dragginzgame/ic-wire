@@ -384,11 +384,27 @@ packet viewer](https://github.com/dragginzgame/ic-wire/blob/main/docs/consumer-f
 
 ## Package and license
 
-Use the registry dependency `ic-wire = "0.3"`.
+Use the registry dependency `ic-wire = "0.5"`.
 Enable `features = ["typescript"]` only when generating client codecs on the host.
 The runtime supports Rust 1.91 and `wasm32-unknown-unknown`.
 
 Licensed under the MIT License; see the packaged LICENSE.
+
+## Finite scratch-buffer encoding
+
+`encode_request_into::<M>(&value, &mut output)` and
+`encode_response_into::<M>(&value, &mut output)` reuse a caller-owned `Vec<u8>`
+with the same finite schema admission, envelope and byte limits as fresh encoding.
+Use these for scratch work whose previous output can be overwritten. Keep
+`RequestBytes<M>` or independently retained immutable bytes for exact retries;
+copying every scratch result can cost more than fresh encoding.
+
+Both functions clear the buffer before admission. Errors leave it empty and may
+release its allocation; successful calls retain capacity across message sizes.
+Retained capacity can exceed a later method's allowance, but never relaxes that
+method's encoded-length checks. The caller owns the retained memory budget and
+can drop the buffer when a large allocation is no longer useful. Fresh encoding
+continues to return immutable, method-bound frames.
 
 ## Native Serde payloads
 
@@ -486,7 +502,13 @@ SQL semantics, endpoint roster and storage encodings are not imported.
 depth allowances for both directions. Dynamic lengths are checked before copying
 or descending. Missing/cyclic aliases and sparse arrays reject. Concrete nodes
 and named references can name trusted scalar checks that run before encoding and
-after decoding; every check along an alias chain applies.
+after decoding; every check along an alias chain applies. Float metadata can
+supply finite numeric `min`/`max` bounds, inclusive in both directions; the
+generator rejects malformed or inverted bounds. Unbounded finite floats retain
+their existing representation, including negative zero. Integer metadata bounds
+must be integral numbers within ±9,007,199,254,740,991; use named consumer checks
+for wider bigint constraints. This restriction applies to metadata bounds, not
+the supported 64/128-bit integer payload range.
 
 Metadata extraction, domain validation and endpoint identities remain consumer-owned.
 Host generators can pass that normalized registry and method list to

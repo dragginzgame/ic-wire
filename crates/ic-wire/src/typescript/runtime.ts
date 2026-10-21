@@ -32,14 +32,16 @@ function object(value: unknown, keys: readonly string[]): Record<string, unknown
   return value as Record<string, unknown>;
 }
 class Budget {
+  private registrySize?: number;
   constructor(public remaining: number, readonly depth: number) {}
   visit(depth: number) { if (--this.remaining < 0 || depth > this.depth) fail('limit'); }
   length(length: number) { if (length > this.remaining) fail('limit'); }
+  aliasLimit(types: Types): number { return this.registrySize ??= Object.keys(types).length; }
 }
 // Resolve aliases without spending a value node, but refuse missing or cyclic
 // aliases. Recursive values must pass through a concrete node and its budget.
-function resolve(schema: Schema, types: Types, visit?: (schema: Schema) => void): Schema {
-  let remaining = schema.k === 'ref' ? Object.keys(types).length : 0;
+function resolve(schema: Schema, types: Types, budget: Budget, visit?: (schema: Schema) => void): Schema {
+  let remaining = schema.k === 'ref' ? budget.aliasLimit(types) : 0;
   while (schema.k === 'ref') {
     if (remaining-- === 0 || !Object.hasOwn(types, schema.name)) return fail('value');
     visit?.(schema);
@@ -60,16 +62,24 @@ function validate(schema: Schema, value: unknown, checks: Checks): void {
 }
 class Writer {
   readonly bytes: Uint8Array;
+  private readonly view: DataView;
   offset = 11;
   constructor(size: number, id: bigint, direction: number) {
     this.bytes = new Uint8Array(size);
     this.bytes.set([73, 87]);
-    new DataView(this.bytes.buffer).setBigUint64(2, id, true);
+    this.view = new DataView(this.bytes.buffer);
+    this.view.setBigUint64(2, id, true);
     this.bytes[10] = direction;
   }
   byte(value: number) { if (this.offset === this.bytes.length) fail('limit'); this.bytes[this.offset++] = value; }
   varint(value: bigint) {
     do { const byte = Number(value & 127n); value >>= 7n; this.byte(value ? byte | 128 : byte); } while (value);
+  }
+  float(value: number, bits: number) {
+    const length = bits / 8;
+    if (length > this.bytes.length - this.offset) fail('limit');
+    if (bits === 32) this.view.setFloat32(this.offset, value, true); else this.view.setFloat64(this.offset, value, true);
+    this.offset += length;
   }
   raw(bytes: Uint8Array) {
     if (bytes.length > this.bytes.length - this.offset) fail('limit');
@@ -78,7 +88,17 @@ class Writer {
 }
 class Reader {
   offset = 11;
-  constructor(readonly bytes: Uint8Array) {}
+  readonly view: DataView;
+  constructor(readonly bytes: Uint8Array) {
+    this.view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  }
+  float(bits: number): number {
+    const length = bits / 8;
+    if (length > this.bytes.length - this.offset) return fail('malformed');
+    const value = bits === 32 ? this.view.getFloat32(this.offset, true) : this.view.getFloat64(this.offset, true);
+    this.offset += length;
+    return value;
+  }
   byte(): number { const value = this.bytes[this.offset++]; if (value === undefined) return fail('malformed'); return value; }
   varint(bits: number): bigint {
     let value = 0n;
@@ -99,7 +119,7 @@ class Reader {
 }
 function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: number, types: Types, checks: Checks): void {
   budget.visit(depth);
-  s = resolve(s, types, schema => validate(schema, value, checks));
+  s = resolve(s, types, budget, schema => validate(schema, value, checks));
   const child = (schema: Schema, item: unknown) => write(schema, item, out, budget, depth + 1, types, checks);
   switch (s.k) {
     case 'unit': if (value !== null) fail('value'); return;
@@ -115,9 +135,9 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
     }
     case 'float': {
       if (typeof value !== 'number' || !Number.isFinite(value) || (s.bits === 32 && !Object.is(Math.fround(value), value))) fail('value');
-      const bytes = new Uint8Array(s.bits / 8), view = new DataView(bytes.buffer);
-      if (s.bits === 32) view.setFloat32(0, value as number, true); else view.setFloat64(0, value as number, true);
-      out.raw(bytes); return;
+      const n = value as number;
+      if (s.min !== undefined && n < s.min || s.max !== undefined && n > s.max) fail('value');
+      out.float(n, s.bits); return;
     }
     case 'bytes': {
       if (!(value instanceof Uint8Array)) fail('value');
@@ -173,8 +193,8 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
   }
 }
 function read(s: Schema, input: Reader, budget: Budget, depth: number, types: Types, checks: Checks): unknown {
-  const value = readValue(resolve(s, types), input, budget, depth, types, checks);
-  resolve(s, types, schema => validate(schema, value, checks));
+  const value = readValue(resolve(s, types, budget), input, budget, depth, types, checks);
+  resolve(s, types, budget, schema => validate(schema, value, checks));
   return value;
 }
 function readValue(s: Schema, input: Reader, budget: Budget, depth: number, types: Types, checks: Checks): unknown {
@@ -190,9 +210,8 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       return s.bits <= 32 ? Number(n) : n;
     }
     case 'float': {
-      const bytes = input.raw(s.bits / 8), view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-      const value = s.bits === 32 ? view.getFloat32(0, true) : view.getFloat64(0, true);
-      if (!Number.isFinite(value)) return fail('malformed'); return value;
+      const value = input.float(s.bits);
+      if (!Number.isFinite(value) || s.min !== undefined && value < s.min || s.max !== undefined && value > s.max) return fail('malformed'); return value;
     }
     case 'bytes': {
       const length = input.length(s.max ?? input.bytes.length - input.offset);
@@ -252,9 +271,11 @@ export function createCodec(metadata: unknown, registry: unknown = {}, checks: C
     if (!(bytes instanceof Uint8Array)) return fail('value');
     if (bytes.length > (direction ? meta.responseBytes : meta.requestBytes)) return fail('limit');
     if (bytes.length < 11) return fail('malformed');
-    if (bytes[0] !== 73 || bytes[1] !== 87 || bytes[10] !== direction || new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getBigUint64(2, true) !== id) return fail('identity');
+    if (bytes[0] !== 73 || bytes[1] !== 87 || bytes[10] !== direction) return fail('identity');
     try {
-      const input = new Reader(bytes), value = read(direction ? meta.response : meta.request, input, new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth), 1, types, checks);
+      const input = new Reader(bytes);
+      if (input.view.getBigUint64(2, true) !== id) return fail('identity');
+      const value = read(direction ? meta.response : meta.request, input, new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth), 1, types, checks);
       if (input.offset !== bytes.length) return fail('malformed');
       return value;
     } catch (error) { if (error instanceof WireError) throw error; return fail('malformed'); }
