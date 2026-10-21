@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.5]
+## [0.5.5] - 2026-10-21
 
 - Separate codec-only and application-checksum allocation benchmarks with
   `--codec-only`, independent encode/decode calibration and labelled format-2
