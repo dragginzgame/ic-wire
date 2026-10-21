@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.8]
+## [0.5.8] - 2026-10-21
 
 - Enforce declared TypeScript float bounds when encoding and decoding, and
   reject malformed or inverted numeric bounds during registry generation.
