@@ -48,6 +48,22 @@ for (const value of [{}, {some:null,extra:1}]) rejects(() => probe({k:'option',i
 rejects(() => probe({k:'result',ok:{k:'unit'},err:{k:'unit'}}).encodeRequest({ok:null,err:null}), 'value');
 rejects(() => probe({k:'record',fields:[]}).encodeRequest({extra:1}), 'value');
 rejects(() => probe({k:'enum',variants:[]}).encodeRequest({tag:'Unknown',value:null}), 'value');
+// Enum IDs are unsigned 32-bit tags, independent of declaration order.
+for (const id of [0,127,128,16383,16384,2097151,2097152,268435455,268435456,4294967295]) {
+  const codec = probe({k:'enum',variants:[{name:'Chosen',id,value:{k:'unit'}},{name:'Other',id:3,value:{k:'unit'}}]});
+  const value = {tag:'Chosen',value:null}, payload = [];
+  let remaining = BigInt(id);
+  do { const byte = Number(remaining & 127n); remaining >>= 7n; payload.push(remaining ? byte|128 : byte); } while (remaining);
+  for (const direction of ['Request','Response']) {
+    const bytes = frame(...payload); bytes[10] = direction === 'Request' ? 0 : 1;
+    assert.deepEqual(codec['encode'+direction](value),bytes);
+    assert.deepEqual(codec['decode'+direction](bytes),value);
+    for (const bad of [[2],[128],[128,0],[255,255,255,255,16],[128,128,128,128,128]]) {
+      const malformed = frame(...bad); malformed[10] = bytes[10];
+      rejects(() => codec['decode'+direction](malformed),'malformed');
+    }
+  }
+}
 // Numeric integer metadata bounds apply exactly, including to bigint payloads.
 for (const kind of ['u','i']) for (const bits of [8,16,32,64,128]) {
   const raw = probe({k:kind,bits});

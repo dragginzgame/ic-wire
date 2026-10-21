@@ -2,48 +2,46 @@
 
 ## Current batch
 
-Released 0.5.11 (`9190e54`) is the baseline. Pending 0.5.12 optimizes the generated
-TypeScript runtime and expands qualification. Package versions, index and Git
-refs remain untouched. No wire-format or public API changes are introduced.
+Released 0.5.12 (`8562529`) is the baseline. Pending 0.5.13 reuses the generated
+TypeScript runtime's number-based varints for enum tags and numeric ID lookup.
+Schema IDs are u32, so their complete domain is exactly representable as numbers.
+No helper, cache, public API or wire-format change is introduced. Wide integer
+payloads, lengths and method identities retain bigint handling.
 
-Small integer payloads (8/16/32 bits) use number arithmetic; 64/128-bit values
-retain bigint arithmetic. The dedicated number varint path preserves unsigned
-32-bit values, signed ZigZag boundaries, minimal encodings and overflow refusal.
-Length prefixes and method identities retain their existing handling.
-
-Text encoding remains unchanged. Both a JavaScript UTF-8 length scan and direct
-frame encoding followed by an in-place prefix shift were investigated. The scan
-regressed large text; the shift had inconsistent gains and repeated regressions.
-The experiments are retained as evidence, not production paths.
+Package versions, staging and Git refs remain untouched. The numbered pending
+changelog is ready for maintainer review; ordinary agent work does not release.
 
 ## Qualification
 
 Focused TypeScript qualification passes: 32 Rust runtime/borrowed tests, strict
 all-target feature Clippy, Rust 1.91 generator compilation, strict TypeScript,
-145 Rust vectors, 29,356 differential mutations and 1 MiB frame boundaries.
-The corpus now includes all small-integer varint transitions, signed ZigZag
-boundaries and explicit malformed prefixes. Extra checks cover nested node/depth
-limits, both directions, text prefix growth and independent returned frames.
-Owned and borrowed Rust byte/text leaves agree on mutated inputs and typed errors.
+146 Rust vectors, 29,560 differential mutations and 1 MiB frame boundaries.
+The corpus adds a Rust-derived maximum enum ID. Independent bigint byte oracles
+cover all u32 tag width transitions, both directions, unknown tags, truncation,
+nonminimal encodings and overflow. Existing traversal and allocation limits stay
+in force. Rust production code and dependency selections are unchanged.
 
-An isolated comparison of text prototypes covers 8,600 combinations of strings,
-allowances and directions with identical bytes/errors. Existing allocation
-checks continue to bound short-string scratch; no new text path is retained.
-Native Node benchmark inputs, environment and results are recorded in
-[evaluation](../evaluation.md#typescript-small-integer-and-text-encoding-study).
-Raw variants, scripts and logs are under `/tmp/ic-wire-0512/`.
-These measurements are not browser or IC instruction claims. Full CI, hosted
-macOS and installed consumer checks were not run for this working-tree batch.
+Two isolated native Node benchmark runs cover arrays of 1,024 unit enum values
+with four selected IDs and an unchanged u64 control. Enum encoding improves
+5–35% and decoding 31–71% in these workloads; generated JavaScript size is
+approximately neutral. These are not browser, IC instruction or Wasm savings.
+See [evaluation](../evaluation.md#typescript-enum-tag-arithmetic) for parameters,
+source identities, limitations and retained CSV results. Raw sources, scripts
+and samples are in `/tmp/ic-wire-0513/` and `target/typescript-enum-tags/`.
+
+Full CI, hosted macOS and installed consumer checks were not run for this batch.
 
 ## Retained decisions
 
 Production remains bounded Postcard; JSON is optional generation/tooling metadata.
-The frame format, canonical re-encoding and exact retry bytes remain unchanged.
-Fresh Rust allocation and scratch reuse retain their separately qualified paths.
-TypeScript buffer growth remains rejected; the writer still respects its selected
-frame allowance. Historical experiments and their tradeoffs remain in
-[evaluation](../evaluation.md).
+Canonical bytes, exact retries, typed errors and pre-allocation bounds remain
+unchanged. Generated metadata and scalar validators remain trusted declarations.
 
+The 0.5.12 small-integer optimization remains selected. Text scanning and direct
+frame text encoding were rejected after measured regressions. The earlier
+bounded-growth writer also remains rejected; buffer allowances are unchanged.
+Historical measurements and tradeoffs remain in [evaluation](../evaluation.md).
+
+Fresh Rust allocation and scratch reuse retain their separately qualified paths.
 Shared Tooling is 0.25.9. IC Build's release editor remains 0.63.0 with `cli`.
-Dependency selections and Rust production code are unchanged by this batch.
 Staging, commits, versions, releases and publication remain maintainer-owned.

@@ -703,3 +703,47 @@ Retained probe SHA-256 identities:
 - `baseline.ts`: `caf41dabcfdcc401dc2cb90bd4ce6e92843b404c6131af2462c46b74a808f2a8`.
 - `selected.ts`: `3e41cfee7cf7a3f1d0cc1137fce6108d80e01f8b64b6972df7d9a31899f90b7a`.
 - `bench-selected.cjs`: `6fb8829cb09f8171688351a9adbd81a69edefe5f39d6ffa61ef3772e5853b84a`.
+
+## TypeScript enum tag arithmetic
+
+Against released 0.5.12 (`8562529`), enum tags reuse the existing number varint
+reader/writer and compare numeric IDs directly. Generated schema IDs are u32;
+number arithmetic preserves all of them exactly. Wider payloads, length prefixes
+and method identities retain bigint handling. No protocol or public API changes
+are required, and no helper or lookup cache is added.
+
+[Native results](evidence/typescript-enum-tags/native.csv) cover two runs, each
+with separate Node processes for each case and both variants in each process.
+Fixed arrays contain 1,024 unit enums with selected ID 0, 128, 16,384 or u32::MAX.
+Descriptors list `Other` (ID 3) before `Chosen` (the selected ID); every value is
+`{tag:'Chosen',value:null}`. The control is 1,024 u64::MAX values. All cases use
+method ID 1, 16,384-byte frame allowances, 4,096 nodes, depth 16 and identical
+request/response schemas. Setup verifies equal bytes and decoded values; the CSV
+records frame hashes, lengths and median nanoseconds per complete operation.
+
+Environment: Node 24.21.0 / V8 13.6.233.17-node.53, TypeScript 7.0.2, strict ES2022
+CommonJS, Linux x86_64, AMD Threadripper 7970X, CPU 0 affinity. Each lane warms
+1,000 operations, independently calibrates to at least 5 ms (65,536-call cap),
+and measures 11 batches with alternating variant order. Explicit GC is outside
+timing; incidental GC and allocations remain inside. Encode and decode are
+separate; input setup, hashing and equality checks are outside timing.
+
+Enum-array encoding improves 5–35% and decoding 31–71% across these runs.
+The unchanged u64 control encodes 4–10% faster and decodes 2–5% slower, illustrating
+measurement variation. These are native Node enum-heavy workloads, not universal
+application speedups, browser results, IC instruction or Wasm size measurements.
+The compiled prototype is 4 bytes smaller uncompressed and 2 bytes larger with
+gzip-9; this is effectively neutral generated JavaScript size.
+
+Qualification adds a Rust-derived maximum-ID variant and independent bigint
+byte oracles for every u32 tag width transition, both directions, unknown tags,
+truncation, nonminimal representations and overflow. The focused gate passes
+146 Rust vectors and 29,560 differential mutations, plus existing 1 MiB checks.
+
+Raw samples, script and compiled/source variants are in `/tmp/ic-wire-0513/`
+and `target/typescript-enum-tags/`. The final source also clarifies a helper
+comment; measured executable logic is identical. Probe SHA-256 identities:
+
+- `baseline.ts`: `3e41cfee7cf7a3f1d0cc1137fce6108d80e01f8b64b6972df7d9a31899f90b7a`.
+- `selected.ts`: `e359c4e2ec92636650cd48bc7a1e4bfd78de88cbb0414b6beafbcf4822ab1491`.
+- `bench.cjs`: `c7bb3a0651b73f57df51435f20369be08e19ab9149c49d561c031cc96da9cc2c`.

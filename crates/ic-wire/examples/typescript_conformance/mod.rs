@@ -34,6 +34,8 @@ struct Record {
 }
 #[derive(Wire)]
 enum Choice {
+    #[wire(id = 4294967295)]
+    Last,
     #[wire(id = 128)]
     Payload(Record),
     #[wire(id = 3)]
@@ -383,6 +385,7 @@ fn main() {
         "{columns:[],rows:[],next:null}",
     );
     f.add(Choice::Empty, "{tag:'Empty',value:null}");
+    f.add(Choice::Last, "{tag:'Last',value:null}");
     f.add(Choice::Payload(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) }), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
     f.add_boxed((), "null");
     f.add_boxed(42_u64, "42n");

@@ -75,7 +75,7 @@ class Writer {
   varint(value: bigint) {
     do { const byte = Number(value & 127n); value >>= 7n; this.byte(value ? byte | 128 : byte); } while (value);
   }
-  // Only admitted unsigned 16/32-bit values (including ZigZag results) enter here.
+  // Only admitted unsigned 16/32-bit values, ZigZag results and u32 tags enter here.
   numberVarint(value: number) {
     do { const byte = value & 127; value >>>= 7; this.byte(value ? byte | 128 : byte); } while (value);
   }
@@ -213,7 +213,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
     case 'enum': {
       const record = object(value, ['tag', 'value']);
       const variant = s.variants.find(v => v.name === record.tag); if (!variant) return fail('value');
-      out.varint(BigInt(variant.id)); child(variant.value, record.value); return;
+      out.numberVarint(variant.id); child(variant.value, record.value); return;
     }
   }
 }
@@ -280,7 +280,7 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       return value;
     }
     case 'enum': {
-      const id = input.varint(32), variant = s.variants.find(v => BigInt(v.id) === id);
+      const id = input.numberVarint(32), variant = s.variants.find(v => v.id === id);
       if (!variant) return fail('malformed');
       return { tag: variant.name, value: child(variant.value) };
     }

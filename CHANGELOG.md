@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.13]
+
+- Reuse number-based varints for TypeScript enum tags, preserving canonical u32
+  IDs and malformed-input refusal without changing the wire format or public API.
+- Qualify enum tag width boundaries and maximum IDs; record native Node timings.
+
 ## [0.5.12] - 2026-10-21
 
 - Encode and decode TypeScript 8/16/32-bit integers with number arithmetic,
