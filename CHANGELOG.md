@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.6]
+## [0.5.6] - 2026-10-21
 
 - Reject TypeScript registry names that shadow generated JSON handling,
   transparent alias cycles, invalid fixed-array lengths and method budgets
