@@ -1,10 +1,54 @@
 # Changelog
 
-## [0.5.4]
+## [0.5.9]
 
 - Adopt Shared Tooling 0.25.9: refuse a new release increment past an
   undelivered committed preparation, preserving its saved plan and evidence.
   Tool pins, package APIs and dependency selections are unchanged.
+
+## [0.5.8] - 2026-10-21
+
+- Enforce declared TypeScript float bounds when encoding and decoding, and
+  reject malformed or inverted numeric bounds during registry generation.
+  Integer bounds outside JavaScript’s exact range are refused before rounding.
+- Encode and decode TypeScript floats through shared frame views, avoiding
+  temporary byte arrays and views per value while preserving exact frames,
+  buffer offsets and limits.
+- Correct the packaged dependency example to select the current 0.5 API.
+
+## [0.5.7] - 2026-10-21
+
+- Adopt IC Tooling 0.63.0 for diagnostic builds and the release metadata editor.
+  Select the editor's required `cli` feature separately from library consumers.
+
+- Avoid repeated TypeScript registry enumeration within each codec operation,
+  preserving alias checks and registry changes between calls.
+- Reject invalid optional collection bounds and inverted byte-length bounds
+  during TypeScript generation instead of relying on JavaScript coercion.
+
+## [0.5.6] - 2026-10-21
+
+- Reject TypeScript registry names that shadow generated JSON handling,
+  transparent alias cycles, invalid fixed-array lengths and method budgets
+  that cannot initialize a codec.
+- Include TypeScript conformance, generator tests, linting and minimum-Rust
+  checks in CI and release validation, with pinned Node/npm setup in hosted CI.
+
+## [0.5.5] - 2026-10-21
+
+- Separate codec-only and application-checksum allocation benchmarks with
+  `--codec-only`, independent encode/decode calibration and labelled format-2
+  reports. Retain measured finite-buffer reuse and pre-allocation UTF-8
+  experiments; text decoding remains unchanged.
+- Add finite `encode_request_into` and `encode_response_into` for reusable
+  scratch buffers, preserving admission, canonical frames and bounded output.
+  Retained retry bytes remain independent of mutable scratch storage.
+
+## [0.5.4] - 2026-10-20
+
+- Update the diagnostic tooling dependency to IC Build 0.62.0 and its transitive
+  Host Artifacts, FS and Process dependencies to 0.62.0. The separately pinned
+  release metadata editor remains at 0.24.0.
 
 ## [0.5.3] - 2026-10-20
 

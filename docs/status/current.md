@@ -2,33 +2,38 @@
 
 ## Current batch
 
-Released 0.5.2 (`7801213`) is the baseline. Pending 0.5.3 adopts published
-IC Build 0.24.0 for diagnostic qualification and the release metadata editor.
-The incoming Cargo manifest/lock update was preserved; Make now selects the
-same editor generation. IC Build brings Host Artifacts, FS and Process 0.32.0.
-IC Wire has no direct Host values to migrate and uses the unchanged diagnostic
-API. Runtime codec dependencies and wire behavior remain unchanged.
-
-Shared Tooling remains 0.25.8 (`0a2d2ee3b5e0ae77755c2915ac28836d4d5ba359`).
-The editor is prepared through `make install-tools` or `make install-release-editor`
-and admitted offline by `make release-editor-check`, retaining the 8 MiB
-per-document allowance. Releases select its path without manual environment setup.
-
-## Retained decisions
-
-The 0.5.1 bounded output-growth and 0.5.2 direct-header improvements are released.
-See [header measurements](../evaluation.md#direct-header-initialization).
-Per-type codec preferences and the native pointer-equality candidate were rejected;
-[experimental evidence](../evaluation.md#native-borrowed-pointer-equality-experiment)
-remains historical. No alternate production codec or preference API is supported.
-
-Staging, commits, versions, tags, pushes and publication remain maintainer-owned.
+Released 0.5.8 (`1894d0a`) is the baseline. PR #16 adopts Shared Tooling 0.25.9
+release retry protection at reviewed revision
+`85aded191d85ac4a8c0e5deab207f6be18895862`. A committed but undelivered release
+preparation refuses a second increment and preserves its saved plan and evidence.
+Package versions and dependency selections remain unchanged. The PR is refreshed
+against current main; merging and release delivery remain maintainer-owned.
 
 ## Qualification
 
-Evaluation tests, strict evaluation Clippy and Rust 1.91 checks pass. All 16
-compiler diagnostics and the passing control are verified. The disposable release
-fixture passes with the actual 0.24.0 editor, including metadata preparation,
-interrupted delivery, receipt rejection and resume. Offline editor admission,
-snapshot integrity, formatting, dependency boundaries and documentation links pass.
-Full CI and native macOS checks were not run; no real release effects occurred.
+The refreshed PR passes snapshot integrity (104 files, exact 0.25.9 revision),
+documentation links, disposable consumer Make/release routing and the disposable
+release integration fixture. These checks execute release effects only inside
+fixture repositories. Existing prepared tool binaries were reused read-only.
+No full local CI, actual release, package publication or consumer suite ran.
+Hosted checks must qualify the refreshed PR commit independently of earlier runs.
+
+## Retained decisions
+
+0.5.7 adopted IC Tooling 0.63.0, with the release editor selecting `cli` separately
+from the diagnostic library. It also bounds registry enumeration to once per
+operation and validates optional collection lengths. TypeScript qualification
+runs in CI/release gates; see [development](../development.md) for local Node/npm
+preparation before offline release validation.
+
+Production remains bounded Postcard; JSON is optional generation/tooling metadata.
+Finite scratch reuse shipped in 0.5.5. Fresh encoding remains separate because
+sharing its mutable-buffer path regressed small-message instruction cost.
+The [scratch-buffer study](../evaluation.md#finite-scratch-buffer-follow-up)
+retains byte parity, capacity/retry tradeoffs and measured evidence.
+Caller-owned scratch capacity may outlive large messages; retain immutable retry
+bytes independently. Rejected experiments remain in [evaluation](../evaluation.md).
+
+Shared Tooling is 0.25.9 in this PR. IC Build's release editor remains 0.63.0 with `cli`.
+Shared snapshots, dependency selection and Rust runtime encoding are unchanged.
+Staging, commits, versions, releases and publication remain maintainer-owned.

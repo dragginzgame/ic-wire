@@ -86,3 +86,32 @@ fn large_buffers_refuse_bad_lengths_truncation_identity_and_noncanonical_prefixe
     ));
     assert_eq!(Bytes::<MAX>::SHAPE.nodes, 1);
 }
+
+#[test]
+fn scratch_reuse_preserves_frames_capacity_and_frozen_retries() {
+    let mut scratch = Vec::new();
+    let mut frozen = Vec::new();
+    let mut high_water = 0;
+    for len in [0, 32, 4096, MAX, 32, 0] {
+        let value = Bytes::<MAX>::new(vec![42; len]).unwrap();
+        ic_wire::encode_request_into::<Large>(&value, &mut scratch).unwrap();
+        assert_eq!(scratch, encode_request::<Large>(&value).unwrap().as_bytes());
+        assert!(scratch.capacity() >= high_water);
+        high_water = scratch.capacity();
+        if len == 4096 {
+            frozen = scratch.clone();
+        }
+        ic_wire::encode_response_into::<Large>(&value, &mut scratch).unwrap();
+        assert_eq!(
+            scratch,
+            ic_wire::encode_response::<Large>(&value)
+                .unwrap()
+                .as_bytes()
+        );
+        assert_eq!(ic_wire::decode_response::<Large>(&scratch).unwrap(), value);
+    }
+    assert_eq!(
+        decode_request::<Large>(&frozen).unwrap().as_slice(),
+        &[42; 4096]
+    );
+}

@@ -1,7 +1,7 @@
 //! Rendering shared by finite schemas and consumer-owned native metadata.
 use super::GenerationError;
 use alloc::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     format,
     string::{String, ToString},
     vec::Vec,
@@ -74,6 +74,7 @@ fn identifier(name: &str) -> Result<(), GenerationError> {
             "unknown",
             "eval",
             "arguments",
+            "JSON",
             "types",
             "createCodec",
             "ReadonlyArray",
@@ -100,8 +101,64 @@ pub(super) fn ty(
         return Err(GenerationError::Complexity);
     }
     *remaining -= 1;
+    let kind = text(value, "k")?;
+    if matches!(kind, "bytes" | "text" | "list" | "array") {
+        let bound = |key| -> Result<Option<u64>, GenerationError> {
+            value
+                .get(key)
+                .map(|n| {
+                    let n = n.as_u64().ok_or(GenerationError::Schema)?;
+                    if n > (1_u64 << 53) - 1 {
+                        return Err(GenerationError::Complexity);
+                    }
+                    Ok(n)
+                })
+                .transpose()
+        };
+        let maximum = bound("max")?;
+        if kind == "array" && maximum.is_none() {
+            return Err(GenerationError::Schema);
+        }
+        if kind == "bytes"
+            && bound("min")?
+                .zip(maximum)
+                .is_some_and(|(min, max)| min > max)
+        {
+            return Err(GenerationError::Schema);
+        }
+    }
+    if matches!(kind, "u" | "i" | "float") {
+        let bound = |key| -> Result<Option<f64>, GenerationError> {
+            value
+                .get(key)
+                .map(|bound| {
+                    let n = bound
+                        .as_f64()
+                        .filter(|n| n.is_finite())
+                        .ok_or(GenerationError::Schema)?;
+                    if kind != "float" {
+                        if n.fract() != 0.0 {
+                            return Err(GenerationError::Schema);
+                        }
+                        // Runtime converts numeric integer bounds to BigInt. Reject
+                        // values that JavaScript would round before that conversion.
+                        if n.abs() > 9_007_199_254_740_991.0 {
+                            return Err(GenerationError::Complexity);
+                        }
+                    }
+                    Ok(n)
+                })
+                .transpose()
+        };
+        if bound("min")?
+            .zip(bound("max")?)
+            .is_some_and(|(min, max)| min > max)
+        {
+            return Err(GenerationError::Schema);
+        }
+    }
     let mut child = |node| ty(node, types, depth + 1, remaining);
-    Ok(match text(value, "k")? {
+    Ok(match kind {
         "ref" => {
             let name = text(value, "name")?;
             if !types.contains_key(name) {
@@ -188,6 +245,36 @@ pub(super) fn ty(
     })
 }
 
+// Transparent aliases must reach a concrete node. Recursive records, lists and
+// enums remain valid; only references/newtypes disappear from TypeScript types.
+fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationError> {
+    let mut checked = BTreeSet::new();
+    for (name, mut node) in types {
+        if checked.contains(name.as_str()) {
+            continue;
+        }
+        let mut chain = BTreeSet::from([name.as_str()]);
+        loop {
+            match text(node, "k")? {
+                "ref" => {
+                    let name = text(node, "name")?;
+                    if checked.contains(name) {
+                        break;
+                    }
+                    if !chain.insert(name) {
+                        return Err(GenerationError::Schema);
+                    }
+                    node = types.get(name).ok_or(GenerationError::Schema)?;
+                }
+                "newtype" => node = &node["item"],
+                _ => break,
+            }
+        }
+        checked.extend(chain);
+    }
+    Ok(())
+}
+
 /// Generate a module from the native metadata grammar consumed by [`super::RUNTIME`].
 ///
 /// Consumers own reflection, endpoint identities, resource limits and custom scalar
@@ -196,8 +283,14 @@ pub(super) fn ty(
 /// not untrusted input. Names, references, type shapes and generation complexity
 /// are checked here; this does not admit native values or infer their bounds.
 /// Each method carries `name`, `mode` (`query`/`update`) and the runtime's method
-/// fields. Named references permit recursive values without expanding definitions.
-/// Custom constraints are retained verbatim for the runtime/consumer to enforce.
+/// fields. Frame allowances must fit the header; node/depth allowances must be
+/// positive. Invalid minimums return [`GenerationError::Limits`]. Named references
+/// permit recursive values, but alias-only cycles return [`GenerationError::Schema`].
+/// Collection bounds must be non-negative integers within JavaScript's exact
+/// integer range. Arrays require `max`; byte `min` cannot exceed `max`.
+/// Integer bounds must also be integral and within JavaScript's exact integer
+/// range; use a named consumer check for wider bigint constraints. Numeric bounds
+/// cannot be inverted. Other custom scalar constraints remain consumer-owned.
 pub fn generate_registry(
     types: &BTreeMap<String, Value>,
     methods: &[Value],
@@ -213,6 +306,7 @@ pub fn generate_registry(
         let rendered = ty(node, types, 0, &mut remaining)?;
         source.push_str(&format!("export type {name} = {rendered};\n"));
     }
+    validate_aliases(types)?;
     // JSON.parse preserves an own __proto__ entry; an object literal would
     // interpret that valid Serde name as a prototype mutation instead.
     source.push_str(&format!(
@@ -237,8 +331,17 @@ pub fn generate_registry(
             "requestDepth",
             "responseDepth",
         ] {
-            if method[key].as_u64().is_none_or(|n| n > (1_u64 << 53) - 1) {
+            let n = method[key].as_u64().ok_or(GenerationError::Complexity)?;
+            if n > (1_u64 << 53) - 1 {
                 return Err(GenerationError::Complexity);
+            }
+            let minimum = if key.ends_with("Bytes") {
+                crate::contract::HEADER as u64
+            } else {
+                1
+            };
+            if n < minimum {
+                return Err(GenerationError::Limits);
             }
         }
         let request = ty(&method["request"], types, 0, &mut remaining)?;

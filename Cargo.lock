@@ -304,12 +304,11 @@ checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "ic-build"
-version = "0.24.0"
+version = "0.63.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42ba043418293afc10a2cfa52fddacba89711fec7680153a0b6fe66ea6459e9c"
+checksum = "2036d85fbb9a1f2c6190801938a2574ff29eae5f43a31846a0bd9bbb180b8b3f"
 dependencies = [
  "cargo_metadata",
- "clap",
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
@@ -324,18 +323,18 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.32.0"
+version = "0.63.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d3f6ca0109755bfaea45b61a91bd5c48ef37826814408027349472385a3fef6"
+checksum = "de90433bb0b6cbe86bb9088a0f271ab832bfb12600eac181e8c501b121be494f"
 dependencies = [
  "sha2",
 ]
 
 [[package]]
 name = "ic-host-fs"
-version = "0.32.0"
+version = "0.63.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a531bd122d3e1e7802d82722152e8a20ba1425fb8bf09824bc163a7c5c287561"
+checksum = "4978f9c0679229aa3f085b4d58a7a3ba12d997fa63d10e98d5ce1571a0908b14"
 dependencies = [
  "ic-host-artifacts",
  "rustix",
@@ -344,9 +343,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.32.0"
+version = "0.63.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e84ed50a40600ca54772779e5d2989a8ebd03b1a9406cf2288db53ad1463eda"
+checksum = "60fed85db6af51ddd5b204b04cd39753ccf31c22568b28d4b54fef0da4f168a1"
 dependencies = [
  "command-fds",
  "ic-host-artifacts",
@@ -357,7 +356,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.5.3"
+version = "0.5.8"
 dependencies = [
  "clap",
  "ic-wire-derive",
@@ -369,7 +368,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-canister-evaluation"
-version = "0.5.3"
+version = "0.5.8"
 dependencies = [
  "bitcode",
  "clap",
@@ -386,7 +385,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.5.3"
+version = "0.5.8"
 dependencies = [
  "proc-macro2",
  "quote",
