@@ -132,6 +132,21 @@ impl Fixture {
                     candidates.push(bytes);
                 }
             }
+            // Nonminimal, overflowing and unterminated prefixes, independently
+            // judged by Rust even when the first field is not a scalar varint.
+            for prefix in [
+                vec![0x80, 0],
+                vec![0xff, 0xff, 4],
+                vec![0xff, 0xff, 0xff, 0xff, 16],
+                vec![0x80; 5],
+                vec![0x80; 10],
+                vec![0xff; 19],
+            ] {
+                let mut bytes = original[..11].to_vec();
+                bytes.extend(prefix);
+                bytes.extend_from_slice(&original[11..]);
+                candidates.push(bytes);
+            }
             // Fixed xorshift stream: reproducible mutation testing, not coverage-guided fuzzing.
             let mut seed = 0x92d6_8ca2_u32;
             for length in 0..64 {
@@ -249,6 +264,38 @@ fn main() {
         })*};
     }
     integers!(u8 => "", i8 => "", u16 => "", i16 => "", u32 => "", i32 => "", u64 => "n", i64 => "n", u128 => "n", i128 => "n");
+    // Every small-integer varint width transition, including signed ZigZag.
+    for shift in [7, 14, 21, 28] {
+        let boundary = 1_u32 << shift;
+        for value in [boundary - 1, boundary, boundary + 1] {
+            f.add(value, &value.to_string());
+            if let Ok(value) = u16::try_from(value) {
+                f.add(value, &value.to_string());
+            }
+        }
+        let signed = (boundary / 2) as i32;
+        for value in [
+            -signed - 1,
+            -signed,
+            -signed + 1,
+            signed - 1,
+            signed,
+            signed + 1,
+        ] {
+            f.add(value, &value.to_string());
+            if let Ok(value) = i16::try_from(value) {
+                f.add(value, &value.to_string());
+            }
+        }
+    }
+    f.add(
+        List::<List<u32, 3>, 2>::new(vec![
+            List::new(vec![127, 128, u32::MAX]).unwrap(),
+            List::new(vec![]).unwrap(),
+        ])
+        .unwrap(),
+        "[[127,128,4294967295],[]]",
+    );
     for value in [127_u64, 128, 16383, 16384, 1 << 53] {
         f.add(value, &format!("{value}n"));
     }

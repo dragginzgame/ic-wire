@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.12]
+
+- Encode and decode TypeScript 8/16/32-bit integers with number arithmetic,
+  preserving canonical Postcard bytes and bigint handling for wider integers.
+- Evaluate and reject two text-buffer optimizations after measured regressions;
+  preserve the existing text encoder and expand its boundary checks.
+- Expand integer-boundary, nested-limit and owned/borrowed malformed-input checks.
+
 ## [0.5.11] - 2026-10-21
 
 - Adopt Shared Tooling 0.25.9: refuse a new release increment past an

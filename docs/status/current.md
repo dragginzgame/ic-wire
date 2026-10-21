@@ -2,59 +2,48 @@
 
 ## Current batch
 
-Local main and remote main match at `3d83549`. The local annotated `v0.5.10`
-tag points to `86aa88c`, which includes the small-frame optimization from PR #15
-but predates the tooling adoption from PR #16. The subsequent merge brought that
-tooling change onto main. The remote has no `v0.5.10` tag as of this inspection;
-Git delivery of the release tag remains unconfirmed. Package publication was not
-checked. Do not move the existing tag or infer publication from the branch push.
+Released 0.5.11 (`9190e54`) is the baseline. Pending 0.5.12 optimizes the generated
+TypeScript runtime and expands qualification. Package versions, index and Git
+refs remain untouched. No wire-format or public API changes are introduced.
 
-Pending 0.5.11 notes now contain the tooling adoption. The dated 0.5.10 entry
-matches its local tag's changelog. Package versions remain 0.5.10. This correction
-and handoff are uncommitted; staging, commits, tag delivery and releases remain
-maintainer-owned. Main CI for `3d83549` is pending at this inspection.
+Small integer payloads (8/16/32 bits) use number arithmetic; 64/128-bit values
+retain bigint arithmetic. The dedicated number varint path preserves unsigned
+32-bit values, signed ZigZag boundaries, minimal encodings and overflow refusal.
+Length prefixes and method identities retain their existing handling.
 
-Shared Tooling 0.25.9 is present at reviewed revision
-`85aded191d85ac4a8c0e5deab207f6be18895862`. It refuses a second release increment
-past an undelivered committed preparation and preserves the saved evidence.
-Reconcile the existing release delivery before attempting another increment.
+Text encoding remains unchanged. Both a JavaScript UTF-8 length scan and direct
+frame encoding followed by an in-place prefix shift were investigated. The scan
+regressed large text; the shift had inconsistent gains and repeated regressions.
+The experiments are retained as evidence, not production paths.
 
 ## Qualification
 
-The refreshed PR passes snapshot integrity (104 files, exact 0.25.9 revision),
-documentation links, disposable consumer Make/release routing and the disposable
-release integration fixture. These checks execute release effects only inside
-fixture repositories. Existing prepared tool binaries were reused read-only.
-No full local CI, actual release, package publication or consumer suite ran.
-All three hosted checks passed on PR #16 head `257a161` before its merge at
-`73ef717`; that result is separate from the current main run.
+Focused TypeScript qualification passes: 32 Rust runtime/borrowed tests, strict
+all-target feature Clippy, Rust 1.91 generator compilation, strict TypeScript,
+145 Rust vectors, 29,356 differential mutations and 1 MiB frame boundaries.
+The corpus now includes all small-integer varint transitions, signed ZigZag
+boundaries and explicit malformed prefixes. Extra checks cover nested node/depth
+limits, both directions, text prefix growth and independent returned frames.
+Owned and borrowed Rust byte/text leaves agree on mutated inputs and typed errors.
 
-The merged small-frame optimization reserves fresh ceilings up to 128 bytes;
-larger ceilings and scratch reuse retain their existing policy. Its 37 focused
-tests and three-platform PR CI passed before merge. The measured 18–26% IC
-instruction reduction applies to affected small fresh frames; exact frames are
-unchanged. See [evaluation](../evaluation.md#small-finite-schema-reservation)
-for native/IC results, size and retained-capacity tradeoffs. External raw probes
-remain under `/tmp/ic-wire-pr15-probe/`. The TypeScript growth experiment was
-rejected separately and remains documented in the same evaluation guide.
+An isolated comparison of text prototypes covers 8,600 combinations of strings,
+allowances and directions with identical bytes/errors. Existing allocation
+checks continue to bound short-string scratch; no new text path is retained.
+Native Node benchmark inputs, environment and results are recorded in
+[evaluation](../evaluation.md#typescript-small-integer-and-text-encoding-study).
+Raw variants, scripts and logs are under `/tmp/ic-wire-0512/`.
+These measurements are not browser or IC instruction claims. Full CI, hosted
+macOS and installed consumer checks were not run for this working-tree batch.
 
 ## Retained decisions
 
-0.5.7 adopted IC Tooling 0.63.0, with the release editor selecting `cli` separately
-from the diagnostic library. It also bounds registry enumeration to once per
-operation and validates optional collection lengths. TypeScript qualification
-runs in CI/release gates; see [development](../development.md) for local Node/npm
-preparation before offline release validation.
-
 Production remains bounded Postcard; JSON is optional generation/tooling metadata.
-Finite scratch reuse shipped in 0.5.5. Fresh encoding remains separate because
-sharing its mutable-buffer path regressed small-message instruction cost.
-The [scratch-buffer study](../evaluation.md#finite-scratch-buffer-follow-up)
-retains byte parity, capacity/retry tradeoffs and measured evidence.
-Caller-owned scratch capacity may outlive large messages; retain immutable retry
-bytes independently. Rejected experiments remain in [evaluation](../evaluation.md).
+The frame format, canonical re-encoding and exact retry bytes remain unchanged.
+Fresh Rust allocation and scratch reuse retain their separately qualified paths.
+TypeScript buffer growth remains rejected; the writer still respects its selected
+frame allowance. Historical experiments and their tradeoffs remain in
+[evaluation](../evaluation.md).
 
-Shared Tooling is 0.25.9 in this PR. IC Build's release editor remains 0.63.0 with `cli`.
-Only the reviewed release-tooling snapshot changes in PR #16; dependency
-selection and Rust runtime encoding remain unchanged.
+Shared Tooling is 0.25.9. IC Build's release editor remains 0.63.0 with `cli`.
+Dependency selections and Rust production code are unchanged by this batch.
 Staging, commits, versions, releases and publication remain maintainer-owned.

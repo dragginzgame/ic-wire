@@ -278,3 +278,42 @@ fn borrowed_and_owned_contracts_generate_identical_typescript() {
         ic_wire::typescript::generate::<Contract<OwnedChunk>>().unwrap()
     );
 }
+
+#[test]
+fn owned_and_borrowed_leaves_agree_on_mutated_frames() {
+    for len in [0, 1, 127, 128, 129] {
+        let value = Text::<129>::new("a".repeat(len)).unwrap();
+        let frame = ic_wire::encode_request::<Contract<Text<129>>>(&value)
+            .unwrap()
+            .into_bytes();
+        let mut candidates = vec![frame.clone()];
+        for end in 0..frame.len() {
+            candidates.push(frame[..end].to_vec());
+        }
+        for offset in 11..frame.len() {
+            for mask in [1, 128, 255] {
+                let mut bytes = frame.clone();
+                bytes[offset] ^= mask;
+                candidates.push(bytes);
+            }
+        }
+        for prefix in [vec![0x80, 0], vec![0xff; 10], vec![0x80; 10]] {
+            let mut bytes = frame[..11].to_vec();
+            bytes.extend(prefix);
+            bytes.extend_from_slice(&frame[11..]);
+            candidates.push(bytes);
+        }
+        for bytes in candidates {
+            let owned = ic_wire::decode_request::<Contract<Text<129>>>(&bytes)
+                .map(|value| value.as_str().to_owned());
+            let borrowed = ic_wire::decode_request::<Contract<TextRef<'_, 129>>>(&bytes)
+                .map(|value| value.as_str().to_owned());
+            assert_eq!(owned, borrowed);
+            let owned = ic_wire::decode_request::<Contract<Bytes<129>>>(&bytes)
+                .map(|value| value.as_slice().to_vec());
+            let borrowed = ic_wire::decode_request::<Contract<BytesRef<'_, 129>>>(&bytes)
+                .map(|value| value.as_slice().to_vec());
+            assert_eq!(owned, borrowed);
+        }
+    }
+}

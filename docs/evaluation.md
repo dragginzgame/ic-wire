@@ -632,3 +632,74 @@ Local sources, compiled variants, scripts and raw samples are retained under
 - Candidate: `20e74baf919a4a922ef7d57cadfd094a1a510e34402777c8724449156c3c5b7b`.
 
 Benchmark script SHA-256: `e4e65a41c07ef227651b1efb63317415c177a7038c7be3e6ca4a8205cd5220b5`.
+
+## TypeScript small-integer and text encoding study
+
+Against released 0.5.11 (`9190e54`), the generated codec handles 8/16/32-bit integer
+payloads using exact number arithmetic. Unsigned shifts are used only inside the
+admitted 32-bit writer; the reader accumulates with multiplication before checking
+width and minimality, avoiding signed bitwise truncation. Signed ZigZag includes
+i32::MIN. Wide integers, method IDs and length prefixes keep bigint handling.
+Small-integer helpers keep the main dispatch functions compact. Rust production
+encoding and all protocol bytes are unchanged.
+
+[Selected native results](evidence/typescript-small-integers/native.csv) compare
+the final integer-only change with baseline in two runs. Each selected schema
+runs in a separate Node process, with both variants loaded in that process.
+The u64 array is an unchanged-path control. These are native Node measurements,
+not browser results, IC instructions, network latency or Wasm deployment size.
+Small-scalar and control timings vary; this does not establish a universal speedup.
+
+Text encoding is unchanged. Two alternatives were tested and rejected:
+
+- A JavaScript UTF-8 length/surrogate scan followed by direct frame encoding
+  increased large-text encode times roughly 95–251% in its first run.
+- Direct frame encoding followed by an in-place shift for the length prefix
+  removed one UTF-8 scratch buffer per field and passed 8,600 byte/error boundary
+  comparisons. Isolated runs improved, but repeated mixed-workload runs were
+  inconsistent: one regressed 4 KiB text by up to 37% and 1 MiB text by 54%.
+  This was not retained as a general optimization. UTF-8 roundtrip validation
+  and final independent frame copying remain in the maintained implementation.
+
+[Rejected text results](evidence/typescript-small-integers/text-rejected.csv)
+retain the scan and both mixed-workload shift runs. Raw rejected candidates,
+isolated controls, source variants, scripts and samples are under
+`target/typescript-small-integers/` and `/tmp/ic-wire-0512/`.
+
+Environment: Node 24.21.0, V8 13.6.233.17-node.53, TypeScript 7.0.2, strict ES2022
+CommonJS output, Linux x86_64, AMD Threadripper 7970X, pinned to CPU 0. Each lane
+warms 1,000 operations, calibrates independently to at least 5 ms (65,536-call
+cap), then reports the median of 11 batches. Case order rotates; baseline and
+candidate order alternate. Explicit GC is outside timed samples; allocation and
+incidental GC remain inside. Input setup, equality assertions and hashing are
+outside timing. Encode and decode are measured separately.
+
+Selected integer inputs are u16::MAX/u32::MAX/u64::MAX fixed arrays of 1,024 values
+and a u8::MAX scalar. Frame allowances are 16,384 for arrays and 32 for the scalar.
+Broader prototypes also exercised signed extrema and u32 value 1. Rejected text
+inputs are empty, 32 ASCII characters, 16 `é` characters, 16 crab emoji, 4,096
+ASCII characters, 2,048 `é` characters and 1 MiB ASCII. Text bounds are 1 MiB;
+frame allowance is UTF-8 length plus 16. All cases use method ID 1, equal request/
+response schemas, 4,096 nodes and depth 16. Every timed frame matches baseline
+bytes and decoded values. No peak-memory claim is made from constructor counts.
+
+Qualification adds every small-integer varint-width transition and signed
+ZigZag boundary to the Rust-generated corpus, plus malformed/overflowing prefixes.
+The expanded gate passes 145 vectors and 29,356 Rust/TypeScript differential
+mutations. Separate tests cover nested node/depth refusal, text prefix growth,
+exact/short frames, buffer independence and owned/borrowed Rust error parity.
+An external probe checks all 131,072 u16/i16 values against the original codec.
+The text prototype comparison includes unpaired surrogates and exact error codes.
+
+In both selected runs, u16/u32 array encoding improves 69–75%; u32 array
+decoding improves 44–45%. u16 decode ranges from 22–54% faster. The u64 control
+ranges from 14% faster to 5% slower, so no wide-integer improvement is claimed.
+
+Unminified CommonJS runtime size rises from 15,512 to 16,959 bytes; gzip-9
+rises from 3,610 to 3,831. This is generated JavaScript size, not linked Wasm.
+
+Retained probe SHA-256 identities:
+
+- `baseline.ts`: `caf41dabcfdcc401dc2cb90bd4ce6e92843b404c6131af2462c46b74a808f2a8`.
+- `selected.ts`: `3e41cfee7cf7a3f1d0cc1137fce6108d80e01f8b64b6972df7d9a31899f90b7a`.
+- `bench-selected.cjs`: `6fb8829cb09f8171688351a9adbd81a69edefe5f39d6ffa61ef3772e5853b84a`.

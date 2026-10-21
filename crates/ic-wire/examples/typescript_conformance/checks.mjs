@@ -65,6 +65,74 @@ for (const kind of ['u','i']) for (const bits of [8,16,32,64,128]) {
     rejects(() => bounded.decodeResponse(raw.encodeResponse(value(n))),'malformed');
   }
 }
+// Independently construct canonical small-integer bytes through a bigint oracle.
+for (const bits of [8,16,32]) for (const kind of ['u','i']) {
+  const signed = kind === 'i', low = signed ? -(2 ** (bits-1)) : 0, high = 2 ** (bits-(signed?1:0))-1;
+  const values = new Set([low,high,0,1]);
+  for (const shift of [7,14,21,28]) for (const n of [2**shift-1,2**shift,2**shift+1]) {
+    values.add(n); values.add(-n); values.add(Math.floor(n/2)); values.add(-Math.floor(n/2));
+  }
+  const codec = probe({k:kind,bits});
+  for (const value of values) {
+    if (value < low || value > high) continue;
+    let n = BigInt(value);
+    const payload = [];
+    if (bits === 8) payload.push(Number(n & 255n));
+    else {
+      if (signed) n = n < 0n ? -2n*n-1n : 2n*n;
+      do { const byte = Number(n & 127n); n >>= 7n; payload.push(n ? byte|128 : byte); } while(n);
+    }
+    for (const direction of ['Request','Response']) {
+      const expected = frame(...payload); expected[10] = direction === 'Response' ? 1 : 0;
+      assert.deepEqual(codec['encode'+direction](value),expected);
+      assert.equal(codec['decode'+direction](expected),value === 0 ? 0 : value);
+      for (let end=11;end<expected.length;end++) rejects(()=>codec['decode'+direction](expected.slice(0,end)),'malformed');
+      if (bits > 8) {
+        const overlong = new Uint8Array(expected.length+1); overlong.set(expected); overlong[expected.length-1] |= 128;
+        rejects(()=>codec['decode'+direction](overlong),'malformed');
+      }
+    }
+  }
+  for(const value of [low-1,high+1]) rejects(()=>codec.encodeRequest(value),'limit');
+}
+// Collection limits count every nested value, including zero-byte units.
+{
+  const schema = {k:'list',max:2,item:{k:'list',max:3,item:{k:'unit'}}};
+  const value = [[null,null,null],[null,null,null]], exact = probe(schema,9,3);
+  for(const direction of ['Request','Response']) {
+    const bytes = exact['encode'+direction](value);
+    assert.deepEqual(exact['decode'+direction](bytes),value);
+    for(const codec of [probe(schema,8,3),probe(schema,9,2)]) {
+      rejects(()=>codec['encode'+direction](value),'limit');
+      rejects(()=>codec['decode'+direction](bytes),'limit');
+    }
+    const oversized = bytes.slice(); oversized[12] = 4;
+    rejects(()=>exact['decode'+direction](oversized),'limit');
+  }
+}
+// Text prefix boundaries, tight budgets and independent compact returned frames.
+for(const text of ['', 'a'.repeat(127), 'a'.repeat(128), 'é'.repeat(64), '🦀'.repeat(32), '\ufefftext']) {
+  const schema = {k:'text',max:512};
+  const meta = {id:'1',request:schema,response:schema,requestBytes:1024,responseBytes:1024,requestNodes:1,responseNodes:1,requestDepth:1,responseDepth:1};
+  const codec = createCodec(meta), payload = new TextEncoder().encode(text);
+  let length = BigInt(payload.length); const prefix = [];
+  do {const b=Number(length&127n);length>>=7n;prefix.push(length?b|128:b);}while(length);
+  for(const direction of ['Request','Response']) {
+    const expected = frame(...prefix,...payload);expected[10]=direction==='Response'?1:0;
+    const exact = createCodec({...meta,requestBytes:expected.length,responseBytes:expected.length});
+    const bytes = exact['encode'+direction](text);
+    assert.deepEqual(bytes,expected);assert.equal(bytes.buffer.byteLength,bytes.length);
+    assert.equal(codec['decode'+direction](bytes),text);
+    codec['encode'+direction]('other');assert.deepEqual(bytes,expected);
+    const short=createCodec({...meta,requestBytes:expected.length-1,responseBytes:expected.length-1});
+    rejects(()=>short['encode'+direction](text),'limit');
+  }
+}
+for(const text of ['\ud800','\udc00','\ud800\ud800','\udc00\ud800','a\ud800','\udc00🦀']) {
+  rejects(()=>probe({k:'text',max:64}).encodeRequest(text),'value');
+  rejects(()=>probe({k:'text',max:64}).encodeResponse(text),'value');
+  rejects(()=>probe({k:'text',max:0}).encodeRequest(text),'limit');
+}
 console.log('Hostile-input and outgoing-value rejection checks passed');
 
 for (const bits of [32,64]) {
