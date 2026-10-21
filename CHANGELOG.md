@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.16]
+
+- Skip redundant canonical byte comparisons for borrowed data on native hosts,
+  matching the existing Wasm shortcut without changing bytes or rejection rules.
+- Measure consumer layout tradeoffs and canonical-decoding stages; keep schema
+  cuts experimental and retain full canonical verification.
+
+- Add a reproducible native-registry generation benchmark and measured evidence;
+  require benchmark reports and inline protocol-change explanations for future work.
+
+- Check finite enum variant counts against the generation budget before copying
+  and sorting them, avoiding unnecessary allocation for oversized metadata.
+- Consolidate finite-schema name and enum-tag validation in the shared metadata
+  validator; check record ID ordering with adjacent comparisons.
+- Replace repeated prefix scans with ordered sets when checking duplicate native
+  metadata fields, enum tags and method names, preserving generated source order.
+
 ## [0.5.15] - 2026-10-21
 
 - Reject non-string scalar-check annotations during TypeScript generation,

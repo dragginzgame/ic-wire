@@ -34,6 +34,12 @@ fn describe(
         return Err(GenerationError::Complexity);
     }
     *remaining -= 1;
+    // Every variant needs a child node; refuse before allocating/sorting its index.
+    if let Schema::Enum(variants) = schema
+        && variants.len() > *remaining
+    {
+        return Err(GenerationError::Complexity);
+    }
     let mut child = |schema| describe(schema, depth + 1, remaining);
     Ok(match schema {
         Schema::Opaque => return Err(GenerationError::Schema),
@@ -56,10 +62,8 @@ fn describe(
         Schema::Record(fields) => {
             let mut nodes = Vec::new();
             for (index, field) in fields.iter().enumerate() {
-                if fields[..index]
-                    .iter()
-                    .any(|f| f.name == field.name || f.id >= field.id)
-                {
+                // Name uniqueness is checked by the shared metadata validator.
+                if index > 0 && fields[index - 1].id >= field.id {
                     return Err(GenerationError::Schema);
                 }
                 nodes.push(json!({"name":field.name,"id":field.id,"value":child(field.value)?}));
@@ -67,19 +71,11 @@ fn describe(
             json!({"k":"record","fields":nodes})
         }
         Schema::Enum(variants) => {
-            if variants.is_empty() {
-                return Err(GenerationError::Schema);
-            }
             let mut variants: Vec<_> = variants.iter().collect();
             variants.sort_by_key(|v| v.id);
             let mut nodes = Vec::new();
-            for (index, variant) in variants.iter().enumerate() {
-                if variants[..index]
-                    .iter()
-                    .any(|v| v.name == variant.name || v.id == variant.id)
-                {
-                    return Err(GenerationError::Schema);
-                }
+            // Empty enums and duplicate names/tags are rejected by metadata::ty.
+            for variant in variants {
                 nodes.push(
                     json!({"name":variant.name,"id":variant.id,"value":child(variant.value)?}),
                 );

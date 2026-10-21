@@ -347,7 +347,7 @@ fn saturated_node_count_is_never_admitted() {
 #[test]
 fn typescript_projects_explicit_id_order_and_rejects_opaque_metadata() {
     use ic_wire::{
-        schema::Schema,
+        schema::{Field, Schema, Variant},
         typescript::{GenerationError, generate},
     };
     let Schema::Record(fields) = Grant::SCHEMA else {
@@ -362,20 +362,62 @@ fn typescript_projects_explicit_id_order_and_rejects_opaque_metadata() {
     assert!(generated.contains("readonly tag: \"Detail\""));
     assert!(generated.contains("export const methodName = \"read\""));
     #[derive(serde::Serialize, serde::Deserialize)]
-    struct Manual;
-    impl Wire for Manual {
+    struct Manual<const CASE: u8>;
+    impl<const CASE: u8> Wire for Manual<CASE> {
         const SHAPE: ic_wire::Shape = ic_wire::Shape::scalar(0);
+        const SCHEMA: Schema = {
+            const A: Field = Field {
+                name: "a",
+                id: 1,
+                value: &Schema::Unit,
+            };
+            const B: Field = Field {
+                name: "b",
+                id: 2,
+                value: &Schema::Unit,
+            };
+            const X: Variant = Variant {
+                name: "x",
+                id: 1,
+                value: &Schema::Unit,
+            };
+            const Y: Variant = Variant {
+                name: "y",
+                id: 2,
+                value: &Schema::Unit,
+            };
+            match CASE {
+                1 => Schema::Record(&[A, B, Field { id: 3, ..A }]),
+                2 => Schema::Record(&[B, A]),
+                3 => Schema::Record(&[A, Field { id: 1, ..B }]),
+                4 => Schema::Enum(&[]),
+                5 => Schema::Enum(&[X, Y, Variant { id: 3, ..X }]),
+                6 => Schema::Enum(&[X, Variant { id: 1, ..Y }]),
+                7 => Schema::Enum(&[X; 4096]),
+                8 => Schema::Enum(&[X; 4095]),
+                _ => Schema::Opaque,
+            }
+        };
     }
-    struct Opaque;
-    impl Method for Opaque {
-        type Request = Manual;
+    struct Opaque<const CASE: u8>;
+    impl<const CASE: u8> Method for Opaque<CASE> {
+        type Request = Manual<CASE>;
         type Response = ();
         const ID: u64 = 1;
         const NAME: &'static str = "opaque";
         const REQUEST_LIMITS: Limits = LIMITS;
         const RESPONSE_LIMITS: Limits = LIMITS;
     }
-    assert_eq!(generate::<Opaque>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<0>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<1>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<2>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<3>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<4>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<5>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<6>>(), Err(GenerationError::Schema));
+    assert_eq!(generate::<Opaque<7>>(), Err(GenerationError::Complexity));
+    // Root + 4095 children fits: ordinary duplicate-name validation still runs.
+    assert_eq!(generate::<Opaque<8>>(), Err(GenerationError::Schema));
 }
 
 #[cfg(feature = "typescript")]
@@ -429,6 +471,8 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
         json!({"k":"float","bits":16}),
         json!({"k":"tuple"}),
         json!({"k":"enum","variants":[]}),
+        json!({"k":"enum","variants":[{"name":"A","id":1,"value":{"k":"unit"}},{"name":"B","id":2,"value":{"k":"unit"}},{"name":"A","id":3,"value":{"k":"unit"}}]}),
+        json!({"k":"enum","variants":[{"name":"A","id":1,"value":{"k":"unit"}},{"name":"B","id":2,"value":{"k":"unit"}},{"name":"C","id":1,"value":{"k":"unit"}}]}),
         json!({"k":"record","fields":[{"name":"x","value":{"k":"unit"}},{"name":"x","value":{"k":"unit"}}]}),
     ] {
         let invalid = BTreeMap::from([("Atom".into(), node)]);

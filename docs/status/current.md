@@ -2,55 +2,58 @@
 
 ## Current batch
 
-Released 0.5.14 (`42ecc9b`) is the baseline. Pending 0.5.15 rejects `as` as a
-TypeScript registry declaration name and rejects non-string scalar-check
-annotations. The existing shared declaration-name
-check now returns `GenerationError::Schema` for that name, rather than producing
-`export type as = ...`, which TypeScript rejects. Escaped field and variant
-names are unaffected; runtime behavior and wire bytes are unchanged.
+Released 0.5.15 (`39535ba`) is the baseline. Pending 0.5.16 includes generator
+validation cleanup and a measured native borrowed-buffer optimization.
+Protocol bytes, identities, limits and malformed-input acceptance are unchanged.
+Package versions, staging and Git refs remain untouched; releases are maintainer-owned.
 
-The regression extends the existing invalid-name tests for both registry types
-and method declarations. Package versions, staging and Git refs remain untouched;
-ordinary agent work does not release.
+Native metadata duplicate checks use ordered sets rather than repeated prefix
+scans. Finite projection shares name/tag validation, checks adjacent record IDs,
+and refuses oversized enum variant lists before copying/sorting them.
 
-Scalar-check validation now requires a string name on every schema node, including
-named references and nested values. Null, numeric, boolean, array and object
-annotations return `GenerationError::Schema`; named consumer validators remain
-accepted. This changes generator admission only, without adding runtime checks.
+The canonical comparator now recognizes identical input regions on native hosts,
+as it already did on Wasm. It checks allowance/length first, then avoids comparing
+a slice with itself. Other regions still receive exact content comparison.
+Borrowed 4 KiB decode improves about 65%; 1 MiB decode falls from about 9.8 us to
+14 ns in paired native runs. These timings exclude processing/hashing the decoded
+blob and do not imply additional Wasm or IC instruction savings.
 
-## Qualification
+Consumer layout experiments remain unadopted. Compact enum IDs save two bytes in
+the example; mandatory/fixed-length keys save one byte but change valid values.
+Fixed-key decoding regresses about 24–25% in the experiment. The probe uses new
+identities and inline byte/cutover descriptions for incompatible layouts. No
+consumer schema or automatic migration is changed. Generic single-pass canonical
+decoding is not implemented: varint minimality alone cannot cover normalized maps
+or arbitrary Serde semantics.
 
-The invalid type declaration was independently reproduced with the installed
-TypeScript 7.0.2 compiler (`TS1005`). Other contextual names were probed without
-broadening the refusal list beyond the demonstrated failure. Local probe files
-and the focused-check log are under `/tmp/ic-wire-0515/`.
+## Evidence and qualification
 
-The malformed scalar-check regression failed against the prior generator, which
-returned source containing `check:null`. It now passes for five invalid annotation
-types across leaf, reference and nested schemas. Before/after check logs are in
-`/tmp/ic-wire-0515-checks/`.
+[Generator results](../performance.md#typescript-generator-comparisons) show
+82–89% gains for 1,024-entry registries; small controls vary from 7% faster to 5%
+slower. Those timings do not cover finite-projection/refusal changes. All 149
+generated TypeScript files were unchanged against the released generator.
 
-Focused TypeScript qualification passes: 32 Rust runtime/borrowed tests, strict
-all-target feature Clippy, Rust 1.91 generator compilation, strict TypeScript,
-146 Rust vectors, 29,560 differential mutations and 1 MiB frame boundaries.
-Formatting, documentation links and whitespace checks pass. Full CI, hosted
-macOS and installed consumer checks were not run for this batch.
+[Protocol/layout study](../protocol-study.md) records canonical stage timings,
+small/owned/integer controls, frame identities and the reproducible isolated
+runner. Exploratory evidence is in `/tmp/ic-wire-protocol-study/`; confirmation
+builds and samples are in `/tmp/ic-wire-protocol-confirm/`. Baseline/candidate
+builds use the same working-tree dependency lockfile; its independently arriving
+edit was preserved. No universal speedup is claimed; integer controls include a
+5% regression in one run and a 1% improvement in the other.
+
+Focused Rust runtime, borrowed and native tests pass. The TypeScript gate passes
+32 runtime/borrowed tests, strict feature Clippy, Rust 1.91 compilation, strict
+TypeScript, 146 vectors, 29,560 differential mutations and 1 MiB boundaries.
+The probe asserts raw Postcard's acceptance and Wire's rejection of a nonminimal
+integer. The isolated runner compiled both variants and compared all frame files.
+Full CI, hosted macOS and installed consumer checks were not run for this batch.
 
 ## Retained decisions
 
-Production remains bounded Postcard; JSON is optional generation/tooling metadata.
-Canonical bytes, exact retries, typed errors and pre-allocation bounds remain
-unchanged. Generated metadata and scalar validators remain trusted declarations.
-
-Released small-integer and enum-tag optimizations remain selected. Wide integers,
-length prefixes and method identities retain bigint handling. The 0.5.14 explicit
-Uint8Array copy preserves decoded-byte ownership for Node Buffer inputs.
-
-Short-length fast paths, text scanning, direct frame text encoding and bounded
-writer growth remain rejected following measured regressions. Historical evidence
-and retained script locations stay in [evaluation](../evaluation.md).
-
-Fresh Rust allocation and scratch reuse retain their separately qualified paths.
-Shared Tooling is 0.25.9. IC Build's release editor remains 0.63.0 with `cli`.
-Dependency selections are unchanged. Staging, commits, versions, releases and
-publication remain maintainer-owned.
+AGENTS.md requires benchmark reporting for cost changes and inline old/new behavior
+plus compatibility notes for protocol changes. Production remains bounded Postcard;
+JSON is generation/tooling metadata. Exact retries and canonical hashing remain.
+Generated metadata and scalar validators remain trusted declarations.
+Small-integer/enum-tag optimizations and Node Buffer byte ownership remain selected.
+Rejected runtime experiments remain documented in [evaluation](../evaluation.md).
+Shared Tooling is 0.25.9; IC Build's release editor is 0.63.0 with `cli`.

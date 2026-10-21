@@ -214,20 +214,21 @@ pub(super) fn ty(
                 return Err(GenerationError::Schema);
             }
             let mut rendered = Vec::new();
-            for (index, field) in fields.iter().enumerate() {
+            let mut names = BTreeSet::new();
+            let mut ids = BTreeSet::new();
+            for field in fields {
                 let name = text(field, "name")?;
-                if fields[..index]
-                    .iter()
-                    .any(|f| f["name"] == name || (is_enum && f["id"] == field["id"]))
-                {
+                if !names.insert(name) {
                     return Err(GenerationError::Schema);
                 }
-                if is_enum
-                    && field["id"]
+                if is_enum {
+                    let id = field["id"]
                         .as_u64()
-                        .is_none_or(|id| id > u64::from(u32::MAX))
-                {
-                    return Err(GenerationError::Schema);
+                        .filter(|id| *id <= u64::from(u32::MAX))
+                        .ok_or(GenerationError::Schema)?;
+                    if !ids.insert(id) {
+                        return Err(GenerationError::Schema);
+                    }
                 }
                 let item = child(&field["value"])?;
                 rendered.push(if is_enum {
@@ -318,11 +319,12 @@ pub fn generate_registry(
         "const types = JSON.parse({});\n",
         json!(json!(types).to_string())
     ));
-    for (index, method) in methods.iter().enumerate() {
+    let mut names = BTreeSet::new();
+    for method in methods {
         let name = text(method, "name")?;
         identifier(name)?;
         if types.contains_key(name)
-            || methods[..index].iter().any(|m| m["name"] == name)
+            || !names.insert(name)
             || !matches!(text(method, "mode")?, "query" | "update")
             || text(method, "id")?.parse::<u64>().is_err()
         {

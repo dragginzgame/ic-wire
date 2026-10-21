@@ -226,11 +226,10 @@ impl Flavor for Compare<'_> {
             // Wasm's bytewise memcmp is expensive for bulk byte/text payloads.
             // Exact unaligned word loads preserve canonical equality; no hash or
             // scratch allocation is involved. Small scalar writes stay simple.
-            self.equal &= if cfg!(any(target_arch = "wasm32", test))
-                && core::ptr::eq(prefix.as_ptr(), bytes.as_ptr())
-            {
+            self.equal &= if core::ptr::eq(prefix.as_ptr(), bytes.as_ptr()) {
                 // Borrowed decoding can serialize the exact input region.
                 // Its length and allowance were checked above; equality needs no scan.
+                // Apply on every host: canonical bytes and rejection rules are unchanged.
                 true
             } else if cfg!(any(target_arch = "wasm32", test)) && bytes.len() >= 8 {
                 if bytes.len() >= 64 {

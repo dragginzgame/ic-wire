@@ -58,6 +58,23 @@ profile, input identity and all codec parameters with measurements. Distinguish
 native time, IC instructions, linked code size and compressed deployment size.
 Do not turn symbol attribution into a savings claim.
 
+For changes affecting runtime or generator cost, include a reproducible before/after
+benchmark in the handoff. Measure the affected path against an identified baseline
+with identical inputs, dependencies and settings; include small-input controls,
+repeated samples, absolute results, percentage changes and regressions. Keep the
+runner and evidence reproducible, and label host generation, native codec time,
+IC instructions and artifact sizes separately. If measurement is blocked or not
+applicable, state why; never substitute an asymptotic claim for measured savings.
+Documentation-only changes do not require benchmarks.
+
+Every protocol-affecting change must include an inline explanation beside the
+changed encoding/decoding or contract logic: the old and new behavior, wire-byte
+or acceptance-rule difference, and compatibility/consumer action. Also summarize
+that change in the changelog and final handoff, with a concrete before/after byte
+or schema example when applicable. Cover framing, identities, payload encodings,
+canonicalization, hashing, limits and malformed-input acceptance; explicitly state
+when a batch leaves the protocol unchanged. Preserve the pre-1.0 rules below.
+
 Keep limits checked before allocation, malformed-input failures typed, and
 wire identity independent of incidental Rust declaration order. Preserve exact
 retry bytes and canonical hashing semantics. The maintained pre-1.0 contract
