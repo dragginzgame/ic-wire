@@ -396,7 +396,21 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
         generate_registry(&types, std::slice::from_ref(&method), "./native-runtime.js").unwrap();
     assert!(source.contains("\\\"check\\\":\\\"decimal\\\""));
     assert!(source.contains("export type Atom = string;"));
-    for name in ["bad-name", "default", "string", "createCodec", "JSON"] {
+    for check in [json!(null), json!(7), json!(true), json!([]), json!({})] {
+        for node in [
+            json!({"k":"text","check":check}),
+            json!({"k":"ref","name":"Atom","check":check}),
+            json!({"k":"list","item":{"k":"unit","check":check}}),
+        ] {
+            let mut invalid = method.clone();
+            invalid["request"] = node;
+            assert_eq!(
+                generate_registry(&types, &[invalid], "./runtime.js"),
+                Err(GenerationError::Schema)
+            );
+        }
+    }
+    for name in ["bad-name", "default", "as", "string", "createCodec", "JSON"] {
         let mut invalid = method.clone();
         invalid["name"] = json!(name);
         assert_eq!(

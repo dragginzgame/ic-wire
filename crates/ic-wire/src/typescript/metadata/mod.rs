@@ -16,6 +16,7 @@ fn identifier(name: &str) -> Result<(), GenerationError> {
             .enumerate()
             .all(|(i, b)| b.is_ascii_alphabetic() || b == b'_' || (i > 0 && b.is_ascii_digit()))
         || [
+            "as",
             "break",
             "case",
             "catch",
@@ -102,6 +103,9 @@ pub(super) fn ty(
     }
     *remaining -= 1;
     let kind = text(value, "k")?;
+    if value.get("check").is_some_and(|check| !check.is_string()) {
+        return Err(GenerationError::Schema);
+    }
     if matches!(kind, "bytes" | "text" | "list" | "array") {
         let bound = |key| -> Result<Option<u64>, GenerationError> {
             value
@@ -290,7 +294,8 @@ fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationErr
 /// integer range. Arrays require `max`; byte `min` cannot exceed `max`.
 /// Integer bounds must also be integral and within JavaScript's exact integer
 /// range; use a named consumer check for wider bigint constraints. Numeric bounds
-/// cannot be inverted. Other custom scalar constraints remain consumer-owned.
+/// cannot be inverted. A `check` annotation must be a string naming a consumer
+/// validator. Other custom scalar constraints remain consumer-owned.
 pub fn generate_registry(
     types: &BTreeMap<String, Value>,
     methods: &[Value],

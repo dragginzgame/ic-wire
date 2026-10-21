@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.15]
+
+- Reject non-string scalar-check annotations during TypeScript generation,
+  including annotations on named references and nested values.
+- Reject `as` as a TypeScript registry declaration name during generation,
+  returning a schema error instead of emitting source that fails to compile.
+
 ## [0.5.14] - 2026-10-21
 
 - Fix TypeScript byte decoding from Node Buffer inputs to return owned storage,
