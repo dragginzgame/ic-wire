@@ -2,28 +2,32 @@
 
 ## Current batch
 
-Released 0.5.9 (`007b3f4`) is the integration baseline. PR #15 refreshes the small finite
-schema reservation proposal (#14). Fresh encoders request the full
-admitted ceiling when it is at most 128 bytes, before initializing the header.
-Larger ceilings and scratch reuse keep their existing reservation policy.
-Tiny values under small schemas may retain up to 64 additional requested bytes.
-Wire identity, single-pass serialization and typed failures remain unchanged.
-Package versions are unchanged; pending notes target 0.5.10. Merge and release
-remain maintainer-owned. The separate TypeScript growth experiment is unrelated.
+Released 0.5.9 (`007b3f4`) is the integration baseline. PR #16 adopts Shared Tooling 0.25.9
+release retry protection at reviewed revision
+`85aded191d85ac4a8c0e5deab207f6be18895862`. A committed but undelivered release
+preparation refuses a second increment and preserves its saved plan and evidence.
+Package versions and dependency selections remain unchanged. The PR is refreshed
+against main after PR #15 merged at `babd05d`. Pending 0.5.10 notes preserve
+both changes. The maintainer has authorized merging PR #16 after its checks pass;
+release delivery remains maintainer-owned.
 
 ## Qualification
 
-The new regression fails on released 0.5.8 and passes with the fix. Focused
-library/runtime/native/borrowed tests pass on Rust 1.99.1 and 1.91, as do strict
-all-target/all-feature Clippy and Rust 1.91 Wasm compilation. The regression
-checks fresh initialization, byte parity and warmed scratch stability.
-Existing checks retain oversized output and allocation-failure identities.
+The refreshed PR passes snapshot integrity (104 files, exact 0.25.9 revision),
+documentation links, disposable consumer Make/release routing and the disposable
+release integration fixture. These checks execute release effects only inside
+fixture repositories. Existing prepared tool binaries were reused read-only.
+No full local CI, actual release, package publication or consumer suite ran.
+Hosted checks must qualify the refreshed PR commit independently of earlier runs.
 
-Matched native and isolated IC measurements are recorded in
-[evaluation](../evaluation.md#small-finite-schema-reservation). Raw probes, locks,
-compiler outputs and runs remain under `/tmp/ic-wire-pr15-probe/`.
-No full local CI or sibling suites ran. Hosted checks must qualify the refreshed
-PR commit independently of the original PR's green checks.
+The merged small-frame optimization reserves fresh ceilings up to 128 bytes;
+larger ceilings and scratch reuse retain their existing policy. Its 37 focused
+tests and three-platform PR CI passed before merge. The measured 18–26% IC
+instruction reduction applies to affected small fresh frames; exact frames are
+unchanged. See [evaluation](../evaluation.md#small-finite-schema-reservation)
+for native/IC results, size and retained-capacity tradeoffs. External raw probes
+remain under `/tmp/ic-wire-pr15-probe/`. The TypeScript growth experiment was
+rejected separately and remains documented in the same evaluation guide.
 
 ## Retained decisions
 
@@ -41,6 +45,7 @@ retains byte parity, capacity/retry tradeoffs and measured evidence.
 Caller-owned scratch capacity may outlive large messages; retain immutable retry
 bytes independently. Rejected experiments remain in [evaluation](../evaluation.md).
 
-Shared Tooling remains 0.25.8. IC Build's release editor remains 0.63.0 with `cli`.
-Shared snapshots, dependency selection and Rust runtime encoding are unchanged.
+Shared Tooling is 0.25.9 in this PR. IC Build's release editor remains 0.63.0 with `cli`.
+Only the reviewed release-tooling snapshot changes in PR #16; dependency
+selection and Rust runtime encoding remain unchanged.
 Staging, commits, versions, releases and publication remain maintainer-owned.
