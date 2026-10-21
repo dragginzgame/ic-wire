@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.13]
+## [0.5.13] - 2026-10-21
 
 - Reuse number-based varints for TypeScript enum tags, preserving canonical u32
   IDs and malformed-input refusal without changing the wire format or public API.
