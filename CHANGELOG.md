@@ -1,10 +1,15 @@
 # Changelog
 
-## [0.5.9]
+## [0.5.10]
 
 - Reserve finite output ceilings up to 128 bytes before writing the header,
   avoiding a second reservation for small control messages crossing 64 bytes.
   Tiny values may retain up to 64 additional requested bytes. Fixes #14.
+
+## [0.5.9] - 2026-10-21
+
+- Record the TypeScript bounded-growth writer experiment: large frame allowances
+  benefit, but tight blob/array regressions leave the existing writer unchanged.
 
 ## [0.5.8] - 2026-10-21
 

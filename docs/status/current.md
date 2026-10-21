@@ -2,13 +2,13 @@
 
 ## Current batch
 
-Released 0.5.8 (`1894d0a`) is the baseline. PR #15 refreshes the small finite
+Released 0.5.9 (`007b3f4`) is the integration baseline. PR #15 refreshes the small finite
 schema reservation proposal (#14). Fresh encoders request the full
 admitted ceiling when it is at most 128 bytes, before initializing the header.
 Larger ceilings and scratch reuse keep their existing reservation policy.
 Tiny values under small schemas may retain up to 64 additional requested bytes.
 Wire identity, single-pass serialization and typed failures remain unchanged.
-Package versions are unchanged; pending notes target 0.5.9. Merge and release
+Package versions are unchanged; pending notes target 0.5.10. Merge and release
 remain maintainer-owned. The separate TypeScript growth experiment is unrelated.
 
 ## Qualification
