@@ -1,0 +1,13 @@
+--- contract/mod.rs
++++ contract/mod.rs
+@@ -111,7 +111,9 @@
+         if required > bytes.capacity() {
+             // Once a message is substantial relative to its ceiling, reserve
+             // the remainder to avoid repeated copies of large batch payloads.
+-            let capacity = if required > self.output.limit / 4 {
++            let capacity = if additional >= 4096 {
++                required
++            } else if required > self.output.limit / 4 {
+                 self.output.limit
+             } else {
+                 required

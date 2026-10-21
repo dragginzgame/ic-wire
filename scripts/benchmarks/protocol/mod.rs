@@ -1,4 +1,5 @@
 //! Isolated native layout/canonical verification probe; see docs/protocol-study.md.
+mod native_views;
 use ic_wire::{Bytes, BytesRef, Limits, List, Method, Wire};
 use serde::Deserialize;
 use std::{hint::black_box, marker::PhantomData, time::Instant};
@@ -105,12 +106,25 @@ fn run<T: Wire + for<'de> Deserialize<'de>, const ID: u64>(name: &str, value: &T
     let frame = ic_wire::encode_request::<Contract<T, ID>>(value).unwrap();
     std::fs::write(format!("{dir}/{name}.bin"), frame.as_bytes()).unwrap();
     measure::<T, ID>(name, value, frame.as_bytes());
+    std::fs::write(
+        format!("{dir}/{name}.capacity"),
+        format!(
+            "{},{}",
+            frame.as_bytes().len(),
+            frame.into_bytes().capacity()
+        ),
+    )
+    .unwrap();
 }
 
 fn main() {
     let directory = std::env::args()
         .nth(1)
         .expect("existing frame output directory");
+    if std::env::var_os("IC_WIRE_NATIVE_VIEWS_ONLY").is_some() {
+        native_views::run(&directory);
+        return;
+    }
     // Experimental cut: a variable-length key constrained by convention to 32
     // bytes becomes an exact [u8;32], dropping prefix 20. Other lengths cease to
     // be valid. New contract ID required; no automatic conversion/retry migration.
@@ -131,7 +145,16 @@ fn main() {
         &List::<u32, 1024>::new(vec![u32::MAX; 1024]).unwrap(),
         &directory,
     );
-    for size in [0, 32, 4096, 1048576] {
+    for count in [4, 16] {
+        let chunks = List::<Bytes<65536>, 16>::new(
+            (0..count)
+                .map(|_| Bytes::new(vec![42; 65536]).unwrap())
+                .collect(),
+        )
+        .unwrap();
+        run::<_, 10>(&format!("chunks_{count}"), &chunks, &directory);
+    }
+    for size in [0, 32, 4096, 262128, 262144, 524288, 1048576] {
         let owned = Bytes::<1048576>::new(vec![42; size]).unwrap();
         run::<_, 8>(&format!("blob_owned_{size}"), &owned, &directory);
         let frame = ic_wire::encode_request::<Contract<Bytes<1048576>, 8>>(&owned).unwrap();

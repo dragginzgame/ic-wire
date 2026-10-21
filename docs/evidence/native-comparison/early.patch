@@ -1,0 +1,18 @@
+--- contract/mod.rs
++++ contract/mod.rs
+@@ -231,13 +231,11 @@
+                 // Its length and allowance were checked above; equality needs no scan.
+                 // Apply on every host: canonical bytes and rejection rules are unchanged.
+                 true
+-            } else if cfg!(any(target_arch = "wasm32", test)) && bytes.len() >= 8 {
++            } else if bytes.len() >= 8 {
+                 if bytes.len() >= 64 {
+                     let (left, left_tail) = prefix.as_chunks::<16>();
+                     let (right, right_tail) = bytes.as_chunks::<16>();
+-                    left.iter().zip(right).fold(0_u128, |difference, (a, b)| {
+-                        difference | (u128::from_ne_bytes(*a) ^ u128::from_ne_bytes(*b))
+-                    }) == 0
++                    left.iter().zip(right).all(|(a, b)| a == b)
+                         && left_tail == right_tail
+                 } else {
+                     let (left, left_tail) = prefix.as_chunks::<8>();

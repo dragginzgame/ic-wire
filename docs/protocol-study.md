@@ -125,3 +125,17 @@ Candidate contract SHA-256 is
 Exploratory builds, three baseline/candidate runs and frame files remain under
 `/tmp/ic-wire-protocol-study/`; the maintained-runner confirmation is under
 `/tmp/ic-wire-protocol-confirm/`.
+
+The follow-up [native comparison experiments](native-comparison-study.md) reject
+word-reduction and early-exit chunk alternatives for owned blobs. The runner's
+optional third argument selects an experimental contract file outside production.
+
+The [bulk-reservation study](bulk-reservation-study.md) extends the probe with
+threshold-sized blobs, chunk lists and returned capacity files. Earlier results
+use the probe hash recorded above (source in revision `24c1250`); use that probe
+version for exact reproduction rather than attributing newer measurements to it.
+
+The [native borrowed-view study](native-views-study.md) adds public native API
+measurements with a full byte scan and multi-field text projections. Select it
+with `IC_WIRE_NATIVE_VIEWS_ONLY=1`; its source identities and evidence are retained
+separately from the original finite-codec measurements above.

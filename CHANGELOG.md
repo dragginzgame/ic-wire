@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.17]
+
+- Qualify native borrowed bytes/text with decode-plus-scan measurements and
+  consumer applicability notes; preserve the existing protocol and runtime.
+
+- Measure exact/headroom bulk reservations, including threshold and multi-chunk
+  cases; retain current growth after observing capacity and timing tradeoffs.
+
+- Evaluate and reject native word-reduction and early-exit canonical comparisons
+  after repeated owned-blob regressions; preserve the released comparator.
+- Allow isolated benchmark candidates from external files and retain their patches,
+  paired timings and unchanged-frame checks.
+
 ## [0.5.16] - 2026-10-21
 
 - Skip redundant canonical byte comparisons for borrowed data on native hosts,
