@@ -48,6 +48,23 @@ for (const value of [{}, {some:null,extra:1}]) rejects(() => probe({k:'option',i
 rejects(() => probe({k:'result',ok:{k:'unit'},err:{k:'unit'}}).encodeRequest({ok:null,err:null}), 'value');
 rejects(() => probe({k:'record',fields:[]}).encodeRequest({extra:1}), 'value');
 rejects(() => probe({k:'enum',variants:[]}).encodeRequest({tag:'Unknown',value:null}), 'value');
+// Numeric integer metadata bounds apply exactly, including to bigint payloads.
+for (const kind of ['u','i']) for (const bits of [8,16,32,64,128]) {
+  const raw = probe({k:kind,bits});
+  const bounded = probe({k:kind,bits,min:1,max:2});
+  const value = n => bits > 32 ? BigInt(n) : n;
+  for (const n of [1,2]) {
+    const bytes = bounded.encodeRequest(value(n));
+    assert.deepEqual(bytes,raw.encodeRequest(value(n)));
+    assert.equal(bounded.decodeRequest(bytes),value(n));
+  }
+  for (const n of [0,3]) {
+    rejects(() => bounded.encodeRequest(value(n)),'value');
+    rejects(() => bounded.decodeRequest(raw.encodeRequest(value(n))),'malformed');
+    rejects(() => bounded.encodeResponse(value(n)),'value');
+    rejects(() => bounded.decodeResponse(raw.encodeResponse(value(n))),'malformed');
+  }
+}
 console.log('Hostile-input and outgoing-value rejection checks passed');
 
 for (const bits of [32,64]) {
@@ -61,6 +78,64 @@ for (const bits of [32,64]) {
   }
 }
 for (const value of [0.1, Number.MAX_VALUE, Number.MIN_VALUE]) rejects(() => probe({k:'float',bits:32}).encodeRequest(value), 'value');
+// Explicit float bounds apply in both directions, including their endpoints.
+for (const bits of [32,64]) {
+  const raw = probe({k:'float',bits});
+  const bounded = probe({k:'float',bits,min:0,max:1});
+  for (const value of [-0,0,0.5,1]) {
+    const bytes = bounded.encodeRequest(value);
+    assert.deepEqual(bytes,raw.encodeRequest(value));
+    assert.ok(Object.is(bounded.decodeRequest(bytes),value));
+  }
+  for (const value of [-1,2]) {
+    rejects(() => bounded.encodeRequest(value),'value');
+    rejects(() => bounded.decodeRequest(raw.encodeRequest(value)),'malformed');
+    rejects(() => bounded.encodeResponse(value),'value');
+    rejects(() => bounded.decodeResponse(raw.encodeResponse(value)),'malformed');
+  }
+  const schema = {k:'float',bits};
+  const exact = {id:'1',request:schema,response:schema,requestBytes:11+bits/8,responseBytes:11+bits/8,requestNodes:1,responseNodes:1,requestDepth:1,responseDepth:1};
+  assert.equal(createCodec(exact).encodeRequest(0.5).length,11+bits/8);
+  rejects(() => createCodec({...exact,requestBytes:10+bits/8}).encodeRequest(0.5),'limit');
+}
+// Encoding float arrays needs only the writer's explicit buffer/view allocation.
+// The final slice still allocates independent returned storage.
+{
+  const ArrayType = globalThis.Uint8Array, ViewType = globalThis.DataView;
+  let arrays = 0, views = 0;
+  try {
+    globalThis.Uint8Array = new Proxy(ArrayType, {construct(target, args) { arrays++; return Reflect.construct(target,args); }});
+    globalThis.DataView = new Proxy(ViewType, {construct(target, args) { views++; return Reflect.construct(target,args); }});
+    probe({k:'array',max:4,item:{k:'float',bits:64}}).encodeRequest([0,0.5,-0,1]);
+    assert.equal(arrays,1);
+    assert.equal(views,1);
+  } finally {
+    globalThis.Uint8Array = ArrayType;
+    globalThis.DataView = ViewType;
+  }
+}
+// Float decoding shares the header view, including offset-backed input.
+for (const bits of [32,64]) {
+  const codec = probe({k:'array',max:4,item:{k:'float',bits}});
+  const values = [0,0.5,-0,1];
+  const bytes = codec.encodeRequest(values);
+  const backing = new Uint8Array(bytes.length+8);
+  backing.set(bytes,3);
+  const input = backing.subarray(3,3+bytes.length);
+  const ViewType = globalThis.DataView, subarray = Uint8Array.prototype.subarray;
+  let views = 0, slices = 0;
+  try {
+    globalThis.DataView = new Proxy(ViewType, {construct(target,args) { views++; return Reflect.construct(target,args); }});
+    Uint8Array.prototype.subarray = function(...args) { slices++; return subarray.apply(this,args); };
+    assert.deepEqual(codec.decodeRequest(input),values);
+    assert.equal(views,1);
+    assert.equal(slices,0);
+  } finally {
+    globalThis.DataView = ViewType;
+    Uint8Array.prototype.subarray = subarray;
+  }
+  for (let end = 11; end < bytes.length; end++) rejects(() => codec.decodeRequest(bytes.slice(0,end)),'malformed');
+}
 console.log('Finite-float canonical bits and rejection checks passed');
 
 // Native Serde consumers supply concrete recursive metadata and explicit traversal

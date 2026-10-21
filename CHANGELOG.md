@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.8]
+
+- Enforce declared TypeScript float bounds when encoding and decoding, and
+  reject malformed or inverted numeric bounds during registry generation.
+  Integer bounds outside JavaScript’s exact range are refused before rounding.
+- Encode and decode TypeScript floats through shared frame views, avoiding
+  temporary byte arrays and views per value while preserving exact frames,
+  buffer offsets and limits.
+- Correct the packaged dependency example to select the current 0.5 API.
+
 ## [0.5.7] - 2026-10-21
 
 - Adopt IC Tooling 0.63.0 for diagnostic builds and the release metadata editor.

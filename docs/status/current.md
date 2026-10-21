@@ -2,47 +2,55 @@
 
 ## Current batch
 
-Released 0.5.6 (`3a6efba`) is the baseline. Pending 0.5.7 avoids repeated
-TypeScript registry enumeration and rejects malformed optional collection bounds.
-It also adopts published IC Tooling 0.63.0: the private diagnostic fixture uses
-IC Build with defaults disabled, resolving Host Artifacts/FS/Process 0.63.0.
-The separately installed release editor is pinned to 0.63.0 with `--features cli`.
-The adoption was reviewed against IC Tooling release `c342bb28`; sibling dirty
-work was not used. No Testkit or new runtime dependency was added.
+Released 0.5.7 (`32a343a`) is the baseline. Pending 0.5.8 fixes TypeScript float
+metadata bounds and removes per-float encoding/decoding scratch allocations. The packaged
+README now recommends `ic-wire = "0.5"`, matching the documented API.
 Package versions, index and Git refs remain untouched.
 
-Alias resolution lazily computes the registry size once per encode/decode
-operation using the existing traversal budget. It still traverses each alias
-and runs reference/concrete validators in the original order. Separate calls
-observe registry changes; missing references and cycles remain typed failures.
-No global registry cache or new public option was introduced.
+Float `min`/`max` metadata is now enforced inclusively on both encode and decode.
+Out-of-range outgoing values fail with `value`; incoming values fail with
+`malformed`. Registry generation refuses nonnumeric or inverted bounds with
+`GenerationError::Schema`. Existing finite-number and exact f32 admission remain,
+including preservation of negative zero. Consumer callbacks still run normally.
+Integer and float metadata bounds now share validation. Integer bounds must be
+integral and within ±9,007,199,254,740,991, preventing JavaScript rounding before
+BigInt conversion. Wider constraints use named consumer checks; bigint payload
+ranges are unchanged. Invalid shapes/inversion return `Schema`; out-of-exact-range
+integer bounds return `Complexity`.
 
-Collection bounds use one generator validation path. `max` is required for
-arrays and optional for lists/bytes/text. Present bounds must be non-negative
-integers within JavaScript's exact range. Optional byte `min` is validated too,
-and cannot exceed `max`. Invalid shape/ranges return `Schema`; integers outside
-the exact range return `Complexity`. Custom scalar checks remain consumer-owned.
+The writer retains its existing header DataView and writes float bytes directly
+into the admitted output buffer. It checks remaining bytes before writing.
+A four-f64 probe retains the identical 43-byte frame while explicit Uint8Array
+constructions fall from five to one and DataView constructions from five to one.
+The returned slice still allocates independent storage. These are constructor
+counts, not measured execution time, peak memory or deployment-size savings.
+The reader also shares the envelope DataView: four floats need one view instead
+of five and no per-float subarrays. Input byte offsets remain respected, and
+remaining input is checked before each read.
 
 ## Qualification
 
-Focused Linux checks pass: 29 feature-enabled Rust runtime/borrowed tests,
-strict Clippy, Rust 1.91 generator compilation, 90 Rust/TypeScript vectors,
-17,524 differential mutations and 1 MiB boundaries. The new bounds regression
-failed before the fix and passes afterward. The registry fixture encodes and
-decodes 100 referenced values with 1,000 registered types, asserting one registry
-enumeration per operation, with mutation/cycle and existing validator checks.
-This is operation-count evidence, not a browser timing or IC instruction claim.
-IC Tooling adoption also passes 16 expected diagnostics plus the valid control,
-evaluation tests, strict evaluation Clippy and Rust 1.91 checks. The selected
-0.63.0 editor passes offline admission and disposable release/Make fixtures.
+Focused Linux checks pass: 31 feature-enabled Rust runtime/borrowed tests, strict
+Clippy, Rust 1.91 generator compilation, 90 Rust/TypeScript vectors, 17,524
+differential mutations and 1 MiB boundaries. The float-bound regression failed
+before the fix and passes afterward. New checks cover both widths and directions,
+inclusive endpoints, negative zero, exact/insufficient frame allowance, malformed
+metadata and absence of per-float explicit buffer/view construction. Decoder
+checks cover both widths, nonzero frame offsets and every payload truncation.
+Integer-bound checks cover both signs, all five widths, both directions, inclusive
+endpoints, invalid metadata and exact-range limits. The new generator regression
+failed before the correction.
+Sources and local check output are in `/tmp/ic-wire-float-058/` and
+`/tmp/ic-wire-reader-058/`; numeric-bound checks are in `/tmp/ic-wire-numeric-058/`.
 Full CI, hosted macOS and installed consumers were not run.
 
 ## Retained decisions
 
-The 0.5.6 release added TypeScript qualification to CI/release gates and fixed
-reserved names, transparent alias cycles and structural method/array budgets.
-Hosted CI prepares pinned Node/npm; local release operators must prepare them
-before offline validation. See [development](../development.md).
+0.5.7 adopted IC Tooling 0.63.0, with the release editor selecting `cli` separately
+from the diagnostic library. It also bounds registry enumeration to once per
+operation and validates optional collection lengths. TypeScript qualification
+runs in CI/release gates; see [development](../development.md) for local Node/npm
+preparation before offline release validation.
 
 Production remains bounded Postcard; JSON is optional generation/tooling metadata.
 Finite scratch reuse shipped in 0.5.5. Fresh encoding remains separate because
@@ -52,5 +60,6 @@ retains byte parity, capacity/retry tradeoffs and measured evidence.
 Caller-owned scratch capacity may outlive large messages; retain immutable retry
 bytes independently. Rejected experiments remain in [evaluation](../evaluation.md).
 
-Shared Tooling remains 0.25.8; its snapshot was not modified. Rust runtime
-encoding and its dependency selection are unchanged. Staging, commits, versions, releases and publication are maintainer-owned.
+Shared Tooling remains 0.25.8. IC Build's release editor remains 0.63.0 with `cli`.
+Shared snapshots, dependency selection and Rust runtime encoding are unchanged.
+Staging, commits, versions, releases and publication remain maintainer-owned.

@@ -127,6 +127,36 @@ pub(super) fn ty(
             return Err(GenerationError::Schema);
         }
     }
+    if matches!(kind, "u" | "i" | "float") {
+        let bound = |key| -> Result<Option<f64>, GenerationError> {
+            value
+                .get(key)
+                .map(|bound| {
+                    let n = bound
+                        .as_f64()
+                        .filter(|n| n.is_finite())
+                        .ok_or(GenerationError::Schema)?;
+                    if kind != "float" {
+                        if n.fract() != 0.0 {
+                            return Err(GenerationError::Schema);
+                        }
+                        // Runtime converts numeric integer bounds to BigInt. Reject
+                        // values that JavaScript would round before that conversion.
+                        if n.abs() > 9_007_199_254_740_991.0 {
+                            return Err(GenerationError::Complexity);
+                        }
+                    }
+                    Ok(n)
+                })
+                .transpose()
+        };
+        if bound("min")?
+            .zip(bound("max")?)
+            .is_some_and(|(min, max)| min > max)
+        {
+            return Err(GenerationError::Schema);
+        }
+    }
     let mut child = |node| ty(node, types, depth + 1, remaining);
     Ok(match kind {
         "ref" => {
@@ -258,7 +288,9 @@ fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationErr
 /// permit recursive values, but alias-only cycles return [`GenerationError::Schema`].
 /// Collection bounds must be non-negative integers within JavaScript's exact
 /// integer range. Arrays require `max`; byte `min` cannot exceed `max`.
-/// Custom scalar constraints remain consumer/runtime-owned.
+/// Integer bounds must also be integral and within JavaScript's exact integer
+/// range; use a named consumer check for wider bigint constraints. Numeric bounds
+/// cannot be inverted. Other custom scalar constraints remain consumer-owned.
 pub fn generate_registry(
     types: &BTreeMap<String, Value>,
     methods: &[Value],

@@ -748,3 +748,100 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
         );
     }
 }
+
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_registry_validates_float_bounds() {
+    use ic_wire::typescript::{GenerationError, generate_registry};
+    use serde_json::{Value, json};
+    use std::collections::BTreeMap;
+    for bits in [32, 64] {
+        for key in ["min", "max"] {
+            for invalid in [Value::Null, json!("1"), json!(true), json!([])] {
+                let mut node = json!({"k":"float","bits":bits});
+                node[key] = invalid;
+                assert_eq!(
+                    generate_registry(
+                        &BTreeMap::from([("Scalar".into(), node)]),
+                        &[],
+                        "./runtime.js"
+                    ),
+                    Err(GenerationError::Schema)
+                );
+            }
+        }
+        for (min, max, valid) in [
+            (0.0, 1.0, true),
+            (0.5, 0.5, true),
+            (-1.0, 1.0, true),
+            (1.0, 0.0, false),
+        ] {
+            let node = json!({"k":"float","bits":bits,"min":min,"max":max});
+            assert_eq!(
+                generate_registry(
+                    &BTreeMap::from([("Scalar".into(), node)]),
+                    &[],
+                    "./runtime.js"
+                )
+                .is_ok(),
+                valid
+            );
+        }
+    }
+}
+
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_registry_validates_integer_bounds_without_precision_loss() {
+    use ic_wire::typescript::{GenerationError, generate_registry};
+    use serde_json::{Value, json};
+    use std::collections::BTreeMap;
+    for kind in ["u", "i"] {
+        for bits in [8, 16, 32, 64, 128] {
+            for key in ["min", "max"] {
+                for (bound, error) in [
+                    (Value::Null, GenerationError::Schema),
+                    (json!("1"), GenerationError::Schema),
+                    (json!(true), GenerationError::Schema),
+                    (json!(1.5), GenerationError::Schema),
+                    (
+                        json!(9_007_199_254_740_993_u64),
+                        GenerationError::Complexity,
+                    ),
+                    (
+                        json!(-9_007_199_254_740_993_i64),
+                        GenerationError::Complexity,
+                    ),
+                ] {
+                    let mut node = json!({"k":kind,"bits":bits});
+                    node[key] = bound;
+                    assert_eq!(
+                        generate_registry(
+                            &BTreeMap::from([("Scalar".into(), node)]),
+                            &[],
+                            "./runtime.js"
+                        ),
+                        Err(error)
+                    );
+                }
+            }
+            for (min, max, valid) in [
+                (0.0, 1.0, true),
+                (1.0, 1.0, true),
+                (-9_007_199_254_740_991.0, 9_007_199_254_740_991.0, true),
+                (2.0, 1.0, false),
+            ] {
+                let node = json!({"k":kind,"bits":bits,"min":min,"max":max});
+                assert_eq!(
+                    generate_registry(
+                        &BTreeMap::from([("Scalar".into(), node)]),
+                        &[],
+                        "./runtime.js"
+                    )
+                    .is_ok(),
+                    valid
+                );
+            }
+        }
+    }
+}

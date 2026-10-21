@@ -384,7 +384,7 @@ packet viewer](https://github.com/dragginzgame/ic-wire/blob/main/docs/consumer-f
 
 ## Package and license
 
-Use the registry dependency `ic-wire = "0.3"`.
+Use the registry dependency `ic-wire = "0.5"`.
 Enable `features = ["typescript"]` only when generating client codecs on the host.
 The runtime supports Rust 1.91 and `wasm32-unknown-unknown`.
 
@@ -502,7 +502,13 @@ SQL semantics, endpoint roster and storage encodings are not imported.
 depth allowances for both directions. Dynamic lengths are checked before copying
 or descending. Missing/cyclic aliases and sparse arrays reject. Concrete nodes
 and named references can name trusted scalar checks that run before encoding and
-after decoding; every check along an alias chain applies.
+after decoding; every check along an alias chain applies. Float metadata can
+supply finite numeric `min`/`max` bounds, inclusive in both directions; the
+generator rejects malformed or inverted bounds. Unbounded finite floats retain
+their existing representation, including negative zero. Integer metadata bounds
+must be integral numbers within ±9,007,199,254,740,991; use named consumer checks
+for wider bigint constraints. This restriction applies to metadata bounds, not
+the supported 64/128-bit integer payload range.
 
 Metadata extraction, domain validation and endpoint identities remain consumer-owned.
 Host generators can pass that normalized registry and method list to
