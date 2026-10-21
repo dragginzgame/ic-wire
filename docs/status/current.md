@@ -2,14 +2,22 @@
 
 ## Current batch
 
-Released 0.5.9 (`007b3f4`) is the integration baseline. PR #16 adopts Shared Tooling 0.25.9
-release retry protection at reviewed revision
-`85aded191d85ac4a8c0e5deab207f6be18895862`. A committed but undelivered release
-preparation refuses a second increment and preserves its saved plan and evidence.
-Package versions and dependency selections remain unchanged. The PR is refreshed
-against main after PR #15 merged at `babd05d`. Pending 0.5.10 notes preserve
-both changes. The maintainer has authorized merging PR #16 after its checks pass;
-release delivery remains maintainer-owned.
+Local main and remote main match at `3d83549`. The local annotated `v0.5.10`
+tag points to `86aa88c`, which includes the small-frame optimization from PR #15
+but predates the tooling adoption from PR #16. The subsequent merge brought that
+tooling change onto main. The remote has no `v0.5.10` tag as of this inspection;
+Git delivery of the release tag remains unconfirmed. Package publication was not
+checked. Do not move the existing tag or infer publication from the branch push.
+
+Pending 0.5.11 notes now contain the tooling adoption. The dated 0.5.10 entry
+matches its local tag's changelog. Package versions remain 0.5.10. This correction
+and handoff are uncommitted; staging, commits, tag delivery and releases remain
+maintainer-owned. Main CI for `3d83549` is pending at this inspection.
+
+Shared Tooling 0.25.9 is present at reviewed revision
+`85aded191d85ac4a8c0e5deab207f6be18895862`. It refuses a second release increment
+past an undelivered committed preparation and preserves the saved evidence.
+Reconcile the existing release delivery before attempting another increment.
 
 ## Qualification
 
@@ -18,7 +26,8 @@ documentation links, disposable consumer Make/release routing and the disposable
 release integration fixture. These checks execute release effects only inside
 fixture repositories. Existing prepared tool binaries were reused read-only.
 No full local CI, actual release, package publication or consumer suite ran.
-Hosted checks must qualify the refreshed PR commit independently of earlier runs.
+All three hosted checks passed on PR #16 head `257a161` before its merge at
+`73ef717`; that result is separate from the current main run.
 
 The merged small-frame optimization reserves fresh ceilings up to 128 bytes;
 larger ceilings and scratch reuse retain their existing policy. Its 37 focused
