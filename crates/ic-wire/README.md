@@ -390,6 +390,22 @@ The runtime supports Rust 1.91 and `wasm32-unknown-unknown`.
 
 Licensed under the MIT License; see the packaged LICENSE.
 
+## Finite scratch-buffer encoding
+
+`encode_request_into::<M>(&value, &mut output)` and
+`encode_response_into::<M>(&value, &mut output)` reuse a caller-owned `Vec<u8>`
+with the same finite schema admission, envelope and byte limits as fresh encoding.
+Use these for scratch work whose previous output can be overwritten. Keep
+`RequestBytes<M>` or independently retained immutable bytes for exact retries;
+copying every scratch result can cost more than fresh encoding.
+
+Both functions clear the buffer before admission. Errors leave it empty and may
+release its allocation; successful calls retain capacity across message sizes.
+Retained capacity can exceed a later method's allowance, but never relaxes that
+method's encoded-length checks. The caller owns the retained memory budget and
+can drop the buffer when a large allocation is no longer useful. Fresh encoding
+continues to return immutable, method-bound frames.
+
 ## Native Serde payloads
 
 `ic_wire::native` handles consumer-owned Serde types, including String, Vec,

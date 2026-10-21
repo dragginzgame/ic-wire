@@ -1,0 +1,7 @@
+profile,variant,linked_wasm_bytes,gzip_bytes
+z,baseline,62748,21954
+z,candidate,63667,22121
+z,string,63658,22137
+speed,baseline,50837,19756
+speed,candidate,51525,19962
+speed,string,51523,19956

@@ -222,6 +222,14 @@ fn all_schema_budgets_precede_decode() {
         Err(Error::SchemaLimit)
     );
     let request = List::new(vec![(); 4]).unwrap();
+    let mut scratch = vec![42; 1024];
+    let capacity = scratch.capacity();
+    assert_eq!(
+        ic_wire::encode_request_into::<Budget<20, 100, 8, 4>>(&request, &mut scratch),
+        Err(Error::SchemaLimit)
+    );
+    assert!(scratch.is_empty());
+    assert_eq!(scratch.capacity(), capacity);
     assert_eq!(
         ic_wire::encoded_request_len::<Budget<20, 100, 8, 4>>(&request),
         Err(Error::SchemaLimit)
@@ -562,6 +570,12 @@ impl Method for AdversarialMethod {
 fn custom_serializer_bounds_and_error_identity() {
     let canonical = encode_request::<AdversarialMethod>(&Adversarial(0)).unwrap();
     for tag in [1, 2, 5] {
+        let mut scratch = vec![42; 1024];
+        assert_eq!(
+            ic_wire::encode_request_into::<AdversarialMethod>(&Adversarial(tag), &mut scratch),
+            Err(Error::Malformed)
+        );
+        assert!(scratch.is_empty());
         assert_eq!(
             ic_wire::encoded_request_len::<AdversarialMethod>(&Adversarial(tag)),
             Err(Error::Malformed)

@@ -2,32 +2,44 @@
 
 ## Current batch
 
-Released 0.5.3 (`d1d9ca2`) is the baseline. Pending 0.5.4 records the incoming
-IC Build diagnostic dependency update from 0.24.0 to 0.62.0, with Host Artifacts,
-FS and Process at 0.62.0. The separate release metadata editor remains pinned to
-0.24.0. This changelog-only batch preserves the manifest and lockfile edits;
-the new dependency selection has not been qualified in this batch.
+Released 0.5.4 (`1e1ea56`) is the baseline. Pending 0.5.5 improves allocation
+benchmark interpretation: `--codec-only` removes the application payload scan,
+while the default retains it. Both modes include canonical checks and destruction;
+constant-time packed-length checks remain. Encode/decode calibration is independent.
+Reports use format 2 with separate repetition counts and a decode-work label.
+The incoming IC Build/Host 0.62.1 lockfile edit was preserved.
 
-Shared Tooling remains 0.25.8 (`0a2d2ee3b5e0ae77755c2915ac28836d4d5ba359`).
-The editor is prepared through `make install-tools` or `make install-release-editor`
-and admitted offline by `make release-editor-check`, retaining the 8 MiB
-per-document allowance. Releases select its path without manual environment setup.
+## Experiments and decisions
 
-## Retained decisions
+An isolated 60-case IC probe measured finite output reuse, retained retry copies,
+owned/borrowed decoding, scan separation and UTF-8 validation before allocation.
+Warm reuse saves 10.5–34.8% encode instructions under opt-3 for tested blob sizes,
+but copying the result for retry retention loses the gain. A 64-case follow-up
+adds mixed-size chunk cycles: reuse saves about 23%, including initially empty
+cycles. Finite `encode_request_into`/`encode_response_into` are now supported.
+The fresh encoder stays intact: matched fresh-case instruction counts are unchanged.
+Callers own retained capacity and must keep exact retry bytes independently.
 
-The 0.5.1 bounded output-growth and 0.5.2 direct-header improvements are released.
-See [header measurements](../evaluation.md#direct-header-initialization).
-Per-type codec preferences and the native pointer-equality candidate were rejected;
-[experimental evidence](../evaluation.md#native-borrowed-pointer-equality-experiment)
-remains historical. No alternate production codec or preference API is supported.
+Both pre-allocation UTF-8 candidates sharply reduce malformed-input work but
+regress small valid strings under opt-3 and grow linked Wasm. Neither was adopted.
+Text decoding remains unchanged. See
+[methodology and complete results](../evaluation.md#finite-reuse-text-validation-and-scan-separation).
+Sources, raw runs, locks and prototypes are retained at `target/reuse-text-scan/`.
 
-Staging, commits, versions, tags, pushes and publication remain maintainer-owned.
+## Qualification
 
-## Previous qualification (IC Build 0.24.0)
+Strict evaluation Clippy, evaluation tests and Rust 1.91 checks pass. Both native
+benchmark modes completed all 44 cases with identical frames and capacities;
+format-2 repetition fields were checked. Isolated reuse tests cover changed
+sizes, borrowed values, frozen retries and failure clearing with spare capacity.
+Runtime tests, strict Clippy, Rust 1.91 host/Wasm checks and documentation links
+also pass for finite scratch APIs. See the
+[follow-up evidence](../evaluation.md#finite-scratch-buffer-follow-up).
+Full CI, macOS and installed-consumer validation were not run.
 
-Evaluation tests, strict evaluation Clippy and Rust 1.91 checks pass. All 16
-compiler diagnostics and the passing control are verified. The disposable release
-fixture passes with the actual 0.24.0 editor, including metadata preparation,
-interrupted delivery, receipt rejection and resume. Offline editor admission,
-snapshot integrity, formatting, dependency boundaries and documentation links pass.
-Full CI and native macOS checks were not run; no real release effects occurred.
+## Retained contract
+
+Production remains bounded Postcard; the released output-growth/header improvements
+remain. Rejected preference and pointer-comparison experiments remain historical.
+Shared Tooling is 0.25.8. The release editor remains separately pinned to IC Build
+0.24.0. Staging, commits, versions, releases and publication remain maintainer-owned.

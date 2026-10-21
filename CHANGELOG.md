@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.5]
+
+- Separate codec-only and application-checksum allocation benchmarks with
+  `--codec-only`, independent encode/decode calibration and labelled format-2
+  reports. Retain measured finite-buffer reuse and pre-allocation UTF-8
+  experiments; text decoding remains unchanged.
+- Add finite `encode_request_into` and `encode_response_into` for reusable
+  scratch buffers, preserving admission, canonical frames and bounded output.
+  Retained retry bytes remain independent of mutable scratch storage.
+
 ## [0.5.4] - 2026-10-20
 
 - Update the diagnostic tooling dependency to IC Build 0.62.0 and its transitive

@@ -81,6 +81,22 @@ checks qualify byte conformance; they do not qualify endpoint authentication,
 certificate verification, installed rollback or browser transport.
 See [consumer fixtures and packet inspection](consumer-fixtures.md).
 
+### Allocation timing modes
+
+`make evaluate-allocation` retains decoding plus the application checksum as the
+default. To isolate codec work, select a fresh output directory:
+
+```sh
+cargo run --locked --profile evaluation -p ic-wire-canister-evaluation --example allocation --features allocation-fixture -- target/allocation-codec evaluation --codec-only
+```
+
+Both modes include canonical validation and result destruction. Codec-only mode
+omits the full payload scan, while retaining constant-time packed-length checks.
+Reports use `format: 2`, label `decode_work`, and record `encode_repetitions` and
+`decode_repetitions` separately; divide each sample column by its own count.
+The old single `repetitions` field is absent. Each operation is calibrated to
+at least 2 ms or the repetition cap. Historical format-1 results remain unchanged.
+
 ### Dependency preparation
 
 Keep `Cargo.lock` selected and use locked builds. Prepare missing dependency

@@ -1,0 +1,5 @@
+profile,variant,linked_wasm_bytes,gzip_9_mtime_0_bytes
+z,baseline,75321,24861
+z,final,75540,24897
+speed,baseline,58203,21979
+speed,final,58223,22010
