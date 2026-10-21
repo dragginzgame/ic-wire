@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.17]
+## [0.5.17] - 2026-10-21
 
 - Qualify native borrowed bytes/text with decode-plus-scan measurements and
   consumer applicability notes; preserve the existing protocol and runtime.
