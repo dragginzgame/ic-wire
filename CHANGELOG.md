@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.7]
+## [0.5.7] - 2026-10-21
 
 - Adopt IC Tooling 0.63.0 for diagnostic builds and the release metadata editor.
   Select the editor's required `cli` feature separately from library consumers.
