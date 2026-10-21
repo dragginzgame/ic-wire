@@ -696,3 +696,55 @@ fn typescript_registry_requires_an_exact_array_length() {
         }
     }
 }
+
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_registry_rejects_invalid_optional_collection_bounds() {
+    use ic_wire::typescript::{GenerationError, generate_registry};
+    use serde_json::{Value, json};
+    use std::collections::BTreeMap;
+    for kind in ["bytes", "text", "list"] {
+        for bound in [
+            Value::Null,
+            json!(-1),
+            json!(1.5),
+            json!("2"),
+            json!(1_u64 << 53),
+        ] {
+            let node = json!({"k":kind,"max":bound,"item":{"k":"unit"}});
+            assert!(
+                generate_registry(
+                    &BTreeMap::from([("Bounded".into(), node)]),
+                    &[],
+                    "./runtime.js"
+                )
+                .is_err()
+            );
+        }
+        for bound in [None, Some(json!(0)), Some(json!(2))] {
+            let mut node = json!({"k":kind,"item":{"k":"unit"}});
+            if let Some(bound) = bound {
+                node["max"] = bound;
+            }
+            assert!(
+                generate_registry(
+                    &BTreeMap::from([("Bounded".into(), node)]),
+                    &[],
+                    "./runtime.js"
+                )
+                .is_ok()
+            );
+        }
+    }
+    for minimum in [Value::Null, json!(-1), json!(1.5), json!("2"), json!(3)] {
+        let node = json!({"k":"bytes","min":minimum,"max":2});
+        assert_eq!(
+            generate_registry(
+                &BTreeMap::from([("Bounded".into(), node)]),
+                &[],
+                "./runtime.js"
+            ),
+            Err(GenerationError::Schema)
+        );
+    }
+}

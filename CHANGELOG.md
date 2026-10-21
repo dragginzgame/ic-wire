@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.7]
+
+- Adopt IC Tooling 0.63.0 for diagnostic builds and the release metadata editor.
+  Select the editor's required `cli` feature separately from library consumers.
+
+- Avoid repeated TypeScript registry enumeration within each codec operation,
+  preserving alias checks and registry changes between calls.
+- Reject invalid optional collection bounds and inverted byte-length bounds
+  during TypeScript generation instead of relying on JavaScript coercion.
+
 ## [0.5.6] - 2026-10-21
 
 - Reject TypeScript registry names that shadow generated JSON handling,

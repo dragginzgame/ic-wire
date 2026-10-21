@@ -101,8 +101,34 @@ pub(super) fn ty(
         return Err(GenerationError::Complexity);
     }
     *remaining -= 1;
+    let kind = text(value, "k")?;
+    if matches!(kind, "bytes" | "text" | "list" | "array") {
+        let bound = |key| -> Result<Option<u64>, GenerationError> {
+            value
+                .get(key)
+                .map(|n| {
+                    let n = n.as_u64().ok_or(GenerationError::Schema)?;
+                    if n > (1_u64 << 53) - 1 {
+                        return Err(GenerationError::Complexity);
+                    }
+                    Ok(n)
+                })
+                .transpose()
+        };
+        let maximum = bound("max")?;
+        if kind == "array" && maximum.is_none() {
+            return Err(GenerationError::Schema);
+        }
+        if kind == "bytes"
+            && bound("min")?
+                .zip(maximum)
+                .is_some_and(|(min, max)| min > max)
+        {
+            return Err(GenerationError::Schema);
+        }
+    }
     let mut child = |node| ty(node, types, depth + 1, remaining);
-    Ok(match text(value, "k")? {
+    Ok(match kind {
         "ref" => {
             let name = text(value, "name")?;
             if !types.contains_key(name) {
@@ -128,16 +154,7 @@ pub(super) fn ty(
             "number".into()
         }
         "newtype" => child(&value["item"])?,
-        "list" | "array" => {
-            // Lists may be dynamically bounded; arrays require an exact length.
-            if value["k"] == "array" {
-                let length = value["max"].as_u64().ok_or(GenerationError::Schema)?;
-                if length > (1_u64 << 53) - 1 {
-                    return Err(GenerationError::Complexity);
-                }
-            }
-            format!("ReadonlyArray<{}>", child(&value["item"])?)
-        }
+        "list" | "array" => format!("ReadonlyArray<{}>", child(&value["item"])?),
         "tuple" => format!(
             "readonly [{}]",
             value["items"]
@@ -239,8 +256,9 @@ fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationErr
 /// fields. Frame allowances must fit the header; node/depth allowances must be
 /// positive. Invalid minimums return [`GenerationError::Limits`]. Named references
 /// permit recursive values, but alias-only cycles return [`GenerationError::Schema`].
-/// Fixed arrays require a non-negative integer `max` within JavaScript's exact
-/// integer range. Custom constraints remain consumer/runtime-owned.
+/// Collection bounds must be non-negative integers within JavaScript's exact
+/// integer range. Arrays require `max`; byte `min` cannot exceed `max`.
+/// Custom scalar constraints remain consumer/runtime-owned.
 pub fn generate_registry(
     types: &BTreeMap<String, Value>,
     methods: &[Value],

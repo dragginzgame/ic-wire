@@ -32,14 +32,16 @@ function object(value: unknown, keys: readonly string[]): Record<string, unknown
   return value as Record<string, unknown>;
 }
 class Budget {
+  private registrySize?: number;
   constructor(public remaining: number, readonly depth: number) {}
   visit(depth: number) { if (--this.remaining < 0 || depth > this.depth) fail('limit'); }
   length(length: number) { if (length > this.remaining) fail('limit'); }
+  aliasLimit(types: Types): number { return this.registrySize ??= Object.keys(types).length; }
 }
 // Resolve aliases without spending a value node, but refuse missing or cyclic
 // aliases. Recursive values must pass through a concrete node and its budget.
-function resolve(schema: Schema, types: Types, visit?: (schema: Schema) => void): Schema {
-  let remaining = schema.k === 'ref' ? Object.keys(types).length : 0;
+function resolve(schema: Schema, types: Types, budget: Budget, visit?: (schema: Schema) => void): Schema {
+  let remaining = schema.k === 'ref' ? budget.aliasLimit(types) : 0;
   while (schema.k === 'ref') {
     if (remaining-- === 0 || !Object.hasOwn(types, schema.name)) return fail('value');
     visit?.(schema);
@@ -99,7 +101,7 @@ class Reader {
 }
 function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: number, types: Types, checks: Checks): void {
   budget.visit(depth);
-  s = resolve(s, types, schema => validate(schema, value, checks));
+  s = resolve(s, types, budget, schema => validate(schema, value, checks));
   const child = (schema: Schema, item: unknown) => write(schema, item, out, budget, depth + 1, types, checks);
   switch (s.k) {
     case 'unit': if (value !== null) fail('value'); return;
@@ -173,8 +175,8 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
   }
 }
 function read(s: Schema, input: Reader, budget: Budget, depth: number, types: Types, checks: Checks): unknown {
-  const value = readValue(resolve(s, types), input, budget, depth, types, checks);
-  resolve(s, types, schema => validate(schema, value, checks));
+  const value = readValue(resolve(s, types, budget), input, budget, depth, types, checks);
+  resolve(s, types, budget, schema => validate(schema, value, checks));
   return value;
 }
 function readValue(s: Schema, input: Reader, budget: Budget, depth: number, types: Types, checks: Checks): unknown {

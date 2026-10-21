@@ -108,6 +108,32 @@ for (const location of ['request', 'alias', 'concrete']) {
   rejects(()=>createCodec({...nativeMeta,request},types).encodeRequest('ok'),'value');
   rejects(()=>createCodec({...nativeMeta,request},types).decodeRequest(frame(2,111,107)),'value');
 }
+// Registry size is computed once per operation, not once per referenced value.
+// Changes between operations remain visible; cyclic aliases still fail.
+{
+  const types = Object.fromEntries(Array.from({length: 1000}, (_, i) => [`T${i}`, {k:'u',bits:8}]));
+  const schema = {k:'list',item:{k:'ref',name:'T0'}};
+  const codec = createCodec({...nativeMeta,request:schema,response:schema,requestNodes:128,responseNodes:128},types);
+  const originalKeys = Object.keys;
+  let scans = 0;
+  try {
+    Object.keys = value => { if (value === types) scans++; return originalKeys(value); };
+    const values = Array(100).fill(7);
+    const bytes = codec.encodeRequest(values);
+    assert.equal(scans,1);
+    assert.deepEqual(codec.decodeRequest(bytes),values);
+    assert.equal(scans,2);
+    types.T0 = {k:'ref',name:'Added'};
+    types.Added = {k:'u',bits:8};
+    assert.deepEqual(codec.encodeRequest(values),bytes);
+    assert.deepEqual(codec.decodeRequest(bytes),values);
+    types.Added = {k:'ref',name:'T0'};
+    rejects(() => codec.encodeRequest(values),'value');
+    rejects(() => codec.decodeRequest(bytes),'value');
+  } finally {
+    Object.keys = originalKeys;
+  }
+}
 // Short strings must not allocate a frame-sized UTF-8 scratch buffer per item.
 const encodeInto = TextEncoder.prototype.encodeInto;
 try {

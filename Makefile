@@ -6,10 +6,10 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.24.0
+RELEASE_EDITOR_VERSION := 0.63.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
-    --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug
+    --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
 include make/consumer.mk
 
 .PHONY: install-release-editor release-editor-check
