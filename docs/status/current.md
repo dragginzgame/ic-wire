@@ -2,34 +2,35 @@
 
 ## Current batch
 
-Released 0.5.18 (`bd9e5bc`) is the baseline. Pending 0.5.19 renames the unpublished
-`ic-wire-canister-evaluation` package/directory to `ic-wire-qualification` and the
-CI target to `check-qualification`. No compatibility aliases are retained.
-The allocation fixture, its packed-projection test and compiler diagnostics remain.
-The standalone nine-case codec comparison and MessagePack comparison suites are
-removed along with their features, drivers and bitcode/wincode/rmp-serde dependencies.
-`evaluate-performance` and `evaluate-messagepack` are retired; allocation, protocol
-and generator probes remain. Historical reports and raw evidence are preserved,
-with old reproduction commands explicitly tied to historical source checkouts.
+Released 0.5.19 (`0381af2`) includes the qualification-crate rename and retirement
+of alternative-codec suites. The follow-up audit changes documentation only:
+released work is no longer described as pending, and the development guide links
+to the recorded Shared Tooling pin instead of duplicating an outdated revision.
+No production, test or benchmark code is removed in this follow-up.
 
-Production Rust code, protocol bytes, identities, admission and borrowed/owned
-semantics are unchanged. This reduces maintained test/tooling scope, not payload
-or Wasm size. Package versions, staging and Git refs remain untouched; Cargo.lock
-is pruned for the renamed package and removed dependency graph.
+The maintained crate is `ic-wire-qualification`; its CI target is
+`check-qualification`. It retains the allocation/borrowing fixture, packed-projection
+test and compiler diagnostics. Protocol and generator probes also remain.
+The old crate/target names occur only in historical reports and evidence or
+retirement explanations. No active build/CI references or compatibility aliases
+remain. Bitcode, wincode and MessagePack dependencies are absent from the workspace.
 
 ## Evidence and qualification
 
-Focused validation covers the renamed package's tests, all-target Clippy and Rust
-1.91 check, compile-fail diagnostics, dependency boundaries, documentation links
-and the disposable release adapter. No runtime performance claim is made: production
-code and retained allocation workloads are unchanged. Full CI and fresh timing
-experiments are outside this tooling-retirement batch.
+The audit reviewed workspace manifests, Make/CI wiring, native and finite codec
+boundaries, derives, bounded projections, qualification fixtures and benchmark
+entry points. The remaining similar flows have distinct ownership, admission or
+error contracts; no further safe code deletion was identified in this pass.
 
-The last complete comparison source/lockfile is revision
-`bd9e5bc0ac2c6a057570ae5aae55e0c1f431488b`; use a separate checkout to rerun retired
-commands. Historical hashes, data and original package paths in evidence are not
-rewritten to imply they came from the renamed crate. Details are in
-[performance](../performance.md#retired-alternative-codec-comparisons).
+Offline locked dependency metadata, dependency-boundary checks, snapshot integrity,
+documentation links and whitespace checks pass. Runtime tests and timing probes
+were not rerun for documentation-only changes. Protocol bytes, resource limits,
+public APIs, dependencies, versions, staging and Git refs are unchanged.
+
+Historical benchmark evidence is retained. The last complete alternative-codec
+comparison source/lockfile is `bd9e5bc0ac2c6a057570ae5aae55e0c1f431488b`; old
+commands require a separate historical checkout. See
+[retired comparisons](../performance.md#retired-alternative-codec-comparisons).
 
 ## Retained decisions
 

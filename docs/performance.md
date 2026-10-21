@@ -46,7 +46,7 @@ are outside timing; generation allocations and destruction are included. Each
 case warms 100 times, calibrates to at least 20 ms (4,096-call cap), and records
 11 batches. Compare medians, repeat runs, and report small-case regressions too.
 
-The pending 0.5.16 native-registry validation change was compared with 0.5.15
+The released 0.5.16 native-registry validation change was compared with 0.5.15
 (`39535ba`), using the same working-tree lockfile in both isolated builds.
 [Median results](evidence/typescript-generator/native.csv) and
 [all samples](evidence/typescript-generator/samples.csv) retain two runs ordered

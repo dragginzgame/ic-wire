@@ -1,7 +1,7 @@
 # Bounded allocation and borrowing study
 
 Historical 0.4.7/0.4.8 experiments. The borrowed finite contract API is now
-implemented for the pending 0.5.0 release; see the
+implemented in the 0.5.0 release; see the
 [migration guide](../crates/ic-wire/README.md#borrowed-bounded-contracts-and-the-05-api-cut).
 
 Investigated 2026-10-19 against released 0.4.7, commit

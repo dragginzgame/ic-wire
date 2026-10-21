@@ -116,8 +116,8 @@ No platform SDK or simulator is selected in any workspace dependency role.
 
 ## Snapshot maintenance and release boundary
 
-Shared Tooling is pinned at 0.25.8, revision
-`0a2d2ee3b5e0ae77755c2915ac28836d4d5ba359`.
+The reviewed Shared Tooling revision is recorded in
+[AGENTS.md](../AGENTS.md) and the [snapshot manifest](../.shared-tooling.snapshot).
 The main snapshot owns the common setup, formatting, hooks, release runner and
 receipt helper. Update through the canonical exporter and reviewed adoption;
 do not patch snapshot-owned files. Product adapters stay local.

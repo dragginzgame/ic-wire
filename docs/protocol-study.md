@@ -4,7 +4,7 @@ This study compares consumer schema choices and profiles finite Rust decoding
 against 0.5.15 (`39535ba`). The selected runtime change extends the existing
 same-input-region comparison shortcut from Wasm/tests to native hosts. Protocol
 bytes, method identity, admission limits and malformed-input acceptance are
-unchanged. The generator changes pending in 0.5.16 do not affect these timings.
+unchanged. The generator changes released in 0.5.16 do not affect these timings.
 
 ## Consumer layout experiments
 
