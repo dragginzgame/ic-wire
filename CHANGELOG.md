@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.19]
+## [0.5.19] - 2026-10-21
 
 - Rename the unpublished tooling crate to `ic-wire-qualification` and its check
   target to `check-qualification`; retain allocation/borrowing and diagnostic checks.

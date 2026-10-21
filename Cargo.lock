@@ -274,7 +274,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.5.18"
+version = "0.5.19"
 dependencies = [
  "clap",
  "ic-wire-derive",
@@ -286,7 +286,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.5.18"
+version = "0.5.19"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -295,7 +295,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-qualification"
-version = "0.5.18"
+version = "0.5.19"
 dependencies = [
  "clap",
  "ic-build",
