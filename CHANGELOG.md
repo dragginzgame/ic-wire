@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.15]
+## [0.5.15] - 2026-10-21
 
 - Reject non-string scalar-check annotations during TypeScript generation,
   including annotations on named references and nested values.
