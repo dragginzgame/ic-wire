@@ -2,44 +2,52 @@
 
 ## Current batch
 
-Released 0.5.4 (`1e1ea56`) is the baseline. Pending 0.5.5 improves allocation
-benchmark interpretation: `--codec-only` removes the application payload scan,
-while the default retains it. Both modes include canonical checks and destruction;
-constant-time packed-length checks remain. Encode/decode calibration is independent.
-Reports use format 2 with separate repetition counts and a decode-work label.
-The incoming IC Build/Host 0.62.1 lockfile edit was preserved.
+Released 0.5.5 (`55efae7`) is the baseline. Pending 0.5.6 fixes the optional
+TypeScript registry generator and includes its qualification in CI/release gates.
+Package versions, index and Git refs remain untouched.
 
-## Experiments and decisions
+The generator rejects `JSON` as a declaration name, preventing shadowing of its
+JSON parser. Transparent reference/newtype cycles are rejected while recursive
+records, lists and enums remain supported. Method frame allowances must fit the
+11-byte header, and node/depth allowances must be positive. Invalid minimums
+return `GenerationError::Limits`; invalid aliases/names return `Schema`.
+Fixed-array metadata requires a non-negative integer length, with values beyond
+JavaScript's exact integer range rejected. Zero-length arrays remain supported.
+Native decode now uses its existing admission macro for 11 identical visitor
+methods, removing repeated bodies while preserving their admission/depth rules.
 
-An isolated 60-case IC probe measured finite output reuse, retained retry copies,
-owned/borrowed decoding, scan separation and UTF-8 validation before allocation.
-Warm reuse saves 10.5–34.8% encode instructions under opt-3 for tested blob sizes,
-but copying the result for retry retention loses the gain. A 64-case follow-up
-adds mixed-size chunk cycles: reuse saves about 23%, including initially empty
-cycles. Finite `encode_request_into`/`encode_response_into` are now supported.
-The fresh encoder stays intact: matched fresh-case instruction counts are unchanged.
-Callers own retained capacity and must keep exact retry bytes independently.
+## Validation ownership
 
-Both pre-allocation UTF-8 candidates sharply reduce malformed-input work but
-regress small valid strings under opt-3 and grow linked Wasm. Neither was adopted.
-Text decoding remains unchanged. See
-[methodology and complete results](../evaluation.md#finite-reuse-text-validation-and-scan-separation).
-Sources, raw runs, locks and prototypes are retained at `target/reuse-text-scan/`.
+`check-typescript` now runs feature-enabled runtime/borrowed Rust tests, strict
+Clippy, the Rust 1.91 library check and generated TypeScript conformance. The
+main CI target includes this check, so maintainer release validation does too.
+Hosted CI prepares Node from `.nvmrc`, npm from `packageManager`, and the locked
+TypeScript package on Linux and both macOS architectures. Local releases need
+the same preparation before offline validation; see [development](../development.md).
+The official setup-node action is pinned to `249970729cb0ef3589644e2896645e5dc5ba9c38`.
 
 ## Qualification
 
-Strict evaluation Clippy, evaluation tests and Rust 1.91 checks pass. Both native
-benchmark modes completed all 44 cases with identical frames and capacities;
-format-2 repetition fields were checked. Isolated reuse tests cover changed
-sizes, borrowed values, frozen retries and failure clearing with spare capacity.
-Runtime tests, strict Clippy, Rust 1.91 host/Wasm checks and documentation links
-also pass for finite scratch APIs. See the
-[follow-up evidence](../evaluation.md#finite-scratch-buffer-follow-up).
-Full CI, macOS and installed-consumer validation were not run.
+Focused Linux checks pass: native and feature-enabled Rust tests, strict Clippy,
+Rust 1.91 host/Wasm compilation,
+90 Rust/TypeScript vectors, 17,524 differential mutations and 1 MiB boundaries.
+The generated recursive fixture now traverses reference/newtype aliases, checking
+that cycle rejection preserves valid recursion. Workflow actionlint, shellcheck,
+Bash syntax and disposable local Make/hook qualification pass.
+Full CI and hosted macOS execution were not run; workflow execution remains the
+proof of hosted Node/npm preparation. No installed consumer was changed.
 
-## Retained contract
+## Retained decisions
 
-Production remains bounded Postcard; the released output-growth/header improvements
-remain. Rejected preference and pointer-comparison experiments remain historical.
+Production remains bounded Postcard; JSON is optional generation/tooling metadata.
+Finite scratch reuse shipped in 0.5.5. Fresh encoding remains separate because
+sharing its mutable-buffer path regressed small-message instruction cost.
+The [scratch-buffer study](../evaluation.md#finite-scratch-buffer-follow-up)
+retains byte parity, capacity/retry tradeoffs and measured evidence.
+Caller-owned scratch capacity may outlive large messages; retain immutable retry
+bytes independently. Text prevalidation and code-generation preferences remain
+rejected experiments, documented in [evaluation](../evaluation.md).
+
 Shared Tooling is 0.25.8. The release editor remains separately pinned to IC Build
-0.24.0. Staging, commits, versions, releases and publication remain maintainer-owned.
+0.24.0. Shared snapshots, dependency selections and runtime encoding are unchanged.
+Staging, commits, versions, releases and publication remain maintainer-owned.

@@ -396,7 +396,7 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
         generate_registry(&types, std::slice::from_ref(&method), "./native-runtime.js").unwrap();
     assert!(source.contains("\\\"check\\\":\\\"decimal\\\""));
     assert!(source.contains("export type Atom = string;"));
-    for name in ["bad-name", "default", "string", "createCodec"] {
+    for name in ["bad-name", "default", "string", "createCodec", "JSON"] {
         let mut invalid = method.clone();
         invalid["name"] = json!(name);
         assert_eq!(
@@ -603,3 +603,96 @@ fn custom_serializer_bounds_and_error_identity() {
     }
 }
 mod large_bytes;
+
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
+    use ic_wire::typescript::{GenerationError, generate_registry};
+    use serde_json::json;
+    use std::collections::BTreeMap;
+    for types in [
+        BTreeMap::from([("Loop".into(), json!({"k":"ref","name":"Loop"}))]),
+        BTreeMap::from([
+            ("A".into(), json!({"k":"ref","name":"B"})),
+            ("B".into(), json!({"k":"ref","name":"A"})),
+        ]),
+        BTreeMap::from([(
+            "Loop".into(),
+            json!({"k":"newtype","item":{"k":"ref","name":"Loop"}}),
+        )]),
+    ] {
+        assert_eq!(
+            generate_registry(&types, &[], "./runtime.js"),
+            Err(GenerationError::Schema)
+        );
+    }
+    let method = json!({"name":"empty","mode":"query","id":"1",
+        "request":{"k":"unit"},"response":{"k":"unit"},
+        "requestBytes":11,"responseBytes":11,"requestNodes":1,"responseNodes":1,
+        "requestDepth":1,"responseDepth":1});
+    assert!(
+        generate_registry(
+            &BTreeMap::new(),
+            std::slice::from_ref(&method),
+            "./runtime.js"
+        )
+        .is_ok()
+    );
+    for (key, minimum) in [
+        ("requestBytes", 11),
+        ("responseBytes", 11),
+        ("requestNodes", 1),
+        ("responseNodes", 1),
+        ("requestDepth", 1),
+        ("responseDepth", 1),
+    ] {
+        for n in [0, minimum - 1] {
+            let mut invalid = method.clone();
+            invalid[key] = json!(n);
+            assert_eq!(
+                generate_registry(&BTreeMap::new(), &[invalid], "./runtime.js"),
+                Err(GenerationError::Limits)
+            );
+        }
+    }
+}
+
+#[cfg(feature = "typescript")]
+#[test]
+fn typescript_registry_requires_an_exact_array_length() {
+    use ic_wire::typescript::{GenerationError, generate_registry};
+    use serde_json::{Value, json};
+    use std::collections::BTreeMap;
+    for length in [
+        None,
+        Some(Value::Null),
+        Some(json!(-1)),
+        Some(json!(1.5)),
+        Some(json!("2")),
+    ] {
+        let mut node = json!({"k":"array","item":{"k":"unit"}});
+        if let Some(length) = length {
+            node["max"] = length;
+        }
+        assert_eq!(
+            generate_registry(
+                &BTreeMap::from([("ArrayValue".into(), node)]),
+                &[],
+                "./runtime.js"
+            ),
+            Err(GenerationError::Schema)
+        );
+    }
+    for length in [0, 2, (1_u64 << 53) - 1, 1_u64 << 53] {
+        let types = BTreeMap::from([(
+            "ArrayValue".into(),
+            json!({"k":"array","max":length,"item":{"k":"unit"}}),
+        )]);
+        let result = generate_registry(&types, &[], "./runtime.js");
+        if length == 1_u64 << 53 {
+            assert_eq!(result, Err(GenerationError::Complexity));
+        } else {
+            assert!(result.is_ok());
+        }
+    }
+}

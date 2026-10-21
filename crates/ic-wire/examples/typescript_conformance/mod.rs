@@ -204,8 +204,13 @@ fn main() {
         }),
     )]);
     types.insert("__proto__".into(), serde_json::json!({"k":"unit"}));
+    types.insert("Alias".into(), serde_json::json!({"k":"ref","name":"Node"}));
+    types.insert(
+        "WrappedAlias".into(),
+        serde_json::json!({"k":"newtype","item":{"k":"ref","name":"Alias"}}),
+    );
     let method = serde_json::json!({"name":"nativeTree","mode":"query","id":"1",
-        "request":{"k":"ref","name":"Node"},"response":{"k":"ref","name":"Node"},
+        "request":{"k":"ref","name":"WrappedAlias"},"response":{"k":"ref","name":"Alias"},
         "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
         "requestDepth":8,"responseDepth":8});
     let mut proto = method.clone();

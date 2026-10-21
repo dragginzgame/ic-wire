@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.6]
+
+- Reject TypeScript registry names that shadow generated JSON handling,
+  transparent alias cycles, invalid fixed-array lengths and method budgets
+  that cannot initialize a codec.
+- Include TypeScript conformance, generator tests, linting and minimum-Rust
+  checks in CI and release validation, with pinned Node/npm setup in hosted CI.
+
 ## [0.5.5] - 2026-10-21
 
 - Separate codec-only and application-checksum allocation benchmarks with

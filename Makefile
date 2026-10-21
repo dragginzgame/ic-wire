@@ -117,7 +117,7 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-evaluation check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-evaluation check-typescript check-wasm check-msrv
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

@@ -51,7 +51,7 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `check-wasm`, `check-msrv` | Runtime Wasm and minimum-toolchain checks |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
 | `check-evaluation` | Native raw-codec roundtrips and evaluation lint/floor checks |
-| `check-typescript` | Generated Rust/TypeScript vectors and differential mutations |
+| `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
 | `evaluate-performance` | Explicit [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
 | `fmt-check` | Grouped manifests, derive order and Rust formatting |
@@ -74,6 +74,12 @@ the private package metadata, then:
 npm --prefix examples/browser ci
 make check-typescript
 ```
+
+`check-typescript` is included in `make ci` and release validation. Local release
+operators must prepare the pinned Node/npm environment and locked package above
+before starting the offline validation phase. Hosted CI prepares them on every
+supported host. The target also runs feature-enabled Rust runtime/borrowed tests,
+strict Clippy and the generator's Rust 1.91 library check.
 
 This package contains only the TypeScript compiler. The generated codec imports
 no transport or browser SDK. Rust vectors, strict typechecking and Node mutation
