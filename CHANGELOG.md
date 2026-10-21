@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.16]
+## [0.5.16] - 2026-10-21
 
 - Skip redundant canonical byte comparisons for borrowed data on native hosts,
   matching the existing Wasm shortcut without changing bytes or rejection rules.
