@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.14]
+## [0.5.14] - 2026-10-21
 
 - Fix TypeScript byte decoding from Node Buffer inputs to return owned storage,
   preserving isolation when either the input frame or decoded bytes are mutated.
