@@ -1,10 +1,15 @@
 # Changelog
 
-## [0.5.9]
+## [0.5.10]
 
 - Adopt Shared Tooling 0.25.9: refuse a new release increment past an
   undelivered committed preparation, preserving its saved plan and evidence.
   Tool pins, package APIs and dependency selections are unchanged.
+
+## [0.5.9] - 2026-10-21
+
+- Record the TypeScript bounded-growth writer experiment: large frame allowances
+  benefit, but tight blob/array regressions leave the existing writer unchanged.
 
 ## [0.5.8] - 2026-10-21
 

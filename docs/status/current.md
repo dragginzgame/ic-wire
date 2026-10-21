@@ -2,7 +2,7 @@
 
 ## Current batch
 
-Released 0.5.8 (`1894d0a`) is the baseline. PR #16 adopts Shared Tooling 0.25.9
+Released 0.5.9 (`007b3f4`) is the integration baseline. PR #16 adopts Shared Tooling 0.25.9
 release retry protection at reviewed revision
 `85aded191d85ac4a8c0e5deab207f6be18895862`. A committed but undelivered release
 preparation refuses a second increment and preserves its saved plan and evidence.
