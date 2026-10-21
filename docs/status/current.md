@@ -2,74 +2,64 @@
 
 ## Current batch
 
-Released 0.5.16 (`24c1250`) is the baseline. Pending 0.5.17 records two rejected
-native canonical-comparison experiments, two bulk-reservation experiments, and
-native borrowed-view qualification and benchmark tooling improvements.
-No production Rust code changes.
-Protocol bytes, identities, limits and malformed-input acceptance are unchanged.
-Package versions, dependencies, staging and Git refs remain untouched.
-
-The word-reduction candidate enables the existing Wasm/test implementation on
-native hosts. It regresses owned 4 KiB decode about 137% and 1 MiB decode 74–84%.
-The early-exit chunk candidate regresses those workloads 77–78% and 33–37%.
-Both keep the borrowed same-input-region shortcut. Neither is selected.
-
-Exact bulk reservation saves capacity for single blobs but increases four-chunk
-capacity 50%. Adding 32 bytes of headroom avoids that counterexample and saves
-75%/50% capacity for 256/512 KiB blobs under a 1 MiB bound. However, 512 KiB
-encoding regresses 5–11%; neither allocation policy replaces the default.
+Released 0.5.17 (`f8e43cf`) is the baseline. Pending 0.5.18 consolidates six
+native decoder methods into the existing admission macro. Methods with names,
+lengths and field/variant lists now share the same budget check and visitor-depth
+setup as scalar and collection methods. Seven compound encoder implementations
+now share one local macro for child-value forwarding and completion. Container
+setup stays explicit; child admission and depth are unchanged. Six owned/borrowed
+byte/text visitor methods also share their existing conservative byte-charge
+check, with no ownership conversion or new runtime mode.
+Protocol bytes, identities, resource charges, error precedence and accepted
+inputs are unchanged. Package versions, dependencies, staging and Git refs remain
+untouched.
 
 ## Evidence and qualification
 
-[Native comparison results](../native-comparison-study.md) contain paired absolute
-timings, small/integer/borrowed controls, all samples and reproducible patches.
-Both candidates were built in disposable snapshots and run twice, with reversed
-baseline/candidate order on the second run. The same lockfile was used in each
-lane; CPU affinity was not fixed. The probe's canonical roundtrip, nonminimal
-integer and baseline/candidate frame comparisons passed. Timing gains are not
-claimed; no IC, Wasm-size, browser or macOS measurement was made.
+The before/after expanded crate is textually identical after excluding the edited
+macro definitions themselves. Generated methods, signatures and bodies are unchanged.
+This is source maintenance, not a runtime cost optimization; no timing or artifact
+size saving is claimed and a performance benchmark is not applicable.
 
-Raw builds and binaries are in `/tmp/ic-wire-native-word/` and
-`/tmp/ic-wire-native-early/`, candidate sources in `/tmp/ic-wire-native-compare/`.
-The runner's optional-file branch was exercised by both complete experiments.
+Reproduce the expansion inspection with the baseline and working-tree sources:
+`RUSTC_BOOTSTRAP=ic_wire cargo rustc --offline --locked -p ic-wire --lib -- -Zunpretty=expanded`.
+The temporary compiler override enables inspection only, not ordinary builds.
+Rust 1.99.1 expansion files and their diff are retained locally in
+`/tmp/ic-wire-admission-cleanup/`. Compare after removing the `admit_visitor`
+macro definition, leaving all generated implementations intact. The encoder
+follow-up uses the preceding working tree as its baseline; its files and diff are
+in `/tmp/ic-wire-compound-cleanup/`. Excluding the new `compound` definition
+also leaves a textually identical expanded crate. The byte/text follow-up repeats
+this comparison against the preceding working tree, excluding only `visit_buffer`;
+its identical expansion and check logs are in `/tmp/ic-wire-buffer-cleanup/`.
 
-[Bulk-reservation results](../bulk-reservation-study.md) include encode timings,
-returned Vec capacities, all samples and candidate patches. The extended probe
-adds threshold-adjacent blobs, four/sixteen-chunk lists and `.capacity` outputs.
-Both candidates passed the probe and unchanged-frame checks in two paired runs;
-capacity is not allocator footprint or peak memory. Raw evidence is in
-`/tmp/ic-wire-bulk-results/` and `/tmp/ic-wire-bulk-slack/`.
-Shell syntax, documentation links and whitespace checks pass. Full runtime suites,
-full CI and hosted macOS were not rerun for this tooling/evidence-only batch.
-Rejected candidates did not receive complete malformed-input qualification.
-
-[Native borrowed-view qualification](../native-views-study.md) measures the public
-native API with identical runtime code in both lanes. Borrowing cuts 1 MiB
-decode-plus-byte-scan time 21–25% and sixteen-text-pair time 45–46%. Pure decode
-savings are substantially larger and do not represent end-to-end work. All four
-process runs passed content, re-encoding, pointer and frame-identity checks.
-Blob-storage already borrows download descriptor text; its owned chunk transport
-is provider-specific. No sibling edits or protocol cut were made. Raw runs are
-in `/tmp/ic-wire-native-views-qualified/`.
+`make test` passes runtime/native coverage and doctests. Focused checks also cover
+strict Clippy, Wasm compilation, Rust 1.91 native/Wasm compilation, formatting,
+documentation links and whitespace. No new tests mirror the unchanged expansion.
+Full CI, browser conformance and sibling suites are outside this source-only batch.
 
 ## Retained decisions
 
 Production remains bounded Postcard. Native owned content uses slice equality;
 Wasm retains its word comparison. Both skip exact same-input-region comparisons
-for borrowed values after length/allowance checks. The released borrowed-blob
-improvement and limits of its measurements remain in the
-[protocol/layout study](../protocol-study.md). Consumers still pay to read/hash
-returned data; those operations are not included in pure decode timings.
+for borrowed values after length/allowance checks. Existing borrowing and the
+released native shortcut remain documented in the
+[protocol/layout study](../protocol-study.md).
 
-The hypothetical fixed-key, compact-tag and mandatory-field layouts remain
-experiments, not adopted schemas. Generic single-pass canonical decoding remains
-unimplemented; normalized maps and arbitrary Serde semantics require more than
-varint checks. Earlier generator scaling evidence is in
-[performance](../performance.md#typescript-generator-comparisons).
+Released 0.5.17 rejected word-reduction and early-exit native comparisons after
+owned-blob regressions; see [native comparison results](../native-comparison-study.md).
+Neither [bulk-reservation policy](../bulk-reservation-study.md) replaces current
+growth: capacity savings came with multi-chunk or timing regressions.
+[Native borrowed-view qualification](../native-views-study.md) compares existing
+owned/borrowed APIs, not a new optimization. It finds 21–25% lower 1 MiB decode
+plus byte-scan time and 45–46% lower sixteen-text-pair time. Blob-storage already
+borrows download descriptor text; its chunk transport remains provider-specific.
 
-AGENTS.md requires measured cost comparisons and inline protocol-change notes.
-Exact retries, canonical hashing and typed errors remain required. Metadata and
-scalar validators are trusted declarations. Other rejected runtime experiments
-remain in [evaluation](../evaluation.md).
+Hypothetical layout cuts remain experiments. Generic single-pass canonical
+decoding is unimplemented; normalized maps and arbitrary Serde semantics require
+more than varint checks. Exact retries, canonical hashing and typed errors remain
+required. Metadata and scalar validators are trusted declarations. Earlier
+runtime evidence is in [evaluation](../evaluation.md); generator scaling evidence
+is in [performance](../performance.md#typescript-generator-comparisons).
 Shared Tooling is 0.25.9; IC Build's release editor is 0.63.0 with `cli`.
 Ordinary agent work does not stage, commit or release.

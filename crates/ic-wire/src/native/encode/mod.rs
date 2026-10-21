@@ -41,7 +41,7 @@ struct Compound<'a, S> {
     depth: usize,
 }
 
-// Only scalar forwarding is generated; allocation and compound admission stay explicit.
+// Scalar forwarding needs no additional admission; allocation checks stay explicit.
 macro_rules! forward_scalar {
     ($($method:ident: $ty:ty),* $(,)?) => {$(
         fn $method(self, value: $ty) -> Result<Self::Ok, Self::Error> {
@@ -221,122 +221,36 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         })
     }
 }
-impl<S: ser::SerializeSeq> ser::SerializeSeq for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-        self.inner.serialize_element(&Bounded {
-            value,
-            budget: self.budget,
-            depth: self.depth,
-        })
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
+// Each compound keeps its existing depth; child values own their admission.
+macro_rules! compound {
+    ($trait:ident, $($method:ident $(($key:ident))?),+ $(,)?) => {
+        impl<S: ser::$trait> ser::$trait for Compound<'_, S> {
+            type Ok = S::Ok;
+            type Error = S::Error;
+            $(fn $method<T: Serialize + ?Sized>(
+                &mut self,
+                $($key: &'static str,)?
+                value: &T,
+            ) -> Result<(), Self::Error> {
+                self.inner.$method(
+                    $($key,)?
+                    &Bounded {
+                        value,
+                        budget: self.budget,
+                        depth: self.depth,
+                    },
+                )
+            })+
+            fn end(self) -> Result<Self::Ok, Self::Error> {
+                self.inner.end()
+            }
+        }
+    };
 }
-impl<S: ser::SerializeTuple> ser::SerializeTuple for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-        self.inner.serialize_element(&Bounded {
-            value,
-            budget: self.budget,
-            depth: self.depth,
-        })
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
-}
-impl<S: ser::SerializeTupleStruct> ser::SerializeTupleStruct for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_field<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-        self.inner.serialize_field(&Bounded {
-            value,
-            budget: self.budget,
-            depth: self.depth,
-        })
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
-}
-impl<S: ser::SerializeTupleVariant> ser::SerializeTupleVariant for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_field<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-        self.inner.serialize_field(&Bounded {
-            value,
-            budget: self.budget,
-            depth: self.depth,
-        })
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
-}
-impl<S: ser::SerializeStruct> ser::SerializeStruct for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_field<T: Serialize + ?Sized>(
-        &mut self,
-        key: &'static str,
-        value: &T,
-    ) -> Result<(), Self::Error> {
-        self.inner.serialize_field(
-            key,
-            &Bounded {
-                value,
-                budget: self.budget,
-                depth: self.depth,
-            },
-        )
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
-}
-impl<S: ser::SerializeStructVariant> ser::SerializeStructVariant for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_field<T: Serialize + ?Sized>(
-        &mut self,
-        key: &'static str,
-        value: &T,
-    ) -> Result<(), Self::Error> {
-        self.inner.serialize_field(
-            key,
-            &Bounded {
-                value,
-                budget: self.budget,
-                depth: self.depth,
-            },
-        )
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
-}
-impl<S: ser::SerializeMap> ser::SerializeMap for Compound<'_, S> {
-    type Ok = S::Ok;
-    type Error = S::Error;
-    fn serialize_key<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-        self.inner.serialize_key(&Bounded {
-            value,
-            budget: self.budget,
-            depth: self.depth,
-        })
-    }
-    fn serialize_value<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-        self.inner.serialize_value(&Bounded {
-            value,
-            budget: self.budget,
-            depth: self.depth,
-        })
-    }
-    fn end(self) -> Result<Self::Ok, Self::Error> {
-        self.inner.end()
-    }
-}
+compound!(SerializeSeq, serialize_element);
+compound!(SerializeTuple, serialize_element);
+compound!(SerializeTupleStruct, serialize_field);
+compound!(SerializeTupleVariant, serialize_field);
+compound!(SerializeStruct, serialize_field(key));
+compound!(SerializeStructVariant, serialize_field(key));
+compound!(SerializeMap, serialize_key, serialize_value);
