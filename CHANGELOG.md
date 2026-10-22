@@ -2,6 +2,9 @@
 
 ## [0.6.0]
 
+- Gate the byte-buffer metadata doctest on the required `typescript` feature
+  and document its setup, so default-feature documentation tests also pass.
+
 - Support `serde_bytes::ByteBuf` and borrowed `serde_bytes::Bytes` in host-only
   `Wire` metadata, generating `Uint8Array` for the existing bulk byte codec path.
   Replacing `Vec<u8>` preserves Postcard bytes but changes traversal accounting

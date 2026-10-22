@@ -51,13 +51,15 @@ For byte fields that also derive `Wire` metadata, prefer the standard
 `serde_bytes::ByteBuf` type (or `ic_wire::Bytes<N>` for a field-local bound):
 
 ```rust
+# #[cfg(feature = "typescript")]
 #[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
 struct Upload {
     data: serde_bytes::ByteBuf,
 }
 ```
 
-Add `serde_bytes = "0.11.19"` to the consumer's dependencies. `ByteBuf` owns its
+Enable IC Wire's `typescript` feature in the host metadata generator and add
+`serde_bytes = "0.11.19"` to the consumer's dependencies. `ByteBuf` owns its
 bytes; `&serde_bytes::Bytes` supports borrowing. Both project to TypeScript
 `Uint8Array`, whereas plain `Vec<u8>` projects to `number[]`. Regenerate bindings
 and qualify traversal budgets when changing that field. `Wire` does not rewrite

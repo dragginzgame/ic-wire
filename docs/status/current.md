@@ -63,6 +63,8 @@ and thirteen generic/custom-scalar/byte projection vectors. Allocation/packed-fi
 and all consumer benchmark cohorts pass. Evidence is retained under
 `docs/evidence/serde-production-0523/`; logs: `target/serde-hardcut-0523/validation/`.
 No full CI, macOS, live canister or consumer installed suite was run.
+The byte-buffer metadata example is feature-gated; default-feature and
+typescript-feature doctests both pass after correcting the CI documentation failure.
 
 ## Preserved tooling and research
 
