@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.21]
+## [0.5.21] - 2026-10-22
 
 - Adopt Shared Tooling 0.26.6 and IC Tooling 0.64.0 for Build, Testkit and
   transitive Host libraries; prepare the 0.64.0 release editor with `cli`.
