@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.2]
+## [0.6.2] - 2026-10-22
 
 - Describe Serde slices and boxed slices in `Wire` metadata, sharing the list
   projection with Vec. Previously rejected slice fields now generate matching
