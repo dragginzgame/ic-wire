@@ -63,7 +63,12 @@ Enable IC Wire's `typescript` feature in the host metadata generator and add
 bytes; `&serde_bytes::Bytes` supports borrowing. Both project to TypeScript
 `Uint8Array`, whereas plain `Vec<u8>` projects to `number[]`. Regenerate bindings
 and qualify traversal budgets when changing that field. `Wire` does not rewrite
-Serde derives; `#[serde(with = "serde_bytes")]` still requires explicit metadata.
+Serde derives. Existing `#[serde(with = "serde_bytes")]` fields also derive
+byte metadata, without changing the field type or serializer. Supported inputs
+are Vec<u8>, [u8], serde_bytes::ByteBuf/Bytes and references to those types;
+aliases of these Rust types work too. Fixed arrays and arbitrary custom adapters
+still require explicit verified metadata. Use the standard dependency under its
+`serde_bytes` name (the absolute `::serde_bytes` path is also recognized).
 This uses the already-measured byte path, not a new runtime optimization: at
 1 MiB, retained opt-3 measurements show 1,049,715 encode instructions versus
 78,644,290 for a generic vector and 2,115,305 for Candid's byte representation.
@@ -207,6 +212,10 @@ In a shared DTO package, replace the unconditional metadata derive above with
 The derive generates only metadata; it does not implement or replace Serde,
 require `wire(id)` annotations, or claim finite static resource bounds.
 Generic declarations are projected after instantiation, such as `Page<String>`.
+Metadata bounds follow field types, including associated types such as `T::Item`;
+the provider `T` need not implement `Wire` unless it is itself a serialized field.
+Recursive fields retain conservative parameter bounds and inline recursive
+metadata remains unsupported. Serde still owns the type's Serialize requirements.
 Field-level `#[serde(borrow)]` and `#[serde(borrow = "'a")]` work with `Wire`,
 including bounded `BytesRef`/`TextRef` DTOs. Serde validates the lifetime names;
 borrowing changes ownership, not the generated client shape or payload bytes.
@@ -225,8 +234,9 @@ Vec, slices, Option, Result, Box (including boxed slices), references, serializa
 one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other
 types require an explicit supported projection; they are not guessed. Apart
-from struct-level `transparent` and field/newtype-variant `borrow`, Serde attributes are rejected, including
-rename, skip, flatten, tagging and custom serializer attributes. Rust raw
+from container-level `transparent`/`deny_unknown_fields`, field/newtype-variant
+`borrow` and the qualified field-level `serde_bytes` adapter, Serde attributes
+are rejected, including rename, skip, flatten, tagging and custom serializers. Rust raw
 identifiers retain their unescaped names in the TypeScript object.
 Slices use the same length-prefixed sequence metadata as Vec, including `&[u8]`.
 Use `serde_bytes::Bytes` for byte-oriented `Uint8Array` metadata; slice metadata

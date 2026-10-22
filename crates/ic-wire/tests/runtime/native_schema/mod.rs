@@ -2,6 +2,39 @@ use ic_wire::{Wire, typescript::native_schema};
 use serde::Serialize;
 use serde_json::json;
 
+trait HasItem {
+    type Item: Serialize;
+}
+#[derive(Serialize)]
+struct Provider;
+impl HasItem for Provider {
+    type Item = u16;
+}
+#[derive(Serialize, Wire)]
+struct Associated<T: HasItem> {
+    value: T::Item,
+}
+#[derive(Serialize, Wire)]
+enum Recursive<T> {
+    Value(T),
+    Next(Box<Self>),
+}
+
+#[test]
+fn metadata_bounds_follow_fields_and_preserve_recursive_refusal() {
+    assert_eq!(
+        native_schema::<Associated<Provider>>().unwrap(),
+        json!({"k":"record","fields":[{"name":"value","value":{"k":"u","bits":16}}]})
+    );
+    let value = Associated::<Provider> { value: 128 };
+    assert_eq!(postcard::to_allocvec(&value).unwrap(), [128, 1]);
+    let _ = Recursive::Next(Box::new(Recursive::Value(1_u8)));
+    assert_eq!(
+        native_schema::<Recursive<u8>>(),
+        Err(ic_wire::typescript::GenerationError::Complexity)
+    );
+}
+
 #[derive(Wire, Serialize)]
 struct Borrowed<'a> {
     r#type: &'a str,

@@ -1,8 +1,8 @@
 # Current handoff
 
-## Current batch: post-0.6.1 audit
+## Current batch: post-0.6.2 generic audit
 
-0.6.1 is released at `beba845`; pending fixes are recorded under 0.6.2.
+0.6.2 is released at `1deec75`; pending fixes are recorded under 0.6.3.
 The released minor version contains the approved API/layout hard cut. Evidence retains its
 original 0.5.23 candidate labels and paths; package versions remain release-owned.
 Keep one production Serde/Postcard codec, exposed through `ic_wire::native`.
@@ -52,6 +52,27 @@ Slice metadata now shares Vec's list projection, enabling boxed-slice fields
 without extra metadata traversal charges. A boxed-u16 generic page has matching
 Rust/TypeScript frames in both directions. This adds no runtime serializer.
 
+Metadata derive bounds now follow actual nonrecursive field types, including
+associated types, rather than requiring their provider parameters to implement
+Wire. Recursive fields retain conservative parameter bounds to avoid trait
+resolution cycles; inline recursion still returns Complexity. Serde's Serialize
+supertrait is explicit. The added syn visitor is host proc-macro tooling only.
+No runtime code, generated metadata layout or protocol changes are made.
+
+Canic #17 follow-up: deny_unknown_fields and standard serde_bytes field adapters
+now derive metadata without DTO/storage changes. Byte adapter input types are
+sealed to qualified byte vectors/slices and serde_bytes buffers (plus references);
+fixed arrays/custom adapters still need explicit verified metadata. New exact
+Rust/TS frames and extra-field rejection checks cover the accepted attributes.
+The maintainer keeps ExternalPrincipal on the Candid side; no principal metadata
+implementation, platform dependency or sibling change is included in this batch.
+
+Owned-blob follow-up reviewed the retained 0.5.22 comparison-cost experiments:
+skipping canonical comparison is invalid for custom Serde; the unrolled candidate
+saved 4.54% on opt-3 1 MiB decode but added 570 Wasm bytes and regressed a small
+opt-z case by 11.04%. No previously rejected candidate is restored. These are
+historical measurements, not a new 0.6.3 instruction or size run.
+
 ## Current evidence
 
 The [production comparison](../candid-comparison.md#production-serde-hard-cut--pending-0523)
@@ -76,7 +97,7 @@ The retired finite blob and short-write savings are historical evidence only.
 Runtime, borrowing, canonical bulk/custom-boundary tests, corpus roundtrips,
 strict lint, Rustdoc, native/Wasm MSRV and nine compiler diagnostics pass.
 TypeScript checks cover 146 vectors, 29,536 mutations, 1 MiB buffer boundaries,
-and fourteen generic/custom-scalar/byte/slice projection vectors. Allocation/packed-field checks
+and seventeen generic/custom-scalar/byte/slice projection vectors. Allocation/packed-field checks
 and all consumer benchmark cohorts pass. Evidence is retained under
 `docs/evidence/serde-production-0523/`; logs: `target/serde-hardcut-0523/validation/`.
 No full CI, macOS, live canister or consumer installed suite was run.

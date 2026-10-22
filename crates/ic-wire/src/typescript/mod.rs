@@ -2,6 +2,8 @@
 mod metadata;
 mod native_schema;
 pub use metadata::generate_registry;
+#[doc(hidden)]
+pub use native_schema::SerdeBytesField;
 pub use native_schema::{SchemaContext, Wire, native_schema};
 
 // JavaScript's safe-integer ceiling for generated numeric bounds.

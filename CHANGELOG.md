@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.3]
+
+- Support container `serde(deny_unknown_fields)` and qualified field-level
+  `serde(with = "serde_bytes")` in metadata derives. Existing DTOs retain their
+  serializers and bytes; byte fields generate Uint8Array bindings. Unsupported
+  adapter/type combinations remain rejected. No principal support is added.
+
+- Derive metadata bounds from serialized field types instead of requiring every
+  generic parameter to implement `Wire`. Associated-type providers no longer
+  need unrelated metadata implementations. Preserve recursive-type refusal and
+  Serde's Serialize requirements; metadata layouts and runtime bytes are unchanged.
+
 ## [0.6.2] - 2026-10-22
 
 - Describe Serde slices and boxed slices in `Wire` metadata, sharing the list

@@ -15,6 +15,26 @@ pub trait Wire: serde::Serialize {
     fn native_schema(context: &mut SchemaContext) -> Result<Value, GenerationError>;
 }
 
+mod byte_field {
+    pub trait Sealed {}
+    impl Sealed for alloc::vec::Vec<u8> {}
+    impl Sealed for [u8] {}
+    impl Sealed for serde_bytes::ByteBuf {}
+    impl Sealed for serde_bytes::Bytes {}
+    impl<T: Sealed + ?Sized> Sealed for &T {}
+}
+
+/// Qualified inputs to the standard `serde_bytes` field adapter.
+/// Sealed to prevent assuming arbitrary custom adapters use a byte-buffer layout.
+///
+/// ```compile_fail
+/// fn require_bytes<T: ic_wire::typescript::SerdeBytesField>() {}
+/// require_bytes::<Vec<u16>>();
+/// ```
+#[doc(hidden)]
+pub trait SerdeBytesField: byte_field::Sealed {}
+impl<T: byte_field::Sealed + ?Sized> SerdeBytesField for T {}
+
 /// Bounded traversal used by derived and explicitly implemented metadata.
 /// Constructed by [`native_schema`]; it does not infer codec resource allowances.
 pub struct SchemaContext {
@@ -22,6 +42,13 @@ pub struct SchemaContext {
     remaining: usize,
 }
 impl SchemaContext {
+    /// Describe a qualified `serde_bytes` field while retaining traversal checks.
+    #[doc(hidden)]
+    pub fn describe_bytes<T: SerdeBytesField + ?Sized>(
+        &mut self,
+    ) -> Result<Value, GenerationError> {
+        self.describe::<serde_bytes::Bytes>()
+    }
     /// Describe a child, rejecting recursive or excessively large inline schemas.
     pub fn describe<T: Wire + ?Sized>(&mut self) -> Result<Value, GenerationError> {
         if self.depth >= 64 || self.remaining == 0 {

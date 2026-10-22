@@ -25,6 +25,12 @@ struct Blob {
     data: serde_bytes::ByteBuf,
 }
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+struct AdaptedBlob {
+    #[serde(with = "serde_bytes")]
+    data: Vec<u8>,
+}
+#[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
 #[serde(transparent)]
 struct Transparent {
     value: Count,
@@ -273,14 +279,32 @@ export function createCodec(method: unknown, types: unknown) {
         },
         "{entries:[[0,128,65535]],total:1n}",
     );
+    assert!(serde_json::from_value::<AdaptedBlob>(json!({"data":[],"extra":1})).is_err());
+    assert_eq!(
+        typescript::native_schema::<AdaptedBlob>().unwrap(),
+        typescript::native_schema::<Blob>().unwrap()
+    );
+    for (offset, data) in [vec![], vec![0, 127, 255], vec![42; 128]]
+        .into_iter()
+        .enumerate()
+    {
+        let javascript = format!("{{data:Uint8Array.from({data:?})}}");
+        let value = AdaptedBlob { data: data.clone() };
+        assert_eq!(
+            native::encode_request(17, &value, LIMITS).unwrap(),
+            native::encode_request(17, &Blob { data: data.into() }, LIMITS).unwrap()
+        );
+        add(directory, &mut checks, 14 + offset, value, &javascript);
+    }
     checks.push_str(r#"
+rejects(() => projection14.encodeRequest({data:new Uint8Array(),extra:1}), 'value');
 for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.encodeRequest(bad), 'value');
   const bytes = new TextEncoder().encode(bad);
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 14 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 17 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

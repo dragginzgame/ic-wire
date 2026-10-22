@@ -1,15 +1,42 @@
 //! Metadata only: Serde retains complete ownership of serialization.
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::visit::Visit;
 use syn::{Data, DeriveInput, Fields, parse_quote};
+
+// Recursive field bounds would make trait selection recurse before the metadata
+// traversal can return Complexity. Keep the existing parameter bounds for these
+// fields; ordinary fields can instead constrain their actual serialized type.
+struct RecursiveType<'a> {
+    name: &'a syn::Ident,
+    found: bool,
+}
+impl<'ast> Visit<'ast> for RecursiveType<'_> {
+    fn visit_type_path(&mut self, path: &'ast syn::TypePath) {
+        self.found |= path
+            .path
+            .segments
+            .iter()
+            .any(|segment| segment.ident == "Self" || segment.ident == *self.name);
+        syn::visit::visit_type_path(self, path);
+    }
+}
+
+struct Projection {
+    transparent: bool,
+    bytes: bool,
+}
 
 fn attributes(
     attrs: &[syn::Attribute],
     allow_transparent: bool,
     allow_borrow: bool,
-) -> syn::Result<bool> {
+    allow_bytes: bool,
+) -> syn::Result<Projection> {
     let mut transparent = false;
     let mut borrow = false;
+    let mut bytes = false;
+    let mut deny_unknown = false;
     for attr in attrs {
         if attr.path().is_ident("wire") {
             return Err(syn::Error::new_spanned(
@@ -21,6 +48,18 @@ fn attributes(
             attr.parse_nested_meta(|meta| {
                 if allow_transparent && meta.path.is_ident("transparent") && !transparent {
                     transparent = true;
+                    Ok(())
+                } else if allow_transparent && meta.path.is_ident("deny_unknown_fields") && !deny_unknown {
+                    // This changes map-format input handling, not Postcard's
+                    // positional layout. TS already rejects extra record keys.
+                    deny_unknown = true;
+                    Ok(())
+                } else if allow_bytes && meta.path.is_ident("with") && !bytes {
+                    let adapter = meta.value()?.parse::<syn::LitStr>()?;
+                    if !matches!(adapter.value().as_str(), "serde_bytes" | "::serde_bytes") {
+                        return Err(meta.error("unsupported Serde byte adapter; custom layouts require explicit verified metadata"));
+                    }
+                    bytes = true;
                     Ok(())
                 } else if allow_borrow && meta.path.is_ident("borrow") && !borrow {
                     // Borrowing changes Deserialize lifetimes, not Serde's layout.
@@ -38,20 +77,26 @@ fn attributes(
             })?;
         }
     }
-    Ok(transparent)
+    Ok(Projection { transparent, bytes })
 }
 
 fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Result<TokenStream> {
-    for field in fields {
-        attributes(&field.attrs, false, true)?;
-    }
     let values: Vec<_> = fields
         .iter()
         .map(|f| {
             let ty = &f.ty;
-            quote!(#context.describe::<#ty>()?)
+            let projection = attributes(&f.attrs, false, true, true)?;
+            Ok(if projection.bytes {
+                // serde_bytes encodes a byte buffer rather than visiting a list.
+                // Existing annotated fields keep their bytes and budgets; only
+                // previously unavailable metadata becomes Uint8Array. Regenerate
+                // bindings. The sealed bound rejects unqualified adapter inputs.
+                quote!(#context.describe_bytes::<#ty>()?)
+            } else {
+                quote!(#context.describe::<#ty>()?)
+            })
         })
-        .collect();
+        .collect::<syn::Result<_>>()?;
     let json = quote!(::ic_wire::__private::serde_json::json);
     if transparent {
         if values.len() != 1 {
@@ -84,7 +129,7 @@ fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Resu
 }
 
 pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
-    let transparent = attributes(&input.attrs, true, false)?;
+    let transparent = attributes(&input.attrs, true, false, false)?.transparent;
     let context = super::fresh_ident(&quote!(#input).to_string(), "__ic_wire_schema");
     // The retired finite Wire IDs sorted fields and determined enum tags. This
     // projection instead describes unchanged Serde bytes: declaration-order fields
@@ -98,7 +143,7 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
                 let newtype = matches!(&variant.fields, Fields::Unnamed(f) if f.unnamed.len() == 1);
                 // Serde also permits borrow on a newtype variant: it applies to
                 // the sole field's lifetimes and leaves the tag/payload unchanged.
-                attributes(&variant.attrs, false, newtype)?;
+                attributes(&variant.attrs, false, newtype, false)?;
                 let name = variant
                     .ident
                     .to_string()
@@ -118,13 +163,44 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
             ));
         }
     };
-    let name = input.ident;
-    let mut generics = input.generics;
-    for parameter in generics.type_params_mut() {
-        parameter
-            .bounds
-            .push(parse_quote!(::ic_wire::typescript::Wire));
+    let name = &input.ident;
+    let mut generics = input.generics.clone();
+    let fields: Vec<_> = match &input.data {
+        Data::Struct(data) => data.fields.iter().collect(),
+        Data::Enum(data) => data.variants.iter().flat_map(|v| &v.fields).collect(),
+        Data::Union(_) => unreachable!(),
+    };
+    let mut recursive = false;
+    for field in fields {
+        let mut visitor = RecursiveType { name, found: false };
+        visitor.visit_type(&field.ty);
+        recursive |= visitor.found;
+        if !visitor.found {
+            let ty = &field.ty;
+            let bound = if attributes(&field.attrs, false, true, true)?.bytes {
+                quote!(::ic_wire::typescript::SerdeBytesField)
+            } else {
+                quote!(::ic_wire::typescript::Wire)
+            };
+            generics
+                .make_where_clause()
+                .predicates
+                .push(parse_quote!(#ty: #bound));
+        }
     }
+    if recursive {
+        for parameter in generics.type_params_mut() {
+            parameter
+                .bounds
+                .push(parse_quote!(::ic_wire::typescript::Wire));
+        }
+    }
+    // Serialize is Wire's supertrait. Let Serde's own bounds establish this
+    // instead of assuming that every generic parameter is itself serialized.
+    generics
+        .make_where_clause()
+        .predicates
+        .push(parse_quote!(Self: ::ic_wire::__private::serde::Serialize));
     let (implementation, ty, constraints) = generics.split_for_impl();
     Ok(quote! {
         impl #implementation ::ic_wire::typescript::Wire for #name #ty #constraints {
@@ -150,6 +226,10 @@ mod tests {
             "struct A { #[serde(flatten)] a: u8 }",
             "struct A { #[serde(with = \"custom\")] a: u8 }",
             "struct A { #[serde(serialize_with = \"custom\")] a: u8 }",
+            "struct A { #[serde(deny_unknown_fields)] a: u8 }",
+            "#[serde(deny_unknown_fields, deny_unknown_fields)] struct A { a: u8 }",
+            "struct A { #[serde(with = \"serde_bytes\", with = \"serde_bytes\")] a: Vec<u8> }",
+            "struct A { #[serde(with = \"serde_bytes\", deserialize_with = \"custom\")] a: Vec<u8> }",
             "#[serde(borrow)] struct A { a: u8 }",
             "enum A { #[serde(borrow)] B }",
             "enum A { #[serde(borrow)] B(u8, u8) }",
