@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.1]
+## [0.6.1] - 2026-10-22
 
 - Allow field-level `serde(borrow)` and explicit borrowed lifetimes in `Wire`
   metadata derives. Borrowed bounded DTOs can now derive metadata alongside
