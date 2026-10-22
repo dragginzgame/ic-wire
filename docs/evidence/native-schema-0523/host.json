@@ -1,0 +1,198 @@
+[
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 2837,
+    "sample": 0,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3303,
+    "sample": 0,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3095,
+    "sample": 1,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 3412,
+    "sample": 1,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 3597,
+    "sample": 2,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3804,
+    "sample": 2,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3696,
+    "sample": 3,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 3332,
+    "sample": 3,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 3461,
+    "sample": 4,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3567,
+    "sample": 4,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3651,
+    "sample": 5,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 3460,
+    "sample": 5,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 3317,
+    "sample": 6,
+    "types": 1
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 3535,
+    "sample": 6,
+    "types": 1
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 312895,
+    "sample": 0,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 343939,
+    "sample": 0,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 346230,
+    "sample": 1,
+    "types": 100
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 322073,
+    "sample": 1,
+    "types": 100
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 318813,
+    "sample": 2,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 347103,
+    "sample": 2,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 346573,
+    "sample": 3,
+    "types": 100
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 316784,
+    "sample": 3,
+    "types": 100
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 317314,
+    "sample": 4,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 350668,
+    "sample": 4,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 350459,
+    "sample": 5,
+    "types": 100
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 326612,
+    "sample": 5,
+    "types": 100
+  },
+  {
+    "derived": false,
+    "iterations": 100,
+    "ns_per_iteration": 317250,
+    "sample": 6,
+    "types": 100
+  },
+  {
+    "derived": true,
+    "iterations": 100,
+    "ns_per_iteration": 348597,
+    "sample": 6,
+    "types": 100
+  }
+]

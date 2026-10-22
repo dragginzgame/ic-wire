@@ -88,8 +88,8 @@ fn artifact(messages: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
 }
 
 fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    if !matches!(primary, "wire-native" | "wire-finite") {
-        return Err("expected wire-native or wire-finite primary lane".into());
+    if !matches!(primary, "wire-native" | "wire-bounded") {
+        return Err("expected wire-native or wire-bounded primary lane".into());
     }
     let mut out = Vec::new();
     writeln!(

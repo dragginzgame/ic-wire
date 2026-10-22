@@ -1,0 +1,34 @@
+[
+  {
+    "cohort": "standard",
+    "profile": "evaluation",
+    "codec": "wire",
+    "wasm_bytes": 226940,
+    "code_section_bytes": 191639,
+    "sha256": "70e2e49edd27c8bce80312970b0b106ab453b65fa3fddac87734942f99e9ccfc"
+  },
+  {
+    "cohort": "standard",
+    "profile": "evaluation",
+    "codec": "candid",
+    "wasm_bytes": 563277,
+    "code_section_bytes": 506349,
+    "sha256": "89b70891a7b310485e98ae9ce26c2d2e2f9871c582790dbfded729dade406981"
+  },
+  {
+    "cohort": "standard",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "wasm_bytes": 323935,
+    "code_section_bytes": 273896,
+    "sha256": "2f1bf41f11b1ee5130ec3be6bd3d76fefe323fd5d36329c6d5fcd752838d6aa7"
+  },
+  {
+    "cohort": "standard",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "wasm_bytes": 860566,
+    "code_section_bytes": 788971,
+    "sha256": "8c10bea986ca7a669703645410e30f1cdbe49461058fa05506304f4c82f872af"
+  }
+]

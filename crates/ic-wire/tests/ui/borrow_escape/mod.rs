@@ -1,8 +1,10 @@
 fn escape() -> ic_wire::TextRef<'static, 32> {
-    let frame = ic_wire::encode_request::<crate::support::BorrowedRead<'_>>(
-        &ic_wire::TextRef::new("local").unwrap(),
+    let frame = ic_wire::native::encode_request(
+        8,
+        &ic_wire::TextRef::<32>::new("local").unwrap(),
+        crate::support::LIMITS,
     )
-    .unwrap()
-    .into_bytes();
-    ic_wire::decode_request::<crate::support::BorrowedRead<'_>>(&frame).unwrap()
+    .unwrap();
+    ic_wire::native::decode_request::<ic_wire::TextRef<'_, 32>>(8, &frame, crate::support::LIMITS)
+        .unwrap()
 }

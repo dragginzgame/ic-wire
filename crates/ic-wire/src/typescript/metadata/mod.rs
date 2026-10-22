@@ -1,4 +1,4 @@
-//! Rendering shared by finite schemas and consumer-owned native metadata.
+//! Rendering for consumer-owned Serde metadata.
 use super::{GenerationError, MAX_SAFE_INTEGER};
 use alloc::{
     collections::{BTreeMap, BTreeSet},
@@ -282,7 +282,8 @@ fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationErr
 
 /// Generate a module from the native metadata grammar consumed by [`super::RUNTIME`].
 ///
-/// Consumers own reflection, endpoint identities, resource limits and custom scalar
+/// [`super::native_schema`] describes supported native Serde declarations.
+/// Consumers own endpoint identities, resource limits and custom scalar
 /// checks. `runtime_module` selects their `createCodec` adapter (for example,
 /// `./native-runtime.js`); it is JSON-escaped. Metadata is trusted configuration,
 /// not untrusted input. Names, references, type shapes and generation complexity

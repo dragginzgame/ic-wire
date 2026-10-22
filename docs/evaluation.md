@@ -6,6 +6,12 @@ Endpoint adapters and browser SDKs remain consumer-owned. The unpublished codec
 benchmark package may use PocketIC for isolated IC instruction measurements;
 it does not qualify consumer endpoint integrations.
 
+The pending Serde hard cut removes the finite Wire API. Sections below recording
+finite admission and WireSchema experiments are historical research; the
+[current production comparison](candid-comparison.md#production-serde-hard-cut--pending-0523)
+owns shipped-codec IC, frame and Wasm measurements. The retained protocol-study
+runner requires archived finite sources and is not a production entrypoint.
+
 ## Maintained checks
 
 | Target | Evidence |
@@ -838,3 +844,117 @@ and `target/typescript-byte-ownership/`. SHA-256 identities:
 - `baseline.ts`: `8f8e8fea4e26d40b1efdfb153bc35382be9c8162776ace3d72db58381f34c945`.
 - `selected.ts`: `ea8e64c5b84b1ba8429acdd0bdc2e64122f06da8a37a05e237e7479e3f296a15`.
 - `bench-long.cjs`: `bc2dfed5fffad041468f1399fb90a305f0512a7904c1d91e724454257d2822c7`.
+
+## Native Serde metadata projection (pending 0.5.23)
+
+`NativeSchema` adds host metadata generation without changing serializers, frame
+bytes or codec admission. The maintained TypeScript conformance runner compares
+handwritten and derived `Page<u64>` metadata through the same registry renderer,
+asserting identical schemas and output. This measures schema construction plus
+rendering, not proc-macro compilation, deployed instructions or codec speed.
+
+| Named schemas | Handwritten median | Derived median | Change |
+| --- | ---: | ---: | ---: |
+| 1 | 3.412 µs | 3.567 µs | +4.54% |
+| 100 | 317.314 µs | 347.103 µs | +9.39% |
+
+Seven alternating samples of 100 iterations follow warmup, with black-boxed
+outputs. One-schema min/max are 2.837–3.597 µs handwritten and 3.095–3.804 µs
+derived; 100-schema ranges are 312.895–326.612 and 343.939–350.668 µs. These are
+unpinned Linux x86_64 observations using Rust 1.99.1/LLVM 23.1.1, opt-3/LTO,
+one codegen unit, panic abort and stripped symbols. The 100 names repeat one
+concrete shape; this is not a 100-distinct-derive compilation benchmark.
+Reproduce with `cargo run --locked -p ic-wire --features typescript --profile
+benchmark-speed --example typescript-conformance -- target/native-schema-measured`.
+The output directory includes `native-schema-host-benchmark.json`.
+
+Separately built deployed Wire fixtures are byte-identical before/after:
+
+| Profile | Wasm code-section bytes, before → after | Total Wasm bytes, before → after |
+| --- | ---: | ---: |
+| opt-z | 43,345 → 43,345 | 54,378 → 54,378 |
+| opt-3 | 51,525 → 51,525 | 78,338 → 78,338 |
+
+Both use `codec-wasm`, features `wire,derive-scale-1`, target
+`wasm32-unknown-unknown`, and the evaluation/benchmark-speed profiles. Baseline
+is `9a1c06e` with the candidate Cargo.toml/Cargo.lock (Tooling 0.64.1, Platform
+0.6.8); candidate adds the metadata implementation. Separate target directories
+prevent cross-checkout artifact reuse. Build each with `cargo build --locked
+-p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown
+--profile PROFILE --features wire,derive-scale-1`; `codec-report --code-size`
+measures the code section. No IC instruction rerun is needed for identical
+binaries; this does not requalify every consumer or the full Candid suite.
+
+[Samples](evidence/native-schema-0523/host.json),
+[source/compiler identity](evidence/native-schema-0523/identity.json) and
+[artifact sizes/hashes](evidence/native-schema-0523/artifacts.json) retain the
+measurement boundary. Existing 146 vectors and 29,560 mutation comparisons pass,
+plus ten derived-native exact-frame fixtures in both directions. Custom hex
+projections reject invalid strings and missing validators. Runtime implementations
+and the TypeScript codec are unchanged; this adds a schema supplier for them.
+
+## Standard Serde derives with finite admission (0.5.23 experiment)
+
+An isolated, unpublished prototype replaces the benchmark records/enums' generated
+Wire serializers with ordinary Serde Serialize/Deserialize derives. An experimental
+`WireSchema` derive retains the existing Shape, schema and canonical hooks, assigning
+positions from declaration order without field-ID annotations. Runtime encoding,
+budgets and verification are unchanged. This is a derive-only experiment, not a
+switch to `native` admission. Bounded Bytes/Text/List and finite field constraints
+remain; unrestricted Vec/String contracts are not qualified by these results.
+
+Matched opt-3/LTO Wasm results (bytes):
+
+| Fixture | Code section, existing → Serde | Total Wasm, existing → Serde |
+| --- | ---: | ---: |
+| One record | 51,525 → 51,527 | 78,338 → 78,340 |
+| 100 records | 355,288 → 345,103 | 389,823 → 379,595 |
+| Standard corpus | 264,914 → 264,810 | 314,728 → 314,624 |
+
+The 100-record fixture saves 10,228 total bytes (2.62%) and 10,185 code bytes
+(2.87%). At opt-z it saves 4,604 total bytes and 4,608 code bytes. These are linked
+fixtures, not symbol-attributed savings; the 100 nominal types use sixteen array
+widths. The one-type opt-z artifact has equal size but a different hash; its opt-3 artifact grows
+by two bytes. Both profiles, all artifact hashes and the standard corpus are in
+[artifact evidence](evidence/serde-derive-0523/artifacts.json).
+
+For all 100 records at opt-3, IC encode instructions fall 2.42–5.53% and decode
+instructions fall 1.85–4.15%. The standard corpus retains the 1 MiB owned blob's
+1,049,786 decode instructions; the ordinary native control remains 2,524,535.
+Empty relay batch decode falls from 526.5 to 450.5. There are small regressions:
+unit-enum encode rises from 500.25 to 505.25 (+1.00%); at opt-z one scale-record
+decode rises by one instruction, and the worst scale truncation rejection rises
+from 3,482.5 to 3,541.5 (+1.69%). No blanket speedup is claimed.
+
+All 2,708 paired IC rows have unchanged input/frame hashes and three identical
+samples. Each short operation repeats four times per query, or once above 64 KiB,
+with no loop/counter subtraction. Both artifacts decode against the same host
+oracle; standard and 100-type roundtrip/damaged-frame tests also pass. The
+[instruction table](evidence/serde-derive-0523/instructions.csv) retains unchanged
+controls and error-path costs as well as improvements.
+
+This is evidence for separating Serde derives from Wire metadata/admission, not
+approval to expose the prototype as a public API. It assumes reviewed ordinary
+Serde implementations and has no general custom-serializer attribute validation.
+A production derive must establish that contract before granting canonical
+shortcuts, support the intended generic/bound policy and qualify TypeScript and
+malformed-input behavior. Automatically assigned metadata IDs differ from the
+old explicit IDs even where fixture bytes match; consumers hashing schemas would
+need regenerated identities. No production codec/API or existing work was changed.
+
+Native opt-3 timing uses two runs per variant, eleven calibrated batches of at
+least 2 ms (cap 1,048,576 iterations), ordered baseline/candidate/candidate/baseline.
+Empty relay decode moves from 23.98–24.23 to 21.82–22.07 ns; 1 MiB owned blob
+remains approximately 17 µs (17.29–17.42 versus 17.13–17.35). Results are mixed:
+32-hash manifest decode moves from 1.233–1.252 to 1.238–1.275 µs, and record-variant
+decode from 70.39–74.95 to 72.91–75.93 ns. All 2,316 native row pairs preserve
+input/frame hashes. These unpinned Linux timings include result destruction and
+are separate from IC costs; allocation/heap measurements were not rerun.
+
+[Native results](evidence/serde-derive-0523/native.csv),
+[compiler/source identity and parameters](evidence/serde-derive-0523/identity.json)
+and [raw samples, source snapshots, prototype patch and commands](evidence/serde-derive-0523/raw.json.gz)
+retain reproduction evidence. Both targets use Rust 1.99.1/LLVM 23.1.1 and matched
+locks/profiles; PocketIC is 16.1.0. Sources live in isolated baseline/candidate
+copies of `9a1c06e` with the same updated Cargo selections. No new Candid IC run,
+full CI, macOS or production migration was performed.

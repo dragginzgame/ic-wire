@@ -1,7 +1,7 @@
 //! Explicit resource admission for native Serde payloads in the same Postcard format.
 //!
 //! Types, IDs, deterministic serialization and domain rules are consumer-owned.
-//! This does not implement `Wire` for arbitrary types or infer a finite schema.
+//! Resource admission follows Serde visits; no static schema is inferred.
 //! Custom Serde implementations are trusted: allocations/work outside visited
 //! values cannot be constrained here. See the runtime guide for budget semantics.
 #[cfg(test)]

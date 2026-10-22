@@ -1,6 +1,6 @@
 //! Input-backed finite byte and text values. Deserializers must lend their input.
 use super::{Bytes, Text};
-use crate::{Error, Shape, Wire, schema::Schema};
+use crate::Error;
 use core::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
@@ -48,13 +48,6 @@ impl<'de: 'a, 'a, const N: usize> Deserialize<'de> for BytesRef<'a, N> {
         d.deserialize_bytes(Visitor::<N>)
     }
 }
-impl<const N: usize> Wire for BytesRef<'_, N> {
-    const SHAPE: Shape = Shape {
-        heap: 0,
-        ..Bytes::<N>::SHAPE
-    };
-    const SCHEMA: Schema = Bytes::<N>::SCHEMA;
-}
 
 /// UTF-8 text bounded in bytes, borrowing its backing storage.
 /// Decoding accepts borrowed input only, without an owned fallback.
@@ -96,11 +89,4 @@ impl<'de: 'a, 'a, const N: usize> Deserialize<'de> for TextRef<'a, N> {
         }
         d.deserialize_str(Visitor::<N>)
     }
-}
-impl<const N: usize> Wire for TextRef<'_, N> {
-    const SHAPE: Shape = Shape {
-        heap: 0,
-        ..Text::<N>::SHAPE
-    };
-    const SCHEMA: Schema = Text::<N>::SCHEMA;
 }

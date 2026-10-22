@@ -20,9 +20,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.64.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.64.1 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.64 without default features; the CLI feature is only enabled for installation.
+0.64.1 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -193,7 +193,7 @@ CORPUS_FEATURE=derive-scale POCKET_IC_BIN=/path/to/pocket-ic \
 `make check-consumer-benchmarks` qualifies these fixtures without timings;
 `check-benchmarks` includes it. The Toko cohort contains copied small DTO shapes
 and a labelled token-card projection, not a dependency on Toko or its endpoints.
-The derive cohorts use finite `Wire` derives versus `CandidType`/Serde derives;
+The derive cohorts use Serde derives versus `CandidType`/Serde derives;
 every selected type is exercised. Identical generated code may still be shared
 by the compiler. `build-times.csv` records single build-command durations rounded
 to whole seconds: dependencies may be cached, and these are neither isolated

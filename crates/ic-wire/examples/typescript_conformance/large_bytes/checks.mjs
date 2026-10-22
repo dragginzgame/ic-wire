@@ -1,5 +1,5 @@
 {
-  const codec = await import('./compiled/large.js');
+  const { codec } = await import('./compiled/large.js');
   const { readFileSync } = await import('node:fs');
   const value = Uint8Array.from({length:1024*1024},(_,i)=>i%251);
   for (const [encode,decode,file] of [[codec.encodeRequest,codec.decodeRequest,'large-request.bin'],[codec.encodeResponse,codec.decodeResponse,'large-response.bin']]) {

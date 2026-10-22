@@ -1,0 +1,30 @@
+[
+  {
+    "profile": "evaluation",
+    "revision": "before",
+    "sha256": "d3921dbdee84dc74f0fc47bfd207469c920b4ad3e8f6211c6caf09ea5a8cc7d0",
+    "wasm_bytes": 54378,
+    "code_bytes": 43345
+  },
+  {
+    "profile": "evaluation",
+    "revision": "after",
+    "sha256": "d3921dbdee84dc74f0fc47bfd207469c920b4ad3e8f6211c6caf09ea5a8cc7d0",
+    "wasm_bytes": 54378,
+    "code_bytes": 43345
+  },
+  {
+    "profile": "benchmark-speed",
+    "revision": "before",
+    "sha256": "561c234cc3db09f05ab820f866cbb1479811098ad9479c7ee66d478d4b3ed7e4",
+    "wasm_bytes": 78338,
+    "code_bytes": 51525
+  },
+  {
+    "profile": "benchmark-speed",
+    "revision": "after",
+    "sha256": "561c234cc3db09f05ab820f866cbb1479811098ad9479c7ee66d478d4b3ed7e4",
+    "wasm_bytes": 78338,
+    "code_bytes": 51525
+  }
+]

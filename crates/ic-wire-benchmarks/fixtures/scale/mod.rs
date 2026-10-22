@@ -1,19 +1,19 @@
 //! Nominally distinct records: six fields, sixteen byte-array widths, unique field labels.
-//! Each enabled type has a runtime-selectable codec path. No native Wire lane is linked.
+//! Each enabled type has a runtime-selectable codec path. All Wire records use the production Serde codec.
 use super::*;
 macro_rules! record {
     ($module:ident, $field:ident, $width:literal) => {
         mod $module {
             use super::*;
             #[cfg(feature = "wire")]
-            #[derive(Debug, PartialEq, ic_wire::Wire)]
+            #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
             struct WireRecord {
-                #[wire(id = 1)] $field: u64,
-                #[wire(id = 2)] active: bool,
-                #[wire(id = 3)] delta: i64,
-                #[wire(id = 4)] optional: Option<u64>,
-                #[wire(id = 5)] bytes: [u8; $width],
-                #[wire(id = 6)] label: ic_wire::Text<64>,
+                $field: u64,
+                active: bool,
+                delta: i64,
+                optional: Option<u64>,
+                bytes: [u8; $width],
+                label: ic_wire::Text<64>,
             }
             #[cfg(feature = "candid")]
             #[derive(Debug, PartialEq, serde::Deserialize, Serialize, CandidType)]
@@ -33,11 +33,11 @@ macro_rules! record {
                     "optional": 128, "bytes": vec![42_u8; $width], "label": "Representative record"
                 })).unwrap();
                 #[cfg(feature = "wire")]
-                lanes.push(lane("wire-finite", Rc::new(WireRecord {
+                lanes.push(lane("wire-bounded", Rc::new(WireRecord {
                     $field: 1_000_000, active: true, delta: -65, optional: Some(128),
                     bytes: [42; $width], label: ic_wire::Text::new("Representative record".into()).unwrap(),
-                }), |v| ic_wire::encode_request::<Binding<WireRecord>>(v).unwrap().into_bytes(),
-                    |b| ic_wire::decode_request::<Binding<WireRecord>>(b).ok()));
+                }), |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
+                    |b| ic_wire::native::decode_request::<WireRecord>(METHOD, b, LIMITS).ok()));
                 #[cfg(feature = "candid")]
                 lanes.push(lane("candid", Rc::new(CandidRecord {
                     $field: 1_000_000, active: true, delta: -65, optional: Some(128),

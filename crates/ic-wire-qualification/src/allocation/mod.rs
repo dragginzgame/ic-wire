@@ -1,7 +1,7 @@
 //! Matched bounded Postcard workloads; layouts have distinct experiment identities.
-use ic_wire::{Bytes, Limits, List, Method, Text, Wire, native};
+use ic_wire::{Bytes, Limits, List, Text, native};
 use serde::{Deserialize, Serialize};
-use std::{hint::black_box, marker::PhantomData};
+use std::hint::black_box;
 
 const LIMITS: Limits = Limits {
     bytes: 2 * 1024 * 1024,
@@ -26,31 +26,22 @@ pub struct Sample {
     /// Observed output capacity after one successful call, not peak heap usage.
     pub capacity: usize,
 }
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Header {
-    #[wire(id = 1)]
     upload: u128,
-    #[wire(id = 2)]
     object: u128,
-    #[wire(id = 3)]
     root: [u8; 32],
-    #[wire(id = 4)]
     bytes: u64,
-    #[wire(id = 5)]
     content_type: Text<64>,
 }
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct ArrayManifest {
-    #[wire(id = 1)]
     header: Header,
-    #[wire(id = 2)]
     chunks: List<[u8; 32], 1024>,
 }
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct PackedManifest {
-    #[wire(id = 1)]
     header: Header,
-    #[wire(id = 2)]
     chunks: Bytes<32768>,
 }
 #[derive(Deserialize, Serialize)]
@@ -94,15 +85,6 @@ struct PackedView<'a> {
     header: HeaderView<'a>,
     #[serde(borrow)]
     chunks: &'a serde_bytes::Bytes,
-}
-struct Binding<T, const ID: u64>(PhantomData<T>);
-impl<T: Wire, const ID: u64> Method for Binding<T, ID> {
-    type Request = T;
-    type Response = T;
-    const ID: u64 = ID;
-    const NAME: &'static str = "allocation_experiment";
-    const REQUEST_LIMITS: Limits = LIMITS;
-    const RESPONSE_LIMITS: Limits = LIMITS;
 }
 fn header(n: usize) -> Header {
     Header {
@@ -193,10 +175,10 @@ pub fn name(case: usize) -> String {
             [0, 1, 32, 1024][case / 7],
             [
                 "native-array",
-                "finite-array",
+                "bounded-array",
                 "reuse-array",
                 "native-packed",
-                "finite-packed",
+                "bounded-packed",
                 "reuse-packed",
                 "borrow-packed"
             ][case % 7]
@@ -206,7 +188,7 @@ pub fn name(case: usize) -> String {
         format!(
             "blob-{}-{}",
             [0, 32, 4096, 1048576][c / 4],
-            ["native-owned", "finite-owned", "reuse-owned", "borrow"][c % 4]
+            ["native-owned", "bounded-owned", "reuse-owned", "borrow"][c % 4]
         )
     }
 }
@@ -235,7 +217,7 @@ pub fn run_with_scan(
         let n = [0, 1, 32, 1024][case / 7];
         let lane = case % 7;
         if lane < 3 {
-            let finite = ArrayManifest {
+            let bounded = ArrayManifest {
                 header: header(n),
                 chunks: List::new((0..n).map(hash).collect()).unwrap(),
             };
@@ -250,8 +232,8 @@ pub fn run_with_scan(
                 clock,
                 |bytes| {
                     if lane == 1 {
-                        let v = ic_wire::decode_request::<Binding<ArrayManifest, ARRAY>>(bytes)
-                            .unwrap();
+                        let v =
+                            native::decode_request::<ArrayManifest>(ARRAY, bytes, LIMITS).unwrap();
                         checksum(v.chunks.as_slice().iter().flatten().copied(), scan)
                     } else {
                         let v: OwnedArray = native::decode_request(ARRAY, bytes, LIMITS).unwrap();
@@ -261,9 +243,8 @@ pub fn run_with_scan(
                 },
                 || {
                     if lane == 1 {
-                        ic_wire::encode_request::<Binding<ArrayManifest, ARRAY>>(black_box(&finite))
+                        native::encode_request::<ArrayManifest>(ARRAY, black_box(&bounded), LIMITS)
                             .unwrap()
-                            .into_bytes()
                     } else {
                         native::encode_request(ARRAY, black_box(&owned), LIMITS).unwrap()
                     }
@@ -271,11 +252,11 @@ pub fn run_with_scan(
             );
             assert_eq!(
                 native::decode_request::<ArrayManifest>(ARRAY, &sample.bytes, LIMITS).unwrap(),
-                finite
+                bounded
             );
             sample
         } else {
-            let finite = PackedManifest {
+            let bounded = PackedManifest {
                 header: header(n),
                 chunks: Bytes::new((0..n).flat_map(hash).collect()).unwrap(),
             };
@@ -301,7 +282,7 @@ pub fn run_with_scan(
                             native::decode_request(PACKED, bytes, LIMITS).unwrap();
                         packed_checksum(v.chunks, scan).unwrap()
                     } else if lane == 4 {
-                        let v = ic_wire::decode_request::<Binding<PackedManifest, PACKED>>(bytes)
+                        let v = native::decode_request::<PackedManifest>(PACKED, bytes, LIMITS)
                             .unwrap();
                         packed_checksum(v.chunks.as_slice(), scan).unwrap()
                     } else {
@@ -311,11 +292,12 @@ pub fn run_with_scan(
                 },
                 || {
                     if lane == 4 {
-                        ic_wire::encode_request::<Binding<PackedManifest, PACKED>>(black_box(
-                            &finite,
-                        ))
+                        native::encode_request::<PackedManifest>(
+                            PACKED,
+                            black_box(&bounded),
+                            LIMITS,
+                        )
                         .unwrap()
-                        .into_bytes()
                     } else {
                         native::encode_request(PACKED, black_box(&owned), LIMITS).unwrap()
                     }
@@ -323,7 +305,7 @@ pub fn run_with_scan(
             );
             assert_eq!(
                 native::decode_request::<PackedManifest>(PACKED, &sample.bytes, LIMITS).unwrap(),
-                finite
+                bounded
             );
             if lane == 6 {
                 let view: PackedView<'_> =
@@ -341,8 +323,8 @@ pub fn run_with_scan(
         let c = case - 28;
         let n = [0, 32, 4096, 1048576][c / 4];
         let lane = c % 4;
-        let finite = Bytes::<1048576>::new((0..n).map(|i| (i % 251) as u8).collect()).unwrap();
-        let owned = serde_bytes::ByteBuf::from(finite.as_slice().to_vec());
+        let bounded = Bytes::<1048576>::new((0..n).map(|i| (i % 251) as u8).collect()).unwrap();
+        let owned = serde_bytes::ByteBuf::from(bounded.as_slice().to_vec());
         let mode = if lane == 1 {
             1
         } else if lane == 2 {
@@ -361,8 +343,7 @@ pub fn run_with_scan(
                         native::decode_request(BLOB, bytes, LIMITS).unwrap();
                     checksum(v.iter().copied(), scan)
                 } else if lane == 1 {
-                    let v =
-                        ic_wire::decode_request::<Binding<Bytes<1048576>, BLOB>>(bytes).unwrap();
+                    let v = native::decode_request::<Bytes<1048576>>(BLOB, bytes, LIMITS).unwrap();
                     checksum(v.as_slice().iter().copied(), scan)
                 } else {
                     let v: serde_bytes::ByteBuf =
@@ -372,9 +353,8 @@ pub fn run_with_scan(
             },
             || {
                 if lane == 1 {
-                    ic_wire::encode_request::<Binding<Bytes<1048576>, BLOB>>(black_box(&finite))
+                    native::encode_request::<Bytes<1048576>>(BLOB, black_box(&bounded), LIMITS)
                         .unwrap()
-                        .into_bytes()
                 } else {
                     native::encode_request(BLOB, black_box(&owned), LIMITS).unwrap()
                 }
@@ -382,7 +362,7 @@ pub fn run_with_scan(
         );
         assert_eq!(
             native::decode_request::<Bytes<1048576>>(BLOB, &sample.bytes, LIMITS).unwrap(),
-            finite
+            bounded
         );
         sample
     }

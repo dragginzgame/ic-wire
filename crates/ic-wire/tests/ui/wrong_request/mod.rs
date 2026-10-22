@@ -1,4 +1,3 @@
-use crate::support::*;
 fn invalid() {
-    let _ = ic_wire::encode_request::<Read>(&true);
+    let _ = ic_wire::native::encode_request::<u64>(7, &true, crate::support::LIMITS);
 }

@@ -1,15 +1,16 @@
 # IC Wire
 
 A bounded Postcard binary protocol for controlled Rust endpoints on the Internet
-Computer. IC Wire owns encoding, explicit layouts, resource admission and typed
+Computer. IC Wire owns encoding, resource admission and typed
 codec errors. Consumers own transport, authentication, endpoint integration,
 application semantics and retry policy.
 
-The maintained runtime supplies explicit-layout derives, bounded containers,
-finite float wrappers and canonical request/reply envelopes. The native Serde
-API admits ordinary containers and recursive values under explicit resource
-limits. Optional host-side generation emits matching TypeScript codecs without
-importing a transport or SDK.
+The production runtime uses ordinary Serde derives with one Postcard codec.
+Bounded byte/text/list and finite-float fields remain optional Serde types.
+Runtime traversal supplies byte, allocation, node and depth admission; host-only
+`Wire` metadata generates matching TypeScript without field IDs.
+The former finite API is retired; `Wire` now generates metadata only. Alternative strategies
+remain research rather than selectable production modes.
 
 Start with the [runtime guide](docs/runtime.md), [design](docs/design.md),
 [evaluation scope](docs/evaluation.md) and [current handoff](docs/status/current.md).

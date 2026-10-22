@@ -1,4 +1,4 @@
-use crate::{Error, Shape, Wire, schema::Schema};
+use crate::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
 macro_rules! finite {
@@ -33,11 +33,6 @@ macro_rules! finite {
                 Self::new(<$primitive>::deserialize(deserializer)?)
                     .map_err(|_| de::Error::custom("non-finite float"))
             }
-        }
-        impl Wire for $name {
-            const __CANONICAL_FIELDS: bool = true;
-            const SHAPE: Shape = Shape::scalar($bits / 8);
-            const SCHEMA: Schema = Schema::Float($bits);
         }
     };
 }

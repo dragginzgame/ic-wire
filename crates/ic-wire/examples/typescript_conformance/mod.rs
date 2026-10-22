@@ -1,80 +1,60 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
 mod large_bytes;
-use ic_wire::{Bytes, Limits, List, Method, Text, Wire, encode_request, encode_response};
+mod native_schema;
+use ic_wire::{Bytes, Limits, List, Text, Wire};
 use std::{
     fmt::Write as _,
     fs,
     io::{BufWriter, Write as _},
-    marker::PhantomData,
     path::PathBuf,
 };
 
-struct Contract<T>(PhantomData<T>);
-impl<T: Wire> Method for Contract<T> {
-    type Request = T;
-    type Response = T;
-    const ID: u64 = 0xfedc_ba98_7654_3210;
-    const NAME: &'static str = "conformance";
-    const REQUEST_LIMITS: Limits = Limits {
-        bytes: 4096,
-        allocation: 16384,
-        nodes: 512,
-        depth: 32,
-    };
-    const RESPONSE_LIMITS: Limits = Self::REQUEST_LIMITS;
+const ID: u64 = 0xfedc_ba98_7654_3210;
+const LIMITS: Limits = Limits {
+    bytes: 4096,
+    allocation: 65536,
+    nodes: 4096,
+    depth: 64,
+};
+fn generate<T: ic_wire::typescript::Wire>() -> String {
+    let schema = ic_wire::typescript::native_schema::<T>().unwrap();
+    let method = serde_json::json!({"name":"codec","mode":"query","id":ID.to_string(),"request":schema,"response":schema,"requestBytes":LIMITS.bytes,"responseBytes":LIMITS.bytes,"requestNodes":LIMITS.nodes,"responseNodes":LIMITS.nodes,"requestDepth":LIMITS.depth,"responseDepth":LIMITS.depth});
+    ic_wire::typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
+        .unwrap()
 }
-#[derive(Wire)]
+#[derive(serde::Serialize, serde::Deserialize, Wire)]
 struct Record {
-    #[wire(id = 9)]
     r#type: Text<32>,
-    #[wire(id = 1)]
     __proto__: Bytes<8>,
-    #[wire(id = 5)]
     optional: Option<Option<()>>,
 }
-#[derive(Wire)]
+#[derive(serde::Serialize, serde::Deserialize, Wire)]
 enum Choice {
-    #[wire(id = 4294967295)]
     Last,
-    #[wire(id = 128)]
     Payload(Record),
-    #[wire(id = 3)]
     Empty,
 }
-#[derive(Wire)]
+#[derive(serde::Serialize, serde::Deserialize, Wire)]
 enum BoxedChoice {
-    #[wire(id = 128)]
     Payload(Box<Record>),
-    #[wire(id = 3)]
     Empty,
 }
 // Consumer-shaped SQL page, not IcyDB's public DTO or storage representation.
-#[derive(Wire)]
+#[derive(serde::Serialize, serde::Deserialize, Wire)]
 enum SqlCell {
-    #[wire(id = 1)]
     Null,
-    #[wire(id = 2)]
     Signed(i64),
-    #[wire(id = 3)]
     Unsigned(u64),
-    #[wire(id = 4)]
     Real(ic_wire::FiniteF64),
-    #[wire(id = 5)]
     Single(ic_wire::FiniteF32),
-    #[wire(id = 6)]
     Text(Text<64>),
-    #[wire(id = 7)]
     Blob(Bytes<32>),
-    #[wire(id = 8)]
     Boolean(bool),
 }
-#[derive(Wire)]
+#[derive(serde::Serialize, serde::Deserialize, Wire)]
 struct SqlPage {
-    #[wire(id = 1)]
     columns: List<Text<32>, 8>,
-    #[wire(id = 2)]
     rows: List<List<SqlCell, 8>, 4>,
-    #[wire(id = 3)]
     next: Option<Bytes<16>>,
 }
 // Native Serde shape oracle, independent of the JavaScript descriptor.
@@ -93,39 +73,42 @@ struct Fixture {
     mutation_data: BufWriter<fs::File>,
 }
 impl Fixture {
-    fn add_boxed<T: Wire + serde::de::DeserializeOwned>(&mut self, value: T, javascript: &str) {
+    fn add_boxed<T: ic_wire::typescript::Wire + serde::de::DeserializeOwned>(
+        &mut self,
+        value: T,
+        javascript: &str,
+    ) {
         let boxed = Box::new(value);
         assert_eq!(
-            encode_request::<Contract<T>>(&boxed).unwrap().as_bytes(),
-            encode_request::<Contract<Box<T>>>(&boxed)
+            ic_wire::native::encode_request::<T>(ID, &boxed, LIMITS)
                 .unwrap()
-                .as_bytes(),
+                .as_slice(),
+            ic_wire::native::encode_request::<Box<T>>(ID, &boxed, LIMITS)
+                .unwrap()
+                .as_slice(),
         );
-        assert_eq!(
-            ic_wire::typescript::generate::<Contract<T>>().unwrap(),
-            ic_wire::typescript::generate::<Contract<Box<T>>>().unwrap(),
-        );
+        assert_eq!(generate::<T>(), generate::<Box<T>>(),);
         self.add(boxed, javascript);
     }
-    fn add<T: Wire + serde::de::DeserializeOwned>(&mut self, value: T, javascript: &str) {
+    fn add<T: ic_wire::typescript::Wire + serde::de::DeserializeOwned>(
+        &mut self,
+        value: T,
+        javascript: &str,
+    ) {
         let name = format!("m{}", self.count);
-        fs::write(
-            self.directory.join(format!("{name}.ts")),
-            ic_wire::typescript::generate::<Contract<T>>().unwrap(),
-        )
-        .unwrap();
-        let request = encode_request::<Contract<T>>(&value).unwrap();
-        let response = encode_response::<Contract<T>>(&value).unwrap();
-        writeln!(self.checks, "import * as {name} from './compiled/{name}.js';\ncheck({name}, {javascript}, {:?}, {:?});", request.as_bytes(), response.as_bytes()).unwrap();
+        fs::write(self.directory.join(format!("{name}.ts")), generate::<T>()).unwrap();
+        let request = ic_wire::native::encode_request::<T>(ID, &value, LIMITS).unwrap();
+        let response = ic_wire::native::encode_response::<T>(ID, &value, LIMITS).unwrap();
+        writeln!(self.checks, "import {{ codec as {name} }} from './compiled/{name}.js';\ncheck({name}, {javascript}, {:?}, {:?});", request.as_slice(), response.as_slice()).unwrap();
         assert_eq!(
-            ic_wire::encoded_request_len::<Contract<T>>(&value).unwrap(),
-            request.as_bytes().len()
+            ic_wire::native::encoded_frame_len::<T>(&value, LIMITS).unwrap(),
+            request.as_slice().len()
         );
         assert_eq!(
-            ic_wire::encoded_response_len::<Contract<T>>(&value).unwrap(),
-            response.as_bytes().len()
+            ic_wire::native::encoded_frame_len::<T>(&value, LIMITS).unwrap(),
+            response.as_slice().len()
         );
-        for (direction, original) in [(0, request.as_bytes()), (1, response.as_bytes())] {
+        for (direction, original) in [(0, request.as_slice()), (1, response.as_slice())] {
             let mut candidates = Vec::new();
             for offset in 0..original.len() {
                 for bit in [1, 128] {
@@ -163,17 +146,11 @@ impl Fixture {
             }
             for bytes in candidates {
                 let accepted = if direction == 0 {
-                    ic_wire::decode_request::<Contract<T>>(&bytes).map(|v| {
-                        ic_wire::encode_request::<Contract<T>>(&v)
-                            .unwrap()
-                            .into_bytes()
-                    })
+                    ic_wire::native::decode_request::<T>(ID, &bytes, LIMITS)
+                        .map(|v| ic_wire::native::encode_request::<T>(ID, &v, LIMITS).unwrap())
                 } else {
-                    ic_wire::decode_response::<Contract<T>>(&bytes).map(|v| {
-                        ic_wire::encode_response::<Contract<T>>(&v)
-                            .unwrap()
-                            .into_bytes()
-                    })
+                    ic_wire::native::decode_response::<T>(ID, &bytes, LIMITS)
+                        .map(|v| ic_wire::native::encode_response::<T>(ID, &v, LIMITS).unwrap())
                 };
                 if let Ok(encoded) = &accepted {
                     assert_eq!(encoded, &bytes);
@@ -414,5 +391,6 @@ fn main() {
     writeln!(f.checks, "console.log('Rust/TypeScript conformance: {} vectors, both directions, truncation and identity rejection passed');", f.count).unwrap();
     writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and canonical re-encode checks passed');", f.mutations).unwrap();
     f.checks.push_str(&large_bytes::generate(&f.directory));
+    f.checks.push_str(&native_schema::generate(&f.directory));
     fs::write(f.directory.join("checks.mjs"), f.checks).unwrap();
 }

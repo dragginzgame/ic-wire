@@ -1,90 +1,78 @@
 # Current handoff
 
-## Current batch
+## Current batch: one production Serde codec
 
-Pending 0.5.22 preserves one Postcard encoding with no size/speed selector.
-Existing finite-derived, ordinary-Serde and borrowed APIs remain separately
-qualified admission/ownership paths. Opt-z and opt-3 are compiler profiles of
-that same implementation. Optimize code-section and total uncompressed Wasm
-size, measuring instruction tradeoffs; gzip is not an acceptance criterion.
-Package versions, staging, commits and release remain maintainer-owned.
+0.5.22 is released at `9a1c06e`; pending 0.6.0 is a maintainer-approved hard cut.
+The minor release reflects breaking API/layout changes. Evidence retains its
+original 0.5.23 candidate labels and paths; package versions remain release-owned.
+Keep one production Serde/Postcard codec, exposed through `ic_wire::native`.
+The former serializer-generating derive, finite Wire trait, Shape/static admission, Method and typed retained
+frames, root finite functions and finite TypeScript generator are removed.
+No parallel codec, compatibility shim, migration reader or caller-selected mode.
+Alternate serializers/derive designs remain isolated research only.
 
-Earlier retained runtime changes are Wasm native serialization/compound inlining
-and shared fresh finite output allocation/header setup. Protocol bytes, bounds,
-canonical validation, typed errors and public APIs are unchanged. The inlining
-experiment reduces opt-3 array-manifest encode/decode instructions by 20.0%/18.8%
-against 0.5.21. Shared output setup reduces the 100-type opt-3 code section by
-9,300 bytes (2.49%), trading +0.49–0.68% encode and +4.23–5.66% decode instructions
-against its immediately preceding baseline. Byte-level sharing was rejected after
-an 82% generic-vector decode regression; rejected hints and tuple helpers are absent.
-See [runtime experiments](../candid-comparison.md) and
-[setup evidence](../candid-consumer-comparison.md#one-default-shared-finite-output-setup).
+Consumers use Serialize/Deserialize, explicit method IDs and runtime Limits.
+Bytes/Text/List, borrowed views and finite floats remain ordinary Serde fields.
+Wire supplies host-only metadata for concrete generics without field IDs; the
+unreleased NativeSchema name is removed. Use Serialize, Deserialize and Wire.
+Existing native frames and envelope bytes remain unchanged. Former finite records
+now follow declaration order; enums use zero-based indices instead of wire IDs.
+Coordinate affected consumers, regenerate metadata and retain exact same-release
+retry bytes. The packaged [guide](../../crates/ic-wire/README.md) owns migration,
+conservative traversal allowances and custom-serializer constraints.
 
-The small-savings follow-up keeps out-of-line Wasm header validation and
-`strip = "symbols"` in benchmark profiles for both codecs. Most file savings are
-metadata removal, not code headroom; consumers select stripping in their own
-workspace and lose diagnostic names. Header sharing has a small instruction cost
-and is not a code-size win in every profile. See the consumer report's small-savings
-section and `docs/evidence/small-savings-0522/` for before/after evidence.
-Bulk-comparison sharing remains rejected. The earlier full rerun includes those
-changes; the guarded verification follow-up is summarized below.
+## Canic unblock
 
-## Latest Candid comparison
+Canic #613 records Wire #17's native generic metadata as its supplier blocker.
+The pending Wire implementation covers Page<T>, ordinary records/enums,
+transparent wrappers and verified explicit custom scalar metadata. It generates
+no serializer and needs no deployment-side TypeScript/JSON feature. Unsupported
+Serde attributes and recursive inline schemas reject; custom implementations
+must describe actual serialized bytes and validate their domains.
 
-Guarded finite verification is now retained: direct `Bytes<N>` verifies its length
-without rescanning the unchanged copied payload. Generated records delegate only
-when every field preserves roundtrip boundaries. Manual Wire implementations must
-keep the hidden defaults. Any custom child forces whole-record exact comparison;
-ordinary native Serde, enums and container verification remain unchanged. This is
-one Postcard encoding, with no caller-selectable mode or protocol change.
+Publication and Canic adoption are not complete. The maintainer owns package
+versions, staging, commits, publication and releases. Canic still owns endpoint/
+caller conversion, metadata/export identity, generated clients and installed
+acceptance. No sibling files were edited and no release effect was executed.
 
-The unguarded prototype was rejected after a custom-field boundary-shift regression.
-It could accept bytes that re-encoded differently even though each local comparison
-looked equal. The whole-type guard rejects that input. The earlier bulk-loop
-alternatives remain rejected; only the guarded field verification is retained.
+## Current evidence
 
-Opt-3 1 MiB owned finite blob decode falls from 2,524,473 to 1,049,786 instructions
-(−58.42%), versus Candid's 1,065,406. Frame sizes remain 1,048,590/1,048,588 bytes.
-Ordinary native Serde owned blob decode remains 2,524,535; borrowing remains 824
-with different ownership. One-byte finite blob decode costs 17 extra instructions
-(+1.96%). The optimization does not eliminate all Candid wins.
+The [production comparison](../candid-comparison.md#production-serde-hard-cut--pending-0523)
+measures 114 standard cases and 100 nominal record types against Candid, both
+profiles, with 4,958 stable IC rows plus input/frame hashes and uncompressed Wasm.
+Opt-3 100-type Wire total/code is 426,480/391,954 bytes versus Candid's
+2,079,944/2,010,763; all those record inputs encode/decode faster than Candid.
+Whole artifacts with sixteen repeated structural widths do not predict app size.
 
-Opt-3 Wire/Candid sizes, in bytes:
+A universal within-3x goal is not met: large u64-list encoding is 18–28x Candid,
+and generic Vec<u8> encoding is 37x. Byte-oriented 1 MiB encode is 0.50x Candid;
+owned decode is 2.37x. Consumers should use byte-oriented opaque fields and
+qualify large integer/hash-array workloads. No native-time/heap rerun for this cut.
+Host metadata now supports serde_bytes::ByteBuf and borrowed Bytes directly,
+projecting to Uint8Array through ordinary Wire derives. This exposes the existing
+bulk byte path without custom serializers or automatic derive rewriting.
+Vec<u8> frame bytes remain identical, but client types and traversal accounting
+change; regenerate bindings and qualify limits. Runtime code is unchanged, so
+the existing instruction evidence applies; no new runtime savings are claimed.
+The retired finite blob and short-write savings are historical evidence only.
 
-| Fixture | Code section | Total uncompressed Wasm |
-| --- | ---: | ---: |
-| Standard corpus | 264,914 / 788,971 | 314,728 / 860,566 |
-| 100 derived types | 355,288 / 2,010,763 | 389,823 / 2,079,944 |
+Runtime, borrowing, canonical bulk/custom-boundary tests, corpus roundtrips,
+strict lint, Rustdoc, native/Wasm MSRV and nine compiler diagnostics pass.
+TypeScript checks cover 146 vectors, 29,536 mutations, 1 MiB buffer boundaries,
+and thirteen generic/custom-scalar/byte projection vectors. Allocation/packed-field checks
+and all consumer benchmark cohorts pass. Evidence is retained under
+`docs/evidence/serde-production-0523/`; logs: `target/serde-hardcut-0523/validation/`.
+No full CI, macOS, live canister or consumer installed suite was run.
 
-The 100-type code section is 8,403 bytes smaller than the preceding baseline;
-standard code grows 315 bytes. The 100-type cohort has sixteen repeated structural
-width patterns; whole-fixture sizes do not isolate derive code or predict app savings.
-Toko and 1/10-type cohorts retain their earlier measurement boundary and were not
-rerun for guarded verification. The prior full five-cohort comparison remains
-historical evidence under `docs/evidence/stripped-full-comparison-0522/`.
+## Preserved tooling and research
 
-The [latest report](../candid-comparison.md#guarded-finite-verification--pending-0522)
-owns results, counterexample, scope and reproduction. Runtime tests, lint,
-native/Wasm MSRV and 16 compile-fail diagnostics plus their passing control pass.
-Two native runs per profile, allocation/heap passes and all eight artifact hashes
-are verified under `docs/evidence/canonical-fields-0522/`. All 4,838 IC rows agree
-across three samples, with unchanged input/frame hashes. All 1,844 fresh
-encode/decode allocation and peak-heap summaries match baseline. Native opt-3
-finite blob decode improves from 33.53–33.69 to 17.34–17.42 µs; Candid is
-18.20–18.38 µs in the rerun. These are unpinned Linux observations.
-Full CI and macOS were not run. Ordinary work does not stage or release.
+Earlier IC Tooling 0.64.1 and Platform 0.6.8 work is preserved. Shared Tooling is
+0.26.6 at `4cb9bc9`, unmodified. Candid/PocketIC remain unpublished benchmark dev
+dependencies through IC Platform/Testkit; the runtime is SDK/host-independent.
+Consumers own transport, endpoints, auth, retries, storage and deployment policy.
 
-## Retained decisions and tooling
-
-Runtime remains Wasm-safe and independent of Candid, simulators and platform SDKs.
-Candid/PocketIC are unpublished benchmark dev dependencies through IC Platform;
-IC Testkit owns server admission/lifecycle. Consumers own transport, endpoints,
-authentication, retry policy and database encodings. No automatic migration or
-parallel legacy protocol exists. Borrowing preserves framing and canonical bytes.
-
-Shared Tooling is 0.26.6 at `4cb9bc9`; IC Build/Testkit and transitive Host select
-0.64.0. The release editor is 0.64.0 with `cli`. Their earlier adoption checks and
-PocketIC driver qualification passed on Linux; see the retained evaluation reports
-and `target/tooling-064-adoption/`. Historical optimization studies remain linked
-from [evaluation](../evaluation.md) and [consumer comparisons](../candid-consumer-comparison.md).
-Ordinary agent work does not stage, commit, push or release.
+Finite writer inlining was rejected (40.38% instruction regression for a tiny
+Wasm saving). The reserve cleanup was measured but its finite writer is now
+retired. Those sources/results, earlier finite guarded verification and the
+Serde-with-finite-admission prototype remain explicitly research/historical
+material in the comparison report. Do not ship or cite them as this codec.

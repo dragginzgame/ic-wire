@@ -4,25 +4,11 @@
 mod borrow_escape;
 #[cfg(ui_case = "borrow_mutation")]
 mod borrow_mutation;
-#[cfg(ui_case = "const_contract")]
-mod const_contract;
-#[cfg(ui_case = "duplicate_field_id")]
-mod duplicate_field_id;
-#[cfg(ui_case = "duplicate_variant_id")]
-mod duplicate_variant_id;
 #[cfg(ui_case = "encode_only_decode")]
 mod encode_only_decode;
-#[cfg(ui_case = "generic_contract")]
-mod generic_contract;
-#[cfg(ui_case = "missing_id")]
-mod missing_id;
-#[cfg(ui_case = "recursive_box")]
-mod recursive_box;
+#[cfg(ui_case = "native_schema_attributes")]
+mod native_schema_attributes;
 mod support;
-#[cfg(ui_case = "tuple_record")]
-mod tuple_record;
-#[cfg(ui_case = "unsupported_field")]
-mod unsupported_field;
 mod valid;
 #[cfg(ui_case = "wrong_async_handler")]
 mod wrong_async_handler;

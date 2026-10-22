@@ -1,0 +1,2 @@
+unsupported Serde attribute for Wire
+Wire follows Serde order; wire IDs are not supported

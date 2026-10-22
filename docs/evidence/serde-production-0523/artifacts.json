@@ -1,0 +1,66 @@
+[
+  {
+    "cohort": "standard",
+    "profile": "evaluation",
+    "codec": "wire",
+    "total_bytes": 228689,
+    "code_bytes": 193414,
+    "sha256": "869c8ca024f46b9e1bc149343d3e6292da3f1cf62042d2c29111f13dc2ad8276"
+  },
+  {
+    "cohort": "standard",
+    "profile": "evaluation",
+    "codec": "candid",
+    "total_bytes": 563277,
+    "code_bytes": 506349,
+    "sha256": "89b70891a7b310485e98ae9ce26c2d2e2f9871c582790dbfded729dade406981"
+  },
+  {
+    "cohort": "standard",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "total_bytes": 321261,
+    "code_bytes": 271236,
+    "sha256": "9d9e78a9d00092c5081da54451f91360108cdc95c6025331d098bdcfda69e335"
+  },
+  {
+    "cohort": "standard",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "total_bytes": 860566,
+    "code_bytes": 788971,
+    "sha256": "8c10bea986ca7a669703645410e30f1cdbe49461058fa05506304f4c82f872af"
+  },
+  {
+    "cohort": "scale100",
+    "profile": "evaluation",
+    "codec": "wire",
+    "total_bytes": 324043,
+    "code_bytes": 305225,
+    "sha256": "388a7fa8b91f2150bc696bb6d4a6823a176cca2fd28c16ee2cc8ced8d5973675"
+  },
+  {
+    "cohort": "scale100",
+    "profile": "evaluation",
+    "codec": "candid",
+    "total_bytes": 1416495,
+    "code_bytes": 1362487,
+    "sha256": "52fb6b3c74cb28145fa1ed2810c3ce5fbe368f8b740c34d352742aacefe943de"
+  },
+  {
+    "cohort": "scale100",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "total_bytes": 426480,
+    "code_bytes": 391954,
+    "sha256": "41639e03b04e0f206fd7ffb3ea4ced7f5257fc3b0043557db1871b62a43e309e"
+  },
+  {
+    "cohort": "scale100",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "total_bytes": 2079944,
+    "code_bytes": 2010763,
+    "sha256": "81dbbdba882a8183d5063a2e4e0261e69b96c6ef956319cb35305bcb5e443e95"
+  }
+]

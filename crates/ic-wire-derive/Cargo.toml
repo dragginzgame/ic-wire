@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire-derive"
-description = "Explicit-layout Wire derives for ic-wire bounded contracts"
+description = "Serde layout metadata derive for ic-wire"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

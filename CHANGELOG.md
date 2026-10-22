@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.6.0]
+
+- Support `serde_bytes::ByteBuf` and borrowed `serde_bytes::Bytes` in host-only
+  `Wire` metadata, generating `Uint8Array` for the existing bulk byte codec path.
+  Replacing `Vec<u8>` preserves Postcard bytes but changes traversal accounting
+  and generated client types; regenerate bindings and qualify consumer limits.
+  No runtime codec change or automatic Serde derive rewriting.
+
+- Hard cut to one production Serde/Postcard codec. Remove the finite `Wire`
+  derive/trait, static shape admission, typed method/retained-byte API and finite
+  TypeScript generator. Keep bounded field wrappers as ordinary Serde types.
+  Use `native` framing with explicit IDs/budgets and host-only `Wire`.
+  Former ID-sorted fields now follow Serde declaration order; enum tags are
+  zero-based indices. Coordinate affected consumers and regenerate metadata;
+  existing native frames are unchanged. No legacy reader or compatibility shim.
+  Migrate benchmarks, borrowing, allocation and cross-language checks to the
+  shipped codec; previous finite-codec savings are research evidence only.
+
+- Record the full five-cohort Serde-derive prototype comparison against Candid:
+  IC instructions, native timing, allocation/heap costs, frame bytes and
+  uncompressed Wasm/code-section sizes. Include Candid wins and retain raw
+  reproduction evidence. This experiment changes no production codec or protocol.
+
+- Add host-only `Wire` metadata derivation for ordinary native Serde
+  declarations, including concrete generics, records, enums and transparent
+  wrappers, without field IDs or replacement serializers. Reuse the existing
+  TypeScript registry/runtime; reject unsupported attributes and recursive inline
+  schemas. Custom scalar projections require explicit metadata and verified
+  validators. Existing wire bytes, codec costs and admission rules are unchanged;
+  native declaration order remains part of the consumer's protocol.
+  Name the metadata-only derive `ic_wire::Wire`, replacing the unreleased
+  `NativeSchema` name without an alias. It requires separate Serde derives and
+  does not restore the former finite serializer or change runtime bytes/costs.
+
+- Adopt IC Tooling 0.64.1 for Build, Testkit and transitive Host libraries,
+  aligning the release metadata editor with the library selection. Existing
+  codec APIs, production dependencies and wire bytes are unchanged.
+
 ## [0.5.22] - 2026-10-22
 
 - Avoid rescanning directly decoded bounded bytes during finite canonical

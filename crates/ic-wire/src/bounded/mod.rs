@@ -1,7 +1,7 @@
 mod borrowed;
 pub use borrowed::{BytesRef, TextRef};
 
-use crate::{Error, Shape, Wire};
+use crate::Error;
 use alloc::{string::String, vec::Vec};
 use core::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
@@ -80,16 +80,6 @@ impl<'de, T: Deserialize<'de>, const N: usize> Deserialize<'de> for List<T, N> {
         d.deserialize_seq(Visitor::<T, N>(core::marker::PhantomData))
     }
 }
-impl<T: Wire, const N: usize> Wire for List<T, N> {
-    const __CANONICAL_FIELDS: bool = T::__CANONICAL_FIELDS;
-    const SCHEMA: crate::schema::Schema = crate::schema::Schema::List(&T::SCHEMA, N);
-    const SHAPE: Shape = Shape {
-        bytes: 10_usize.saturating_add(T::SHAPE.bytes.saturating_mul(N)),
-        heap: N.saturating_mul(core::mem::size_of::<T>().saturating_add(T::SHAPE.heap)),
-        nodes: 1_usize.saturating_add(N.saturating_mul(T::SHAPE.nodes)),
-        depth: T::SHAPE.depth.saturating_add(1),
-    };
-}
 
 /// Bounded opaque bytes; consumers validate principal bytes using their existing
 /// principal type. IC Wire defines no new identity type.
@@ -144,20 +134,6 @@ impl<'de, const N: usize> Deserialize<'de> for Bytes<N> {
         d.deserialize_bytes(Visitor::<N>)
     }
 }
-impl<const N: usize> Wire for Bytes<N> {
-    const __CANONICAL_FIELDS: bool = true;
-    fn __canonical(&self, canonical: &mut crate::__private::Canonical<'_>) -> Result<(), Error> {
-        canonical.copied_bytes(self.0.len())
-    }
-
-    const SCHEMA: crate::schema::Schema = crate::schema::Schema::Bytes(N);
-    const SHAPE: Shape = Shape {
-        bytes: N.saturating_add(10),
-        heap: N,
-        nodes: 1,
-        depth: 1,
-    };
-}
 
 /// UTF-8 text bounded in bytes.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -195,9 +171,4 @@ impl<'de, const N: usize> Deserialize<'de> for Text<N> {
         let text = String::from_utf8(bytes.0).map_err(|_| de::Error::custom("invalid UTF-8"))?;
         Ok(Self(text))
     }
-}
-impl<const N: usize> Wire for Text<N> {
-    const __CANONICAL_FIELDS: bool = true;
-    const SCHEMA: crate::schema::Schema = crate::schema::Schema::Text(N);
-    const SHAPE: Shape = Bytes::<N>::SHAPE;
 }

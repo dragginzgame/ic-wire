@@ -88,7 +88,9 @@ canonicalization, hashing, limits and malformed-input acceptance; explicitly sta
 when a batch leaves the protocol unchanged. Preserve the pre-1.0 rules below.
 
 Keep limits checked before allocation, malformed-input failures typed, and
-wire identity independent of incidental Rust declaration order. Preserve exact
+one production Serde/Postcard codec. The finite Wire API is retired; alternate
+codec/derive strategies remain research. Native metadata uses no field IDs and follows Serde
+declaration order; changes to that order require coordinated consumers. Preserve exact
 retry bytes and canonical hashing semantics. The maintained pre-1.0 contract
 must not create v2/legacy lanes; same-release retries remain required. Do not
 introduce automatic migration or compatibility shims.

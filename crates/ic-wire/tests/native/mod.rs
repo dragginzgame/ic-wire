@@ -1,5 +1,5 @@
 //! Native Serde admission, wire compatibility and failure boundaries.
-use ic_wire::{Error, Limits, Method, native};
+use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};
 
 const LIMITS: Limits = Limits {
@@ -23,18 +23,8 @@ struct Owned {
     label: String,
     values: Vec<u64>,
 }
-struct Scalar;
-impl Method for Scalar {
-    type Request = u64;
-    type Response = u64;
-    const ID: u64 = 7;
-    const NAME: &'static str = "scalar";
-    const REQUEST_LIMITS: Limits = LIMITS;
-    const RESPONSE_LIMITS: Limits = LIMITS;
-}
-
 #[test]
-fn borrowed_frames_match_owned_postcard_and_finite_wire() {
+fn borrowed_frames_match_owned_postcard_and_frozen_envelope() {
     let value = Borrowed {
         label: "é🦀",
         values: &[0, 128, u64::MAX],
@@ -70,15 +60,20 @@ fn borrowed_frames_match_owned_postcard_and_finite_wire() {
         native::decode_response::<Owned>(7, &response, LIMITS).unwrap(),
         expected
     );
-    for n in [0, 127, 128, u64::MAX] {
-        assert_eq!(
-            native::encode_request(7, &n, LIMITS).unwrap(),
-            ic_wire::encode_request::<Scalar>(&n).unwrap().as_bytes()
-        );
-        assert_eq!(
-            native::encode_response(7, &n, LIMITS).unwrap(),
-            ic_wire::encode_response::<Scalar>(&n).unwrap().as_bytes()
-        );
+    for n in [0_u64, 127, 128, u64::MAX] {
+        for direction in [0_u8, 1] {
+            let mut expected = vec![0x49, 0x57];
+            expected.extend_from_slice(&7_u64.to_le_bytes());
+            expected.push(direction);
+            expected.extend(postcard::to_allocvec(&n).unwrap());
+            let frame = if direction == 0 {
+                native::encode_request(7, &n, LIMITS)
+            } else {
+                native::encode_response(7, &n, LIMITS)
+            }
+            .unwrap();
+            assert_eq!(frame, expected);
+        }
     }
     for end in 0..frame.len() {
         assert!(native::decode_request::<Owned>(7, &frame[..end], LIMITS).is_err());

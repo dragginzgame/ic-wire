@@ -1,0 +1,20 @@
+{
+  "baseline": "primitive-write-0523 selected after source; source snapshot retained in that raw bundle. No other crate sources changed.",
+  "baseline_bundle_sha256": "35a841c61b2b2cf6e6b00f9acf84c7d8fa4557e8552d26a50fb207d9c22c1725",
+  "candidate": "GrowingOutput::reserve replaces duplicate admission/capacity branches with debug assertions; callers retain release admission before allocation.",
+  "rejected": "Both finite writer inline(always) attributes replaced with inline.",
+  "scope": "114-case standard corpus, both profiles, three identical IC samples per row, unmodified Candid artifacts reused; standard and 100-type Wire linked Wasm. No native-time, allocation or heap rerun. All inputs, limits and profiles unchanged from baseline.",
+  "stats": {
+    "rejected-inline": {
+      "rows": 2958,
+      "changed": 74,
+      "regressed": 70
+    },
+    "selected-reserve": {
+      "rows": 2958,
+      "changed": 46,
+      "regressed": 0
+    }
+  },
+  "raw_sha256": "d020a9a3b95b3061f1a3a53aab019c035c693906e677dc69c87518b4657d0426"
+}

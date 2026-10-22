@@ -49,7 +49,7 @@ for profile in evaluation benchmark-speed; do
     done
 done
 primary=wire-native
-case "$corpus" in derive-scale*) primary=wire-finite;; esac
+case "$corpus" in derive-scale*) primary=wire-bounded;; esac
 cargo run --locked -p ic-wire-benchmarks --example codec-report -- "$out" "$primary"
 if [ -n "${POCKET_IC_BIN:-}" ]; then
     cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features "wire,candid,ic$extra" -- "$out" > "$out/instructions.log" 2>&1

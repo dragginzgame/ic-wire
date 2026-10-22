@@ -11,12 +11,13 @@ readme = "README.md"
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
-typescript = ["dep:serde_json"]
+typescript = ["dep:serde_json", "dep:serde_bytes"]
 
 [dependencies]
 ic-wire-derive.workspace = true
 postcard.workspace = true
 serde.workspace = true
+serde_bytes = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]

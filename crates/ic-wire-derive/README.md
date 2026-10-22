@@ -1,15 +1,14 @@
-# IC Wire derives
+# IC Wire metadata derive
 
-The `Wire` derive implements explicit-layout bounded contracts for
-[`ic-wire`](https://crates.io/crates/ic-wire). Applications should depend on
-`ic-wire` and use its re-exported `Wire` derive.
+`Wire` describes ordinary Serde layouts for IC Wire’s optional host-side
+TypeScript generator. It generates no serializers and requires no field IDs.
+Use the re-export from `ic-wire` alongside ordinary `Serialize` / `Deserialize`.
+Concrete generic instantiations follow Serde declaration order. Unsupported Serde
+attributes fail explicitly; custom serializers require verified manual metadata.
 
-Fields and enum variants require explicit `#[wire(id = N)]` identities. Records
-and enums support lifetime parameters, including inline outlives bounds, for
-bounded borrowed fields. Type/const parameters, where clauses, recursive derives,
-unbounded containers and unsupported field shapes are
-rejected. See the [runtime guide](https://github.com/dragginzgame/ic-wire/blob/main/crates/ic-wire/README.md).
-
-Consumers own endpoint integration and its qualification.
+This replaces the former serializer-generating `Wire` derive; the new derive
+requires ordinary Serde serialization and generates only metadata. See the
+[runtime guide](https://github.com/dragginzgame/ic-wire/blob/main/crates/ic-wire/README.md)
+for migration, host feature gating, bounds and consumer responsibilities.
 
 Licensed under the MIT License; see the packaged LICENSE.

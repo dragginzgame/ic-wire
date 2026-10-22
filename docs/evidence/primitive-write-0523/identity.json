@@ -1,0 +1,12 @@
+{
+  "baseline": "Actual incoming working-tree sources plus twelve finite list benchmark lanes; full snapshots in raw bundle.",
+  "candidate": "Only five-line GrowingOutput one-byte extension fast path. Wire derive retained; experimental WireSchema is not adopted.",
+  "scope": "Standard corpus IC both profiles and native opt-3 two runs of eleven samples, two millisecond target; 100-type linked Wire Wasm both profiles. No concurrent builds/IC during native timing. Native order before1,before2,after1,after2; unpinned Linux. IC three identical samples; loop cost not subtracted. Embedded Git metadata belongs to launch repo; source snapshots identify builds.",
+  "stats": {
+    "rows": 2958,
+    "stable_rows": 2958,
+    "changed": 67,
+    "regressed": 12
+  },
+  "raw_sha256": "35a841c61b2b2cf6e6b00f9acf84c7d8fa4557e8552d26a50fb207d9c22c1725"
+}

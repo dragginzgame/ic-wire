@@ -1,0 +1,21 @@
+{
+  "selection": "One production Serde/Postcard codec with runtime admission. wire-native, wire-bounded and wire-borrowed label field representations/ownership, not codec modes. Finite Wire derive and APIs removed.",
+  "scope": "114 standard cases and 100 nominal record types, both profiles. IC instructions, frame bytes, linked uncompressed Wasm and code-section sizes. No native timing, heap, allocation rerun, or 1/10/Toko cohort rerun. 100 types repeat sixteen structural width patterns; whole-artifact savings do not predict application size.",
+  "source": "Full isolated compiled source snapshot in raw bundle; test/document-only follow-ups do not affect measured artifacts.",
+  "compiler": "Rust 1.99.1 / LLVM 23.1.1; wasm32-unknown-unknown; evaluation opt-z and benchmark-speed opt-3; LTO, one codegen unit, panic abort, stripped symbols",
+  "measurement": "PocketIC 16.1.0 via IC Platform 0.6.8 and IC Tooling 0.64.1; three identical samples per row, four operations through 64 KiB and one above, loop overhead not subtracted; locked dependency graph in raw source.",
+  "lock_sha256": "536fa2b7306f69d4b0da521c809bf3e4e432bc63de21c79a4956fd4a003a6025",
+  "stats": {
+    "standard": {
+      "rows": 2958,
+      "stable_rows": 2958,
+      "paired_rows": 1590
+    },
+    "scale100": {
+      "rows": 2000,
+      "stable_rows": 2000,
+      "paired_rows": 1000
+    }
+  },
+  "raw_sha256": "a2193563bcf48b507f87a10b801d34d0e6bb238a2732ab443f9cbc668a90179b"
+}

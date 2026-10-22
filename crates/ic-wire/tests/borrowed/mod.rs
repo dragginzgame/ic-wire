@@ -1,36 +1,25 @@
 //! Borrowed bounded contracts preserve the owned wire format and input custody.
-use core::marker::PhantomData;
-use ic_wire::{Bytes, BytesRef, Error, Limits, List, Method, Text, TextRef, Wire};
+use ic_wire::{Bytes, BytesRef, Error, Limits, List, Text, TextRef};
 use serde::{Deserialize, Serialize};
 
-struct Contract<T>(PhantomData<T>);
-impl<T: Wire> Method for Contract<T> {
-    type Request = T;
-    type Response = Result<T, u8>;
-    const ID: u64 = 71;
-    const NAME: &'static str = "chunk";
-    const REQUEST_LIMITS: Limits = Limits {
-        bytes: 2 * 1024 * 1024,
-        allocation: 8 * 1024 * 1024,
-        nodes: 4096,
-        depth: 32,
-    };
-    const RESPONSE_LIMITS: Limits = Self::REQUEST_LIMITS;
-}
-#[derive(Debug, PartialEq, Wire)]
+const ID: u64 = 71;
+const LIMITS: Limits = Limits {
+    bytes: 2 * 1024 * 1024,
+    allocation: 16 * 1024 * 1024,
+    nodes: 4096,
+    depth: 32,
+};
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct OwnedChunk {
-    #[wire(id = 1)]
     name: Text<64>,
-    #[wire(id = 2)]
     data: Bytes<1048576>,
 }
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Chunk<'data, 'name> {
-    // Declaration order differs deliberately; IDs own the layout.
-    #[wire(id = 2)]
-    data: BytesRef<'data, 1048576>,
-    #[wire(id = 1)]
+    #[serde(borrow)]
     name: TextRef<'name, 64>,
+    #[serde(borrow)]
+    data: BytesRef<'data, 1048576>,
 }
 #[test]
 fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
@@ -48,18 +37,15 @@ fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
             owned.data.as_slice().as_ptr()
         );
         let mut scratch = Vec::with_capacity(2 * 1024 * 1024);
-        ic_wire::encode_request_into::<Contract<Chunk<'_, '_>>>(&view, &mut scratch).unwrap();
-        let frame = ic_wire::encode_request::<Contract<Chunk<'_, '_>>>(&view)
-            .unwrap()
-            .into_bytes();
+        ic_wire::native::encode_request_into::<Chunk<'_, '_>>(ID, &view, LIMITS, &mut scratch)
+            .unwrap_or_else(|e| panic!("size={size}: {e}"));
+        let frame = ic_wire::native::encode_request::<Chunk<'_, '_>>(ID, &view, LIMITS).unwrap();
         assert_eq!(
             frame,
-            ic_wire::encode_request::<Contract<OwnedChunk>>(&owned)
-                .unwrap()
-                .into_bytes()
+            ic_wire::native::encode_request::<OwnedChunk>(ID, &owned, LIMITS).unwrap()
         );
         assert_eq!(scratch, frame);
-        let decoded = ic_wire::decode_request::<Contract<Chunk<'_, '_>>>(&frame).unwrap();
+        let decoded = ic_wire::native::decode_request::<Chunk<'_, '_>>(ID, &frame, LIMITS).unwrap();
         assert_eq!(decoded, view);
         let range = frame.as_ptr() as usize..frame.as_ptr() as usize + frame.len();
         assert!(range.contains(&(decoded.name.as_str().as_ptr() as usize)));
@@ -67,60 +53,60 @@ fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
             assert!(range.contains(&(decoded.data.as_slice().as_ptr() as usize)));
         }
         assert_eq!(
-            ic_wire::encode_request::<Contract<Chunk<'_, '_>>>(&decoded)
+            ic_wire::native::encode_request::<Chunk<'_, '_>>(ID, &decoded, LIMITS)
                 .unwrap()
-                .as_bytes(),
+                .as_slice(),
             frame
         );
-        assert_eq!(Chunk::SHAPE.heap, 0);
-        assert_eq!(Chunk::SHAPE.bytes, OwnedChunk::SHAPE.bytes);
-        let response = ic_wire::encode_response::<Contract<Chunk<'_, '_>>>(&Ok(view)).unwrap();
+        let response =
+            ic_wire::native::encode_response::<Result<Chunk<'_, '_>, u8>>(ID, &Ok(view), LIMITS)
+                .unwrap();
         assert!(
-            ic_wire::decode_response::<Contract<Chunk<'_, '_>>>(response.as_bytes())
-                .unwrap()
-                .is_ok()
+            ic_wire::native::decode_response::<Result<Chunk<'_, '_>, u8>>(
+                ID,
+                response.as_slice(),
+                LIMITS
+            )
+            .unwrap()
+            .is_ok()
         );
         assert_eq!(
-            ic_wire::decode_request::<Contract<Chunk<'_, '_>>>(response.as_bytes()),
+            ic_wire::native::decode_request::<Chunk<'_, '_>>(ID, response.as_slice(), LIMITS),
             Err(Error::Identity)
         );
     }
     // Keep immutable owned bytes for retries independently of the source's lifetime.
     let retained = {
         let source = Text::<64>::new("retry".into()).unwrap();
-        ic_wire::encode_request::<Contract<TextRef<'_, 64>>>(&source.as_borrowed())
+        ic_wire::native::encode_request::<TextRef<'_, 64>>(ID, &source.as_borrowed(), LIMITS)
             .unwrap()
-            .into_bytes()
     };
     assert_eq!(
-        ic_wire::decode_request::<Contract<TextRef<'_, 64>>>(&retained)
+        ic_wire::native::decode_request::<TextRef<'_, 64>>(ID, &retained, LIMITS)
             .unwrap()
             .as_str(),
         "retry"
     );
 }
 
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Nested<'a: 'b, 'b> {
-    #[wire(id = 1)]
+    #[serde(borrow)]
     items: List<TextRef<'a, 16>, 3>,
-    #[wire(id = 2)]
+    #[serde(borrow)]
     chunks: [BytesRef<'b, 8>; 2],
-    #[wire(id = 3)]
+    #[serde(borrow)]
     optional: Option<Box<TextRef<'a, 16>>>,
 }
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 enum Choice<'a: 'b, 'b> {
-    #[wire(id = 9)]
-    Chunk(Chunk<'a, 'b>),
-    #[wire(id = 2)]
+    Chunk(#[serde(borrow)] Chunk<'a, 'b>),
     Empty,
-    #[wire(id = 5)]
-    Nested(Nested<'a, 'b>),
+    Nested(#[serde(borrow)] Nested<'a, 'b>),
 }
-#[derive(Debug, PartialEq, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 struct Collision<'__ic_wire_de> {
-    #[wire(id = 1)]
+    #[serde(borrow)]
     text: TextRef<'__ic_wire_de, 8>,
 }
 #[test]
@@ -142,24 +128,29 @@ fn lifetime_derives_cover_enums_nested_containers_bounds_and_name_collisions() {
             name: TextRef::new("chunk").unwrap(),
         }),
     ] {
-        let frame = ic_wire::encode_request::<Contract<Choice<'_, '_>>>(&value).unwrap();
+        let frame = ic_wire::native::encode_request::<Choice<'_, '_>>(ID, &value, LIMITS).unwrap();
         assert_eq!(
-            ic_wire::decode_request::<Contract<Choice<'_, '_>>>(frame.as_bytes()).unwrap(),
+            ic_wire::native::decode_request::<Choice<'_, '_>>(ID, frame.as_slice(), LIMITS)
+                .unwrap(),
             value
         );
-        for len in 0..frame.as_bytes().len() {
+        for len in 0..frame.as_slice().len() {
             assert!(
-                ic_wire::decode_request::<Contract<Choice<'_, '_>>>(&frame.as_bytes()[..len])
-                    .is_err()
+                ic_wire::native::decode_request::<Choice<'_, '_>>(
+                    ID,
+                    &frame.as_slice()[..len],
+                    LIMITS
+                )
+                .is_err()
             );
         }
     }
     let collision = Collision {
         text: TextRef::new("name").unwrap(),
     };
-    let frame = ic_wire::encode_request::<Contract<Collision<'_>>>(&collision).unwrap();
+    let frame = ic_wire::native::encode_request::<Collision<'_>>(ID, &collision, LIMITS).unwrap();
     assert_eq!(
-        ic_wire::decode_request::<Contract<Collision<'_>>>(frame.as_bytes()).unwrap(),
+        ic_wire::native::decode_request::<Collision<'_>>(ID, frame.as_slice(), LIMITS).unwrap(),
         collision
     );
 }
@@ -171,20 +162,25 @@ fn borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input
     assert!(BytesRef::<0>::new(&[]).is_ok());
     assert!(TextRef::<0>::new("").is_ok());
     for text in ["", "é", "€", "🦀"] {
-        let frame =
-            ic_wire::encode_request::<Contract<Text<4>>>(&Text::new(text.into()).unwrap()).unwrap();
+        let frame = ic_wire::native::encode_request::<Text<4>>(
+            ID,
+            &Text::new(text.into()).unwrap(),
+            LIMITS,
+        )
+        .unwrap();
         assert_eq!(
-            ic_wire::decode_request::<Contract<TextRef<'_, 4>>>(frame.as_bytes())
+            ic_wire::native::decode_request::<TextRef<'_, 4>>(ID, frame.as_slice(), LIMITS)
                 .unwrap()
                 .as_str(),
             text
         );
     }
-    let frame = ic_wire::encode_request::<Contract<Text<4>>>(&Text::new("abc".into()).unwrap())
-        .unwrap()
-        .into_bytes();
+    let frame =
+        ic_wire::native::encode_request::<Text<4>>(ID, &Text::new("abc".into()).unwrap(), LIMITS)
+            .unwrap();
     let decode = |bytes: &[u8]| {
-        ic_wire::decode_request::<Contract<TextRef<'_, 4>>>(bytes).map(|v| v.as_str().len())
+        ic_wire::native::decode_request::<TextRef<'_, 4>>(ID, bytes, LIMITS)
+            .map(|v| v.as_str().len())
     };
     for n in 0..frame.len() {
         assert!(decode(&frame[..n]).is_err());
@@ -217,65 +213,21 @@ fn borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input
     );
 }
 
-#[test]
-fn borrowed_fields_do_not_charge_owned_payload_heap() {
-    struct Read<'a>(PhantomData<&'a ()>);
-    impl<'a> Method for Read<'a> {
-        type Request = BytesRef<'a, 32>;
-        type Response = Bytes<32>;
-        const ID: u64 = 1;
-        const NAME: &'static str = "read";
-        const REQUEST_LIMITS: Limits = Limits {
-            bytes: 53,
-            allocation: 53,
-            nodes: 1,
-            depth: 1,
-        };
-        const RESPONSE_LIMITS: Limits = Self::REQUEST_LIMITS;
-    }
-    let value = Bytes::<32>::new(vec![42; 32]).unwrap();
-    let frame = ic_wire::encode_request::<Read<'_>>(&value.as_borrowed()).unwrap();
-    assert_eq!(
-        ic_wire::decode_request::<Read<'_>>(frame.as_bytes())
-            .unwrap()
-            .as_slice(),
-        value.as_slice()
-    );
-    assert!(matches!(
-        ic_wire::encode_response::<Read<'_>>(&value),
-        Err(Error::SchemaLimit)
-    ));
-    // Bounds stay enforced even when the borrowed representation needs no value heap.
-    assert_eq!(BytesRef::<32>::SHAPE.nodes, Bytes::<32>::SHAPE.nodes);
-    assert_eq!(TextRef::<32>::SHAPE.depth, Text::<32>::SHAPE.depth);
-}
-
 #[derive(Serialize)]
 struct Outgoing(u32);
-impl Wire for Outgoing {
-    const SHAPE: ic_wire::Shape = <u32 as Wire>::SHAPE;
-}
+
 #[test]
 fn encoding_and_sizing_do_not_require_a_decoder() {
-    let frame = ic_wire::encode_request::<Contract<Outgoing>>(&Outgoing(7)).unwrap();
+    let frame = ic_wire::native::encode_request::<Outgoing>(ID, &Outgoing(7), LIMITS).unwrap();
     assert_eq!(
-        frame.as_bytes(),
-        ic_wire::encode_request::<Contract<u32>>(&7)
+        frame.as_slice(),
+        ic_wire::native::encode_request::<u32>(ID, &7, LIMITS)
             .unwrap()
-            .as_bytes()
+            .as_slice()
     );
     assert_eq!(
-        frame.as_bytes().len(),
-        ic_wire::encoded_request_len::<Contract<Outgoing>>(&Outgoing(7)).unwrap()
-    );
-}
-
-#[cfg(feature = "typescript")]
-#[test]
-fn borrowed_and_owned_contracts_generate_identical_typescript() {
-    assert_eq!(
-        ic_wire::typescript::generate::<Contract<Chunk<'static, 'static>>>().unwrap(),
-        ic_wire::typescript::generate::<Contract<OwnedChunk>>().unwrap()
+        frame.as_slice().len(),
+        ic_wire::native::encoded_frame_len::<Outgoing>(&Outgoing(7), LIMITS).unwrap()
     );
 }
 
@@ -283,9 +235,7 @@ fn borrowed_and_owned_contracts_generate_identical_typescript() {
 fn owned_and_borrowed_leaves_agree_on_mutated_frames() {
     for len in [0, 1, 127, 128, 129] {
         let value = Text::<129>::new("a".repeat(len)).unwrap();
-        let frame = ic_wire::encode_request::<Contract<Text<129>>>(&value)
-            .unwrap()
-            .into_bytes();
+        let frame = ic_wire::native::encode_request::<Text<129>>(ID, &value, LIMITS).unwrap();
         let mut candidates = vec![frame.clone()];
         for end in 0..frame.len() {
             candidates.push(frame[..end].to_vec());
@@ -304,14 +254,14 @@ fn owned_and_borrowed_leaves_agree_on_mutated_frames() {
             candidates.push(bytes);
         }
         for bytes in candidates {
-            let owned = ic_wire::decode_request::<Contract<Text<129>>>(&bytes)
+            let owned = ic_wire::native::decode_request::<Text<129>>(ID, &bytes, LIMITS)
                 .map(|value| value.as_str().to_owned());
-            let borrowed = ic_wire::decode_request::<Contract<TextRef<'_, 129>>>(&bytes)
+            let borrowed = ic_wire::native::decode_request::<TextRef<'_, 129>>(ID, &bytes, LIMITS)
                 .map(|value| value.as_str().to_owned());
             assert_eq!(owned, borrowed);
-            let owned = ic_wire::decode_request::<Contract<Bytes<129>>>(&bytes)
+            let owned = ic_wire::native::decode_request::<Bytes<129>>(ID, &bytes, LIMITS)
                 .map(|value| value.as_slice().to_vec());
-            let borrowed = ic_wire::decode_request::<Contract<BytesRef<'_, 129>>>(&bytes)
+            let borrowed = ic_wire::native::decode_request::<BytesRef<'_, 129>>(ID, &bytes, LIMITS)
                 .map(|value| value.as_slice().to_vec());
             assert_eq!(owned, borrowed);
         }

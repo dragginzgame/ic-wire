@@ -1,0 +1,146 @@
+[
+  {
+    "variant": "before",
+    "profile": "evaluation",
+    "codec": "wire",
+    "wasm_bytes": 227094,
+    "code_section_bytes": 191792,
+    "sha256": "71baa65513c24f176772848083060a88b1cee704bfb9f02c8bcabba3d929f346"
+  },
+  {
+    "variant": "before",
+    "profile": "evaluation",
+    "codec": "candid",
+    "wasm_bytes": 563277,
+    "code_section_bytes": 506349,
+    "sha256": "89b70891a7b310485e98ae9ce26c2d2e2f9871c582790dbfded729dade406981"
+  },
+  {
+    "variant": "before",
+    "profile": "evaluation",
+    "codec": "scale100-wire",
+    "wasm_bytes": 304626,
+    "code_section_bytes": 285800,
+    "sha256": "dcbecb0bf4baa04e5df789328ab277d089ed6b2d91538fe4cb9793e788287c47"
+  },
+  {
+    "variant": "before",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "wasm_bytes": 324039,
+    "code_section_bytes": 274000,
+    "sha256": "b1b4c6b4a77fda3cec177d4b08dcee081d39cffa32e392d2d4cadccf991c920d"
+  },
+  {
+    "variant": "before",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "wasm_bytes": 860566,
+    "code_section_bytes": 788971,
+    "sha256": "8c10bea986ca7a669703645410e30f1cdbe49461058fa05506304f4c82f872af"
+  },
+  {
+    "variant": "before",
+    "profile": "benchmark-speed",
+    "codec": "scale100-wire",
+    "wasm_bytes": 389823,
+    "code_section_bytes": 355288,
+    "sha256": "99fac55f917089c3471872d9ed59f0cc53dc975fb83e38d825a8828ac8a4817f"
+  },
+  {
+    "variant": "after",
+    "profile": "evaluation",
+    "codec": "wire",
+    "wasm_bytes": 227594,
+    "code_section_bytes": 192292,
+    "sha256": "a26e5b4770fef564c1dedad9f512a625212128cdba8f8fdcf633affffebd6fa6"
+  },
+  {
+    "variant": "after",
+    "profile": "evaluation",
+    "codec": "candid",
+    "wasm_bytes": 563277,
+    "code_section_bytes": 506349,
+    "sha256": "89b70891a7b310485e98ae9ce26c2d2e2f9871c582790dbfded729dade406981"
+  },
+  {
+    "variant": "after",
+    "profile": "evaluation",
+    "codec": "scale100-wire",
+    "wasm_bytes": 304897,
+    "code_section_bytes": 286069,
+    "sha256": "0316cd86e7bfd7f20f20abb020080f83b569c7663bcadc0ab687f32d10e2d01c"
+  },
+  {
+    "variant": "after",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "wasm_bytes": 324045,
+    "code_section_bytes": 274005,
+    "sha256": "3c67f3d1f7faa197c30ec6c7cf1cbd1f21ed647bc4039b48de0b2a64e0ffbdc1"
+  },
+  {
+    "variant": "after",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "wasm_bytes": 860566,
+    "code_section_bytes": 788971,
+    "sha256": "8c10bea986ca7a669703645410e30f1cdbe49461058fa05506304f4c82f872af"
+  },
+  {
+    "variant": "after",
+    "profile": "benchmark-speed",
+    "codec": "scale100-wire",
+    "wasm_bytes": 390188,
+    "code_section_bytes": 355653,
+    "sha256": "21aae45b9a5ca970e4cf097e4d518db2893a9b8c21bc5342403ecebe9267e508"
+  },
+  {
+    "variant": "both-writers",
+    "profile": "evaluation",
+    "codec": "wire",
+    "wasm_bytes": 227494,
+    "code_section_bytes": 192192,
+    "sha256": "af4b5019a196d655c8164a96a360ccff356a1ac6e3551a355d4eae61396a609d"
+  },
+  {
+    "variant": "both-writers",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "wasm_bytes": 325460,
+    "code_section_bytes": 275420,
+    "sha256": "ea7f59ff0d37e2f90815bae0edfa8e527458b1ad4e30e78dbf9a5b5088312b3d"
+  },
+  {
+    "variant": "both-with-inline",
+    "profile": "evaluation",
+    "codec": "wire",
+    "wasm_bytes": 227483,
+    "code_section_bytes": 192182,
+    "sha256": "c3343d4c925198a66c9b1abb3eea0fc54303982ab3683be88c62d52023e8406c"
+  },
+  {
+    "variant": "both-with-inline",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "wasm_bytes": 327078,
+    "code_section_bytes": 277026,
+    "sha256": "23b97b444cce9990eab0a92ffd9995d155422f38417817d45ab4853f8efb8f6d"
+  },
+  {
+    "variant": "finite-only-prototype",
+    "profile": "evaluation",
+    "codec": "wire",
+    "wasm_bytes": 227443,
+    "code_section_bytes": 192142,
+    "sha256": "b60ecf00072f18651c13f13ea2d1d07c8978bc433767b780e9c51861727c4d5e"
+  },
+  {
+    "variant": "finite-only-prototype",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "wasm_bytes": 323925,
+    "code_section_bytes": 273885,
+    "sha256": "f2fea8c5ca2e1f404e3cb4b5b6bd782c0d715dc18903f1e86d0a324fe7b7a21e"
+  }
+]

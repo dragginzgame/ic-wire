@@ -3,23 +3,11 @@ fn check() {
     let _ = adapter(&[], |_| Ok(7));
     let _future = async_adapter(&[], |_| async { Ok(7) });
 }
-
-#[derive(ic_wire::Wire)]
-struct Borrowed<'de> {
-    #[wire(id = 1)]
-    text: ic_wire::TextRef<'de, 32>,
-}
-#[derive(ic_wire::Wire)]
-enum BorrowedChoice<'de> {
-    #[wire(id = 1)]
-    Data(Borrowed<'de>),
-    #[wire(id = 2)]
-    Empty,
-}
 fn borrowed_check() {
     let frame =
-        ic_wire::encode_request::<BorrowedRead<'_>>(&ic_wire::TextRef::new("local").unwrap())
+        ic_wire::native::encode_request(8, &ic_wire::TextRef::<32>::new("local").unwrap(), LIMITS)
             .unwrap();
-    let view = ic_wire::decode_request::<BorrowedRead<'_>>(frame.as_bytes()).unwrap();
+    let view: ic_wire::TextRef<'_, 32> =
+        ic_wire::native::decode_request(8, &frame, LIMITS).unwrap();
     assert_eq!(view.as_str(), "local");
 }

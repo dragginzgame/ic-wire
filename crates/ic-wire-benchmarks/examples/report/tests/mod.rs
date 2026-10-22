@@ -71,12 +71,12 @@ fn comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse() {
     );
     fs::write(&file, format!("{complete}{wire}\n")).unwrap();
     assert!(comparison(&root, "wire-native").is_err());
-    let finite = complete.replace("wire-native", "wire-finite");
+    let finite = complete.replace("wire-native", "wire-bounded");
     fs::write(&file, finite).unwrap();
     assert!(comparison(&root, "wire-native").is_err());
-    assert!(comparison(&root, "wire-finite").is_ok());
+    assert!(comparison(&root, "wire-bounded").is_ok());
     assert!(comparison(&root, "unknown").is_err());
     fs::write(&file, &candid).unwrap();
-    assert!(comparison(&root, "wire-finite").is_err());
+    assert!(comparison(&root, "wire-bounded").is_err());
     fs::remove_dir_all(root).unwrap();
 }

@@ -9,26 +9,19 @@ mod bounded;
 mod contract;
 mod float;
 pub mod native;
-pub mod schema;
-mod shape;
 /// Optional host-side TypeScript generation; never required by a canister.
 #[cfg(feature = "typescript")]
 pub mod typescript;
 pub use bounded::{Bytes, BytesRef, List, Text, TextRef};
-pub use contract::{
-    Method, RequestBytes, ResponseBytes, decode_request, decode_response, encode_request,
-    encode_request_into, encode_response, encode_response_into, encoded_request_len,
-    encoded_response_len,
-};
 pub use float::{FiniteF32, FiniteF64};
 pub use ic_wire_derive::Wire;
-pub use shape::{Limits, Shape, Wire};
 
 /// Implementation dependencies used by generated contracts.
 #[doc(hidden)]
 pub mod __private {
-    pub use crate::contract::Canonical;
     pub use serde;
+    #[cfg(feature = "typescript")]
+    pub use serde_json;
 }
 
 /// Typed codec/admission failure, distinct from transport and application errors.
@@ -36,8 +29,6 @@ pub mod __private {
 pub enum Error {
     /// Wire, collection or text allowance exceeded.
     Limit,
-    /// The declared schema exceeds the method's resource allowances.
-    SchemaLimit,
     /// Allocation failed within an admitted allowance.
     Allocation,
     /// Invalid or truncated Postcard representation.
@@ -55,3 +46,16 @@ impl core::fmt::Display for Error {
     }
 }
 impl core::error::Error for Error {}
+
+/// Consumer-selected allowances for Serde traversal.
+#[derive(Clone, Copy, Debug)]
+pub struct Limits {
+    /// Maximum encoding bytes; framed APIs include the 11-byte header.
+    pub bytes: usize,
+    /// Maximum value heap plus codec scratch (excludes caller input).
+    pub allocation: usize,
+    /// Maximum visited value nodes, including unit elements.
+    pub nodes: usize,
+    /// Maximum nesting depth.
+    pub depth: usize,
+}

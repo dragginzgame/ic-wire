@@ -1,0 +1,98 @@
+[
+  {
+    "cohort": "scale1",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "wasm_bytes": 54378,
+    "code_section_bytes": 43345,
+    "sha256": "d3921dbdee84dc74f0fc47bfd207469c920b4ad3e8f6211c6caf09ea5a8cc7d0"
+  },
+  {
+    "cohort": "scale1",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "wasm_bytes": 78338,
+    "code_section_bytes": 51525,
+    "sha256": "561c234cc3db09f05ab820f866cbb1479811098ad9479c7ee66d478d4b3ed7e4"
+  },
+  {
+    "cohort": "scale1",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "wasm_bytes": 54378,
+    "code_section_bytes": 43345,
+    "sha256": "19ece5b2dc5c4b654ce988be5784cc0f8bd9cb830ac84d2094726b40c07b1d9d"
+  },
+  {
+    "cohort": "scale1",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "wasm_bytes": 78340,
+    "code_section_bytes": 51527,
+    "sha256": "b224144a8898efd5289ffcb8003d5579cd1cfbd3bcc88cc0c51359d6285ba037"
+  },
+  {
+    "cohort": "scale100",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "wasm_bytes": 304626,
+    "code_section_bytes": 285800,
+    "sha256": "dcbecb0bf4baa04e5df789328ab277d089ed6b2d91538fe4cb9793e788287c47"
+  },
+  {
+    "cohort": "scale100",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "wasm_bytes": 389823,
+    "code_section_bytes": 355288,
+    "sha256": "99fac55f917089c3471872d9ed59f0cc53dc975fb83e38d825a8828ac8a4817f"
+  },
+  {
+    "cohort": "scale100",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "wasm_bytes": 300022,
+    "code_section_bytes": 281192,
+    "sha256": "28f5bbbc254529aa4c89830e0beafa7c239342a3280cf886922307aa24356d79"
+  },
+  {
+    "cohort": "scale100",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "wasm_bytes": 379595,
+    "code_section_bytes": 345103,
+    "sha256": "4ca4b96f7527170e6200ada4dadc3e7d2dacc1eee0b039f2d4428c7d0aa09fe4"
+  },
+  {
+    "cohort": "standard",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "wasm_bytes": 222082,
+    "code_section_bytes": 187010,
+    "sha256": "044c94f56389eee5841b2da118eadb5935ebb15dfe26f4bd449dacadb00520fb"
+  },
+  {
+    "cohort": "standard",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "wasm_bytes": 314728,
+    "code_section_bytes": 264914,
+    "sha256": "7efbf368f70715eafa8d33452b436ba69713a1e9909ef94adce141c7251dfb7f"
+  },
+  {
+    "cohort": "standard",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "wasm_bytes": 221928,
+    "code_section_bytes": 186857,
+    "sha256": "87d88d2e0bfd3acab697b1425837b699313b86bfde3513f365e333c2736060de"
+  },
+  {
+    "cohort": "standard",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "wasm_bytes": 314624,
+    "code_section_bytes": 264810,
+    "sha256": "58a4dcfc8b67967e1d2193bf079ed4d65b72a914563bed239bf289d49ee5004c"
+  }
+]

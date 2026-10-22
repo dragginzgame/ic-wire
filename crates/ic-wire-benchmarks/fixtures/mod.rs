@@ -300,6 +300,14 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
     push!(case("hash-array", [0x95_u8; 32]));
     for n in [4096, 1_048_576] {
         push!(case(&format!("generic-byte-vector-{n}"), data(n)));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            // Same input and bytes; compare bounded Serde fields under the same runtime admission.
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 1_048_576>::new(data(n)).unwrap(),
+            );
+        }
     }
     for n in [0, 1, 32, 127, 128, 4096, 65_536, 1_048_576] {
         push!(case(&format!("blob-random-{n}"), Blob(data(n))));
@@ -313,7 +321,7 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
         push!(case(&format!("text-ascii-{n}"), "a".repeat(n)));
         #[cfg(feature = "wire")]
         if selected.is_none_or(|s| s + 1 == index) {
-            add_finite(
+            add_bounded(
                 out.last_mut().unwrap(),
                 ic_wire::Text::<65536>::new("a".repeat(n)).unwrap(),
             );
@@ -325,10 +333,28 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
             &format!("u64-list-small-{n}"),
             (0..n).map(|i| (i % 128) as u64).collect::<Vec<_>>(),
         ));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            // Same input and bytes; compare bounded Serde fields under the same runtime admission.
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 16_384>::new((0..n).map(|i| (i % 128) as u64).collect())
+                    .unwrap(),
+            );
+        }
         push!(case(
             &format!("u64-list-wide-{n}"),
             (0..n).map(|i| u64::MAX - i as u64).collect::<Vec<_>>(),
         ));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            // Same input and bytes; compare bounded Serde fields under the same runtime admission.
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 16_384>::new((0..n).map(|i| u64::MAX - i as u64).collect())
+                    .unwrap(),
+            );
+        }
     }
     for n in [0, 1, 16, 128] {
         push!(case(
@@ -349,9 +375,9 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
         ));
         #[cfg(feature = "wire")]
         if selected.is_none_or(|s| s + 1 == index) {
-            add_finite(
+            add_bounded(
                 out.last_mut().unwrap(),
-                ic_wire::List::<_, 128>::new((0..n).map(|_| finite_message(256)).collect())
+                ic_wire::List::<_, 128>::new((0..n).map(|_| bounded_message(256)).collect())
                     .unwrap(),
             );
         }
@@ -368,9 +394,9 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
         ));
         #[cfg(feature = "wire")]
         if selected.is_none_or(|s| s + 1 == index) {
-            add_finite(
+            add_bounded(
                 out.last_mut().unwrap(),
-                FiniteManifest {
+                BoundedManifest {
                     object: u128::MAX,
                     size: n as u64 * 1_048_576,
                     content_type: ic_wire::Text::new("application/octet-stream".into()).unwrap(),
@@ -393,14 +419,14 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
     push!(case("variant-unit", Event::Idle));
     #[cfg(feature = "wire")]
     if selected.is_none_or(|s| s + 1 == index) {
-        add_finite(out.last_mut().unwrap(), FiniteEvent::Idle);
+        add_bounded(out.last_mut().unwrap(), BoundedEvent::Idle);
     }
     push!(case("variant-record", Event::Data(message(128))));
     #[cfg(feature = "wire")]
     if selected.is_none_or(|s| s + 1 == index) {
-        add_finite(
+        add_bounded(
             out.last_mut().unwrap(),
-            FiniteEvent::Data(finite_message(128)),
+            BoundedEvent::Data(bounded_message(128)),
         );
     }
     push!(case(
@@ -418,37 +444,22 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
 }
 
 #[cfg(feature = "wire")]
-struct Binding<T>(std::marker::PhantomData<T>);
-#[cfg(feature = "wire")]
-impl<T: ic_wire::Wire> ic_wire::Method for Binding<T> {
-    type Request = T;
-    type Response = T;
-    const ID: u64 = METHOD;
-    const NAME: &'static str = "benchmark";
-    const REQUEST_LIMITS: ic_wire::Limits = LIMITS;
-    const RESPONSE_LIMITS: ic_wire::Limits = LIMITS;
-}
-#[cfg(feature = "wire")]
-fn add_finite<T: ic_wire::Wire + DeserializeOwned + PartialEq + Debug + 'static>(
+fn add_bounded<T: Serialize + DeserializeOwned + PartialEq + Debug + 'static>(
     case: &mut Case,
     value: T,
 ) {
-    let finite = lane(
-        "wire-finite",
+    let bounded = lane(
+        "wire-bounded",
         Rc::new(value),
-        |v| {
-            ic_wire::encode_request::<Binding<T>>(v)
-                .unwrap()
-                .into_bytes()
-        },
-        |bytes| ic_wire::decode_request::<Binding<T>>(bytes).ok(),
+        |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
+        |bytes| ic_wire::native::decode_request::<T>(METHOD, bytes, LIMITS).ok(),
     );
-    assert_eq!(finite.bytes, case.lanes[0].bytes);
-    case.lanes.push(finite);
+    assert_eq!(bounded.bytes, case.lanes[0].bytes);
+    case.lanes.push(bounded);
 }
 #[cfg(feature = "wire")]
 fn add_blob_lanes(case: &mut Case, value: Vec<u8>) {
-    add_finite(
+    add_bounded(
         case,
         ic_wire::Bytes::<1_048_576>::new(value.clone()).unwrap(),
     );
@@ -484,38 +495,35 @@ fn add_blob_lanes(case: &mut Case, value: Vec<u8>) {
 }
 
 #[cfg(feature = "wire")]
-#[derive(Debug, PartialEq, ic_wire::Wire)]
-struct FiniteMessage {
-    #[wire(id = 1)]
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+struct BoundedMessage {
     sequence: u64,
-    #[wire(id = 2)]
+
     topic: ic_wire::Text<64>,
-    #[wire(id = 3)]
+
     payload: ic_wire::Bytes<256>,
 }
 #[cfg(feature = "wire")]
-#[derive(Debug, PartialEq, ic_wire::Wire)]
-struct FiniteManifest {
-    #[wire(id = 1)]
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+struct BoundedManifest {
     object: u128,
-    #[wire(id = 2)]
+
     size: u64,
-    #[wire(id = 3)]
+
     content_type: ic_wire::Text<64>,
-    #[wire(id = 4)]
+
     hashes: ic_wire::List<[u8; 32], 1024>,
 }
 #[cfg(feature = "wire")]
-#[derive(Debug, PartialEq, ic_wire::Wire)]
-enum FiniteEvent {
-    #[wire(id = 0)]
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+enum BoundedEvent {
     Idle,
-    #[wire(id = 1)]
-    Data(FiniteMessage),
+
+    Data(BoundedMessage),
 }
 #[cfg(feature = "wire")]
-fn finite_message(n: usize) -> FiniteMessage {
-    FiniteMessage {
+fn bounded_message(n: usize) -> BoundedMessage {
+    BoundedMessage {
         sequence: 16_384,
         topic: ic_wire::Text::new("relay/events".into()).unwrap(),
         payload: ic_wire::Bytes::new(data(n)).unwrap(),

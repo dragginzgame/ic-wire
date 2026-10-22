@@ -1,0 +1,22 @@
+{
+  "baseline": "9a1c06e with candidate Cargo.toml/Cargo.lock (IC Platform 0.6.8, IC Tooling 0.64.1)",
+  "candidate": "working tree; source hashes below",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "host_profile": "benchmark-speed: opt-3, LTO, one codegen unit, panic abort, strip symbols",
+  "host_cases": "1 and 100 named Page<u64> schemas; seven alternating samples, 100 generations/sample; metadata construction plus generate_registry; identical output asserted; unpinned Linux",
+  "host_baseline": "handwritten metadata using the same grammar and renderer",
+  "wasm_cases": "codec-wasm wire,derive-scale-1; wasm32-unknown-unknown; evaluation opt-z and benchmark-speed opt-3; separate baseline/candidate target directories",
+  "instruction_measurement": "Not rerun: deployed Wire Wasm is byte-identical in both matched fixtures; host metadata has no deployed instruction path.",
+  "sources": {
+    "Cargo.toml": "6f25cac9eef8556e224745e8a3d23f113775ecb4311e30f99f5c8cc35a3bd74b",
+    "Cargo.lock": "536fa2b7306f69d4b0da521c809bf3e4e432bc63de21c79a4956fd4a003a6025",
+    "crates/ic-wire-derive/src/lib.rs": "b2e7f92571e969efc761b1de48736aed2430a2fff90471a25892cd8e82a80400",
+    "crates/ic-wire-derive/src/native_schema/mod.rs": "3e1c9b9e7db08d43fb5cc3cd3d7ee503ace214ad9774a7a227e363ce7a5affaf",
+    "crates/ic-wire/src/lib.rs": "cf6241e2cb77f632fe2779bbdbc8db0811d95f6d3c0547204516a415ae9a16b3",
+    "crates/ic-wire/src/typescript/mod.rs": "246513682abba95d97b0be5cf931c0d9abaecb5a31b952933a1b7499e41190ef",
+    "crates/ic-wire/src/typescript/metadata/mod.rs": "c18a36296580b39aafda4392397d16d498530d01d11bd80fefd7f9c158380d51",
+    "crates/ic-wire/src/typescript/native_schema/mod.rs": "7257958502deb40508c09abf2f64e017d87c1aefee759d0a4301269fb4d804f3",
+    "crates/ic-wire/examples/typescript_conformance/native_schema/mod.rs": "b4d98ec44eeb660516185358d1ff29a4cb7986b293dfea885fbf97c6a080a722"
+  },
+  "samples_sha256": "50a648e83d75724028c9fec9f5135e16102a45567faf4d5065cc1c5023e95f58"
+}
