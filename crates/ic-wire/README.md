@@ -210,6 +210,8 @@ Generic declarations are projected after instantiation, such as `Page<String>`.
 Field-level `#[serde(borrow)]` and `#[serde(borrow = "'a")]` work with `Wire`,
 including bounded `BytesRef`/`TextRef` DTOs. Serde validates the lifetime names;
 borrowing changes ownership, not the generated client shape or payload bytes.
+These borrowing annotations also work on newtype enum variants; their tags and
+payload layouts are unchanged.
 Rust field declaration order and zero-based enum variant order describe the
 existing Serde bytes. For example, `{ a: u8, b: u16 }` with values 1/128 emits
 payload `01 80 01`; reversing the declarations emits `80 01 01`. Reordering or
@@ -219,13 +221,16 @@ There is no Candid-style schema evolution or compatibility fallback.
 Supported shapes are named/unit/tuple structs, externally tagged enums (unit,
 newtype, tuple and named variants), single-field `#[serde(transparent)]` structs,
 generic types/where clauses, fixed-width integers, bool, unit, String/str,
-Vec, Option, Result, Box, references, serializable fixed arrays and tuples of
+Vec, slices, Option, Result, Box (including boxed slices), references, serializable fixed arrays and tuples of
 one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other
 types require an explicit supported projection; they are not guessed. Apart
-from struct-level `transparent` and field-level `borrow`, Serde attributes are rejected, including
+from struct-level `transparent` and field/newtype-variant `borrow`, Serde attributes are rejected, including
 rename, skip, flatten, tagging and custom serializer attributes. Rust raw
 identifiers retain their unescaped names in the TypeScript object.
+Slices use the same length-prefixed sequence metadata as Vec, including `&[u8]`.
+Use `serde_bytes::Bytes` for byte-oriented `Uint8Array` metadata; slice metadata
+does not make arbitrary typed slices borrowable during Serde deserialization.
 
 The first version inlines concrete schemas and rejects recursive types or schemas
 exceeding 64 levels/65,536 visited nodes with `GenerationError::Complexity`.

@@ -263,6 +263,16 @@ export function createCodec(method: unknown, types: unknown) {
             &javascript,
         );
     }
+    add(
+        directory,
+        &mut checks,
+        13,
+        Page {
+            entries: vec![vec![0_u16, 128, 65535].into_boxed_slice()],
+            total: 1,
+        },
+        "{entries:[[0,128,65535]],total:1n}",
+    );
     checks.push_str(r#"
 for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.encodeRequest(bad), 'value');
@@ -270,7 +280,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 13 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 14 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

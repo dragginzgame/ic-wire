@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.2]
+
+- Describe Serde slices and boxed slices in `Wire` metadata, sharing the list
+  projection with Vec. Previously rejected slice fields now generate matching
+  TypeScript arrays; existing Vec metadata/budgets and protocol bytes are unchanged.
+
+- Support Serde's variant-level `borrow` annotation on newtype enum variants
+  in `Wire` metadata. Bare and explicit lifetimes preserve the existing variant
+  tag and borrowed payload; invalid unit/tuple/record placements remain rejected.
+- Reuse the scalar metadata helper for finite floats, removing duplicate
+  implementations without changing metadata, generated clients or runtime code.
+
 ## [0.6.1] - 2026-10-22
 
 - Allow field-level `serde(borrow)` and explicit borrowed lifetimes in `Wire`

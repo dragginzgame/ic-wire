@@ -23,6 +23,45 @@ struct Chunk<'data, 'name> {
     #[serde(borrow)]
     data: BytesRef<'data, 1048576>,
 }
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "typescript", derive(ic_wire::Wire))]
+enum BorrowedValue<'a> {
+    #[serde(borrow)]
+    Bytes(BytesRef<'a, 64>),
+    #[serde(borrow = "'a")]
+    Text(TextRef<'a, 64>),
+}
+
+#[test]
+fn newtype_variants_borrow_with_derived_metadata() {
+    #[cfg(feature = "typescript")]
+    assert_eq!(
+        ic_wire::typescript::native_schema::<BorrowedValue<'_>>().unwrap(),
+        serde_json::json!({"k":"enum","variants":[
+            {"name":"Bytes","id":0,"value":{"k":"bytes","max":64}},
+            {"name":"Text","id":1,"value":{"k":"text","max":64}}
+        ]})
+    );
+    for (value, payload) in [
+        (
+            BorrowedValue::Bytes(BytesRef::new(&[0, 255]).unwrap()),
+            vec![0, 2, 0, 255],
+        ),
+        (
+            BorrowedValue::Text(TextRef::new("é").unwrap()),
+            vec![1, 2, 195, 169],
+        ),
+    ] {
+        assert_eq!(ic_wire::native::encode(&value, LIMITS).unwrap(), payload);
+        let decoded: BorrowedValue<'_> = ic_wire::native::decode(&payload, LIMITS).unwrap();
+        assert_eq!(decoded, value);
+        let pointer = match decoded {
+            BorrowedValue::Bytes(bytes) => bytes.as_slice().as_ptr(),
+            BorrowedValue::Text(text) => text.as_str().as_ptr(),
+        };
+        assert_eq!(pointer, payload[2..].as_ptr());
+    }
+}
 #[test]
 fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
     #[cfg(feature = "typescript")]

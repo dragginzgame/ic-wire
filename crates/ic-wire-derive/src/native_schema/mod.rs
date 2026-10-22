@@ -95,17 +95,16 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         Data::Enum(data) if !transparent && !data.variants.is_empty() => {
             let mut variants = Vec::new();
             for (id, variant) in data.variants.iter().enumerate() {
-                attributes(&variant.attrs, false, false)?;
+                let newtype = matches!(&variant.fields, Fields::Unnamed(f) if f.unnamed.len() == 1);
+                // Serde also permits borrow on a newtype variant: it applies to
+                // the sole field's lifetimes and leaves the tag/payload unchanged.
+                attributes(&variant.attrs, false, newtype)?;
                 let name = variant
                     .ident
                     .to_string()
                     .trim_start_matches("r#")
                     .to_owned();
-                let value = fields(
-                    &variant.fields,
-                    &context,
-                    matches!(&variant.fields, Fields::Unnamed(f) if f.unnamed.len() == 1),
-                )?;
+                let value = fields(&variant.fields, &context, newtype)?;
                 variants.push(quote!({"name":#name,"id":#id,"value":#value}));
             }
             quote!(
@@ -152,7 +151,9 @@ mod tests {
             "struct A { #[serde(with = \"custom\")] a: u8 }",
             "struct A { #[serde(serialize_with = \"custom\")] a: u8 }",
             "#[serde(borrow)] struct A { a: u8 }",
-            "enum A { #[serde(borrow)] B(u8) }",
+            "enum A { #[serde(borrow)] B }",
+            "enum A { #[serde(borrow)] B(u8, u8) }",
+            "enum A { #[serde(borrow)] B { a: u8 } }",
             "struct A { #[serde(borrow, borrow)] a: u8 }",
             "struct A { #[serde(borrow = 1)] a: u8 }",
             "struct A { #[serde(borrow, with = \"custom\")] a: u8 }",

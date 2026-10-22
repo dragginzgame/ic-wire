@@ -79,6 +79,15 @@ fn byte_buffers_keep_frames_and_admit_in_bulk() {
 
 #[test]
 fn generics_borrows_and_struct_forms_follow_serde() {
+    let list = native_schema::<Vec<u16>>().unwrap();
+    assert_eq!(native_schema::<[u16]>().unwrap(), list);
+    assert_eq!(native_schema::<&[u16]>().unwrap(), list);
+    assert_eq!(native_schema::<Box<[u16]>>().unwrap(), list);
+    // A byte slice still uses Serde's sequence layout, not byte-buffer metadata.
+    assert_eq!(
+        native_schema::<&[u8]>().unwrap(),
+        native_schema::<Vec<u8>>().unwrap()
+    );
     assert_eq!(
         native_schema::<Borrowed<'_>>().unwrap(),
         json!({"k":"record","fields":[

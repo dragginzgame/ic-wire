@@ -72,10 +72,20 @@ scalar! {
     i8 => json!({"k":"i","bits":8}), i16 => json!({"k":"i","bits":16}),
     i32 => json!({"k":"i","bits":32}), i64 => json!({"k":"i","bits":64}),
     i128 => json!({"k":"i","bits":128}),
+    crate::FiniteF32 => json!({"k":"float","bits":32}),
+    crate::FiniteF64 => json!({"k":"float","bits":64}),
 }
 // Deliberately omit pointer-sized integers and raw floats: their platform/range
 // contracts cannot be faithfully inferred from the TS runtime.
 impl<T: Wire> Wire for Vec<T> {
+    fn native_schema(c: &mut SchemaContext) -> Result<Value, GenerationError> {
+        <[T] as Wire>::native_schema(c)
+    }
+}
+// Serde sequences share a length-prefixed layout regardless of Vec/slice custody.
+// Forward directly (not through describe) so existing Vec metadata traversal
+// depth/node accounting and generated clients remain unchanged.
+impl<T: Wire> Wire for [T] {
     fn native_schema(c: &mut SchemaContext) -> Result<Value, GenerationError> {
         Ok(json!({"k":"list","item":c.describe::<T>()?}))
     }
@@ -138,15 +148,5 @@ bounded_scalar!(crate::TextRef<'_, N>, "text");
 impl<T: Wire, const N: usize> Wire for crate::List<T, N> {
     fn native_schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
         Ok(json!({"k":"list", "max":N, "item":context.describe::<T>()?}))
-    }
-}
-impl Wire for crate::FiniteF32 {
-    fn native_schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
-        Ok(json!({"k":"float", "bits":32}))
-    }
-}
-impl Wire for crate::FiniteF64 {
-    fn native_schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
-        Ok(json!({"k":"float", "bits":64}))
     }
 }

@@ -1,8 +1,8 @@
 # Current handoff
 
-## Current batch: post-0.6.0 audit
+## Current batch: post-0.6.1 audit
 
-0.6.0 is released at `7dc70b4`; pending fixes are recorded under 0.6.1.
+0.6.1 is released at `beba845`; pending fixes are recorded under 0.6.2.
 The released minor version contains the approved API/layout hard cut. Evidence retains its
 original 0.5.23 candidate labels and paths; package versions remain release-owned.
 Keep one production Serde/Postcard codec, exposed through `ic_wire::native`.
@@ -43,6 +43,15 @@ Runtime code and protocol are unchanged; no runtime benchmark rerun is needed.
 Focused derive, default runtime, borrowing, TypeScript/MSRV/lint and nine
 diagnostic checks pass; doctests pass with and without the typescript feature.
 
+The next audit extends borrow annotations to Serde's newtype enum variants,
+including explicit lifetimes. Exact tag/payload and input-backed borrowing tests
+cover both bytes and text; other variant placements remain rejected.
+Finite-float metadata now reuses the existing scalar helper, with identical
+metadata and no runtime-code change or performance claim.
+Slice metadata now shares Vec's list projection, enabling boxed-slice fields
+without extra metadata traversal charges. A boxed-u16 generic page has matching
+Rust/TypeScript frames in both directions. This adds no runtime serializer.
+
 ## Current evidence
 
 The [production comparison](../candid-comparison.md#production-serde-hard-cut--pending-0523)
@@ -67,7 +76,7 @@ The retired finite blob and short-write savings are historical evidence only.
 Runtime, borrowing, canonical bulk/custom-boundary tests, corpus roundtrips,
 strict lint, Rustdoc, native/Wasm MSRV and nine compiler diagnostics pass.
 TypeScript checks cover 146 vectors, 29,536 mutations, 1 MiB buffer boundaries,
-and thirteen generic/custom-scalar/byte projection vectors. Allocation/packed-field checks
+and fourteen generic/custom-scalar/byte/slice projection vectors. Allocation/packed-field checks
 and all consumer benchmark cohorts pass. Evidence is retained under
 `docs/evidence/serde-production-0523/`; logs: `target/serde-hardcut-0523/validation/`.
 No full CI, macOS, live canister or consumer installed suite was run.

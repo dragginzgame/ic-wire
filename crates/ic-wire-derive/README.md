@@ -7,6 +7,7 @@ Concrete generic instantiations follow Serde declaration order. Unsupported Serd
 attributes fail explicitly; custom serializers require verified manual metadata.
 Field-level `#[serde(borrow)]` and `#[serde(borrow = "'a")]` are supported:
 they constrain deserialization lifetimes without changing the serialized layout.
+The same annotations are supported on newtype enum variants, as in Serde.
 
 This replaces the former serializer-generating `Wire` derive; the new derive
 requires ordinary Serde serialization and generates only metadata. See the
