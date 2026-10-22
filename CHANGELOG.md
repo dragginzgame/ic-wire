@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.22]
+## [0.5.22] - 2026-10-22
 
 - Avoid rescanning directly decoded bounded bytes during finite canonical
   verification. Generated records delegate verification only when every field
