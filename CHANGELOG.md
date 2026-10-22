@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.20]
+## [0.5.20] - 2026-10-22
 
 - Resolve benchmark Wasm artifacts from Cargo build messages so configured target
   directories cannot select stale files. Reject incomplete or duplicate comparison
