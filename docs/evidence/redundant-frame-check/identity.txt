@@ -1,0 +1,32 @@
+rustc 1.99.1 (58cf8f9c3 2026-10-13)
+binary: rustc
+commit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67
+commit-date: 2026-10-13
+host: x86_64-unknown-linux-gnu
+release: 1.99.1
+LLVM version: 23.1.1
+RUSTFLAGS=
+CARGO_ENCODED_RUSTFLAGS=
+baseline=83f90a4779aa3cdaf016484dc096322708cd0cdf
+c5fa4498d315a640f0afaac5a967b59a9b0d040ae50c3c351b1ea60dd1b412bf  Cargo.lock
+c67d5959203edf4b97ecc52274948361a353d2d88c650aae44c82ff0cef3d86c  scripts/benchmarks/protocol/mod.rs
+40c59148c603d5169285a0b0b9057b389fca72a127c9012335781df2dea5c8fd  scripts/benchmarks/protocol/native_views/mod.rs
+2e55088f0a9c101ca1ce69fea4295215c2e840b2481d18bf04534f0670bcd955  scripts/benchmarks/protocol/run.sh
+694e6027a4dc1395276b2668b53e55049f1442b13cf32ed8567f9a23f0330c7b  /tmp/ic-wire-redundant-check/baseline-contract.rs
+26ff6005e1d7cef5bdf30b48551c71a961b4651c506a072ac2b301e14ea1a9ad  /tmp/ic-wire-redundant-check/candidate-contract.rs
+e349442c9d36236c4805e772c4c9c97703d962929850af157ddc9df7c4fdd935  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_0.bin
+988ab7542ab46ad52caf361af0ec96ef63eaa74879d56ee527015a4c84e72c10  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_1048576.bin
+21267ef750e0a6a7ec12619f3769f38eed718c7d3e40b00be27c13f1bfeb4430  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_262128.bin
+9beb0e11ec92f787c3433e605d0610959142a671d2cfc1f0843b0c5a8a589915  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_262144.bin
+3c58246cf420f333b9e8bc842cf19f7e2fb0f784afcf61be2e7281e138336807  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_32.bin
+22af92b9ed4157c3d2a991c54d30a0f60afb1f4e87c10824895b97280380e41c  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_4096.bin
+aee33a47fc3db7c43b4e1588b2126c767802bc03f0f5a82ff51cbe4410894e3f  /tmp/ic-wire-redundant-check/baseline-frames/blob_owned_524288.bin
+ab438332af87c658d16c266ad05227243bd72fe440a5af34843a7d931eaa10f9  /tmp/ic-wire-redundant-check/baseline-frames/chunks_16.bin
+85618a97b674271e10fad0b54366e4c729476e0199156e7bb06a43ce1784b1e7  /tmp/ic-wire-redundant-check/baseline-frames/chunks_4.bin
+5899c33f06d3ab2fd85ef3fbb8fe8d62ebd0394fb7d798bee60f61a75e1cbc40  /tmp/ic-wire-redundant-check/baseline-frames/integers.bin
+72998880ae38a6141deb70f077c7512c1bff2cd7bb87d2d6ba201757e08b7de9  /tmp/ic-wire-redundant-check/baseline-frames/key_bytes.bin
+ff8177cbd23525d12d65b621ef5a4bb6be2314b6715be83060d155a5314a2b3e  /tmp/ic-wire-redundant-check/baseline-frames/key_fixed.bin
+08760ed445c2db5865bcee437f88b07f172e9cb0f62ca6d1c222b43c9091f0da  /tmp/ic-wire-redundant-check/baseline-frames/key_optional.bin
+64777556b5746b496425cbbee8d1c2ab16228cb6b8be9ff1558d2429f0ca9e74  /tmp/ic-wire-redundant-check/baseline-frames/key_required.bin
+a128bbe0b53e072a491586ba258038e854b3acbed360d60c6566a3d1f07ff9f5  /tmp/ic-wire-redundant-check/baseline-frames/tag_small.bin
+012af1862b7de47a6647759ffca745f36e92afaa2e23c94d904dd04e743a1097  /tmp/ic-wire-redundant-check/baseline-frames/tag_wide.bin

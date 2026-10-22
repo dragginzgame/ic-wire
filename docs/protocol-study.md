@@ -139,3 +139,41 @@ The [native borrowed-view study](native-views-study.md) adds public native API
 measurements with a full byte scan and multi-field text projections. Select it
 with `IC_WIRE_NATIVE_VIEWS_ONLY=1`; its source identities and evidence are retained
 separately from the original finite-codec measurements above.
+
+## Redundant frame check cleanup (0.5.20)
+
+Finite admission already guarantees the schema frame ceiling is no greater than
+`limits.bytes`. Decode now checks the input against that ceiling alone, removing
+an implied comparison. Bytes, error precedence and admission are unchanged.
+The shared TypeScript safe-integer constant is also unchanged in value; its
+integer and floating-point uses remain exact compile-time constants.
+
+The existing runner compared `83f90a4` with the single-condition decoder in two
+paired runs, reversing lane order on the second run. Reproduce with
+`bash scripts/benchmarks/protocol/run.sh /tmp/wire-frame-check-new 83f90a4`.
+All frame comparisons and the canonical/nonminimal-input assertions passed.
+Selected full-decode medians (native ns; eleven batches each):
+
+| Case | Run | Before ns | After ns | Change |
+| --- | --- | --- | --- | --- |
+| key_bytes | 1 | 25.5 | 26.6 | +4.0% |
+| key_bytes | 2 | 25.5 | 27.6 | +8.3% |
+| tag_small | 1 | 3.8 | 3.8 | +0.1% |
+| tag_small | 2 | 4.0 | 5.7 | +43.0% |
+| integers | 1 | 10068.7 | 10042.0 | -0.3% |
+| integers | 2 | 10281.9 | 10253.1 | -0.3% |
+| blob_owned_4096 | 1 | 124.8 | 120.5 | -3.5% |
+| blob_owned_4096 | 2 | 118.6 | 124.5 | +5.0% |
+| blob_owned_1048576 | 1 | 35263.4 | 32121.6 | -8.9% |
+| blob_owned_1048576 | 2 | 33951.9 | 32587.5 | -4.0% |
+
+Timings are mixed, including small-case regressions; no speedup is claimed.
+The host was not isolated: focused validation also ran during part of this
+experiment, and CPU affinity was not fixed. These results do not establish a
+causal performance regression or improvement. No IC or artifact-size claim.
+The compiler was Rust 1.99.1 / LLVM 23.1.1, x86_64 Linux on Threadripper 7970X,
+release opt-level 3, no LTO or extra RUSTFLAGS. Inputs, limits, warmup and calibration
+are defined by the retained probe; both lanes used the same lockfile.
+[Raw samples](evidence/redundant-frame-check/samples.csv),
+[all stage medians](evidence/redundant-frame-check/medians.csv) and
+[source/frame identities](evidence/redundant-frame-check/identity.txt) retain the data.

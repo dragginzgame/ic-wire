@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.5.20]
+
+- Resolve benchmark Wasm artifacts from Cargo build messages so configured target
+  directories cannot select stale files. Reject incomplete or duplicate comparison
+  rows before writing reports; Wire-only reuse measurements remain explicit.
+
+- Reduce Wasm canonical byte/text comparison instructions with 32-byte bulk
+  blocks and word-sized tails. Measured 1 MiB owned decode improves 14.0% at
+  opt-z (+129 linked Wasm bytes) and 2.38% at opt-3 (+25 bytes); protocol bytes,
+  admission, typed failures and native comparison behavior are unchanged.
+
+- Add an unpublished Candid comparison suite with matched wire types, native
+  timing, allocation counts, peak live heap, IC instructions through PocketIC,
+  and linked/compressed Wasm sizes.
+  Candid remains a benchmark-only dev dependency through IC Platform; the
+  production protocol and published crates are unchanged.
+
+- Prevent generated Wire generic/visitor names from shadowing contract payload
+  types, fixing compilation for names such as `A` and `D` without changing bytes.
+- Fully qualify generated core/Serde references, including result constructors
+  and primitive enum tags, to avoid consumer-name and prelude dependencies.
+- Use private generated bindings to avoid ordinary consumer constants such as
+  `value` and `tag`; infer enum payloads so associated types using `Self` compile.
+- Remove an implied finite-frame length check and share TypeScript generation
+  safe-integer limits, preserving protocol bytes, admission and typed errors.
+
 ## [0.5.19] - 2026-10-21
 
 - Rename the unpublished tooling crate to `ic-wire-qualification` and its check

@@ -1,0 +1,53 @@
+{
+  "artifacts": [
+    {
+      "codec": "wire",
+      "profile": "evaluation",
+      "sha256": "5fbc3947823326cdcffc653c8aa19d92558121abfcb8ea836e2ba662246e9d9d"
+    },
+    {
+      "codec": "candid",
+      "profile": "evaluation",
+      "sha256": "18cf2c27834032ea7fc2104471eeac31d2fa1c9401b18cee548cdde74d8df6c7"
+    },
+    {
+      "codec": "wire",
+      "profile": "benchmark-speed",
+      "sha256": "bd636d1bb4d9855c982583be223262fe8ab954f3baab77af12f177c1381973c3"
+    },
+    {
+      "codec": "candid",
+      "profile": "benchmark-speed",
+      "sha256": "8ba7e28e1a5963b9012fd56ad73c7f8cd9e57a69fc4549b4eb7a606db8215d52"
+    }
+  ],
+  "counter": "ic0.performance_counter(0)",
+  "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+  "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+  "format": 1,
+  "large_repetitions": 1,
+  "lock_sha256": "bd334989af69c3e8a5099ba584ed402d5fc163733e7fd0461ff39e35dfbf7e75",
+  "notes": "Final artifacts are byte-identical to the measured split candidate; instruction output copied without modification. Every matched frame and input hash agrees. CSV retains every changed row plus selected unchanged decode controls; full samples remain in target directories.",
+  "samples": 3,
+  "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+  "server_version": "pocket-ic-server 16.1.0\n",
+  "small_repetitions": 4,
+  "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83",
+  "baseline_contract_sha256": "26ff6005e1d7cef5bdf30b48551c71a961b4651c506a072ac2b301e14ea1a9ad",
+  "candidate_contract_sha256": "1fbf4e483320a1c9f339601123bbaed7db150566afa858177813299f5e243836",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "baseline_directory": "target/codec-comparison-2026-10-22-v1",
+  "candidate_directory": "target/wasm-compare-final-2026-10-22",
+  "native_executables": [
+    {
+      "profile": "benchmark-speed",
+      "baseline_and_candidate_sha256": "9840a2ada480a9a9e32b8c2755ffd71421000869a2824381f58f46704667d305",
+      "bytes": 2173088
+    },
+    {
+      "profile": "evaluation",
+      "baseline_and_candidate_sha256": "03f250dce09fd29f8a6bd62e94f3c6d7e41f9953a57535b0317cf11269506437",
+      "bytes": 1828600
+    }
+  ]
+}

@@ -166,3 +166,15 @@ The native scaffold supports Linux x86_64, macOS ARM64 and macOS x86_64 through
 the configured CI matrix. Local Linux checks do not qualify either native macOS
 host. Keep [host support](supported-hosts.md), compiler-floor checking and Wasm
 compilation distinct from runtime performance or consumer deployment acceptance.
+
+## Candid comparison benchmarks
+
+Run `make check-benchmarks` for corpus correctness, lint and Rust 1.91 checks.
+Run `make evaluate-codecs` for native timing, allocation counts, peak live heap
+and Wasm footprint under both optimization profiles. It requires the prepared
+`wasm32-unknown-unknown` target, `gzip` and `shasum`; it does not install tools.
+Set `POCKET_IC_BIN` to an explicitly prepared server to include IC instruction
+measurements. The driver uses IC Testkit for server admission/lifecycle and never
+downloads it implicitly. Output directories must not already exist. Use
+`bash scripts/ci/evaluate-codecs.sh target/another-run` to retain another run.
+See [methodology and results](candid-comparison.md) before interpreting ratios.

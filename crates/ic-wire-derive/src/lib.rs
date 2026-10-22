@@ -1,6 +1,6 @@
 //! Explicit-layout derives for IC Wire contracts.
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{ToTokens, format_ident, quote};
 use std::collections::BTreeSet;
 use syn::{
     Data, DeriveInput, Fields, GenericParam, Lifetime, LifetimeParam, parse_macro_input,
@@ -36,6 +36,15 @@ fn identity(attrs: &[syn::Attribute]) -> syn::Result<u32> {
     })
 }
 
+// Generated local types and generics must not shadow names in the contract.
+fn fresh_ident(source: &str, base: &str) -> syn::Ident {
+    let mut name = base.to_owned();
+    while source.contains(&name) {
+        name.push('_');
+    }
+    format_ident!("{name}")
+}
+
 fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     if input
         .generics
@@ -55,6 +64,12 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
             "wire ids belong on fields or variants",
         ));
     }
+    let source = input.to_token_stream().to_string();
+    let serializer = fresh_ident(&source, "S");
+    let deserializer = fresh_ident(&source, "D");
+    let serializer_binding = fresh_ident(&source, "__ic_wire_serializer");
+    let deserializer_binding = fresh_ident(&source, "__ic_wire_deserializer");
+    let fields_binding = fresh_ident(&source, "__ic_wire_fields");
     let generics = input.generics;
     let mut decode_name = "__ic_wire_de".to_owned();
     while generics
@@ -111,28 +126,35 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                 .iter()
                 .map(|name| name.to_string().trim_start_matches("r#").to_owned())
                 .collect();
+            let indices: Vec<_> = (0..fields.len()).map(syn::Index::from).collect();
             let field_ids: Vec<_> = fields.iter().map(|f| f.0).collect();
             (
-                quote! { ::ic_wire::__private::serde::Serialize::serialize(&(#(&self.#names,)*), serializer) },
+                quote! { ::ic_wire::__private::serde::Serialize::serialize(&(#(&self.#names,)*), #serializer_binding) },
                 quote! {
-                    let (#(#names,)*): (#(#types,)*) = ::ic_wire::__private::serde::Deserialize::deserialize(deserializer)?;
-                    Ok(Self { #(#names,)* })
+                    let #fields_binding: (#(#types,)*) = ::ic_wire::__private::serde::Deserialize::deserialize(#deserializer_binding)?;
+                    ::core::result::Result::Ok(Self { #(#names: #fields_binding.#indices,)* })
                 },
                 quote! { ::ic_wire::Shape::record(&[#(<#types as ::ic_wire::Wire>::SHAPE,)*]) },
                 quote! { ::ic_wire::schema::Schema::Record(&[#(::ic_wire::schema::Field { name: #labels, id: #field_ids, value: &<#types as ::ic_wire::Wire>::SCHEMA },)*]) },
             )
         }
-        Data::Enum(data) => {
-            enum_expansion::expand(&name, &generics, &decode_generics, &decode_lifetime, data)?
-        }
+        Data::Enum(data) => enum_expansion::expand(
+            &name,
+            &generics,
+            &decode_generics,
+            &decode_lifetime,
+            data,
+            &source,
+            (&serializer_binding, &deserializer_binding),
+        )?,
         Data::Union(_) => return Err(syn::Error::new_spanned(name, "unions are unsupported")),
     };
     Ok(quote! {
         impl #impl_generics ::ic_wire::__private::serde::Serialize for #name #type_generics #where_clause {
-            fn serialize<S: ::ic_wire::__private::serde::Serializer>(&self, serializer: S) -> ::core::result::Result<S::Ok, S::Error> { #serialize }
+            fn serialize<#serializer: ::ic_wire::__private::serde::Serializer>(&self, #serializer_binding: #serializer) -> ::core::result::Result<<#serializer as ::ic_wire::__private::serde::Serializer>::Ok, <#serializer as ::ic_wire::__private::serde::Serializer>::Error> { #serialize }
         }
         impl #decode_impl_generics ::ic_wire::__private::serde::Deserialize<#decode_lifetime> for #name #type_generics #decode_where_clause {
-            fn deserialize<D: ::ic_wire::__private::serde::Deserializer<#decode_lifetime>>(deserializer: D) -> ::core::result::Result<Self, D::Error> { #deserialize }
+            fn deserialize<#deserializer: ::ic_wire::__private::serde::Deserializer<#decode_lifetime>>(#deserializer_binding: #deserializer) -> ::core::result::Result<Self, <#deserializer as ::ic_wire::__private::serde::Deserializer<#decode_lifetime>>::Error> { #deserialize }
         }
         impl #impl_generics ::ic_wire::Wire for #name #type_generics #where_clause {
             const SHAPE: ::ic_wire::Shape = #shape;

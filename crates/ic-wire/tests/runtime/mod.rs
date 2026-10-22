@@ -1,6 +1,7 @@
 //! Runtime contract behavior and rejection boundaries.
 mod boxed;
 mod canonical_bytes;
+mod derive_hygiene;
 use ic_wire::{
     Bytes, Error, Limits, List, Method, Text, Wire, decode_request, decode_response,
     encode_request, encode_response,

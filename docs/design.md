@@ -18,8 +18,10 @@ canonicality, resource limits and typed errors.
 | Shared Tooling | Reviewed contributor setup, formatting and release mechanics |
 
 The runtime remains Wasm-safe and independent of platform and host tooling.
-No endpoint SDK, simulator or browser transport is part of the workspace.
-All dependency roles, including tests, use the selected codec boundary.
+Endpoint SDKs and browser transports remain consumer-owned. The unpublished
+benchmark crate may use Candid and PocketIC as dev dependencies for codec
+comparisons and IC instruction measurements; published crates remain independent
+of them.
 
 ## Contract discipline
 

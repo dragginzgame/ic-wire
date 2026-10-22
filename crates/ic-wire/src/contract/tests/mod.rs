@@ -94,22 +94,24 @@ fn finite_encoding_allocates_for_emitted_bytes_without_a_second_visit() {
 #[test]
 fn exact_bulk_equality_covers_word_boundaries_tails_and_every_mismatch() {
     // Native unit builds exercise the same chunk branch as production Wasm.
-    for len in 0..=97 {
-        let original: Vec<_> = (0..len).map(|i| i as u8).collect();
+    for len in 0..=161 {
+        let storage: Vec<_> = (0..len + 1).map(|i| i as u8).collect();
+        // Exercise unaligned starts as well as every 32-byte block/tail boundary.
+        let original = &storage[1..];
         let compare = || Compare {
-            remaining: &original,
+            remaining: original,
             allowance: len,
             equal: true,
         };
         let mut equal = compare();
-        equal.try_extend(&original).unwrap();
+        equal.try_extend(original).unwrap();
         assert!(equal.finalize().unwrap());
-        let copy = original.clone();
+        let copy = original.to_vec();
         let mut separate = compare();
         separate.try_extend(&copy).unwrap();
         assert!(separate.finalize().unwrap());
         for position in 0..len {
-            let mut different = original.clone();
+            let mut different = original.to_vec();
             different[position] ^= 1;
             let mut refused = compare();
             refused.try_extend(&different).unwrap();
@@ -123,7 +125,7 @@ fn exact_bulk_equality_covers_word_boundaries_tails_and_every_mismatch() {
                 continue;
             }
             let mut unequal = Compare {
-                remaining: &original,
+                remaining: original,
                 allowance: len + 1,
                 equal: true,
             };

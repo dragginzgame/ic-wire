@@ -1,5 +1,5 @@
 //! Rendering shared by finite schemas and consumer-owned native metadata.
-use super::GenerationError;
+use super::{GenerationError, MAX_SAFE_INTEGER};
 use alloc::{
     collections::{BTreeMap, BTreeSet},
     format,
@@ -112,7 +112,7 @@ pub(super) fn ty(
                 .get(key)
                 .map(|n| {
                     let n = n.as_u64().ok_or(GenerationError::Schema)?;
-                    if n > (1_u64 << 53) - 1 {
+                    if n > MAX_SAFE_INTEGER {
                         return Err(GenerationError::Complexity);
                     }
                     Ok(n)
@@ -146,7 +146,7 @@ pub(super) fn ty(
                         }
                         // Runtime converts numeric integer bounds to BigInt. Reject
                         // values that JavaScript would round before that conversion.
-                        if n.abs() > 9_007_199_254_740_991.0 {
+                        if n.abs() > MAX_SAFE_INTEGER as f64 {
                             return Err(GenerationError::Complexity);
                         }
                     }
@@ -339,7 +339,7 @@ pub fn generate_registry(
             "responseDepth",
         ] {
             let n = method[key].as_u64().ok_or(GenerationError::Complexity)?;
-            if n > (1_u64 << 53) - 1 {
+            if n > MAX_SAFE_INTEGER {
                 return Err(GenerationError::Complexity);
             }
             let minimum = if key.ends_with("Bytes") {

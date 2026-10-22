@@ -2,35 +2,91 @@
 
 ## Current batch
 
-Released 0.5.19 (`0381af2`) includes the qualification-crate rename and retirement
-of alternative-codec suites. The follow-up audit changes documentation only:
-released work is no longer described as pending, and the development guide links
-to the recorded Shared Tooling pin instead of duplicating an outdated revision.
-No production, test or benchmark code is removed in this follow-up.
+Pending 0.5.20 removes the redundant finite input comparison against method bytes:
+schema admission already guarantees the schema frame ceiling is no larger.
+TypeScript generation now shares one safe-integer ceiling for finite metadata,
+registry bounds and method allowances, including exact f64 conversion.
+Protocol bytes, validation order, typed errors, owned/borrowed behavior and public
+APIs are unchanged. Package versions, staging and Git refs are untouched.
 
-The maintained crate is `ic-wire-qualification`; its CI target is
-`check-qualification`. It retains the allocation/borrowing fixture, packed-projection
-test and compiler diagnostics. Protocol and generator probes also remain.
-The old crate/target names occur only in historical reports and evidence or
-retirement explanations. No active build/CI references or compatibility aliases
-remain. Bitcode, wincode and MessagePack dependencies are absent from the workspace.
+Wire derives now choose generated generic and visitor identifiers absent from the
+contract source. Previously, a field type named `D` or enum payload named `A` was
+shadowed by a generated Serde parameter and failed compilation. Regression cases
+also cover underscore-suffixed names and a visitor-name collision, asserting exact
+Postcard bytes. Generated result constructors are also fully qualified: consumer
+value names `Ok`/`Err` previously broke record/enum decoding compilation. The
+regression checks unit/payload variants and unknown-tag rejection. No field/variant
+identity or decoding rule changes. All generated library references and calls now
+use absolute paths or fully qualified associated types, including the primitive
+enum tag. A no-implicit-prelude regression shadows `u32` with a consumer byte alias
+and checks tags above 255; consumer field types remain as declared.
+Generated bindings use private prefixed names; the experimental function-import
+shielding and its wrapper are removed. Record decoding projects tuple fields
+instead of binding consumer field names. Enum payload types are inferred from
+constructors, preserving consumer `Self` references; unit payloads remain `()`.
+Regressions cover ordinary constant names, array-length constants, associated
+payload types, exact bytes and malformed enums. Deliberate collisions with private
+generated names are not guaranteed. Wire identity and acceptance are unchanged.
+
+An unpublished `ic-wire-benchmarks` package now compares 114 deterministic Candid
+and Wire workloads. Candid/PocketIC remain dev-only through IC Platform; IC Testkit
+owns server admission/lifecycle. The former blanket simulator restriction is
+narrowed to permit codec benchmarks while keeping application integration outside
+this repository. Native time, allocation counts, peak heap, actual IC instructions
+and linked/gzip Wasm sizes are measured separately under opt-z and opt-3.
+See [methodology and results](../candid-comparison.md). PocketIC pins the shared
+lockfile's `thiserror` to 2.0.18; production dependency-boundary and runtime checks
+pass. Published crates gain no Candid or simulator dependency.
+
+Wasm canonical comparison now uses 32-byte blocks and word-sized tails. The
+matched corpus measures 14.0% fewer 1 MiB owned-decode instructions at opt-z
+(+129 Wasm / +48 gzip bytes), and 2.38% fewer at opt-3 (+25 Wasm / unchanged gzip).
+Seven small opt-3 decode cases add three instructions; protocol bytes are unchanged.
+See the [retained comparison and reproduction](../candid-comparison.md#wasm-comparison-optimization--pending-0520).
+
+Benchmark artifact discovery now follows Cargo JSON paths, including configured
+target directories. Reports reject missing comparison partners, duplicate rows
+and empty runs before creating CSV output. The full rerun at
+`target/codec-comparison-2026-10-22-rerun/` passes: 2,352 matched comparisons and
+2,838 IC result rows, all matching retained optimized counts and frame hashes.
+Both profiles retain identical allocation/heap results and Wire artifact sizes.
 
 ## Evidence and qualification
 
-The audit reviewed workspace manifests, Make/CI wiring, native and finite codec
-boundaries, derives, bounded projections, qualification fixtures and benchmark
-entry points. The remaining similar flows have distinct ownership, admission or
-error contracts; no further safe code deletion was identified in this pass.
+`make test` and `make check-typescript` pass, including 146 vectors and 29,560
+differential mutations. The latter includes strict Clippy and the generator's
+Rust 1.91 library check. Formatting, Wasm compilation and documentation checks pass.
+The derive follow-up passes `make test`, compile-fail diagnostics, strict Clippy
+and Rust 1.91 native/Wasm checks. The separate reproducer failed before the fix
+and compiles afterward; logs are in `/tmp/ic-wire-derive-hygiene/` and
+`/tmp/ic-wire-result-hygiene/`. The full-path follow-up also passes these gates;
+logs are in `/tmp/ic-wire-qualified-paths/`. The conventional-binding simplification
+passes the same gates; `/tmp/ic-wire-conventional-derive/` retains its failing
+`Self` regression and passing checks. Runtime costs
+are not benchmarked for this name-resolution fix: emitted codec operations are
+unchanged, and previously failing contracts had no runnable baseline. Macro
+expansion now inspects the source token text; compile-time cost was not measured.
 
-Offline locked dependency metadata, dependency-boundary checks, snapshot integrity,
-documentation links and whitespace checks pass. Runtime tests and timing probes
-were not rerun for documentation-only changes. Protocol bytes, resource limits,
-public APIs, dependencies, versions, staging and Git refs are unchanged.
+The benchmark corpus, lint, Rust 1.91 native/Wasm, formatting, local Make adapter,
+document links and dependency boundaries pass. The completed run is retained at
+`target/codec-comparison-2026-10-22-v1/` with source snapshots and raw samples.
+All 2,838 IC result rows have agreeing repeated counts and native-frame equality.
+PocketIC required localhost access outside the sandbox; its failed startup log
+and successful rerun are both retained. Linux was measured; macOS was not run.
+Earlier benchmark directories are pilots, not the reported evidence.
 
-Historical benchmark evidence is retained. The last complete alternative-codec
-comparison source/lockfile is `bd9e5bc0ac2c6a057570ae5aae55e0c1f431488b`; old
-commands require a separate historical checkout. See
-[retired comparisons](../performance.md#retired-alternative-codec-comparisons).
+The protocol probe compared baseline `83f90a4` with the decoder change twice,
+including unchanged-frame and nonminimal-input checks. Timings are mixed and the
+host was not isolated; no speedup or causal regression is established. Raw samples,
+absolute timings and controls are in the
+[protocol study](../protocol-study.md#redundant-frame-check-cleanup-0520).
+The constant refactor replaces identical compile-time values; it changes no
+algorithm and has no separate generator performance claim. Full CI was not run.
+
+Qualification remains in `ic-wire-qualification`, with `check-qualification` as its
+CI gate. Older alternative-codec suites remain retired; the new Candid suite is separate.
+Allocation/borrowing fixtures, compiler diagnostics, protocol and generator probes
+remain maintained. Historical reports require their recorded source revisions.
 
 ## Retained decisions
 

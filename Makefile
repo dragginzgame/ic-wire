@@ -28,6 +28,22 @@ check-package:
 	+@$(MAKE) lint
 	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
 
+.PHONY: evaluate-codecs evaluate-codec-instructions check-benchmarks
+evaluate-codecs:
+	+@bash scripts/ci/evaluate-codecs.sh "$(CURDIR)/target/codec-comparison"
+
+evaluate-codec-instructions:
+	+@env cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features wire,candid,ic -- "$(CURDIR)/target/codec-comparison"
+
+check-benchmarks:
+	+@env cargo test --locked -p ic-wire-benchmarks --example codec-report
+	+@env cargo test --locked -p ic-wire-benchmarks --features wire,candid --test roundtrip
+	+@env cargo clippy --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic -- -D warnings
+	+@env cargo clippy --locked -p ic-wire-benchmarks --bench suite --features wire,candid,allocations -- -D warnings
+	+@env cargo clippy --locked -p ic-wire-benchmarks --bench suite --features wire,candid,heap -- -D warnings
+	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic
+	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features wire,candid
+
 .PHONY: evaluate-allocation
 evaluate-allocation:
 	+@env cargo run --locked --profile evaluation -p ic-wire-qualification --example allocation --features allocation-fixture -- target/allocation-comparison evaluation
@@ -59,6 +75,8 @@ help:
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
+		'Evaluation: evaluate-codecs (Candid comparison: timing, allocation, peak heap, Wasm size)' \
+		'Qualification: check-benchmarks (comparison corpus, lint and MSRV)' \
 		'Evaluation: evaluate-allocation (borrowing, buffers and bounded/packed layouts)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Qualification: check-qualification (allocation fixtures and compiler support)' \
@@ -88,7 +106,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md
 
 .PHONY: check-boundary
 check-boundary:
@@ -107,7 +125,7 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-typescript check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-benchmarks check-typescript check-wasm check-msrv
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

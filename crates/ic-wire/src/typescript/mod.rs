@@ -10,6 +10,9 @@ use serde_json::{Value, json};
 mod metadata;
 pub use metadata::generate_registry;
 
+// JavaScript's safe-integer ceiling for generated numeric bounds.
+const MAX_SAFE_INTEGER: u64 = (1_u64 << 53) - 1;
+
 /// Shared bounded Postcard implementation. Write beside generated method modules
 /// as `wire-runtime.ts`; it imports no SDK and owns no transport/auth policy.
 pub const RUNTIME: &str = include_str!("runtime.ts");
@@ -86,7 +89,7 @@ fn describe(
 }
 
 fn exact(value: usize) -> Result<(), GenerationError> {
-    if value as u128 > (1_u128 << 53) - 1 {
+    if value as u128 > u128::from(MAX_SAFE_INTEGER) {
         Err(GenerationError::Complexity)
     } else {
         Ok(())

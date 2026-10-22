@@ -1,8 +1,10 @@
 # Evaluation scope
 
-The maintained qualification exercises the selected Postcard codec and its
-generated TypeScript implementation. Endpoint adapters, simulators, browser SDKs
-and installed canister drivers are outside this repository.
+The maintained qualification exercises the selected Postcard codec, its
+generated TypeScript implementation and an isolated Candid comparison suite.
+Endpoint adapters and browser SDKs remain consumer-owned. The unpublished codec
+benchmark package may use PocketIC for isolated IC instruction measurements;
+it does not qualify consumer endpoint integrations.
 
 ## Maintained checks
 
@@ -11,13 +13,16 @@ and installed canister drivers are outside this repository.
 | `test` | Runtime/native bounds, canonical bytes, typed failures and retry buffers |
 | `check-typed-diagnostics` | Actual compile-fail subjects and a passing control |
 | `check-typescript` | Generated types, Rust vectors and differential malformed-input checks |
+| `check-benchmarks` | Matched Candid/Wire corpus, malformed-frame checks, lint and MSRV |
+| `evaluate-codecs` | Repeated native timing, allocator counts, peak live heap and Wasm footprint |
 | `check-qualification` | Allocation/borrowing fixture tests, strict linting and compiler-floor checks |
 | `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.91 floor |
 
 The unpublished `ic-wire-qualification` package owns the maintained allocation,
 borrowing and buffer-reuse fixtures plus the IC Build compiler-diagnostic runner.
-Alternative-codec suites were retired in 0.5.19; their reports and raw evidence
-remain historical. See [retired comparisons](performance.md#retired-alternative-codec-comparisons)
+Earlier alternative-codec suites were retired in 0.5.19; their reports and raw
+evidence remain historical. The new [Candid suite](candid-comparison.md) is owned
+by the unpublished `ic-wire-benchmarks` package. See [retired comparisons](performance.md#retired-alternative-codec-comparisons)
 for the last source revision and reproduction boundary. Raw Postcard controls in
 the retained protocol probes omit Wire admission/canonicality and are not runtime
 modes. Native timings, IC instructions and artifact sizes remain distinct evidence.

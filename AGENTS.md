@@ -20,8 +20,10 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
   before broad adoption. Postcard is selected for controlled RPC and owned user
   endpoints. Preserve the explicit runtime contract in docs/runtime.md.
 - Keep runtime code Wasm-safe and independent of platform SDKs and host tooling.
-- Keep all workspace dependency roles limited to codec qualification. Do not add
-  endpoint SDKs, simulators or browser transports; integration belongs to consumers.
+- Keep workspace dependency roles limited to codec qualification. The unpublished
+  benchmark package may use Candid and PocketIC through IC Platform as dev
+  dependencies, with IC Testkit owning server admission/lifecycle. Do not add
+  endpoint SDKs or browser transports; application integration belongs to consumers.
 - Use one selected wire encoding, not a configurable codec framework.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
@@ -50,8 +52,12 @@ Preserve dirty work. Ordinary work leaves staging, commits, own versions and
 releases to the maintainer. Maintain runtime/native codec tests, compile-fail
 diagnostics and standalone Rust/TypeScript conformance. The unpublished
 qualification package owns allocation/borrowing fixtures and compiler diagnostics.
-Alternative-codec comparison suites are retired; retained raw Postcard probes are
-diagnostic controls, not production modes. Siblings are read-only unless separately
+The unpublished `ic-wire-benchmarks` package compares Candid through an
+`ic-platform` dev dependency. Codec comparisons and raw Postcard probes are
+qualification controls, not production modes. Keep Candid out of published crates.
+The benchmark package denies unsafe code except its explicitly scoped IC export
+attribute; the entrypoint uses safe system-call wrappers. Other packages inherit
+the workspace's unsafe-code prohibition. Siblings are read-only unless separately
 authorized.
 
 Use focused checks for changed code. Check for an active build sharing target/

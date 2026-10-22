@@ -1,0 +1,58 @@
+[package]
+name = "ic-wire-benchmarks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+dhat.workspace = true
+ic-testkit.workspace = true
+
+[features]
+wire = []
+candid = []
+allocations = []
+heap = []
+ic = ["ic-platform/pocket-ic"]
+
+[dev-dependencies]
+ic-platform = { workspace = true, features = ["candid", "ic0"] }
+ic-wire.workspace = true
+serde.workspace = true
+serde_bytes.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+stats_alloc.workspace = true
+
+[[bench]]
+name = "suite"
+path = "benches/suite/mod.rs"
+harness = false
+required-features = ["wire", "candid"]
+
+[[example]]
+name = "codec-wasm"
+path = "examples/wasm/mod.rs"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "codec-report"
+path = "examples/report/mod.rs"
+
+[[example]]
+name = "codec-instructions"
+path = "examples/instructions/mod.rs"
+required-features = ["wire", "candid", "ic"]
+
+# IC exports require unsafe attributes, but the fixture uses only safe system calls.
+# Keep denial everywhere except the explicitly exported entrypoint.
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[[test]]
+name = "roundtrip"
+path = "tests/roundtrip/mod.rs"
+required-features = ["wire", "candid"]
