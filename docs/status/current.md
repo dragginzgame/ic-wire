@@ -2,91 +2,55 @@
 
 ## Current batch
 
-Pending 0.5.20 removes the redundant finite input comparison against method bytes:
-schema admission already guarantees the schema frame ceiling is no larger.
-TypeScript generation now shares one safe-integer ceiling for finite metadata,
-registry bounds and method allowances, including exact f64 conversion.
-Protocol bytes, validation order, typed errors, owned/borrowed behavior and public
-APIs are unchanged. Package versions, staging and Git refs are untouched.
+Pending 0.5.21 improves owned byte/text decoding on Wasm. A separate bulk
+comparison helper processes 64-byte blocks while preserving exact canonical
+validation, bounds, error precedence and the existing borrowed-input shortcut.
+Native slice equality and protocol bytes are unchanged; no consumer migration
+is required. Package versions, staging and Git refs are untouched.
 
-Wire derives now choose generated generic and visitor identifiers absent from the
-contract source. Previously, a field type named `D` or enum payload named `A` was
-shadowed by a generated Serde parameter and failed compilation. Regression cases
-also cover underscore-suffixed names and a visitor-name collision, asserting exact
-Postcard bytes. Generated result constructors are also fully qualified: consumer
-value names `Ok`/`Err` previously broke record/enum decoding compilation. The
-regression checks unit/payload variants and unknown-tag rejection. No field/variant
-identity or decoding rule changes. All generated library references and calls now
-use absolute paths or fully qualified associated types, including the primitive
-enum tag. A no-implicit-prelude regression shadows `u32` with a consumer byte alias
-and checks tags above 255; consumer field types remain as declared.
-Generated bindings use private prefixed names; the experimental function-import
-shielding and its wrapper are removed. Record decoding projects tuple fields
-instead of binding consumer field names. Enum payload types are inferred from
-constructors, preserving consumer `Self` references; unit payloads remain `()`.
-Regressions cover ordinary constant names, array-length constants, associated
-payload types, exact bytes and malformed enums. Deliberate collisions with private
-generated names are not guaranteed. Wire identity and acceptance are unchanged.
-
-An unpublished `ic-wire-benchmarks` package now compares 114 deterministic Candid
-and Wire workloads. Candid/PocketIC remain dev-only through IC Platform; IC Testkit
-owns server admission/lifecycle. The former blanket simulator restriction is
-narrowed to permit codec benchmarks while keeping application integration outside
-this repository. Native time, allocation counts, peak heap, actual IC instructions
-and linked/gzip Wasm sizes are measured separately under opt-z and opt-3.
-See [methodology and results](../candid-comparison.md). PocketIC pins the shared
-lockfile's `thiserror` to 2.0.18; production dependency-boundary and runtime checks
-pass. Published crates gain no Candid or simulator dependency.
-
-Wasm canonical comparison now uses 32-byte blocks and word-sized tails. The
-matched corpus measures 14.0% fewer 1 MiB owned-decode instructions at opt-z
-(+129 Wasm / +48 gzip bytes), and 2.38% fewer at opt-3 (+25 Wasm / unchanged gzip).
-Seven small opt-3 decode cases add three instructions; protocol bytes are unchanged.
-See the [retained comparison and reproduction](../candid-comparison.md#wasm-comparison-optimization--pending-0520).
-
-Benchmark artifact discovery now follows Cargo JSON paths, including configured
-target directories. Reports reject missing comparison partners, duplicate rows
-and empty runs before creating CSV output. The full rerun at
-`target/codec-comparison-2026-10-22-rerun/` passes: 2,352 matched comparisons and
-2,838 IC result rows, all matching retained optimized counts and frame hashes.
-Both profiles retain identical allocation/heap results and Wire artifact sizes.
+Against rebuilt release 0.5.20 (`a5b80e6`), owned 1 MiB decode uses 8.7% fewer
+IC instructions at opt-z and 6.1% fewer at opt-3. Whole-fixture Wasm grows
+200/327 bytes, and gzip grows 109/201 bytes. Some small decodes regress: the
+worst percentage case adds 73 instructions (3.48%) for a 127-byte blob. Candid
+still wins owned 1 MiB decoding. Two alternative loops were rejected.
+See [results, tradeoffs and reproduction](../candid-comparison.md#owned-blob-follow-up--pending-0521).
 
 ## Evidence and qualification
 
-`make test` and `make check-typescript` pass, including 146 vectors and 29,560
-differential mutations. The latter includes strict Clippy and the generator's
-Rust 1.91 library check. Formatting, Wasm compilation and documentation checks pass.
-The derive follow-up passes `make test`, compile-fail diagnostics, strict Clippy
-and Rust 1.91 native/Wasm checks. The separate reproducer failed before the fix
-and compiles afterward; logs are in `/tmp/ic-wire-derive-hygiene/` and
-`/tmp/ic-wire-result-hygiene/`. The full-path follow-up also passes these gates;
-logs are in `/tmp/ic-wire-qualified-paths/`. The conventional-binding simplification
-passes the same gates; `/tmp/ic-wire-conventional-derive/` retains its failing
-`Self` regression and passing checks. Runtime costs
-are not benchmarked for this name-resolution fix: emitted codec operations are
-unchanged, and previously failing contracts had no runnable baseline. Macro
-expansion now inspects the source token text; compile-time cost was not measured.
+The complete 114-case IC corpus has three agreeing counts per measured operation
+and exact native-frame equality for all 2,838 rows. Of these, 75 improve, 34
+regress and 2,729 are unchanged. Baseline/candidate builds use identical inputs,
+compiler settings and lockfiles, with separate opt-z/opt-3 Wasm and gzip sizes.
+Native benchmark binaries are byte-identical before/after in both profiles.
+Runtime tests, strict Clippy, native/Wasm Rust 1.91 and benchmark corpus checks
+pass. Mismatch coverage extends through 257-byte unaligned inputs, and a bulk
+mismatch still checks subsequent output allowance. Full CI/macOS were not run.
 
-The benchmark corpus, lint, Rust 1.91 native/Wasm, formatting, local Make adapter,
-document links and dependency boundaries pass. The completed run is retained at
-`target/codec-comparison-2026-10-22-v1/` with source snapshots and raw samples.
-All 2,838 IC result rows have agreeing repeated counts and native-frame equality.
-PocketIC required localhost access outside the sandbox; its failed startup log
-and successful rerun are both retained. Linux was measured; macOS was not run.
-Earlier benchmark directories are pilots, not the reported evidence.
+## Allocation-budget follow-up
 
-The protocol probe compared baseline `83f90a4` with the decoder change twice,
-including unchanged-frame and nonminimal-input checks. Timings are mixed and the
-host was not isolated; no speedup or causal regression is established. Raw samples,
-absolute timings and controls are in the
-[protocol study](../protocol-study.md#redundant-frame-check-cleanup-0520).
-The constant refactor replaces identical compile-time values; it changes no
-algorithm and has no separate generator performance claim. Full CI was not run.
+The pending batch also stores native heap allowance in whole eight-byte charge
+units. Independent boundary/overflow tests preserve the old admission semantics.
+Relative to the owned helper above, Wasm shrinks 326/796 bytes and gzip shrinks
+89/222 bytes at opt-z/opt-3. IC rows: 419 improve, two regress (under 0.025%),
+2,417 unchanged. Allocations and peak heap are unchanged. Native timing controls
+show host drift, so no causal native speedup is claimed. Focused runtime, Clippy,
+MSRV and benchmark checks pass. Protocol bytes and consumer limits are unchanged.
 
-Qualification remains in `ic-wire-qualification`, with `check-qualification` as its
-CI gate. Older alternative-codec suites remain retired; the new Candid suite is separate.
-Allocation/borrowing fixtures, compiler diagnostics, protocol and generator probes
-remain maintained. Historical reports require their recorded source revisions.
+Generic byte-vector encoding remains expensive. Byte-oriented Serde encoding
+uses about 48× fewer IC instructions for 1 MiB at opt-3 with identical bytes;
+corpus assertions cover matching 4 KiB/1 MiB frames. Consumer guidance explains
+the representation and accounting tradeoff. See [results and reproduction](../candid-comparison.md#allocation-budget-units--pending-0521).
+
+## Released foundation
+
+0.5.20 shipped derive name-resolution fixes, shared TypeScript safe-integer
+bounds, the redundant finite-frame check removal and the first Wasm comparison
+optimization. It also added the unpublished Candid/PocketIC benchmark package.
+Published crates remain independent of Candid and simulators. The benchmark
+runner follows Cargo artifact paths and rejects incomplete/duplicate comparisons.
+Its retained complete rerun is `target/codec-comparison-2026-10-22-rerun/`;
+[methodology and earlier results](../candid-comparison.md) distinguish native
+latency, IC instructions, allocations, peak heap and deployment sizes.
 
 ## Retained decisions
 
@@ -111,5 +75,15 @@ more than varint checks. Exact retries, canonical hashing and typed errors remai
 required. Metadata and scalar validators are trusted declarations. Earlier
 runtime evidence is in [evaluation](../evaluation.md); generator scaling evidence
 is in [performance](../performance.md#typescript-generator-comparisons).
-Shared Tooling is 0.25.9; IC Build's release editor is 0.63.0 with `cli`.
+Shared Tooling is 0.26.6 at `4cb9bc9`; IC Build/Testkit and transitive Host
+libraries select 0.64.0. The release editor is 0.64.0 with `cli`.
+Platform imports already satisfy the 0.64 ownership changes. Host/Cargo-only
+setup needs no IC executable selection. Runtime and protocol are unchanged.
+Snapshot, tool admission, pin/boundary, formatting/link, disposable Make/release,
+diagnostic, qualification and benchmark lint/MSRV checks pass on Linux. The 0.64
+Host/Testkit driver also passes the complete PocketIC frame check against the
+existing candidate Wasm: all 2,838 rows and repeated counts are identical.
+Evidence: `target/tooling-064-adoption/` and `/tmp/ic-wire-tooling-adoption/`.
+This validates host adoption, not rebuilt Wasm performance; full CI/macOS remain
+unrun. Earlier benchmark compiler/lock identities remain historical evidence.
 Ordinary agent work does not stage, commit or release.

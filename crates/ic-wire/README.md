@@ -415,6 +415,16 @@ Consumers own declaration order, compatible method IDs, deterministic serializer
 and domain validation (including finite floats where required). Unordered maps
 are unsuitable unless their serializer establishes deterministic ordering.
 
+For opaque binary fields, use byte-oriented serialization. Finite contracts offer
+`Bytes<N>` and `BytesRef<'_, N>`. A native DTO can retain its `Vec<u8>` field and
+use `#[serde(with = "serde_bytes")]` with a consumer dependency on `serde_bytes`.
+Ordinary `Vec<u8>` serialization visits and admits every element; the byte path
+admits the buffer in bulk. Both produce the same Postcard byte-vector payload
+(for example, `[0, 127, 255]` becomes `03 00 7f ff`), but their traversal and
+allocation-budget accounting differ. Qualify the chosen representation against
+consumer limits. The benchmark corpus checks exact frame equivalence at 4 KiB
+and 1 MiB; the byte path requires no new runtime API or encoding mode.
+
 ```rust
 use ic_wire::{Limits, native};
 use serde::{Deserialize, Serialize};

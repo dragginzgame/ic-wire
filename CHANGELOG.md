@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.21]
+
+- Adopt Shared Tooling 0.26.6 and IC Tooling 0.64.0 for Build, Testkit and
+  transitive Host libraries; prepare the 0.64.0 release editor with `cli`.
+  Runtime dependencies, protocol bytes and consumer APIs are unchanged.
+
+- Store native allocation allowances in whole charge units, preserving limits,
+  overflow refusal and protocol bytes. The comparison fixture shrinks 326/796
+  Wasm bytes at opt-z/opt-3; text-pair encoding uses 3.04% fewer IC instructions
+  at opt-3. Two malformed-map cases regress less than 0.025%. Document
+  byte-oriented Serde blob encoding and assert matching generic/blob frames.
+
+- Reduce owned byte/text decoding instructions on Wasm with a separate bulk
+  comparison loop. A 1 MiB blob improves 8.7% at opt-z and 6.1% at opt-3 for
+  200/327 additional linked Wasm bytes; some small inputs cost up to 73 extra
+  instructions. Protocol bytes, admission and typed failures are unchanged.
+
 ## [0.5.20] - 2026-10-22
 
 - Resolve benchmark Wasm artifacts from Cargo build messages so configured target

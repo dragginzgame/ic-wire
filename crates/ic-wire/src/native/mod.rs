@@ -4,6 +4,9 @@
 //! This does not implement `Wire` for arbitrary types or infer a finite schema.
 //! Custom Serde implementations are trusted: allocations/work outside visited
 //! values cannot be constrained here. See the runtime guide for budget semantics.
+#[cfg(test)]
+mod tests;
+
 mod decode;
 mod encode;
 
@@ -14,7 +17,7 @@ use serde::{Deserialize, Serialize};
 
 struct Budget {
     nodes: Cell<usize>,
-    heap: Cell<usize>,
+    heap_units: Cell<usize>,
     depth: usize,
     refused: Cell<bool>,
 }
@@ -22,7 +25,11 @@ impl Budget {
     fn new(limits: Limits) -> Self {
         Self {
             nodes: Cell::new(limits.nodes),
-            heap: Cell::new(limits.allocation.saturating_sub(limits.bytes)),
+            // All value charges are multiples of eight bytes. Store whole charge
+            // units instead of bytes: the unused remainder cannot fund a charge.
+            // This removes per-visit multiplication without changing admission,
+            // overflow rejection, wire bytes or consumer limits.
+            heap_units: Cell::new(limits.allocation.saturating_sub(limits.bytes) / 8),
             depth: limits.depth,
             refused: Cell::new(limits.allocation < limits.bytes),
         }
@@ -49,15 +56,11 @@ impl Budget {
     }
     #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn bytes(&self, bytes: usize) -> bool {
-        let Some(cost) = bytes.checked_mul(8) else {
+        let Some(heap) = self.heap_units.get().checked_sub(bytes) else {
             self.refused.set(true);
             return false;
         };
-        let Some(heap) = self.heap.get().checked_sub(cost) else {
-            self.refused.set(true);
-            return false;
-        };
-        self.heap.set(heap);
+        self.heap_units.set(heap);
         true
     }
     fn error(&self) -> Error {

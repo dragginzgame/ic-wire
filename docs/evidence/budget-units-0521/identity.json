@@ -1,0 +1,414 @@
+{
+  "baseline": "a5b80e6 plus docs/evidence/owned-blob-0521/selected.patch",
+  "baseline_instructions": "Copied unchanged from owned-blob-0521-final after all four rebuilt Wasm SHA256 hashes matched",
+  "runs": {
+    "baseline": {
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "c0c578b5a2b939f683aec7e2583df142e33edcfc17d787b2f261e641e4367373"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "23256a986037b5cd34837d5076d1077ddf19434e139210bd4f074809f76728b4"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "d36791378edec9a3aa1d3df8676e28c3cc4c424ab828370c70ec777cab96c87d"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "c2d333e82ae49ded8598378de6c59d88f47307e5004ee91bead4ab28b7338e89"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+        "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "8861d92992759670117bf55248804b3c501d3e1c91e1f56947ad876a565a64b0",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "native": {
+        "evaluation-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "d2871872d80f0b27880626b2cf04a462a15d443d827ad2cd0904c0606abd3103",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1833400,
+          "process_status": "Name:\tsuite-546b11b17\nUmask:\t0002\nState:\tR (running)\nTgid:\t303\nNgid:\t0\nPid:\t303\nPPid:\t11\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t65534 65534 65534 65534 65534 65534 65534 65534 1000 \nNStgid:\t303\nNSpid:\t303\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t   37244 kB\nVmSize:\t   35452 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30328 kB\nVmRSS:\t   30192 kB\nRssAnon:\t   27228 kB\nRssFile:\t    2964 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t     872 kB\nVmLib:\t    1896 kB\nVmPTE:\t     116 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t22\nnonvoluntary_ctxt_switches:\t2534\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "evaluation",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "d2871872d80f0b27880626b2cf04a462a15d443d827ad2cd0904c0606abd3103",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1833400,
+          "process_status": "Name:\tsuite-546b11b17\nUmask:\t0002\nState:\tR (running)\nTgid:\t328\nNgid:\t0\nPid:\t328\nPPid:\t317\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t65534 65534 65534 65534 65534 65534 65534 65534 1000 \nNStgid:\t328\nNSpid:\t328\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t   37244 kB\nVmSize:\t   35452 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30184 kB\nVmRSS:\t   30184 kB\nRssAnon:\t   27224 kB\nRssFile:\t    2960 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t     872 kB\nVmLib:\t    1896 kB\nVmPTE:\t     116 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t16\nnonvoluntary_ctxt_switches:\t3163\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "evaluation",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "7256c0398a31cfe0c35d7b7c5179e6da3bf53f3e76e8eab622a9cf61ed59f913",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 2173088,
+          "process_status": "Name:\tsuite-e817b5a86\nUmask:\t0002\nState:\tR (running)\nTgid:\t1259\nNgid:\t0\nPid:\t1259\nPPid:\t967\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t65534 65534 65534 65534 65534 65534 65534 65534 1000 \nNStgid:\t1259\nNSpid:\t1259\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t   37992 kB\nVmSize:\t   35868 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30612 kB\nVmRSS:\t   30612 kB\nRssAnon:\t   27224 kB\nRssFile:\t    3388 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t    1300 kB\nVmLib:\t    1896 kB\nVmPTE:\t     120 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t15\nnonvoluntary_ctxt_switches:\t2789\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "benchmark-speed",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "7256c0398a31cfe0c35d7b7c5179e6da3bf53f3e76e8eab622a9cf61ed59f913",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 2173088,
+          "process_status": "Name:\tsuite-e817b5a86\nUmask:\t0002\nState:\tR (running)\nTgid:\t1284\nNgid:\t0\nPid:\t1284\nPPid:\t1273\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t65534 65534 65534 65534 65534 65534 65534 65534 1000 \nNStgid:\t1284\nNSpid:\t1284\nNSpgid:\t1\nNSsid:\t1\nKthread:\t0\nVmPeak:\t   37992 kB\nVmSize:\t   35868 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30668 kB\nVmRSS:\t   30668 kB\nRssAnon:\t   27228 kB\nRssFile:\t    3440 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t    1300 kB\nVmLib:\t    1896 kB\nVmPTE:\t     116 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t81\nnonvoluntary_ctxt_switches:\t2400\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "benchmark-speed",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        }
+      }
+    },
+    "candidate": {
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "896a8cb09a61010a521f1c85fc3888386d225d3c683ed93e6c242e64b30e5ac2"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "23256a986037b5cd34837d5076d1077ddf19434e139210bd4f074809f76728b4"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "cffa5087e91130a2b1e1c722c0da63b02a38dba5342b4873fa1036b6cb10440d"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "c2d333e82ae49ded8598378de6c59d88f47307e5004ee91bead4ab28b7338e89"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+        "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "native": {
+        "evaluation-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "c7f21504e141d3ce388a4aaff7b072f8ad916e6e0cc8495b28887ee1ba453edf",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M tests/roundtrip/mod.rs\n M ../ic-wire/README.md\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../ic-wire/src/native/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../ic-wire/src/native/tests/\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1829448,
+          "process_status": "Name:\tsuite-546b11b17\nUmask:\t0002\nState:\tR (running)\nTgid:\t2519364\nNgid:\t0\nPid:\t2519364\nPPid:\t2511618\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 24 27 30 46 100 105 125 1000 \nNStgid:\t2519364\nNSpid:\t2519364\nNSpgid:\t2511595\nNSsid:\t2511595\nKthread:\t0\nVmPeak:\t   37236 kB\nVmSize:\t   35448 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30188 kB\nVmRSS:\t   30188 kB\nRssAnon:\t   27228 kB\nRssFile:\t    2960 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t     868 kB\nVmLib:\t    1896 kB\nVmPTE:\t     112 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t8/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000800000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t31\nnonvoluntary_ctxt_switches:\t2656\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "evaluation",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "c7f21504e141d3ce388a4aaff7b072f8ad916e6e0cc8495b28887ee1ba453edf",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M tests/roundtrip/mod.rs\n M ../ic-wire/README.md\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../ic-wire/src/native/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../ic-wire/src/native/tests/\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1829448,
+          "process_status": "Name:\tsuite-546b11b17\nUmask:\t0002\nState:\tR (running)\nTgid:\t2530168\nNgid:\t0\nPid:\t2530168\nPPid:\t2530071\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 24 27 30 46 100 105 125 1000 \nNStgid:\t2530168\nNSpid:\t2530168\nNSpgid:\t2511595\nNSsid:\t2511595\nKthread:\t0\nVmPeak:\t   37236 kB\nVmSize:\t   35448 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30168 kB\nVmRSS:\t   30168 kB\nRssAnon:\t   27224 kB\nRssFile:\t    2944 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t     868 kB\nVmLib:\t    1896 kB\nVmPTE:\t     112 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t14/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000800000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t32\nnonvoluntary_ctxt_switches:\t1768\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "evaluation",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "36d3f0525dad50534015bc118b8294f21faa2b19a503690d3ae92153c1b1b52e",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M tests/roundtrip/mod.rs\n M ../ic-wire/README.md\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../ic-wire/src/native/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../ic-wire/src/native/tests/\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 2170560,
+          "process_status": "Name:\tsuite-e817b5a86\nUmask:\t0002\nState:\tR (running)\nTgid:\t2637694\nNgid:\t0\nPid:\t2637694\nPPid:\t2613166\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 24 27 30 46 100 105 125 1000 \nNStgid:\t2637694\nNSpid:\t2637694\nNSpgid:\t2511595\nNSsid:\t2511595\nKthread:\t0\nVmPeak:\t   37984 kB\nVmSize:\t   35864 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30668 kB\nVmRSS:\t   30668 kB\nRssAnon:\t   27228 kB\nRssFile:\t    3440 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t    1296 kB\nVmLib:\t    1896 kB\nVmPTE:\t     116 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t23/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000800000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t20\nnonvoluntary_ctxt_switches:\t3202\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "benchmark-speed",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 114,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "cpu_info": "AMD Ryzen Threadripper 7970X 32-Cores; unpinned, unisolated host",
+          "executable_sha256": "36d3f0525dad50534015bc118b8294f21faa2b19a503690d3ae92153c1b1b52e",
+          "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+          "format": 1,
+          "git_head": "a5b80e6c3f7c02530067fbeae188382e7e916386\n",
+          "git_status": " M ../../CHANGELOG.md\n M ../../Cargo.lock\n M tests/roundtrip/mod.rs\n M ../ic-wire/README.md\n M ../ic-wire/src/contract/mod.rs\n M ../ic-wire/src/contract/tests/mod.rs\n M ../ic-wire/src/native/mod.rs\n M ../../docs/candid-comparison.md\n M ../../docs/status/current.md\n?? ../ic-wire/src/native/tests/\n?? ../../docs/evidence/owned-blob-0521/\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "276147d63003b04fb646686e367eff6675561105a3f3c3cf23505b69a6f527e5",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 2170560,
+          "process_status": "Name:\tsuite-e817b5a86\nUmask:\t0002\nState:\tR (running)\nTgid:\t2683204\nNgid:\t0\nPid:\t2683204\nPPid:\t2682826\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 24 27 30 46 100 105 125 1000 \nNStgid:\t2683204\nNSpid:\t2683204\nNSpgid:\t2511595\nNSsid:\t2511595\nKthread:\t0\nVmPeak:\t   37984 kB\nVmSize:\t   35864 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   30656 kB\nVmRSS:\t   30656 kB\nRssAnon:\t   27228 kB\nRssFile:\t    3428 kB\nRssShmem:\t       0 kB\nVmData:\t   31468 kB\nVmStk:\t     136 kB\nVmExe:\t    1296 kB\nVmLib:\t    1896 kB\nVmPTE:\t     116 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t18/958291\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000000000440\nCapInh:\t0000000800000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffffff,ffffffff\nCpus_allowed_list:\t0-63\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t16\nnonvoluntary_ctxt_switches:\t1156\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+          "profile": "benchmark-speed",
+          "runner_sha256": "21dbf1d643a87cc6d70bdf7860246d5f44608d2aba0eaecf7f2d59507bfb0479",
+          "rustflags": null,
+          "samples": 11,
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        }
+      }
+    }
+  }
+}

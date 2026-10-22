@@ -232,31 +232,13 @@ impl Flavor for Compare<'_> {
                 // Apply on every host: canonical bytes and rejection rules are unchanged.
                 true
             } else if cfg!(any(target_arch = "wasm32", test)) && bytes.len() >= 8 {
-                // Process 32 bytes per bulk iteration, then an 8-byte word tail.
-                // Previously 16-byte blocks left a bytewise tail. Exact equality,
+                // Process 64 bytes per bulk iteration, then an 8-byte word tail.
+                // Previously bulk blocks were 32 bytes. Exact equality,
                 // frame bytes, admission and serializer-error precedence are unchanged;
                 // no consumer migration is needed. Keep the small-write branch separate
                 // to avoid increasing its Wasm instruction cost.
                 if bytes.len() >= 64 {
-                    let (left, left_tail) = prefix.as_chunks::<32>();
-                    let (right, right_tail) = bytes.as_chunks::<32>();
-                    left.iter().zip(right).fold(0_u128, |difference, (a, b)| {
-                        let (a0, a1) = a.split_at(16);
-                        let (b0, b1) = b.split_at(16);
-                        difference
-                            | (u128::from_ne_bytes(a0.try_into().unwrap())
-                                ^ u128::from_ne_bytes(b0.try_into().unwrap()))
-                            | (u128::from_ne_bytes(a1.try_into().unwrap())
-                                ^ u128::from_ne_bytes(b1.try_into().unwrap()))
-                    }) == 0
-                        && {
-                            let (left, left_tail) = left_tail.as_chunks::<8>();
-                            let (right, right_tail) = right_tail.as_chunks::<8>();
-                            left.iter().zip(right).fold(0_u64, |difference, (a, b)| {
-                                difference | (u64::from_ne_bytes(*a) ^ u64::from_ne_bytes(*b))
-                            }) == 0
-                                && left_tail == right_tail
-                        }
+                    equal_bulk(prefix, bytes)
                 } else {
                     let (left, left_tail) = prefix.as_chunks::<8>();
                     let (right, right_tail) = bytes.as_chunks::<8>();
@@ -278,6 +260,31 @@ impl Flavor for Compare<'_> {
     fn finalize(self) -> postcard::Result<Self::Output> {
         Ok(self.equal && self.remaining.is_empty())
     }
+}
+
+// Keep the bulk scan out of scalar serializer paths; equality remains exact.
+// The caller has already checked equal slice lengths and the byte allowance.
+#[inline(never)]
+fn equal_bulk(prefix: &[u8], bytes: &[u8]) -> bool {
+    let (left, left_tail) = prefix.as_chunks::<64>();
+    let (right, right_tail) = bytes.as_chunks::<64>();
+    left.iter().zip(right).fold(0_u128, |difference, (a, b)| {
+        let (a, _) = a.as_chunks::<16>();
+        let (b, _) = b.as_chunks::<16>();
+        difference
+            | (u128::from_ne_bytes(a[0]) ^ u128::from_ne_bytes(b[0]))
+            | (u128::from_ne_bytes(a[1]) ^ u128::from_ne_bytes(b[1]))
+            | (u128::from_ne_bytes(a[2]) ^ u128::from_ne_bytes(b[2]))
+            | (u128::from_ne_bytes(a[3]) ^ u128::from_ne_bytes(b[3]))
+    }) == 0
+        && {
+            let (left, left_tail) = left_tail.as_chunks::<8>();
+            let (right, right_tail) = right_tail.as_chunks::<8>();
+            left.iter().zip(right).fold(0_u64, |difference, (a, b)| {
+                difference | (u64::from_ne_bytes(*a) ^ u64::from_ne_bytes(*b))
+            }) == 0
+                && left_tail == right_tail
+        }
 }
 
 fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {

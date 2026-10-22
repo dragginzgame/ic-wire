@@ -5,6 +5,25 @@ mod fixtures;
 fn corpus_roundtrips_and_rejects_damaged_frames() {
     let cases = fixtures::cases(); // Asserts semantic equality for every lane.
     assert!(cases.len() >= 100);
+    for length in [4096, 1_048_576] {
+        let vector = cases
+            .iter()
+            .find(|c| c.name == format!("generic-byte-vector-{length}"))
+            .unwrap();
+        let blob = cases
+            .iter()
+            .find(|c| c.name == format!("blob-random-{length}"))
+            .unwrap();
+        assert_eq!(vector.input_json, blob.input_json);
+        for lane in &vector.lanes {
+            let bulk = blob.lanes.iter().find(|b| b.name == lane.name).unwrap();
+            assert_eq!(
+                lane.bytes, bulk.bytes,
+                "byte representation: {length}/{}",
+                lane.name
+            );
+        }
+    }
     for (index, case) in cases.into_iter().enumerate() {
         let selected = fixtures::cases_selected(Some(index));
         assert_eq!(selected.len(), 1);

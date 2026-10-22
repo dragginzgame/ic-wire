@@ -298,3 +298,135 @@ without an application payload scan. No universal speed winner is established.
 corpus, lint and MSRV checks. An incomplete report reproducer now exits nonzero
 with a missing-partner error and creates no CSV. No protocol or runtime change
 was made by these tooling fixes.
+
+## Owned blob follow-up — pending 0.5.21
+
+The retained candidate moves the Wasm bulk comparison into a non-inlined helper
+and widens its blocks from 32 to 64 bytes. The eight-byte tail, scalar path,
+exact-input-region borrowing shortcut and native slice equality remain. It still
+copies owned payloads and validates their complete canonical serialization:
+custom Serde visitors can transform data, so successful decoding alone cannot
+replace that validation. Wire bytes, limits, error precedence and retry/hash
+semantics do not change; no consumer migration is needed.
+
+Baseline is released 0.5.20, commit `a5b80e6`, rebuilt with the same lockfile,
+compiler, corpus and profiles as every candidate. Both profiles use LTO, one
+codegen unit and stripped debug information. The existing PocketIC driver takes
+three samples per operation and checks every reply frame against native fixtures.
+All 2,838 rows match input/frame hashes and have agreeing repeated counts.
+
+| Owned Wire decode | Before instructions | After instructions | Change |
+| --- | ---: | ---: | ---: |
+| opt-z / 127-byte blob | 2,098.5 | 2,171.5 | +3.48% |
+| opt-z / 4 KiB blob | 12,743.5 | 11,821.5 | −7.24% |
+| opt-z / 1 MiB blob | 2,820,070 | 2,574,348 | −8.71% |
+| opt-z / packed manifest, 1,024 hashes | 96,957.5 | 89,315.5 | −7.88% |
+| opt-3 / 127-byte blob | 1,609.5 | 1,650.5 | +2.55% |
+| opt-3 / 4 KiB blob | 11,729.5 | 11,143.5 | −5.00% |
+| opt-3 / 1 MiB blob | 2,688,438 | 2,524,652 | −6.09% |
+| opt-3 / packed manifest, 1,024 hashes | 88,182.5 | 83,114.5 | −5.75% |
+
+| Whole Wire fixture | Before bytes | After bytes | Delta |
+| --- | ---: | ---: | ---: |
+| opt-z Wasm | 404,487 | 404,687 | +200 |
+| opt-z gzip | 112,534 | 112,643 | +109 |
+| opt-3 Wasm | 486,916 | 487,243 | +327 |
+| opt-3 gzip | 135,371 | 135,572 | +201 |
+
+Across all rows, 75 improve, 34 regress and 2,729 are unchanged. The worst
+percentage regression is the opt-z 127-byte blob (+73 instructions / 3.48%).
+These small-input costs and additional code are the tradeoff for the larger
+payload gains. Candid still wins owned 1 MiB decoding at opt-3: 1,065,406
+instructions versus Wire's 2,524,652. No universal codec speedup is claimed.
+
+Two alternatives were rejected. An inline 64-byte scan improves the 1 MiB case
+8.7%/2.4% but adds 67/618 Wasm bytes at opt-z/opt-3 and regresses common controls
+by up to 6.6%. A 32-byte scan using a u64 accumulator worsens the 1 MiB case
+1.2%/9.8%, with −13/+418 Wasm bytes. Merely using a narrower Rust integer did
+not produce a faster Wasm loop; no instruction-level cause is asserted.
+
+[Changed rows and small controls](evidence/owned-blob-0521/instructions.csv)
+retain all three counts and frame hashes; [artifact sizes](evidence/owned-blob-0521/wasm.csv)
+cover the baseline and all candidates. Retained patches reconstruct the
+[selected helper](evidence/owned-blob-0521/selected.patch), rejected
+[inline 64-byte loop](evidence/owned-blob-0521/inline64.patch) and rejected
+[u64 reduction](evidence/owned-blob-0521/u64.patch). Use disposable checkouts of
+`a5b80e6`, apply one patch to the candidate only, and run the existing
+`evaluate-codecs.sh` with an explicit `POCKET_IC_BIN` in each checkout and distinct
+output directories. No dependency or compiler-setting change is required.
+Full sources, artifacts and samples remain in `target/owned-blob-0521-baseline/`,
+`target/owned-blob-0521-64/`, `target/owned-blob-0521-u64/` and
+`target/owned-blob-0521-helper/`. The compiler and driver identities accompany them.
+
+[Source/compiler/artifact identities](evidence/owned-blob-0521/identity.json)
+include both native executable hashes. Rebuilding native benchmarks under both
+profiles yields byte-identical executables before/after, so native timing was
+not rerun and no native speedup is claimed. Runtime, corpus, Clippy and Rust 1.91
+native/Wasm checks pass. Tests cover every mismatch position through 257 bytes
+from an unaligned input start and preserve later allowance errors after a bulk
+mismatch. Full CI and macOS were not run.
+Final sources and rebuilt artifacts are also retained at
+`target/owned-blob-0521-final/`. All four Wasm binaries are byte-identical to the
+measured helper run; its instruction output is copied there unchanged.
+
+## Allocation budget units — pending 0.5.21
+
+The native Serde budget now stores whole eight-byte charge units. Previously,
+each visit multiplied its charge by eight before subtracting from a byte budget.
+Dividing the initial allowance once preserves admission, overflow refusal and
+unused remainders while removing repeated checked multiplication. Protocol bytes,
+canonical validation, consumer limits and typed errors are unchanged. An independent
+regression test compares the old arithmetic through fractional budgets, `usize::MAX`
+and sticky refusal. No consumer migration is required.
+
+This comparison starts **after** the owned-blob helper above: release `a5b80e6`
+plus its selected patch. Both profiles use the same compiler, lockfile, corpus,
+LTO and single codegen unit. Rust 1.99.1 / LLVM 23.1.1, PocketIC 16.1.0 and the
+114-case fixture are retained in [measurement identities](evidence/budget-units-0521/identity.json).
+All 2,838 IC rows preserve input/frame hashes and have three agreeing samples.
+419 improve, two regress and 2,417 are unchanged; Candid artifacts are unchanged.
+
+| Metric | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| opt-z Wire Wasm bytes | 404,687 | 404,361 | −326 (−0.08%) |
+| opt-z Wire gzip bytes | 112,643 | 112,554 | −89 (−0.08%) |
+| opt-3 Wire Wasm bytes | 487,243 | 486,447 | −796 (−0.16%) |
+| opt-3 Wire gzip bytes | 135,572 | 135,350 | −222 (−0.16%) |
+| opt-3 encode 128 text pairs, IC instructions | 134,609.25 | 130,513.25 | −3.04% |
+| opt-3 unit encode, IC instructions | 385.25 | 385.25 | unchanged |
+| opt-3 reject truncated 16-entry map, IC instructions | 41,585.75 | 41,595.75 | +0.024% |
+| opt-3 reject truncated 128-entry map, IC instructions | 586,208.75 | 586,330.75 | +0.021% |
+
+Allocation and heap measurements are identical in all 1,158 rows per profile
+and measurement mode. Native timing ran twice per profile, with 11 samples per
+operation per run on an unpinned Threadripper 7970X. Median candidate/baseline
+ratios across Wire-native rows were 0.915/0.920 at opt-z and 0.977/0.989 at opt-3.
+However, unchanged Candid controls also measured about 4% faster in both profiles:
+these native timings do not establish a causal or universal speedup.
+[Absolute native controls and repeated samples](evidence/budget-units-0521/native-controls.csv)
+include small values, text pairs and both blob representations.
+
+The generic byte-vector gap remains: opt-3 1 MiB encoding still costs 50,332,657
+IC instructions, versus 1,049,868 using byte-oriented Serde encoding (about 48×
+less). These are distinct representations in the suite, not a before/after runtime
+speedup. Generic and byte-oriented fixtures now assert identical frames at 4 KiB
+and 1 MiB. Consumers can select `serde_bytes` for native blob fields or finite
+`Bytes`/`BytesRef`; limits must be qualified because traversal accounting differs.
+Candid still wins some cases, including owned large-blob decoding.
+
+[Changed IC rows and controls](evidence/budget-units-0521/instructions.csv),
+[Wasm sizes](evidence/budget-units-0521/wasm.csv) and the
+[selected runtime patch](evidence/budget-units-0521/selected.patch) retain the
+comparison. To reproduce, create two disposable checkouts of `a5b80e6`, apply the
+owned-blob selected patch to both and this patch to the candidate only. Run
+`POCKET_IC_BIN=/path/to/pocket-ic bash scripts/ci/evaluate-codecs.sh OUTPUT`
+in each with distinct output directories and identical tooling. Use the retained
+`target/budget-units-0521-baseline/evaluation-native-1/Cargo.lock` in both:
+the working lockfile differs from release 0.5.20 and its hash is in the identities.
+Full samples remain
+in `target/budget-units-0521-baseline/` and `target/budget-units-0521-candidate/`.
+Baseline IC samples were reused from `owned-blob-0521-final` only after all four
+rebuilt Wasm hashes matched; candidate IC measurements are fresh.
+
+`make fmt test lint check-msrv check-benchmarks` passes, including the arithmetic
+regression and frame equivalence assertions. Full CI and macOS were not run.
