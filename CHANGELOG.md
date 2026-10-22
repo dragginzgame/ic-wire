@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.0]
+## [0.6.0] - 2026-10-22
 
 - Gate the byte-buffer metadata doctest on the required `typescript` feature
   and document its setup, so default-feature documentation tests also pass.
