@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.3]
+## [0.6.3] - 2026-10-22
 
 - Support container `serde(deny_unknown_fields)` and qualified field-level
   `serde(with = "serde_bytes")` in metadata derives. Existing DTOs retain their
