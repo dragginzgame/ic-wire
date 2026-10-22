@@ -3,8 +3,13 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Fields, parse_quote};
 
-fn attributes(attrs: &[syn::Attribute], allow_transparent: bool) -> syn::Result<bool> {
+fn attributes(
+    attrs: &[syn::Attribute],
+    allow_transparent: bool,
+    allow_borrow: bool,
+) -> syn::Result<bool> {
     let mut transparent = false;
+    let mut borrow = false;
     for attr in attrs {
         if attr.path().is_ident("wire") {
             return Err(syn::Error::new_spanned(
@@ -17,6 +22,16 @@ fn attributes(attrs: &[syn::Attribute], allow_transparent: bool) -> syn::Result<
                 if allow_transparent && meta.path.is_ident("transparent") && !transparent {
                     transparent = true;
                     Ok(())
+                } else if allow_borrow && meta.path.is_ident("borrow") && !borrow {
+                    // Borrowing changes Deserialize lifetimes, not Serde's layout.
+                    // Previously rejected DTOs can now derive the same metadata;
+                    // frame bytes, admission and client representations are unchanged.
+                    // Serde remains responsible for validating the named lifetimes.
+                    if meta.input.peek(syn::Token![=]) {
+                        meta.value()?.parse::<syn::LitStr>()?;
+                    }
+                    borrow = true;
+                    Ok(())
                 } else {
                     Err(meta.error("unsupported Serde attribute for Wire; use an explicit verified Wire implementation for custom layouts"))
                 }
@@ -28,7 +43,7 @@ fn attributes(attrs: &[syn::Attribute], allow_transparent: bool) -> syn::Result<
 
 fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Result<TokenStream> {
     for field in fields {
-        attributes(&field.attrs, false)?;
+        attributes(&field.attrs, false, true)?;
     }
     let values: Vec<_> = fields
         .iter()
@@ -69,7 +84,7 @@ fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Resu
 }
 
 pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
-    let transparent = attributes(&input.attrs, true)?;
+    let transparent = attributes(&input.attrs, true, false)?;
     let context = super::fresh_ident(&quote!(#input).to_string(), "__ic_wire_schema");
     // The retired finite Wire IDs sorted fields and determined enum tags. This
     // projection instead describes unchanged Serde bytes: declaration-order fields
@@ -80,7 +95,7 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         Data::Enum(data) if !transparent && !data.variants.is_empty() => {
             let mut variants = Vec::new();
             for (id, variant) in data.variants.iter().enumerate() {
-                attributes(&variant.attrs, false)?;
+                attributes(&variant.attrs, false, false)?;
                 let name = variant
                     .ident
                     .to_string()
@@ -136,6 +151,11 @@ mod tests {
             "struct A { #[serde(flatten)] a: u8 }",
             "struct A { #[serde(with = \"custom\")] a: u8 }",
             "struct A { #[serde(serialize_with = \"custom\")] a: u8 }",
+            "#[serde(borrow)] struct A { a: u8 }",
+            "enum A { #[serde(borrow)] B(u8) }",
+            "struct A { #[serde(borrow, borrow)] a: u8 }",
+            "struct A { #[serde(borrow = 1)] a: u8 }",
+            "struct A { #[serde(borrow, with = \"custom\")] a: u8 }",
             "struct A { #[wire(id = 0)] a: u8 }",
             "#[serde(transparent)] struct A(u8, u8);",
             "enum E {}",

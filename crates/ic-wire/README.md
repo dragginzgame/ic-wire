@@ -207,6 +207,9 @@ In a shared DTO package, replace the unconditional metadata derive above with
 The derive generates only metadata; it does not implement or replace Serde,
 require `wire(id)` annotations, or claim finite static resource bounds.
 Generic declarations are projected after instantiation, such as `Page<String>`.
+Field-level `#[serde(borrow)]` and `#[serde(borrow = "'a")]` work with `Wire`,
+including bounded `BytesRef`/`TextRef` DTOs. Serde validates the lifetime names;
+borrowing changes ownership, not the generated client shape or payload bytes.
 Rust field declaration order and zero-based enum variant order describe the
 existing Serde bytes. For example, `{ a: u8, b: u16 }` with values 1/128 emits
 payload `01 80 01`; reversing the declarations emits `80 01 01`. Reordering or
@@ -220,7 +223,7 @@ Vec, Option, Result, Box, references, serializable fixed arrays and tuples of
 one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other
 types require an explicit supported projection; they are not guessed. Apart
-from struct-level `transparent`, all Serde attributes are rejected, including
+from struct-level `transparent` and field-level `borrow`, Serde attributes are rejected, including
 rename, skip, flatten, tagging and custom serializer attributes. Rust raw
 identifiers retain their unescaped names in the TypeScript object.
 

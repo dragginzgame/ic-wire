@@ -1,9 +1,9 @@
 # Current handoff
 
-## Current batch: one production Serde codec
+## Current batch: post-0.6.0 audit
 
-0.5.22 is released at `9a1c06e`; pending 0.6.0 is a maintainer-approved hard cut.
-The minor release reflects breaking API/layout changes. Evidence retains its
+0.6.0 is released at `7dc70b4`; pending fixes are recorded under 0.6.1.
+The released minor version contains the approved API/layout hard cut. Evidence retains its
 original 0.5.23 candidate labels and paths; package versions remain release-owned.
 Keep one production Serde/Postcard codec, exposed through `ic_wire::native`.
 The former serializer-generating derive, finite Wire trait, Shape/static admission, Method and typed retained
@@ -24,16 +24,24 @@ conservative traversal allowances and custom-serializer constraints.
 ## Canic unblock
 
 Canic #613 records Wire #17's native generic metadata as its supplier blocker.
-The pending Wire implementation covers Page<T>, ordinary records/enums,
+The released Wire implementation covers Page<T>, ordinary records/enums,
 transparent wrappers and verified explicit custom scalar metadata. It generates
 no serializer and needs no deployment-side TypeScript/JSON feature. Unsupported
 Serde attributes and recursive inline schemas reject; custom implementations
 must describe actual serialized bytes and validate their domains.
 
-Publication and Canic adoption are not complete. The maintainer owns package
-versions, staging, commits, publication and releases. Canic still owns endpoint/
-caller conversion, metadata/export identity, generated clients and installed
-acceptance. No sibling files were edited and no release effect was executed.
+The maintainer reports release delivery and that Canic's supplier need is met.
+Canic owns endpoint/caller conversion, metadata/export identity, generated clients
+and installed acceptance; this audit did not rerun its integration suite.
+Versions, staging, commits and releases remain maintainer-owned.
+
+The audit reproduced a metadata derive rejection for borrowed bounded DTOs.
+Field-level serde(borrow), including explicit lifetime lists, is now accepted;
+custom-layout attributes remain rejected. Owned and borrowed metadata/frame
+equivalence is checked by the existing 0-byte through 1 MiB borrowing fixture.
+Runtime code and protocol are unchanged; no runtime benchmark rerun is needed.
+Focused derive, default runtime, borrowing, TypeScript/MSRV/lint and nine
+diagnostic checks pass; doctests pass with and without the typescript feature.
 
 ## Current evidence
 

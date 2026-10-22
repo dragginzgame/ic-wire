@@ -10,19 +10,26 @@ const LIMITS: Limits = Limits {
     depth: 32,
 };
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "typescript", derive(ic_wire::Wire))]
 struct OwnedChunk {
     name: Text<64>,
     data: Bytes<1048576>,
 }
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "typescript", derive(ic_wire::Wire))]
 struct Chunk<'data, 'name> {
-    #[serde(borrow)]
+    #[serde(borrow = "'name")]
     name: TextRef<'name, 64>,
     #[serde(borrow)]
     data: BytesRef<'data, 1048576>,
 }
 #[test]
 fn blob_requests_borrow_owned_storage_and_decode_without_payload_copies() {
+    #[cfg(feature = "typescript")]
+    assert_eq!(
+        ic_wire::typescript::native_schema::<OwnedChunk>().unwrap(),
+        ic_wire::typescript::native_schema::<Chunk<'_, '_>>().unwrap()
+    );
     for size in [0, 1, 32, 4096, 1048576] {
         let owned = OwnedChunk {
             name: Text::new("application/octet-stream".into()).unwrap(),

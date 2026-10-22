@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1]
+
+- Allow field-level `serde(borrow)` and explicit borrowed lifetimes in `Wire`
+  metadata derives. Borrowed bounded DTOs can now derive metadata alongside
+  Serialize/Deserialize, matching their owned forms. Custom-layout attributes
+  remain rejected; runtime admission, frame bytes and client layouts are unchanged.
+
 ## [0.6.0] - 2026-10-22
 
 - Gate the byte-buffer metadata doctest on the required `typescript` feature
