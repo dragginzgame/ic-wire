@@ -9,12 +9,16 @@ use std::{
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     if let Some(first) = args.next() {
-        if first == "--artifact" {
+        if first == "--code-size" {
+            let wasm = fs::read(args.next().ok_or("Wasm file required")?)?;
+            println!("{}", code_size(&wasm)?);
+        } else if first == "--artifact" {
             let messages = fs::read_to_string(args.next().ok_or("Cargo JSON file required")?)?;
             println!("{}", artifact(&messages)?.display());
         } else {
             let root = PathBuf::from(first);
-            let report = comparison(&root)?;
+            let primary = args.next().unwrap_or_else(|| "wire-native".into());
+            let report = comparison(&root, &primary)?;
             fs::OpenOptions::new()
                 .write(true)
                 .create_new(true)
@@ -25,6 +29,37 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         Err("evidence directory or --artifact Cargo JSON file required".into())
     }
+}
+
+// Read section framing only; this reports the code-section payload, not module
+// validity or a sum of compressed bytes. Cargo supplies the validated module.
+fn code_size(wasm: &[u8]) -> Result<usize, &'static str> {
+    if !wasm.starts_with(b"\0asm\x01\0\0\0") {
+        return Err("expected a core Wasm version 1 module");
+    }
+    let mut rest = &wasm[8..];
+    let mut code = None;
+    while let Some((&id, tail)) = rest.split_first() {
+        rest = tail;
+        let mut length = 0_u32;
+        for shift in (0..35).step_by(7) {
+            let (&byte, tail) = rest.split_first().ok_or("truncated section length")?;
+            rest = tail;
+            if shift == 28 && byte > 15 {
+                return Err("section length overflow");
+            }
+            length |= u32::from(byte & 127) << shift;
+            if byte & 128 == 0 {
+                break;
+            }
+        }
+        let length = usize::try_from(length).map_err(|_| "section length overflow")?;
+        rest = rest.get(length..).ok_or("truncated section payload")?;
+        if id == 10 && code.replace(length).is_some() {
+            return Err("duplicate code section");
+        }
+    }
+    Ok(code.unwrap_or(0))
 }
 
 fn artifact(messages: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -52,7 +87,10 @@ fn artifact(messages: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(paths.remove(0))
 }
 
-fn comparison(root: &Path) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    if !matches!(primary, "wire-native" | "wire-finite") {
+        return Err("expected wire-native or wire-finite primary lane".into());
+    }
     let mut out = Vec::new();
     writeln!(
         out,
@@ -91,7 +129,7 @@ fn comparison(root: &Path) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         let mut matched = 0;
         for ((case, operation, codec), wire) in &rows {
             if codec == "candid"
-                && !rows.contains_key(&(case.clone(), operation.clone(), "wire-native".into()))
+                && !rows.contains_key(&(case.clone(), operation.clone(), primary.into()))
             {
                 return Err(format!("missing Wire measurement: {case}/{operation}").into());
             }

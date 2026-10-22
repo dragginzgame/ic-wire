@@ -1,0 +1,15 @@
+{
+  "baseline": "target/final-0522-derive-scale/source, pending 0.5.22; see final-comparison-0522 identity",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "profile": "benchmark-speed: opt-3,LTO,1 codegen unit,panic abort,strip debuginfo",
+  "target": "wasm32-unknown-unknown",
+  "source_changes": "Two separate candidates: cfg_attr(wasm32, inline(never)) on contract::payload or Compare::try_extend. Both restored.",
+  "no_name_section": {
+    "removed_bytes": 48306,
+    "wasm_bytes": 398639,
+    "code_section_bytes": 363873,
+    "sha256": "7fbb7fee972b3fd99ceea00b03109dd4b5b08e1498c6800bb9256c1a216003ac",
+    "qualification": "offline section removal only; no install or instruction rerun"
+  },
+  "decision": "No production changes retained; code-section reduction too small to pursue extra call overhead; name removal only addresses whole-file size."
+}

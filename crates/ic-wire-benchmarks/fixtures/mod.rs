@@ -1,5 +1,13 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
 #![allow(dead_code)]
+#[cfg(feature = "derive-scale")]
+mod scale;
+#[cfg(feature = "toko")]
+mod toko;
+#[cfg(all(feature = "toko", feature = "derive-scale"))]
+compile_error!("select one benchmark corpus");
+#[cfg(all(feature = "derive-scale-1", feature = "derive-scale-10"))]
+compile_error!("select one derive cohort size");
 #[cfg(feature = "candid")]
 use ic_platform::candid::contract::CandidType;
 use serde::{Serialize, de::DeserializeOwned};
@@ -43,7 +51,14 @@ fn lane<T: PartialEq + Debug + 'static>(
     decode: impl Fn(&[u8]) -> Option<T> + 'static,
 ) -> Lane {
     let bytes = encode(&value);
+    // Keep per-type diagnostic formatting out of the measured Wasm artifact.
+    #[cfg(not(target_family = "wasm"))]
     assert_eq!(decode(&bytes).as_ref(), Some(value.as_ref()), "{name}");
+    #[cfg(target_family = "wasm")]
+    assert!(
+        decode(&bytes).as_ref() == Some(value.as_ref()),
+        "{name}: roundtrip mismatch"
+    );
     Lane {
         name,
         bytes,
@@ -209,6 +224,20 @@ pub fn cases() -> Vec<Case> {
 }
 /// Construct only the selected workload for IC calls, preserving corpus indices.
 pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
+    #[cfg(feature = "toko")]
+    {
+        toko::cases_selected(selected)
+    }
+    #[cfg(feature = "derive-scale")]
+    {
+        scale::cases_selected(selected)
+    }
+    #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
+    {
+        standard_cases_selected(selected)
+    }
+}
+fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
     let mut out = Vec::new();
     let mut index = 0;
     macro_rules! push {

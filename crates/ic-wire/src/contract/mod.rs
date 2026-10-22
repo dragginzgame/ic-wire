@@ -262,6 +262,49 @@ impl Flavor for Compare<'_> {
     }
 }
 
+// Post-decode verification for finite values. Previously every owned blob was
+// compared byte-for-byte. Controlled Bytes now verifies its length and advances
+// over the unchanged copy; generated records delegate only when ALL children
+// preserve decoding boundaries. Any custom child keeps whole-value comparison.
+// Canonical bytes, typed failures and accepted inputs are unchanged; no migration.
+// This context is created only after successful decoding and trailing checks.
+#[doc(hidden)]
+pub struct Canonical<'a> {
+    compare: Compare<'a>,
+}
+impl Canonical<'_> {
+    /// Compare custom/ordinary Serde output exactly, preserving error precedence.
+    pub fn compare<T: serde::Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Error> {
+        let mut serializer = postcard::Serializer {
+            output: Compare {
+                remaining: self.compare.remaining,
+                allowance: self.compare.allowance,
+                equal: self.compare.equal,
+            },
+        };
+        value
+            .serialize(&mut serializer)
+            .map_err(|_| Error::Malformed)?;
+        self.compare = serializer.output;
+        Ok(())
+    }
+    /// Only for unchanged built-in byte/text values immediately after decoding.
+    pub(crate) fn copied_bytes(&mut self, length: usize) -> Result<(), Error> {
+        self.compare(&length)?;
+        if length > self.compare.allowance {
+            return Err(Error::Malformed);
+        }
+        self.compare.allowance -= length;
+        if let Some(rest) = self.compare.remaining.get(length..) {
+            self.compare.remaining = rest;
+        } else {
+            self.compare.equal = false;
+            self.compare.remaining = &[];
+        }
+        Ok(())
+    }
+}
+
 // Keep the bulk scan out of scalar serializer paths; equality remains exact.
 // The caller has already checked equal slice lengths and the byte allowance.
 #[inline(never)]
@@ -287,8 +330,9 @@ fn equal_bulk(prefix: &[u8], bytes: &[u8]) -> bool {
         }
 }
 
-fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
-    let size = admit::<T>(limits)?;
+// Share allocation/header setup across contract types; byte emission stays inline.
+#[cfg_attr(target_arch = "wasm32", inline(never))]
+fn fresh_output(id: u64, direction: u8, size: usize) -> Result<Output, Error> {
     // The fixed header always fits after admission. Initialize the same bounded
     // starting capacity directly, leaving the cold growth path for payloads.
     let mut bytes = Vec::new();
@@ -296,9 +340,15 @@ fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<
         .try_reserve_exact(if size <= 128 { size } else { 64 })
         .map_err(|_| Error::Allocation)?;
     bytes.extend_from_slice(&header(id, direction));
+    Ok(Output { bytes, limit: size })
+}
+
+fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
+    let size = admit::<T>(limits)?;
+    let output = fresh_output(id, direction, size)?;
     let allocation_failed = Cell::new(false);
     let output = GrowingOutput {
-        output: Output { bytes, limit: size },
+        output,
         allocation_failed: &allocation_failed,
     };
     postcard::serialize_with_flavor(value, output).map_err(|_| {
@@ -361,15 +411,15 @@ fn decode<'de, T: Wire + serde::Deserialize<'de>>(
     if !rest.is_empty() {
         return Err(Error::Trailing);
     }
-    let equal = postcard::serialize_with_flavor(
-        &value,
-        Compare {
+    let mut canonical = Canonical {
+        compare: Compare {
             remaining: payload,
             allowance: size - HEADER,
             equal: true,
         },
-    )
-    .map_err(|_| Error::Malformed)?;
+    };
+    value.__canonical(&mut canonical)?;
+    let equal = canonical.compare.finalize().map_err(|_| Error::Malformed)?;
     if !equal {
         return Err(Error::Noncanonical);
     }
@@ -447,6 +497,8 @@ pub(crate) fn header(id: u64, direction: u8) -> [u8; HEADER] {
     header[10] = direction;
     header
 }
+// Share fixed-header validation across Wasm codec instantiations.
+#[cfg_attr(target_arch = "wasm32", inline(never))]
 pub(crate) fn payload(id: u64, direction: u8, bytes: &[u8]) -> Result<&[u8], Error> {
     if bytes.len() < HEADER {
         return Err(Error::Malformed);

@@ -4,7 +4,22 @@ mod fixtures;
 #[test]
 fn corpus_roundtrips_and_rejects_damaged_frames() {
     let cases = fixtures::cases(); // Asserts semantic equality for every lane.
+    #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
     assert!(cases.len() >= 100);
+    #[cfg(feature = "toko")]
+    assert_eq!(cases.len(), 10);
+    #[cfg(feature = "derive-scale")]
+    assert_eq!(
+        cases.len(),
+        if cfg!(feature = "derive-scale-1") {
+            1
+        } else if cfg!(feature = "derive-scale-10") {
+            10
+        } else {
+            100
+        }
+    );
+    #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
     for length in [4096, 1_048_576] {
         let vector = cases
             .iter()

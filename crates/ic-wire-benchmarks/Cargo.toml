@@ -16,6 +16,10 @@ candid = []
 allocations = []
 heap = []
 ic = ["ic-platform/pocket-ic"]
+toko = []
+derive-scale = []
+derive-scale-1 = ["derive-scale"]
+derive-scale-10 = ["derive-scale"]
 
 [dev-dependencies]
 ic-platform = { workspace = true, features = ["candid", "ic0"] }

@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.5.22]
+
+- Avoid rescanning directly decoded bounded bytes during finite canonical
+  verification. Generated records delegate verification only when every field
+  preserves roundtrip boundaries; custom children retain whole-value comparison.
+  A 1 MiB owned blob uses 58.4% fewer opt-3 IC decode instructions, and the
+  100-type fixture's code section shrinks by 8,403 bytes. A one-byte blob costs
+  17 extra instructions. Ordinary Serde decoding and protocol bytes are unchanged.
+
+- Share fixed-header validation on Wasm for a small code-size saving, trading
+  additional decode instructions. Strip symbols in benchmark profiles for both
+  codecs and document the consumer setting; smaller files lose diagnostic names.
+  Most file savings are metadata removal, not reduced executable code.
+
+- Share finite output allocation/header setup on Wasm, keeping one codec strategy.
+  The 100-type opt-3 code section shrinks 2.49%, trading 0.49–0.68% more encode
+  and 4.23–5.66% more decode instructions.
+  Protocol bytes, allocation policy and public APIs are unchanged.
+
+- Add isolated Toko-shaped and 1/10/100-distinct-type derive benchmark cohorts,
+  sharing the native, allocation, heap, IC instruction and Wasm-size runner.
+  Preserve ULID blob representation and label the token-card projection and
+  preformatted decimal limitation. Report code-section size separately from total
+  Wasm and gzip, and exclude per-type debug formatting from Wasm assertions.
+  Runtime dependencies and protocol are unchanged.
+
+- Inline native serialization admission and compound forwarding on Wasm. The
+  comparison fixture shrinks 5,449/1,569 Wasm bytes at opt-z/opt-3; opt-3
+  1,024-hash manifest encoding/decoding uses 20.0%/18.8% fewer IC instructions.
+  Some small opt-z cases regress up to 2.08%. Protocol bytes, limits, typed
+  errors and native-target behavior are unchanged.
+
 ## [0.5.21] - 2026-10-22
 
 - Adopt Shared Tooling 0.26.6 and IC Tooling 0.64.0 for Build, Testkit and

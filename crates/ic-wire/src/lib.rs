@@ -27,6 +27,7 @@ pub use shape::{Limits, Shape, Wire};
 /// Implementation dependencies used by generated contracts.
 #[doc(hidden)]
 pub mod __private {
+    pub use crate::contract::Canonical;
     pub use serde;
 }
 

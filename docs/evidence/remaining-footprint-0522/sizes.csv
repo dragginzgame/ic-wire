@@ -1,0 +1,4 @@
+variant,wasm_bytes,code_section_bytes,sha256
+baseline,446945,363873,e01cb70480ffe083ac730651cbe94aba164c5ad242d09f0e3f21a610879ce598
+shared-header-validation,446812,363691,2cf99bf574a25c3df7ff53eabb61bd662146e3e7426d559963cb5bc957ccbee9
+bulk-comparison-out-of-line,446945,363873,e01cb70480ffe083ac730651cbe94aba164c5ad242d09f0e3f21a610879ce598

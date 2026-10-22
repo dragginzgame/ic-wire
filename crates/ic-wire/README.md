@@ -208,6 +208,18 @@ node/depth allowances bound traversal but are not instruction-counter estimates.
 Manual Wire implementations are trusted contract code and must satisfy these
 bounds. Prefer the derive and supplied bounded types.
 
+Finite decoding verifies canonical output after Postcard decoding. Supplied
+`Bytes<N>` checks its canonical length without rescanning the bytes it just copied.
+Generated records verify fields separately only when every field has the internal
+roundtrip/boundary guarantee. A custom child disables this optimization for the
+whole containing record: custom Serde can move field boundaries as well as change
+values. Manual Wire implementations must leave the hidden `__CANONICAL_FIELDS`
+and `__canonical` defaults intact. These are runtime/derive implementation hooks,
+not consumer tuning options. Ordinary native Serde decoding, enums and container
+verification retain exact serialized comparison; a blob nested inside such a
+container does not automatically receive the direct-Bytes optimization. Wire
+bytes, canonical rejection and ownership are unchanged.
+
 Length hints are checked before list allocation. When Postcard hides a hint,
 decode visits at most N elements and rejects an extra element without decoding
 it. This covers zero-byte unit elements. Bytes/text check their lengths before

@@ -35,6 +35,7 @@ macro_rules! finite {
             }
         }
         impl Wire for $name {
+            const __CANONICAL_FIELDS: bool = true;
             const SHAPE: Shape = Shape::scalar($bits / 8);
             const SCHEMA: Schema = Schema::Float($bits);
         }

@@ -94,6 +94,9 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     let (decode_impl_generics, _, decode_where_clause) = decode_generics.split_for_impl();
     let name = input.ident;
     let mut ids = BTreeSet::new();
+    let canonical_binding = fresh_ident(&source, "__ic_wire_canonical");
+    let mut canonical_fields = quote!(false);
+    let mut canonical = quote! { #canonical_binding.compare(self) };
     let (serialize, deserialize, shape, schema) = match input.data {
         Data::Struct(data) => {
             let Fields::Named(fields) = data.fields else {
@@ -128,6 +131,14 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                 .collect();
             let indices: Vec<_> = (0..fields.len()).map(syn::Index::from).collect();
             let field_ids: Vec<_> = fields.iter().map(|f| f.0).collect();
+            canonical_fields = quote!(true #(&& <#types as ::ic_wire::Wire>::__CANONICAL_FIELDS)*);
+            canonical = quote! {
+                if !<Self as ::ic_wire::Wire>::__CANONICAL_FIELDS {
+                    return #canonical_binding.compare(self);
+                }
+                #(::ic_wire::Wire::__canonical(&self.#names, #canonical_binding)?;)*
+                ::core::result::Result::Ok(())
+            };
             (
                 quote! { ::ic_wire::__private::serde::Serialize::serialize(&(#(&self.#names,)*), #serializer_binding) },
                 quote! {
@@ -157,6 +168,10 @@ fn expand(input: DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
             fn deserialize<#deserializer: ::ic_wire::__private::serde::Deserializer<#decode_lifetime>>(#deserializer_binding: #deserializer) -> ::core::result::Result<Self, <#deserializer as ::ic_wire::__private::serde::Deserializer<#decode_lifetime>>::Error> { #deserialize }
         }
         impl #impl_generics ::ic_wire::Wire for #name #type_generics #where_clause {
+            const __CANONICAL_FIELDS: ::core::primitive::bool = #canonical_fields;
+            fn __canonical(&self, #canonical_binding: &mut ::ic_wire::__private::Canonical<'_>) -> ::core::result::Result<(), ::ic_wire::Error> {
+                #canonical
+            }
             const SHAPE: ::ic_wire::Shape = #shape;
             const SCHEMA: ::ic_wire::schema::Schema = #schema;
         }

@@ -1,0 +1,31 @@
+--- a/crates/ic-wire/src/contract/mod.rs
++++ b/crates/ic-wire/src/contract/mod.rs
+@@ -287,8 +287,9 @@
+         }
+ }
+ 
+-fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
+-    let size = admit::<T>(limits)?;
++// Share allocation/header setup across contract types; byte emission stays inline.
++#[cfg_attr(target_arch = "wasm32", inline(never))]
++fn fresh_output(id: u64, direction: u8, size: usize) -> Result<Output, Error> {
+     // The fixed header always fits after admission. Initialize the same bounded
+     // starting capacity directly, leaving the cold growth path for payloads.
+     let mut bytes = Vec::new();
+@@ -296,9 +297,15 @@
+         .try_reserve_exact(if size <= 128 { size } else { 64 })
+         .map_err(|_| Error::Allocation)?;
+     bytes.extend_from_slice(&header(id, direction));
++    Ok(Output { bytes, limit: size })
++}
++
++fn encode<T: Wire>(id: u64, direction: u8, limits: Limits, value: &T) -> Result<Vec<u8>, Error> {
++    let size = admit::<T>(limits)?;
++    let output = fresh_output(id, direction, size)?;
+     let allocation_failed = Cell::new(false);
+     let output = GrowingOutput {
+-        output: Output { bytes, limit: size },
++        output,
+         allocation_failed: &allocation_failed,
+     };
+     postcard::serialize_with_flavor(value, output).map_err(|_| {

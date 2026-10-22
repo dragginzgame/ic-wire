@@ -178,3 +178,42 @@ measurements. The driver uses IC Testkit for server admission/lifecycle and neve
 downloads it implicitly. Output directories must not already exist. Use
 `bash scripts/ci/evaluate-codecs.sh target/another-run` to retain another run.
 See [methodology and results](candid-comparison.md) before interpreting ratios.
+
+The optional `CORPUS_FEATURE` selects `toko`, `derive-scale-1`,
+`derive-scale-10`, or `derive-scale` (100 distinct types). Omit it for the
+standard corpus. Each selection uses the same runner and separate codec artifacts:
+
+```sh
+CORPUS_FEATURE=toko POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh target/toko-comparison
+CORPUS_FEATURE=derive-scale POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh target/derive-100-comparison
+```
+
+`make check-consumer-benchmarks` qualifies these fixtures without timings;
+`check-benchmarks` includes it. The Toko cohort contains copied small DTO shapes
+and a labelled token-card projection, not a dependency on Toko or its endpoints.
+The derive cohorts use finite `Wire` derives versus `CandidType`/Serde derives;
+every selected type is exercised. Identical generated code may still be shared
+by the compiler. `build-times.csv` records single build-command durations rounded
+to whole seconds: dependencies may be cached, and these are neither isolated
+macro-expansion timings nor statistically established compiler speedups.
+
+### Uncompressed Wasm footprint
+
+The benchmark profiles use `strip = "symbols"` for both codecs. This removes
+function-name metadata and reduces total Wasm size, at the cost of diagnostic
+backtrace names. It does not directly reduce the code section subject to the IC
+code-size ceiling. Keep total Wasm and code-section measurements separate.
+
+A consumer can select the same setting in its own workspace's deployment profile:
+
+```toml
+[profile.release]
+strip = "symbols"
+```
+
+IC Wire cannot set a consuming workspace's profile. Preserve the consumer's other
+profile choices; use a separate symbol-preserving build when diagnostics need it.
+Existing stripped deployments may already obtain this saving. See the
+[qualified comparison](candid-consumer-comparison.md#small-savings-retained-after-instruction-qualification).

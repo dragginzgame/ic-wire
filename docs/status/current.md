@@ -2,88 +2,89 @@
 
 ## Current batch
 
-Pending 0.5.21 improves owned byte/text decoding on Wasm. A separate bulk
-comparison helper processes 64-byte blocks while preserving exact canonical
-validation, bounds, error precedence and the existing borrowed-input shortcut.
-Native slice equality and protocol bytes are unchanged; no consumer migration
-is required. Package versions, staging and Git refs are untouched.
+Pending 0.5.22 preserves one Postcard encoding with no size/speed selector.
+Existing finite-derived, ordinary-Serde and borrowed APIs remain separately
+qualified admission/ownership paths. Opt-z and opt-3 are compiler profiles of
+that same implementation. Optimize code-section and total uncompressed Wasm
+size, measuring instruction tradeoffs; gzip is not an acceptance criterion.
+Package versions, staging, commits and release remain maintainer-owned.
 
-Against rebuilt release 0.5.20 (`a5b80e6`), owned 1 MiB decode uses 8.7% fewer
-IC instructions at opt-z and 6.1% fewer at opt-3. Whole-fixture Wasm grows
-200/327 bytes, and gzip grows 109/201 bytes. Some small decodes regress: the
-worst percentage case adds 73 instructions (3.48%) for a 127-byte blob. Candid
-still wins owned 1 MiB decoding. Two alternative loops were rejected.
-See [results, tradeoffs and reproduction](../candid-comparison.md#owned-blob-follow-up--pending-0521).
+Earlier retained runtime changes are Wasm native serialization/compound inlining
+and shared fresh finite output allocation/header setup. Protocol bytes, bounds,
+canonical validation, typed errors and public APIs are unchanged. The inlining
+experiment reduces opt-3 array-manifest encode/decode instructions by 20.0%/18.8%
+against 0.5.21. Shared output setup reduces the 100-type opt-3 code section by
+9,300 bytes (2.49%), trading +0.49–0.68% encode and +4.23–5.66% decode instructions
+against its immediately preceding baseline. Byte-level sharing was rejected after
+an 82% generic-vector decode regression; rejected hints and tuple helpers are absent.
+See [runtime experiments](../candid-comparison.md) and
+[setup evidence](../candid-consumer-comparison.md#one-default-shared-finite-output-setup).
 
-## Evidence and qualification
+The small-savings follow-up keeps out-of-line Wasm header validation and
+`strip = "symbols"` in benchmark profiles for both codecs. Most file savings are
+metadata removal, not code headroom; consumers select stripping in their own
+workspace and lose diagnostic names. Header sharing has a small instruction cost
+and is not a code-size win in every profile. See the consumer report's small-savings
+section and `docs/evidence/small-savings-0522/` for before/after evidence.
+Bulk-comparison sharing remains rejected. The earlier full rerun includes those
+changes; the guarded verification follow-up is summarized below.
 
-The complete 114-case IC corpus has three agreeing counts per measured operation
-and exact native-frame equality for all 2,838 rows. Of these, 75 improve, 34
-regress and 2,729 are unchanged. Baseline/candidate builds use identical inputs,
-compiler settings and lockfiles, with separate opt-z/opt-3 Wasm and gzip sizes.
-Native benchmark binaries are byte-identical before/after in both profiles.
-Runtime tests, strict Clippy, native/Wasm Rust 1.91 and benchmark corpus checks
-pass. Mismatch coverage extends through 257-byte unaligned inputs, and a bulk
-mismatch still checks subsequent output allowance. Full CI/macOS were not run.
+## Latest Candid comparison
 
-## Allocation-budget follow-up
+Guarded finite verification is now retained: direct `Bytes<N>` verifies its length
+without rescanning the unchanged copied payload. Generated records delegate only
+when every field preserves roundtrip boundaries. Manual Wire implementations must
+keep the hidden defaults. Any custom child forces whole-record exact comparison;
+ordinary native Serde, enums and container verification remain unchanged. This is
+one Postcard encoding, with no caller-selectable mode or protocol change.
 
-The pending batch also stores native heap allowance in whole eight-byte charge
-units. Independent boundary/overflow tests preserve the old admission semantics.
-Relative to the owned helper above, Wasm shrinks 326/796 bytes and gzip shrinks
-89/222 bytes at opt-z/opt-3. IC rows: 419 improve, two regress (under 0.025%),
-2,417 unchanged. Allocations and peak heap are unchanged. Native timing controls
-show host drift, so no causal native speedup is claimed. Focused runtime, Clippy,
-MSRV and benchmark checks pass. Protocol bytes and consumer limits are unchanged.
+The unguarded prototype was rejected after a custom-field boundary-shift regression.
+It could accept bytes that re-encoded differently even though each local comparison
+looked equal. The whole-type guard rejects that input. The earlier bulk-loop
+alternatives remain rejected; only the guarded field verification is retained.
 
-Generic byte-vector encoding remains expensive. Byte-oriented Serde encoding
-uses about 48× fewer IC instructions for 1 MiB at opt-3 with identical bytes;
-corpus assertions cover matching 4 KiB/1 MiB frames. Consumer guidance explains
-the representation and accounting tradeoff. See [results and reproduction](../candid-comparison.md#allocation-budget-units--pending-0521).
+Opt-3 1 MiB owned finite blob decode falls from 2,524,473 to 1,049,786 instructions
+(−58.42%), versus Candid's 1,065,406. Frame sizes remain 1,048,590/1,048,588 bytes.
+Ordinary native Serde owned blob decode remains 2,524,535; borrowing remains 824
+with different ownership. One-byte finite blob decode costs 17 extra instructions
+(+1.96%). The optimization does not eliminate all Candid wins.
 
-## Released foundation
+Opt-3 Wire/Candid sizes, in bytes:
 
-0.5.20 shipped derive name-resolution fixes, shared TypeScript safe-integer
-bounds, the redundant finite-frame check removal and the first Wasm comparison
-optimization. It also added the unpublished Candid/PocketIC benchmark package.
-Published crates remain independent of Candid and simulators. The benchmark
-runner follows Cargo artifact paths and rejects incomplete/duplicate comparisons.
-Its retained complete rerun is `target/codec-comparison-2026-10-22-rerun/`;
-[methodology and earlier results](../candid-comparison.md) distinguish native
-latency, IC instructions, allocations, peak heap and deployment sizes.
+| Fixture | Code section | Total uncompressed Wasm |
+| --- | ---: | ---: |
+| Standard corpus | 264,914 / 788,971 | 314,728 / 860,566 |
+| 100 derived types | 355,288 / 2,010,763 | 389,823 / 2,079,944 |
 
-## Retained decisions
+The 100-type code section is 8,403 bytes smaller than the preceding baseline;
+standard code grows 315 bytes. The 100-type cohort has sixteen repeated structural
+width patterns; whole-fixture sizes do not isolate derive code or predict app savings.
+Toko and 1/10-type cohorts retain their earlier measurement boundary and were not
+rerun for guarded verification. The prior full five-cohort comparison remains
+historical evidence under `docs/evidence/stripped-full-comparison-0522/`.
 
-Production remains bounded Postcard. Native owned content uses slice equality;
-Wasm retains its word comparison. Both skip exact same-input-region comparisons
-for borrowed values after length/allowance checks. Existing borrowing and the
-released native shortcut remain documented in the
-[protocol/layout study](../protocol-study.md).
+The [latest report](../candid-comparison.md#guarded-finite-verification--pending-0522)
+owns results, counterexample, scope and reproduction. Runtime tests, lint,
+native/Wasm MSRV and 16 compile-fail diagnostics plus their passing control pass.
+Two native runs per profile, allocation/heap passes and all eight artifact hashes
+are verified under `docs/evidence/canonical-fields-0522/`. All 4,838 IC rows agree
+across three samples, with unchanged input/frame hashes. All 1,844 fresh
+encode/decode allocation and peak-heap summaries match baseline. Native opt-3
+finite blob decode improves from 33.53–33.69 to 17.34–17.42 µs; Candid is
+18.20–18.38 µs in the rerun. These are unpinned Linux observations.
+Full CI and macOS were not run. Ordinary work does not stage or release.
 
-Released 0.5.17 rejected word-reduction and early-exit native comparisons after
-owned-blob regressions; see [native comparison results](../native-comparison-study.md).
-Neither [bulk-reservation policy](../bulk-reservation-study.md) replaces current
-growth: capacity savings came with multi-chunk or timing regressions.
-[Native borrowed-view qualification](../native-views-study.md) compares existing
-owned/borrowed APIs, not a new optimization. It finds 21–25% lower 1 MiB decode
-plus byte-scan time and 45–46% lower sixteen-text-pair time. Blob-storage already
-borrows download descriptor text; its chunk transport remains provider-specific.
+## Retained decisions and tooling
 
-Hypothetical layout cuts remain experiments. Generic single-pass canonical
-decoding is unimplemented; normalized maps and arbitrary Serde semantics require
-more than varint checks. Exact retries, canonical hashing and typed errors remain
-required. Metadata and scalar validators are trusted declarations. Earlier
-runtime evidence is in [evaluation](../evaluation.md); generator scaling evidence
-is in [performance](../performance.md#typescript-generator-comparisons).
-Shared Tooling is 0.26.6 at `4cb9bc9`; IC Build/Testkit and transitive Host
-libraries select 0.64.0. The release editor is 0.64.0 with `cli`.
-Platform imports already satisfy the 0.64 ownership changes. Host/Cargo-only
-setup needs no IC executable selection. Runtime and protocol are unchanged.
-Snapshot, tool admission, pin/boundary, formatting/link, disposable Make/release,
-diagnostic, qualification and benchmark lint/MSRV checks pass on Linux. The 0.64
-Host/Testkit driver also passes the complete PocketIC frame check against the
-existing candidate Wasm: all 2,838 rows and repeated counts are identical.
-Evidence: `target/tooling-064-adoption/` and `/tmp/ic-wire-tooling-adoption/`.
-This validates host adoption, not rebuilt Wasm performance; full CI/macOS remain
-unrun. Earlier benchmark compiler/lock identities remain historical evidence.
-Ordinary agent work does not stage, commit or release.
+Runtime remains Wasm-safe and independent of Candid, simulators and platform SDKs.
+Candid/PocketIC are unpublished benchmark dev dependencies through IC Platform;
+IC Testkit owns server admission/lifecycle. Consumers own transport, endpoints,
+authentication, retry policy and database encodings. No automatic migration or
+parallel legacy protocol exists. Borrowing preserves framing and canonical bytes.
+
+Shared Tooling is 0.26.6 at `4cb9bc9`; IC Build/Testkit and transitive Host select
+0.64.0. The release editor is 0.64.0 with `cli`. Their earlier adoption checks and
+PocketIC driver qualification passed on Linux; see the retained evaluation reports
+and `target/tooling-064-adoption/`. Historical optimization studies remain linked
+from [evaluation](../evaluation.md) and [consumer comparisons](../candid-consumer-comparison.md).
+Ordinary agent work does not stage, commit, push or release.

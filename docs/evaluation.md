@@ -14,6 +14,7 @@ it does not qualify consumer endpoint integrations.
 | `check-typed-diagnostics` | Actual compile-fail subjects and a passing control |
 | `check-typescript` | Generated types, Rust vectors and differential malformed-input checks |
 | `check-benchmarks` | Matched Candid/Wire corpus, malformed-frame checks, lint and MSRV |
+| `check-consumer-benchmarks` | Toko-shaped and 1/10/100-type derive corpus, lint and MSRV checks |
 | `evaluate-codecs` | Repeated native timing, allocator counts, peak live heap and Wasm footprint |
 | `check-qualification` | Allocation/borrowing fixture tests, strict linting and compiler-floor checks |
 | `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.91 floor |

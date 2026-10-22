@@ -1,0 +1,15 @@
+{
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "target": "wasm32-unknown-unknown",
+  "profiles": "opt-z/opt-3, LTO,1 codegen unit,panic abort; before strip=debuginfo, after strip=symbols",
+  "baseline": "docs/evidence/final-comparison-0522; target/final-0522-{standard,derive-scale}/source",
+  "candidate": "baseline plus selected.patch; target/small-savings-0522-{standard,derive-scale}/source",
+  "verified_ic_rows": 4838,
+  "native_timing": "not remeasured",
+  "source_sha256": {
+    "Cargo.toml": "ce5d0ffaeb55f279ead5d5c84f740329f1ec15aeae1e6a189283815734daa4d3",
+    "Cargo.lock": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+    "crates/ic-wire/src/contract/mod.rs": "983bc6fb8ee913e71d859f60d8261412b25c84bfab3d57a9b9be5b1c574cbbe3"
+  },
+  "raw_archive_sha256": "dc262c1c8cef67b33e825d8249a278cfcc95d194452530d20b561eec8bbad0fc"
+}

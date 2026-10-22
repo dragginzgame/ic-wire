@@ -47,7 +47,7 @@ opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
-strip = "debuginfo"
+strip = "symbols"
 
 [profile.benchmark-speed]
 inherits = "evaluation"

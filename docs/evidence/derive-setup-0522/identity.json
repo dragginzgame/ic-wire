@@ -1,0 +1,33 @@
+{
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "target": "wasm32-unknown-unknown",
+  "profiles": "evaluation opt-z; benchmark-speed opt-3; both LTO,1 codegen unit,panic abort,strip debuginfo",
+  "gzip": "gzip -n -9",
+  "baseline": "0.5.21 plus incoming pending native serialization inlining and corrected Wasm fixture assertions; see derive-footprint-0522 and consumer-cohorts-0522",
+  "selected": "setup: fresh allocation/header setup factored into a non-inlined Wasm helper",
+  "rejected": {
+    "candidate": "non-inlined GrowingOutput try_push/try_extend and Compare try_push",
+    "output": "non-inlined GrowingOutput try_push/try_extend only",
+    "tuple-helpers": "common tuple Serialize/Deserialize helpers: no code-section improvement; local both-{3,z}.wasm",
+    "narrow-hints": "individual push/extend/compare hints: local /tmp/wire-shared-tuples/"
+  },
+  "measurement": "3 identical samples per row; frame and input hashes match baseline; fixture construction excluded from IC counters; no loop overhead subtraction",
+  "native": "not remeasured; no native speed/allocation claim",
+  "host_identity_note": "driver hashes describe the driver build source, not necessarily installed baseline Wasm; artifact SHA identities identify each measured module",
+  "source_sha256": {
+    "Cargo.lock": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+    "crates/ic-wire/src/contract/mod.rs": "c5059eaf11cec8927afc899134f0d5bef8907ba258cef39eec73d9785a23e5bf",
+    "crates/ic-wire-benchmarks/fixtures/mod.rs": "ca119aa1cb427b439b65a29fdb31bea1ceaa856fedf6edb025aa17d699f27a7d",
+    "crates/ic-wire-benchmarks/fixtures/scale/mod.rs": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1"
+  },
+  "rows": {
+    "derive-100/baseline": 2000,
+    "derive-100/candidate": 2000,
+    "derive-100/output": 2000,
+    "derive-100/setup": 2000,
+    "standard/baseline": 2838,
+    "standard/candidate": 2838,
+    "standard/output": 2838,
+    "standard/setup": 2838
+  }
+}

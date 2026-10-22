@@ -63,7 +63,11 @@ authorized.
 Use focused checks for changed code. Check for an active build sharing target/
 before compiling. Do not run broad Canic or sibling suites. Keep compiler, target,
 profile, input identity and all codec parameters with measurements. Distinguish
-native time, IC instructions, linked code size and compressed deployment size.
+native time, IC instructions, Wasm code-section size and total uncompressed Wasm size.
+Optimize one codec strategy for code-section pressure and total uncompressed Wasm
+size, measuring instruction tradeoffs. Gzip size is not an optimization objective
+or acceptance criterion; historical/compressed measurements may remain as evidence
+but must not influence candidate selection or headline improvement reports.
 Do not turn symbol attribution into a savings claim.
 
 For changes affecting runtime or generator cost, include a reproducible before/after

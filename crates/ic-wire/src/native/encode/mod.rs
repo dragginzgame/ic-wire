@@ -11,6 +11,7 @@ pub(super) struct Bounded<'a, T: ?Sized> {
 }
 
 impl<T: Serialize + ?Sized> Serialize for Bounded<'_, T> {
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn serialize<S: Serializer>(&self, inner: S) -> Result<S::Ok, S::Error> {
         if self.depth.saturating_add(2) > self.budget.depth
             // Preserve four node charges and two value-size charges, but admit
@@ -227,7 +228,8 @@ macro_rules! compound {
         impl<S: ser::$trait> ser::$trait for Compound<'_, S> {
             type Ok = S::Ok;
             type Error = S::Error;
-            $(fn $method<T: Serialize + ?Sized>(
+            $(#[cfg_attr(target_arch = "wasm32", inline(always))]
+            fn $method<T: Serialize + ?Sized>(
                 &mut self,
                 $($key: &'static str,)?
                 value: &T,

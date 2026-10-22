@@ -81,6 +81,7 @@ impl<'de, T: Deserialize<'de>, const N: usize> Deserialize<'de> for List<T, N> {
     }
 }
 impl<T: Wire, const N: usize> Wire for List<T, N> {
+    const __CANONICAL_FIELDS: bool = T::__CANONICAL_FIELDS;
     const SCHEMA: crate::schema::Schema = crate::schema::Schema::List(&T::SCHEMA, N);
     const SHAPE: Shape = Shape {
         bytes: 10_usize.saturating_add(T::SHAPE.bytes.saturating_mul(N)),
@@ -144,6 +145,11 @@ impl<'de, const N: usize> Deserialize<'de> for Bytes<N> {
     }
 }
 impl<const N: usize> Wire for Bytes<N> {
+    const __CANONICAL_FIELDS: bool = true;
+    fn __canonical(&self, canonical: &mut crate::__private::Canonical<'_>) -> Result<(), Error> {
+        canonical.copied_bytes(self.0.len())
+    }
+
     const SCHEMA: crate::schema::Schema = crate::schema::Schema::Bytes(N);
     const SHAPE: Shape = Shape {
         bytes: N.saturating_add(10),
@@ -191,6 +197,7 @@ impl<'de, const N: usize> Deserialize<'de> for Text<N> {
     }
 }
 impl<const N: usize> Wire for Text<N> {
+    const __CANONICAL_FIELDS: bool = true;
     const SCHEMA: crate::schema::Schema = crate::schema::Schema::Text(N);
     const SHAPE: Shape = Bytes::<N>::SHAPE;
 }

@@ -1,0 +1,22 @@
+--- a/crates/ic-wire/src/contract/mod.rs
++++ b/crates/ic-wire/src/contract/mod.rs
+@@ -454,6 +454,8 @@
+     header[10] = direction;
+     header
+ }
++// Share fixed-header validation across Wasm codec instantiations.
++#[cfg_attr(target_arch = "wasm32", inline(never))]
+ pub(crate) fn payload(id: u64, direction: u8, bytes: &[u8]) -> Result<&[u8], Error> {
+     if bytes.len() < HEADER {
+         return Err(Error::Malformed);
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -47,7 +47,7 @@
+ lto = true
+ codegen-units = 1
+ panic = "abort"
+-strip = "debuginfo"
++strip = "symbols"
+ 
+ [profile.benchmark-speed]
+ inherits = "evaluation"

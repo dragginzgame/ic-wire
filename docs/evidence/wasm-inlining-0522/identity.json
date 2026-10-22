@@ -1,0 +1,160 @@
+{
+  "baseline_commit": "91244e96de4299ed96a666c6b50c62aa2138b72f",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "profiles": {
+    "evaluation": "opt-z, LTO, one codegen unit, panic abort, strip debuginfo",
+    "benchmark-speed": "opt-3, LTO, one codegen unit, panic abort, strip debuginfo"
+  },
+  "target": "wasm32-unknown-unknown",
+  "native_measurements": "Not rerun: annotations are cfg-gated to wasm32. No native timing, allocation or heap claim.",
+  "variants": {
+    "baseline": {
+      "artifacts": [
+        {
+          "codec": "wire",
+          "profile": "evaluation",
+          "sha256": "87988e07d09d4f83a3325920d57c31c9b2a73eb7508d9621f59293b3a8639479"
+        },
+        {
+          "codec": "candid",
+          "profile": "evaluation",
+          "sha256": "bcfdb2dd1e08faded9ed3aebea81dafca4af6b8e379bb877172d8aad804dffc6"
+        },
+        {
+          "codec": "wire",
+          "profile": "benchmark-speed",
+          "sha256": "0a071878f5c5168b6599dc1a350a1e90bb73a9742461ea2ded63e86b634c38e0"
+        },
+        {
+          "codec": "candid",
+          "profile": "benchmark-speed",
+          "sha256": "e9f4f4a18b68dd4a2cd439d09c1dd3c7339a294681243232ab488bbc2603201e"
+        }
+      ],
+      "counter": "ic0.performance_counter(0)",
+      "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+      "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+      "format": 1,
+      "large_repetitions": 1,
+      "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+      "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+      "samples": 3,
+      "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+      "server_version": "pocket-ic-server 16.1.0\n",
+      "small_repetitions": 4,
+      "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83",
+      "encode_source_sha256": "fe60f460a2738a40dbc0cfce062b5f6cbaa0340120cf9ffd9ada4ada101d8a33"
+    },
+    "candidate": {
+      "artifacts": [
+        {
+          "codec": "wire",
+          "profile": "evaluation",
+          "sha256": "28f0e365ad997c71beacf9ea758cce2852d1948c2eeb039039ba6cc4348b4272"
+        },
+        {
+          "codec": "candid",
+          "profile": "evaluation",
+          "sha256": "bcfdb2dd1e08faded9ed3aebea81dafca4af6b8e379bb877172d8aad804dffc6"
+        },
+        {
+          "codec": "wire",
+          "profile": "benchmark-speed",
+          "sha256": "1cecda4335f1edcc5eee3cc0c8045498860e49b9a33b6c4f0ffdf77d96cd1794"
+        },
+        {
+          "codec": "candid",
+          "profile": "benchmark-speed",
+          "sha256": "e9f4f4a18b68dd4a2cd439d09c1dd3c7339a294681243232ab488bbc2603201e"
+        }
+      ],
+      "counter": "ic0.performance_counter(0)",
+      "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+      "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+      "format": 1,
+      "large_repetitions": 1,
+      "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+      "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+      "samples": 3,
+      "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+      "server_version": "pocket-ic-server 16.1.0\n",
+      "small_repetitions": 4,
+      "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83",
+      "encode_source_sha256": "f530c493d2280516b816a2f9fa7e1be92f1b3664b1b72cce39899cde1ab10cc2"
+    },
+    "bounded": {
+      "artifacts": [
+        {
+          "codec": "wire",
+          "profile": "evaluation",
+          "sha256": "e33025231f653357f4350445723f096a45565f1a9f52f4263c6cd4c11caa2c10"
+        },
+        {
+          "codec": "candid",
+          "profile": "evaluation",
+          "sha256": "bcfdb2dd1e08faded9ed3aebea81dafca4af6b8e379bb877172d8aad804dffc6"
+        },
+        {
+          "codec": "wire",
+          "profile": "benchmark-speed",
+          "sha256": "4db8045030b8d6e621ba868407bbcb0f5c48c31ee08c4db78a2bd70b49bbf4a9"
+        },
+        {
+          "codec": "candid",
+          "profile": "benchmark-speed",
+          "sha256": "e9f4f4a18b68dd4a2cd439d09c1dd3c7339a294681243232ab488bbc2603201e"
+        }
+      ],
+      "counter": "ic0.performance_counter(0)",
+      "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+      "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+      "format": 1,
+      "large_repetitions": 1,
+      "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+      "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+      "samples": 3,
+      "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+      "server_version": "pocket-ic-server 16.1.0\n",
+      "small_repetitions": 4,
+      "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83",
+      "encode_source_sha256": "4d3fff14eaf81139e3906f57671a78e44aa3ac51bc1fc9b14bddf57c73f7afe3"
+    },
+    "compound": {
+      "artifacts": [
+        {
+          "codec": "wire",
+          "profile": "evaluation",
+          "sha256": "777b69a8b625c54cf75569f447bc59ae11ec940f42954aa95e55611d2f11b6bc"
+        },
+        {
+          "codec": "candid",
+          "profile": "evaluation",
+          "sha256": "bcfdb2dd1e08faded9ed3aebea81dafca4af6b8e379bb877172d8aad804dffc6"
+        },
+        {
+          "codec": "wire",
+          "profile": "benchmark-speed",
+          "sha256": "5226df13c2b2d9fa8180fe0c6b74b574e245f99f59eaa79f02cc9234937f8cb5"
+        },
+        {
+          "codec": "candid",
+          "profile": "benchmark-speed",
+          "sha256": "e9f4f4a18b68dd4a2cd439d09c1dd3c7339a294681243232ab488bbc2603201e"
+        }
+      ],
+      "counter": "ic0.performance_counter(0)",
+      "driver_sha256": "06dc71fab98ab7f85594732bbe0d7b77f849e981253ce831f27d4fa4f1a526a7",
+      "fixture_sha256": "cf10e2a23c68044a54af50853d20eb78e065c20f6ec9466c49ab66d239880947",
+      "format": 1,
+      "large_repetitions": 1,
+      "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+      "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+      "samples": 3,
+      "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+      "server_version": "pocket-ic-server 16.1.0\n",
+      "small_repetitions": 4,
+      "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83",
+      "encode_source_sha256": "f9f2f539ebf3da83a6ff482844562b9a43b034fea15f208ba4357f460d580b33"
+    }
+  }
+}

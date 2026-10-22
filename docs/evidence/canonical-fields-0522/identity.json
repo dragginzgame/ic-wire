@@ -1,0 +1,129 @@
+{
+  "baseline": "91244e9 plus incoming dirty batch, docs/evidence/stripped-full-comparison-0522",
+  "candidate": "guarded finite Bytes/record verification, pending 0.5.22",
+  "cohorts": {
+    "standard": {
+      "runtime_tree_sha256": "0077a21a8342ccda24f5823e12d2d2865d1ebc67dabb9e426dc874689b0829ed",
+      "runtime_files": {
+        "crates/ic-wire/src/bounded/borrowed/mod.rs": "593e8dc9772cad8d6d1f8562fd003c3698f45626a09491f8fbb71bcbf991b2a3",
+        "crates/ic-wire/src/bounded/mod.rs": "92196ff2e06d8a5817e96ab45a1cc9263c52eb44f3a3cddb0582c6e7451b6461",
+        "crates/ic-wire/src/contract/mod.rs": "ca18a2d3459323ac671f32f7c8af231598b18036ee75eb5d1335121cb8250011",
+        "crates/ic-wire/src/contract/tests/mod.rs": "e4c34e698427bd5b8173fdd4fa3ff9ab82ea4f03569680ce89be881c6398757c",
+        "crates/ic-wire/src/float/mod.rs": "1138026bccfb68553afc3805beb97ba1b0a7780965bf1b70d6d4f09e431f2f1b",
+        "crates/ic-wire/src/lib.rs": "2a829da2b33a012163cdba686e209a27a3930aa5bbc3db6a9271fb1a74cced18",
+        "crates/ic-wire/src/native/decode/mod.rs": "0e23c8bba33c2fbe6d51bf1c1be514b95b3952a5b575c6ccbfcd4c64964b00df",
+        "crates/ic-wire/src/native/encode/mod.rs": "f530c493d2280516b816a2f9fa7e1be92f1b3664b1b72cce39899cde1ab10cc2",
+        "crates/ic-wire/src/native/mod.rs": "d1ac57c02d3aa2cd0e79a8adda73941e8791070a87bd0a1b2e1a06d1ba961a82",
+        "crates/ic-wire/src/native/tests/mod.rs": "2001a476dbc5a1225bd9de89a54eb31c36a0c1409354c4a6f57b32e0171d6bba",
+        "crates/ic-wire/src/schema/mod.rs": "e177ff609382eff2aaa687013506d963465782120f6e9896d1af150ea15e6ba8",
+        "crates/ic-wire/src/shape/mod.rs": "3f2f8aa016b083090ead8ba94509bb7befb6ea6139319eca8949706f44445a15",
+        "crates/ic-wire/src/typescript/metadata/mod.rs": "dc82b554004c6760c8a1394f5614d2d46f54df73580ab1f3a1db9fc1a265b0dc",
+        "crates/ic-wire/src/typescript/mod.rs": "c8233a84a6d39f83b8ba154e5a3e6765677b8d94be9c5fbe01fec26e7ad2dbf6",
+        "crates/ic-wire-derive/src/enum_expansion/mod.rs": "fd60cd0188a5d46033aceba0f603bee4ba3adb2259497cabe4bb8c597dc33539",
+        "crates/ic-wire-derive/src/lib.rs": "f5843f9c54f470188881f664ebf26b7f076d36d69cbe80fa0cb2d879812d8fc7"
+      },
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "bf4dd904b3d4bf7ff56324d7887946ce42ac7e8cf126c50352c0ffecf5b4ee7e"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "16441a8bf8ed84394f6bc53df128bcc6b60560c9ca48cc227b2455d12c20c812"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "883babe27da0d393ad9aa96bc4d11a238b9f2df14a2f7873f641717d18493f5d"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "28556bb2e59bdd0d9a4ad449e3095a35f1b79d8041b6d1c5fb42afd3b78764f9"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+        "driver_sha256": "120b09869360482d17f69d45a50c0ae5ba966fa9ad2f4182a86521cd2d9de561",
+        "fixture_sha256": "ca119aa1cb427b439b65a29fdb31bea1ceaa856fedf6edb025aa17d699f27a7d",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "input_cases": 114
+    },
+    "derive-100": {
+      "runtime_tree_sha256": "0077a21a8342ccda24f5823e12d2d2865d1ebc67dabb9e426dc874689b0829ed",
+      "runtime_files": {
+        "crates/ic-wire/src/bounded/borrowed/mod.rs": "593e8dc9772cad8d6d1f8562fd003c3698f45626a09491f8fbb71bcbf991b2a3",
+        "crates/ic-wire/src/bounded/mod.rs": "92196ff2e06d8a5817e96ab45a1cc9263c52eb44f3a3cddb0582c6e7451b6461",
+        "crates/ic-wire/src/contract/mod.rs": "ca18a2d3459323ac671f32f7c8af231598b18036ee75eb5d1335121cb8250011",
+        "crates/ic-wire/src/contract/tests/mod.rs": "e4c34e698427bd5b8173fdd4fa3ff9ab82ea4f03569680ce89be881c6398757c",
+        "crates/ic-wire/src/float/mod.rs": "1138026bccfb68553afc3805beb97ba1b0a7780965bf1b70d6d4f09e431f2f1b",
+        "crates/ic-wire/src/lib.rs": "2a829da2b33a012163cdba686e209a27a3930aa5bbc3db6a9271fb1a74cced18",
+        "crates/ic-wire/src/native/decode/mod.rs": "0e23c8bba33c2fbe6d51bf1c1be514b95b3952a5b575c6ccbfcd4c64964b00df",
+        "crates/ic-wire/src/native/encode/mod.rs": "f530c493d2280516b816a2f9fa7e1be92f1b3664b1b72cce39899cde1ab10cc2",
+        "crates/ic-wire/src/native/mod.rs": "d1ac57c02d3aa2cd0e79a8adda73941e8791070a87bd0a1b2e1a06d1ba961a82",
+        "crates/ic-wire/src/native/tests/mod.rs": "2001a476dbc5a1225bd9de89a54eb31c36a0c1409354c4a6f57b32e0171d6bba",
+        "crates/ic-wire/src/schema/mod.rs": "e177ff609382eff2aaa687013506d963465782120f6e9896d1af150ea15e6ba8",
+        "crates/ic-wire/src/shape/mod.rs": "3f2f8aa016b083090ead8ba94509bb7befb6ea6139319eca8949706f44445a15",
+        "crates/ic-wire/src/typescript/metadata/mod.rs": "dc82b554004c6760c8a1394f5614d2d46f54df73580ab1f3a1db9fc1a265b0dc",
+        "crates/ic-wire/src/typescript/mod.rs": "c8233a84a6d39f83b8ba154e5a3e6765677b8d94be9c5fbe01fec26e7ad2dbf6",
+        "crates/ic-wire-derive/src/enum_expansion/mod.rs": "fd60cd0188a5d46033aceba0f603bee4ba3adb2259497cabe4bb8c597dc33539",
+        "crates/ic-wire-derive/src/lib.rs": "f5843f9c54f470188881f664ebf26b7f076d36d69cbe80fa0cb2d879812d8fc7"
+      },
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "732dd1a7e6267135bc620e9f570c90231ca387c7b9fd7f2cacd7693d684bc655"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "b98b0e8716cf01aa4865bb2040a0316d8557d95d87e5050fb327b7827b16df64"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "dc18b5f99952dfdc43a8c3def67ff5d9209280ce8e015415321d2da933eec162"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "fea135bb043e675c5a6b1b758d1734f609ee71a9722687190c01372ea62e283f"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+        "driver_sha256": "120b09869360482d17f69d45a50c0ae5ba966fa9ad2f4182a86521cd2d9de561",
+        "fixture_sha256": "ca119aa1cb427b439b65a29fdb31bea1ceaa856fedf6edb025aa17d699f27a7d",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "input_cases": 100
+    }
+  },
+  "verified_ic_rows": 4838,
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "raw_archive_sha256": "831bc0d33be70afe51d421e3a6a5bd2a5278b0a393b3d7d0a01b758acc68becc"
+}

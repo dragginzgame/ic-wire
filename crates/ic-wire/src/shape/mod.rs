@@ -75,6 +75,21 @@ impl Shape {
 /// Decoding additionally requires `Deserialize` for the input lifetime; a Wire
 /// value may borrow input or support encoding only.
 pub trait Wire: Serialize {
+    /// Internal whole-type guarantee of unchanged values and decoding boundaries.
+    /// Reserved for supplied types and generated code; manual implementations
+    /// must retain this default and the default `__canonical` method.
+    #[doc(hidden)]
+    const __CANONICAL_FIELDS: bool = false;
+
+    /// Internal post-decode verification. Custom implementations retain exact comparison.
+    #[doc(hidden)]
+    fn __canonical(
+        &self,
+        canonical: &mut crate::__private::Canonical<'_>,
+    ) -> Result<(), crate::Error> {
+        canonical.compare(self)
+    }
+
     /// Static resource authority for this value.
     const SHAPE: Shape;
     /// Static projection metadata; custom implementations must opt in honestly.
@@ -96,6 +111,7 @@ pub struct Limits {
 macro_rules! scalars {
     ($($ty:ty => ($bytes:expr, $schema:expr)),* $(,)?) => { $(
         impl Wire for $ty {
+            const __CANONICAL_FIELDS: bool = true;
             const SHAPE: Shape = Shape::scalar($bytes);
             const SCHEMA: crate::schema::Schema = $schema;
         }
@@ -109,10 +125,12 @@ u32 => (5, Schema::Unsigned(32)), i32 => (5, Schema::Signed(32)),
 u64 => (10, Schema::Unsigned(64)), i64 => (10, Schema::Signed(64)),
 u128 => (19, Schema::Unsigned(128)), i128 => (19, Schema::Signed(128)) }
 impl<T: Wire> Wire for Option<T> {
+    const __CANONICAL_FIELDS: bool = T::__CANONICAL_FIELDS;
     const SHAPE: Shape = Shape::choice(1, &[T::SHAPE]);
     const SCHEMA: Schema = Schema::Option(&T::SCHEMA);
 }
 impl<T: Wire, E: Wire> Wire for Result<T, E> {
+    const __CANONICAL_FIELDS: bool = T::__CANONICAL_FIELDS && E::__CANONICAL_FIELDS;
     const SHAPE: Shape = Shape::choice(1, &[T::SHAPE, E::SHAPE]);
     const SCHEMA: Schema = Schema::Result(&T::SCHEMA, &E::SCHEMA);
 }
@@ -120,6 +138,7 @@ impl<T: Wire, E: Wire> Wire for Result<T, E> {
 // Serde boxes are transparent: only owned heap storage changes. Saturation
 // preserves the existing fail-closed admission rule, including nested boxes.
 impl<T: Wire> Wire for Box<T> {
+    const __CANONICAL_FIELDS: bool = T::__CANONICAL_FIELDS;
     const SHAPE: Shape = Shape {
         heap: core::mem::size_of::<T>().saturating_add(T::SHAPE.heap),
         ..T::SHAPE
@@ -131,6 +150,7 @@ impl<T: Wire, const N: usize> Wire for [T; N]
 where
     [T; N]: Serialize,
 {
+    const __CANONICAL_FIELDS: bool = T::__CANONICAL_FIELDS;
     const SCHEMA: Schema = Schema::Array(&T::SCHEMA, N);
     const SHAPE: Shape = Shape {
         bytes: T::SHAPE.bytes.saturating_mul(N),

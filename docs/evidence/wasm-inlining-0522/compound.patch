@@ -1,0 +1,12 @@
+--- a/crates/ic-wire/src/native/encode/mod.rs
++++ b/crates/ic-wire/src/native/encode/mod.rs
+@@ -227,7 +227,8 @@
+         impl<S: ser::$trait> ser::$trait for Compound<'_, S> {
+             type Ok = S::Ok;
+             type Error = S::Error;
+-            $(fn $method<T: Serialize + ?Sized>(
++            $(#[cfg_attr(target_arch = "wasm32", inline(always))]
++            fn $method<T: Serialize + ?Sized>(
+                 &mut self,
+                 $($key: &'static str,)?
+                 value: &T,

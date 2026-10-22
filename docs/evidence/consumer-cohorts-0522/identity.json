@@ -1,0 +1,828 @@
+{
+  "runtime": "91244e9 plus selected Wasm inlining patch, pending 0.5.22",
+  "toko_commit": "44d4e2c6d41e3575b2503e79ffa369129ff3ecf2",
+  "icydb_tag": "v0.258.0",
+  "icydb_commit": "354efe678e242a5c7ed0c3f2a8a905f586cb65cd",
+  "cohorts": {
+    "toko": {
+      "runtime_tree_sha256": "d213e726e0271bd6c9befcbaad850db7566b1483d16c3aeff94e1bd36824e5af",
+      "native": {
+        "benchmark-speed-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "a4a1ab1aac1a609cad69015846b196ab7040a3be679c674c46165525971f8490",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1581272,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "a4a1ab1aac1a609cad69015846b196ab7040a3be679c674c46165525971f8490",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1581272,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "659413d0aa1b7634202ca18c0475dbeb5b002f1bf40c59dd58fbc4b0c2aac8a2",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1322960,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "659413d0aa1b7634202ca18c0475dbeb5b002f1bf40c59dd58fbc4b0c2aac8a2",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1322960,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        }
+      },
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "7aa38ff2bbd0ba52d93df9632435eadbdeb823bef8f9807874b087ba7939b7d0"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "81fd3588f05d4453f2f2705ef1347c973a96978d4dd46715affca1bc8d71bf35"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "d8a483e45eebe2318ea94a193215fb716233f0c3a98bcd7870e785428519a188"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "7056abb44a7e0c9ce7b9fd7c18749a2cdb5331393cf617adaf2d740ea125d336"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+        "driver_sha256": "120b09869360482d17f69d45a50c0ae5ba966fa9ad2f4182a86521cd2d9de561",
+        "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "input_cases": 10
+    },
+    "derive-1": {
+      "runtime_tree_sha256": "d213e726e0271bd6c9befcbaad850db7566b1483d16c3aeff94e1bd36824e5af",
+      "native": {
+        "benchmark-speed-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 1,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "4c8a02c2f432f81f5a950c9d3c8a64bc31d98922d3783c3ef3b83c251dd6ed55",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1259592,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 1,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "4c8a02c2f432f81f5a950c9d3c8a64bc31d98922d3783c3ef3b83c251dd6ed55",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1259592,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 1,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "def31cface7e255a412cc936e335e6a13a92948fa3d7c426ed94be672c54abe0",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1113624,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 1,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "def31cface7e255a412cc936e335e6a13a92948fa3d7c426ed94be672c54abe0",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1113624,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        }
+      },
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "c8157f72ec3ebc689ac7122e72ee940ffd37e5312a0da9a9d3bc3612a037f8f4"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "53cfdd63e7aa40d491259edbb590759fe5bf005b7f768e6ed92495126b461d7f"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "7658b7d61b9c5c305586061fcce5f7caf1141aa70cc87c486e44c1caa23927fd"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "3087d39025267d2c4d2776438147cb47904ce4c379d905d46a6bc399e14c578c"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+        "driver_sha256": "120b09869360482d17f69d45a50c0ae5ba966fa9ad2f4182a86521cd2d9de561",
+        "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "input_cases": 1
+    },
+    "derive-10": {
+      "runtime_tree_sha256": "d213e726e0271bd6c9befcbaad850db7566b1483d16c3aeff94e1bd36824e5af",
+      "native": {
+        "benchmark-speed-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "65e6dc36ad8f79e13e455c649e25c779fcab71e9935abea414ffc42010d468ce",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1692384,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "65e6dc36ad8f79e13e455c649e25c779fcab71e9935abea414ffc42010d468ce",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1692384,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "2554c3977524b7a65f2f94a6e1a168a49627ccbb171432632946c8cbfaf9c1a0",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1385056,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 10,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "2554c3977524b7a65f2f94a6e1a168a49627ccbb171432632946c8cbfaf9c1a0",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 1385056,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        }
+      },
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "7164b670d884c5a0ebfec5b3d61cfffb753aa196ede3360af4f555340442b1a2"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "8c81900f2813be3e36762badceb1adca774149aa57c668ae7c50e42a2ec4f3f3"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "29f773b3c236e106d701dbe673e75e54fa40189da3f5326ad176dd4eb52bf98d"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "0e789306bb0e6cbd2619d403cf4d95aae849f11751ec1f8f058887f1601edeec"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+        "driver_sha256": "120b09869360482d17f69d45a50c0ae5ba966fa9ad2f4182a86521cd2d9de561",
+        "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "input_cases": 10
+    },
+    "derive-100": {
+      "runtime_tree_sha256": "d213e726e0271bd6c9befcbaad850db7566b1483d16c3aeff94e1bd36824e5af",
+      "native": {
+        "benchmark-speed-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 100,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "f4eb0bd096a3ff824fa2e32289edf0765c7be9213539e595cf114c3a6ed4474e",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 4229032,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "benchmark-speed-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 100,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "f4eb0bd096a3ff824fa2e32289edf0765c7be9213539e595cf114c3a6ed4474e",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 4229032,
+          "profile": "benchmark-speed",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-1": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 100,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "cf1ba69240c1d26cb6920fd80e97a3af7aa3d3d5fa18149c99c4b75a76f0048e",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 3183920,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        },
+        "evaluation-native-2": {
+          "candid_limits": {
+            "decoding_quota": 134217728,
+            "header_bytes": 65536,
+            "reply_bytes": 2097152,
+            "skipping_quota": 134217728,
+            "type_entries": 4096
+          },
+          "case_count": 100,
+          "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+          "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+          "executable_sha256": "cf1ba69240c1d26cb6920fd80e97a3af7aa3d3d5fa18149c99c4b75a76f0048e",
+          "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+          "format": 1,
+          "git_head": "91244e96de4299ed96a666c6b50c62aa2138b72f\n",
+          "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+          "limitations": [
+            "Serial warm-cache microbenchmarks; not application latency or cold-start cost",
+            "Timing includes result destruction and loop/dynamic-call overhead",
+            "Allocation counts are a separate instrumented build, not timing results or peak heap",
+            "p95 describes batch means, not request tail latency",
+            "Candid quotas and Wire budgets have different semantics",
+            "Input setup, roundtrip equality and reporting are outside measurements"
+          ],
+          "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+          "minimum_batch_ms": 2,
+          "mode": "native-time",
+          "native_executable_bytes": 3183920,
+          "profile": "evaluation",
+          "runner_sha256": "4c3ca4a2ddfc71b75f0723bfe9142cee9ba77dca19e3a165e31b87df6238dfde",
+          "rustflags": null,
+          "samples": 11,
+          "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+          "wire_limits": {
+            "allocation": 268435456,
+            "bytes": 2097152,
+            "depth": 64,
+            "nodes": 8388608
+          }
+        }
+      },
+      "instructions": {
+        "artifacts": [
+          {
+            "codec": "wire",
+            "profile": "evaluation",
+            "sha256": "a804327cc1a00a09c5179f07af188c7104d37a5ba745aa340662712800c2299e"
+          },
+          {
+            "codec": "candid",
+            "profile": "evaluation",
+            "sha256": "4f8614e9588290f18023d45ac3bd6b29caf484bcac2cf4dc654ef6c2990326b8"
+          },
+          {
+            "codec": "wire",
+            "profile": "benchmark-speed",
+            "sha256": "13678fad79fb6b137a627d0e7a22966fdc08d701670484813567dce51044ed54"
+          },
+          {
+            "codec": "candid",
+            "profile": "benchmark-speed",
+            "sha256": "3dd69cd3ab4a7ce9a0ea2750511e9c891d0a0738d3035866f9481e0b0c9d5924"
+          }
+        ],
+        "counter": "ic0.performance_counter(0)",
+        "derive_fixture_sha256": "9037bbc2f387f2303aaf3fea1a823ee7a4fb737115bba1a95bd9e13ff54912c1",
+        "driver_sha256": "120b09869360482d17f69d45a50c0ae5ba966fa9ad2f4182a86521cd2d9de561",
+        "fixture_sha256": "fc9035935ca727cdbb2c0ac139e4fa93fea980ba5716cf9ef9e602372ec5161d",
+        "format": 1,
+        "large_repetitions": 1,
+        "lock_sha256": "80970249d606eebffa09fb44140148c3fc0a3990fea5191021dd153264727c12",
+        "notes": "Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures.",
+        "samples": 3,
+        "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+        "server_version": "pocket-ic-server 16.1.0\n",
+        "small_repetitions": 4,
+        "toko_fixture_sha256": "da8a2e09cd92f7c6c219062faeecfcd2fae2da70d01c79d59766642e0178e43a",
+        "wasm_driver_sha256": "197d750d122444b66d0f15313183882c8c73039bb82b95470562e696e0121f83"
+      },
+      "input_cases": 100
+    }
+  },
+  "verified_ic_rows": 2440,
+  "raw_archive_sha256": "35b4151f0a01e3d3ed9995e6333b3d1f7af72215241d87ffc42c96b9816147c0",
+  "native_host": "AMD Ryzen Threadripper 7970X, Linux x86_64, unpinned/unisolated",
+  "reporter_sha256": "fda98f3714e638b38639e02055bc9d8421a182484882e47077d57dfaa70456cd"
+}

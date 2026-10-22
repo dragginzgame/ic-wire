@@ -4,6 +4,266 @@
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
 
+## Guarded finite verification — pending 0.5.22
+
+The retained follow-up removes the redundant owned-byte scan for direct finite
+`Bytes<N>` and eligible generated records, without replacing Postcard or adding a
+codec option. These measurements supersede the standard and 100-type results in
+the earlier full rerun below. Toko and the 1/10-type cohorts were not rerun here.
+
+| opt-3 owned blob, 1 MiB | Wire before | Wire after | Candid |
+| --- | ---: | ---: | ---: |
+| Frame bytes | 1,048,590 | 1,048,590 | 1,048,588 |
+| Decode IC instructions | 2,524,473 | 1,049,786 | 1,065,406 |
+
+Wire finite decode falls 58.42%, about 1.47% below Candid for this input. This
+does **not** speed up ordinary native Serde blob decode, which remains 2,524,535
+instructions. Borrowed Wire remains 824 instructions with different ownership.
+At opt-z finite owned decode falls from 2,574,508 to 1,050,451 (−59.20%);
+Candid uses 1,073,875. All encoded frame hashes remain unchanged.
+
+| Fixture/profile | Wire code before → after | Wire Wasm before → after | Candid code / Wasm |
+| --- | ---: | ---: | ---: |
+| Standard / opt-3 | 264,599 → 264,914 | 314,412 → 314,728 | 788,971 / 860,566 |
+| 100 types / opt-3 | 363,691 → 355,288 | 398,228 → 389,823 | 2,010,763 / 2,079,944 |
+| Standard / opt-z | 186,739 → 186,895 | 221,815 → 221,969 | 506,669 / 563,600 |
+| 100 types / opt-z | 286,569 → 285,724 | 305,391 → 304,550 | 1,362,761 / 1,416,775 |
+
+All sizes are uncompressed bytes of complete fixture canisters. The opt-3
+100-type code reduction is 8,403 bytes (2.31%); this is not isolated derive-symbol
+attribution or a promise for a consumer application. Small-input costs remain:
+one-byte finite blob decode rises from 868.5 to 885.5 instructions (+1.96%), and
+an empty finite manifest rises from 2,853.5 to 2,901.5 (+1.68%). The 100-type
+record-000/015 decode counts fall from 2,883.5/3,800.5 to 2,858.5/3,347.5.
+Some opt-3 bad-header checks in that fixture cost three extra instructions.
+At opt-z, record-001 decode rises from 5,241.5 to 5,278.5 (+0.71%); the
+100-type decode range is −2.26% to +0.71%. At opt-3 all 100 improve by 0.36–11.92%.
+
+Two opt-3 native runs put finite 1 MiB owned decode at 17.34–17.42 µs, versus
+33.53–33.69 µs in the baseline and Candid's rerun 18.20–18.38 µs. Ordinary
+native Serde remains 33.70–34.20 µs. These are unpinned Linux host measurements,
+not IC latency guarantees. All 1,844 fresh encode/decode allocation and peak-heap
+summaries match baseline exactly; finite blob decode still allocates once with
+1,048,576 bytes peak live value heap.
+
+[Full before/after results](evidence/canonical-fields-0522/summary.csv),
+[Wasm sizes](evidence/canonical-fields-0522/artifacts.csv),
+[identities](evidence/canonical-fields-0522/identity.json) and
+[raw samples, source patches and regression evidence](evidence/canonical-fields-0522/raw.json.gz)
+cover both profiles, 114 standard cases and 100 derived types. All 4,838 IC rows
+have three agreeing samples; all input/frame hashes match baseline and native
+runs, with unchanged encoded lengths. All eight final artifacts are byte-identical
+to those used for the guarded PocketIC runs, including Candid controls. Native
+timing has two runs per profile, eleven calibrated batches per operation, minimum
+2 ms batches and a 1,048,576-repetition cap. Allocation and heap passes are separate.
+IC sampling, fixture shapes and compiler settings match the full rerun below:
+Rust 1.99.1/LLVM 23.1.1, locked dependencies, opt-z/opt-3, LTO, one codegen unit,
+panic abort, stripped symbols and PocketIC 16.1.0. IC setup and reply transport
+are excluded; destruction and loop overhead are included without subtraction.
+
+Reproduce with `scripts/ci/evaluate-codecs.sh NEW_OUTPUT`, once with the default
+corpus and once with `CORPUS_FEATURE=derive-scale`, setting `POCKET_IC_BIN` to
+the prepared server to include IC measurements. Full source snapshots and outputs
+are in `target/canonical-fields-0522-final-{standard,scale}`. The initial guarded
+IC artifacts and runs are under `target/canonical-fields-0522-gated-*`; exact
+artifact equality permits reusing those counts for the final source cleanup.
+Runtime tests, strict lint, native/Wasm MSRV, 16 compile-fail diagnostics with
+passing control and documentation-link checks pass. Full CI, macOS, TypeScript
+conformance and other consumer cohorts were not rerun for this change.
+
+### Why the whole-type guard matters
+
+The default verification hook still compares full serialized output. Supplied
+bytes can skip their unchanged copied payload, and generated records delegate
+only when **all** field types preserve decoded values and field boundaries.
+Manual implementations default to no guarantee. Their containing records retain
+whole-value comparison. The hidden hooks are reserved for runtime/derive code;
+they are not user-selectable trust or optimization settings. Ordinary Serde,
+enums and container verification remain on exact comparison. No protocol bytes,
+canonical rejection rules, resource limits, allocation policy or ownership change.
+
+A first unguarded prototype passed existing tests but was rejected after a new
+counterexample. One custom field consumes two bytes but serializes one; another
+consumes one but serializes two. With a copied blob between them, payload
+`07 01 01 2a 09` decodes but re-encodes as `07 01 2a 2a 09`. Local comparisons
+can look equal at shifted boundaries while skipping the wrong blob region.
+The whole-type guard preserves `Noncanonical` for this input. The regression
+fails on the unguarded prototype and passes on the retained implementation.
+Additional tests cover copied-record length/scalar prefix minimality, every
+truncation, payload changes and zero/word/varint/4 KiB boundaries.
+
+## Complete pending 0.5.22 rerun
+
+This complete rerun includes shared header validation and symbol stripping for
+both codecs in all five cohorts. It supersedes the earlier five-cohort run for
+current measurements; that run remains in [pre-stripping evidence](evidence/final-comparison-0522/identity.json).
+
+This is the full comparison before guarded finite verification, after shared finite output setup, shared
+header validation, symbol stripping and removal of per-type debug formatting
+from Wasm assertions. Other measurement sections below retain historical results. Production has one Postcard encoding and no size/speed
+selector. `wire-native`, `wire-finite` and `wire-borrowed` label existing admission
+and ownership APIs, not alternate codecs. They remain separately measured;
+this rerun does not remove or merge their public contracts. Compiler opt-z and
+opt-3 are build profiles of the same implementation, not selectable Wire modes.
+
+Uncompressed Wasm and the code section drive footprint decisions. Gzip has no
+role in candidate selection or the headline comparison. Sizes below cover whole
+fixture canisters including input construction, identity and dispatch; they do
+not isolate derive code or predict savings in a deployed consumer.
+
+| opt-3 fixture | Wire code section | Candid code section | Wire total Wasm | Candid total Wasm |
+| --- | ---: | ---: | ---: | ---: |
+| Standard 114 cases | 264,599 | 788,971 | 314,412 | 860,566 |
+| Toko-shaped 10 cases | 103,529 | 559,369 | 114,105 | 592,130 |
+| 1 derived type | 51,371 | 385,608 | 78,183 | 433,476 |
+| 10 derived types | 106,408 | 628,148 | 134,030 | 678,550 |
+| 100 derived types | 363,691 | 2,010,763 | 398,228 | 2,079,944 |
+
+All sizes are bytes. From 1 to 100 types, code grows 312,320 bytes for Wire and
+1,625,155 for Candid. The cohort has 100 nominal records but sixteen structural
+width patterns, so this is not extrapolatable to arbitrary application schemas.
+At opt-z the 100-type code sections are 286,569/1,362,761 bytes, with total Wasm
+305,391/1,416,775 bytes. Full results for both profiles are retained below.
+
+Selected opt-3 results retain each operation's admission/canonicality work:
+
+| Input / API | Wire / Candid payload bytes | Wire / Candid encode instructions | Wire / Candid decode instructions |
+| --- | ---: | ---: | ---: |
+| Billing / ordinary Serde | 77 / 171 | 5,408.25 / 71,447.25 | 9,386.5 / 70,250.5 |
+| 1,000-token filter / ordinary Serde | 19,617 / 19,663 | 170,638.25 / 172,445.25 | 2,039,087.5 / 2,925,759.5 |
+| 50-card projection / ordinary Serde | 10,798 / 11,004 | 219,873.25 / 213,439.75 | 743,614.5 / 1,845,558.5 |
+| Derived record 000 in 100-type cohort | 43 / 99 | 1,636.25 / 57,479.5 | 2,883.5 / 54,304.5 |
+| 1 MiB byte-oriented blob / finite owned | 1,048,590 / 1,048,588 | 1,050,174 / 2,115,305 | 2,524,473 / 1,065,406 |
+| 1 MiB generic byte vector / ordinary Serde | 1,048,590 / 1,048,588 | 50,332,657 / 2,112,185 | 68,687,385 / 119,553,449 |
+| 1,024-hash manifest / finite | 32,830 / 33,883 | 1,270,583.25 / 155,989.25 | 2,097,685.5 / 4,233,898.5 |
+
+Across all 100 small derived records, Candid/Wire instruction ratios range from
+25.51–35.13 for encoding and 14.74–18.83 for decoding at opt-3. This does not
+mean Wire wins every workload. Candid uses 2.93% fewer encode instructions for
+the card projection, about 2.37× fewer instructions for owned 1 MiB blob decode,
+23.83× fewer for generic 1 MiB byte-vector encoding, and 8.13× fewer for finite
+manifest encoding. The generic-vector and blob fixtures use different Serde
+representations; applications should not treat their costs as interchangeable.
+
+Native time is a separate metric. The two opt-3 native run medians for billing
+encode are 121.8–124.0 ns Wire versus 2,186.6–2,233.2 ns Candid; decode is
+175.0–179.9 ns versus 1,669.2–1,674.5 ns. Projection encode is 3.69–3.72 µs
+versus 4.93–4.94 µs, despite Candid's IC encode advantage. Owned finite 1 MiB blob
+decode is 33.53–33.69 µs versus 18.18–18.49 µs, favoring Candid on both metrics.
+Host results are unpinned/unisolated Linux observations, not latency guarantees.
+
+Allocation and peak-live-heap passes are separate from timing. Billing decode
+uses no Wire allocations versus Candid's 67 allocations plus 4 reallocations.
+The card projection uses 351+4 versus 864+3 requests, but its Wire peak live heap
+is higher: 24,866 versus 22,613 bytes. Borrowed Wire 1 MiB blob decode takes
+824 IC instructions with no value allocation, but is not an ownership-equivalent
+comparison to Candid's owned result; Candid borrowing was not measured.
+
+### Rerun evidence and reproduction
+
+The rerun uses Rust 1.99.1, locked dependencies (Candid 0.10.39/Postcard 1.1.3),
+Linux x86_64 native and wasm32-unknown-unknown IC builds, LTO, one codegen unit,
+panic abort and stripped symbols (`strip = "symbols"`) for both codecs.
+Both opt-z/opt-3 profiles have two native runs with eleven calibrated samples (minimum 2 ms batches), separate allocation
+and DHAT heap passes, and three IC samples per operation through PocketIC 16.1.0.
+IC counts divide by four repetitions through 64 KiB or one above it, without
+subtracting counter/loop overhead. Input construction is outside timed loops.
+The [consumer study](candid-consumer-comparison.md) owns Toko provenance, ULID
+representation, preformatted decimal and projection limitations.
+
+All 5,278 IC rows have three identical samples. Timing, allocation, heap and IC
+passes have matching input/frame identities, and all five cohorts use the same runtime source.
+The source is released `91244e9` plus the pending serialization inlining, shared
+output setup, shared header validation and benchmark corrections, not an unmodified
+released package.
+No runtime or protocol changes were made during this rerun. The benchmark itself
+checks roundtrips and malformed frames; full CI and macOS were not rerun.
+
+- [Payload, IC, native, allocation and heap summary](evidence/stripped-full-comparison-0522/summary.csv).
+- [Uncompressed artifact sizes, code sections, hashes and observed build times](evidence/stripped-full-comparison-0522/artifacts.csv).
+- [Compiler/source identities and parameters](evidence/stripped-full-comparison-0522/identity.json).
+- [Complete raw samples and identities](evidence/stripped-full-comparison-0522/raw.json.gz).
+
+Build times are single dependency-warm observations, not isolated macro-expansion
+or clean-build benchmarks. The raw sample archive is compressed for storage;
+that compression is unrelated to the Wasm optimization criteria.
+Full source snapshots, logs and Wasm files remain in `target/stripped-full-0522-*`.
+To reproduce with fresh output directories and an explicitly prepared server:
+
+```sh
+POCKET_IC_BIN=/path/to/pocket-ic bash scripts/ci/evaluate-codecs.sh target/new-standard
+CORPUS_FEATURE=toko POCKET_IC_BIN=/path/to/pocket-ic bash scripts/ci/evaluate-codecs.sh target/new-toko
+CORPUS_FEATURE=derive-scale-1 POCKET_IC_BIN=/path/to/pocket-ic bash scripts/ci/evaluate-codecs.sh target/new-derive-1
+CORPUS_FEATURE=derive-scale-10 POCKET_IC_BIN=/path/to/pocket-ic bash scripts/ci/evaluate-codecs.sh target/new-derive-10
+CORPUS_FEATURE=derive-scale POCKET_IC_BIN=/path/to/pocket-ic bash scripts/ci/evaluate-codecs.sh target/new-derive-100
+```
+
+## Owned blob comparison-cost experiment — pending 0.5.22
+
+**No runtime change retained.** Three probes against the complete stripped rerun
+above isolate bulk canonical comparison and test two exact-equality alternatives.
+The baseline remains the selected implementation; neither an alternate codec nor
+a relaxed canonicality mode was added. Protocol bytes and acceptance are unchanged.
+
+For the same 1 MiB random blob, finite-owned decode instructions are:
+
+| Implementation | opt-z | opt-3 | opt-3 change |
+| --- | ---: | ---: | ---: |
+| Selected Wire baseline | 2,574,508 | 2,524,473 | — |
+| Skip bulk comparison: invalid diagnostic control | 1,050,656 | 1,049,794 | −58.42% |
+| Exact 256-byte unrolled comparison: rejected | 2,422,952 | 2,409,790 | −4.54% |
+| Exact short-circuit word comparison: rejected | 2,787,494 | 2,786,614 | +10.38% |
+| Candid owned decode | 1,073,875 | 1,065,406 | — |
+
+Wire/Candid frame sizes remain 1,048,590/1,048,588 bytes. The diagnostic control
+replaces only the shared bulk equality helper with `true`; it still allocates,
+copies and performs the surrounding decode/serialization checks. Its native unit
+test fails at length 64, mismatch position 0. It is not a usable fast decoder or
+a performance promise for a future implementation. The measured delta attributes
+about 58% of current opt-3 owned-blob decode cost to that bulk comparison path,
+including its code-generation effects.
+
+Checking a canonical length prefix alone cannot replace this comparison under
+the existing custom-Serde contract. The maintained canonical-bytes regression
+contains a decoder that normalizes blob contents: structurally valid bytes can
+deserialize successfully yet serialize differently. A structural Postcard validator
+would miss this. Safely removing the scan requires a stronger roundtrip guarantee
+for the admitted type implementations, or a deliberate change to that contract;
+schema metadata alone supplies no such guarantee. This experiment does not implement
+or qualify such a redesign.
+
+The 256-byte probe grows whole-fixture Wasm/code by 477 bytes at opt-z and 570
+at opt-3. It also regresses opt-z 128-byte native blob decode from 2,047.5 to
+2,273.5 instructions (+11.04%). The short-circuit probe grows those sizes by
+15/17 bytes at opt-z/opt-3 and regresses large-blob decode by 8.27%/10.38%.
+Both exact candidates pass the existing equality, runtime, native and borrowed
+checks; neither warrants adoption. The restored baseline passes all 43 focused
+tests. No new tests, dependencies or runtime symbols were needed.
+
+[Instruction results](evidence/owned-blob-0522/instructions.csv),
+[artifact sizes and hashes](evidence/owned-blob-0522/artifacts.csv) and
+[raw samples, source patches and test logs](evidence/owned-blob-0522/raw.json.gz)
+retain the experiment. The archive includes baseline/candidate source hashes,
+compiler identity and patches against the full rerun's source snapshot.
+All 11,352 rows across baseline and three probes have three agreeing IC samples;
+input/frame hashes, frame lengths and repetition counts match for every key.
+Candid artifacts are reused byte-for-byte from the baseline. Sizes describe the
+complete standard 114-case fixture, including its harness, not isolated helpers.
+
+Reproduction uses the full rerun's `target/stripped-full-0522-standard/source`,
+applying one archived patch at a time. Build `codec-wasm` with `--locked`,
+`--features wire`, `--target wasm32-unknown-unknown` and each of the `evaluation`
+and `benchmark-speed` profiles; copy the resulting artifacts alongside baseline
+Candid artifacts under the driver's expected filenames. Run the unchanged standard
+`codec-instructions` driver with the prepared PocketIC 16.1.0 server, as below.
+Rust 1.99.1, LLVM 23.1.1, LTO, one codegen unit, panic abort and symbol stripping
+match the baseline. The driver measures three samples, four operations per sample
+through 64 KiB and one above, without overhead subtraction. Local artifacts live
+under `target/owned-blob-0522-{ablation,unroll,shortcircuit}`. Native timings,
+allocator passes, consumer cohorts, full CI and macOS were not rerun for these
+rejected Wasm-only probes. Production source is restored exactly to its starting
+dirty-tree content; earlier pending changes are preserved.
+
 ## Run and reproduce
 
 - `make check-benchmarks`: semantic roundtrips, stable re-encoding, damaged-header,
@@ -430,3 +690,73 @@ rebuilt Wasm hashes matched; candidate IC measurements are fresh.
 
 `make fmt test lint check-msrv check-benchmarks` passes, including the arithmetic
 regression and frame equivalence assertions. Full CI and macOS were not run.
+
+## Wasm serialization inlining — pending 0.5.22
+
+Two Wasm-only inlining annotations expose native value admission and compound
+field forwarding to the caller's optimizer. The selected change keeps both;
+there is no new serialization mode. Wire bytes, node/depth/allocation charges,
+canonical validation, errors and retry/hash semantics remain unchanged. No
+consumer migration is required. Native targets do not receive either annotation.
+
+Baseline is release 0.5.21 (`91244e9`), freshly rebuilt with its lockfile. All
+variants use Rust 1.99.1 / LLVM 23.1.1, wasm32-unknown-unknown, LTO, one codegen
+unit, panic abort and stripped debug information. `evaluation` selects opt-z;
+`benchmark-speed` selects opt-3. PocketIC 16.1.0 measures the same 114-case corpus,
+three agreeing samples per operation, four repetitions through 64 KiB and one
+above it. Limits and codec parameters are those of the suite described above.
+All 2,838 rows retain identical input/frame hashes. Candid binaries and counts
+are identical between variants. This is IC instruction evidence, not native time.
+
+| opt-3 IC instructions | Wire before | Wire selected | Candid |
+| --- | ---: | ---: | ---: |
+| 1,024-hash array manifest encode | 3,143,270.25 | 2,513,359.25 (−20.04%) | 155,989.25 |
+| 1,024-hash array manifest decode | 6,090,868.50 | 4,944,774.50 (−18.82%) | 4,233,898.50 |
+| 128-message relay encode | 221,386.25 | 220,234.25 (−0.52%) | 178,577.50 |
+| 128-message relay decode | 494,042.50 | 487,387.50 (−1.35%) | 986,233.50 |
+| 1 MiB generic byte-vector encode | 50,332,657 | 50,332,657 (unchanged) | 2,112,185 |
+
+| Whole Wire fixture | Before bytes | Selected bytes | Delta |
+| --- | ---: | ---: | ---: |
+| opt-z Wasm | 404,522 | 399,073 | −5,449 (−1.35%) |
+| opt-z gzip | 112,658 | 112,368 | −290 (−0.26%) |
+| opt-3 Wasm | 486,448 | 484,879 | −1,569 (−0.32%) |
+| opt-3 gzip | 135,554 | 135,164 | −390 (−0.29%) |
+
+Across all rows, 464 improve, 200 regress and 2,174 are unchanged. The worst
+percentage regression is opt-z empty array-manifest decoding: 7,338.5 → 7,491.5
+instructions (+153 / 2.08%). The largest absolute regression is opt-z relay
+encoding/reuse (+768 instructions, about 0.19%). Opt-z large-manifest encoding
+improves 4.42% and decoding 2.43%. This is a measured tradeoff, not universal
+improvement or a claim that Wire always beats Candid.
+
+Two narrower variants were rejected. Inlining value admission alone shrinks
+Wasm 6,270/2,694 bytes at opt-z/opt-3, but loses the opt-3 manifest encode gain
+and regresses its decoding 1.85%. Inlining compound forwarding alone changes
+Wasm by −3,246/+52 bytes and leaves opt-3 large-manifest costs unchanged.
+The combination gives the useful manifest improvement with smaller artifacts.
+
+[Instruction changes and controls](evidence/wasm-inlining-0522/instructions.csv)
+retain all changed selected rows, small controls, Candid controls and repeated
+samples. [Sizes](evidence/wasm-inlining-0522/wasm.csv) and
+[identities](evidence/wasm-inlining-0522/identity.json) cover all four builds.
+Apply the [selected patch](evidence/wasm-inlining-0522/candidate.patch),
+[value-only patch](evidence/wasm-inlining-0522/bounded.patch) or
+[compound-only patch](evidence/wasm-inlining-0522/compound.patch) independently
+to disposable `91244e9` checkouts. Run `evaluate-codecs.sh` with the same explicit
+`POCKET_IC_BIN` and distinct output directories to reproduce the standard suite.
+This experiment rebuilt both-profile Wasm artifacts and ran `codec-instructions`
+for each variant; it did not rerun native timing, allocations or peak heap, and
+makes no new claims for those metrics. Full source snapshots, Cargo artifact
+messages and all samples remain in `target/inline-0522-{baseline,candidate,bounded,compound}/`.
+
+Focused runtime tests, strict Clippy, Rust 1.91 native/Wasm checks and the benchmark
+roundtrip corpus pass. Full CI and macOS were not run. Generic primitive-vector
+encoding and owned large-blob decoding remain important Candid wins; byte-oriented
+schemas help some consumers but do not remove those comparison cases.
+
+## Consumer-shaped and derive-scaling cohorts
+
+The [Toko-shaped and 1/10/100-type study](candid-consumer-comparison.md) adds
+separately selected corpora, preserving the standard suite and distinguishing
+actual DTO shapes, a token-card projection and synthetic derive scaling.
