@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.7]
+## [0.6.7] - 2026-10-23
 
 - Expand the standard Candid comparison from 154 to 214 cases, adding signed and
   mixed-width integer distributions, byte boundaries, float/boolean/optional
