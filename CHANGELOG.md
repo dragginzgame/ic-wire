@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.5]
+## [0.6.5] - 2026-10-23
 
 - Forward small u64 values through Postcard's equivalent one-byte serializer.
   Large small-u64 lists use 40.6% fewer opt-3 encode instructions and 15.8% fewer
