@@ -2,9 +2,9 @@
 
 ## [0.6.9]
 
-- Reject `Int16Array` as a generated declaration name, matching `Uint8Array`,
-  to prevent shadowed packed-field types and circular TypeScript aliases.
-  Use another registry type or method name; payload schemas and wire bytes are unchanged.
+- Fully qualify generated `Int16Array`, `Uint8Array` and `ReadonlyArray` types
+  through `globalThis`, allowing consumer declarations with those names without
+  shadowing built-ins. Payload schemas and wire bytes are unchanged.
 - Include the packed-i16 fixture hash in native and IC benchmark identities,
   and refresh the released Serde/0.6.8 status documentation.
 

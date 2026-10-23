@@ -78,9 +78,6 @@ fn identifier(name: &str) -> Result<(), GenerationError> {
             "JSON",
             "types",
             "createCodec",
-            "ReadonlyArray",
-            "Uint8Array",
-            "Int16Array",
         ]
         .contains(&name)
     {
@@ -177,8 +174,9 @@ pub(super) fn ty(
         "unit" => "null".into(),
         "bool" => "boolean".into(),
         "text" => "string".into(),
-        "bytes" => "Uint8Array".into(),
-        "packed-i16" => "Int16Array".into(),
+        // Qualify built-ins so consumer aliases cannot capture field/frame types.
+        "bytes" => "globalThis.Uint8Array".into(),
+        "packed-i16" => "globalThis.Int16Array".into(),
         "u" | "i" => {
             let bits = value["bits"].as_u64().ok_or(GenerationError::Schema)?;
             if ![8, 16, 32, 64, 128].contains(&bits) {
@@ -193,7 +191,7 @@ pub(super) fn ty(
             "number".into()
         }
         "newtype" => child(&value["item"])?,
-        "list" | "array" => format!("ReadonlyArray<{}>", child(&value["item"])?),
+        "list" | "array" => format!("globalThis.ReadonlyArray<{}>", child(&value["item"])?),
         "tuple" => format!(
             "readonly [{}]",
             value["items"]
@@ -360,7 +358,7 @@ pub fn generate_registry(
         let request = ty(&method["request"], types, 0, &mut remaining)?;
         let response = ty(&method["response"], types, 0, &mut remaining)?;
         source.push_str(&format!(
-            "export const {name} = (() => {{ const codec = createCodec({method}, types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();\n",
+            "export const {name} = (() => {{ const codec = createCodec({method}, types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): globalThis.Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: globalThis.Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): globalThis.Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: globalThis.Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();\n",
             name_json = json!(name), mode = method["mode"],
         ));
     }

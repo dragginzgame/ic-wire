@@ -197,6 +197,18 @@ fn main() {
             ]
         }),
     )]);
+    // Consumer aliases may share built-in names without capturing their uses.
+    for (name, schema) in [
+        ("Int16Array", serde_json::json!({"k":"packed-i16","max":8})),
+        ("Uint8Array", serde_json::json!({"k":"bytes","max":8})),
+        (
+            "ReadonlyArray",
+            serde_json::json!({"k":"list","item":{"k":"u","bits":16}}),
+        ),
+        ("globalThis", serde_json::json!({"k":"unit"})),
+    ] {
+        types.insert(name.into(), schema);
+    }
     types.insert("__proto__".into(), serde_json::json!({"k":"unit"}));
     types.insert("Alias".into(), serde_json::json!({"k":"ref","name":"Node"}));
     types.insert(
@@ -207,6 +219,23 @@ fn main() {
         "request":{"k":"ref","name":"WrappedAlias"},"response":{"k":"ref","name":"Alias"},
         "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
         "requestDepth":8,"responseDepth":8});
+    // Method exports live in the value namespace; compile their signatures too.
+    for name in ["Int16Array", "Uint8Array", "ReadonlyArray", "globalThis"] {
+        let mut shadow = method.clone();
+        shadow["name"] = serde_json::json!(name);
+        shadow["request"] = serde_json::json!({"k":"packed-i16","max":8});
+        shadow["response"] = serde_json::json!({"k":"bytes","max":8});
+        fs::write(
+            directory.join(format!("shadow-{name}.ts")),
+            ic_wire::typescript::generate_registry(
+                &Default::default(),
+                &[shadow],
+                "./wire-runtime.js",
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    }
     let mut proto = method.clone();
     proto["name"] = serde_json::json!("prototypeName");
     proto["request"] = serde_json::json!({"k":"ref","name":"__proto__"});

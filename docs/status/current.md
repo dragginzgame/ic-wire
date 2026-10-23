@@ -3,11 +3,13 @@
 ## Current batch: 0.6.9 audit fixes
 
 0.6.8 is released at `58527ce`; pending fixes are recorded under 0.6.9.
-The metadata generator reserves Int16Array alongside Uint8Array, preventing
-consumer declarations from shadowing the packed field's built-in TypeScript type.
+The metadata generator qualifies Int16Array, Uint8Array and ReadonlyArray through
+globalThis instead of reserving those names. Consumer aliases and method exports
+can share built-in names without shadowing generated field or frame types.
 Both native and IC benchmark identities now hash the packed-i16 fixture source.
 Runtime encoding, protocol acceptance, canonical hashing and retry bytes are unchanged.
-The regression fails on 0.6.8 and passes with the fix. TypeScript conformance
+The built-in name fixtures fail with the reservation-based fix and pass with
+qualified types, including a consumer declaration named globalThis. TypeScript conformance
 passes 149 vectors and 30,172 mutations; both measurement runners pass strict
 Clippy. No codec performance claim or full benchmark rerun is part of this batch.
 

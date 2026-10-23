@@ -35,16 +35,7 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
             );
         }
     }
-    for name in [
-        "bad-name",
-        "default",
-        "as",
-        "string",
-        "createCodec",
-        "JSON",
-        "Uint8Array",
-        "Int16Array",
-    ] {
+    for name in ["bad-name", "default", "as", "string", "createCodec", "JSON"] {
         let mut invalid = method.clone();
         invalid["name"] = json!(name);
         assert_eq!(
