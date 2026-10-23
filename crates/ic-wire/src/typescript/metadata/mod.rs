@@ -80,6 +80,7 @@ fn identifier(name: &str) -> Result<(), GenerationError> {
             "createCodec",
             "ReadonlyArray",
             "Uint8Array",
+            "Int16Array",
         ]
         .contains(&name)
     {

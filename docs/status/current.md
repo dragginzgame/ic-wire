@@ -1,9 +1,19 @@
 # Current handoff
 
-## Current batch: bounded packed-i16 production field
+## Current batch: 0.6.9 audit fixes
 
-0.6.7 is released at `a848368`; pending changes remain under 0.6.8.
-Incoming IC Host/Tooling 0.66.0 adoption and IC Platform 0.6.10 are preserved.
+0.6.8 is released at `58527ce`; pending fixes are recorded under 0.6.9.
+The metadata generator reserves Int16Array alongside Uint8Array, preventing
+consumer declarations from shadowing the packed field's built-in TypeScript type.
+Both native and IC benchmark identities now hash the packed-i16 fixture source.
+Runtime encoding, protocol acceptance, canonical hashing and retry bytes are unchanged.
+The regression fails on 0.6.8 and passes with the fix. TypeScript conformance
+passes 149 vectors and 30,172 mutations; both measurement runners pass strict
+Clippy. No codec performance claim or full benchmark rerun is part of this batch.
+
+## Released packed-i16 production field
+
+0.6.8 includes IC Host/Tooling 0.66.0 and IC Platform 0.6.10.
 
 `PackedI16<N>` now owns a bounded Vec<i16>, serializes a safe little-endian byte
 view, and decodes owned words after validating length/parity. Its Wire metadata
