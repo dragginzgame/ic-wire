@@ -1,0 +1,6 @@
+{
+  "baseline_revision": "a848368; incoming uncommitted IC Host/Tooling 0.66.0 adoption retained identically",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "lock_sha256": "7b210a7a13d4536551a4ab1245940b6e2e4fab87587756f289595c473b3a783e",
+  "notes": "20 i16 cases, two profiles. Baseline excludes packed lanes; packed uses per-element Vec operations; bulk uses initialized fixed-width writes and exact-length extension. All packed conversion and result destruction timed. No production API. Cast uses bytemuck 1.25.2 as a direct benchmark-only dev dependency; its matching control is cast-baseline. Initial manifests retained for earlier loop/bulk stages."
+}

@@ -12,7 +12,7 @@ pub mod native;
 /// Optional host-side TypeScript generation; never required by a canister.
 #[cfg(feature = "typescript")]
 pub mod typescript;
-pub use bounded::{Bytes, BytesRef, List, Text, TextRef};
+pub use bounded::{Bytes, BytesRef, List, PackedI16, Text, TextRef};
 pub use float::{FiniteF32, FiniteF64};
 pub use ic_wire_derive::Wire;
 

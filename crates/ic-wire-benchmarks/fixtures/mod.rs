@@ -1,10 +1,17 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
 #![allow(dead_code)]
+#[cfg(feature = "packed-i16")]
+mod packed_i16;
 #[cfg(feature = "derive-scale")]
 mod scale;
 #[cfg(feature = "toko")]
 mod toko;
 #[cfg(all(feature = "toko", feature = "derive-scale"))]
+compile_error!("select one benchmark corpus");
+#[cfg(all(
+    feature = "packed-i16",
+    any(feature = "toko", feature = "derive-scale")
+))]
 compile_error!("select one benchmark corpus");
 #[cfg(all(feature = "derive-scale-1", feature = "derive-scale-10"))]
 compile_error!("select one derive cohort size");
@@ -245,7 +252,11 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     {
         scale::cases_selected(selected)
     }
-    #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
+    #[cfg(feature = "packed-i16")]
+    {
+        packed_i16::cases_selected(selected)
+    }
+    #[cfg(not(any(feature = "toko", feature = "derive-scale", feature = "packed-i16")))]
     {
         standard_cases_selected(selected)
     }

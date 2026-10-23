@@ -377,6 +377,18 @@ fn main() {
     );
     f.add_boxed(Choice::Empty, "{tag:'Empty',value:null}");
     f.add(BoxedChoice::Payload(Box::new(Record { r#type: Text::new("hello".into()).unwrap(), __proto__: Bytes::new(vec![1,2]).unwrap(), optional: Some(None) })), "{tag:'Payload',value:{['__proto__']:new Uint8Array([1,2]),optional:{some:null},type:'hello'}}");
+    f.add(
+        ic_wire::PackedI16::<0>::new(vec![]).unwrap(),
+        "new Int16Array()",
+    );
+    f.add(
+        ic_wire::PackedI16::<1>::new(vec![32767]).unwrap(),
+        "new Int16Array([32767])",
+    );
+    f.add(
+        ic_wire::PackedI16::<8>::new(vec![-32768, -65, -1, 0, 63, 64, 16384, 32767]).unwrap(),
+        "new Int16Array([-32768,-65,-1,0,63,64,16384,32767])",
+    );
     f.mutation_data.flush().unwrap();
     let codecs = (0..f.count)
         .map(|index| format!("m{index}"))

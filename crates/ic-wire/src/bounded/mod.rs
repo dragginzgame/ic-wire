@@ -1,5 +1,7 @@
 mod borrowed;
+mod packed_i16;
 pub use borrowed::{BytesRef, TextRef};
+pub use packed_i16::PackedI16;
 
 use crate::Error;
 use alloc::{string::String, vec::Vec};

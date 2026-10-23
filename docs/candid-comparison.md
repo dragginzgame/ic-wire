@@ -1,8 +1,14 @@
 # Candid comparison suite
 
+The [production packed-i16 qualification](packed-i16-production.md) measures the
+explicit `PackedI16<N>` field against ordinary lists and Candid.
+
 `ic-wire-benchmarks` is unpublished. All codecs and profilers are dev dependencies;
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
+
+The unpublished [packed-i16 experiment](packed-i16-study.md) demonstrates a bulk
+field representation; it does not change the production comparisons below.
 
 The [full 0.6.7-candidate comparison](full-comparison-067.md) is the current
 reference: 214 standard cases, ten Toko-shaped cases and 1/10/100-record cohorts,

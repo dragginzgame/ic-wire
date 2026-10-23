@@ -6,7 +6,7 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.65.0
+RELEASE_EDITOR_VERSION := 0.66.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -47,11 +47,11 @@ check-benchmarks:
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in toko derive-scale-1 derive-scale-10 derive-scale; do \
+	+@for corpus in toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline; do \
 	    cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --test roundtrip && \
 	    cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in toko derive-scale; do \
+	+@for corpus in toko derive-scale packed-i16; do \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" && \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done

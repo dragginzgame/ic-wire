@@ -47,6 +47,30 @@ allocation-budget accounting differ. Qualify the chosen representation against
 consumer limits. The benchmark corpus checks exact frame equivalence at 4 KiB
 and 1 MiB; the byte path requires no new runtime API or encoding mode.
 
+For bulk signed 16-bit values, `PackedI16<N>` owns a bounded `Vec<i16>` and
+serializes it as bytes: a byte count followed by fixed-width little-endian words.
+`new` admits an existing vector without copying; `as_slice` borrows its words and
+`into_vec` returns ownership. `Wire` metadata projects it to `Int16Array`, with
+`N` counting elements. Rust and TypeScript decode into owned storage and reject
+odd byte lengths and excess elements before allocating.
+
+```rust
+let samples = ic_wire::PackedI16::<1024>::new(vec![-32768, 0, 32767])?;
+assert_eq!(samples.as_slice(), &[-32768, 0, 32767]);
+# Ok::<(), ic_wire::Error>(())
+```
+
+This is an explicit field layout, not an optimization of ordinary `Vec<i16>` or
+`List<i16,N>`. For `[32767]`, their payload `01 fe ff 03` becomes `02 ff 7f`;
+for `[0]`, `01 00` becomes `02 00 00`. Wide values shrink, small values grow.
+Switch both Rust and TypeScript schemas together, regenerate clients, and resolve
+retained old frames before switching a deployed field. Framing, method identity
+and exact retry/canonical-byte requirements do not change; no fallback reader exists.
+The native budget admits the packed byte span in bulk, rather than charging one
+Serde node per integer. Qualify limits for this representation. Little-endian
+hosts and Wasm use a safe byte view without a packing allocation; big-endian
+serialization uses a bounded temporary buffer and is not performance-qualified.
+
 For byte fields that also derive `Wire` metadata, prefer the standard
 `serde_bytes::ByteBuf` type (or `ic_wire::Bytes<N>` for a field-local bound):
 

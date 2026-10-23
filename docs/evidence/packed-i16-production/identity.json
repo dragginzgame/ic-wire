@@ -1,0 +1,6 @@
+{
+  "baseline": "a848368 + incoming Host 0.66.0 / Platform 0.6.10 + identical candidate runtime; baseline feature omits packed use",
+  "lock_sha256": "66af67d6e0b126e2459d81fb3744583627c14596d9ab0ccfd3da00b0827fe01f",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "notes": "20 inputs, identical lock/profile/limits. Baseline has ordinary Wire+Candid; candidate adds public PackedI16. Two native runs/profile with 11 samples, 3 IC samples. Source snapshots and runner are in raw.json.gz. Artifact comparison measures adding this field to this fixture, not replacing every list in an installed consumer."
+}

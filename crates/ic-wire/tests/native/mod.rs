@@ -538,3 +538,68 @@ fn hidden_list_lengths_preserve_bounds_and_zero_sized_values() {
         Err(Error::Limit)
     );
 }
+
+#[test]
+fn packed_i16_bytes_bounds_and_canonicality() {
+    use ic_wire::PackedI16;
+    for value in i16::MIN..=i16::MAX {
+        let packed = PackedI16::<1>::new(vec![value]).unwrap();
+        let word = value.to_le_bytes();
+        let bytes = [2, word[0], word[1]];
+        assert_eq!(native::encode(&packed, LIMITS).unwrap(), bytes);
+        assert_eq!(
+            native::decode::<PackedI16<1>>(&bytes, LIMITS).unwrap(),
+            packed
+        );
+        assert_eq!(packed.as_slice(), &[value]);
+    }
+    let values = vec![i16::MIN, -1, 0, i16::MAX];
+    let ptr = values.as_ptr();
+    let packed = PackedI16::<4>::new(values).unwrap();
+    assert_eq!(packed.as_slice().as_ptr(), ptr);
+    let bytes = native::encode(&packed, LIMITS).unwrap();
+    // A deliberately unaligned input must not require an i16-aligned byte view.
+    let mut offset = vec![0];
+    offset.extend_from_slice(&bytes);
+    assert_eq!(
+        native::decode::<PackedI16<4>>(&offset[1..], LIMITS).unwrap(),
+        packed
+    );
+    let values = packed.into_vec();
+    assert_eq!(values.as_ptr(), ptr);
+    assert!(PackedI16::<0>::new(vec![0]).is_err());
+    assert_eq!(
+        native::decode::<PackedI16<0>>(&[0], LIMITS)
+            .unwrap()
+            .as_slice(),
+        &[] as &[i16]
+    );
+    for bytes in [
+        &[1, 0][..],
+        &[4, 0, 0, 0, 0],
+        &[2, 0],
+        &[0x82, 0, 0, 0],
+        &[0, 0],
+    ] {
+        assert!(native::decode::<PackedI16<1>>(bytes, LIMITS).is_err());
+    }
+    assert_eq!(
+        native::encode(&vec![i16::MAX], LIMITS).unwrap(),
+        [1, 254, 255, 3]
+    );
+    let packed = PackedI16::<1>::new(vec![0]).unwrap();
+    for short in [
+        Limits { bytes: 2, ..LIMITS },
+        Limits { nodes: 1, ..LIMITS },
+        Limits {
+            allocation: 1,
+            ..LIMITS
+        },
+    ] {
+        assert_eq!(native::encode(&packed, short), Err(Error::Limit));
+        assert_eq!(
+            native::decode::<PackedI16<1>>(&[2, 0, 0], short),
+            Err(Error::Limit)
+        );
+    }
+}

@@ -168,6 +168,7 @@ macro_rules! bounded_scalar {
         }
     };
 }
+bounded_scalar!(crate::PackedI16<N>, "packed-i16");
 bounded_scalar!(crate::Bytes<N>, "bytes");
 bounded_scalar!(crate::BytesRef<'_, N>, "bytes");
 bounded_scalar!(crate::Text<N>, "text");

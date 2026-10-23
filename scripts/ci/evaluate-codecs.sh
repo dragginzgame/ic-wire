@@ -6,7 +6,7 @@ cd "$root"
 out="${1:-$root/target/codec-comparison}"
 case "$out" in /*) ;; *) out="$root/$out" ;; esac
 corpus="${CORPUS_FEATURE:-}"
-case "$corpus" in ""|toko|derive-scale|derive-scale-1|derive-scale-10) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
+case "$corpus" in ""|toko|derive-scale|derive-scale-1|derive-scale-10|packed-i16|packed-i16-baseline) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
 extra="${corpus:+,$corpus}"
 mkdir "$out"
 mkdir -p "$out/source/scripts/ci"

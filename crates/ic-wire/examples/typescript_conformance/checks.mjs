@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { WireError } from './compiled/wire-runtime.js';
 import { nativeTree, prototypeName } from './compiled/native.js';
-const normalize = value => value instanceof Uint8Array ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
+const normalize = value => value instanceof Uint8Array || value instanceof Int16Array ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
 function check(codec, value, request, response) {
   for (const [encode, decode, bytes] of [[codec.encodeRequest, codec.decodeRequest, request], [codec.encodeResponse, codec.decodeResponse, response]]) {
     const input = Uint8Array.from(bytes);
@@ -373,3 +373,11 @@ async function checkMutations(codecs, expected) {
   }
   assert.equal(count, expected, 'mutation record count');
 }
+
+const packedI16 = probe({k:'packed-i16',max:2});
+assert.throws(() => packedI16.encodeRequest([1,2]), WireError);
+assert.throws(() => packedI16.encodeRequest(new Int16Array(3)), WireError);
+assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,1,0])), WireError);
+assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,6,0,0,0,0,0,0])), WireError);
+assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,0x82,0,0,0])), WireError);
+assert.deepEqual(packedI16.decodeRequest(Uint8Array.from([...header,4,0,128,255,127])),new Int16Array([-32768,32767]));

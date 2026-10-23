@@ -220,6 +220,27 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
             );
         }
     }
+    for (bound, valid) in [
+        (None, false),
+        (Some(0), true),
+        (Some(2), true),
+        (Some((1_u64 << 52) - 1), true),
+        (Some(1_u64 << 52), false),
+    ] {
+        let mut node = json!({"k":"packed-i16"});
+        if let Some(bound) = bound {
+            node["max"] = json!(bound);
+        }
+        assert_eq!(
+            generate_registry(
+                &BTreeMap::from([("Packed".into(), node)]),
+                &[],
+                "./runtime.js"
+            )
+            .is_ok(),
+            valid
+        );
+    }
     for minimum in [Value::Null, json!(-1), json!(1.5), json!("2"), json!(3)] {
         let node = json!({"k":"bytes","min":minimum,"max":2});
         assert_eq!(

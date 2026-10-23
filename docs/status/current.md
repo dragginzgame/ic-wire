@@ -1,9 +1,31 @@
 # Current handoff
 
-## Current batch: full expanded Candid comparison
+## Current batch: bounded packed-i16 production field
 
-Source `066b618` includes the pending 0.6.7 i64 optimization; workspace package
-versions still read 0.6.6. This batch adds sixty benchmark cases, taking the
+0.6.7 is released at `a848368`; pending changes remain under 0.6.8.
+Incoming IC Host/Tooling 0.66.0 adoption and IC Platform 0.6.10 are preserved.
+
+`PackedI16<N>` now owns a bounded Vec<i16>, serializes a safe little-endian byte
+view, and decodes owned words after validating length/parity. Its Wire metadata
+projects to Int16Array. There is still one Serde/Postcard codec; Vec<i16> is unchanged.
+Opting in changes [32767] from 01 fe ff 03 to 02 ff 7f. Coordinate field schemas,
+regenerate clients and resolve retained old-layout frames before switching.
+Small values take more bytes; canonical hashing/retry and envelope rules remain.
+
+The maintained benchmark now uses the public type; prototype adapter/conversion
+implementations are retired to the [research archive](../packed-i16-study.md).
+The [production qualification](../packed-i16-production.md) owns measurements and
+validation. At opt-3, 16,384 wide values use 33,489.25 encode / 79,960 decode
+instructions (0.417x / 0.057x Candid); opt-z fixture growth is 2,438 total /
+2,304 code bytes. Empty decode and small-value payloads regress versus ordinary
+lists. All 80 packed/Candid encode/decode comparisons favor packed.
+Big-endian execution and installed consumers remain unqualified.
+Versions, staging, commits and releases remain maintainer-owned.
+
+## Latest full comparison
+
+The benchmark snapshot at `066b618` included the then-pending 0.6.7 i64
+optimization and used package version 0.6.6. It added sixty cases, taking the
 standard corpus to 214, plus ten Toko-shaped and 1/10/100-record cohorts.
 The [full comparison](../full-comparison-067.md) owns current results and source
 identity: native time, allocation counts, peak heap, IC instructions, wire bytes,
@@ -67,6 +89,7 @@ the preceding matched optimization experiment and its opt-z tradeoffs.
 This expanded suite is a fresh comparison, not a before/after speedup claim.
 No full CI, macOS, installed-consumer or application-latency claim is made.
 
-Shared Tooling is 0.26.7 at `3e8d7cd`, with Build/Testkit/Host 0.65.0 and
-Platform 0.6.9 lock selections. Candid/PocketIC remain unpublished benchmark
+Shared Tooling is 0.26.7 at `3e8d7cd`, with Build/Testkit/Host 0.66.0 and
+Platform 0.6.10 lock selections. The separate Platform update is preserved;
+packed-i16 measurements retain their matched archived 0.6.9 lock. Candid/PocketIC remain unpublished benchmark
 dev dependencies; the runtime stays SDK/host-independent. Siblings are read-only.

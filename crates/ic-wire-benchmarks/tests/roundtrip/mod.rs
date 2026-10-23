@@ -10,7 +10,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         cases.len(),
         "benchmark case identities must be unique"
     );
-    #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
+    #[cfg(not(any(feature = "toko", feature = "derive-scale", feature = "packed-i16")))]
     assert!(cases.len() >= 100);
     #[cfg(feature = "toko")]
     assert_eq!(cases.len(), 10);
@@ -25,7 +25,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
             100
         }
     );
-    #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
+    #[cfg(not(any(feature = "toko", feature = "derive-scale", feature = "packed-i16")))]
     for length in [4096, 1_048_576] {
         let vector = cases
             .iter()

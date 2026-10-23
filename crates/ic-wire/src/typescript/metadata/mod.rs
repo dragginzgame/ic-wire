@@ -106,7 +106,7 @@ pub(super) fn ty(
     if value.get("check").is_some_and(|check| !check.is_string()) {
         return Err(GenerationError::Schema);
     }
-    if matches!(kind, "bytes" | "text" | "list" | "array") {
+    if matches!(kind, "bytes" | "text" | "list" | "array" | "packed-i16") {
         let bound = |key| -> Result<Option<u64>, GenerationError> {
             value
                 .get(key)
@@ -120,8 +120,11 @@ pub(super) fn ty(
                 .transpose()
         };
         let maximum = bound("max")?;
-        if kind == "array" && maximum.is_none() {
+        if matches!(kind, "array" | "packed-i16") && maximum.is_none() {
             return Err(GenerationError::Schema);
+        }
+        if kind == "packed-i16" && maximum.is_some_and(|n| n > MAX_SAFE_INTEGER / 2) {
+            return Err(GenerationError::Complexity);
         }
         if kind == "bytes"
             && bound("min")?
@@ -174,6 +177,7 @@ pub(super) fn ty(
         "bool" => "boolean".into(),
         "text" => "string".into(),
         "bytes" => "Uint8Array".into(),
+        "packed-i16" => "Int16Array".into(),
         "u" | "i" => {
             let bits = value["bits"].as_u64().ok_or(GenerationError::Schema)?;
             if ![8, 16, 32, 64, 128].contains(&bits) {

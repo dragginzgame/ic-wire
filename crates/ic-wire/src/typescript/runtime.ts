@@ -8,6 +8,7 @@ export class WireError extends Error {
 type Field = { name: string; value: Schema };
 export type Schema = ( { k: 'unit' | 'bool' }
   | { k: 'bytes'; min?: number; max?: number }
+  | { k: 'packed-i16'; max: number }
   | { k: 'text'; max?: number }
   | { k: 'u' | 'i' | 'float'; bits: number; min?: number; max?: number }
   | { k: 'list'; max?: number; item: Schema }
@@ -171,6 +172,16 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (s.max !== undefined && bytes.length > s.max) fail('limit');
       out.varint(BigInt(bytes.length)); out.raw(bytes); return;
     }
+    case 'packed-i16': {
+      if (!(value instanceof Int16Array)) return fail('value');
+      if (value.length > s.max) fail('limit');
+      // Explicit field change: [32767] is 02 ff 7f, not list 01 fe ff 03.
+      // Consumers must switch both schemas; never reinterpret ordinary lists.
+      out.varint(BigInt(value.length) * 2n);
+      if (value.byteLength > out.bytes.length - out.offset) fail('limit');
+      for (const word of value) { out.byte(word & 255); out.byte((word >>> 8) & 255); }
+      return;
+    }
     case 'text': {
       if (typeof value !== 'string') fail('value');
       const text = value as string, remaining = Math.min(s.max ?? out.bytes.length, out.bytes.length - out.offset);
@@ -249,6 +260,15 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       const length = input.length(s.max ?? input.bytes.length - input.offset);
       if (s.min !== undefined && length < s.min) fail('malformed');
       return new Uint8Array(input.raw(length));
+    }
+    case 'packed-i16': {
+      const length = input.length(Math.min(s.max * 2, input.bytes.length - input.offset));
+      if (length % 2) return fail('malformed');
+      // Validate the complete byte span before allocating; input may be unaligned.
+      const bytes = input.raw(length), view = new DataView(bytes.buffer, bytes.byteOffset, length);
+      const values = new Int16Array(length / 2);
+      for (let i = 0; i < values.length; i++) values[i] = view.getInt16(i * 2, true);
+      return values;
     }
     case 'text': {
       const text = utf8.decode(input.raw(input.length(Math.min(s.max ?? input.bytes.length, input.bytes.length - input.offset))));

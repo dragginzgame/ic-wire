@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.8]
+
+- Add bounded `PackedI16<N>` Serde fields and matching `Int16Array` TypeScript
+  metadata/codecs, using safe bulk byte views for little-endian encoding and
+  owned decoding with bounds checked before allocation. Ordinary `Vec<i16>` is
+  unchanged. Opting in changes `[32767]` from `01 fe ff 03` to `02 ff 7f`;
+  coordinate consumers, regenerate clients and resolve retained old-layout frames.
+  Small values use more bytes; framing, identity and canonical retry rules remain.
+  Replace benchmark-only adapters/conversion paths with the production field;
+  retain their archived research and measure the production cohort against Candid.
+
+- Adopt IC Build/Testkit and Host support crates 0.66.0, including the matching
+  release metadata helper. Update the instruction benchmark to borrow its
+  PocketIC client through the owner accessor, keeping the managed server alive
+  throughout use. Production codec, protocol bytes and admission are unchanged.
+
 ## [0.6.7] - 2026-10-23
 
 - Expand the standard Candid comparison from 154 to 214 cases, adding signed and

@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert!(version.status.success());
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
         .build_instance(PocketIcBuilder::new().with_application_subnet())?;
-    let pic = &owned.instance;
+    let pic = owned.instance();
     let cases = fixtures::cases();
     let operations = [
         "encode-fresh",
