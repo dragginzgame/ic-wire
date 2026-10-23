@@ -107,3 +107,85 @@ boundary checks with exact/insufficient budgets, runtime/borrowing tests,
 benchmark roundtrips, TypeScript/lint and native/Wasm MSRV. The new Host/Testkit
 startup path passes actual PocketIC runs and the host-driver MSRV check.
 No new native-time, allocation, heap, macOS, installed-consumer or full-CI claim.
+
+## 0.6.7: share the i64 writer
+
+Retain i64-only sharing: apply Postcard's existing zigzag mapping once, then
+call the private u64 serializer. This removes a duplicate signed encoding path
+and inherits the existing small-u64 shortcut. It adds no public mode or type.
+Original i64 admission is completed before this conversion; bytes and canonical
+acceptance remain unchanged (`-64` → `7f`, `64` → `80 01`). i8 stays raw-byte
+encoded (`-1` → `ff`). No consumer, retry or hash migration is needed.
+
+Matched baseline is released 0.6.6 (`6372a6a`) with its clean lockfile. Both sides
+use the unchanged 154-case corpus and settings described above: Rust 1.99.1,
+LLVM 23.1.1, opt-z/opt-3, Wasm LTO, one codegen unit and PocketIC 16.1.0. Three
+identical samples per row retain input/frame hashes, lengths and repetitions.
+These are IC instructions, not native timing or allocation measurements.
+
+| Input / opt-3 operation | Wire before | Wire after | Change | Candid |
+| --- | ---: | ---: | ---: | ---: |
+| Empty i64 list / encode | 792.25 | 792.25 | 0% | 13,609.25 |
+| One small i64 / encode | 1,058.25 | 937.25 | -11.43% | 14,651.25 |
+| 1,024 small i64s / encode | 254,776.25 | 130,872.25 | -48.63% | 31,333.25 |
+| 16,384 small i64s / encode | 4,064,078.25 | 2,081,614.25 | -48.78% | 277,316 |
+| 16,384 small i64s / decode | 4,067,503.5 | 3,395,759.5 | -16.51% | 1,277,278 |
+| 16,384 wide i64s / encode | 7,046,150 | 6,931,462 | -1.63% | 277,260 |
+
+Small vectors cycle through 0–63; wide vectors repeat i64::MAX. Negative values
+are exercised by scalar and record controls, and boundary tests, not a separate
+negative-vector performance sweep. Large small-value frames remain 16,398 bytes
+for Wire versus Candid's 131,084. Encoding still costs 7.51x Candid; decode is
+2.66x. Wide-vector costs remain a substantial gap.
+
+The standard opt-3 suite has no instruction regressions. At opt-z, small-u64
+fresh encoding rises 3,589,881.5 → 4,048,633.5 (+12.779%), while small-i64 encoding
+falls 8,291,960.5 → 3,327,608.5 (-59.87%). The largest regression is small-u64 reuse
+at +12.781%. This is an explicit size/speed tradeoff, accepted for smaller Wasm
+and substantial signed-integer gains. It is not a universal speed improvement.
+
+The all-width i16/i32/i64 version shrinks opt-3 Wasm by only 381 bytes and
+regresses opt-z small-u16 reuse 18.17%; it is not retained. Forcing signed wrapper
+inlining produces identical Wasm. Forcing the unsigned writers inline limits
+regressions but grows opt-3 Wasm by 753 bytes instead; it is also rejected.
+
+| Fixture/profile | Wire total before → after | Wire code before → after | Candid total / code |
+| --- | ---: | ---: | ---: |
+| Standard / opt-z | 251,535 → 251,486 (-49) | 215,561 → 215,515 (-46) | 615,730 / 557,931 |
+| Standard / opt-3 | 359,197 → 358,209 (-988) | 308,541 → 307,549 (-992) | 932,103 / 859,605 |
+| 100 records / opt-z | 324,087 → 324,033 (-54) | 305,264 → 305,218 (-46) | 1,416,914 / 1,362,897 |
+| 100 records / opt-3 | 426,626 → 422,871 (-3,755) | 392,100 → 388,342 (-3,758) | 2,079,944 / 2,010,763 |
+
+These are total uncompressed Wasm and code-section payload bytes, not symbol
+attribution. Unlike the preceding u16/u32 optimization, all 100 records exercise
+the changed i64 path (delta -65). Sixteen repeated structural widths still do
+not predict an installed application's footprint. Candid artifacts and counts
+are unchanged between paired runs. All 100 record encode/decode rows improve
+in both profiles; the cohort has no instruction regressions. The five standard
+and two scale runs retain 23,190 rows with three identical samples each.
+At opt-3, record encoding improves 4.32–17.83% and decoding 1.20–2.43%.
+For record_000, encode is 1,890.25 → 1,695.25 instructions and decode is
+3,092.5 → 3,017.5. Opt-z record gains are below 0.18%.
+
+The [raw archive](evidence/signed-sharing-067/raw.json.gz) preserves every sample,
+source variant, lockfile, compiler identity, build script and validation log.
+[Instruction controls](evidence/signed-sharing-067/instructions.csv),
+[artifact sizes/hashes](evidence/signed-sharing-067/artifacts.csv),
+[aggregate results](evidence/signed-sharing-067/summary.csv) and
+[identity](evidence/signed-sharing-067/identity.json) summarize the evidence.
+Reproduce using the extraction/build/IC sequence above with `/tmp/wire-opt067`:
+`run-build.sh` builds baseline/zigzag, and the separate `inline-build.sh`,
+`i64-build.sh` and `unsigned-inline-build.sh` build refinements. Measure each
+before `scale-build.sh` replaces the host driver with the 100-record version;
+then measure scale-baseline/scale-i64. Retain each matching variant's Wasm pair.
+
+The production regression test compares i64 values -128 through 127, extrema,
+and both sides of every signed varint transition against raw Postcard. Exact
+and insufficient allocation/node/depth budgets, mixed vectors and the i8 raw-byte
+control pass. Runtime/borrowing/canonical tests, benchmark roundtrips, TypeScript
+conformance/lint and native/Wasm MSRV pass. No native timing, allocation/heap,
+macOS, installed-consumer or full-CI rerun is claimed.
+
+A separate host-only webpki-root-certs lock update appeared during the task and
+was preserved; the source archive retains the identical released lock used for
+all benchmark pairs. No performance effect is attributed to that update.

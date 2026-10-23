@@ -1,0 +1,6 @@
+{
+  "baseline": "6372a6a (0.6.6), clean released lock and unchanged 154-case corpus",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "lock_sha256": "c8262b5ced40a6e36b2b201ed4ee99fe6c88b1d52c9be33cb89945e5b78c0e64",
+  "notes": "Each experiment changes only its named encoder or comparison implementation. Both sides share all inputs, compiler flags and dependencies. No native-time/heap measurements."
+}

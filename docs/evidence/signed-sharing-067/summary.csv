@@ -1,0 +1,8 @@
+cohort,variant,rows,improved,regressed,unchanged,worst_percent
+standard,baseline,3838,0,0,2298,0.0
+standard,zigzag,3838,235,133,1930,18.173265035166853
+standard,inline,3838,235,133,1930,18.173265035166853
+standard,i64,3838,157,81,2060,12.78070235190365
+standard,unsigned-inline,3838,132,79,2087,2.768922016329789
+scale100,scale-baseline,2000,0,0,1000,0.0
+scale100,scale-i64,2000,400,0,600,0.0

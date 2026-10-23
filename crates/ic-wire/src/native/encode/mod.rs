@@ -66,13 +66,20 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         serialize_i8: i8,
         serialize_i16: i16,
         serialize_i32: i32,
-        serialize_i64: i64,
         serialize_i128: i128,
         serialize_u8: u8,
         serialize_u128: u128,
         serialize_f32: f32,
         serialize_f64: f64,
         serialize_char: char,
+    }
+    // Previously i64 used Postcard's separate signed varint writer. Apply its
+    // identical zigzag mapping, then reuse our u64 writer and one-byte shortcut.
+    // Original signed-type admission is already done; bytes and canonical
+    // acceptance are unchanged (-64 -> 7f, 64 -> 80 01). No consumer migration
+    // or retry/hash change. i8 deliberately retains its raw-byte representation.
+    fn serialize_i64(self, value: i64) -> Result<Self::Ok, Self::Error> {
+        self.serialize_u64(((value << 1) ^ (value >> 63)) as u64)
     }
     // Postcard encodes u16/u32 values below 128 identically to u8. As with
     // u64 below, use its byte writer while retaining the original value's

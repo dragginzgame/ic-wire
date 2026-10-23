@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.7]
+
+- Share i64 zigzag encoding with the existing unsigned Postcard writer. Large
+  small-i64 vectors use 48.78% fewer opt-3 encode instructions and 16.51% fewer
+  decode instructions; the standard fixture shrinks by 988 uncompressed Wasm
+  bytes; the 100-record fixture shrinks by 3,755 bytes. Small-u64 opt-z encoding
+  regresses up to 12.79%; no standard opt-3
+  regression is measured. Preserve signed-type admission, exact wire bytes,
+  canonical checks and retry hashes. No consumer migration or second codec.
+
 ## [0.6.6] - 2026-10-23
 
 - Extend the private one-byte Postcard shortcut to small u16/u32 values. Large

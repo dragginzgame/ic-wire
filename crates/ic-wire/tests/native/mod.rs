@@ -50,7 +50,7 @@ fn u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries() {
     );
 }
 #[test]
-fn unsigned_shortcuts_preserve_postcard_bytes_and_original_budgets() {
+fn integer_shortcuts_preserve_postcard_bytes_and_original_budgets() {
     macro_rules! check_values {
         ($ty:ty, $values:expr) => {{
             let exact = Limits {
@@ -93,6 +93,23 @@ fn unsigned_shortcuts_preserve_postcard_bytes_and_original_budgets() {
     }
     values.push(u32::MAX);
     check_values!(u32, values);
+    let mut signed_values: Vec<i64> = (-128..=127).collect();
+    // Zigzag changes width at signed magnitudes 2^6, 2^13, ... .
+    for shift in (6..63).step_by(7) {
+        let boundary = 1_i64 << shift;
+        signed_values.extend([
+            -boundary - 1,
+            -boundary,
+            -boundary + 1,
+            boundary - 1,
+            boundary,
+            boundary + 1,
+        ]);
+    }
+    signed_values.extend([i64::MIN, i64::MAX]);
+    check_values!(i64, signed_values);
+    // i8 is not zigzag encoded by Postcard and must not take this route.
+    assert_eq!(native::encode(&-1_i8, LIMITS).unwrap(), [0xff]);
 }
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 enum Tree {

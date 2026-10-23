@@ -4,6 +4,11 @@
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
 
+The [0.6.7 i64 sharing refinement](integer-shortcut-study.md#067-share-the-i64-writer)
+reduces duplicate serialization code: the standard opt-3 fixture shrinks by 988
+Wasm bytes while large small-i64 encode/decode instructions fall 48.78%/16.51%.
+Its opt-z small-u64 regression is recorded alongside the gains.
+
 The [0.6.6 integer study](integer-shortcut-study.md) extends the selected shortcut
 to u16/u32, cutting large small-value opt-3 encode instructions by 61–63% with
 601 extra Wasm bytes in its expanded corpus. It records wide-value regressions,

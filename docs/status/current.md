@@ -1,20 +1,21 @@
 # Current handoff
 
-## Current batch: integer optimization and tooling adoption
+## Current batch: shared i64 encoding
 
-0.6.5 is released at `e10196e`; pending changes are under 0.6.6.
-The private Serde adapter now also forwards u16/u32 values below 128 through
-Postcard's equivalent u8 writer. Original admission and exact bytes are preserved.
-Large small-value u16/u32 vectors save 61–63% opt-3 encode instructions; the
-expanded fixture grows 601 total Wasm bytes. Worst regression is 3.89% on opt-z
-wide-u16 encoding. See the [study](../integer-shortcut-study.md) for matched
-instructions, sizes, controls, rejected candidates and reproducible source.
+0.6.6 is released at `6372a6a`; pending changes are under 0.6.7.
+The private adapter maps i64 to its identical zigzag u64 representation and
+reuses the unsigned writer. Original signed-type admission and bytes remain.
+Large small-i64 vectors save 48.78% opt-3 encode and 16.51% decode instructions;
+the standard/100-record fixtures shrink by 988/3,755 Wasm bytes at opt-3.
+All record encode/decode rows improve in both profiles; no standard opt-3 regression.
+Opt-z small-u64 encoding regresses up to 12.79%. See the
+[study](../integer-shortcut-study.md#067-share-the-i64-writer) for paired costs,
+100-record results, controls, rejected refinements and reproducible sources.
 
-Signed shortcuts, streamed wide-u64 encoding and 128-byte canonical comparison
-remain research: their wide-value/small-blob regressions do not justify adoption.
-One production codec remains. No wire or acceptance-rule change is introduced.
-Runtime/boundary/borrowing, TypeScript/lint, native/Wasm MSRV and benchmark
-roundtrips pass. No new native timing, heap or installed-consumer qualification.
+Broader signed sharing and inlining remain research. Runtime boundary/borrowing,
+benchmark roundtrips, TypeScript/lint and native/Wasm MSRV checks pass.
+One production Serde/Postcard codec remains; protocol and acceptance rules are
+unchanged. No new native timing, heap or installed-consumer qualification.
 Versions, staging, commits, publication and releases remain maintainer-owned.
 
 ## Production contract
@@ -80,3 +81,7 @@ Platform 0.6.9 lock selections. Setup, snapshot, dependency-boundary/pin and
 disposable Make/release adapter checks pass; PocketIC startup verifies the new
 Testkit integration. Candid/PocketIC stay in unpublished benchmark dev dependencies;
 the runtime remains SDK/host-independent. Sibling checkouts are read-only.
+
+A separate Cargo.lock update to webpki-root-certs 1.0.11 appeared during this task
+and is preserved. Benchmark pairs use the archived released lock (1.0.10), not
+that unrelated host-certificate update. It is outside this optimization batch.
