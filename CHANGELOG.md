@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.6]
+## [0.6.6] - 2026-10-23
 
 - Extend the private one-byte Postcard shortcut to small u16/u32 values. Large
   small-value vectors use 61–63% fewer opt-3 encode instructions; the expanded
