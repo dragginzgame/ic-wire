@@ -1,5 +1,10 @@
 # Layout and canonical-decoding study
 
+Historical finite-codec research. Its runner was retired from the active tree in
+0.6.4; the commands below apply to an isolated checkout of
+`9a1c06e6829da053190d997cdeed92a861addedb` (0.5.22), with that revision’s
+lockfile and finite sources. Retained results are not current-codec benchmarks.
+
 This study compares consumer schema choices and profiles finite Rust decoding
 against 0.5.15 (`39535ba`). The selected runtime change extends the existing
 same-input-region comparison shortcut from Wasm/tests to native hosts. Protocol
@@ -84,8 +89,8 @@ run. The eleven-byte frame and all decoder rejection rules remain unchanged.
 
 ## Reproduction and scope
 
-Run the maintained [probe](../scripts/benchmarks/protocol/mod.rs) through its
-[isolated runner](../scripts/benchmarks/protocol/run.sh), with a new output path:
+Run the archived [probe](https://github.com/dragginzgame/ic-wire/blob/9a1c06e6829da053190d997cdeed92a861addedb/scripts/benchmarks/protocol/mod.rs) through its
+[isolated runner](https://github.com/dragginzgame/ic-wire/blob/9a1c06e6829da053190d997cdeed92a861addedb/scripts/benchmarks/protocol/run.sh), with a new output path:
 
 ```sh
 taskset -c 0 bash scripts/benchmarks/protocol/run.sh /tmp/wire-protocol-run 39535ba

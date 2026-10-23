@@ -1,5 +1,10 @@
 # Fresh-encoding bulk reservation experiments
 
+Historical finite-codec research. Its runner was retired from the active tree in
+0.6.4; the commands below apply to an isolated checkout of
+`9a1c06e6829da053190d997cdeed92a861addedb` (0.5.22), with that revision’s
+lockfile and finite sources. Retained results are not current-codec benchmarks.
+
 Against 0.5.16 (`24c1250`), two candidates override fresh encoder growth when a
 single bulk write requires at least 4,096 bytes. Both remain unselected. Production
 runtime code, wire bytes, admission limits and error behavior are unchanged.
@@ -53,14 +58,14 @@ No configurable production allocation mode is introduced.
 
 ## Reproduction and qualification
 
-Use the [isolated runner](../scripts/benchmarks/protocol/run.sh) with either
+Use the [isolated runner](https://github.com/dragginzgame/ic-wire/blob/9a1c06e6829da053190d997cdeed92a861addedb/scripts/benchmarks/protocol/run.sh) with either
 retained patch, following the candidate-file procedure in the
 [native comparison study](native-comparison-study.md#reproduction). Patch inputs
 are [exact](evidence/bulk-reservation/exact.patch) and
 [headroom](evidence/bulk-reservation/slack.patch). Apply them to the released
 `crates/ic-wire/src/contract/mod.rs` and pass the resulting file as argument three.
 
-The [probe](../scripts/benchmarks/protocol/mod.rs) adds blob lengths 262,128,
+The [probe](https://github.com/dragginzgame/ic-wire/blob/9a1c06e6829da053190d997cdeed92a861addedb/scripts/benchmarks/protocol/mod.rs) adds blob lengths 262,128,
 262,144 and 524,288 to its existing 0/32/4096/1048576 cases. The bound remains
 1 MiB; the threshold pair straddles the quarter-ceiling jump including framing.
 New list cases contain four or sixteen 65,536-byte blobs, each byte 42, with

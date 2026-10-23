@@ -1,5 +1,10 @@
 # Native canonical-comparison experiments
 
+Historical finite-codec research. Its runner was retired from the active tree in
+0.6.4; the commands below apply to an isolated checkout of
+`9a1c06e6829da053190d997cdeed92a861addedb` (0.5.22), with that revision’s
+lockfile and finite sources. Retained results are not current-codec benchmarks.
+
 Against released 0.5.16 (`24c1250`), two candidates changed the exact-content
 comparison used when serialized bytes do not share the input's start pointer.
 Both were rejected. The production comparator, protocol bytes, identity,
@@ -40,8 +45,8 @@ The existing native slice equality remains preferable for these owned workloads.
 
 ## Reproduction
 
-The existing [protocol probe](../scripts/benchmarks/protocol/mod.rs) and its
-[runner](../scripts/benchmarks/protocol/run.sh) are reused. The runner now accepts
+The archived [protocol probe](https://github.com/dragginzgame/ic-wire/blob/9a1c06e6829da053190d997cdeed92a861addedb/scripts/benchmarks/protocol/mod.rs) and its
+[runner](https://github.com/dragginzgame/ic-wire/blob/9a1c06e6829da053190d997cdeed92a861addedb/scripts/benchmarks/protocol/run.sh) are reused. The runner now accepts
 an optional candidate contract file, so experiments need not edit production.
 Reconstruct either candidate from the released comparator and its retained patch:
 

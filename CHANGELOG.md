@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4]
+
+- Retire the obsolete finite-codec protocol benchmark runner and its native-view
+  helper. Historical studies now link to the exact 0.5.22 source revision;
+  retained measurements remain intact. Compact the accumulated handoff.
+  Production Serde benchmarks, runtime APIs, bytes and admission are unchanged.
+
 ## [0.6.3] - 2026-10-22
 
 - Support container `serde(deny_unknown_fields)` and qualified field-level

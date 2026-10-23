@@ -9,8 +9,9 @@ it does not qualify consumer endpoint integrations.
 The pending Serde hard cut removes the finite Wire API. Sections below recording
 finite admission and WireSchema experiments are historical research; the
 [current production comparison](candid-comparison.md#production-serde-hard-cut--pending-0523)
-owns shipped-codec IC, frame and Wasm measurements. The retained protocol-study
-runner requires archived finite sources and is not a production entrypoint.
+owns shipped-codec IC, frame and Wasm measurements. The retired protocol-study
+runner is available only in the archived finite revision linked by those studies;
+it is no longer maintained alongside the production Serde suite.
 
 ## Maintained checks
 

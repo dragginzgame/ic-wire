@@ -1,118 +1,73 @@
 # Current handoff
 
-## Current batch: post-0.6.2 generic audit
+## Current batch: retire finite-codec tooling
 
-0.6.2 is released at `1deec75`; pending fixes are recorded under 0.6.3.
-The released minor version contains the approved API/layout hard cut. Evidence retains its
-original 0.5.23 candidate labels and paths; package versions remain release-owned.
-Keep one production Serde/Postcard codec, exposed through `ic_wire::native`.
-The former serializer-generating derive, finite Wire trait, Shape/static admission, Method and typed retained
-frames, root finite functions and finite TypeScript generator are removed.
-No parallel codec, compatibility shim, migration reader or caller-selected mode.
-Alternate serializers/derive designs remain isolated research only.
+0.6.3 is released at `36e9856`; pending cleanup is recorded under 0.6.4.
+The obsolete scripts/benchmarks/protocol runner and its native-view helper are
+removed from the active tree. They depended on the retired finite Method/Wire
+API. Historical studies link to the unchanged 0.5.22 source revision
+`9a1c06e6829da053190d997cdeed92a861addedb`; retained evidence is untouched.
+Production benchmarks remain in ic-wire-benchmarks and ic-wire-qualification.
+No runtime, protocol, admission or generated client change is made by this batch.
+Versions, staging, commits, publication and releases remain maintainer-owned.
 
+## Production contract
+
+Keep one production Serde/Postcard codec, exposed through ic_wire::native.
 Consumers use Serialize/Deserialize, explicit method IDs and runtime Limits.
-Bytes/Text/List, borrowed views and finite floats remain ordinary Serde fields.
-Wire supplies host-only metadata for concrete generics without field IDs; the
-unreleased NativeSchema name is removed. Use Serialize, Deserialize and Wire.
-Existing native frames and envelope bytes remain unchanged. Former finite records
-now follow declaration order; enums use zero-based indices instead of wire IDs.
-Coordinate affected consumers, regenerate metadata and retain exact same-release
-retry bytes. The packaged [guide](../../crates/ic-wire/README.md) owns migration,
-conservative traversal allowances and custom-serializer constraints.
+Bytes/Text/List, borrowed views and finite floats are ordinary Serde field types.
+Wire generates host-only metadata; it does not generate serializers.
+The finite Wire trait, Shape/static admission, Method, typed retained frames and
+finite TypeScript generator are removed. No legacy reader, compatibility shim,
+automatic migration or alternate production codec is maintained.
 
-## Canic unblock
+The 0.6.0 cut changed former finite records to Serde declaration order and enums
+to zero-based indices; existing native frames and envelope bytes were unchanged.
+Affected consumers must regenerate metadata and coordinate layouts. Preserve
+exact same-release retry bytes. The packaged [guide](../../crates/ic-wire/README.md)
+owns migration, conservative traversal allowances and custom-serializer rules.
 
-Canic #613 records Wire #17's native generic metadata as its supplier blocker.
-The released Wire implementation covers Page<T>, ordinary records/enums,
-transparent wrappers and verified explicit custom scalar metadata. It generates
-no serializer and needs no deployment-side TypeScript/JSON feature. Unsupported
-Serde attributes and recursive inline schemas reject; custom implementations
-must describe actual serialized bytes and validate their domains.
+## Metadata and Canic integration
 
-The maintainer reports release delivery and that Canic's supplier need is met.
-Canic owns endpoint/caller conversion, metadata/export identity, generated clients
-and installed acceptance; this audit did not rerun its integration suite.
-Versions, staging, commits and releases remain maintainer-owned.
+Released metadata supports concrete generics, associated field types, transparent
+wrappers, borrowed records/newtype variants, slices and boxed slices. Recursive
+inline schemas return Complexity; recursive fields retain conservative bounds.
+Unsupported custom Serde layouts require explicit verified metadata. Standard
+serde_bytes field adapters and deny_unknown_fields are supported; qualified byte
+inputs project to Uint8Array without changing their existing Postcard bytes.
 
-The audit reproduced a metadata derive rejection for borrowed bounded DTOs.
-Field-level serde(borrow), including explicit lifetime lists, is now accepted;
-custom-layout attributes remain rejected. Owned and borrowed metadata/frame
-equivalence is checked by the existing 0-byte through 1 MiB borrowing fixture.
-Runtime code and protocol are unchanged; no runtime benchmark rerun is needed.
-Focused derive, default runtime, borrowing, TypeScript/MSRV/lint and nine
-diagnostic checks pass; doctests pass with and without the typescript feature.
-
-The next audit extends borrow annotations to Serde's newtype enum variants,
-including explicit lifetimes. Exact tag/payload and input-backed borrowing tests
-cover both bytes and text; other variant placements remain rejected.
-Finite-float metadata now reuses the existing scalar helper, with identical
-metadata and no runtime-code change or performance claim.
-Slice metadata now shares Vec's list projection, enabling boxed-slice fields
-without extra metadata traversal charges. A boxed-u16 generic page has matching
-Rust/TypeScript frames in both directions. This adds no runtime serializer.
-
-Metadata derive bounds now follow actual nonrecursive field types, including
-associated types, rather than requiring their provider parameters to implement
-Wire. Recursive fields retain conservative parameter bounds to avoid trait
-resolution cycles; inline recursion still returns Complexity. Serde's Serialize
-supertrait is explicit. The added syn visitor is host proc-macro tooling only.
-No runtime code, generated metadata layout or protocol changes are made.
-
-Canic #17 follow-up: deny_unknown_fields and standard serde_bytes field adapters
-now derive metadata without DTO/storage changes. Byte adapter input types are
-sealed to qualified byte vectors/slices and serde_bytes buffers (plus references);
-fixed arrays/custom adapters still need explicit verified metadata. New exact
-Rust/TS frames and extra-field rejection checks cover the accepted attributes.
+Canic #17 supplied these requirements. Canic owns endpoint/caller conversion,
+IDs, budgets, compiled role selection, generated clients and installed acceptance.
 The maintainer keeps ExternalPrincipal on the Candid side; no principal metadata
-implementation, platform dependency or sibling change is included in this batch.
+or platform dependency was added. Do not infer that all consumer integration
+acceptance is complete from Wire's standalone conformance checks.
 
-Owned-blob follow-up reviewed the retained 0.5.22 comparison-cost experiments:
-skipping canonical comparison is invalid for custom Serde; the unrolled candidate
-saved 4.54% on opt-3 1 MiB decode but added 570 Wasm bytes and regressed a small
-opt-z case by 11.04%. No previously rejected candidate is restored. These are
-historical measurements, not a new 0.6.3 instruction or size run.
-
-## Current evidence
+## Evidence and remaining costs
 
 The [production comparison](../candid-comparison.md#production-serde-hard-cut--pending-0523)
 measures 114 standard cases and 100 nominal record types against Candid, both
 profiles, with 4,958 stable IC rows plus input/frame hashes and uncompressed Wasm.
 Opt-3 100-type Wire total/code is 426,480/391,954 bytes versus Candid's
 2,079,944/2,010,763; all those record inputs encode/decode faster than Candid.
-Whole artifacts with sixteen repeated structural widths do not predict app size.
+Sixteen repeated structural widths do not predict installed application size.
+Historical evidence keeps its original 0.5.23 candidate labels and paths.
 
 A universal within-3x goal is not met: large u64-list encoding is 18–28x Candid,
 and generic Vec<u8> encoding is 37x. Byte-oriented 1 MiB encode is 0.50x Candid;
-owned decode is 2.37x. Consumers should use byte-oriented opaque fields and
-qualify large integer/hash-array workloads. No native-time/heap rerun for this cut.
-Host metadata now supports serde_bytes::ByteBuf and borrowed Bytes directly,
-projecting to Uint8Array through ordinary Wire derives. This exposes the existing
-bulk byte path without custom serializers or automatic derive rewriting.
-Vec<u8> frame bytes remain identical, but client types and traversal accounting
-change; regenerate bindings and qualify limits. Runtime code is unchanged, so
-the existing instruction evidence applies; no new runtime savings are claimed.
-The retired finite blob and short-write savings are historical evidence only.
+owned decode is 2.37x. Qualify integer/hash-array workloads and use byte-oriented
+opaque fields. Field representation changes can change budgets and client types.
 
-Runtime, borrowing, canonical bulk/custom-boundary tests, corpus roundtrips,
-strict lint, Rustdoc, native/Wasm MSRV and nine compiler diagnostics pass.
-TypeScript checks cover 146 vectors, 29,536 mutations, 1 MiB buffer boundaries,
-and seventeen generic/custom-scalar/byte/slice projection vectors. Allocation/packed-field checks
-and all consumer benchmark cohorts pass. Evidence is retained under
-`docs/evidence/serde-production-0523/`; logs: `target/serde-hardcut-0523/validation/`.
-No full CI, macOS, live canister or consumer installed suite was run.
-The byte-buffer metadata example is feature-gated; default-feature and
-typescript-feature doctests both pass after correcting the CI documentation failure.
+Prior canonical-comparison experiments remain rejected: skipping comparison is
+invalid for custom Serde; unrolling saved 4.54% on opt-3 1 MiB decode but added
+570 Wasm bytes and regressed a small opt-z case by 11.04%. Retired finite blob and
+writer savings are historical only. No new performance claim accompanies cleanup.
 
-## Preserved tooling and research
+Focused runtime, borrowing, derive, diagnostics, strict lint, native/Wasm MSRV and
+default/TypeScript doctests passed for the preceding implementation batches.
+TypeScript checks cover 146 vectors, 29,536 mutations, 1 MiB buffer boundaries
+and seventeen generic/custom-scalar/byte/slice projection vectors. Full CI,
+macOS and installed consumer suites were not run in these audits.
 
-Earlier IC Tooling 0.64.1 and Platform 0.6.8 work is preserved. Shared Tooling is
-0.26.6 at `4cb9bc9`, unmodified. Candid/PocketIC remain unpublished benchmark dev
-dependencies through IC Platform/Testkit; the runtime is SDK/host-independent.
-Consumers own transport, endpoints, auth, retries, storage and deployment policy.
-
-Finite writer inlining was rejected (40.38% instruction regression for a tiny
-Wasm saving). The reserve cleanup was measured but its finite writer is now
-retired. Those sources/results, earlier finite guarded verification and the
-Serde-with-finite-admission prototype remain explicitly research/historical
-material in the comparison report. Do not ship or cite them as this codec.
+Shared Tooling remains 0.26.6 at `4cb9bc9`, with Tooling 0.64.1 and Platform 0.6.8
+lock selections. Candid/PocketIC stay in unpublished benchmark dev dependencies;
+the runtime remains SDK/host-independent. Sibling checkouts are read-only.

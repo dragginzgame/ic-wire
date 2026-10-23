@@ -1,5 +1,10 @@
 # Native borrowed-view qualification
 
+Historical finite-codec research. Its runner was retired from the active tree in
+0.6.4; the commands below apply to an isolated checkout of
+`9a1c06e6829da053190d997cdeed92a861addedb` (0.5.22), with that revision’s
+lockfile and finite sources. Retained results are not current-codec benchmarks.
+
 Borrowed bytes remain the most promising existing API for read-only blob work.
 This experiment measures owned and borrowed projections using the public native
 API at 0.5.16 (`24c1250`). It introduces no production optimization or protocol
