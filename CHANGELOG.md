@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.9]
+## [0.6.9] - 2026-10-23
 
 - Fully qualify generated `Int16Array`, `Uint8Array` and `ReadonlyArray` types
   through `globalThis`, allowing consumer declarations with those names without
