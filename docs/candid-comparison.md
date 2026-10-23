@@ -4,6 +4,11 @@
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
 
+The [0.6.6 integer study](integer-shortcut-study.md) extends the selected shortcut
+to u16/u32, cutting large small-value opt-3 encode instructions by 61–63% with
+601 extra Wasm bytes in its expanded corpus. It records wide-value regressions,
+unchanged 100-record controls and three rejected candidates.
+
 The selected [small-u64 specialization](small-u64-study.md) preserves bytes and
 admission, cuts large small-u64 opt-3 encoding by 40.6% and adds 146 Wasm bytes.
 The report includes opt-z regressions and the remaining Candid performance gap.

@@ -1,0 +1,8 @@
+cohort,variant,rows,improved,regressed,unchanged,worst_percent
+standard,baseline,3838,0,0,2298,0.0
+standard,unsigned,3838,65,47,2186,3.883034373084082
+standard,signed,3838,94,98,2106,9.386519842876329
+standard,stream,3838,246,122,1930,32.08638642499035
+standard,bulk128,3838,60,14,2224,5.6394763343403875
+scale100,scale-baseline,2000,0,0,1000,0.0
+scale100,scale-unsigned,2000,0,0,1000,0.0

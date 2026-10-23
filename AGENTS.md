@@ -5,7 +5,7 @@ Read docs/status/current.md first, then README.md, docs/design.md and
 Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `4cb9bc907154225a3f7e4c33fd8d75fbeaa125c8` (0.26.6).
+rules, vendored at `3e8d7cd3e7e9b7b79a5e800c30daf0be2710dab0` (0.26.7).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.6]
+
+- Extend the private one-byte Postcard shortcut to small u16/u32 values. Large
+  small-value vectors use 61–63% fewer opt-3 encode instructions; the expanded
+  fixture adds 601 uncompressed Wasm bytes. Wide-u16 opt-z encoding regresses
+  up to 3.89%. Original budgets, wire bytes, canonical checks and retries remain
+  unchanged; no consumer migration or additional codec. Extend integer controls
+  and retain measured rejected signed, streamed-u64 and blob-comparison trials.
+
+- Adopt Shared Tooling 0.26.7 and IC Build/Testkit with Host support crates 0.65.0.
+  Explicit tool setup now waits for an admitted shared-slot installer; offline
+  checks remain immediate. Keep host tooling out of the published runtime.
+
 ## [0.6.5] - 2026-10-23
 
 - Forward small u64 values through Postcard's equivalent one-byte serializer.

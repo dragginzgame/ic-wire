@@ -49,6 +49,51 @@ fn u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries() {
         values
     );
 }
+#[test]
+fn unsigned_shortcuts_preserve_postcard_bytes_and_original_budgets() {
+    macro_rules! check_values {
+        ($ty:ty, $values:expr) => {{
+            let exact = Limits {
+                bytes: 32,
+                allocation: 32 + 16 * size_of::<$ty>(),
+                nodes: 4,
+                depth: 3,
+            };
+            for value in $values {
+                let expected = postcard::to_allocvec(&value).unwrap();
+                assert_eq!(native::encode(&value, exact).unwrap(), expected);
+                assert_eq!(native::encoded_len(&value, exact).unwrap(), expected.len());
+                assert_eq!(native::decode::<$ty>(&expected, exact).unwrap(), value);
+                for short in [
+                    Limits {
+                        allocation: exact.allocation - 1,
+                        ..exact
+                    },
+                    Limits { nodes: 3, ..exact },
+                    Limits { depth: 2, ..exact },
+                ] {
+                    assert_eq!(native::encode(&value, short), Err(Error::Limit));
+                    assert_eq!(native::decode::<$ty>(&expected, short), Err(Error::Limit));
+                }
+            }
+            let values: Vec<$ty> = (0..=255).collect();
+            let expected = postcard::to_allocvec(&values).unwrap();
+            assert_eq!(native::encode(&values, LIMITS).unwrap(), expected);
+            assert_eq!(
+                native::decode::<Vec<$ty>>(&expected, LIMITS).unwrap(),
+                values
+            );
+        }};
+    }
+    check_values!(u16, 0..=u16::MAX);
+    let mut values: Vec<u32> = (0..=255).collect();
+    for shift in (7..32).step_by(7) {
+        let boundary = 1_u32 << shift;
+        values.extend([boundary - 1, boundary, boundary + 1]);
+    }
+    values.push(u32::MAX);
+    check_values!(u32, values);
+}
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 enum Tree {
     Leaf(String, u128),

@@ -69,12 +69,28 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         serialize_i64: i64,
         serialize_i128: i128,
         serialize_u8: u8,
-        serialize_u16: u16,
-        serialize_u32: u32,
         serialize_u128: u128,
         serialize_f32: f32,
         serialize_f64: f64,
         serialize_char: char,
+    }
+    // Postcard encodes u16/u32 values below 128 identically to u8. As with
+    // u64 below, use its byte writer while retaining the original value's
+    // admission charges. Bytes, canonical acceptance and retries are unchanged;
+    // consumers need no migration (127 -> 7f, 128 -> 80 01 for both types).
+    fn serialize_u16(self, value: u16) -> Result<Self::Ok, Self::Error> {
+        if value < 128 {
+            self.inner.serialize_u8(value as u8)
+        } else {
+            self.inner.serialize_u16(value)
+        }
+    }
+    fn serialize_u32(self, value: u32) -> Result<Self::Ok, Self::Error> {
+        if value < 128 {
+            self.inner.serialize_u8(value as u8)
+        } else {
+            self.inner.serialize_u32(value)
+        }
     }
     fn serialize_u64(self, value: u64) -> Result<Self::Ok, Self::Error> {
         // This private adapter only wraps Postcard serializers (including sizing

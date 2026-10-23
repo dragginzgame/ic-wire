@@ -257,6 +257,18 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
         })*};
     }
     integers!(u8, u16, u32, i8, i16, i32);
+    macro_rules! integer_lists {
+        ($($ty:ty),*) => {$({
+            for n in [0, 1, 1024, 16384] {
+                push!(case(&format!("{}-list-small-{n}", stringify!($ty)),
+                    (0..n).map(|i| (i % 64) as $ty).collect::<Vec<_>>()));
+                push!(case(&format!("{}-list-wide-{n}", stringify!($ty)),
+                    vec![<$ty>::MAX; n]));
+            }
+        })*};
+    }
+    integer_lists!(u16, u32, i16, i32, i64);
+
     push!(case("f32-subnormal", f32::from_bits(1)));
     push!(case("f64-negative-zero", -0.0_f64));
     push!(case("f64-max", f64::MAX));
