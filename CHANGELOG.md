@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.4]
+## [0.6.4] - 2026-10-23
 
 - Retire the obsolete finite-codec protocol benchmark runner and its native-view
   helper. Historical studies now link to the exact 0.5.22 source revision;
