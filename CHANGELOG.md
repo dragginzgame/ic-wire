@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.10]
+## [0.6.10] - 2026-10-23
 
 - Allow registry declarations and method exports named `types`, `createCodec`
   and `JSON`. Generated helpers use names outside the consumer identifier grammar;
