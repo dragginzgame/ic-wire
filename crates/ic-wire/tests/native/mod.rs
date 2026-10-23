@@ -8,6 +8,47 @@ const LIMITS: Limits = Limits {
     nodes: 4096,
     depth: 64,
 };
+
+#[test]
+fn u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries() {
+    let mut values: Vec<u64> = (0..=255).collect();
+    for shift in (7..64).step_by(7) {
+        let boundary = 1_u64 << shift;
+        values.extend([boundary - 1, boundary, boundary + 1]);
+    }
+    values.push(u64::MAX);
+    // The charge remains that of u64 even when its Postcard representation is
+    // one byte: four nodes, depth three, and two eight-byte value charges x8.
+    let exact = Limits {
+        bytes: 32,
+        allocation: 160,
+        nodes: 4,
+        depth: 3,
+    };
+    for &value in &values {
+        let expected = postcard::to_allocvec(&value).unwrap();
+        assert_eq!(native::encode(&value, exact).unwrap(), expected);
+        assert_eq!(native::encoded_len(&value, exact).unwrap(), expected.len());
+        assert_eq!(native::decode::<u64>(&expected, exact).unwrap(), value);
+        for short in [
+            Limits {
+                allocation: 159,
+                ..exact
+            },
+            Limits { nodes: 3, ..exact },
+            Limits { depth: 2, ..exact },
+        ] {
+            assert_eq!(native::encode(&value, short), Err(Error::Limit));
+            assert_eq!(native::decode::<u64>(&expected, short), Err(Error::Limit));
+        }
+    }
+    let expected = postcard::to_allocvec(&values).unwrap();
+    assert_eq!(native::encode(&values, LIMITS).unwrap(), expected);
+    assert_eq!(
+        native::decode::<Vec<u64>>(&expected, LIMITS).unwrap(),
+        values
+    );
+}
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 enum Tree {
     Leaf(String, u128),

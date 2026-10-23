@@ -4,6 +4,14 @@
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
 
+The selected [small-u64 specialization](small-u64-study.md) preserves bytes and
+admission, cuts large small-u64 opt-3 encoding by 40.6% and adds 146 Wasm bytes.
+The report includes opt-z regressions and the remaining Candid performance gap.
+
+The [0.6.5 Serde short-write study](serde-short-write-study.md) records five
+rejected current-codec candidates, including instruction gains and Wasm/regression
+tradeoffs. None changes the selected production implementation.
+
 ## Production Serde hard cut — pending 0.5.23
 
 One production codec now uses ordinary Serde and Postcard with runtime admission.

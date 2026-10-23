@@ -71,11 +71,21 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         serialize_u8: u8,
         serialize_u16: u16,
         serialize_u32: u32,
-        serialize_u64: u64,
         serialize_u128: u128,
         serialize_f32: f32,
         serialize_f64: f64,
         serialize_char: char,
+    }
+    fn serialize_u64(self, value: u64) -> Result<Self::Ok, Self::Error> {
+        // This private adapter only wraps Postcard serializers (including sizing
+        // and canonical comparison). Below 128, u64 and u8 emit the same byte.
+        // Avoid the temporary varint buffer without changing value admission,
+        // frame bytes, canonicality or retry hashes. No consumer migration.
+        if value < 128 {
+            self.inner.serialize_u8(value as u8)
+        } else {
+            self.inner.serialize_u64(value)
+        }
     }
     fn serialize_str(self, value: &str) -> Result<Self::Ok, Self::Error> {
         if !self.budget.bytes(value.len()) {

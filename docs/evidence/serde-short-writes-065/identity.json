@@ -1,0 +1,5 @@
+{
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "revision": "0300e81cd981fc0f637d417eb91d77b7ea0a27c9",
+  "lock_sha256": "6923aab3ee284bdf137007835a33a99dbd5bf68f1b63f1ecc6bd27ce2e099bfb"
+}

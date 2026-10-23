@@ -1,0 +1,5 @@
+cohort,variant,rows,improved,regressed,unchanged,worst_percent
+standard,baseline,2958,0,0,1818,0.0
+standard,selected,2958,210,94,1514,1.7520805957073948
+scale100,baseline,2000,0,0,1000,0.0
+scale100,selected,2000,200,200,600,0.8905710787042276

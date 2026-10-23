@@ -1,14 +1,31 @@
 # Current handoff
 
-## Current batch: retire finite-codec tooling
+## Current batch: measured small-u64 specialization
 
-0.6.3 is released at `36e9856`; pending cleanup is recorded under 0.6.4.
+0.6.4 is released at `0300e81`; pending changes are under 0.6.5.
+The private Serde adapter now emits u64 values below 128 through Postcard's
+equivalent u8 writer. Original u64 resource charges and exact bytes are preserved.
+Large small-u64 lists save 40.60% encode and 15.82% decode instructions at opt-3;
+standard and 100-type probes each grow 146 total/code Wasm bytes. Opt-z wide-list
+encoding regresses 1.70%; large integer lists still lose to Candid. See the
+[measured study](../small-u64-study.md) for all 9,916 rows and source identity.
+Runtime/boundary/borrowing tests, TypeScript/lint and native/Wasm MSRV pass.
+No new native-time, heap or installed-consumer qualification is claimed.
+
+Five short-write/inlining candidates were measured against the current Serde
+codec with the same incoming dirty lockfile. None is retained: up to 40.26%
+opt-3 small-u64-list savings trade against opt-z generic-byte regressions and
+larger opt-3 Wasm. See the [experiment](../serde-short-write-study.md) for all
+17,748 rows, source identity, controls and rejected implementations. Those trials
+changed no production code or dependency selection. Native timing,
+heap and 100-type scaling were not rerun for the rejected candidates.
+
 The obsolete scripts/benchmarks/protocol runner and its native-view helper are
 removed from the active tree. They depended on the retired finite Method/Wire
 API. Historical studies link to the unchanged 0.5.22 source revision
 `9a1c06e6829da053190d997cdeed92a861addedb`; retained evidence is untouched.
 Production benchmarks remain in ic-wire-benchmarks and ic-wire-qualification.
-No runtime, protocol, admission or generated client change is made by this batch.
+That earlier tooling retirement changed no runtime, protocol or generated client.
 Versions, staging, commits, publication and releases remain maintainer-owned.
 
 ## Production contract

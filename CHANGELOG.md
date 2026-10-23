@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.5]
+
+- Forward small u64 values through Postcard's equivalent one-byte serializer.
+  Large small-u64 lists use 40.6% fewer opt-3 encode instructions and 15.8% fewer
+  decode instructions, adding 146 Wasm bytes in both standard and 100-type probes.
+  Opt-z wide-list encoding regresses 1.70%. Preserve original u64 admission,
+  wire bytes and canonical checks; no new codec, API or consumer representation.
+
+- Record five rejected Serde short-write/inlining experiments with matched IC
+  instructions, uncompressed Wasm sizes and full source/sample evidence. Large
+  small-integer-list gains did not justify other regressions and opt-3 code growth.
+  No runtime, protocol or dependency-selection change is retained.
+
 ## [0.6.4] - 2026-10-23
 
 - Retire the obsolete finite-codec protocol benchmark runner and its native-view
