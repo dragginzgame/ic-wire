@@ -4,6 +4,12 @@
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
 
+The [full 0.6.7-candidate comparison](full-comparison-067.md) is the current
+reference: 214 standard cases, ten Toko-shaped cases and 1/10/100-record cohorts,
+with native timing, allocations, peak heap, IC instructions, wire bytes and
+uncompressed total/code-section Wasm. Historical smaller-corpus results below
+retain their original source identities.
+
 The [0.6.7 i64 sharing refinement](integer-shortcut-study.md#067-share-the-i64-writer)
 reduces duplicate serialization code: the standard opt-3 fixture shrinks by 988
 Wasm bytes while large small-i64 encode/decode instructions fall 48.78%/16.51%.

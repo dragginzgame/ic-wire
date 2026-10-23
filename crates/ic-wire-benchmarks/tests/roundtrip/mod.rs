@@ -4,6 +4,12 @@ mod fixtures;
 #[test]
 fn corpus_roundtrips_and_rejects_damaged_frames() {
     let cases = fixtures::cases(); // Asserts semantic equality for every lane.
+    let names: std::collections::BTreeSet<_> = cases.iter().map(|case| &case.name).collect();
+    assert_eq!(
+        names.len(),
+        cases.len(),
+        "benchmark case identities must be unique"
+    );
     #[cfg(not(any(feature = "toko", feature = "derive-scale")))]
     assert!(cases.len() >= 100);
     #[cfg(feature = "toko")]

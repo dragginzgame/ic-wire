@@ -2,6 +2,13 @@
 
 ## [0.6.7]
 
+- Expand the standard Candid comparison from 154 to 214 cases, adding signed and
+  mixed-width integer distributions, byte boundaries, float/boolean/optional
+  lists, nested blobs and account snapshots. Rerun native time, allocation,
+  peak heap, IC instructions, wire bytes and uncompressed Wasm across standard,
+  Toko-shaped and 1/10/100-record cohorts. Stop generating gzip measurements.
+  Benchmark-only changes; production runtime, protocol and acceptance are unchanged.
+
 - Share i64 zigzag encoding with the existing unsigned Postcard writer. Large
   small-i64 vectors use 48.78% fewer opt-3 encode instructions and 16.51% fewer
   decode instructions; the standard fixture shrinks by 988 uncompressed Wasm

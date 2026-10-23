@@ -19,7 +19,7 @@ batch_ms="${BATCH_MS:-2}"
 case "$runs" in ''|*[!0-9]*) echo 'RUNS must be a positive integer' >&2; exit 1;; esac
 if [ "$runs" -lt 1 ]; then echo 'RUNS must be positive' >&2; exit 1; fi
 printf 'profile,codec,elapsed_seconds\n' > "$out/build-times.csv"
-printf 'profile,codec,wasm_bytes,gzip_bytes,wasm_sha256,code_section_bytes\n' > "$out/wasm.csv"
+printf 'profile,codec,wasm_bytes,wasm_sha256,code_section_bytes\n' > "$out/wasm.csv"
 for profile in evaluation benchmark-speed; do
     run=1
     while [ "$run" -le "$runs" ]; do
@@ -40,12 +40,10 @@ for profile in evaluation benchmark-speed; do
         artifact="$(cargo run --locked -p ic-wire-benchmarks --example codec-report -- \
             --artifact "$out/$profile-$codec-build.jsonl" 2>> "$out/$profile-$codec-wasm.log")"
         cp "$artifact" "$out/$profile-$codec.wasm"
-        gzip -n -9 -c "$artifact" > "$out/$profile-$codec.wasm.gz"
         bytes="$(wc -c < "$artifact" | tr -d ' ')"
-        compressed="$(wc -c < "$out/$profile-$codec.wasm.gz" | tr -d ' ')"
         digest="$(shasum -a 256 "$artifact")"
         code_bytes="$(cargo run --locked -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$profile-$codec-wasm.log")"
-        printf '%s,%s,%s,%s,%s,%s\n' "$profile" "$codec" "$bytes" "$compressed" "${digest%% *}" "$code_bytes" >> "$out/wasm.csv"
+        printf '%s,%s,%s,%s,%s\n' "$profile" "$codec" "$bytes" "${digest%% *}" "$code_bytes" >> "$out/wasm.csv"
     done
 done
 primary=wire-native

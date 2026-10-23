@@ -189,6 +189,19 @@ struct Node {
     value: u64,
     children: Vec<Node>,
 }
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+struct AccountSnapshot {
+    id: u64,
+    owner: String,
+    balance: u128,
+    delta: i64,
+    tags: std::collections::BTreeMap<String, String>,
+    events: Vec<Event>,
+    samples: Vec<Option<i64>>,
+    proofs: Vec<Blob>,
+}
 fn tree(depth: usize) -> Node {
     Node {
         value: depth as u64,
@@ -450,6 +463,99 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
     ));
     for depth in [0, 1, 4, 8] {
         push!(case(&format!("tree-depth-{depth}"), tree(depth)));
+    }
+    // Append new cases so existing benchmark identities retain their indices.
+    macro_rules! signed_distributions {
+        ($($ty:ty),*) => {$({
+            for n in [1, 128, 4096] {
+                push!(case(&format!("{}-list-negative-{n}", stringify!($ty)),
+                    (0..n).map(|i| -1 - (i % 64) as $ty).collect::<Vec<_>>()));
+                let values = [<$ty>::MIN, -16385, -65, -64, -1, 0, 63, 64, 16384, <$ty>::MAX];
+                push!(case(&format!("{}-list-mixed-{n}", stringify!($ty)),
+                    (0..n).map(|i| values[i % values.len()]).collect::<Vec<_>>()));
+            }
+        })*};
+    }
+    signed_distributions!(i16, i32, i64);
+    macro_rules! unsigned_distributions {
+        ($($ty:ty),*) => {$({
+            for n in [1, 128, 4096] {
+                let values = [0, 127, 128, 16383, 16384, <$ty>::MAX];
+                push!(case(&format!("{}-list-mixed-{n}", stringify!($ty)),
+                    (0..n).map(|i| values[i % values.len()]).collect::<Vec<_>>()));
+            }
+        })*};
+    }
+    unsigned_distributions!(u16, u32, u64);
+    for n in [63, 64, 65, 129, 16383, 16384, 16385, 65535, 65537] {
+        push!(case(&format!("blob-random-{n}"), Blob(data(n))));
+    }
+    for n in [0, 1, 32, 127, 128] {
+        push!(case(&format!("generic-byte-vector-{n}"), data(n)));
+    }
+    for n in [0, 1, 1024] {
+        push!(case(
+            &format!("bool-list-{n}"),
+            (0..n).map(|i| i % 2 == 0).collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("optional-i64-list-{n}"),
+            (0..n)
+                .map(|i| if i % 3 == 0 { None } else { Some(-(i as i64)) })
+                .collect::<Vec<_>>()
+        ));
+        let singles = [0.0_f32, -0.0, f32::MIN_POSITIVE, f32::MAX, -1.5];
+        let doubles = [0.0_f64, -0.0, f64::MIN_POSITIVE, f64::MAX, -1.5];
+        push!(case(
+            &format!("f32-list-{n}"),
+            (0..n)
+                .map(|i| singles[i % singles.len()])
+                .collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("f64-list-{n}"),
+            (0..n)
+                .map(|i| doubles[i % doubles.len()])
+                .collect::<Vec<_>>()
+        ));
+    }
+    for n in [0, 1, 16, 128] {
+        push!(case(
+            &format!("nested-blobs-{n}"),
+            (0..n)
+                .map(|i| Blob(data([0, 1, 63, 64, 128, 4096][i % 6])))
+                .collect::<Vec<_>>()
+        ));
+    }
+    for n in [0, 1, 128] {
+        push!(case(
+            &format!("account-snapshot-{n}"),
+            AccountSnapshot {
+                id: 42,
+                owner: "account:benchmark".into(),
+                balance: 1_000_000_000_000,
+                delta: -65,
+                tags: [
+                    ("tier".into(), "standard".into()),
+                    ("region".into(), "eu".into())
+                ]
+                .into(),
+                events: (0..n)
+                    .map(|i| match i % 3 {
+                        0 => Event::Idle,
+                        1 => Event::Data(message(128)),
+                        _ => Event::Failure {
+                            code: 403,
+                            detail: "permission denied".into()
+                        },
+                    })
+                    .collect(),
+                samples: (0..n)
+                    .map(|i| if i % 2 == 0 { None } else { Some(-(i as i64)) })
+                    .collect(),
+                proofs: (0..n).map(|i| Blob(vec![i as u8; 32])).collect(),
+            }
+        ));
     }
     assert!(selected.is_none_or(|s| s < index), "unknown case");
     out

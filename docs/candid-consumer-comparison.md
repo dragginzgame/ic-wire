@@ -1,5 +1,8 @@
 # Consumer-shaped and derive-scaling comparisons
 
+For the current Serde codec, see the [full 0.6.7-candidate rerun](full-comparison-067.md),
+including all Toko and 1/10/100-record cohorts. The measurements below are historical.
+
 This study compares the pending 0.5.22 Wire runtime with the benchmark's selected
 Candid 0.10.39 through IC Platform 0.6.7. It does not build or modify Toko, import
 its database, or measure endpoint transport, database work, TypeScript or business

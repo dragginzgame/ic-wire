@@ -1,21 +1,20 @@
 # Current handoff
 
-## Current batch: shared i64 encoding
+## Current batch: full expanded Candid comparison
 
-0.6.6 is released at `6372a6a`; pending changes are under 0.6.7.
-The private adapter maps i64 to its identical zigzag u64 representation and
-reuses the unsigned writer. Original signed-type admission and bytes remain.
-Large small-i64 vectors save 48.78% opt-3 encode and 16.51% decode instructions;
-the standard/100-record fixtures shrink by 988/3,755 Wasm bytes at opt-3.
-All record encode/decode rows improve in both profiles; no standard opt-3 regression.
-Opt-z small-u64 encoding regresses up to 12.79%. See the
-[study](../integer-shortcut-study.md#067-share-the-i64-writer) for paired costs,
-100-record results, controls, rejected refinements and reproducible sources.
+Source `066b618` includes the pending 0.6.7 i64 optimization; workspace package
+versions still read 0.6.6. This batch adds sixty benchmark cases, taking the
+standard corpus to 214, plus ten Toko-shaped and 1/10/100-record cohorts.
+The [full comparison](../full-comparison-067.md) owns current results and source
+identity: native time, allocation counts, peak heap, IC instructions, wire bytes,
+and total/code-section uncompressed Wasm. Gzip measurement is removed.
+All five cohorts complete in both profiles: 1,340 paired encode/decode rows,
+7,598 IC rows and 24,672 native/instrumented rows. Cross-mode input/frame identities
+match; every IC row has three identical samples. Focused benchmark roundtrips,
+lint, Rust 1.91 checking and runner/format checks pass.
 
-Broader signed sharing and inlining remain research. Runtime boundary/borrowing,
-benchmark roundtrips, TypeScript/lint and native/Wasm MSRV checks pass.
-One production Serde/Postcard codec remains; protocol and acceptance rules are
-unchanged. No new native timing, heap or installed-consumer qualification.
+Production runtime, generator logic, protocol and acceptance rules are unchanged
+by this benchmark batch. One production Serde/Postcard codec remains.
 Versions, staging, commits, publication and releases remain maintainer-owned.
 
 ## Production contract
@@ -51,37 +50,23 @@ acceptance is complete from Wire's standalone conformance checks.
 
 ## Evidence and remaining costs
 
-The [production comparison](../candid-comparison.md#production-serde-hard-cut--pending-0523)
-measures 114 standard cases and 100 nominal record types against Candid, both
-profiles, with 4,958 stable IC rows plus input/frame hashes and uncompressed Wasm.
-Opt-3 100-type Wire total/code is 426,480/391,954 bytes versus Candid's
-2,079,944/2,010,763; all those record inputs encode/decode faster than Candid.
-Sixteen repeated structural widths do not predict installed application size.
-Historical evidence keeps its original 0.5.23 candidate labels and paths.
+At opt-3 in the expanded standard corpus, Wire wins 161/214 encodes and 155/214
+decodes by IC instructions. The whole Wasm fixture is 435,212 bytes versus
+Candid's 1,053,914. These case counts are not a production traffic weighting.
+Candid remains substantially faster for large primitive vectors: wide i16
+encoding is about 50x Wire/Candid, generic byte encoding 37x, and wide i64 decode
+9.55x. Owned 1 MiB blob decode is 2.37x; byte-oriented encoding is 0.50x.
 
-A universal within-3x goal is not met: large small-u64-list opt-3 encoding
-is still 10.46x Candid after the [0.6.5 optimization](../small-u64-study.md),
-and generic Vec<u8> encoding is 37x. Byte-oriented 1 MiB encode is 0.50x Candid;
-owned decode is 2.37x. Qualify integer/hash-array workloads and use byte-oriented
-opaque fields. Field representation changes can change budgets and client types.
+At opt-3, all ten Toko-shaped decode cases favor Wire; the 50-card projection encode is
+1.9% more expensive than Candid. Native timings vary between runs; the report
+keeps both medians and separates them from deterministic IC counts. Fixture
+sizes do not predict an installed application's footprint.
 
-Prior canonical-comparison experiments remain rejected: skipping comparison is
-invalid for custom Serde; unrolling saved 4.54% on opt-3 1 MiB decode but added
-570 Wasm bytes and regressed a small opt-z case by 11.04%. Retired finite blob and
-writer savings are historical only. No new performance claim accompanies cleanup.
-
-Focused runtime, borrowing, derive, diagnostics, strict lint, native/Wasm MSRV and
-default/TypeScript doctests passed for the preceding implementation batches.
-TypeScript checks cover 146 vectors, 29,536 mutations, 1 MiB buffer boundaries
-and seventeen generic/custom-scalar/byte/slice projection vectors. Full CI,
-macOS and installed consumer suites were not run in these audits.
+The [integer study](../integer-shortcut-study.md#067-share-the-i64-writer) retains
+the preceding matched optimization experiment and its opt-z tradeoffs.
+This expanded suite is a fresh comparison, not a before/after speedup claim.
+No full CI, macOS, installed-consumer or application-latency claim is made.
 
 Shared Tooling is 0.26.7 at `3e8d7cd`, with Build/Testkit/Host 0.65.0 and
-Platform 0.6.9 lock selections. Setup, snapshot, dependency-boundary/pin and
-disposable Make/release adapter checks pass; PocketIC startup verifies the new
-Testkit integration. Candid/PocketIC stay in unpublished benchmark dev dependencies;
-the runtime remains SDK/host-independent. Sibling checkouts are read-only.
-
-A separate Cargo.lock update to webpki-root-certs 1.0.11 appeared during this task
-and is preserved. Benchmark pairs use the archived released lock (1.0.10), not
-that unrelated host-certificate update. It is outside this optimization batch.
+Platform 0.6.9 lock selections. Candid/PocketIC remain unpublished benchmark
+dev dependencies; the runtime stays SDK/host-independent. Siblings are read-only.
