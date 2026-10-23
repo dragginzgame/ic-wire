@@ -1,5 +1,10 @@
 # Candid comparison suite
 
+The [0.6.10 scaling/blob study](scaling-blob-0610.md) measures packed fields across
+1/10/100 DTOs and rejects a larger owned-blob comparison loop after measuring its
+instruction, small-input and Wasm tradeoffs.
+
+
 The [production packed-i16 qualification](packed-i16-production.md) measures the
 explicit `PackedI16<N>` field against ordinary lists and Candid.
 

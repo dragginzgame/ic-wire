@@ -6,7 +6,7 @@ cd "$root"
 out="${1:-$root/target/codec-comparison}"
 case "$out" in /*) ;; *) out="$root/$out" ;; esac
 corpus="${CORPUS_FEATURE:-}"
-case "$corpus" in ""|toko|derive-scale|derive-scale-1|derive-scale-10|packed-i16|packed-i16-baseline) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
+case "$corpus" in ""|toko|derive-scale|derive-scale-1|derive-scale-10|packed-i16|packed-i16-baseline|packed-scale|packed-scale-shared|packed-scale,derive-scale-1|packed-scale,derive-scale-10|packed-scale-shared,derive-scale-1|packed-scale-shared,derive-scale-10) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
 extra="${corpus:+,$corpus}"
 mkdir "$out"
 mkdir -p "$out/source/scripts/ci"
@@ -47,7 +47,7 @@ for profile in evaluation benchmark-speed; do
     done
 done
 primary=wire-native
-case "$corpus" in derive-scale*) primary=wire-bounded;; esac
+case "$corpus" in derive-scale*|packed-scale*) primary=wire-bounded;; esac
 cargo run --locked -p ic-wire-benchmarks --example codec-report -- "$out" "$primary"
 if [ -n "${POCKET_IC_BIN:-}" ]; then
     cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features "wire,candid,ic$extra" -- "$out" > "$out/instructions.log" 2>&1

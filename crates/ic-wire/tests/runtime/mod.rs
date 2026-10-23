@@ -19,7 +19,7 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
     )]);
     let source =
         generate_registry(&types, std::slice::from_ref(&method), "./native-runtime.js").unwrap();
-    assert!(source.contains("\\\"check\\\":\\\"decimal\\\""));
+    assert!(source.contains("\"check\":\"decimal\""));
     assert!(source.contains("export type Atom = string;"));
     for check in [json!(null), json!(7), json!(true), json!([]), json!({})] {
         for node in [
@@ -35,7 +35,16 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
             );
         }
     }
-    for name in ["bad-name", "default", "as", "string", "createCodec", "JSON"] {
+    for name in [
+        "bad-name",
+        "default",
+        "as",
+        "string",
+        "eval",
+        "arguments",
+        "$types",
+        "$createCodec",
+    ] {
         let mut invalid = method.clone();
         invalid["name"] = json!(name);
         assert_eq!(

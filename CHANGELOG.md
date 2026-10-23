@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.10]
+
+- Allow registry declarations and method exports named `types`, `createCodec`
+  and `JSON`. Generated helpers use names outside the consumer identifier grammar;
+  registry literals preserve own `__proto__` properties without global JSON access.
+  Protocol bytes, payload acceptance and canonical retry rules are unchanged.
+- Add packed-field scaling cohorts for 1/10/100 derived records with shared or
+  varied bounds. Retain measured Wasm/IC evidence and reject a larger owned-blob
+  comparison loop because its modest large-input gain adds Wasm and slows small inputs.
+
 ## [0.6.9] - 2026-10-23
 
 - Fully qualify generated `Int16Array`, `Uint8Array` and `ReadonlyArray` types

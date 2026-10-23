@@ -75,9 +75,6 @@ fn identifier(name: &str) -> Result<(), GenerationError> {
             "unknown",
             "eval",
             "arguments",
-            "JSON",
-            "types",
-            "createCodec",
         ]
         .contains(&name)
     {
@@ -308,7 +305,7 @@ pub fn generate_registry(
 ) -> Result<String, GenerationError> {
     let mut remaining = 65536;
     let mut source = format!(
-        "// Generated from IC Wire metadata; edit the source contracts.\nimport {{ createCodec }} from {};\n",
+        "// Generated from IC Wire metadata; edit the source contracts.\nimport {{ createCodec as $createCodec }} from {};\n",
         json!(runtime_module)
     );
     for (name, node) in types {
@@ -317,12 +314,14 @@ pub fn generate_registry(
         source.push_str(&format!("export type {name} = {rendered};\n"));
     }
     validate_aliases(types)?;
-    // JSON.parse preserves an own __proto__ entry; an object literal would
-    // interpret that valid Serde name as a prototype mutation instead.
-    source.push_str(&format!(
-        "const types = JSON.parse({});\n",
-        json!(json!(types).to_string())
-    ));
+    // `$` is outside consumer identifiers, so helpers cannot capture exports.
+    // Computed __proto__ keys preserve the own properties JSON.parse previously
+    // produced. JSON escapes quotes inside strings, so this matches keys only.
+    // Registry meaning and wire schemas stay unchanged; no consumer migration.
+    let registry = json!(types)
+        .to_string()
+        .replace("\"__proto__\":", "[\"__proto__\"]:");
+    source.push_str(&format!("const $types = {registry};\n"));
     let mut names = BTreeSet::new();
     for method in methods {
         let name = text(method, "name")?;
@@ -358,7 +357,7 @@ pub fn generate_registry(
         let request = ty(&method["request"], types, 0, &mut remaining)?;
         let response = ty(&method["response"], types, 0, &mut remaining)?;
         source.push_str(&format!(
-            "export const {name} = (() => {{ const codec = createCodec({method}, types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): globalThis.Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: globalThis.Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): globalThis.Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: globalThis.Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();\n",
+            "export const {name} = (() => {{ const codec = $createCodec({method}, $types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): globalThis.Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: globalThis.Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): globalThis.Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: globalThis.Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();\n",
             name_json = json!(name), mode = method["mode"],
         ));
     }

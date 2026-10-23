@@ -1,10 +1,12 @@
-//! Nominally distinct records: six fields, sixteen byte-array widths, unique field labels.
+//! Nominally distinct six-field records with byte-array or packed-word cohorts.
 //! Each enabled type has a runtime-selectable codec path. All Wire records use the production Serde codec.
 use super::*;
 macro_rules! record {
     ($module:ident, $field:ident, $width:literal) => {
         mod $module {
             use super::*;
+            #[cfg(feature = "packed-scale")]
+            const PACKED_BOUND: usize = if cfg!(feature = "packed-scale-shared") { 16_384 } else { $width * 1024 };
             #[cfg(feature = "wire")]
             #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
             struct WireRecord {
@@ -12,7 +14,10 @@ macro_rules! record {
                 active: bool,
                 delta: i64,
                 optional: Option<u64>,
+                #[cfg(not(feature = "packed-scale"))]
                 bytes: [u8; $width],
+                #[cfg(feature = "packed-scale")]
+                samples: ic_wire::PackedI16<PACKED_BOUND>,
                 label: ic_wire::Text<64>,
             }
             #[cfg(feature = "candid")]
@@ -23,25 +28,41 @@ macro_rules! record {
                 active: bool,
                 delta: i64,
                 optional: Option<u64>,
+                #[cfg(not(feature = "packed-scale"))]
                 bytes: [u8; $width],
+                #[cfg(feature = "packed-scale")]
+                samples: Vec<i16>,
                 label: String,
             }
             pub(super) fn build() -> Case {
                 let mut lanes = Vec::new();
-                let input_json = serde_json::to_vec(&serde_json::json!({
+                let mut input = serde_json::json!({
                     stringify!($field): 1_000_000_u64, "active": true, "delta": -65,
                     "optional": 128, "bytes": vec![42_u8; $width], "label": "Representative record"
-                })).unwrap();
+                });
+                if cfg!(feature = "packed-scale") {
+                    input.as_object_mut().unwrap().remove("bytes");
+                    input["samples"] = serde_json::json!(vec![i16::MAX; 8]);
+                }
+                let input_json = serde_json::to_vec(&input).unwrap();
                 #[cfg(feature = "wire")]
                 lanes.push(lane("wire-bounded", Rc::new(WireRecord {
                     $field: 1_000_000, active: true, delta: -65, optional: Some(128),
-                    bytes: [42; $width], label: ic_wire::Text::new("Representative record".into()).unwrap(),
+                    #[cfg(not(feature = "packed-scale"))]
+                    bytes: [42; $width],
+                    #[cfg(feature = "packed-scale")]
+                    samples: ic_wire::PackedI16::new(vec![i16::MAX; 8]).unwrap(),
+                    label: ic_wire::Text::new("Representative record".into()).unwrap(),
                 }), |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
                     |b| ic_wire::native::decode_request::<WireRecord>(METHOD, b, LIMITS).ok()));
                 #[cfg(feature = "candid")]
                 lanes.push(lane("candid", Rc::new(CandidRecord {
                     $field: 1_000_000, active: true, delta: -65, optional: Some(128),
-                    bytes: [42; $width], label: "Representative record".into(),
+                    #[cfg(not(feature = "packed-scale"))]
+                    bytes: [42; $width],
+                    #[cfg(feature = "packed-scale")]
+                    samples: vec![i16::MAX; 8],
+                    label: "Representative record".into(),
                 }), |v| ic_platform::candid::contract::encode_one(v).unwrap(),
                     |b| ic_platform::candid::decode_exactly_one(b, CANDID_LIMITS).ok()));
                 Case { name: stringify!($module).into(), input_json, lanes }

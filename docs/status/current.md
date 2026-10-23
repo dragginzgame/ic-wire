@@ -1,17 +1,24 @@
 # Current handoff
 
-## Current batch: 0.6.9 audit fixes
+## Current batch: 0.6.10 generator cleanup and measurements
 
-0.6.8 is released at `58527ce`; pending fixes are recorded under 0.6.9.
-The metadata generator qualifies Int16Array, Uint8Array and ReadonlyArray through
-globalThis instead of reserving those names. Consumer aliases and method exports
-can share built-in names without shadowing generated field or frame types.
-Both native and IC benchmark identities now hash the packed-i16 fixture source.
-Runtime encoding, protocol acceptance, canonical hashing and retry bytes are unchanged.
-The built-in name fixtures fail with the reservation-based fix and pass with
-qualified types, including a consumer declaration named globalThis. TypeScript conformance
-passes 149 vectors and 30,172 mutations; both measurement runners pass strict
-Clippy. No codec performance claim or full benchmark rerun is part of this batch.
+0.6.9 is released at `c0841e7`; pending work is recorded under 0.6.10.
+The generator accepts types/createCodec/JSON names, uses `$`-prefixed helpers,
+and preserves own __proto__ properties through computed registry-literal keys.
+Built-in types remain qualified; conformance compiles and executes colliding exports.
+
+The [scaling/blob study](../scaling-blob-0610.md) owns matched sources, repeated
+samples, instructions and uncompressed Wasm/code sizes. Host generation improves
+16–19% in the measured 1/100-type controls. At 100 DTOs, opt-z Wire is 263,834
+bytes with a shared packed bound and 292,476 with sixteen bounds, versus
+1,283,379 for Candid. Limits must continue to describe actual consumer contracts.
+The 256-byte owned-blob comparison experiment is rejected: only 4.9–6.2% fewer
+large-decode instructions, +482–579 Wasm bytes, and slower small inputs.
+Production codec, payload acceptance, canonical hashing and retry bytes are unchanged.
+
+TypeScript conformance, scaling roundtrips, strict Clippy and Rust 1.91 checks pass.
+No installed-consumer, big-endian or full CI qualification is claimed.
+Versions, staging, commits and releases remain maintainer-owned.
 
 ## Released packed-i16 production field
 

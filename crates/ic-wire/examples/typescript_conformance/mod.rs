@@ -206,6 +206,9 @@ fn main() {
             serde_json::json!({"k":"list","item":{"k":"u","bits":16}}),
         ),
         ("globalThis", serde_json::json!({"k":"unit"})),
+        ("JSON", serde_json::json!({"k":"unit"})),
+        ("types", serde_json::json!({"k":"unit"})),
+        ("createCodec", serde_json::json!({"k":"unit"})),
     ] {
         types.insert(name.into(), schema);
     }
@@ -220,7 +223,15 @@ fn main() {
         "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
         "requestDepth":8,"responseDepth":8});
     // Method exports live in the value namespace; compile their signatures too.
-    for name in ["Int16Array", "Uint8Array", "ReadonlyArray", "globalThis"] {
+    for name in [
+        "Int16Array",
+        "Uint8Array",
+        "ReadonlyArray",
+        "globalThis",
+        "JSON",
+        "types",
+        "createCodec",
+    ] {
         let mut shadow = method.clone();
         shadow["name"] = serde_json::json!(name);
         shadow["request"] = serde_json::json!({"k":"packed-i16","max":8});
@@ -431,6 +442,9 @@ fn main() {
     .unwrap();
     writeln!(f.checks, "console.log('Rust/TypeScript conformance: {} vectors, both directions, truncation and identity rejection passed');", f.count).unwrap();
     writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and canonical re-encode checks passed');", f.mutations).unwrap();
+    for name in ["JSON", "types", "createCodec", "globalThis"] {
+        writeln!(f.checks, "{{ const module = await import('./compiled/shadow-{name}.js'); const codec = module['{name}']; const value = new Int16Array([-32768, 32767]); assert.deepEqual(codec.decodeRequest(codec.encodeRequest(value)), value); }}").unwrap();
+    }
     f.checks.push_str(&large_bytes::generate(&f.directory));
     f.checks.push_str(&native_schema::generate(&f.directory));
     fs::write(f.directory.join("checks.mjs"), f.checks).unwrap();

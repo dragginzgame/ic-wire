@@ -20,6 +20,8 @@ toko = []
 # Benchmark cohort selection, never a production codec mode.
 packed-i16 = []
 packed-i16-baseline = ["packed-i16"]
+packed-scale = ["derive-scale"]
+packed-scale-shared = ["packed-scale"]
 derive-scale = []
 derive-scale-1 = ["derive-scale"]
 derive-scale-10 = ["derive-scale"]

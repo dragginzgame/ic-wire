@@ -1,0 +1,6 @@
+{
+  "baseline_revision": "c0841e7 (0.6.9)",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "lock_sha256": "3849be792c870f8ab40e8ab6f68b900fa701212b9bfbaea32e1495ebd9cfeeee",
+  "notes": "Scale cohorts use same records/values, 1/10/100 types and 1 versus up to 16 packed bounds. Blob experiment uses isolated ten-case fixture and exact 64 versus 256-byte canonical comparison. Generator times are host generation, not codec or IC time. Sources, samples, scripts and identities archived."
+}
