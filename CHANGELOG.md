@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.8]
+## [0.6.8] - 2026-10-23
 
 - Add bounded `PackedI16<N>` Serde fields and matching `Int16Array` TypeScript
   metadata/codecs, using safe bulk byte views for little-endian encoding and
