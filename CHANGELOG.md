@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.12]
+## [0.6.12] - 2026-10-24
 
 - Restore deterministic packed fuzz seeds on every run, without requiring the
   archived corpus. Add Rust endian-helper tests and simulated big-endian
