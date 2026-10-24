@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.13]
+## [0.6.13] - 2026-10-24
 
 - Add five mixed blob/packed-integer/string/optional records to hotspot
   qualification (87 cases). Isolate canonical comparison costs and reject two
