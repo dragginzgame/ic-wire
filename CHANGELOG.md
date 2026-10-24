@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.1]
+## [0.7.1] - 2026-10-24
 
 - Add opt-in host schema advice for ordinary primitive lists, exact-path
   acknowledgements with reasons, stale-acknowledgement detection and a
