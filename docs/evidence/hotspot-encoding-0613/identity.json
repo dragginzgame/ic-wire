@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "source_head": "f470bcd9c72a08c4942b38258d9bcd42a8c6858c",
+  "files": {
+    "README.md": {
+      "bytes": 1782,
+      "sha256": "fde09f44cfa45ce310e0c6582ec9c2835cb253542d2a4c1e41da2313481c455e"
+    },
+    "standard-changes.csv": {
+      "bytes": 423408,
+      "sha256": "e434fd7fd2515831e353fdc7e8806b6651ca3a70c1884b046e2458472c0d9394"
+    },
+    "wasm.csv": {
+      "bytes": 5193,
+      "sha256": "16eaef90a3d201e6ffbff74ff8e973d16e31912fedb2efc565a8da509567026f"
+    },
+    "hotspots-changes.csv": {
+      "bytes": 609606,
+      "sha256": "d7d9216374f8635441b55f423487ecf3f31b95fcc2542e75024f7723c9fd9c7a"
+    },
+    "hotspots-instructions.csv": {
+      "bytes": 835533,
+      "sha256": "7e27fd250394bf05170659ff170318c831a269e9df8486988d850a570fbcb421"
+    },
+    "native-changes.csv": {
+      "bytes": 167736,
+      "sha256": "2f79adb98a929d9fac65c78281ffc014d0486e102a368f004f44b238b829a801"
+    },
+    "raw.tar.gz": {
+      "bytes": 4578978,
+      "sha256": "9b150030979230b8819ee2916372c7278648b354c64801fc9a596114eed35479"
+    },
+    "checks.json": {
+      "bytes": 564,
+      "sha256": "af0a85e1be2a8d2d37efaf9ba19ce05701b4276a702a20d9e7c65444499312a1"
+    }
+  },
+  "checks": {
+    "hotspots": {
+      "variants": 10,
+      "cases_per_variant": 50,
+      "rows": 11000,
+      "samples_per_row": 3,
+      "identical_frames_and_inputs": true,
+      "identical_repeated_counters": true
+    },
+    "wasm": {
+      "artifacts": 48,
+      "sizes_and_hashes_validated": true
+    },
+    "standard": {
+      "cases": 298,
+      "rows_per_variant": 7006,
+      "identical_frames_and_inputs": true,
+      "identical_repeated_counters": true
+    },
+    "native": {
+      "runs": 2,
+      "samples": 11,
+      "minimum_batch_ms": 2,
+      "identical_frames_and_inputs": true,
+      "rows": 3600
+    }
+  },
+  "raw_contents": "Sources/overlays, source hashes, compiler/lock/parameters, all IC/native samples and identities, Wasm artifacts, logs and replay helpers. Native inputs/frames are reproducible from fixtures and validated hashes, not duplicated per timing run."
+}

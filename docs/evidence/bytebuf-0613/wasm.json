@@ -1,0 +1,30 @@
+[
+  {
+    "variant": "before",
+    "profile": "evaluation",
+    "total": 76520,
+    "code": 66243,
+    "sha256": "2140e4b18081e7ea71d5f5fc4b8822435c8f46db68ac232d6f7eed1504e27baa"
+  },
+  {
+    "variant": "after",
+    "profile": "evaluation",
+    "total": 76520,
+    "code": 66243,
+    "sha256": "98ea41d3372274956491e0d3d4ced94fd8307a3891a069e7ea4a9f07cdbd893b"
+  },
+  {
+    "variant": "before",
+    "profile": "benchmark-speed",
+    "total": 97507,
+    "code": 87860,
+    "sha256": "423464486f549d2503604fac24fb51d7816f162780b6962edc4efea76bcfd7e3"
+  },
+  {
+    "variant": "after",
+    "profile": "benchmark-speed",
+    "total": 97507,
+    "code": 87860,
+    "sha256": "423464486f549d2503604fac24fb51d7816f162780b6962edc4efea76bcfd7e3"
+  }
+]

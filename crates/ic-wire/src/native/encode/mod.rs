@@ -64,7 +64,6 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     forward_scalar! {
         serialize_bool: bool,
         serialize_i8: i8,
-        serialize_i16: i16,
         serialize_i32: i32,
         serialize_i128: i128,
         serialize_u8: u8,
@@ -72,6 +71,29 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         serialize_f32: f32,
         serialize_f64: f64,
         serialize_char: char,
+    }
+    // The private adapter only wraps Postcard serializers, including sizing and
+    // canonical comparison. Previously i16 used its temporary varint buffer;
+    // emit the same zigzag varint through a prefix-free tuple of raw u8 values.
+    // Admission still charges the original i16, not the implementation
+    // bytes. Payloads (-64 -> 7f, 64 -> 80 01, 32767 -> fe ff 03), canonical
+    // acceptance, limits, hashes and retry bytes are unchanged; no migration.
+    fn serialize_i16(self, value: i16) -> Result<Self::Ok, Self::Error> {
+        let value = ((value << 1) ^ (value >> 15)) as u16;
+        if value < 128 {
+            return self.inner.serialize_u8(value as u8);
+        }
+        let mut tuple = self
+            .inner
+            .serialize_tuple(if value < 16384 { 2 } else { 3 })?;
+        ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+        if value < 16384 {
+            ser::SerializeTuple::serialize_element(&mut tuple, &((value >> 7) as u8))?;
+        } else {
+            ser::SerializeTuple::serialize_element(&mut tuple, &(((value >> 7) as u8) | 128))?;
+            ser::SerializeTuple::serialize_element(&mut tuple, &((value >> 14) as u8))?;
+        }
+        ser::SerializeTuple::end(tuple)
     }
     // Previously i64 used Postcard's separate signed varint writer. Apply its
     // identical zigzag mapping, then reuse our u64 writer and one-byte shortcut.

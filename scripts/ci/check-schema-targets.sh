@@ -24,6 +24,7 @@ serde = { version = "1.0", default-features = false, features = ["derive", "allo
 EOF_MANIFEST
 export CARGO_TARGET_DIR="$root/target/schema-targets/build"
 cargo metadata --offline --format-version 1 --manifest-path "$fixture/Cargo.toml" > "$fixture/metadata.json"
+cargo test --locked --offline --manifest-path "$fixture/Cargo.toml"
 cargo test --locked --offline --manifest-path "$fixture/Cargo.toml" --features wire-schema
 for features in '' wire-schema; do
     options=()
@@ -31,8 +32,15 @@ for features in '' wire-schema; do
     cargo check --locked --offline --manifest-path "$fixture/Cargo.toml" --target wasm32-unknown-unknown "${options[@]}"
     cargo tree --locked --offline --manifest-path "$fixture/Cargo.toml" --target wasm32-unknown-unknown \
         -e normal --prefix none --format '{p}' "${options[@]}" > "$fixture/wasm-${features:-runtime}.txt"
-    if rg '^serde_(json|bytes) v' "$fixture/wasm-${features:-runtime}.txt"; then
+    if rg '^serde_json v' "$fixture/wasm-${features:-runtime}.txt"; then
         echo 'Host metadata dependency leaked into the Wasm runtime graph' >&2
+        exit 1
+    fi
+    # ByteBuf is a runtime dependency now; keep its alloc-only feature boundary.
+    cargo tree --locked --offline --manifest-path "$fixture/Cargo.toml" --target wasm32-unknown-unknown \
+        -e normal --prefix none --format '{p} features={f}' "${options[@]}" > "$fixture/wasm-${features:-runtime}-features.txt"
+    if ! rg -q '^serde_bytes v[^ ]+ features=alloc$' "$fixture/wasm-${features:-runtime}-features.txt"; then
+        echo 'ByteBuf requires the alloc-only serde_bytes runtime dependency' >&2
         exit 1
     fi
 done

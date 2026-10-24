@@ -2,16 +2,60 @@
 
 ## [0.6.13]
 
+- Add five mixed blob/packed-integer/string/optional records to hotspot
+  qualification (87 cases). Isolate canonical comparison costs and reject two
+  exact comparison alternatives after matched instruction and Wasm measurements.
+  No runtime, wire-byte, admission or canonical-acceptance change is retained.
+
+- Expand hotspot qualification from 50 to 82 cases with byte-buffer block
+  boundaries. Record and reject larger canonical-comparison blocks: modest
+  large-buffer instruction savings cost extra Wasm and regress small inputs.
+  Production codec, protocol bytes, admission and canonical checks are unchanged.
+
+- Expose `ic_wire::ByteBuf` as the standard `serde_bytes::ByteBuf` type, with
+  alloc-only runtime support and native TypeScript byte metadata. Consumers need
+  only ic-wire and Serde for owned bulk byte fields. Qualify the public path in
+  no_std native/Wasm consumer builds, exact frames and TypeScript conformance.
+  Existing byte-buffer encoding/admission and canonical checks are unchanged;
+  ordinary `Vec<u8>` still uses per-element traversal unless explicitly adapted.
+
+- Make byte-oriented binary fields and packed integer/hash arrays the default
+  guidance for new bulk contracts. Add a compiled mixed-DTO quickstart and
+  Rust/TypeScript conformance for empty, singleton and multi-element values;
+  retain ordinary collections for general shapes and compact small values.
+  Document coordinated field adoption, client types and preserved bounds.
+  This guidance/qualification batch changes no production encoding or admission;
+  existing fields are not automatically rewritten.
+
+- Reduce ordinary i16 encoding costs with a direct, byte-identical Postcard
+  varint writer. Matched standard-corpus wide-list IC encoding falls 54% at
+  opt-z and 34% at opt-3; the standard Wasm grows 370/673 bytes. Record the
+  opt-z small-u16 instruction and native wide-i16 decoding regressions, rejected
+  alternatives and repeated measurements. Add a focused hotspot corpus.
+  Protocol, schemas, admission, canonical hashing and retry bytes are unchanged
+  (`32767_i16` remains `fe ff 03`); no consumer migration is required.
+
+- Expand and rerun the Wire/Candid matrix: 21 cohorts, 1,101 overlapping case
+  entries, both profiles, IC instructions, frame bytes, native timing/memory and
+  84 uncompressed Wasm artifacts. Add integer/container/generic/mixed-bulk cases
+  and a reproducible full runner. Preserve all wins, losses and matched controls;
+  production codec, wire bytes, acceptance rules and hashing are unchanged.
+
 - Keep TypeScript metadata and its optional dependencies native-only even when
   a consumer forwards the schema feature into a Wasm build. Derives still leave
   Serde implementations and runtime codecs available. Add consumer/graph checks
   alongside existing strict TypeScript conformance. Fixes the remaining feature
   boundary in [#17](https://github.com/dragginzgame/ic-wire/issues/17); wire bytes,
   acceptance rules, canonical hashing and limits are unchanged.
-- Adopt Shared Tooling 0.26.9 at `3657c044`, including the reviewed Cargo setup
-  owner-withdrawal and cache-initialization corrections requested by
-  [#18](https://github.com/dragginzgame/ic-wire/issues/18). Preserve tool pins and
-  explicitly re-prepare Cargo tools for the changed build-policy identity.
+- Adopt Shared Tooling commit `4c0f198e` (recorded VERSION 0.26.10), including
+  Cargo setup phase/timing diagnostics, literal tool catalogs and aggregate tool
+  diagnostics. Keep the canonical snapshot and common external IC guard. The
+  supplier's new changes are headed 0.26.11, while its committed VERSION remains
+  0.26.10; retain exact revision-based provenance.
+- Adopt IC Tooling 0.67.0 for Build/Host/Testkit qualification and the release
+  metadata editor. Preserve native-only dependency roles and existing feature
+  selections. Codec bytes, admission, hashing and production runtime are unchanged.
+
 
 ## [0.6.12] - 2026-10-24
 

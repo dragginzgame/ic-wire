@@ -6,7 +6,7 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.66.0
+RELEASE_EDITOR_VERSION := 0.67.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -28,9 +28,12 @@ check-package:
 	+@$(MAKE) lint
 	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
 
-.PHONY: evaluate-codecs evaluate-codec-instructions check-benchmarks
+.PHONY: evaluate-codecs evaluate-codec-matrix evaluate-codec-instructions check-benchmarks
 evaluate-codecs:
 	+@bash scripts/ci/evaluate-codecs.sh "$(CURDIR)/target/codec-comparison"
+
+evaluate-codec-matrix:
+	+@bash scripts/ci/evaluate-codec-matrix.sh "$(CURDIR)/target/codec-matrix"
 
 evaluate-codec-instructions:
 	+@env cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features wire,candid,ic -- "$(CURDIR)/target/codec-comparison"
@@ -47,11 +50,11 @@ check-benchmarks:
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
+	+@for corpus in hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
 	    cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --test roundtrip && \
 	    cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
+	+@for corpus in hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" && \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
@@ -87,7 +90,7 @@ help:
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
-		'Evaluation: evaluate-codecs (Candid comparison: timing, allocation, peak heap, Wasm size)' \
+		'Evaluation: evaluate-codecs / evaluate-codec-matrix (timing, heap, Wasm, explicit PocketIC)' \
 		'Qualification: check-benchmarks (comparison corpus, lint and MSRV)' \
 		'Evaluation: evaluate-allocation (borrowing, buffers and bounded/packed layouts)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
@@ -118,11 +121,11 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md docs/history/candid-comparison.md docs/packed-fields.md docs/packed-consolidation-0611.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/full-comparison-0613.md docs/hotspot-encoding-0613.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md docs/history/candid-comparison.md docs/packed-fields.md docs/packed-consolidation-0611.md
 
 .PHONY: check-boundary
 check-boundary:
-	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)"
+	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 
 check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"

@@ -1,0 +1,32 @@
+{
+  "before": {
+    "evaluation": {
+      "total": 76520,
+      "code": 66243
+    },
+    "benchmark-speed": {
+      "total": 97507,
+      "code": 87860
+    }
+  },
+  "block128": {
+    "evaluation": {
+      "total": 76682,
+      "code": 66405
+    },
+    "benchmark-speed": {
+      "total": 97766,
+      "code": 88119
+    }
+  },
+  "block256": {
+    "evaluation": {
+      "total": 77002,
+      "code": 66725
+    },
+    "benchmark-speed": {
+      "total": 98086,
+      "code": 88439
+    }
+  }
+}

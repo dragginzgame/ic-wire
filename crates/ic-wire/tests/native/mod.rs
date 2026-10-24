@@ -87,6 +87,9 @@ fn integer_shortcuts_preserve_postcard_bytes_and_original_budgets() {
         }};
     }
     check_values!(u16, 0..=u16::MAX);
+    // Exhaust the signed domain too: the direct writer must preserve all three
+    // varint widths and charge i16 admission rather than its raw output bytes.
+    check_values!(i16, i16::MIN..=i16::MAX);
     let mut values: Vec<u32> = (0..=255).collect();
     for shift in (7..32).step_by(7) {
         let boundary = 1_u32 << shift;

@@ -20,9 +20,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.64.1 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.67.0 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.64.1 without default features; the CLI feature is only enabled for installation.
+0.67.0 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -54,11 +54,13 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
 | `check-qualification` | Allocation/borrowing fixtures and qualification lint/floor checks |
 | `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
+| `evaluate-codec-matrix` | Full 21-cohort Wire/Candid matrix; requires explicit prepared PocketIC |
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
 | `fmt-check` | Grouped manifests, derive order and Rust formatting |
-| `check-pins`, `check-boundary` | Dependency inheritance/pins and private-control ownership |
+| `check-pins`, `check-boundary` | Dependency inheritance/pins, common external IC guard and private-control ownership |
 | `shared-tooling-check` | Recorded snapshot bytes and modes |
+| `tools-report` | Aggregate offline host/Cargo/local-tool diagnostics; runs every checker |
 | `check-doc-links` | Maintained local documentation references |
 | `check-tooling`, `check-release` | Disposable Make/hook and release-adapter fixtures |
 
@@ -84,7 +86,9 @@ supported host. The target also runs feature-enabled Rust runtime/borrowed tests
 strict Clippy and the generator's Rust 1.91 library check. It also runs a disposable
 consumer that forwards a local schema feature: native metadata and exact runtime
 frames must work, while Wasm builds with and without forwarding exclude Wire's
-optional `serde_json`/`serde_bytes` metadata dependencies from the normal graph.
+optional `serde_json` metadata dependency from the normal graph. The consumer
+uses `ic_wire::ByteBuf` without a direct serde_bytes dependency, and the check
+requires serde_bytes with only its `alloc` feature in the Wasm runtime graph.
 The forwarded Wasm build is checked on Rust 1.91 too. Run only this boundary check
 with `bash scripts/ci/check-schema-targets.sh`; evidence remains under
 `target/schema-targets/`. These graph checks do not measure installed Wasm size.
@@ -200,6 +204,20 @@ compilation distinct from runtime performance or consumer deployment acceptance.
 ## Candid comparison benchmarks
 
 Run `make check-benchmarks` for corpus correctness, lint and Rust 1.91 checks.
+For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
+prepared server and run `make evaluate-codec-matrix`. The 21 cohorts cover the
+standard/Toko corpora, 1/10/100 ordinary derived records, bounded packed-i16 and
+ordinary controls, shared/varied bound records, and generic packed integer/hash
+fields plus matching ordinary controls and 1/10/100-record scaling. These are
+benchmark cohorts within the one codec, not selectable production strategies.
+
+The runner freezes source/lock before measurement, requires a fresh output
+folder, runs cohorts serially and retains both optimization profiles, two native
+runs of eleven samples, allocation/peak-heap probes, raw Wasm/code sizes and IC
+counters. Native and IC measurements remain separate. Prepare locked dependencies
+first; the full runner is offline. Use `bash scripts/ci/evaluate-codec-matrix.sh
+NEW_OUTPUT` for another run. It is an explicit experiment, outside ordinary CI.
+
 Run `make evaluate-codecs` for native timing, allocation counts, peak live heap
 and Wasm footprint under both optimization profiles. It requires the prepared
 `wasm32-unknown-unknown` target, `gzip` and `shasum`; it does not install tools.
@@ -209,11 +227,14 @@ downloads it implicitly. Output directories must not already exist. Use
 `bash scripts/ci/evaluate-codecs.sh target/another-run` to retain another run.
 See [methodology and results](candid-comparison.md) before interpreting ratios.
 
-The optional `CORPUS_FEATURE` selects `toko`, `derive-scale-1`,
+The optional `CORPUS_FEATURE` selects `hotspots` (ordinary integer/byte lists
+with empty, singleton and byte-buffer controls), `toko`, `derive-scale-1`,
 `derive-scale-10`, or `derive-scale` (100 distinct types). Omit it for the
 standard corpus. Each selection uses the same runner and separate codec artifacts:
 
 ```sh
+CORPUS_FEATURE=hotspots POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh target/hotspot-comparison
 CORPUS_FEATURE=toko POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/toko-comparison
 CORPUS_FEATURE=derive-scale POCKET_IC_BIN=/path/to/pocket-ic \

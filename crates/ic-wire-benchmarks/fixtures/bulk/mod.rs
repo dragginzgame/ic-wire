@@ -102,6 +102,63 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
             }
         ));
     }
+    macro_rules! signed {
+        ($($ty:ty),*) => {$(for n in [1, 128, 16384] {
+            for mixed in [false, true] {
+                push!({let choices = [<$ty>::MIN, -65, -1, 0, 64, <$ty>::MAX];
+                    let values: Vec<$ty> = (0..n).map(|i| if mixed { choices[i % choices.len()] } else { -1 - (i % 64) as $ty }).collect();
+                    paired(format!("{}-{}-{n}", stringify!($ty), if mixed { "mixed" } else { "negative" }), values, |v| field(v.clone()))});
+            }
+        })*};
+    }
+    signed!(i16, i32, i64);
+    macro_rules! unsigned {
+        ($($ty:ty),*) => {$(for n in [1, 128, 16384] {
+            push!({let choices = [0, 127, 128, 16383, 16384, <$ty>::MAX];
+                let values: Vec<$ty> = (0..n).map(|i| choices[i % choices.len()]).collect();
+                paired(format!("{}-mixed-{n}", stringify!($ty)), values, |v| field(v.clone()))});
+        })*};
+    }
+    unsigned!(u16, u32, u64);
+    for n in [0, 1, 16, 1024] {
+        push!(paired(
+            format!("mixed-envelope-{n}"),
+            BulkEnvelope {
+                id: u128::MAX,
+                signed: vec![i16::MIN; n * 8],
+                unsigned: vec![u64::MAX; n * 8],
+                hashes: (0..n).map(|i| [i as u8; 32]).collect::<Vec<_>>(),
+                headers: vec![
+                    ("Content-Type".into(), "application/octet-stream".into()),
+                    ("X-Object".into(), "Mixed fixture".into())
+                ],
+                cursor: Some("next-page".into()),
+                events: vec![GenericEvent::Value(128_u64), GenericEvent::Empty],
+            },
+            |v| BulkEnvelope {
+                id: v.id,
+                signed: field(v.signed.clone()),
+                unsigned: field(v.unsigned.clone()),
+                hashes: field(v.hashes.clone()),
+                headers: v.headers.clone(),
+                cursor: v.cursor.clone(),
+                events: vec![GenericEvent::Value(128_u64), GenericEvent::Empty],
+            }
+        ));
+    }
     assert!(selected.is_none_or(|s| s < index));
     out
+}
+
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+struct BulkEnvelope<S, U, H> {
+    id: u128,
+    signed: S,
+    unsigned: U,
+    hashes: H,
+    headers: Vec<(String, String)>,
+    cursor: Option<String>,
+    events: Vec<GenericEvent<u64>>,
 }

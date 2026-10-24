@@ -19,6 +19,16 @@ pub use bounded::{Bytes, BytesRef, List, PackedI16, Text, TextRef};
 pub use float::{FiniteF32, FiniteF64};
 pub use ic_wire_derive::Wire;
 
+/// Owned binary data using Serde's bulk byte-buffer representation.
+///
+/// This is the same type as `serde_bytes::ByteBuf`, available without a separate
+/// consumer dependency. Use [`Bytes<N>`] when the field needs a byte limit.
+/// Native [`Limits`] still apply; TypeScript metadata projects to `Uint8Array`.
+/// Compared with `Vec<u8>`, bytes are identical but admission is bulk rather
+/// than per-element. Existing ByteBuf bytes, limits and canonical checks are
+/// unchanged by this re-export; no migration is needed from serde_bytes::ByteBuf.
+pub use serde_bytes::ByteBuf;
+
 /// Implementation dependencies used by generated contracts.
 #[doc(hidden)]
 pub mod __private {

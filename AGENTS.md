@@ -5,7 +5,7 @@ Read docs/status/current.md first, then README.md, docs/design.md and
 Rust integration; see docs/runtime.md for its implemented contract.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `3657c044c0e91321effe8835989491a4cd0b5cba` (0.26.9).
+rules, vendored at `4c0f198e56d4c6d27b12a5c2d515e0e01070151e` (recorded version 0.26.10).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot
@@ -25,6 +25,11 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
   dependencies, with IC Testkit owning server admission/lifecycle. Do not add
   endpoint SDKs or browser transports; application integration belongs to consumers.
 - Use one selected wire encoding, not a configurable codec framework.
+- Default new contract examples to byte-oriented fields for binary data and
+  `Packed<T>` for large homogeneous supported integer/hash arrays. Keep ordinary
+  collections for general records and small-value varint use cases. Preserve
+  explicit field bounds; existing declarations require coordinated adoption.
+  Keep ordinary-vector benchmark controls visible; do not silently rewrite Serde.
 - Canic, Relay and IcyDB retain their own contracts and runtime semantics.
 - IcyDB database storage/key encodings are outside initial scope.
 - Maintainer-operated releases use direct Git delivery to origin/main through

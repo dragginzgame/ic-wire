@@ -14,11 +14,12 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "toko",
         feature = "derive-scale",
         feature = "packed-i16",
-        feature = "bulk"
+        feature = "bulk",
+        feature = "hotspots"
     )))]
     assert!(cases.len() >= 100);
     #[cfg(feature = "bulk")]
-    assert_eq!(cases.len(), 68);
+    assert_eq!(cases.len(), 99);
     #[cfg(feature = "toko")]
     assert_eq!(cases.len(), 10);
     #[cfg(feature = "derive-scale")]
@@ -36,7 +37,8 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "toko",
         feature = "derive-scale",
         feature = "packed-i16",
-        feature = "bulk"
+        feature = "bulk",
+        feature = "hotspots"
     )))]
     for length in [4096, 1_048_576] {
         let vector = cases

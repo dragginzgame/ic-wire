@@ -37,6 +37,61 @@ Consumers own declaration order, compatible method IDs, deterministic serializer
 and domain validation (including finite floats where required). Unordered maps
 are unsuitable unless their serializer establishes deterministic ordering.
 
+### Choose fields for bulk data
+
+Use these defaults when declaring a new contract:
+
+| Data | Default field | TypeScript shape |
+| --- | --- | --- |
+| Binary data with a field limit | `Bytes<N>` | `Uint8Array` |
+| Binary data with operation-level limits | `ic_wire::ByteBuf` or `Vec<u8>` with `#[serde(with = "serde_bytes")]` | `Uint8Array` |
+| Large homogeneous integer arrays | `Packed<T>` with `i16`, `u16`, `i32`, `u32`, `i64` or `u64` | Corresponding integer typed array |
+| Lists of 32-byte hashes | `Packed<[u8; 32]>` | Flat `Uint8Array` |
+| Records, general collections or small-value varints | Ordinary `Vec<T>` or bounded `List<T,N>` | Array of element values |
+
+The bulk fields use Serde's byte-buffer hook within the same Postcard codec.
+Ordinary sequences visit each element; the metadata derive does not rewrite
+them. A large list of small integers may still favor ordinary varints for payload
+size. `PackedI16<N>` remains available when a signed-16-bit field requires an
+element bound; generic `Packed<T>` has no per-field maximum.
+Choose one representation per field for all values, including empty and small
+inputs; do not switch layouts according to the current value's length.
+
+This complete DTO combines the recommended fields with an ordinary collection:
+
+```rust
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "typescript", derive(ic_wire::Wire))]
+struct BulkTransfer {
+    payload: ic_wire::Bytes<4096>,
+    samples: ic_wire::Packed<i16>,
+    chunk_hashes: ic_wire::Packed<[u8; 32]>,
+    labels: Vec<String>,
+}
+let transfer = BulkTransfer {
+    payload: ic_wire::Bytes::new(vec![42; 1024])?,
+    samples: ic_wire::Packed::new(vec![i16::MAX; 1024]),
+    chunk_hashes: ic_wire::Packed::new(vec![[0xab; 32]; 32]),
+    labels: vec!["sensor".into()],
+};
+let limits = ic_wire::Limits {
+    bytes: 16 * 1024, allocation: 256 * 1024, nodes: 256, depth: 32,
+};
+let frame = ic_wire::native::encode_request(7, &transfer, limits)?;
+let decoded: BulkTransfer = ic_wire::native::decode_request(7, &frame, limits)?;
+assert_eq!(decoded, transfer);
+# Ok::<(), ic_wire::Error>(())
+```
+
+Operation budgets bound codec admission. Consumers additionally validate their
+own sample/hash counts and semantics before encoding and after decoding. Keep
+existing field-local bounds when migrating a declaration. Switching an ordinary
+integer/hash list to packed data changes bytes and generated client types;
+coordinate both ends and resolve retained old-layout frames before switching.
+The details and byte examples below apply to that explicit adoption.
+
+### Representation and adoption details
+
 For opaque binary fields, use byte-oriented serialization. Byte-oriented field wrappers include
 `Bytes<N>` and `BytesRef<'_, N>`. A native DTO can retain its `Vec<u8>` field and
 use `#[serde(with = "serde_bytes")]` with a consumer dependency on `serde_bytes`.
@@ -89,25 +144,33 @@ Serde node per integer. Qualify limits for this representation. Little-endian
 hosts and Wasm use a safe byte view without a packing allocation; big-endian
 serialization uses a bounded temporary buffer and is not performance-qualified.
 
-For byte fields that also derive `Wire` metadata, prefer the standard
-`serde_bytes::ByteBuf` type (or `ic_wire::Bytes<N>` for a field-local bound):
+For owned byte fields, use `ic_wire::ByteBuf` (or `ic_wire::Bytes<N>` for a
+field-local bound). It re-exports `serde_bytes::ByteBuf` directly, with alloc-only
+runtime support on native and Wasm targets. No extra dependency or Serde field
+annotation is needed:
 
 ```rust
-# #[cfg(feature = "typescript")]
-#[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "typescript", derive(ic_wire::Wire))]
 struct Upload {
-    data: serde_bytes::ByteBuf,
+    data: ic_wire::ByteBuf,
 }
+let upload = Upload { data: vec![0, 127, 255].into() };
+let limits = ic_wire::Limits { bytes: 64, allocation: 1024, nodes: 16, depth: 8 };
+let frame = ic_wire::native::encode_request(7, &upload, limits)?;
+assert_eq!(ic_wire::native::decode_request::<Upload>(7, &frame, limits)?, upload);
+# Ok::<(), ic_wire::Error>(())
 ```
 
-Enable IC Wire's `typescript` feature in the host metadata generator and add
-`serde_bytes = "0.11.19"` to the consumer's dependencies. `ByteBuf` owns its
-bytes; `&serde_bytes::Bytes` supports borrowing. Both project to TypeScript
+Enable IC Wire's `typescript` feature in the host metadata generator.
+`ByteBuf` owns its bytes; `BytesRef<'_, N>` supports bounded borrowing.
+The direct `serde_bytes` adapter and unbounded `&serde_bytes::Bytes` remain
+available with a consumer dependency on `serde_bytes`. These byte fields project to
 `Uint8Array`, whereas plain `Vec<u8>` projects to `number[]`. Regenerate bindings
 and qualify traversal budgets when changing that field. `Wire` does not rewrite
 Serde derives. Existing `#[serde(with = "serde_bytes")]` fields also derive
 byte metadata, without changing the field type or serializer. Supported inputs
-are Vec<u8>, [u8], serde_bytes::ByteBuf/Bytes and references to those types;
+are `Vec<u8>`, `[u8]`, `serde_bytes::ByteBuf`/`Bytes` and references to those types;
 aliases of these Rust types work too. Fixed arrays and arbitrary custom adapters
 still require explicit verified metadata. Use the standard dependency under its
 `serde_bytes` name (the absolute `::serde_bytes` path is also recognized).
@@ -129,6 +192,9 @@ assert_eq!(native::encoded_frame_len(&request, limits)?, bytes.len());
 assert_eq!(native::decode_request::<Request>(7, &bytes, limits)?, request);
 # Ok::<(), ic_wire::Error>(())
 ```
+
+The two small values above deliberately use ordinary varints. Large homogeneous
+integer fields should start with `Packed<T>` and measure any payload-size tradeoff.
 
 `encode`/`decode` and `encoded_len` operate on payloads without headers.
 `encode_request`/`encode_response` accept borrowed Serialize values without an
@@ -231,7 +297,8 @@ Keep the existing Serde derives and add `ic_wire::Wire` in the host
 generator build. For shared contract packages, gate it with a local feature:
 `wire-schema = ["ic-wire/typescript"]`. Enable that feature in the generator.
 On Wasm targets, forwarding it keeps the runtime codec but omits Wire's metadata
-module, metadata trait implementations and optional JSON/byte-schema dependencies.
+module, metadata trait implementations and optional JSON dependency.
+The alloc-only serde_bytes dependency remains available for runtime ByteBuf use.
 `ic_wire::Wire` emits metadata implementations only for native targets. Gate calls
 to `ic_wire::typescript` and consumer-owned metadata implementations with
 `#[cfg(not(target_family = "wasm"))]`. A direct consumer dependency such as

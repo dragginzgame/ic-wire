@@ -57,6 +57,8 @@ mod sealed {
 
 /// Owned fixed-width words serialized as one Postcard byte buffer.
 ///
+/// Recommended for large homogeneous integer/hash fields. Use ordinary lists
+/// for general collections or when small-value varint compactness takes priority.
 /// Supports i16/u16/i32/u32/i64/u64 and 32-byte hashes. Runtime [`crate::Limits`]
 /// bound admission; this type has no per-field element limit. Small integers
 /// may use more bytes than ordinary lists. Switching from Vec requires coordinated

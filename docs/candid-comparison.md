@@ -1,59 +1,70 @@
 # Current Candid comparison
 
-IC Wire has one production Serde/Postcard codec. `Wire` derives host-side layout
-metadata, while Serde owns serialization. `Packed<T>` is an explicit bulk field
-representation within that codec. Candid and PocketIC belong only to the
-unpublished benchmark package.
+IC Wire has one production Serde/Postcard codec. Wire derives host layout
+metadata; Serde owns serialization. Packed<T> is an explicit field representation.
+Candid and PocketIC remain in the unpublished benchmark package.
 
 ## Which report to use
 
-| Question | Maintained evidence |
+| Question | Evidence |
 | --- | --- |
-| What happened to the native/TypeScript timing follow-ups? | [Qualification and rejected screens](packed-0612.md) |
-| How does the public packed field compare? | [Promotion qualification](packed-promotion-0611.md): 68 fields/manifests and 1/10/100 records, both profiles |
-| How does the broader ordinary codec compare? | [Full matrix](full-comparison-0611.md): thirteen cohorts and 597 overlapping case entries |
-| Why choose runtime-limited packed fields? | [Design experiment](bulk-fields-0611.md): ordinary vectors, const bounds and the selected prototype |
-| Why are ordinary large vectors expensive? | [Cost breakdown](cost-breakdown-0611.md): admission, preflight, canonical checking and raw Postcard controls |
-| What did sharing bounded decoding save? | [Packed sharing](packed-sharing-0611.md): exact field limits retained across many DTOs |
-| Which representation should a consumer choose? | [Packed-field guide](packed-fields.md) and the [runtime contract](runtime.md) |
+| What changed in the largest instruction losses? | [Ordinary-list hotspot follow-up](hotspot-encoding-0613.md): matched i16 improvement, residual gaps, byte-buffer selection and measured regressions |
+| What is the latest full comparison? | [Expanded 0.6.13 matrix](full-comparison-0613.md): 21 cohorts, 1,101 overlapping case entries, both profiles and all cost metrics |
+| How was public Packed qualified? | [Promotion qualification](packed-promotion-0611.md): prototype/public equivalence |
+| What was the previous broad baseline? | [0.6.11 matrix](full-comparison-0611.md): thirteen cohorts and 597 overlapping case entries |
+| Why choose runtime-limited packed fields? | [Design study](bulk-fields-0611.md): ordinary vectors, const bounds and selected prototype |
+| Why are ordinary vectors expensive? | [Cost breakdown](cost-breakdown-0611.md): admission, preflight, canonical checking and raw Postcard controls |
+| What did bounded decoder sharing save? | [Packed sharing](packed-sharing-0611.md): exact limits across many DTOs |
+| What happened to native/TypeScript timing follow-ups? | [Qualification and rejected screens](packed-0612.md): layout sensitivity and tiny-array tradeoffs |
+| Which field should consumers select? | [Packed guide](packed-fields.md) and [runtime contract](runtime.md) |
 
-## Current conclusions
+## Full-matrix baseline
 
-All 716 packed-field/record encode/decode IC comparisons favor Wire over Candid.
-Promotion preserves the prototype's IC counts, allocations, frames and total/code
-Wasm sizes. This does not imply ordinary Vec fields acquired packed behavior.
-In the broader standard corpus, opt-3 Wire wins 161/214 encodes and 155/214 decodes.
+The subsequent [hotspot follow-up](hotspot-encoding-0613.md) retains a
+byte-identical i16 writer. Its matched standard rerun reduces wide-i16 opt-3
+encoding from 49.94x to 32.82x Candid, with 673 additional total/code Wasm bytes.
+It records regressions and leaves the generic-byte-vector gap unchanged. The
+figures below describe the full matrix before that optimization.
 
-For the 100-record packed fixture, opt-3 uncompressed Wire Wasm is 655,798 bytes
-(total) / 620,658 (code), versus Candid's 2,639,766 / 2,570,257. Whole-fixture
-measurements do not predict an installed consumer's exact footprint.
+Wire total/code Wasm is smaller in all 42 matched cohort/profile pairs. At opt-3,
+100 ordinary records use 424,179 total / 389,650 code bytes versus Candid's
+2,081,252 / 2,012,071. The 100 mixed-bulk records use 655,798 / 620,658 versus
+2,639,766 / 2,570,257. These are whole fixtures, not installed application savings.
+Applications retaining external Candid endpoints still retain their required code.
 
-Small packed integers can expand payloads; small u64 data can grow eightfold.
-Native opt-z large-u16 decode regresses about 57% against the unpublished prototype
-but still beats Candid. Tiny TypeScript arrays add overhead; large arrays improve.
-Ordinary wide-i16 encode remains about 50x Candid's IC cost, and owned 1 MiB blob
-decode remains about 2.37x in the broad comparison. Use the relevant report's
-inputs and dependency pins rather than combining numbers across unrelated builds.
+All 840 generic packed-field/record IC encode/decode comparisons favor Wire.
+The 298-case standard corpus wins 232/298 encodes and 236/298 decodes at opt-3.
+Ordinary wide-i16 encode still costs 49.94x Candid, generic 1 MiB Vec<u8> encode
+37.23x, signed-byte list encode 8.61x at 4,096 items, and owned byte-oriented
+1 MiB blob decode 2.37x. Ordinary wide-u16 encode reaches 123.85x at opt-z.
+Packed does not implicitly alter normal vectors and does not support i8 today.
 
-## Measurement contract
+Small packed values can expand payloads relative to ordinary Wire varints.
+Select byte-oriented fields for binary data, and packed words where their fixed
+encoding suits the contract. Coordinate schemas/clients and preserve retry bytes.
+Runtime container benchmarks do not establish automatic TypeScript metadata
+support for every Rust collection. Borrowed/reuse lanes remain separately labelled.
 
-Compare equivalent logical inputs with recorded source, lockfile, compiler,
-target, optimization profile, codec parameters and exact frame identities.
-Keep native host time, IC instructions, allocations/peak heap, wire bytes, total
-uncompressed Wasm and code-section bytes separate. Repeat timing samples and keep
-small-input controls and regressions. Gzip is not an optimization objective.
-Candid hash fixtures retain their declared nested-array schema; they are not
-comparisons against a newly flattened Candid blob.
+## Measurement and reproduction
 
-`make evaluate-codecs` owns the runner; see [evaluation](evaluation.md) for focused
-checks and each linked report for its precise reproduction command. Optional IC
-measurements require an explicitly prepared PocketIC binary. This does not qualify
-application endpoints, authentication, storage migrations or installed clients.
+The archived run uses Platform 0.6.12; a concurrent 0.6.14 lock update was preserved
+but was not rebuilt for these figures. Use the report's exact source/lock pins.
+
+Use `POCKET_IC_BIN=/prepared/server make evaluate-codec-matrix` for the full run;
+see [development](development.md) and the report's frozen source/runner evidence.
+Compare identical inputs, compiler, lock, flags, target, profiles and limits.
+Keep native time, IC instructions, allocations/heap, frame bytes, total raw Wasm
+and code-section bytes distinct. Gzip is not an optimization objective.
+Hash-array Candid fixtures retain their nested schema; flat byte-oriented manifest
+controls are also measured. Resource policies and evolution guarantees differ.
+
+The full report records an outer-runner tail error after all cohorts completed,
+its cause and corrected-runner checks. All measurement data independently validate.
+No broad CI, installed endpoint, application-latency or new protocol claim follows.
 
 ## Historical evidence
 
-The [historical comparison studies](history/candid-comparison.md) preserve previous
-finite-codec experiments, rejected variants and their raw evidence. Their "pending"
-and "current" labels describe the source revision of that study, not today's API.
-The old serializer-generating finite Wire API is retired. Historical commands
-must run against their recorded source, not be treated as current production modes.
+[Earlier comparisons](history/candid-comparison.md) retain finite-codec and rejected
+experiments. Their pending/current labels belong to their recorded source, not
+today's API. The serializer-generating finite Wire API is retired; old commands
+must run against their pinned revision.

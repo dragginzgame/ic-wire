@@ -6,7 +6,7 @@ cd "$root"
 out="${1:-$root/target/codec-comparison}"
 case "$out" in /*) ;; *) out="$root/$out" ;; esac
 corpus="${CORPUS_FEATURE:-}"
-case "$corpus" in ""|bulk|bulk,bulk-baseline|bulk-scale|bulk-scale,bulk-baseline|bulk-scale,derive-scale-1|bulk-scale,derive-scale-10|bulk-scale,bulk-baseline,derive-scale-1|bulk-scale,bulk-baseline,derive-scale-10|toko|derive-scale|derive-scale-1|derive-scale-10|packed-i16|packed-i16-baseline|packed-scale|packed-scale-shared|packed-scale,derive-scale-1|packed-scale,derive-scale-10|packed-scale-shared,derive-scale-1|packed-scale-shared,derive-scale-10) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
+case "$corpus" in ""|hotspots|bulk|bulk,bulk-baseline|bulk-scale|bulk-scale,bulk-baseline|bulk-scale,derive-scale-1|bulk-scale,derive-scale-10|bulk-scale,bulk-baseline,derive-scale-1|bulk-scale,bulk-baseline,derive-scale-10|toko|derive-scale|derive-scale-1|derive-scale-10|packed-i16|packed-i16-baseline|packed-scale|packed-scale-shared|packed-scale,derive-scale-1|packed-scale,derive-scale-10|packed-scale-shared,derive-scale-1|packed-scale-shared,derive-scale-10) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
 extra="${corpus:+,$corpus}"
 mkdir "$out"
 mkdir -p "$out/source/scripts/ci"

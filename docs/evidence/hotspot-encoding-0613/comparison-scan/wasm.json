@@ -1,0 +1,52 @@
+{
+  "before": {
+    "evaluation": {
+      "total": 88623,
+      "code": 77603
+    },
+    "benchmark-speed": {
+      "total": 113275,
+      "code": 102926
+    }
+  },
+  "no-scan": {
+    "evaluation": {
+      "total": 88045,
+      "code": 77027
+    },
+    "benchmark-speed": {
+      "total": 113100,
+      "code": 102748
+    }
+  },
+  "no-canonical": {
+    "evaluation": {
+      "total": 83363,
+      "code": 72355
+    },
+    "benchmark-speed": {
+      "total": 103970,
+      "code": 93628
+    }
+  },
+  "array-eq": {
+    "evaluation": {
+      "total": 88478,
+      "code": 77458
+    },
+    "benchmark-speed": {
+      "total": 113136,
+      "code": 102787
+    }
+  },
+  "word64": {
+    "evaluation": {
+      "total": 88618,
+      "code": 77598
+    },
+    "benchmark-speed": {
+      "total": 113266,
+      "code": 102917
+    }
+  }
+}

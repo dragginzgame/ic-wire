@@ -10,6 +10,12 @@ pub struct Page<T> {
     pub total: u64,
 }
 
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "wire-schema", derive(ic_wire::Wire))]
+pub struct Upload {
+    pub data: ic_wire::ByteBuf,
+}
+
 pub fn roundtrip() -> Result<(), ic_wire::Error> {
     let limits = ic_wire::Limits {
         bytes: 256,
@@ -28,15 +34,32 @@ pub fn roundtrip() -> Result<(), ic_wire::Error> {
         ic_wire::native::decode_request::<Page<u64>>(1, &bytes, limits)?,
         page
     );
+    // The public re-export needs only ic-wire + serde, including no_std/Wasm.
+    // Its payload remains the existing byte-buffer encoding: 03 00 7f ff.
+    let upload = Upload {
+        data: ic_wire::ByteBuf::from(alloc::vec![0, 127, 255]),
+    };
+    let bytes = ic_wire::native::encode_request(1, &upload, limits)?;
+    assert_eq!(bytes, [73, 87, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 127, 255]);
+    assert_eq!(
+        ic_wire::native::decode_request::<Upload>(1, &bytes, limits)?,
+        upload
+    );
     Ok(())
 }
 
-#[cfg(all(test, feature = "wire-schema", not(target_family = "wasm")))]
+#[cfg(all(test, not(target_family = "wasm")))]
 #[test]
 fn metadata_and_runtime() {
     roundtrip().unwrap();
-    let schema = ic_wire::typescript::native_schema::<Page<u64>>().unwrap();
-    assert_eq!(schema["fields"][0]["name"], "entries");
-    assert_eq!(schema["fields"][0]["value"]["k"], "list");
-    assert_eq!(schema["fields"][1]["name"], "total");
+    #[cfg(feature = "wire-schema")]
+    {
+        let schema = ic_wire::typescript::native_schema::<Page<u64>>().unwrap();
+        assert_eq!(schema["fields"][0]["name"], "entries");
+        assert_eq!(schema["fields"][0]["value"]["k"], "list");
+        assert_eq!(schema["fields"][1]["name"], "total");
+        let schema = ic_wire::typescript::native_schema::<Upload>().unwrap();
+        assert_eq!(schema["fields"][0]["name"], "data");
+        assert_eq!(schema["fields"][0]["value"]["k"], "bytes");
+    }
 }

@@ -17,6 +17,8 @@ allocations = []
 heap = []
 ic = ["ic-platform/pocket-ic"]
 toko = []
+# Focused ordinary-list/output-writer qualification, not a production mode.
+hotspots = []
 # Benchmark cohort selection, never a production codec mode.
 packed-i16 = []
 packed-i16-baseline = ["packed-i16"]

@@ -74,7 +74,7 @@ fn byte_buffers_keep_frames_and_admit_in_bulk() {
         depth: 64,
     };
     assert_eq!(
-        native_schema::<serde_bytes::ByteBuf>().unwrap(),
+        native_schema::<ic_wire::ByteBuf>().unwrap(),
         json!({"k":"bytes"})
     );
     assert_eq!(
@@ -83,7 +83,7 @@ fn byte_buffers_keep_frames_and_admit_in_bulk() {
     );
     for length in [0, 1, 127, 128, 4096] {
         let vector = vec![255; length];
-        let bytes = serde_bytes::ByteBuf::from(vector.clone());
+        let bytes: ic_wire::ByteBuf = serde_bytes::ByteBuf::from(vector.clone());
         let frame = native::encode_request(17, &vector, limits).unwrap();
         assert_eq!(frame, native::encode_request(17, &bytes, limits).unwrap());
         let bulk = Limits {
@@ -92,7 +92,7 @@ fn byte_buffers_keep_frames_and_admit_in_bulk() {
         };
         assert_eq!(frame, native::encode_request(17, &bytes, bulk).unwrap());
         assert_eq!(
-            native::decode_request::<serde_bytes::ByteBuf>(17, &frame, bulk).unwrap(),
+            native::decode_request::<ic_wire::ByteBuf>(17, &frame, bulk).unwrap(),
             bytes
         );
         let borrowed: &serde_bytes::Bytes = native::decode_request(17, &frame, bulk).unwrap();
@@ -101,12 +101,12 @@ fn byte_buffers_keep_frames_and_admit_in_bulk() {
             assert_eq!(native::encode_request(17, &vector, bulk), Err(Error::Limit));
         }
         assert!(
-            native::decode_request::<serde_bytes::ByteBuf>(17, &frame[..frame.len() - 1], bulk)
+            native::decode_request::<ic_wire::ByteBuf>(17, &frame[..frame.len() - 1], bulk)
                 .is_err()
         );
         let mut trailing = frame;
         trailing.push(0);
-        assert!(native::decode_request::<serde_bytes::ByteBuf>(17, &trailing, bulk).is_err());
+        assert!(native::decode_request::<ic_wire::ByteBuf>(17, &trailing, bulk).is_err());
     }
 }
 

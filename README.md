@@ -17,6 +17,13 @@ Start with the [runtime guide](docs/runtime.md), [design](docs/design.md),
 The runtime and derive crates were first published at 0.3.0; the private
 `ic-wire-qualification` package remains unpublished.
 
+For new contracts, default binary fields to `Bytes<N>`, `ic_wire::ByteBuf`
+or the `serde_bytes` adapter, and large homogeneous integer/hash arrays to
+`Packed<T>`. Keep ordinary collections for records and small values where compact
+varints matter. These field types share the same Serde/Postcard codec; choosing
+packed fields is explicit and requires coordinated consumers for existing layouts.
+See the [field selection and adoption guide](docs/packed-fields.md).
+
 ## Development
 
 The virtual root workspace owns package metadata, dependency selections and the
@@ -41,5 +48,3 @@ and tags; registry publication is a separate maintainer action.
 ## License
 
 Licensed under the [MIT License](LICENSE).
-
-See [packed fields](docs/packed-fields.md) for bulk integer/hash fields and coordinated consumer adoption.

@@ -1,0 +1,41 @@
+{
+  "baseline": "incoming working tree based on f470bcd9c72a08c4942b38258d9bcd42a8c6858c, including prior i16 optimization and bulk-field guidance",
+  "change": "serde_bytes normal alloc-only dependency and ByteBuf re-export",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "target": "wasm32-unknown-unknown",
+  "profiles": [
+    "evaluation (opt-z)",
+    "benchmark-speed (opt-3)"
+  ],
+  "lock_sha256": "d3a8aca62bc34f158e59c9c94b7f4f9e908e47145fd22e1cfc02be95baeb2c78",
+  "cases": 50,
+  "paired_rows": 1100,
+  "samples_per_row": 3,
+  "changes": 0,
+  "notes": [
+    "Lock, fixtures, codec parameters and build profiles match; dependency placement/features change as intended.",
+    "Existing byte-adapter and ordinary-list cases exercise deployed codec costs; public ByteBuf identity and no-extra-dependency use are checked separately.",
+    "No native timing rerun or new speedup claim; speed Wasm is byte-identical, size-profile Wasm has equal size and equal measured IC counters.",
+    "Use source/before plus source/after-overlay for the candidate. Build with the archived helper; adjust its scratch/target roots.",
+    "Copy wire and Candid Wasms into per-variant output directories named PROFILE-wire.wasm and PROFILE-candid.wasm; run codec-instructions with wire,candid,ic,hotspots and explicit PocketIC 16.1.0.",
+    "Host oracle uses the existing hotspot driver; setup is untimed and every guest frame is checked exactly."
+  ],
+  "files": {
+    "README.md": {
+      "bytes": 2121,
+      "sha256": "31699ae2e710eaad9f292bb261442038c8eedf7daa92ebd134cfb90d04b7d62e"
+    },
+    "wasm.json": {
+      "bytes": 743,
+      "sha256": "8a436f5c9a4b3fdc7dd485369e327a43dac0b916444d610494e8cda35912fbc9"
+    },
+    "instructions.csv": {
+      "bytes": 85070,
+      "sha256": "6ac356e2e02633019d1ed0f8a2e020f429f2ad72ee41a0d71f14436c0f9cbf99"
+    },
+    "raw.tar.gz": {
+      "bytes": 582690,
+      "sha256": "5e15261079d7a85b08362f26176be72c3f762fd2135fbb47bd2a04b33d3c6259"
+    }
+  }
+}

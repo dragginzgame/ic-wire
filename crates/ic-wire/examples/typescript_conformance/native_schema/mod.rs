@@ -22,13 +22,23 @@ struct User {
 struct Count(u64);
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
 struct Blob {
-    data: serde_bytes::ByteBuf,
+    data: ic_wire::ByteBuf,
 }
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 struct AdaptedBlob {
     #[serde(with = "serde_bytes")]
     data: Vec<u8>,
+}
+// Recommended mixed DTO: bulk binary/numeric/hash fields and an ordinary
+// collection of labels. This is a new fixture, not a migration of User/Page;
+// their ordinary-vector layouts remain compatibility and small-value controls.
+#[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+struct BulkTransfer {
+    payload: ic_wire::Bytes<4096>,
+    samples: ic_wire::Packed<i16>,
+    chunk_hashes: ic_wire::Packed<[u8; 32]>,
+    labels: Vec<String>,
 }
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
 #[serde(transparent)]
@@ -296,6 +306,29 @@ export function createCodec(method: unknown, types: unknown) {
         );
         add(directory, &mut checks, 14 + offset, value, &javascript);
     }
+    for (offset, count) in [0, 1, 32].into_iter().enumerate() {
+        let payload = vec![0xab; count];
+        let samples: Vec<i16> = (0..count)
+            .map(|i| [i16::MIN, -1, 0, 64, i16::MAX][i % 5])
+            .collect();
+        let chunk_hashes = vec![[0xcd; 32]; count];
+        let javascript = format!(
+            "{{payload:Uint8Array.from({payload:?}),samples:Int16Array.from({samples:?}),chunk_hashes:new Uint8Array({}).fill(205),labels:['sensor']}}",
+            count * 32,
+        );
+        add(
+            directory,
+            &mut checks,
+            17 + offset,
+            BulkTransfer {
+                payload: ic_wire::Bytes::new(payload).unwrap(),
+                samples: ic_wire::Packed::new(samples),
+                chunk_hashes: ic_wire::Packed::new(chunk_hashes),
+                labels: vec!["sensor".into()],
+            },
+            &javascript,
+        );
+    }
     checks.push_str(r#"
 rejects(() => projection14.encodeRequest({data:new Uint8Array(),extra:1}), 'value');
 for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
@@ -304,7 +337,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 17 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 20 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

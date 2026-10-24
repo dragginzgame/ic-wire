@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #[cfg(any(feature = "bulk", feature = "bulk-scale"))]
 mod bulk;
+#[cfg(feature = "hotspots")]
+mod hotspots;
 #[cfg(feature = "packed-i16")]
 mod packed_i16;
 #[cfg(feature = "derive-scale")]
@@ -32,6 +34,16 @@ compile_error!("select one scaling field representation");
     not(any(feature = "bulk", feature = "bulk-scale"))
 ))]
 compile_error!("bulk-baseline requires a bulk corpus");
+#[cfg(all(
+    feature = "hotspots",
+    any(
+        feature = "bulk",
+        feature = "derive-scale",
+        feature = "toko",
+        feature = "packed-i16"
+    )
+))]
+compile_error!("select one benchmark corpus");
 #[cfg(feature = "candid")]
 use ic_platform::candid::contract::CandidType;
 use serde::{Serialize, de::DeserializeOwned};
@@ -261,6 +273,10 @@ pub fn cases() -> Vec<Case> {
 }
 /// Construct only the selected workload for IC calls, preserving corpus indices.
 pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
+    #[cfg(feature = "hotspots")]
+    {
+        hotspots::cases_selected(selected)
+    }
     #[cfg(feature = "bulk")]
     {
         bulk::cases_selected(selected)
@@ -281,12 +297,35 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         feature = "toko",
         feature = "derive-scale",
         feature = "packed-i16",
-        feature = "bulk"
+        feature = "bulk",
+        feature = "hotspots"
     )))]
     {
         standard_cases_selected(selected)
     }
 }
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+struct Page<T> {
+    entries: Vec<T>,
+    total: u64,
+    cursor: Option<String>,
+}
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+struct TupleRecord(u32, String);
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+enum GenericEvent<T> {
+    Empty,
+    Value(T),
+    Batch(Vec<T>),
+    Failure { code: u32, detail: String },
+}
+
 fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
     let mut out = Vec::new();
     let mut index = 0;
@@ -594,6 +633,119 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
             }
         ));
     }
+    // Additional deterministic Serde/Candid shapes; preserve earlier case indices.
+    macro_rules! minimums {
+        ($($ty:ty),*) => {$(push!(case(concat!(stringify!($ty), "-min"), <$ty>::MIN));)*};
+    }
+    minimums!(i8, i16, i32);
+    push!(case("bool-false", false));
+    push!(case("u128-zero", 0_u128));
+    push!(case("i128-zero", 0_i128));
+    push!(case("i128-max", i128::MAX));
+    push!(case("f32-zero", 0_f32));
+    push!(case("f32-max", f32::MAX));
+    push!(case("f64-subnormal", f64::from_bits(1)));
+    macro_rules! extra_lists {
+        ($($ty:ty),*) => {$(
+            for n in [0, 1, 128, 4096] {
+                push!(case(&format!("{}-extra-list-small-{n}", stringify!($ty)),
+                    (0..n).map(|i| (i % 64) as $ty).collect::<Vec<_>>()));
+                push!(case(&format!("{}-extra-list-wide-{n}", stringify!($ty)), vec![<$ty>::MAX; n]));
+            }
+        )*};
+    }
+    extra_lists!(u8, i8, u128, i128);
+    for n in [0, 1, 16, 128] {
+        push!(case(
+            &format!("ordered-set-{n}"),
+            (0..n as u64).collect::<std::collections::BTreeSet<_>>()
+        ));
+        push!(case(
+            &format!("deque-{n}"),
+            (0..n as u64).collect::<std::collections::VecDeque<_>>()
+        ));
+        push!(case(
+            &format!("linked-list-{n}"),
+            (0..n as i64)
+                .map(|i| -i)
+                .collect::<std::collections::LinkedList<_>>()
+        ));
+        push!(case(
+            &format!("nested-map-{n}"),
+            (0..n)
+                .map(|i| (i as u32, vec![Some(i as u64), None, Some(u64::MAX)]))
+                .collect::<std::collections::BTreeMap<_, _>>()
+        ));
+        push!(case(
+            &format!("page-blob-{n}"),
+            Page {
+                entries: (0..n).map(|_| Blob(data(32))).collect(),
+                total: n as u64,
+                cursor: Some("next".into())
+            }
+        ));
+        push!(case(
+            &format!("page-option-result-{n}"),
+            Page {
+                entries: (0..n)
+                    .map(|i| if i % 3 == 0 {
+                        None
+                    } else {
+                        Some(if i % 2 == 0 {
+                            Ok(i as u64)
+                        } else {
+                            Err("denied".to_owned())
+                        })
+                    })
+                    .collect(),
+                total: n as u64,
+                cursor: None
+            }
+        ));
+        push!(case(
+            &format!("nested-page-{n}"),
+            Page {
+                entries: (0..n)
+                    .map(|i| Page {
+                        entries: vec![i as u32, u32::MAX],
+                        total: 2,
+                        cursor: None
+                    })
+                    .collect(),
+                total: n as u64,
+                cursor: Some("next".into())
+            }
+        ));
+    }
+    push!(case("fixed-u64-empty", [0_u64; 0]));
+    push!(case("fixed-u16-16", [u16::MAX; 16]));
+    push!(case("fixed-u64-32", [u64::MAX; 32]));
+    push!(case("fixed-i32-32", [i32::MIN; 32]));
+    push!(case("fixed-hashes-16", [[0x95_u8; 32]; 16]));
+    push!(case(
+        "boxed-slice-u64",
+        vec![0_u64, 128, u64::MAX].into_boxed_slice()
+    ));
+    push!(case(
+        "duration",
+        std::time::Duration::new(u32::MAX as u64, 999_999_999)
+    ));
+    push!(case("nested-option-none", Some(None::<u64>)));
+    push!(case("result-optional", Ok::<_, String>(Some(u64::MAX))));
+    push!(case("tuple-struct", TupleRecord(128, "tuple".into())));
+    push!(case("generic-enum-empty", GenericEvent::<u64>::Empty));
+    push!(case("generic-enum-value", GenericEvent::Value(u64::MAX)));
+    push!(case(
+        "generic-enum-batch",
+        GenericEvent::Batch(vec![0_u64, 128, u64::MAX])
+    ));
+    push!(case(
+        "generic-enum-failure",
+        GenericEvent::<u64>::Failure {
+            code: 403,
+            detail: "denied".into()
+        }
+    ));
     assert!(selected.is_none_or(|s| s < index), "unknown case");
     out
 }

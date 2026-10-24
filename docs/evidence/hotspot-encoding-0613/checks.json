@@ -1,0 +1,27 @@
+{
+  "hotspots": {
+    "variants": 10,
+    "cases_per_variant": 50,
+    "rows": 11000,
+    "samples_per_row": 3,
+    "identical_frames_and_inputs": true,
+    "identical_repeated_counters": true
+  },
+  "wasm": {
+    "artifacts": 48,
+    "sizes_and_hashes_validated": true
+  },
+  "standard": {
+    "cases": 298,
+    "rows_per_variant": 7006,
+    "identical_frames_and_inputs": true,
+    "identical_repeated_counters": true
+  },
+  "native": {
+    "runs": 2,
+    "samples": 11,
+    "minimum_batch_ms": 2,
+    "identical_frames_and_inputs": true,
+    "rows": 3600
+  }
+}

@@ -43,3 +43,17 @@ serializer-generating Wire derive, static shape admission and typed method codec
 are retired; Wire now names the metadata-only derive.
 Bounded owned/borrowed field wrappers share Serde representations; borrowing
 changes custody, not framing. Alternative serializers remain research only.
+
+## Field selection
+
+New contracts should use byte-oriented fields for binary data and `Packed<T>`
+for large homogeneous arrays of its supported integers or 32-byte hashes.
+These fields expose contiguous data to the existing Serde byte-buffer path.
+Use ordinary collections for records, general shapes and small integers where
+varint compactness is the priority. This is a declaration convention, not an
+automatic rewrite by the metadata derive or serializer.
+
+Keep field-specific limits when selecting a representation. `PackedI16<N>`
+retains an element bound; `Packed<T>` relies on operation budgets and consumer
+validation. Apply the [field adoption procedure](packed-fields.md#adopting-an-existing-field)
+when changing an existing declaration, including TypeScript shapes and retries.
