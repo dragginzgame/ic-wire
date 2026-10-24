@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.4]
+## [0.7.4] - 2026-10-24
 
 - Decode one-byte u16/u32/u64 varints directly while retaining width-specific
   multi-byte validation. Matched IC tests show up to 11% lower decode cost with
