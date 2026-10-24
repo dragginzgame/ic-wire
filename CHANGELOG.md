@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.3]
+## [0.7.3] - 2026-10-24
 
 - Reject the encoding-wrapper inlining candidate after five-cohort, two-profile
   qualification exposed encode regressions up to approximately 2x. Retain size,
