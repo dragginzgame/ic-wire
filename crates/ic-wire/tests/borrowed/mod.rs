@@ -236,7 +236,7 @@ fn borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input
     assert_eq!(decode(&bad), Err(Error::Trailing));
     let mut bad = frame.clone();
     bad.splice(11..12, [0x83, 0]);
-    assert_eq!(decode(&bad), Err(Error::Noncanonical));
+    assert_eq!(decode(&bad), Err(Error::Malformed));
     let mut bad = frame.clone();
     bad[12] = 0xff;
     assert_eq!(decode(&bad), Err(Error::Malformed));

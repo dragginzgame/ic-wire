@@ -95,8 +95,11 @@ when a batch leaves the protocol unchanged. Preserve the pre-1.0 rules below.
 Keep limits checked before allocation, malformed-input failures typed, and
 one production Serde/Postcard codec. The finite Wire API is retired; alternate
 codec/derive strategies remain research. Native metadata uses no field IDs and follows Serde
-declaration order; changes to that order require coordinated consumers. Preserve exact
-retry bytes and canonical hashing semantics. The maintained pre-1.0 contract
+declaration order; changes to that order require coordinated consumers. Preserve
+exact retained retry bytes and encoder hash inputs. Decode validates
+primitive Postcard representations in one pass; collection/custom-Serde
+normalization is consumer-owned and re-encoding need not reproduce input bytes.
+The maintained pre-1.0 contract
 must not create v2/legacy lanes; same-release retries remain required. Do not
 introduce automatic migration or compatibility shims.
 

@@ -72,12 +72,12 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         serialize_f64: f64,
         serialize_char: char,
     }
-    // The private adapter only wraps Postcard serializers, including sizing and
-    // canonical comparison. Previously i16 used its temporary varint buffer;
+    // The private adapter wraps Postcard output and sizing serializers.
+    // Previously i16 used its temporary varint buffer;
     // emit the same zigzag varint through a prefix-free tuple of raw u8 values.
     // Admission still charges the original i16, not the implementation
-    // bytes. Payloads (-64 -> 7f, 64 -> 80 01, 32767 -> fe ff 03), canonical
-    // acceptance, limits, hashes and retry bytes are unchanged; no migration.
+    // bytes. Payloads (-64 -> 7f, 64 -> 80 01, 32767 -> fe ff 03) and
+    // encoder admission are unchanged.
     fn serialize_i16(self, value: i16) -> Result<Self::Ok, Self::Error> {
         let value = ((value << 1) ^ (value >> 15)) as u16;
         if value < 128 {
@@ -97,15 +97,15 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     }
     // Previously i64 used Postcard's separate signed varint writer. Apply its
     // identical zigzag mapping, then reuse our u64 writer and one-byte shortcut.
-    // Original signed-type admission is already done; bytes and canonical
-    // acceptance are unchanged (-64 -> 7f, 64 -> 80 01). No consumer migration
+    // Original signed-type admission is already done; bytes and encoder
+    // admission are unchanged (-64 -> 7f, 64 -> 80 01). No consumer migration
     // or retry/hash change. i8 deliberately retains its raw-byte representation.
     fn serialize_i64(self, value: i64) -> Result<Self::Ok, Self::Error> {
         self.serialize_u64(((value << 1) ^ (value >> 63)) as u64)
     }
     // Postcard encodes u16/u32 values below 128 identically to u8. As with
     // u64 below, use its byte writer while retaining the original value's
-    // admission charges. Bytes, canonical acceptance and retries are unchanged;
+    // admission charges. Bytes, primitive acceptance and retries are unchanged;
     // consumers need no migration (127 -> 7f, 128 -> 80 01 for both types).
     fn serialize_u16(self, value: u16) -> Result<Self::Ok, Self::Error> {
         if value < 128 {
@@ -122,10 +122,10 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         }
     }
     fn serialize_u64(self, value: u64) -> Result<Self::Ok, Self::Error> {
-        // This private adapter only wraps Postcard serializers (including sizing
-        // and canonical comparison). Below 128, u64 and u8 emit the same byte.
+        // This private adapter only wraps Postcard output and sizing serializers.
+        // Below 128, u64 and u8 emit the same byte.
         // Avoid the temporary varint buffer without changing value admission,
-        // frame bytes, canonicality or retry hashes. No consumer migration.
+        // frame bytes, primitive validity or retry hashes. No consumer migration.
         if value < 128 {
             self.inner.serialize_u8(value as u8)
         } else {

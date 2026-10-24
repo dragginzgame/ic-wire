@@ -3,7 +3,7 @@
 IC Wire provides one selected Postcard encoding for controlled Rust endpoints.
 Consumers declare stable method identities; fields and variants follow Serde order.
 The [runtime guide](runtime.md) specifies the maintained bytes, supported types,
-canonicality, resource limits and typed errors.
+primitive validation, resource limits and typed errors.
 
 ## Ownership
 
@@ -26,8 +26,8 @@ of them.
 ## Contract discipline
 
 Check lengths and budgets before allocation, reject malformed/trailing input
-with typed errors, and preserve canonical bytes for hashing and same-release
-retries. Serde projection follows declaration order without field IDs;
+with typed errors. Preserve original frame bytes for hashing and same-release
+retries; decoding does not guarantee byte-identical reserialization. Serde projection follows declaration order without field IDs;
 field/variant reordering changes that protocol and requires
 coordinated consumers.
 Consumers retain their own hash domains, semantic ordering and retained-byte

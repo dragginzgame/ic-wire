@@ -47,7 +47,7 @@ fn invalid_widths_and_noncanonical_lengths_are_rejected() {
                     assert_eq!(decoded, Err(ic_wire::Error::Malformed));
                 }
             }
-            assert_eq!(ic_wire::native::decode::<Packed<$ty>>(&[0x80, 0], LIMITS), Err(ic_wire::Error::Noncanonical));
+            assert_eq!(ic_wire::native::decode::<Packed<$ty>>(&[0x80, 0], LIMITS), Err(ic_wire::Error::Malformed));
         )*};
     }
     check!(i16, u16, i32, u32, i64, u64, [u8; 32]);
@@ -205,7 +205,7 @@ fn packed_length_prefixes_offsets_and_budget_boundaries() {
             noncanonical.insert(last_prefix + 1, 0);
             assert_eq!(
                 ic_wire::native::decode::<Packed<T>>(&noncanonical, LIMITS),
-                Err(ic_wire::Error::Noncanonical)
+                Err(ic_wire::Error::Malformed)
             );
             let mut low = 0;
             let mut high = LIMITS.allocation;

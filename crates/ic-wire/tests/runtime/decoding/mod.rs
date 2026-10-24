@@ -1,4 +1,4 @@
-//! Every differing byte must be rejected, including bulk boundaries and tails.
+//! Consumer normalization and strict primitive parsing are separate contracts.
 use ic_wire::{Bytes, Error, Limits, native};
 use serde::{Deserialize, Deserializer, Serialize};
 const ID: u64 = 0x43414e4f4e;
@@ -11,12 +11,12 @@ const LIMITS: Limits = Limits {
 fn encode<T: Serialize>(value: &T) -> Result<Vec<u8>, Error> {
     native::encode_request(ID, value, LIMITS)
 }
-fn decode<'de, T: Serialize + Deserialize<'de>>(bytes: &'de [u8]) -> Result<T, Error> {
+fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8]) -> Result<T, Error> {
     native::decode_request(ID, bytes, LIMITS)
 }
 
 // A trusted custom contract that normalizes bytes in place on decode. Thus
-// arbitrary nonzero input is valid Serde but fails Wire's canonical comparison.
+// arbitrary nonzero input now normalizes successfully without reserialization.
 #[derive(Serialize)]
 #[serde(transparent)]
 struct Normalized(Bytes<65>);
@@ -29,7 +29,7 @@ impl<'de> Deserialize<'de> for Normalized {
 }
 
 #[test]
-fn bulk_comparison_checks_every_byte_and_tail() {
+fn custom_normalization_is_consumer_owned() {
     for len in 0..=65 {
         let value = Normalized(Bytes::new(vec![0; len]).unwrap());
         let canonical = encode::<Normalized>(&value).unwrap();
@@ -43,7 +43,12 @@ fn bulk_comparison_checks_every_byte_and_tail() {
             // Header followed by one-byte length for every value in this test.
             altered[12 + position] = 1;
             assert!(
-                matches!(decode::<Normalized>(&altered), Err(Error::Noncanonical)),
+                decode::<Normalized>(&altered)
+                    .unwrap()
+                    .0
+                    .as_slice()
+                    .iter()
+                    .all(|b| *b == 0),
                 "length {len}, position {position}"
             );
         }
@@ -84,14 +89,12 @@ struct Shifted {
 }
 
 #[test]
-fn custom_field_boundaries_cannot_hide_a_different_roundtrip() {
+fn custom_field_boundaries_can_have_a_different_roundtrip() {
     let mut frame = encode::<Normalized>(&Normalized(Bytes::new(vec![]).unwrap())).unwrap();
     frame.truncate(11);
     frame.extend_from_slice(&[7, 1, 1, 42, 9]);
-    assert!(matches!(
-        decode::<Shifted>(&frame),
-        Err(Error::Noncanonical)
-    ));
+    let value = decode::<Shifted>(&frame).unwrap();
+    assert_ne!(encode(&value).unwrap(), frame);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -125,7 +128,7 @@ fn copied_record_checks_prefixes_truncation_and_preserves_owned_bytes() {
             longer.insert(end + 1, 0);
             assert!(matches!(
                 decode::<CopiedRecord>(&longer),
-                Err(Error::Noncanonical)
+                Err(Error::Malformed)
             ));
         }
         let mut changed = frame.clone();

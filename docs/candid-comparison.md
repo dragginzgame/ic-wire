@@ -4,6 +4,13 @@ IC Wire has one production Serde/Postcard codec. Wire derives host layout
 metadata; Serde owns serialization. Packed<T> is an explicit field representation.
 Candid and PocketIC remain in the unpublished benchmark package.
 
+## Pending 0.7.0 decoding cut
+
+The [one-pass qualification](evidence/one-pass-070/README.md) records the approved
+normalization contract change, matched 87-case IC/native results and 100-record
+Wasm sizes. Earlier full matrices below describe the old decoding contract; their
+encoding results remain historical controls, not a rerun of the new decoder.
+
 ## Which report to use
 
 | Question | Evidence |

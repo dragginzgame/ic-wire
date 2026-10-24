@@ -9,6 +9,7 @@ mod tests;
 
 mod decode;
 mod encode;
+mod parser;
 
 use crate::{Error, Limits, contract};
 use alloc::vec::Vec;
@@ -159,18 +160,15 @@ pub fn encode_response_into<T: Serialize + ?Sized>(
     encode_prefixed_into(value, limits, &contract::header(id, 1), bytes)
 }
 
-/// Decode a complete canonical payload; allocation admission precedes visitor calls.
+/// Decode a complete Postcard payload; allocation admission precedes visitor calls.
 /// Borrowed bytes and strings may refer directly to the input for its lifetime.
-/// Canonical verification and conservative resource charges also apply to borrowed values.
-pub fn decode<'de, T: Serialize + Deserialize<'de>>(
-    bytes: &'de [u8],
-    limits: Limits,
-) -> Result<T, Error> {
+/// Primitive representations are checked while reading; Serde normalization is consumer-owned.
+pub fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8], limits: Limits) -> Result<T, Error> {
     if bytes.len() > limits.bytes {
         return Err(Error::Limit);
     }
     let budget = Budget::new(limits);
-    let mut input = postcard::Deserializer::from_bytes(bytes);
+    let mut input = parser::Deserializer::from_bytes(bytes);
     let value = T::deserialize(decode::Bounded {
         inner: &mut input,
         budget: &budget,
@@ -180,23 +178,10 @@ pub fn decode<'de, T: Serialize + Deserialize<'de>>(
     if !input.finalize().map_err(|_| Error::Malformed)?.is_empty() {
         return Err(Error::Trailing);
     }
-    let budget = Budget::new(limits);
-    let equal = postcard::serialize_with_flavor(
-        &encode::Bounded {
-            value: &value,
-            budget: &budget,
-            depth: 1,
-        },
-        contract::Compare {
-            remaining: bytes,
-            allowance: limits.bytes,
-            equal: true,
-        },
-    )
-    .map_err(|_| budget.error())?;
-    if !equal {
-        return Err(Error::Noncanonical);
-    }
+    // Hard cut: decoding no longer reserializes or charges a serialization pass.
+    // Primitive parsing stays strict, but maps/sets and custom Serde may normalize:
+    // e.g. map bytes 02 02 14 01 0a now decode and re-encode as 02 01 0a 02 14.
+    // Consumers own normalization and must retain original bytes for exact retries.
     Ok(value)
 }
 
@@ -222,7 +207,7 @@ pub fn encoded_frame_len<T: Serialize + ?Sized>(value: &T, limits: Limits) -> Re
         .map(|size| size + contract::HEADER)
 }
 /// Check request identity and direction before decoding its bounded native value.
-pub fn decode_request<'de, T: Serialize + Deserialize<'de>>(
+pub fn decode_request<'de, T: Deserialize<'de>>(
     id: u64,
     bytes: &'de [u8],
     limits: Limits,
@@ -230,14 +215,14 @@ pub fn decode_request<'de, T: Serialize + Deserialize<'de>>(
     decode_frame(id, 0, bytes, limits)
 }
 /// Check response identity and direction before decoding its bounded native value.
-pub fn decode_response<'de, T: Serialize + Deserialize<'de>>(
+pub fn decode_response<'de, T: Deserialize<'de>>(
     id: u64,
     bytes: &'de [u8],
     limits: Limits,
 ) -> Result<T, Error> {
     decode_frame(id, 1, bytes, limits)
 }
-fn decode_frame<'de, T: Serialize + Deserialize<'de>>(
+fn decode_frame<'de, T: Deserialize<'de>>(
     id: u64,
     direction: u8,
     bytes: &'de [u8],

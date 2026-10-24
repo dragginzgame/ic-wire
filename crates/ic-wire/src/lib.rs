@@ -25,7 +25,7 @@ pub use ic_wire_derive::Wire;
 /// consumer dependency. Use [`Bytes<N>`] when the field needs a byte limit.
 /// Native [`Limits`] still apply; TypeScript metadata projects to `Uint8Array`.
 /// Compared with `Vec<u8>`, bytes are identical but admission is bulk rather
-/// than per-element. Existing ByteBuf bytes, limits and canonical checks are
+/// than per-element. Existing ByteBuf bytes, limits and primitive checks are
 /// unchanged by this re-export; no migration is needed from serde_bytes::ByteBuf.
 pub use serde_bytes::ByteBuf;
 
@@ -48,8 +48,6 @@ pub enum Error {
     Malformed,
     /// Bytes remain after the expected value.
     Trailing,
-    /// A valid value used a noncanonical representation.
-    Noncanonical,
     /// Envelope marker, method identity or direction differs.
     Identity,
 }

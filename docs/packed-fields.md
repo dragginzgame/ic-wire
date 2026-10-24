@@ -143,5 +143,6 @@ cut; no fallback decoder or automatic replay conversion is provided by Wire.
 The inspected upload declaration contains metadata and hashes, not complete
 content bytes. Consequently, the synthetic owned-1-MiB-blob decoding hotspot is
 not evidence of a bottleneck in this declaration. Manifest adoption and its
-installed instruction/Wasm measurement should precede another canonical-comparison
-rewrite. Wire's exact canonical verification remains required.
+installed instruction/Wasm measurement remains consumer-owned. Since the 0.7 cut,
+Wire validates primitives while reading but does not enforce byte-identical
+reserialization. Consumers own normalization and retain exact retry frames.

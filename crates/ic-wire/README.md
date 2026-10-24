@@ -2,9 +2,29 @@
 
 IC Wire has one production codec: bounded Serde traversal with Postcard encoding.
 Use `Serialize` / `Deserialize` on consumer DTOs and the `native` module for
-framing, resource admission and canonical validation. `Wire` generates
+framing, resource admission and strict primitive validation. `Wire` generates
 host-only metadata; it never generates a serializer. Alternative codec and
 derive designs are research, not selectable runtime modes.
+
+## One-pass decoding (0.7 hard cut)
+
+Decode requires only `Deserialize`, validates primitive encodings while reading,
+and does not serialize the decoded value again. Encoder bytes and the envelope
+are unchanged. Overlong varints, invalid booleans/options, malformed UTF-8 and
+multi-character char payloads are rejected; trailing bytes remain rejected.
+`Error::Noncanonical` is removed; invalid representations return `Error::Malformed`.
+
+Collections and custom Serde visitors now own normalization. For example, map
+payload `02 02 14 01 0a` is accepted as `{1: 10, 2: 20}` and re-encodes as
+`02 01 0a 02 14`. Duplicate map keys or set entries may collapse. Successful
+decoding does not promise that re-encoding reproduces the received bytes.
+Consumers must validate any required ordering, uniqueness or normalization, and
+retain original immutable frames for exact retries/raw-byte signatures/hashes.
+Do not reconstruct those bytes from a decoded value. No fallback mode is provided.
+
+The private reader is adapted from Postcard 1.1.3 with minimal-varint and exact-char
+checks; its MIT notice is retained in `src/native/parser/LICENSE-MIT`. Upstream
+Postcard still owns encoding. No forked dependency or public parser API is added.
 
 ## Hard cut from the finite API
 
@@ -138,7 +158,7 @@ This is an explicit field layout, not an optimization of ordinary `Vec<i16>` or
 for `[0]`, `01 00` becomes `02 00 00`. Wide values shrink, small values grow.
 Switch both Rust and TypeScript schemas together, regenerate clients, and resolve
 retained old frames before switching a deployed field. Framing, method identity
-and exact retry/canonical-byte requirements do not change; no fallback reader exists.
+and exact retained-byte retry requirements do not change; no fallback reader exists.
 The native budget admits the packed byte span in bulk, rather than charging one
 Serde node per integer. Qualify limits for this representation. Little-endian
 hosts and Wasm use a safe byte view without a packing allocation; big-endian
@@ -201,7 +221,7 @@ integer fields should start with `Packed<T>` and measure any payload-size tradeo
 owned Deserialize requirement. Native decode accepts `Deserialize<'de>` values:
 strings and explicit byte views can borrow directly from the input. Ordinary
 owned callers remain supported. Borrowing
-does not skip resource admission or canonical verification, and does not make
+does not skip resource admission or primitive validation, and does not make
 arbitrary integer sequences borrowable. The decoded value cannot outlive its input.
 `encoded_frame_len` includes the 11-byte header for either direction. Retain the
 returned bytes unchanged for any consumer-authorized retry; IDs alone do not
@@ -246,15 +266,17 @@ times visited value sizes and text/byte lengths; node and depth accounting follo
 Serde traversal, including seeds and enum wrappers. It is deliberately conservative,
 not an allocator/peak-memory measurement. It follows actual values. Different borrowed/owned representations may require
 different traversal allowances. Native decoding suppresses collection size hints
-and admits elements before their visitors can allocate. Canonical checking streams
-serialization against the input without allocating a second output buffer.
+and admits elements before their visitors can allocate. Decode applies only its
+own traversal charges; it no longer charges a second serialization pass. Encoding
+has its own allowances, so successful decoding does not guarantee successful
+encoding under the same limits.
 
 Custom Serde code is trusted: work and allocations outside these visited boundaries
 must be bounded by its owner. Standard/custom Deserialize allocations may abort on
 allocator exhaustion; the adapter does not make arbitrary Serde allocation fallible.
 The codec's own output reserve is fallible. Resource refusals are `Error::Limit`;
-invalid payloads, trailing bytes, identity and noncanonical encodings retain typed
-errors. Caller input custody is excluded. Native depth allowances must fit the
+invalid primitive representations (including overlong integers) are
+`Error::Malformed`; trailing bytes and envelope identity retain their own errors. Caller input custody is excluded. Native depth allowances must fit the
 consumer's stack budget. No schema-independent performance claim is made.
 
 The traversal adapters are adapted from IcyDB's native admission implementation;

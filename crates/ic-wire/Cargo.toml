@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire"
-description = "Bounded canonical Postcard contracts for controlled Internet Computer endpoints"
+description = "Bounded Serde/Postcard contracts for controlled Internet Computer endpoints"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

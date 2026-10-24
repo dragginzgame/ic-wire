@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0]
+
+- **Breaking:** Decode in one pass without reserializing the result. Decode APIs
+  require only `Deserialize`; maps, sets and custom Serde visitors may normalize
+  input. Consumers own ordering/uniqueness rules and must retain original frame
+  bytes for exact retries, signatures and hashes instead of reconstructing them.
+  For example, map bytes `02 02 14 01 0a` now decode successfully and re-encode
+  as `02 01 0a 02 14`. Encoder bytes and framing are unchanged.
+- Reject nonminimal varints and invalid char payloads directly as `Malformed`;
+  remove the obsolete `Noncanonical` error. Decode applies its own resource
+  allowance without a second serialization charge. Update exhaustive error
+  matches and configure encode/decode budgets independently.
+- Keep one Serde/Postcard codec: use a private attributed Postcard reader with
+  strict primitive checks, retaining upstream encoding and no forked dependency.
+  Remove the comparison implementation and qualify normalization, malformed
+  inputs, borrowing and Deserialize-only consumers. No compatibility lane remains.
+
 ## [0.6.13] - 2026-10-24
 
 - Add five mixed blob/packed-integer/string/optional records to hotspot

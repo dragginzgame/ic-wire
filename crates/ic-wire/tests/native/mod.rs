@@ -40,7 +40,6 @@ fn u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries() {
             Limits { depth: 2, ..exact },
         ] {
             assert_eq!(native::encode(&value, short), Err(Error::Limit));
-            assert_eq!(native::decode::<u64>(&expected, short), Err(Error::Limit));
         }
     }
     let expected = postcard::to_allocvec(&values).unwrap();
@@ -74,7 +73,6 @@ fn integer_shortcuts_preserve_postcard_bytes_and_original_budgets() {
                     Limits { depth: 2, ..exact },
                 ] {
                     assert_eq!(native::encode(&value, short), Err(Error::Limit));
-                    assert_eq!(native::decode::<$ty>(&expected, short), Err(Error::Limit));
                 }
             }
             let values: Vec<$ty> = (0..=255).collect();
@@ -202,12 +200,102 @@ fn borrowed_frames_match_owned_postcard_and_frozen_envelope() {
     );
     assert_eq!(
         native::decode::<u64>(&[0x80, 0], LIMITS),
-        Err(Error::Noncanonical)
+        Err(Error::Malformed)
     );
     assert_eq!(
         native::decode::<String>(&[1, 0xff], LIMITS),
         Err(Error::Malformed)
     );
+}
+
+#[test]
+fn decode_only_types_and_independent_decode_allowances() {
+    #[derive(Debug, PartialEq, Deserialize)]
+    struct DecodeOnly(u64);
+    let bytes = postcard::to_allocvec(&u64::MAX).unwrap();
+    let exact = Limits {
+        bytes: 10,
+        allocation: 74,
+        nodes: 1,
+        depth: 1,
+    };
+    assert_eq!(native::decode::<u64>(&bytes, exact), Ok(u64::MAX));
+    for refused in [
+        Limits {
+            allocation: 73,
+            ..exact
+        },
+        Limits { nodes: 0, ..exact },
+        Limits { depth: 0, ..exact },
+    ] {
+        assert_eq!(native::decode::<u64>(&bytes, refused), Err(Error::Limit));
+    }
+    assert_eq!(
+        native::decode::<DecodeOnly>(&bytes, LIMITS),
+        Ok(DecodeOnly(u64::MAX))
+    );
+    let frame = native::encode_request(7, &u64::MAX, LIMITS).unwrap();
+    assert_eq!(
+        native::decode_request::<DecodeOnly>(7, &frame, LIMITS),
+        Ok(DecodeOnly(u64::MAX))
+    );
+    let frame = native::encode_response(7, &u64::MAX, LIMITS).unwrap();
+    assert_eq!(
+        native::decode_response::<DecodeOnly>(7, &frame, LIMITS),
+        Ok(DecodeOnly(u64::MAX))
+    );
+}
+
+#[test]
+fn strict_integer_reads_reject_every_redundant_u16_encoding() {
+    for value in 0..=u16::MAX {
+        let mut bytes = postcard::to_allocvec(&value).unwrap();
+        assert_eq!(native::decode::<u16>(&bytes, LIMITS), Ok(value));
+        *bytes.last_mut().unwrap() |= 128;
+        bytes.push(0);
+        assert_eq!(native::decode::<u16>(&bytes, LIMITS), Err(Error::Malformed));
+    }
+    for value in [0, 127, 128, u64::MAX as u128, u128::MAX] {
+        let mut bytes = postcard::to_allocvec(&value).unwrap();
+        assert_eq!(native::decode::<u128>(&bytes, LIMITS), Ok(value));
+        *bytes.last_mut().unwrap() |= 128;
+        bytes.push(0);
+        assert_eq!(
+            native::decode::<u128>(&bytes, LIMITS),
+            Err(Error::Malformed)
+        );
+    }
+}
+
+#[test]
+fn strict_parsing_allows_consumer_normalization() {
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    #[serde(from = "u8")]
+    struct Reduced(u8);
+    impl From<u8> for Reduced {
+        fn from(value: u8) -> Self {
+            Self(value % 10)
+        }
+    }
+    // A shortest-form primitive can still be changed by the consumer's visitor.
+    assert_eq!(native::decode::<Reduced>(&[17], LIMITS), Ok(Reduced(7)));
+    assert_eq!(native::decode::<Reduced>(&[7], LIMITS), Ok(Reduced(7)));
+    // Collections can reorder or collapse entries without a parse error.
+    for (bytes, expected) in [([2, 2, 1], vec![1, 2]), ([2, 1, 1], vec![1])] {
+        assert_eq!(
+            native::decode::<std::collections::BTreeSet<u8>>(&bytes, LIMITS),
+            Ok(expected.into_iter().collect())
+        );
+    }
+    // Upstream Postcard takes the first scalar from this multi-character string.
+    assert_eq!(
+        native::decode::<char>(&[2, b'a', b'b'], LIMITS),
+        Err(Error::Malformed)
+    );
+    for value in ['a', 'é', '界', '🦀'] {
+        let bytes = native::encode(&value, LIMITS).unwrap();
+        assert_eq!(native::decode::<char>(&bytes, LIMITS), Ok(value));
+    }
 }
 
 #[test]
@@ -260,12 +348,14 @@ fn every_allowance_is_enforced_and_empty_values_remain_valid() {
     let bytes = native::encode(&map, LIMITS).unwrap();
     assert_eq!(bytes, postcard::to_allocvec(&map).unwrap());
     assert_eq!(native::decode::<std::collections::BTreeMap<String, Option<Result<Vec<i64>, (u8, String)>>>>(&bytes, LIMITS).unwrap(), map);
-    // Deserialization alone normalizes unordered and duplicate map keys; native
-    // admission must reject both instead of accepting alternate hash/retry bytes.
-    for bytes in [[2, 2, 20, 1, 10], [2, 1, 10, 1, 20]] {
+    // Consumers now own ordering and duplicate-key normalization.
+    for (bytes, expected) in [
+        ([2, 2, 20, 1, 10], vec![(1, 10), (2, 20)]),
+        ([2, 1, 10, 1, 20], vec![(1, 20)]),
+    ] {
         assert_eq!(
             native::decode::<std::collections::BTreeMap<u8, u8>>(&bytes, LIMITS),
-            Err(Error::Noncanonical)
+            Ok(expected.into_iter().collect())
         );
     }
     let text = "x".repeat(128);
@@ -391,7 +481,6 @@ fn scalar_admission_preserves_exact_resource_boundaries() {
     ] {
         assert_eq!(native::encoded_len(&u64::MAX, refused), Err(Error::Limit));
         assert_eq!(native::encode(&u64::MAX, refused), Err(Error::Limit));
-        assert_eq!(native::decode::<u64>(&bytes, refused), Err(Error::Limit));
     }
 }
 
@@ -443,7 +532,7 @@ fn borrowed_decode_points_into_the_frame_and_preserves_rejections() {
     overlong.extend_from_slice(&frame[12..]);
     assert_eq!(
         native::decode_request::<View<'_>>(7, &overlong, LIMITS),
-        Err(Error::Noncanonical)
+        Err(Error::Malformed)
     );
     let reply = native::encode_response(7, &value, LIMITS).unwrap();
     assert_eq!(
@@ -608,7 +697,7 @@ fn packed_i16_bytes_bounds_and_canonicality() {
     let packed = PackedI16::<1>::new(vec![0]).unwrap();
     for short in [
         Limits { bytes: 2, ..LIMITS },
-        Limits { nodes: 1, ..LIMITS },
+        Limits { nodes: 0, ..LIMITS },
         Limits {
             allocation: 1,
             ..LIMITS

@@ -1,0 +1,42 @@
+{
+  "before": {
+    "evaluation": {
+      "total": 88554,
+      "code": 77598
+    },
+    "benchmark-speed": {
+      "total": 113275,
+      "code": 102926
+    },
+    "records": {
+      "evaluation": {
+        "total": 324256,
+        "code": 305505
+      },
+      "benchmark-speed": {
+        "total": 424179,
+        "code": 389650
+      }
+    }
+  },
+  "strict": {
+    "evaluation": {
+      "total": 83369,
+      "code": 72425
+    },
+    "benchmark-speed": {
+      "total": 104456,
+      "code": 94114
+    },
+    "records": {
+      "evaluation": {
+        "total": 310589,
+        "code": 291865
+      },
+      "benchmark-speed": {
+        "total": 398716,
+        "code": 364218
+      }
+    }
+  }
+}

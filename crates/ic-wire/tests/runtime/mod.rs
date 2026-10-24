@@ -1,5 +1,5 @@
 //! Runtime metadata and Serde field boundaries.
-mod canonical_bytes;
+mod decoding;
 #[cfg(feature = "typescript")]
 mod native_schema;
 

@@ -58,7 +58,7 @@ impl<'de, const N: usize> Deserialize<'de> for PackedI16<N> {
 
 // Share decoding across bounds instead of specializing the allocation/copy loop
 // for each N. The field's exact element limit is still checked before allocation;
-// byte layout, canonical verification and budget charges remain unchanged.
+// byte layout, primitive validation and budget charges remain unchanged.
 struct PackedVisitor {
     limit: usize,
 }

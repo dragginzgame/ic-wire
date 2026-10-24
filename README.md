@@ -6,6 +6,8 @@ codec errors. Consumers own transport, authentication, endpoint integration,
 application semantics and retry policy.
 
 The production runtime uses ordinary Serde derives with one Postcard codec.
+Decode validates primitives in one pass and requires only Deserialize; collection
+and custom-visitor normalization is consumer-owned. Keep original bytes for retries.
 Bounded byte/text/list and finite-float fields remain optional Serde types.
 Runtime traversal supplies byte, allocation, node and depth admission; host-only
 `Wire` metadata generates matching TypeScript without field IDs.

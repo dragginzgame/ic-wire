@@ -201,7 +201,7 @@ pub fn run(case: usize, repetitions: u64, clock: &mut impl FnMut() -> u64) -> Sa
 }
 /// Measure the same cases with independent encode/decode repetition counts.
 /// The scan switch includes or excludes the application payload checksum.
-/// Codec-only mode retains decoding, canonical checks, result destruction and
+/// Codec-only mode retains decoding, primitive checks, result destruction and
 /// constant-time packed-layout length checks. It black-boxes the byte iterator.
 ///
 /// # Panics

@@ -33,29 +33,38 @@ const LIMITS: Limits = Limits {
     depth: 16,
 };
 
+// Decode no longer applies the encoder budget. Give re-encoding its own
+// allowance when checking representation-stable fuzz types.
+const ENCODE_LIMITS: Limits = Limits {
+    allocation: 65536,
+    nodes: 4096,
+    depth: 64,
+    ..LIMITS
+};
+
 fn check_frame(bytes: &[u8]) {
     if let Ok(value) = native::decode_request::<Request>(ID, bytes, LIMITS) {
         assert_eq!(
-            native::encode_request(ID, &value, LIMITS)
+            native::encode_request(ID, &value, ENCODE_LIMITS)
                 .unwrap()
                 .as_slice(),
             bytes
         );
         assert_eq!(
-            native::encoded_frame_len(&value, LIMITS).unwrap(),
+            native::encoded_frame_len(&value, ENCODE_LIMITS).unwrap(),
             bytes.len()
         );
         assert!(native::decode_response::<Response>(ID, bytes, LIMITS).is_err());
     }
     if let Ok(value) = native::decode_response::<Response>(ID, bytes, LIMITS) {
         assert_eq!(
-            native::encode_response(ID, &value, LIMITS)
+            native::encode_response(ID, &value, ENCODE_LIMITS)
                 .unwrap()
                 .as_slice(),
             bytes
         );
         assert_eq!(
-            native::encoded_frame_len(&value, LIMITS).unwrap(),
+            native::encoded_frame_len(&value, ENCODE_LIMITS).unwrap(),
             bytes.len()
         );
         assert!(native::decode_request::<Request>(ID, bytes, LIMITS).is_err());
