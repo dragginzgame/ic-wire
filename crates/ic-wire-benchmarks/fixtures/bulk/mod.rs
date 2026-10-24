@@ -80,7 +80,7 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
             }
         )*};
     }
-    numeric!(i16, u16, i32, u32, i64, u64);
+    numeric!(i8, i16, u16, i32, u32, i64, u64);
     for n in [0, 1, 32, 1024] {
         let hashes = || (0..n).map(|i| [i as u8; 32]).collect::<Vec<_>>();
         push!(paired(format!("hashes-{n}"), hashes(), |values| field(

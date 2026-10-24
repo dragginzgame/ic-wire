@@ -29,7 +29,9 @@ const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 const utf16 = new TextEncoder();
 // Generic packed fields use a byte count, unlike ordinary element-count lists.
 // Both endpoints must select this schema. Existing packed-i16 keeps its bound.
-const packedArrays = { i16: Int16Array, u16: Uint16Array, i32: Int32Array, u32: Uint32Array,
+// Signed-byte packed fields preserve raw Vec<i8> bytes, with bulk budgets and
+// Int8Array ownership. Existing schemas are unchanged; regenerate adopted fields.
+const packedArrays = { i8: Int8Array, i16: Int16Array, u16: Uint16Array, i32: Int32Array, u32: Uint32Array,
   i64: BigInt64Array, u64: BigUint64Array, hash32: Uint8Array } as const;
 const littleEndian = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 function swapWords(bytes: Uint8Array, width: number): void {

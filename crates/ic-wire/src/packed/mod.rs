@@ -38,7 +38,7 @@ mod sealed {
         }
     )*};
 }
-    words!(i16, u16, i32, u32, i64, u64);
+    words!(i8, i16, u16, i32, u32, i64, u64);
     impl super::PackedElement for [u8; 32] {}
     impl Word for [u8; 32] {
         #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
@@ -59,7 +59,7 @@ mod sealed {
 ///
 /// Recommended for large homogeneous integer/hash fields. Use ordinary lists
 /// for general collections or when small-value varint compactness takes priority.
-/// Supports i16/u16/i32/u32/i64/u64 and 32-byte hashes. Runtime [`crate::Limits`]
+/// Supports i8/i16/u16/i32/u32/i64/u64 and 32-byte hashes. Runtime [`crate::Limits`]
 /// bound admission; this type has no per-field element limit. Small integers
 /// may use more bytes than ordinary lists. Switching from Vec requires coordinated
 /// consumers; see the packed-field guide.
@@ -87,6 +87,10 @@ impl<T> Packed<T> {
 }
 impl<T: PackedElement> Serialize for Packed<T> {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        // Packed<i8> adds signed-byte bulk admission: [-128, 127] keeps the
+        // ordinary Vec bytes 02 80 7f, but metadata becomes Int8Array and
+        // traversal is charged per buffer. Regenerate clients and review limits.
+        // Other existing packed encodings are unchanged.
         // Opt-in field layout: element count + per-element encoding becomes
         // byte count + fixed LE words. [32767_i16]: 01 fe ff 03 -> 02 ff 7f.
         // One 32-byte hash changes its prefix 01 -> 20; hash bytes are unchanged.
@@ -169,7 +173,7 @@ mod tests {
                 }
             )*};
         }
-        check!(i16, u16, i32, u32, i64, u64);
+        check!(i8, i16, u16, i32, u32, i64, u64);
         let hash = core::array::from_fn::<_, 32, _>(|i| i as u8);
         let mut bytes = Vec::new();
         hash.append_le(&mut bytes);

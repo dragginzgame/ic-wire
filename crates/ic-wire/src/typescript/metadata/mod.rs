@@ -177,6 +177,7 @@ pub(super) fn ty(
         "packed" => format!(
             "globalThis.{}",
             match text(value, "word")? {
+                "i8" => "Int8Array",
                 "i16" => "Int16Array",
                 "u16" => "Uint16Array",
                 "i32" => "Int32Array",
@@ -265,7 +266,7 @@ pub(super) fn ty(
 
 // Transparent aliases must reach a concrete node. Recursive records, lists and
 // enums remain valid; only references/newtypes disappear from TypeScript types.
-fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationError> {
+pub(super) fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), GenerationError> {
     let mut checked = BTreeSet::new();
     for (name, mut node) in types {
         if checked.contains(name.as_str()) {

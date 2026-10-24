@@ -54,5 +54,10 @@ name = "typescript-conformance"
 path = "examples/typescript_conformance/mod.rs"
 required-features = ["typescript"]
 
+[[example]]
+name = "bulk-lint"
+path = "examples/bulk_lint/mod.rs"
+required-features = ["typescript"]
+
 [lints]
 workspace = true

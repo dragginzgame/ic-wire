@@ -429,6 +429,11 @@ fn main() {
         ic_wire::PackedI16::<8>::new(vec![-32768, -65, -1, 0, 63, 64, 16384, 32767]).unwrap(),
         "new Int16Array([-32768,-65,-1,0,63,64,16384,32767])",
     );
+    f.add(ic_wire::Packed::<i8>::new(vec![]), "new Int8Array()");
+    f.add(
+        ic_wire::Packed::<i8>::new((i8::MIN..=i8::MAX).collect()),
+        "Int8Array.from({length:256}, (_, i) => i - 128)",
+    );
     f.add(ic_wire::Packed::<i16>::new(vec![]), "new Int16Array()");
     f.add(
         ic_wire::Packed::new(vec![i16::MIN, i16::MAX]),

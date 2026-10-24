@@ -382,7 +382,7 @@ assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,6,0,0,0,0
 assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,0x82,0,0,0])), WireError);
 assert.deepEqual(packedI16.decodeRequest(Uint8Array.from([...header,4,0,128,255,127])),new Int16Array([-32768,32767]));
 
-for (const [word, ctor, width] of [['i16',Int16Array,2], ['u16',Uint16Array,2],
+for (const [word, ctor, width] of [['i8',Int8Array,1], ['i16',Int16Array,2], ['u16',Uint16Array,2],
   ['i32',Int32Array,4], ['u32',Uint32Array,4], ['i64',BigInt64Array,8],
   ['u64',BigUint64Array,8], ['hash32',Uint8Array,32]]) {
   const codec = probe({k:'packed',word});
@@ -394,7 +394,7 @@ for (const [word, ctor, width] of [['i16',Int16Array,2], ['u16',Uint16Array,2],
   decoded[0] = word.endsWith('64') ? 1n : 1;
   assert.deepEqual(offset.subarray(1),encoded);
   assert.throws(() => codec.encodeRequest([]), WireError);
-  assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,1,0])), WireError);
+  assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,width === 1 ? 2 : 1,0])), WireError);
   assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,0x80,0])), WireError);
   assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,width,...new Uint8Array(width-1)])), WireError);
 }

@@ -23,7 +23,7 @@ fn packed_words_match_little_endian_bytes_and_unaligned_decode() {
             assert_eq!(decoded, packed);
         )*};
     }
-    check!(i16, u16, i32, u32, i64, u64);
+    check!(i8, i16, u16, i32, u32, i64, u64);
     let packed = Packed::<_>::new(vec![[0xab; 32]]);
     let bytes = ic_wire::native::encode(&packed, LIMITS).unwrap();
     assert_eq!(bytes, [vec![32], vec![0xab; 32]].concat());
@@ -50,7 +50,7 @@ fn invalid_widths_and_noncanonical_lengths_are_rejected() {
             assert_eq!(ic_wire::native::decode::<Packed<$ty>>(&[0x80, 0], LIMITS), Err(ic_wire::Error::Malformed));
         )*};
     }
-    check!(i16, u16, i32, u32, i64, u64, [u8; 32]);
+    check!(i8, i16, u16, i32, u32, i64, u64, [u8; 32]);
 }
 
 #[test]
@@ -270,4 +270,36 @@ fn packed_length_prefixes_offsets_and_budget_boundaries() {
     check::<i64>();
     check::<u64>();
     check::<[u8; 32]>();
+}
+
+#[test]
+fn signed_bytes_keep_vec_bytes_but_use_bulk_admission() {
+    let values: Vec<i8> = (i8::MIN..=i8::MAX).collect();
+    let packed = Packed::new(values.clone());
+    let bytes = ic_wire::native::encode(&values, LIMITS).unwrap();
+    assert_eq!(bytes, ic_wire::native::encode(&packed, LIMITS).unwrap());
+    let bulk = ic_wire::Limits { nodes: 1, ..LIMITS };
+    assert_eq!(
+        ic_wire::native::decode::<Packed<i8>>(&bytes, bulk).unwrap(),
+        packed
+    );
+    assert_eq!(
+        ic_wire::native::decode::<Vec<i8>>(&bytes, bulk),
+        Err(ic_wire::Error::Limit)
+    );
+    for limits in [
+        ic_wire::Limits {
+            bytes: bytes.len() - 1,
+            ..bulk
+        },
+        ic_wire::Limits {
+            allocation: 0,
+            ..bulk
+        },
+    ] {
+        assert_eq!(
+            ic_wire::native::decode::<Packed<i8>>(&bytes, limits),
+            Err(ic_wire::Error::Limit)
+        );
+    }
 }

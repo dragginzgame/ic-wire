@@ -21,6 +21,7 @@ enum Cell {
     PackedI64(Packed<i64>),
     PackedU64(Packed<u64>),
     PackedHashes(Packed<[u8; 32]>),
+    PackedI8(Packed<i8>),
 }
 
 type Request = List<Cell, 8>;

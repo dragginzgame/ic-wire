@@ -404,3 +404,15 @@ or a promise of identical traversal charges to Rust's Serde visitor.
 
 Runtime and derive crates use the MIT License. Candid and simulator dependencies
 are confined to unpublished benchmarks; production remains platform-independent.
+
+### Bulk-field advice on native hosts
+
+With `typescript`, `typescript::lint_bulk_fields` reports ordinary primitive
+lists that may benefit from byte buffers or `Packed<T>`. Pass a map of named
+schemas and a map of exact diagnostic paths to acknowledgement reasons. Inspect
+`report.warnings` and `report.stale_acknowledgements`; optionally require
+`report.is_clean()` in consumer CI. Include inline method request/response roots.
+This opt-in lint does not rewrite Serde or affect Wasm. Small lists may be better
+left compact; preserve field bounds and custom validation when adopting advice.
+`Packed<i8>` uses `Int8Array` metadata and preserves ordinary signed-byte payloads
+while changing traversal to bulk admission (`[-128,127]` stays `02 80 7f`).

@@ -1,0 +1,48 @@
+{
+  "before": {
+    "evaluation-candid.wasm": {
+      "total": 442247,
+      "code": 407050
+    },
+    "benchmark-speed-candid.wasm": {
+      "total": 679957,
+      "code": 645666
+    },
+    "benchmark-speed-wire.wasm": {
+      "total": 136393,
+      "code": 125879
+    },
+    "evaluation-wire.wasm": {
+      "total": 104837,
+      "code": 93622
+    }
+  },
+  "after": {
+    "evaluation-candid.wasm": {
+      "total": 442247,
+      "code": 407050
+    },
+    "benchmark-speed-candid.wasm": {
+      "total": 679957,
+      "code": 645666
+    },
+    "benchmark-speed-wire.wasm": {
+      "total": 122614,
+      "code": 112140
+    },
+    "evaluation-wire.wasm": {
+      "total": 98377,
+      "code": 87195
+    }
+  },
+  "unchanged_100_records": {
+    "before": {
+      "total": 398712,
+      "code": 364218
+    },
+    "after": {
+      "total": 398712,
+      "code": 364218
+    }
+  }
+}

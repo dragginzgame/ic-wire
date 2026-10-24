@@ -1,4 +1,6 @@
 //! Native Serde admission, wire compatibility and failure boundaries.
+#[cfg(feature = "typescript")]
+mod bulk_lint;
 mod packed;
 use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};

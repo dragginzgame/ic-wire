@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.1]
+
+- Add opt-in host schema advice for ordinary primitive lists, exact-path
+  acknowledgements with reasons, stale-acknowledgement detection and a
+  `bulk-lint --deny-warnings` command for consumer CI. Existing schemas and
+  codec behavior are unchanged; field adoption remains explicit.
+- Support `Packed<i8>` with `Int8Array` clients. Signed-byte payloads retain
+  ordinary vector bytes (`[-128, 127]` remains `02 80 7f`) but use bulk
+  admission. Regenerate clients and review limits when adopting the field.
+
 ## [0.7.0] - 2026-10-24
 
 - **Breaking:** Decode in one pass without reserializing the result. Decode APIs

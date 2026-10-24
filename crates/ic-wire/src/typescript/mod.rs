@@ -1,4 +1,6 @@
 //! Host-side TypeScript projection of Serde layouts.
+mod bulk_lint;
+pub use bulk_lint::{BulkLintReport, BulkWarning, lint_bulk_fields};
 mod metadata;
 mod native_schema;
 pub use metadata::generate_registry;

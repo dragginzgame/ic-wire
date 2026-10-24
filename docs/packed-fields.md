@@ -11,7 +11,7 @@ The choice is fixed for the field, including its empty/small values; it is never
 selected dynamically from the current input length.
 
 `ic_wire::Packed<T>` is an owned field in the production Serde/Postcard codec,
-not a second codec. It supports six fixed-width integer types (`i16`, `u16`,
+not a second codec. It supports seven fixed-width integer types (`i8`, `i16`, `u16`,
 `i32`, `u32`, `i64`, `u64`) and 32-byte hashes (`[u8; 32]`). Floats, arbitrary
 structs and platform-sized integers are excluded by a sealed element trait.
 Use ordinary Serde derives and `ic_wire::Wire` metadata as usual. For byte data,
@@ -85,7 +85,7 @@ runtime bytes, schemas or acceptance rules.
 
 Generated metadata uses `{k:'packed',word:'i16'}` (or the other supported word
 name; hashes use `hash32`). Integer fields use the corresponding typed array:
-Int16Array, Uint16Array, Int32Array, Uint32Array, BigInt64Array or BigUint64Array.
+Int8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, BigInt64Array or BigUint64Array.
 Hash fields use one flat Uint8Array whose length must be divisible by 32.
 Existing bounded `{k:'packed-i16',max:N}` metadata retains its limit.
 
@@ -146,3 +146,51 @@ not evidence of a bottleneck in this declaration. Manifest adoption and its
 installed instruction/Wasm measurement remains consumer-owned. Since the 0.7 cut,
 Wire validates primitives while reading but does not enforce byte-identical
 reserialization. Consumers own normalization and retain exact retry frames.
+
+## Host-side bulk advice and CI
+
+With the host-only `typescript` feature, `typescript::lint_bulk_fields` scans
+resolved schemas for ordinary primitive lists and recommends byte buffers or
+`Packed<T>`. Rust type aliases are resolved by `native_schema`; nested schemas
+and named references are supported. Named references are reported at their
+shared definition once, not at every referring endpoint. Include inline method
+request/response schemas as named roots too. Types without Wire metadata are
+outside this lint's coverage.
+
+```rust
+use std::collections::BTreeMap;
+use ic_wire::typescript::{lint_bulk_fields, native_schema};
+
+let schemas = BTreeMap::from([("Samples".into(), native_schema::<Vec<i64>>().unwrap())]);
+let acknowledgements = BTreeMap::new();
+let report = lint_bulk_fields(&schemas, &acknowledgements).unwrap();
+for warning in &report.warnings {
+    eprintln!("{}: consider {}", warning.path, warning.representation);
+}
+// Optional CI policy: assert!(report.is_clean());
+```
+
+Diagnostic paths escape `~` and `/` as `~0` and `~1`. For example,
+`/Request/fields/samples/item` identifies a list inside an optional `samples`
+field. Acknowledge an intentional compact vector with an exact path and a
+nonempty reason, such as `{"/Samples":"At most four small values; retain varints"}`.
+Stale acknowledgements make `is_clean()` false. There is no wildcard suppression.
+
+For a JSON object of named schema roots, the repository command is:
+
+```sh
+cargo run -p ic-wire --features typescript --example bulk-lint -- schemas.json
+cargo run -p ic-wire --features typescript --example bulk-lint -- schemas.json --acknowledgements acknowledged.json --deny-warnings
+```
+
+The first command prints advice and succeeds; the second fails on unacknowledged
+candidates or stale acknowledgements. Invalid schemas or empty reasons fail in
+both modes. This is opt-in host tooling, with no canister code, emitted-byte or
+schema changes. It does not automatically rewrite fields or predict a slowdown:
+short lists and small values may favor ordinary encoding. Preserve bounds,
+newtype validation and other consumer constraints when adopting a suggestion.
+
+`Packed<i8>` now supplies bulk signed-byte handling and projects to `Int8Array`.
+For `[-128, 127]`, both `Vec<i8>` and `Packed<i8>` emit `02 80 7f`. Adoption still
+changes traversal budgets, JSON projection and generated client types; coordinate
+consumers and review limits. The exhaustive 256-value test confirms byte parity.

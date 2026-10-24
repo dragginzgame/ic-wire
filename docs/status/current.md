@@ -1,71 +1,62 @@
 # Current handoff
 
-## Released baseline and pending 0.7.0
+## Released baseline and pending 0.7.1
 
-0.6.13 is released at `1003261d481a65cf3dd87b5f1e249bc82103ddbc`; package versions
-remain 0.6.13. The maintainer explicitly approved removing the post-decode
-reserialization check after reviewing normalization examples. The open changelog
-is 0.7.0 because acceptance rules and the public error enum change. Staging,
-versions, commits, publication and delivery remain maintainer-owned. No sibling
-was changed. Incoming research coverage and evidence were preserved.
+0.7.0 is released at `aa7cc32acbd54a58d77720bedfb1ae530926f57e`; package versions
+remain 0.7.0. This batch started clean. The open 0.7.1 changelog covers opt-in
+host bulk advice and Packed<i8>. Staging, versions, commits, publication and
+pushes remain maintainer-owned. No sibling was changed.
 
-## Implemented contract
+## Implemented work
 
-One production Serde/Postcard codec remains. Decode requires only Deserialize,
-uses a private attributed Postcard 1.1.3 reader with strict varint/char checks,
-and retains framing, identity, trailing-byte and resource checks. Re-encoding
-and the encoder traversal budget are no longer part of decode. Compare, its
-helper/tests and Error::Noncanonical are retired; malformed primitives now fail
-as Malformed. No dependency fork, alternative mode or compatibility reader exists.
+`typescript::lint_bulk_fields` scans named resolved schema roots, including
+nested aliases/containers and shared references. It recommends byte buffers or
+Packed for ordinary primitive lists. Exact diagnostic paths plus nonempty reasons
+acknowledge deliberate compact fields; stale acknowledgements remain visible.
+The `bulk-lint` example prints advice and optionally fails CI with
+`--deny-warnings`. Consumers must include inline method request/response schemas
+as roots. Types without Wire metadata are outside coverage. No automatic rewrite
+or canister runtime policy is introduced.
 
-Consumers own map/set ordering, uniqueness and custom Serde normalization.
-Map bytes `02 02 14 01 0a` now decode and re-encode as `02 01 0a 02 14`.
-Retain original immutable frames for exact retries and raw-byte signatures/hashes;
-decode success does not guarantee identical re-encoding. Review exhaustive error
-matches and configure encode/decode allowances independently. Emitted bytes,
-method IDs, hash algorithms and the eleven-byte envelope are unchanged.
+Packed<i8> uses existing packed machinery and Int8Array metadata. For [-128,127],
+bytes remain `02 80 7f`; traversal budgets, JSON projection and generated clients
+change on adoption. Preserve consumer constraints and regenerate clients. All
+existing fields, frame identities, hashes and retry rules remain unchanged.
 
-## Matched measurements and validation
+## Qualification and tradeoffs
 
-The [production qualification](../evidence/one-pass-070/README.md) preserves
-frozen sources, scripts, raw samples, identities and artifacts. All 1,904 matched
-IC rows retain input/frame identity and three equal samples. Opt-3 1 MiB blob
-decode falls 2,524,535 to 1,049,510 instructions (-58.43%); Candid is 1,065,023.
-Encoding counters are unchanged and all successful decode counters improve in
-the 87-case corpus. Truncated wide-u16 rejection regresses 16.28%.
+The [matched bulk study](../evidence/bulk-advice-071/README.md) retains 109 cases,
+2,180 IC row pairs, three equal samples per row, matching logical input identities
+and unchanged Candid controls. It compares ordinary versus explicitly packed
+fields with the same expanded fixture and Cargo.lock, not a transparent upgrade.
+At opt-3, 16,384 i8 values encode in 17,298 versus 820,017 ordinary instructions;
+decode costs 17,435 versus 667,758. Frame bytes are identical. Every selected
+packed encode/decode case beats Candid in both profiles. This is corpus evidence,
+not a universal guarantee. Single-i8 encode/decode regress 6.13%/8.47% versus
+ordinary fields; small integer payloads may grow when fixed-width packing is used.
 
-Total/code Wasm drops 8,835/8,812 bytes for the hot spots and 25,467/25,432 bytes
-for 100 ordinary records at opt-3 (6.00% less total record Wasm). The 100-record
-probe measures size only. Native runs use two orders and eleven samples per row;
-large-blob decode improves about 46%, with noisy host encoding and rejection
-regressions recorded separately. No installed-canister size claim is made.
+Packed cohort total Wasm falls 13,779 bytes at opt-3 (10.10%). The unchanged
+100-record consumer remains byte-identical at 398,712 bytes. Optional host linting
+adds about 119 microseconds to generation for 100 schema roots in the measured
+probe. No native codec timing or installed-canister size claim is made.
 
-Runtime/native/borrowed tests, strict Clippy, default doctests and package file
-listing pass. TypeScript qualification passes 157 vectors, 32,156 mutations,
-20 native-projection vectors and 48 simulated-endian cases. No_std/default/schema
-Wasm consumers and Rust 1.91 pass. ASan fuzzing passes 100,000 inputs with leak
-detection disabled for sandbox constraints. Document links, format and diff
-checks pass. No full 21-cohort rerun, macOS, real big-endian or installed-consumer
-performance qualification is claimed.
+Native/lib tests, strict Clippy, doctests, CLI exit checks, Rust 1.91 and native/
+no_std/Wasm consumers pass. TypeScript passes 159 vectors, 33,560 mutations,
+20 projection vectors and 54 simulated-endian cases. ASan fuzzing passes 100,000
+inputs with leak detection disabled for sandbox constraints. Real big-endian
+execution remains unqualified. Formatting, diff and local document links pass.
 
-## Retained direction and limitations
+## Retained direction
 
-Use ByteBuf/Bytes/BytesRef for binary data and Packed<T> for supported homogeneous
-integer/hash fields. Ordinary vectors remain available for compact small values
-and general collections, with known large encoding gaps. This decoder change
-does not provide implicit bulk encoding. Wire generates native host metadata;
-Serde owns layouts with declaration order and no field IDs. Consumers coordinate
-layout changes. See the [runtime guide](../runtime.md) and
-[field guide](../packed-fields.md).
-
-The [0.6.13 full matrix](../full-comparison-0613.md) remains historical evidence
-for 21 cohorts. The [earlier one-pass study](../evidence/strict-decoding-0614/README.md)
-is superseded by production qualification, not another shipping mode. Consumer
-storage, endpoint IDs, installed acceptance and retries remain consumer-owned;
-required external principals remain on Candid boundaries. Siblings are read-only.
-
-## Tooling selection
+One production Serde/Postcard codec remains, with one-pass strict primitive
+decoding and consumer-owned normalization. Retain original frames for exact
+retries and raw-byte signatures/hashes; successful decoding does not promise
+identical re-encoding. No compatibility lane exists. The
+[0.7 one-pass study](../evidence/one-pass-070/README.md) and
+[0.6.13 full matrix](../full-comparison-0613.md) remain historical evidence.
+Ordinary-vector controls and their large gaps remain visible. See the
+[bulk field guide](../packed-fields.md) and [runtime contract](../runtime.md).
 
 Shared Tooling is pinned at `4c0f198e`, recorded version 0.26.10. IC Build/Host/
-Testkit are 0.67.0 and Platform 0.6.14. Do not infer policy from mutable siblings
-or patch snapshot-owned files. Ordinary work does not run releases.
+Testkit are 0.67.0 and Platform 0.6.14. Siblings remain read-only. Do not infer
+policy from mutable siblings or patch snapshot-owned files.

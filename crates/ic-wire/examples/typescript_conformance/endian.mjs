@@ -23,6 +23,7 @@ function bigEndianArray(Native, getter, setter) {
   };
 }
 const specs = [
+  ['i8', 'Int8Array', 'getInt8', 'setInt8', [-128, 1, 127]],
   ['i16', 'Int16Array', 'getInt16', 'setInt16', [-32768, 1, 32767]],
   ['u16', 'Uint16Array', 'getUint16', 'setUint16', [0, 1, 65535]],
   ['i32', 'Int32Array', 'getInt32', 'setInt32', [-2147483648, 1, 2147483647]],
@@ -57,7 +58,7 @@ for (const [word, name, , setter, values] of [...specs, ['hash32', 'Uint8Array',
         const decoded = codec['decode'+direction](padded.subarray(1,-2));
         padded.fill(0);
         assert.deepEqual(Array.from(decoded), selected);
-        const malformed = Uint8Array.from([...header,1,0]); malformed[10] = frame[10];
+        const malformed = Uint8Array.from([...header,word === 'i8' ? 2 : 1,0]); malformed[10] = frame[10];
         assert.throws(()=>codec['decode'+direction](malformed), WireError);
         cases++;
       }
