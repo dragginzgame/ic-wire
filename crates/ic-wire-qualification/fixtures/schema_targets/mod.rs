@@ -5,6 +5,11 @@ use alloc::vec::Vec;
 
 #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "wire-schema", derive(ic_wire::Wire))]
+#[serde(transparent)]
+pub struct TemplateId(pub alloc::borrow::Cow<'static, str>);
+
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "wire-schema", derive(ic_wire::Wire))]
 pub struct Page<T> {
     pub entries: Vec<T>,
     pub total: u64,
@@ -45,6 +50,13 @@ pub fn roundtrip() -> Result<(), ic_wire::Error> {
         ic_wire::native::decode_request::<Upload>(1, &bytes, limits)?,
         upload
     );
+    let id = TemplateId(alloc::borrow::Cow::Borrowed("id"));
+    let bytes = ic_wire::native::encode_request(1, &id, limits)?;
+    assert_eq!(&bytes[11..], &[2, b'i', b'd']);
+    assert_eq!(
+        ic_wire::native::decode_request::<TemplateId>(1, &bytes, limits)?,
+        id
+    );
     Ok(())
 }
 
@@ -54,6 +66,10 @@ fn metadata_and_runtime() {
     roundtrip().unwrap();
     #[cfg(feature = "wire-schema")]
     {
+        assert_eq!(
+            ic_wire::typescript::native_schema::<TemplateId>().unwrap()["k"],
+            "text"
+        );
         let schema = ic_wire::typescript::native_schema::<Page<u64>>().unwrap();
         assert_eq!(schema["fields"][0]["name"], "entries");
         assert_eq!(schema["fields"][0]["value"]["k"], "list");

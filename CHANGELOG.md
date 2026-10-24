@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.5]
+
+- Support host-only `Cow<str>` text metadata, including transparent consumer
+  identifiers. Qualify owned/borrowed Rust and TypeScript frames, admission and
+  native/Wasm feature forwarding; runtime bytes and codec behavior are unchanged.
+  Resolves [#19 — Support Cow<str> native schema projection for transparent consumer identifiers](https://github.com/dragginzgame/ic-wire/issues/19).
+- Confirm the delivered native metadata and schema-forwarding fixes against the
+  successful 0.7.3 Linux/macOS matrix and close
+  [#17 — Native Serde schema projection for endpoint-derived TypeScript registries](https://github.com/dragginzgame/ic-wire/issues/17).
+
 ## [0.7.4] - 2026-10-24
 
 - Decode one-byte u16/u32/u64 varints directly while retaining width-specific

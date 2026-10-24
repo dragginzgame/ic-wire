@@ -1,6 +1,6 @@
 //! Host-only projection of ordinary native Serde layouts.
 use super::GenerationError;
-use alloc::{boxed::Box, string::String, vec::Vec};
+use alloc::{borrow::Cow, boxed::Box, string::String, vec::Vec};
 use serde_json::{Value, json};
 
 /// Metadata for a native Postcard serialization layout, not a runtime resource bound.
@@ -104,6 +104,14 @@ scalar! {
 }
 // Deliberately omit pointer-sized integers and raw floats: their platform/range
 // contracts cannot be faithfully inferred from the TS runtime.
+// Serde serializes either Cow custody as str and normally deserializes to Owned.
+// This adds host metadata only; text bytes, budgets and runtime parsing are unchanged.
+impl Wire for Cow<'_, str> {
+    fn native_schema(c: &mut SchemaContext) -> Result<Value, GenerationError> {
+        <str as Wire>::native_schema(c)
+    }
+}
+
 impl<T: Wire> Wire for Vec<T> {
     fn native_schema(c: &mut SchemaContext) -> Result<Value, GenerationError> {
         <[T] as Wire>::native_schema(c)

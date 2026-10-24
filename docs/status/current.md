@@ -1,13 +1,40 @@
 # Current handoff
 
-## Released baseline and pending 0.7.4
+## Released baseline and pending 0.7.5
 
-0.7.3 is released at `2240f27c9e3f8074a533ed5d030685ee068a03b9`; package versions
-remain 0.7.3. The checkout was clean at the start of this batch. Pending 0.7.4
-retains the standalone one-byte varint shortcut after rejecting shared-loop and
-output experiments. Incoming staged documentation/evidence was preserved.
-Dependencies, build profiles and protocol are unchanged. Staging,
-commits, versions, publication and pushes remain maintainer-owned.
+0.7.4 is released at `e0982118d7d2cf61af787610fd5cc96b4b6f8def`; package versions
+remain 0.7.4. This batch began with a clean checkout. Pending 0.7.5 adds host-only
+Cow<str> metadata for issue #19. Runtime codec code, dependencies, build profiles
+and protocol are unchanged. Staging, commits, versions, publication and pushes
+remain maintainer-owned; no sibling repository was changed.
+
+## Cow text metadata and issue closure
+
+`Cow<'a, str>` now delegates metadata to the existing str projection. Transparent
+consumer identifiers derive Wire without changing their Serde representations.
+Borrowed and owned equal strings have identical request/response frames and
+generated TypeScript bytes; normal Serde decoding returns Cow::Owned. The change
+does not promise zero-copy Cow decoding or support arbitrary custom Cow targets.
+Existing bytes such as text `id` → `02 69 64`, runtime budgets and malformed/
+trailing-frame refusal are unchanged. Metadata stays native-target gated.
+
+Qualification covers static and non-static borrowed text, owned text, empty and
+Unicode strings, 127/128-byte lengths, all four budget refusals, truncation, invalid
+UTF-8 and trailing bytes. The maintained conformance gate passes 159 frame vectors,
+33,560 mutations, 24 native projection vectors (four new Cow cases), simulated
+endian checks and runtime/schema-forwarded Wasm graphs. The disposable consumer
+includes a transparent Cow<'static, str> identifier, including Rust 1.91 Wasm.
+Feature-enabled library/runtime tests, Clippy and native MSRV checks pass.
+Reproduce with `make check-typescript` and the focused `cow_text` runtime test;
+logs are under `/tmp/wire-cow-075/`. This adds a previously uncompilable host
+projection, not a codec or renderer optimization; no before/after performance
+claim or meaningful supported Cow-metadata baseline exists.
+
+#17 is closed against delivered metadata/forwarding support and the complete
+0.7.3 Linux/macOS ARM/macOS Intel CI run 40109481026. The 0.7.4 run was still in
+progress when inspected; its success was not claimed. #19 was closed as explicitly
+requested after local qualification, with the pending-publication boundary stated
+in its closure comment. Canic adoption still needs the maintainer's 0.7.5 release.
 
 ## Tooling and qualification
 
@@ -19,9 +46,7 @@ checks passed; retained bulk Wasms reproduced all 2,180 rows through updated hos
 tooling. This was host integration qualification, not fresh codec performance.
 
 0.7.3 includes the Bash 3.2 schema-target fix and benchmark-report validation.
-The macOS fix is now delivered locally in the release; hosted macOS results and
-issue #17 closure have not been rechecked in this batch. Linux checks alone do
-not establish macOS success. No sibling repository was changed.
+Its complete hosted matrix supplies the macOS evidence for #17 closure above.
 
 ## Wasm research decisions
 

@@ -365,7 +365,7 @@ There is no Candid-style schema evolution or compatibility fallback.
 
 Supported shapes are named/unit/tuple structs, externally tagged enums (unit,
 newtype, tuple and named variants), single-field `#[serde(transparent)]` structs,
-generic types/where clauses, fixed-width integers, bool, unit, String/str,
+generic types/where clauses, fixed-width integers, bool, unit, String/str/Cow<str>,
 Vec, slices, Option, Result, Box (including boxed slices), references, serializable fixed arrays and tuples of
 one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other
@@ -377,6 +377,11 @@ identifiers retain their unescaped names in the TypeScript object.
 Slices use the same length-prefixed sequence metadata as Vec, including `&[u8]`.
 Use `serde_bytes::Bytes` for byte-oriented `Uint8Array` metadata; slice metadata
 does not make arbitrary typed slices borrowable during Serde deserialization.
+
+`Cow<'a, str>` projects to the same text metadata as `str` and `String`, including
+inside transparent identifiers. Borrowed and owned equal strings encode identically.
+Ordinary Serde deserialization produces `Cow::Owned`; use `&str` when the contract
+requires a borrowed view of the input frame.
 
 The first version inlines concrete schemas and rejects recursive types or schemas
 exceeding 64 levels/65,536 visited nodes with `GenerationError::Complexity`.

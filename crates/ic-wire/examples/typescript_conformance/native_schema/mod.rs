@@ -8,6 +8,10 @@ use serde_json::{Value, json};
 use std::{collections::BTreeMap, fmt::Write as _, fs, path::Path};
 
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+#[serde(transparent)]
+struct CowText(std::borrow::Cow<'static, str>);
+
+#[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
 struct Page<T> {
     entries: Vec<T>,
     total: u64,
@@ -329,6 +333,27 @@ export function createCodec(method: unknown, types: unknown) {
             &javascript,
         );
     }
+    for (offset, text) in ["", "template-é🦀"].into_iter().enumerate() {
+        let borrowed = CowText(std::borrow::Cow::Borrowed(text));
+        let owned = CowText(std::borrow::Cow::Owned(text.to_owned()));
+        assert_eq!(
+            native::encode_request(17, &borrowed, LIMITS).unwrap(),
+            native::encode_request(17, &owned, LIMITS).unwrap()
+        );
+        assert_eq!(
+            native::encode_response(17, &borrowed, LIMITS).unwrap(),
+            native::encode_response(17, &owned, LIMITS).unwrap()
+        );
+        let javascript = serde_json::to_string(text).unwrap();
+        add(
+            directory,
+            &mut checks,
+            20 + offset * 2,
+            borrowed,
+            &javascript,
+        );
+        add(directory, &mut checks, 21 + offset * 2, owned, &javascript);
+    }
     checks.push_str(r#"
 rejects(() => projection14.encodeRequest({data:new Uint8Array(),extra:1}), 'value');
 for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
@@ -337,7 +362,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 20 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 24 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

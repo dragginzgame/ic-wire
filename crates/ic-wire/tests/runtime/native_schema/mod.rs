@@ -1,6 +1,79 @@
 use ic_wire::{Wire, typescript::native_schema};
 use serde::Serialize;
 use serde_json::json;
+use std::borrow::Cow;
+
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize, Wire)]
+#[serde(transparent)]
+struct CowText<'a>(Cow<'a, str>);
+
+#[test]
+fn cow_text_preserves_schema_frames_and_admission() {
+    use ic_wire::{Error, Limits, native};
+    let limits = Limits {
+        bytes: 4096,
+        allocation: 32768,
+        nodes: 512,
+        depth: 32,
+    };
+    assert_eq!(
+        native_schema::<CowText<'static>>().unwrap(),
+        native_schema::<String>().unwrap()
+    );
+    for text in [
+        String::new(),
+        "é🦀".into(),
+        "a".repeat(127),
+        "a".repeat(128),
+    ] {
+        let borrowed = CowText(Cow::Borrowed(text.as_str()));
+        let owned = CowText(Cow::Owned(text.clone()));
+        for response in [false, true] {
+            let encode = |value: &CowText<'_>, limits| {
+                if response {
+                    native::encode_response(17, value, limits)
+                } else {
+                    native::encode_request(17, value, limits)
+                }
+            };
+            let decode = |bytes: &[u8], limits| -> Result<CowText<'static>, Error> {
+                if response {
+                    native::decode_response(17, bytes, limits)
+                } else {
+                    native::decode_request(17, bytes, limits)
+                }
+            };
+            let frame = encode(&borrowed, limits).unwrap();
+            assert_eq!(frame, encode(&owned, limits).unwrap());
+            assert_eq!(&frame[11..], postcard::to_allocvec(&text).unwrap());
+            let decoded = decode(&frame, limits).unwrap();
+            assert_eq!(decoded, owned);
+            assert!(matches!(decoded.0, Cow::Owned(_)));
+            for short in [
+                Limits {
+                    bytes: 11,
+                    ..limits
+                },
+                Limits {
+                    allocation: 0,
+                    ..limits
+                },
+                Limits { nodes: 0, ..limits },
+                Limits { depth: 0, ..limits },
+            ] {
+                assert_eq!(encode(&borrowed, short), Err(Error::Limit));
+                assert_eq!(decode(&frame, short), Err(Error::Limit));
+            }
+            assert!(decode(&frame[..frame.len() - 1], limits).is_err());
+            let mut damaged = frame.clone();
+            damaged.push(0);
+            assert_eq!(decode(&damaged, limits), Err(Error::Trailing));
+            damaged.truncate(11);
+            damaged.extend_from_slice(&[1, 255]);
+            assert_eq!(decode(&damaged, limits), Err(Error::Malformed));
+        }
+    }
+}
 
 trait HasItem {
     type Item: Serialize;
