@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.4]
+
+- Decode one-byte u16/u32/u64 varints directly while retaining width-specific
+  multi-byte validation. Matched IC tests show up to 11% lower decode cost with
+  nearly neutral Wasm size; retain the small-input regressions in the evidence.
+  Encoding, wire bytes, limits and malformed-input acceptance are unchanged.
+
+- Record two rejected shared-varint reader prototypes: Wasm savings did not
+  justify wide/small-integer decode regressions. Retain correctness and matched
+  instruction evidence; production decoding and protocol remain unchanged.
+
+- Reject byte-output inlining after broader tests exposed roughly doubled
+  instructions for wide-u16 list encoding despite smaller type-count controls.
+  Retain reproducible size and instruction evidence; production is unchanged.
+
+- Record the rejected shared output-preparation experiment: negligible opt-z
+  savings at 100 types were outweighed by growth in other builds. Retain
+  reproducible size evidence and refresh the handoff; production is unchanged.
+
 ## [0.7.3] - 2026-10-24
 
 - Reject the encoding-wrapper inlining candidate after five-cohort, two-profile

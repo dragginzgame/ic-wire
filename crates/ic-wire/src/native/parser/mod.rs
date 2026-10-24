@@ -66,8 +66,14 @@ impl<'de, F: Flavor<'de>> Deserializer<'de, F> {
 
     #[inline]
     fn try_take_varint_u16(&mut self) -> Result<u16> {
-        let mut out = 0;
-        for i in 0..varint_max::<u16>() {
+        // Read the common one-byte representation locally; multi-byte values
+        // retain this width's original checks. Bytes and rejection rules do not change.
+        let first = self.flavor.pop()?;
+        if first < 128 {
+            return Ok(first as u16);
+        }
+        let mut out = (first & 0x7f) as u16;
+        for i in 1..varint_max::<u16>() {
             let val = self.flavor.pop()?;
             let carry = (val & 0x7F) as u16;
             out |= carry << (7 * i);
@@ -91,8 +97,14 @@ impl<'de, F: Flavor<'de>> Deserializer<'de, F> {
 
     #[inline]
     fn try_take_varint_u32(&mut self) -> Result<u32> {
-        let mut out = 0;
-        for i in 0..varint_max::<u32>() {
+        // Read the common one-byte representation locally; multi-byte values
+        // retain this width's original checks. Bytes and rejection rules do not change.
+        let first = self.flavor.pop()?;
+        if first < 128 {
+            return Ok(first as u32);
+        }
+        let mut out = (first & 0x7f) as u32;
+        for i in 1..varint_max::<u32>() {
             let val = self.flavor.pop()?;
             let carry = (val & 0x7F) as u32;
             out |= carry << (7 * i);
@@ -116,8 +128,14 @@ impl<'de, F: Flavor<'de>> Deserializer<'de, F> {
 
     #[inline]
     fn try_take_varint_u64(&mut self) -> Result<u64> {
-        let mut out = 0;
-        for i in 0..varint_max::<u64>() {
+        // Read the common one-byte representation locally; multi-byte values
+        // retain this width's original checks. Bytes and rejection rules do not change.
+        let first = self.flavor.pop()?;
+        if first < 128 {
+            return Ok(first as u64);
+        }
+        let mut out = (first & 0x7f) as u64;
+        for i in 1..varint_max::<u64>() {
             let val = self.flavor.pop()?;
             let carry = (val & 0x7F) as u64;
             out |= carry << (7 * i);

@@ -1,0 +1,162 @@
+[
+  {
+    "cohort": "one",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "total": 53841,
+    "code": 42841,
+    "sha256": "49b6678616182c816e03037cc8fb1026963a57cd96fdf143ccf251b46262e6a2"
+  },
+  {
+    "cohort": "one",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "total": 74844,
+    "code": 48102,
+    "sha256": "6058b86762cf33d965a836643eaa0fe394ffa48cdd711643ae62399267d74bd4"
+  },
+  {
+    "cohort": "one",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "total": 53998,
+    "code": 42997,
+    "sha256": "b391e404581f917a4077e51f78367cad706f0ef54f71eba9fb0ad0e1c7fb9443"
+  },
+  {
+    "cohort": "one",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "total": 74876,
+    "code": 48134,
+    "sha256": "f87f15cc76216b66175cbdea251d697c63f96dc91c61ee17904519a43b6c931d"
+  },
+  {
+    "cohort": "hundred",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "total": 310664,
+    "code": 291897,
+    "sha256": "8a0302a2fc2f59f3713273824b47b559741e30020a8dfbfbf1222d2ac4c77a71"
+  },
+  {
+    "cohort": "hundred",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "total": 398712,
+    "code": 364218,
+    "sha256": "2f5d7376b2e39ed44072feda5495e5c15022b6ab1af6339da86fe34989954a9e"
+  },
+  {
+    "cohort": "hundred",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "total": 310738,
+    "code": 291971,
+    "sha256": "82a9c8b75b15d8551dcc10ea08e17b1e16e4dd94cb4b960141336ff19227dee8"
+  },
+  {
+    "cohort": "hundred",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "total": 398744,
+    "code": 364250,
+    "sha256": "f150aba36bd6da930115167df9f23d1eb00a917f9ab51388169c5daeadf1a42b"
+  },
+  {
+    "cohort": "standard",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "total": 377595,
+    "code": 337567,
+    "sha256": "81f46177f52a6d7d30971a23b4cf31832003ce52bbc889c81a818dccf85b02b0"
+  },
+  {
+    "cohort": "standard",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "total": 573672,
+    "code": 518962,
+    "sha256": "486e02bb73ec3bf6c81187b9d52137f060416455c65ea9266410816186d4678e"
+  },
+  {
+    "cohort": "standard",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "total": 377800,
+    "code": 337772,
+    "sha256": "a1beea6b7e391d94757e9d3f945a9da0308ddbce47523948b0da987ac3d83a2f"
+  },
+  {
+    "cohort": "standard",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "total": 573464,
+    "code": 518754,
+    "sha256": "89fcd3e79c1caf06b3e2c93ace76ac5ccb1317205db153ff6c41541ae38dad60"
+  },
+  {
+    "cohort": "toko",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "total": 81011,
+    "code": 69819,
+    "sha256": "50f9ca674a289ebdfbb8ed30925878a3e8617bf0db5d7a94866e73bc71af4031"
+  },
+  {
+    "cohort": "toko",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "total": 103861,
+    "code": 93328,
+    "sha256": "22622def2845390704e3a42ded731af16a03269c02059a33dea5bff160d71835"
+  },
+  {
+    "cohort": "toko",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "total": 81125,
+    "code": 69933,
+    "sha256": "c58a11858fe40ef002a5d7817a835619364a8bc68910d601080411f310b864fc"
+  },
+  {
+    "cohort": "toko",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "total": 103852,
+    "code": 93319,
+    "sha256": "b0aea47228b5e1ed5e727daf7ce37d4bfc6a9d6d492e1f933261c5ed87fb50e3"
+  },
+  {
+    "cohort": "bulk",
+    "variant": "baseline",
+    "profile": "evaluation",
+    "total": 98382,
+    "code": 87200,
+    "sha256": "486c985be807da7e851b6dbfebdb4fd3491ded3090dcc368f808e6290383c0c5"
+  },
+  {
+    "cohort": "bulk",
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "total": 122614,
+    "code": 112140,
+    "sha256": "a18d24d58a4a9ded32d1191cfbbac1b19fa5a3d85c7cde16bd5023549421efe1"
+  },
+  {
+    "cohort": "bulk",
+    "variant": "candidate",
+    "profile": "evaluation",
+    "total": 98465,
+    "code": 87283,
+    "sha256": "c36d767ebdd302918f95d367cb9509b46d9bdba66180901a45afb12ec123d951"
+  },
+  {
+    "cohort": "bulk",
+    "variant": "candidate",
+    "profile": "benchmark-speed",
+    "total": 122571,
+    "code": 112097,
+    "sha256": "e822768e4da76815ad6b0414e6920c6bdc11ce01e16921e8ae8f02866a752cc9"
+  }
+]
