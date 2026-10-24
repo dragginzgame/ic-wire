@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.0]
+## [0.7.0] - 2026-10-24
 
 - **Breaking:** Decode in one pass without reserializing the result. Decode APIs
   require only `Deserialize`; maps, sets and custom Serde visitors may normalize
