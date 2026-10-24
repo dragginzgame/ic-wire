@@ -88,8 +88,8 @@ fn artifact(messages: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
 }
 
 fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    if !matches!(primary, "wire-native" | "wire-bounded") {
-        return Err("expected wire-native or wire-bounded primary lane".into());
+    if !matches!(primary, "wire-native" | "wire-bounded" | "wire-packed-i16") {
+        return Err("expected wire-native, wire-bounded or wire-packed-i16 primary lane".into());
     }
     let mut out = Vec::new();
     writeln!(
@@ -97,7 +97,9 @@ fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error:
         "run,case,wire_codec,operation,wire_bytes,candid_bytes,wire_size_change_pct,wire_ns,candid_ns,wire_time_change_pct,candid_over_wire_speed_ratio"
     )?;
     let mut dirs = fs::read_dir(root)?
-        .map(|e| e.unwrap().path())
+        .map(|e| e.map(|entry| entry.path()))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
         .filter(|p| {
             p.is_dir()
                 && p.file_name()
@@ -112,8 +114,29 @@ fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error:
     dirs.sort();
     for dir in dirs {
         let mut rows = BTreeMap::new();
-        for line in fs::read_to_string(dir.join("samples.jsonl"))?.lines() {
+        for (index, line) in fs::read_to_string(dir.join("samples.jsonl"))?
+            .lines()
+            .enumerate()
+        {
             let row: Value = serde_json::from_str(line)?;
+            // Reject incomplete evidence before pairing: two absent identities
+            // must not compare equal, and zero denominators cannot yield ratios.
+            let strings = ["case", "operation", "codec", "input_sha256"];
+            if strings
+                .iter()
+                .any(|key| row[key].as_str().is_none_or(str::is_empty))
+                || row["encoded_bytes"].as_u64().is_none_or(|bytes| bytes == 0)
+                || row["measurement"]["median_ns"]
+                    .as_f64()
+                    .is_none_or(|time| !time.is_finite() || time <= 0.0)
+            {
+                return Err(format!(
+                    "invalid measurement in {} at line {}",
+                    dir.display(),
+                    index + 1
+                )
+                .into());
+            }
             let previous = rows.insert(
                 (
                     row["case"].as_str().unwrap().to_owned(),
@@ -147,7 +170,9 @@ fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error:
                 .get(&(case.clone(), operation.clone(), "candid".into()))
                 .ok_or_else(|| format!("missing Candid measurement: {case}/{operation}"))?;
             matched += 1;
-            assert_eq!(wire["input_sha256"], candid["input_sha256"]);
+            if wire["input_sha256"] != candid["input_sha256"] {
+                return Err(format!("input identity mismatch: {case}/{operation}/{codec}").into());
+            }
             let w = wire["measurement"]["median_ns"].as_f64().unwrap();
             let c = candid["measurement"]["median_ns"].as_f64().unwrap();
             let wb = wire["encoded_bytes"].as_f64().unwrap();

@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.7.3]
+
+- Reject the encoding-wrapper inlining candidate after five-cohort, two-profile
+  qualification exposed encode regressions up to approximately 2x. Retain size,
+  instruction and payload-parity evidence; production behavior remains unchanged.
+
+- Retain measured Wasm-size research for scalar sharing, encoding-wrapper
+  inlining and compiler optimization levels. Record workload-dependent size
+  and instruction tradeoffs; leave production code and build profiles unchanged.
+
+- Record the rejected Wasm budget-sharing experiment: roughly 1% size savings
+  at 100 types did not justify higher instruction costs. Keep production
+  inlining, runtime behavior and wire bytes unchanged.
+
+- Reject incomplete benchmark measurements, nonpositive timings/sizes and
+  mismatched input identities before writing comparisons, instead of accepting
+  absent hashes, emitting invalid ratios or panicking on malformed fields.
+
+- Require the packed-i16 benchmark lane when reporting that cohort, so native
+  control measurements cannot hide missing packed results. Preserve both lanes
+  in the comparison output; runtime and protocol are unchanged.
+
+- Adopt IC Tooling 0.68.1 and IC Platform 0.6.15 for diagnostic builds,
+  benchmark support and the release metadata editor. Keep published runtime
+  dependencies and existing codec behavior unchanged.
+
+- Fix schema-forwarding qualification on macOS Bash 3.2 by keeping Cargo
+  argument arrays nonempty under `set -u`. Runtime and protocol are unchanged.
+
 ## [0.7.2] - 2026-10-24
 
 - Adopt IC Tooling 0.68.0 for diagnostic builds, benchmark lifecycle helpers

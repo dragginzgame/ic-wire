@@ -1,0 +1,25 @@
+standard evaluation encode-fresh -7.641 16.045 u32-list-small-16384 3573602.5 4147000.5
+standard evaluation decode-owned-or-labelled-borrowed 0.0 0.0 unit 250.5 250.5
+standard evaluation encode-reuse -7.641 16.048 u32-list-small-16384 3573129.5 4146529.5
+standard benchmark-speed encode-fresh -22.164 100.971 u32-list-small-16384 1606561.25 3228721.25
+standard benchmark-speed decode-owned-or-labelled-borrowed 0.0 0.0 unit 207.5 207.5
+standard benchmark-speed encode-reuse -22.165 100.991 u32-list-small-16384 1606239.25 3228398.25
+toko evaluation encode-fresh -1.261 0.429 toko-create-variant 5129.5 5151.5
+toko evaluation decode-owned-or-labelled-borrowed 0.0 0.0 toko-funding 3974.5 3974.5
+toko evaluation encode-reuse -1.313 0.472 toko-create-variant 4665.5 4687.5
+toko benchmark-speed encode-fresh 0.056 13.168 toko-funding 2445.25 2767.25
+toko benchmark-speed decode-owned-or-labelled-borrowed 0.0 0.0 toko-funding 1908.5 1908.5
+toko benchmark-speed encode-reuse 0.056 15.18 toko-funding 2121.25 2443.25
+bulk evaluation encode-fresh -0.517 0.601 hashes-0 1664.5 1674.5
+bulk evaluation decode-owned-or-labelled-borrowed 0.0 0.0 i8-small-0 632.5 632.5
+bulk benchmark-speed encode-fresh 0.0 29.805 hashes-0 654.25 849.25
+bulk benchmark-speed decode-owned-or-labelled-borrowed 0.0 0.0 i8-small-0 351.5 351.5
+one evaluation encode-fresh 3.371 3.371 record_000 3856.5 3986.5
+one evaluation decode-owned-or-labelled-borrowed 0.0 0.0 record_000 2316.5 2316.5
+one benchmark-speed encode-fresh 16.525 16.525 record_000 1555.25 1812.25
+one benchmark-speed decode-owned-or-labelled-borrowed 0.0 0.0 record_000 1267.5 1267.5
+hundred evaluation encode-fresh -0.287 0.226 record_015 7515.5 7532.5
+hundred evaluation decode-owned-or-labelled-borrowed 0.0 0.0 record_000 3269.5 3269.5
+hundred benchmark-speed encode-fresh 1.506 46.551 record_015 2511.25 3680.25
+hundred benchmark-speed decode-owned-or-labelled-borrowed 0.0 0.0 record_000 1476.5 1476.5
+Matched rows: 6246

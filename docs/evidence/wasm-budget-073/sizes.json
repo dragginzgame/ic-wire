@@ -1,0 +1,44 @@
+[
+  {
+    "variant": "baseline",
+    "cohort": "derive-scale-1",
+    "total": 53841,
+    "code": 42841,
+    "sha256": "6f1f50b67186dc37ce326c4f9c9e62be786ffcc01487b13a32e79d40128dd1b0"
+  },
+  {
+    "variant": "baseline",
+    "cohort": "derive-scale",
+    "total": 310664,
+    "code": 291897,
+    "sha256": "2660ef704723e3fa01f9c6001f0b49081209cff31d03a976a5067f1d3beb32f8"
+  },
+  {
+    "variant": "automatic",
+    "cohort": "derive-scale-1",
+    "total": 53859,
+    "code": 42857,
+    "sha256": "c58e26613b109b8a48124e1108dc2a86ba283a24b477d31c0c7ebc03d18c1707"
+  },
+  {
+    "variant": "automatic",
+    "cohort": "derive-scale",
+    "total": 307441,
+    "code": 288671,
+    "sha256": "6b37fe0befc10154a34d1be7dd9ae40223dcaa1915e63aa76a9bb7b3346763d1"
+  },
+  {
+    "variant": "outlined",
+    "cohort": "derive-scale-1",
+    "total": 53687,
+    "code": 42684,
+    "sha256": "b2a1668226a9c2242e32b24101b74be3c955cd9e8605c8f4d210c7d9ffa81795"
+  },
+  {
+    "variant": "outlined",
+    "cohort": "derive-scale",
+    "total": 308174,
+    "code": 289403,
+    "sha256": "1d24ad57b0cef7b5e58fa7fe8f15c7347bb058d8a4f34d8264b50f73c061cc17"
+  }
+]

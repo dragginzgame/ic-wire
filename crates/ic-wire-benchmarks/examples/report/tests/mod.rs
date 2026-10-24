@@ -78,5 +78,50 @@ fn comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse() {
     assert!(comparison(&root, "unknown").is_err());
     fs::write(&file, &candid).unwrap();
     assert!(comparison(&root, "wire-bounded").is_err());
+    // A native control must not mask a missing packed measurement.
+    fs::write(&file, &complete).unwrap();
+    assert!(comparison(&root, "wire-packed-i16").is_err());
+    let packed = wire.replace("wire-native", "wire-packed-i16");
+    fs::write(&file, format!("{complete}{packed}\n")).unwrap();
+    let report = String::from_utf8(comparison(&root, "wire-packed-i16").unwrap()).unwrap();
+    assert_eq!(report.lines().count(), 3);
+    assert!(report.contains(",wire-native,"));
+    assert!(report.contains(",wire-packed-i16,"));
+    for (field, value) in [
+        ("case", json!(null)),
+        ("operation", json!(42)),
+        ("codec", json!("")),
+        ("input_sha256", json!(null)),
+        ("encoded_bytes", json!(0)),
+        ("encoded_bytes", json!(-1)),
+        ("encoded_bytes", json!(1.5)),
+        ("measurement", json!({})),
+        ("measurement", json!({"median_ns":0})),
+        ("measurement", json!({"median_ns":-1})),
+        ("measurement", json!({"median_ns":"20"})),
+    ] {
+        let invalid = [&wire, &candid].map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            row[field] = value.clone();
+            row.to_string()
+        });
+        fs::write(&file, invalid.join("\n")).unwrap();
+        let error = comparison(&root, "wire-native").unwrap_err().to_string();
+        assert!(error.contains("invalid measurement"), "{error}");
+    }
+    fs::write(
+        &file,
+        format!(
+            "{wire}\n{}",
+            candid.replace("same-input", "different-input")
+        ),
+    )
+    .unwrap();
+    assert!(
+        comparison(&root, "wire-native")
+            .unwrap_err()
+            .to_string()
+            .contains("input identity mismatch")
+    );
     fs::remove_dir_all(root).unwrap();
 }

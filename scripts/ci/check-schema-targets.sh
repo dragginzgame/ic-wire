@@ -27,17 +27,19 @@ cargo metadata --offline --format-version 1 --manifest-path "$fixture/Cargo.toml
 cargo test --locked --offline --manifest-path "$fixture/Cargo.toml"
 cargo test --locked --offline --manifest-path "$fixture/Cargo.toml" --features wire-schema
 for features in '' wire-schema; do
-    options=()
-    [[ -z "$features" ]] || options=(--features "$features")
-    cargo check --locked --offline --manifest-path "$fixture/Cargo.toml" --target wasm32-unknown-unknown "${options[@]}"
-    cargo tree --locked --offline --manifest-path "$fixture/Cargo.toml" --target wasm32-unknown-unknown \
+    # Bash 3.2 treats an empty array as unset under nounset. Keep the shared
+    # target arguments in the array so both feature selections remain nonempty.
+    options=(--target wasm32-unknown-unknown)
+    [[ -z "$features" ]] || options+=(--features "$features")
+    cargo check --locked --offline --manifest-path "$fixture/Cargo.toml" "${options[@]}"
+    cargo tree --locked --offline --manifest-path "$fixture/Cargo.toml" \
         -e normal --prefix none --format '{p}' "${options[@]}" > "$fixture/wasm-${features:-runtime}.txt"
     if rg '^serde_json v' "$fixture/wasm-${features:-runtime}.txt"; then
         echo 'Host metadata dependency leaked into the Wasm runtime graph' >&2
         exit 1
     fi
     # ByteBuf is a runtime dependency now; keep its alloc-only feature boundary.
-    cargo tree --locked --offline --manifest-path "$fixture/Cargo.toml" --target wasm32-unknown-unknown \
+    cargo tree --locked --offline --manifest-path "$fixture/Cargo.toml" \
         -e normal --prefix none --format '{p} features={f}' "${options[@]}" > "$fixture/wasm-${features:-runtime}-features.txt"
     if ! rg -q '^serde_bytes v[^ ]+ features=alloc$' "$fixture/wasm-${features:-runtime}-features.txt"; then
         echo 'ByteBuf requires the alloc-only serde_bytes runtime dependency' >&2

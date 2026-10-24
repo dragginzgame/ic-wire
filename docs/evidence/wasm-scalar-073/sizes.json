@@ -1,0 +1,86 @@
+[
+  {
+    "variant": "baseline",
+    "cohort": "derive-scale-1",
+    "total": 53841,
+    "code": 42841,
+    "sha256": "6f1f50b67186dc37ce326c4f9c9e62be786ffcc01487b13a32e79d40128dd1b0"
+  },
+  {
+    "variant": "baseline",
+    "cohort": "derive-scale",
+    "total": 310664,
+    "code": 291897,
+    "sha256": "2660ef704723e3fa01f9c6001f0b49081209cff31d03a976a5067f1d3beb32f8"
+  },
+  {
+    "variant": "shared",
+    "cohort": "derive-scale-1",
+    "total": 54088,
+    "code": 43086,
+    "sha256": "a804fc3485cd294b6b2316cb5c101d35fa4c4e169a771f86deac10c6be0fb655"
+  },
+  {
+    "variant": "shared",
+    "cohort": "derive-scale",
+    "total": 310812,
+    "code": 292043,
+    "sha256": "b43ff36035e2d6351790c523e496dc7cc3d5820f0c797cba41f598907c3fc48a"
+  },
+  {
+    "variant": "shared64",
+    "cohort": "derive-scale-1",
+    "total": 53841,
+    "code": 42841,
+    "sha256": "6f1f50b67186dc37ce326c4f9c9e62be786ffcc01487b13a32e79d40128dd1b0"
+  },
+  {
+    "variant": "shared64",
+    "cohort": "derive-scale",
+    "total": 310664,
+    "code": 291897,
+    "sha256": "2660ef704723e3fa01f9c6001f0b49081209cff31d03a976a5067f1d3beb32f8"
+  },
+  {
+    "variant": "encode-auto",
+    "cohort": "derive-scale-1",
+    "total": 54195,
+    "code": 43194,
+    "sha256": "57867f38d37bb3ffb64162c1799b608eb32e9eef7d2817160954d9b8b9c00b08"
+  },
+  {
+    "variant": "encode-auto",
+    "cohort": "derive-scale",
+    "total": 307896,
+    "code": 289129,
+    "sha256": "b4779da9a523870f3259d2d3ab94e957b6ca6e9dbd041b2aeef16ffbe20650df"
+  },
+  {
+    "variant": "opt-s",
+    "cohort": "derive-scale-1",
+    "total": 49845,
+    "code": 39449,
+    "sha256": "7645fd6e1a67606d83d55ed8a2772e2a42c568e71139973d73a45d3f7e3a2893"
+  },
+  {
+    "variant": "opt-s",
+    "cohort": "derive-scale",
+    "total": 317655,
+    "code": 299570,
+    "sha256": "816473dff431c61ecf5b37dcd31a85b66ff6ad82be44da4fe277486cc6569fa2"
+  },
+  {
+    "variant": "opt-3",
+    "cohort": "derive-scale-1",
+    "total": 74844,
+    "code": 48102,
+    "sha256": "d14df28ff84e38e551415a7cf87f6508e6075920335d01a57c82e78f5060f5e2"
+  },
+  {
+    "variant": "opt-3",
+    "cohort": "derive-scale",
+    "total": 398712,
+    "code": 364218,
+    "sha256": "2f5d7376b2e39ed44072feda5495e5c15022b6ab1af6339da86fe34989954a9e"
+  }
+]

@@ -20,9 +20,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.68.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.68.1 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.68.0 without default features; the CLI feature is only enabled for installation.
+0.68.1 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
