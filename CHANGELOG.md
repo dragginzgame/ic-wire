@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.2]
+## [0.7.2] - 2026-10-24
 
 - Adopt IC Tooling 0.68.0 for diagnostic builds, benchmark lifecycle helpers
   and the release metadata editor. Published runtime dependencies, wire bytes
