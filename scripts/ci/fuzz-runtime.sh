@@ -12,6 +12,7 @@ host="$(rustup run "$toolchain" rustc -vV | sed -n 's/^host: //p')"
 [[ -n "$host" ]] || { printf 'Missing Rust host identity\n' >&2; exit 1; }
 export CARGO_TARGET_DIR="$root/target/fuzz-runtime"
 mkdir -p "$CARGO_TARGET_DIR/corpus" "$CARGO_TARGET_DIR/artifacts"
+perl scripts/ci/seed-packed-fuzz.pl "$CARGO_TARGET_DIR/corpus"
 # An explicit target keeps these flags off proc-macro/build-script host binaries.
 export RUSTFLAGS='-Cpasses=sancov-module -Cllvm-args=-sanitizer-coverage-level=4 -Cllvm-args=-sanitizer-coverage-inline-8bit-counters -Cllvm-args=-sanitizer-coverage-pc-table -Cllvm-args=-sanitizer-coverage-trace-compares -Zsanitizer=address'
 rustup run "$toolchain" cargo run --offline --locked --release --target "$host" \

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.12]
+
+- Restore deterministic packed fuzz seeds on every run, without requiring the
+  archived corpus. Add Rust endian-helper tests and simulated big-endian
+  TypeScript codec checks to normal qualification. Real big-endian execution
+  remains unqualified; production code paths and protocol are unchanged.
+
+- Strengthen packed-field qualification across length-prefix boundaries, input
+  offsets, malformed bytes and exact resource limits; add all seven packed types
+  to the runtime fuzz model. Record native code-layout and TypeScript small-array
+  experiments, rejecting candidates without a reliable overall win. Production
+  codec, bytes, acceptance rules and generated runtime remain unchanged.
+
 ## [0.6.11] - 2026-10-24
 
 - Qualify the Blob-shaped manifest boundary for packed hashes, preserving exact

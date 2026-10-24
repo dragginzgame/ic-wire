@@ -161,3 +161,113 @@ fn blob_manifest_boundary_preserves_order_and_header_bytes() {
         );
     }
 }
+
+#[test]
+fn packed_length_prefixes_offsets_and_budget_boundaries() {
+    fn check<T: ic_wire::PackedElement>() {
+        let width = size_of::<T>();
+        for len in (0..=65).chain([127, 128, 129, 255, 256, 257, 16383, 16384]) {
+            let data: Vec<u8> = (0..len)
+                .map(|i| (i as u8).wrapping_mul(73).wrapping_add(19))
+                .collect();
+            let bytes =
+                ic_wire::native::encode(&ic_wire::Bytes::<32768>::new(data).unwrap(), LIMITS)
+                    .unwrap();
+            for offset in 0..8 {
+                let mut input = vec![0xa5; offset];
+                input.extend_from_slice(&bytes);
+                let decoded = ic_wire::native::decode::<Packed<T>>(&input[offset..], LIMITS);
+                if len % width != 0 {
+                    assert_eq!(decoded, Err(ic_wire::Error::Malformed));
+                    continue;
+                }
+                let decoded = decoded.unwrap();
+                assert_eq!(decoded.as_slice().len(), len / width);
+                assert_eq!(ic_wire::native::encode(&decoded, LIMITS).unwrap(), bytes);
+            }
+            if len % width != 0 {
+                continue;
+            }
+            for end in [0, 1, bytes.len() / 2, bytes.len() - 1] {
+                if end < bytes.len() {
+                    assert!(ic_wire::native::decode::<Packed<T>>(&bytes[..end], LIMITS).is_err());
+                }
+            }
+            let mut trailing = bytes.clone();
+            trailing.push(0);
+            assert_eq!(
+                ic_wire::native::decode::<Packed<T>>(&trailing, LIMITS),
+                Err(ic_wire::Error::Trailing)
+            );
+            let last_prefix = bytes.iter().position(|b| b & 0x80 == 0).unwrap();
+            let mut noncanonical = bytes.clone();
+            noncanonical[last_prefix] |= 0x80;
+            noncanonical.insert(last_prefix + 1, 0);
+            assert_eq!(
+                ic_wire::native::decode::<Packed<T>>(&noncanonical, LIMITS),
+                Err(ic_wire::Error::Noncanonical)
+            );
+            let mut low = 0;
+            let mut high = LIMITS.allocation;
+            while low < high {
+                let allocation = low + (high - low) / 2;
+                let result = ic_wire::native::decode::<Packed<T>>(
+                    &bytes,
+                    ic_wire::Limits {
+                        allocation,
+                        ..LIMITS
+                    },
+                );
+                match result {
+                    Ok(_) => high = allocation,
+                    Err(ic_wire::Error::Limit) => low = allocation + 1,
+                    Err(error) => panic!("unexpected admission error: {error:?}"),
+                }
+            }
+            assert!(
+                ic_wire::native::decode::<Packed<T>>(
+                    &bytes,
+                    ic_wire::Limits {
+                        allocation: high,
+                        ..LIMITS
+                    }
+                )
+                .is_ok()
+            );
+            if high > 0 {
+                assert_eq!(
+                    ic_wire::native::decode::<Packed<T>>(
+                        &bytes,
+                        ic_wire::Limits {
+                            allocation: high - 1,
+                            ..LIMITS
+                        }
+                    ),
+                    Err(ic_wire::Error::Limit)
+                );
+            }
+            for limits in [
+                ic_wire::Limits {
+                    bytes: bytes.len() - 1,
+                    ..LIMITS
+                },
+                ic_wire::Limits { nodes: 0, ..LIMITS },
+            ] {
+                assert_eq!(
+                    ic_wire::native::decode::<Packed<T>>(&bytes, limits),
+                    Err(ic_wire::Error::Limit)
+                );
+            }
+        }
+        for bytes in [&[0xff; 12][..], &[0x80; 12][..]] {
+            assert!(ic_wire::native::decode::<Packed<T>>(bytes, LIMITS).is_err());
+        }
+    }
+    check::<i16>();
+    check::<u16>();
+    check::<i32>();
+    check::<u32>();
+    check::<i64>();
+    check::<u64>();
+    check::<[u8; 32]>();
+}

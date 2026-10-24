@@ -918,9 +918,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.6.11"
+version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a89ca2109e79e00b8e8008f942bd4b2c0f26d1821376c1863d178ee3ad021a4"
+checksum = "a1efa3bea22eed8dbca1e667936664a694a02bfdee29543ee533084f04ea5f6b"
 dependencies = [
  "candid",
  "crc32fast",
@@ -2136,9 +2136,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.16.3"
+version = "1.16.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
+checksum = "d0d5d4b1981b8bbbb7aed204cae5726d683d5d6ac7e74ec54122ea28f315e7c8"
 
 [[package]]
 name = "socket2"

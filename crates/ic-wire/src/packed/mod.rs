@@ -15,7 +15,7 @@ mod sealed {
         #[cfg(feature = "typescript")]
         const SCHEMA: &'static str;
         fn read_le(bytes: &[u8]) -> Self;
-        #[cfg(target_endian = "big")]
+        #[cfg(any(target_endian = "big", test))]
         fn append_le(self, bytes: &mut Vec<u8>);
     }
     // These concrete readers cross the crate boundary when a consumer instantiates
@@ -30,7 +30,7 @@ mod sealed {
             fn read_le(bytes: &[u8]) -> Self {
                 Self::from_le_bytes(bytes.try_into().unwrap())
             }
-            #[cfg(target_endian = "big")]
+            #[cfg(any(target_endian = "big", test))]
             #[inline]
             fn append_le(self, bytes: &mut Vec<u8>) {
                 bytes.extend_from_slice(&self.to_le_bytes());
@@ -47,7 +47,7 @@ mod sealed {
         fn read_le(bytes: &[u8]) -> Self {
             bytes.try_into().unwrap()
         }
-        #[cfg(target_endian = "big")]
+        #[cfg(any(target_endian = "big", test))]
         #[inline]
         fn append_le(self, bytes: &mut Vec<u8>) {
             bytes.extend_from_slice(&self);
@@ -146,5 +146,32 @@ impl<T: PackedElement> serde::de::Visitor<'_> for PackedVisitor<T> {
             .map_err(|_| E::custom("allocation"))?;
         values.extend(bytes.chunks_exact(width).map(T::read_le));
         Ok(values)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn endian_append_matches_wire_bytes() {
+        use super::sealed::Word;
+        use alloc::vec::Vec;
+        macro_rules! check {
+            ($($ty:ty),*) => {$(
+                let words = [<$ty>::MIN, 1, <$ty>::MAX];
+                let mut bytes = Vec::new();
+                for word in words { word.append_le(&mut bytes); }
+                let expected: Vec<_> = words.iter().flat_map(|word| word.to_le_bytes()).collect();
+                assert_eq!(bytes, expected);
+                for (chunk, word) in bytes.chunks_exact(size_of::<$ty>()).zip(words) {
+                    assert_eq!(<$ty>::read_le(chunk), word);
+                }
+            )*};
+        }
+        check!(i16, u16, i32, u32, i64, u64);
+        let hash = core::array::from_fn::<_, 32, _>(|i| i as u8);
+        let mut bytes = Vec::new();
+        hash.append_le(&mut bytes);
+        assert_eq!(bytes, hash);
+        assert_eq!(<[u8; 32]>::read_le(&bytes), hash);
     }
 }

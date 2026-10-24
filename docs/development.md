@@ -89,6 +89,30 @@ checks qualify byte conformance; they do not qualify endpoint authentication,
 certificate verification, installed rollback or browser transport.
 See [consumer fixtures and packet inspection](consumer-fixtures.md).
 
+The same target runs packed codecs with simulated big-endian numeric typed-array
+storage, using DataView as an independent byte oracle. It checks all seven packed
+types and bounded i16, signed/unsigned extrema, empty fields, both directions,
+unaligned frames, owned output and malformed widths. This executes the TypeScript
+swap branches; it does not qualify a native big-endian JavaScript engine.
+`cargo test --locked -p ic-wire --lib endian_append_matches_wire_bytes` also
+exercises Rust's big-endian append helpers on the local host. Full Rust big-endian
+serialization and allocation/error paths still require a real target or emulator.
+
+### Runtime fuzz seeds
+
+`make fuzz-runtime` restores 112 deterministic packed frames before every run,
+using `scripts/ci/seed-packed-fuzz.pl`. No archived corpus is needed on a clean
+checkout. Seeds cover every supported word type, both directions, empty fields,
+length-prefix boundaries and partial-word rejection. Existing discovered corpus
+entries are preserved. Cell variant indices in the seed oracle must track the
+qualification enum in `examples/fuzz_runtime/mod.rs`.
+
+The runner requires the prepared `nightly-2026-07-29` toolchain and a C++ compiler;
+it installs nothing. To inspect only the seed corpus, create an empty directory
+and run `perl scripts/ci/seed-packed-fuzz.pl DIRECTORY`. The sanitizer default is
+unchanged; on hosts where ptrace prevents LeakSanitizer shutdown, an explicit
+`ASAN_OPTIONS=detect_leaks=0` run retains address checking but does not check leaks.
+
 ### Allocation timing modes
 
 `make evaluate-allocation` retains decoding plus the application checksum as the

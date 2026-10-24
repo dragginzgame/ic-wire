@@ -58,7 +58,9 @@ Existing bounded `{k:'packed-i16',max:N}` metadata retains its limit.
 The runtime writes little-endian bytes regardless of host endianness and copies
 incoming bytes before exposing a typed array. Decoded values do not alias the
 input. Byte and traversal budgets remain enforced; they do not bound JavaScript
-engine heap. Big-endian paths are implemented but have not been execution-qualified.
+engine heap. Big-endian TypeScript swap paths pass simulated typed-array storage checks, and
+Rust append helpers pass local unit tests. Real big-endian Rust serialization
+and JavaScript-engine execution remain unqualified. See [development](development.md).
 
 ## Selection and evidence
 

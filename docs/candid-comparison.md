@@ -9,6 +9,7 @@ unpublished benchmark package.
 
 | Question | Maintained evidence |
 | --- | --- |
+| What happened to the native/TypeScript timing follow-ups? | [Qualification and rejected screens](packed-0612.md) |
 | How does the public packed field compare? | [Promotion qualification](packed-promotion-0611.md): 68 fields/manifests and 1/10/100 records, both profiles |
 | How does the broader ordinary codec compare? | [Full matrix](full-comparison-0611.md): thirteen cohorts and 597 overlapping case entries |
 | Why choose runtime-limited packed fields? | [Design experiment](bulk-fields-0611.md): ordinary vectors, const bounds and the selected prototype |

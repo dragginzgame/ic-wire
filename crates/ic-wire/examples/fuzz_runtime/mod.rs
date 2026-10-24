@@ -1,7 +1,7 @@
 //! Coverage-guided checks for bounded frames; see docs/development.md.
 #![no_main]
 
-use ic_wire::{Bytes, FiniteF32, FiniteF64, Limits, List, Text, native};
+use ic_wire::{Bytes, FiniteF32, FiniteF64, Limits, List, Packed, Text, native};
 use libfuzzer_sys::fuzz_target;
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -14,6 +14,13 @@ enum Cell {
     Text(Text<32>),
     Bytes(Bytes<32>),
     Nested(List<Option<[bool; 3]>, 4>),
+    PackedI16(Packed<i16>),
+    PackedU16(Packed<u16>),
+    PackedI32(Packed<i32>),
+    PackedU32(Packed<u32>),
+    PackedI64(Packed<i64>),
+    PackedU64(Packed<u64>),
+    PackedHashes(Packed<[u8; 32]>),
 }
 
 type Request = List<Cell, 8>;
