@@ -46,6 +46,10 @@ no_std/Wasm consumers pass. TypeScript passes 159 vectors, 33,560 mutations,
 inputs with leak detection disabled for sandbox constraints. Real big-endian
 execution remains unqualified. Formatting, diff and local document links pass.
 
+Release validation exposed a stale bulk-corpus assertion (99 instead of 109).
+The assertion now includes the ten i8 controls; runtime and protocol are unchanged.
+The complete `make check-benchmarks` gate passes, including all cohorts and MSRV checks.
+
 ## Retained direction
 
 One production Serde/Postcard codec remains, with one-pass strict primitive

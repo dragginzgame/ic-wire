@@ -9,6 +9,8 @@
 - Support `Packed<i8>` with `Int8Array` clients. Signed-byte payloads retain
   ordinary vector bytes (`[-128, 127]` remains `02 80 7f`) but use bulk
   admission. Regenerate clients and review limits when adopting the field.
+- Fix the benchmark gate's expected bulk corpus count to include the ten new
+  signed-byte cases (109 total).
 
 ## [0.7.0] - 2026-10-24
 

@@ -19,7 +19,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
     )))]
     assert!(cases.len() >= 100);
     #[cfg(feature = "bulk")]
-    assert_eq!(cases.len(), 99);
+    assert_eq!(cases.len(), 109); // Includes ten i8 small/wide length controls.
     #[cfg(feature = "toko")]
     assert_eq!(cases.len(), 10);
     #[cfg(feature = "derive-scale")]
