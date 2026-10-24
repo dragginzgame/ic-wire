@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.6]
+## [0.7.6] - 2026-10-24
 
 - Strengthen adversarial decode qualification: verify envelope rejection before
   consumer deserialization, bounded element visits for forged zero-byte collection
