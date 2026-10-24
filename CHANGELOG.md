@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.6]
+
+- Strengthen adversarial decode qualification: verify envelope rejection before
+  consumer deserialization, bounded element visits for forged zero-byte collection
+  lengths, and independent calls after failures. Clarify consumer integration
+  responsibilities; runtime code, wire bytes and acceptance rules are unchanged.
+
 ## [0.7.5] - 2026-10-24
 
 - Support host-only `Cow<str>` text metadata, including transparent consumer

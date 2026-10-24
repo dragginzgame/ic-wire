@@ -1,4 +1,5 @@
 //! Native Serde admission, wire compatibility and failure boundaries.
+mod adversarial;
 #[cfg(feature = "typescript")]
 mod bulk_lint;
 mod packed;

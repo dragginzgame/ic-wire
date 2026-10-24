@@ -283,6 +283,23 @@ The traversal adapters are adapted from IcyDB's native admission implementation;
 its MIT notice is retained in `src/native/LICENSE-MIT`. IcyDB's numeric policies,
 SQL semantics, endpoint roster and storage encodings are not imported.
 
+## Consumer integration qualification
+
+Request/response decoding checks frame size, identity and direction before calling
+the payload's `Deserialize`. Input is already in caller custody: rejecting before
+transport allocation/copying requires consumer integration. The native adversarial
+tests count consumer visits, checking zero-byte collections against node allowances
+and successful mixed-value decoding after failures. These are deterministic work
+checks, not IC instruction or peak-memory measurements; custom Serde remains trusted.
+
+Consumers own method/schema identity assignment and coordinated deployment. Native
+fields follow Serde declaration order, without field IDs; changing a layout requires
+coordinated consumers. Decode does not promise canonical re-encoding of normalized
+values: preserve original bytes for exact retries and raw-byte hashing/signatures.
+Authentication, handler admission, rollback on response failure and retry effect
+deduplication require consumer end-to-end tests. Wire's codec tests cannot establish
+those transport and execution guarantees.
+
 ## Concrete native TypeScript metadata
 
 `typescript::RUNTIME` accepts trusted concrete metadata through
