@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.6.11]
+
+- Qualify the Blob-shaped manifest boundary for packed hashes, preserving exact
+  hash/header bytes and frame-limit rejection without changing consumer storage.
+  Replace the long current-comparison page with an index, preserve historical
+  studies and repair their deep links. Reject internal packed sharing candidates
+  after Wasm screening; production runtime, bytes and acceptance are unchanged.
+
+- Promote the measured bulk field to `Packed<T>` for six integer widths and
+  32-byte hashes, with Serde and TypeScript metadata/typed arrays. Keep one
+  Postcard codec and all canonical/admission checks. Opt-in fields replace an
+  element count/varints with byte count/fixed little-endian words: `[32767_i16]`
+  changes from `01 fe ff 03` to `02 ff 7f`. Consumers must coordinate schemas
+  and retain retry bytes; small integers can grow. Existing `PackedI16<N>` keeps
+  its field bound and bytes. Retire the duplicated benchmark implementation.
+  Qualify the public implementation against the prototype and Candid, retaining
+  IC/Wasm parity and documenting native/TypeScript timing tradeoffs.
+
+- Record isolated codec-cost ablations against Candid and upstream Postcard,
+  separating budget, preflight, canonical-verification and output-writer costs.
+  Retain measurements and rejected diagnostic sources only; production codec,
+  limits and protocol are unchanged.
+
+- Record the full thirteen-cohort Wire/Candid comparison: repeated native time,
+  IC instructions, payload sizes, allocations, peak heap and uncompressed
+  total/code-section Wasm in both profiles. Preserve all wins and losses;
+  this measurement batch changes no runtime behavior or protocol.
+
+- Share packed-i16 decoding across bounds while checking each field's exact
+  element limit before allocation. Preserve wire bytes, resource admission,
+  malformed-input errors and canonical retry behavior. Record the measured
+  multi-bound Wasm savings and single-bound/decode-overhead tradeoffs.
+
 ## [0.6.10] - 2026-10-23
 
 - Allow registry declarations and method exports named `types`, `createCodec`

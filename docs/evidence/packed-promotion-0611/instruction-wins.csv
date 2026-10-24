@@ -1,0 +1,17 @@
+cohort,profile,operation,cases,wire_fewer_instructions,candid_fewer_instructions,equal
+fields,evaluation,encode-fresh,68,68,0,0
+fields,evaluation,decode-owned-or-labelled-borrowed,68,68,0,0
+fields,benchmark-speed,encode-fresh,68,68,0,0
+fields,benchmark-speed,decode-owned-or-labelled-borrowed,68,68,0,0
+scale-1,evaluation,encode-fresh,1,1,0,0
+scale-1,evaluation,decode-owned-or-labelled-borrowed,1,1,0,0
+scale-1,benchmark-speed,encode-fresh,1,1,0,0
+scale-1,benchmark-speed,decode-owned-or-labelled-borrowed,1,1,0,0
+scale-10,evaluation,encode-fresh,10,10,0,0
+scale-10,evaluation,decode-owned-or-labelled-borrowed,10,10,0,0
+scale-10,benchmark-speed,encode-fresh,10,10,0,0
+scale-10,benchmark-speed,decode-owned-or-labelled-borrowed,10,10,0,0
+scale-100,evaluation,encode-fresh,100,100,0,0
+scale-100,evaluation,decode-owned-or-labelled-borrowed,100,100,0,0
+scale-100,benchmark-speed,encode-fresh,100,100,0,0
+scale-100,benchmark-speed,decode-owned-or-labelled-borrowed,100,100,0,0

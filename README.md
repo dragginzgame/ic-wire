@@ -41,3 +41,5 @@ and tags; registry publication is a separate maintainer action.
 ## License
 
 Licensed under the [MIT License](LICENSE).
+
+See [packed fields](docs/packed-fields.md) for bulk integer/hash fields and coordinated consumer adoption.

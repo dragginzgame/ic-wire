@@ -174,6 +174,19 @@ pub(super) fn ty(
         // Qualify built-ins so consumer aliases cannot capture field/frame types.
         "bytes" => "globalThis.Uint8Array".into(),
         "packed-i16" => "globalThis.Int16Array".into(),
+        "packed" => format!(
+            "globalThis.{}",
+            match text(value, "word")? {
+                "i16" => "Int16Array",
+                "u16" => "Uint16Array",
+                "i32" => "Int32Array",
+                "u32" => "Uint32Array",
+                "i64" => "BigInt64Array",
+                "u64" => "BigUint64Array",
+                "hash32" => "Uint8Array",
+                _ => return Err(GenerationError::Schema),
+            }
+        ),
         "u" | "i" => {
             let bits = value["bits"].as_u64().ok_or(GenerationError::Schema)?;
             if ![8, 16, 32, 64, 128].contains(&bits) {

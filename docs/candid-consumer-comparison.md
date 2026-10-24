@@ -8,7 +8,7 @@ Candid 0.10.39 through IC Platform 0.6.7. It does not build or modify Toko, impo
 its database, or measure endpoint transport, database work, TypeScript or business
 logic. No published dependency or protocol changes are introduced by these fixtures.
 
-The [complete pending 0.5.22 rerun](candid-comparison.md#complete-pending-0522-rerun)
+The [complete pending 0.5.22 rerun](history/candid-comparison.md#complete-pending-0522-rerun)
 is the latest comparison after shared output/header setup, symbol stripping and
 corrected Wasm assertions.
 It covers both compiler profiles, all five cohorts, native time, IC instructions,
@@ -93,7 +93,7 @@ isolate macro expansion or establish statistically repeatable build-time ratios.
 All **2,440 IC rows** across the four cohorts have three agreeing samples; frames
 match their native counterparts. The standard corpus is unchanged. Runtime
 source is release `91244e9` plus the pending Wasm inlining change from the
-[preceding experiment](candid-comparison.md#wasm-serialization-inlining--pending-0522).
+[preceding experiment](history/candid-comparison.md#wasm-serialization-inlining--pending-0522).
 All cohort snapshots have the same runtime source identity.
 
 ### Toko-shaped messages

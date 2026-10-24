@@ -9,6 +9,7 @@ type Field = { name: string; value: Schema };
 export type Schema = ( { k: 'unit' | 'bool' }
   | { k: 'bytes'; min?: number; max?: number }
   | { k: 'packed-i16'; max: number }
+  | { k: 'packed'; word: keyof typeof packedArrays }
   | { k: 'text'; max?: number }
   | { k: 'u' | 'i' | 'float'; bits: number; min?: number; max?: number }
   | { k: 'list'; max?: number; item: Schema }
@@ -26,6 +27,19 @@ type Checks = Readonly<Record<string, (value: unknown) => void>>;
 const fail = (code: WireError['code']): never => { throw new WireError(code); };
 const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 const utf16 = new TextEncoder();
+// Generic packed fields use a byte count, unlike ordinary element-count lists.
+// Both endpoints must select this schema. Existing packed-i16 keeps its bound.
+const packedArrays = { i16: Int16Array, u16: Uint16Array, i32: Int32Array, u32: Uint32Array,
+  i64: BigInt64Array, u64: BigUint64Array, hash32: Uint8Array } as const;
+const littleEndian = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
+function swapWords(bytes: Uint8Array, width: number): void {
+  for (let start = 0; start < bytes.length; start += width) {
+    for (let i = 0; i < width / 2; i++) {
+      const other = start + width - 1 - i, value = bytes[start + i]!;
+      bytes[start + i] = bytes[other]!; bytes[other] = value;
+    }
+  }
+}
 function object(value: unknown, keys: readonly string[]): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return fail('value');
   const own = Reflect.ownKeys(value);
@@ -172,14 +186,17 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (s.max !== undefined && bytes.length > s.max) fail('limit');
       out.varint(BigInt(bytes.length)); out.raw(bytes); return;
     }
-    case 'packed-i16': {
-      if (!(value instanceof Int16Array)) return fail('value');
-      if (value.length > s.max) fail('limit');
-      // Explicit field change: [32767] is 02 ff 7f, not list 01 fe ff 03.
-      // Consumers must switch both schemas; never reinterpret ordinary lists.
-      out.varint(BigInt(value.length) * 2n);
+    case 'packed-i16': case 'packed': {
+      const kind = s.k === 'packed-i16' ? 'i16' : s.word, ctor = packedArrays[kind];
+      if (!(value instanceof ctor)) return fail('value');
+      const width = kind === 'hash32' ? 32 : ctor.BYTES_PER_ELEMENT;
+      if (value.byteLength % width) return fail('value');
+      if (s.k === 'packed-i16' && value.byteLength / width > s.max) fail('limit');
+      out.varint(BigInt(value.byteLength));
       if (value.byteLength > out.bytes.length - out.offset) fail('limit');
-      for (const word of value) { out.byte(word & 255); out.byte((word >>> 8) & 255); }
+      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+      if (littleEndian || kind === 'hash32') out.raw(bytes);
+      else { const copy = new Uint8Array(bytes); swapWords(copy, width); out.raw(copy); }
       return;
     }
     case 'text': {
@@ -261,14 +278,20 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       if (s.min !== undefined && length < s.min) fail('malformed');
       return new Uint8Array(input.raw(length));
     }
-    case 'packed-i16': {
-      const length = input.length(Math.min(s.max * 2, input.bytes.length - input.offset));
-      if (length % 2) return fail('malformed');
-      // Validate the complete byte span before allocating; input may be unaligned.
-      const bytes = input.raw(length), view = new DataView(bytes.buffer, bytes.byteOffset, length);
-      const values = new Int16Array(length / 2);
-      for (let i = 0; i < values.length; i++) values[i] = view.getInt16(i * 2, true);
-      return values;
+    case 'packed-i16': case 'packed': {
+      const kind = s.k === 'packed-i16' ? 'i16' : s.word, ctor = packedArrays[kind];
+      const width = kind === 'hash32' ? 32 : ctor.BYTES_PER_ELEMENT;
+      const max = s.k === 'packed-i16' ? s.max * width : input.bytes.length - input.offset;
+      const length = input.length(Math.min(max, input.bytes.length - input.offset));
+      // New packed schemas reject partial words of their selected width. The
+      // existing packed-i16 schema still rejects odd lengths and values over max.
+      if (length % width) return fail('malformed');
+      if (length === 0) return new ctor(0);
+      // Check the entire span before allocating. Copy also handles unaligned input
+      // and ensures decoded values never retain or mutate the caller's buffer.
+      const bytes = new Uint8Array(input.raw(length));
+      if (!littleEndian && kind !== 'hash32') swapWords(bytes, width);
+      return new ctor(bytes.buffer);
     }
     case 'text': {
       const text = utf8.decode(input.raw(input.length(Math.min(s.max ?? input.bytes.length, input.bytes.length - input.offset))));

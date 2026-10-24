@@ -50,33 +50,39 @@ impl<const N: usize> Serialize for PackedI16<N> {
 }
 impl<'de, const N: usize> Deserialize<'de> for PackedI16<N> {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct Visitor<const N: usize>;
-        impl<const N: usize> de::Visitor<'_> for Visitor<N> {
-            type Value = PackedI16<N>;
-            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                f.write_str("bounded packed little-endian i16 words")
-            }
-            fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
-                // Reject incomplete words and the element bound before allocation.
-                // Every complete LE word is valid; canonical length checking is
-                // still provided by the native codec's exact reserialization.
-                if !bytes.len().is_multiple_of(2) || bytes.len() / 2 > N {
-                    return Err(E::custom("invalid packed length"));
-                }
-                let mut values = Vec::new();
-                values
-                    .try_reserve_exact(bytes.len() / 2)
-                    .map_err(|_| E::custom("allocation"))?;
-                values.extend(
-                    bytes
-                        .as_chunks::<2>()
-                        .0
-                        .iter()
-                        .map(|word| i16::from_le_bytes(*word)),
-                );
-                Ok(PackedI16(values))
-            }
+        deserializer
+            .deserialize_bytes(PackedVisitor { limit: N })
+            .map(Self)
+    }
+}
+
+// Share decoding across bounds instead of specializing the allocation/copy loop
+// for each N. The field's exact element limit is still checked before allocation;
+// byte layout, canonical verification and budget charges remain unchanged.
+struct PackedVisitor {
+    limit: usize,
+}
+impl de::Visitor<'_> for PackedVisitor {
+    type Value = Vec<i16>;
+    fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("bounded packed little-endian i16 words")
+    }
+    #[inline(never)]
+    fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
+        if !bytes.len().is_multiple_of(2) || bytes.len() / 2 > self.limit {
+            return Err(E::custom("invalid packed length"));
         }
-        deserializer.deserialize_bytes(Visitor::<N>)
+        let mut values = Vec::new();
+        values
+            .try_reserve_exact(bytes.len() / 2)
+            .map_err(|_| E::custom("allocation"))?;
+        values.extend(
+            bytes
+                .as_chunks::<2>()
+                .0
+                .iter()
+                .map(|word| i16::from_le_bytes(*word)),
+        );
+        Ok(values)
     }
 }

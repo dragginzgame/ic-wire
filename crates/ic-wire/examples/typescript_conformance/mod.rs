@@ -429,6 +429,35 @@ fn main() {
         ic_wire::PackedI16::<8>::new(vec![-32768, -65, -1, 0, 63, 64, 16384, 32767]).unwrap(),
         "new Int16Array([-32768,-65,-1,0,63,64,16384,32767])",
     );
+    f.add(ic_wire::Packed::<i16>::new(vec![]), "new Int16Array()");
+    f.add(
+        ic_wire::Packed::new(vec![i16::MIN, i16::MAX]),
+        "new Int16Array([-32768,32767])",
+    );
+    f.add(
+        ic_wire::Packed::new(vec![0_u16, u16::MAX]),
+        "new Uint16Array([0,65535])",
+    );
+    f.add(
+        ic_wire::Packed::new(vec![i32::MIN, i32::MAX]),
+        "new Int32Array([-2147483648,2147483647])",
+    );
+    f.add(
+        ic_wire::Packed::new(vec![0_u32, u32::MAX]),
+        "new Uint32Array([0,4294967295])",
+    );
+    f.add(
+        ic_wire::Packed::new(vec![i64::MIN, i64::MAX]),
+        "new BigInt64Array([-9223372036854775808n,9223372036854775807n])",
+    );
+    f.add(
+        ic_wire::Packed::new(vec![0_u64, u64::MAX]),
+        "new BigUint64Array([0n,18446744073709551615n])",
+    );
+    f.add(
+        ic_wire::Packed::new(vec![[0xab_u8; 32], [0xcd; 32]]),
+        "Uint8Array.from([...new Uint8Array(32).fill(0xab),...new Uint8Array(32).fill(0xcd)])",
+    );
     f.mutation_data.flush().unwrap();
     let codecs = (0..f.count)
         .map(|index| format!("m{index}"))

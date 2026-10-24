@@ -1,5 +1,7 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
 #![allow(dead_code)]
+#[cfg(any(feature = "bulk", feature = "bulk-scale"))]
+mod bulk;
 #[cfg(feature = "packed-i16")]
 mod packed_i16;
 #[cfg(feature = "derive-scale")]
@@ -15,6 +17,21 @@ compile_error!("select one benchmark corpus");
 compile_error!("select one benchmark corpus");
 #[cfg(all(feature = "derive-scale-1", feature = "derive-scale-10"))]
 compile_error!("select one derive cohort size");
+#[cfg(all(
+    feature = "bulk",
+    any(feature = "toko", feature = "derive-scale", feature = "packed-i16")
+))]
+compile_error!("select one benchmark corpus");
+#[cfg(all(
+    feature = "bulk-scale",
+    any(feature = "toko", feature = "packed-i16", feature = "packed-scale")
+))]
+compile_error!("select one scaling field representation");
+#[cfg(all(
+    feature = "bulk-baseline",
+    not(any(feature = "bulk", feature = "bulk-scale"))
+))]
+compile_error!("bulk-baseline requires a bulk corpus");
 #[cfg(feature = "candid")]
 use ic_platform::candid::contract::CandidType;
 use serde::{Serialize, de::DeserializeOwned};
@@ -244,6 +261,10 @@ pub fn cases() -> Vec<Case> {
 }
 /// Construct only the selected workload for IC calls, preserving corpus indices.
 pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
+    #[cfg(feature = "bulk")]
+    {
+        bulk::cases_selected(selected)
+    }
     #[cfg(feature = "toko")]
     {
         toko::cases_selected(selected)
@@ -256,7 +277,12 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     {
         packed_i16::cases_selected(selected)
     }
-    #[cfg(not(any(feature = "toko", feature = "derive-scale", feature = "packed-i16")))]
+    #[cfg(not(any(
+        feature = "toko",
+        feature = "derive-scale",
+        feature = "packed-i16",
+        feature = "bulk"
+    )))]
     {
         standard_cases_selected(selected)
     }

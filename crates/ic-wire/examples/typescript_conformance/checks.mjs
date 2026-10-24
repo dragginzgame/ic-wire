@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { WireError } from './compiled/wire-runtime.js';
 import { nativeTree, prototypeName } from './compiled/native.js';
-const normalize = value => value instanceof Uint8Array || value instanceof Int16Array ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
+const normalize = value => ArrayBuffer.isView(value) ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
 function check(codec, value, request, response) {
   for (const [encode, decode, bytes] of [[codec.encodeRequest, codec.decodeRequest, request], [codec.encodeResponse, codec.decodeResponse, response]]) {
     const input = Uint8Array.from(bytes);
@@ -381,3 +381,21 @@ assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,1,0])), W
 assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,6,0,0,0,0,0,0])), WireError);
 assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,0x82,0,0,0])), WireError);
 assert.deepEqual(packedI16.decodeRequest(Uint8Array.from([...header,4,0,128,255,127])),new Int16Array([-32768,32767]));
+
+for (const [word, ctor, width] of [['i16',Int16Array,2], ['u16',Uint16Array,2],
+  ['i32',Int32Array,4], ['u32',Uint32Array,4], ['i64',BigInt64Array,8],
+  ['u64',BigUint64Array,8], ['hash32',Uint8Array,32]]) {
+  const codec = probe({k:'packed',word});
+  const value = new ctor(word === 'hash32' ? 32 : 2);
+  const encoded = codec.encodeRequest(value);
+  const offset = new Uint8Array(encoded.length + 1); offset.set(encoded,1);
+  const decoded = codec.decodeRequest(offset.subarray(1));
+  assert.deepEqual(decoded,value);
+  decoded[0] = word.endsWith('64') ? 1n : 1;
+  assert.deepEqual(offset.subarray(1),encoded);
+  assert.throws(() => codec.encodeRequest([]), WireError);
+  assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,1,0])), WireError);
+  assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,0x80,0])), WireError);
+  assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,width,...new Uint8Array(width-1)])), WireError);
+}
+assert.throws(() => probe({k:'packed',word:'hash32'}).encodeRequest(new Uint8Array(31)),WireError);

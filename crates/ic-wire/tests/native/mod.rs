@@ -1,4 +1,5 @@
 //! Native Serde admission, wire compatibility and failure boundaries.
+mod packed;
 use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};
 
@@ -586,6 +587,20 @@ fn packed_i16_bytes_bounds_and_canonicality() {
     assert_eq!(
         native::encode(&vec![i16::MAX], LIMITS).unwrap(),
         [1, 254, 255, 3]
+    );
+    // A shared decoder must honor each field's own bound, not reuse a prior one.
+    let pair = (
+        PackedI16::<1>::new(vec![i16::MIN]).unwrap(),
+        PackedI16::<2>::new(vec![0, i16::MAX]).unwrap(),
+    );
+    let bytes = native::encode(&pair, LIMITS).unwrap();
+    assert_eq!(
+        native::decode::<(PackedI16<1>, PackedI16<2>)>(&bytes, LIMITS).unwrap(),
+        pair
+    );
+    assert_eq!(
+        native::decode::<(PackedI16<2>, PackedI16<1>)>(&bytes, LIMITS),
+        Err(Error::Malformed)
     );
     let packed = PackedI16::<1>::new(vec![0]).unwrap();
     for short in [

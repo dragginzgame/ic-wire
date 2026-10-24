@@ -8,6 +8,8 @@ extern crate alloc;
 mod bounded;
 mod contract;
 mod float;
+mod packed;
+pub use packed::{Packed, PackedElement};
 pub mod native;
 /// Optional host-side TypeScript generation; never required by a canister.
 #[cfg(feature = "typescript")]

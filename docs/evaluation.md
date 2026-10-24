@@ -43,6 +43,12 @@ authentication, storage formats or delivery policy.
 See [borrowing, buffers and bounded layouts](allocation-comparison.md) for the
 44-case native/IC experiment and its consumer-schema tradeoffs.
 
+## Historical experiments
+
+The remaining sections preserve earlier measurements and source revisions. They
+are evidence, not additional supported APIs. Current results are indexed in the
+[comparison guide](candid-comparison.md).
+
 The 0.5 borrowed-contract [allocation probe](evidence/borrowed-contracts-0.5/allocations.csv)
 compares owned and borrowed finite decoding of the same name/chunk frames. On
 Linux x86_64 with Rust 1.99.1, opt-z/LTO/one codegen unit/panic abort, a single-thread

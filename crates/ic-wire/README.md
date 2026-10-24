@@ -47,6 +47,24 @@ allocation-budget accounting differ. Qualify the chosen representation against
 consumer limits. The benchmark corpus checks exact frame equivalence at 4 KiB
 and 1 MiB; the byte path requires no new runtime API or encoding mode.
 
+For bulk integer vectors or hash lists, `Packed<T>` owns a `Vec<T>` and serializes
+it as a single byte buffer. Supported elements are `i16`, `u16`, `i32`, `u32`,
+`i64`, `u64` and `[u8; 32]`. Runtime `Limits` bound admission; there is no per-field
+const bound. Use `new`, `as_slice` and `into_vec` to wrap, inspect and recover data.
+
+```rust
+let hashes = ic_wire::Packed::new(vec![[0xab_u8; 32]]);
+assert_eq!(hashes.as_slice().len(), 1);
+```
+
+This is still the same Serde/Postcard codec. Selecting this field changes ordinary
+list bytes to a byte count followed by fixed little-endian words. For example,
+`[32767_i16]` changes from `01 fe ff 03` to `02 ff 7f`. Coordinate both endpoint
+schemas and retain exact retry bytes. Small integers can produce larger payloads.
+The TypeScript feature maps integers to the corresponding typed arrays (including
+`BigInt64Array`/`BigUint64Array`) and hashes to flat `Uint8Array` bytes, with a length
+that must be divisible by 32. Ordinary vectors retain their current encoding.
+
 For bulk signed 16-bit values, `PackedI16<N>` owns a bounded `Vec<i16>` and
 serializes it as bytes: a byte count followed by fixed-width little-endian words.
 `new` admits an existing vector without copying; `as_slice` borrows its words and

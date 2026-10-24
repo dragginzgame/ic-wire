@@ -178,3 +178,9 @@ impl<T: Wire, const N: usize> Wire for crate::List<T, N> {
         Ok(json!({"k":"list", "max":N, "item":context.describe::<T>()?}))
     }
 }
+
+impl<T: crate::PackedElement> Wire for crate::Packed<T> {
+    fn native_schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
+        Ok(json!({"k":"packed", "word": T::SCHEMA}))
+    }
+}

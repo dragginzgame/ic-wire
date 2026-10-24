@@ -1,4 +1,4 @@
-//! Nominally distinct six-field records with byte-array or packed-word cohorts.
+//! Nominally distinct records with byte-array, packed-i16 or mixed bulk-field cohorts.
 //! Each enabled type has a runtime-selectable codec path. All Wire records use the production Serde codec.
 use super::*;
 macro_rules! record {
@@ -14,10 +14,24 @@ macro_rules! record {
                 active: bool,
                 delta: i64,
                 optional: Option<u64>,
-                #[cfg(not(feature = "packed-scale"))]
+                #[cfg(not(any(feature = "packed-scale", feature = "bulk-scale")))]
                 bytes: [u8; $width],
                 #[cfg(feature = "packed-scale")]
                 samples: ic_wire::PackedI16<PACKED_BOUND>,
+                #[cfg(feature = "bulk-scale")]
+                signed16: bulk::Field<i16>,
+                #[cfg(feature = "bulk-scale")]
+                unsigned16: bulk::Field<u16>,
+                #[cfg(feature = "bulk-scale")]
+                signed32: bulk::Field<i32>,
+                #[cfg(feature = "bulk-scale")]
+                unsigned32: bulk::Field<u32>,
+                #[cfg(feature = "bulk-scale")]
+                signed64: bulk::Field<i64>,
+                #[cfg(feature = "bulk-scale")]
+                unsigned64: bulk::Field<u64>,
+                #[cfg(feature = "bulk-scale")]
+                hashes: bulk::Field<[u8; 32]>,
                 label: ic_wire::Text<64>,
             }
             #[cfg(feature = "candid")]
@@ -28,10 +42,24 @@ macro_rules! record {
                 active: bool,
                 delta: i64,
                 optional: Option<u64>,
-                #[cfg(not(feature = "packed-scale"))]
+                #[cfg(not(any(feature = "packed-scale", feature = "bulk-scale")))]
                 bytes: [u8; $width],
                 #[cfg(feature = "packed-scale")]
                 samples: Vec<i16>,
+                #[cfg(feature = "bulk-scale")]
+                signed16: Vec<i16>,
+                #[cfg(feature = "bulk-scale")]
+                unsigned16: Vec<u16>,
+                #[cfg(feature = "bulk-scale")]
+                signed32: Vec<i32>,
+                #[cfg(feature = "bulk-scale")]
+                unsigned32: Vec<u32>,
+                #[cfg(feature = "bulk-scale")]
+                signed64: Vec<i64>,
+                #[cfg(feature = "bulk-scale")]
+                unsigned64: Vec<u64>,
+                #[cfg(feature = "bulk-scale")]
+                hashes: Vec<[u8; 32]>,
                 label: String,
             }
             pub(super) fn build() -> Case {
@@ -44,24 +72,63 @@ macro_rules! record {
                     input.as_object_mut().unwrap().remove("bytes");
                     input["samples"] = serde_json::json!(vec![i16::MAX; 8]);
                 }
+                #[cfg(feature = "bulk-scale")]
+                {
+                    input.as_object_mut().unwrap().remove("bytes");
+                    input["signed16"] = serde_json::json!(vec![i16::MAX; 8]);
+                    input["unsigned16"] = serde_json::json!(vec![u16::MAX; 8]);
+                    input["signed32"] = serde_json::json!(vec![i32::MAX; 8]);
+                    input["unsigned32"] = serde_json::json!(vec![u32::MAX; 8]);
+                    input["signed64"] = serde_json::json!(vec![i64::MAX; 8]);
+                    input["unsigned64"] = serde_json::json!(vec![u64::MAX; 8]);
+                    input["hashes"] = serde_json::json!(vec![[42_u8; 32]; 8]);
+                }
                 let input_json = serde_json::to_vec(&input).unwrap();
                 #[cfg(feature = "wire")]
                 lanes.push(lane("wire-bounded", Rc::new(WireRecord {
                     $field: 1_000_000, active: true, delta: -65, optional: Some(128),
-                    #[cfg(not(feature = "packed-scale"))]
+                    #[cfg(not(any(feature = "packed-scale", feature = "bulk-scale")))]
                     bytes: [42; $width],
                     #[cfg(feature = "packed-scale")]
                     samples: ic_wire::PackedI16::new(vec![i16::MAX; 8]).unwrap(),
+                    #[cfg(feature = "bulk-scale")]
+                    signed16: bulk::field(vec![i16::MAX; 8]),
+                    #[cfg(feature = "bulk-scale")]
+                    unsigned16: bulk::field(vec![u16::MAX; 8]),
+                    #[cfg(feature = "bulk-scale")]
+                    signed32: bulk::field(vec![i32::MAX; 8]),
+                    #[cfg(feature = "bulk-scale")]
+                    unsigned32: bulk::field(vec![u32::MAX; 8]),
+                    #[cfg(feature = "bulk-scale")]
+                    signed64: bulk::field(vec![i64::MAX; 8]),
+                    #[cfg(feature = "bulk-scale")]
+                    unsigned64: bulk::field(vec![u64::MAX; 8]),
+                    #[cfg(feature = "bulk-scale")]
+                    hashes: bulk::field(vec![[42_u8; 32]; 8]),
                     label: ic_wire::Text::new("Representative record".into()).unwrap(),
                 }), |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
                     |b| ic_wire::native::decode_request::<WireRecord>(METHOD, b, LIMITS).ok()));
                 #[cfg(feature = "candid")]
                 lanes.push(lane("candid", Rc::new(CandidRecord {
                     $field: 1_000_000, active: true, delta: -65, optional: Some(128),
-                    #[cfg(not(feature = "packed-scale"))]
+                    #[cfg(not(any(feature = "packed-scale", feature = "bulk-scale")))]
                     bytes: [42; $width],
                     #[cfg(feature = "packed-scale")]
                     samples: vec![i16::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    signed16: vec![i16::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    unsigned16: vec![u16::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    signed32: vec![i32::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    unsigned32: vec![u32::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    signed64: vec![i64::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    unsigned64: vec![u64::MAX; 8],
+                    #[cfg(feature = "bulk-scale")]
+                    hashes: vec![[42_u8; 32]; 8],
                     label: "Representative record".into(),
                 }), |v| ic_platform::candid::contract::encode_one(v).unwrap(),
                     |b| ic_platform::candid::decode_exactly_one(b, CANDID_LIMITS).ok()));

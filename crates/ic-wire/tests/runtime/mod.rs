@@ -250,6 +250,29 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
             valid
         );
     }
+    for word in [
+        json!("i16"),
+        json!("u16"),
+        json!("i32"),
+        json!("u32"),
+        json!("i64"),
+        json!("u64"),
+        json!("hash32"),
+        json!("f64"),
+        Value::Null,
+        json!(16),
+    ] {
+        let valid = word.as_str().is_some_and(|s| s != "f64");
+        assert_eq!(
+            generate_registry(
+                &BTreeMap::from([("Packed".into(), json!({"k":"packed","word":word}))]),
+                &[],
+                "./runtime.js"
+            )
+            .is_ok(),
+            valid
+        );
+    }
     for minimum in [Value::Null, json!(-1), json!(1.5), json!("2"), json!(3)] {
         let node = json!({"k":"bytes","min":minimum,"max":2});
         assert_eq!(

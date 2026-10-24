@@ -1,62 +1,80 @@
 # Current handoff
 
-## Current batch: 0.6.10 generator cleanup and measurements
+## Current batch: 0.6.11 packed fields
 
-0.6.9 is released at `c0841e7`; pending work is recorded under 0.6.10.
-The generator accepts types/createCodec/JSON names, uses `$`-prefixed helpers,
-and preserves own __proto__ properties through computed registry-literal keys.
-Built-in types remain qualified; conformance compiles and executes colliding exports.
+0.6.10 is released at `31bcef2`; pending work is recorded under 0.6.11.
+Earlier pending work shares PackedI16 decoding across bounds while retaining
+checks before allocation. Bytes, metadata, canonical verification and retries
+are unchanged. The [paired study](../packed-sharing-0611.md) records 100-DTO
+savings of 4,354 total opt-z bytes / 6,886 opt-3 bytes, plus small decode overhead.
+All 33,952 typed admission outcomes match. That change is preserved.
 
-The [scaling/blob study](../scaling-blob-0610.md) owns matched sources, repeated
-samples, instructions and uncompressed Wasm/code sizes. Host generation improves
-16–19% in the measured 1/100-type controls. At 100 DTOs, opt-z Wire is 263,834
-bytes with a shared packed bound and 292,476 with sixteen bounds, versus
-1,283,379 for Candid. Limits must continue to describe actual consumer contracts.
-The 256-byte owned-blob comparison experiment is rejected: only 4.9–6.2% fewer
-large-decode instructions, +482–579 Wasm bytes, and slower small inputs.
-Production codec, payload acceptance, canonical hashing and retry bytes are unchanged.
+## Public bulk fields
 
-TypeScript conformance, scaling roundtrips, strict Clippy and Rust 1.91 checks pass.
-No installed-consumer, big-endian or full CI qualification is claimed.
-Versions, staging, commits and releases remain maintainer-owned.
+The measured runtime-limited prototype is promoted to `ic_wire::Packed<T>` for
+six integer widths and 32-byte hashes. It remains a field in the one production
+Serde/Postcard codec. The benchmark now uses the public implementation; its
+private duplicate is removed. The sealed element trait excludes arbitrary types.
+The [migration guide](../packed-fields.md) explains bytes, limits and typed arrays.
+Existing PackedI16<N> retains its tighter element bound and exact wire contract.
 
-## Released packed-i16 production field
+Rust/TypeScript conformance passes 157 vectors and 32,156 differential mutations,
+including wide signed/unsigned extrema, flat hashes, unaligned input, owned output,
+malformed lengths and canonical prefixes. Native tests include all 65,536 i16s.
+Generic TypeScript descriptors use packed/word; bounded packed-i16 remains supported.
+Both use a shared typed-array path with explicit little-endian conversion.
 
-0.6.8 includes IC Host/Tooling 0.66.0 and IC Platform 0.6.10.
+The [bulk study](../bulk-fields-0611.md) measured all 68 field/manifest and 1/10/100
+record cases ahead of Candid in both profiles. At opt-3, a 1,024-hash manifest
+falls from 2.52M/5.04M to 35,175/82,936 encode/decode instructions, growing one byte.
+100 records shrink 19,234 total / 19,209 code Wasm bytes. Small integers can grow
+up to eight times in payload; empty u32 decode regresses 39.13% versus ordinary Wire.
+Per-field const-bound and extra entry-helper prototypes were rejected for Wasm growth.
+The [promotion qualification](../packed-promotion-0611.md) confirms all 3,580 IC
+rows and 16 total/code Wasm sizes match the prototype, with unchanged allocations,
+peak heap and frames. Concrete word readers need inline hints across crate
+boundaries; the first public candidate regressed large i16 decode 5.48x and was
+rejected. Native opt-z large u16 decode still regresses 57% versus the prototype.
+TypeScript bulk copies improve large arrays but one-word decode adds 135–155 ns.
+Current-dependency Rustdoc, native/benchmark tests, Clippy, TypeScript and MSRV
+checks pass; consumer adoption and big-endian execution remain unqualified.
 
-`PackedI16<N>` now owns a bounded Vec<i16>, serializes a safe little-endian byte
-view, and decodes owned words after validating length/parity. Its Wire metadata
-projects to Int16Array. There is still one Serde/Postcard codec; Vec<i16> is unchanged.
-Opting in changes [32767] from 01 fe ff 03 to 02 ff 7f. Coordinate field schemas,
-regenerate clients and resolve retained old-layout frames before switching.
-Small values take more bytes; canonical hashing/retry and envelope rules remain.
+## Consumer boundary and consolidation
 
-The maintained benchmark now uses the public type; prototype adapter/conversion
-implementations are retired to the [research archive](../packed-i16-study.md).
-The [production qualification](../packed-i16-production.md) owns measurements and
-validation. At opt-3, 16,384 wide values use 33,489.25 encode / 79,960 decode
-instructions (0.417x / 0.057x Candid); opt-z fixture growth is 2,438 total /
-2,304 code bytes. Empty decode and small-value payloads regress versus ordinary
-lists. All 80 packed/Candid encode/decode comparisons favor packed.
-Big-endian execution and installed consumers remain unqualified.
-Versions, staging, commits and releases remain maintainer-owned.
+The [Wire-side review](../packed-consolidation-0611.md) qualifies Blob's manifest
+shape with 0/1/4/1,024 hashes, exact headers, owned roundtrip, frame limits and
+host metadata. Application bounds/root validation and Candid storage stay owned
+by Blob. The maintainer explicitly selected Wire-side work only: no sibling
+mutation, build or installed-endpoint claim. Adoption remains consumer-owned.
+Sharing packed visitors added 29 opt-z bytes at 100 bounded DTOs; sharing only
+serialization added four. Generic packed artifacts were identical. Both are
+rejected screens, with no new runtime code or protocol changes. Native timing
+and IC counters were not rerun for these rejected candidates. All 16 native
+tests, focused Clippy and documentation links pass. Comparison navigation is
+now a current index plus preserved historical reports. The inspected manifest
+has no whole-content bytes, so owned-blob optimization is not established as its
+next bottleneck; actual consumer adoption/measurement comes first.
 
-## Latest full comparison
+## Codec-cost investigation
 
-The benchmark snapshot at `066b618` included the then-pending 0.6.7 i64
-optimization and used package version 0.6.6. It added sixty cases, taking the
-standard corpus to 214, plus ten Toko-shaped and 1/10/100-record cohorts.
-The [full comparison](../full-comparison-067.md) owns current results and source
-identity: native time, allocation counts, peak heap, IC instructions, wire bytes,
-and total/code-section uncompressed Wasm. Gzip measurement is removed.
-All five cohorts complete in both profiles: 1,340 paired encode/decode rows,
-7,598 IC rows and 24,672 native/instrumented rows. Cross-mode input/frame identities
-match; every IC row has three identical samples. Focused benchmark roundtrips,
-lint, Rust 1.91 checking and runner/format checks pass.
+The [cost breakdown](../cost-breakdown-0611.md) preserves six isolated variants,
+22 inputs, 528 primary pairs and 24 artifacts. Pure Postcard AllocVec still costs
+40.3x Candid for wide-i16 encode and 18.8x for wide-i64. Budget accounting alone
+saves only 3.3% on i16 encode. Removing canonical verification improves owned blob
+decode but violates the contract; removing preflight causes reallocations. No
+checks were removed. Rejected variants and original source remain in the archive.
 
-Production runtime, generator logic, protocol and acceptance rules are unchanged
-by this benchmark batch. One production Serde/Postcard codec remains.
-Versions, staging, commits, publication and releases remain maintainer-owned.
+## Previous qualification and remaining costs
+
+The [packed-i16 qualification](../packed-i16-production.md) owns the original
+bounded-field measurements and migration contract. Its implementation is preserved.
+The [full candidate matrix](../full-comparison-0611.md) covers 597 overlapping
+case entries, thirteen cohorts, two profiles, 52 Wasms and 2,388 paired comparisons.
+All cross-mode input/frame hashes match and each IC row has three equal samples.
+Wire Wasm is smaller in every cohort/profile. Opt-3 standard encode/decode wins
+are 161/214 and 155/214. Ordinary wide i16 encode remains 49.9x Candid, generic
+byte-vector encode 37.2x, wide i64 decode 9.55x and owned 1 MiB blob decode 2.37x.
+Packed is an explicit field choice, not a fix to ordinary list representations.
 
 ## Production contract
 
@@ -89,26 +107,12 @@ The maintainer keeps ExternalPrincipal on the Candid side; no principal metadata
 or platform dependency was added. Do not infer that all consumer integration
 acceptance is complete from Wire's standalone conformance checks.
 
-## Evidence and remaining costs
+## Tooling and qualification limits
 
-At opt-3 in the expanded standard corpus, Wire wins 161/214 encodes and 155/214
-decodes by IC instructions. The whole Wasm fixture is 435,212 bytes versus
-Candid's 1,053,914. These case counts are not a production traffic weighting.
-Candid remains substantially faster for large primitive vectors: wide i16
-encoding is about 50x Wire/Candid, generic byte encoding 37x, and wide i64 decode
-9.55x. Owned 1 MiB blob decode is 2.37x; byte-oriented encoding is 0.50x.
-
-At opt-3, all ten Toko-shaped decode cases favor Wire; the 50-card projection encode is
-1.9% more expensive than Candid. Native timings vary between runs; the report
-keeps both medians and separates them from deterministic IC counts. Fixture
-sizes do not predict an installed application's footprint.
-
-The [integer study](../integer-shortcut-study.md#067-share-the-i64-writer) retains
-the preceding matched optimization experiment and its opt-z tradeoffs.
-This expanded suite is a fresh comparison, not a before/after speedup claim.
-No full CI, macOS, installed-consumer or application-latency claim is made.
-
-Shared Tooling is 0.26.7 at `3e8d7cd`, with Build/Testkit/Host 0.66.0 and
-Platform 0.6.10 lock selections. The separate Platform update is preserved;
-packed-i16 measurements retain their matched archived 0.6.9 lock. Candid/PocketIC remain unpublished benchmark
-dev dependencies; the runtime stays SDK/host-independent. Siblings are read-only.
+Shared Tooling is 0.26.7 at `3e8d7cd`. Incoming dependency updates select Platform
+0.6.11 and Testkit 0.66.2; these are preserved. Matched promotion measurements use
+the archived study's Platform 0.6.10/Testkit 0.66.0 pins in an isolated source tree.
+Current-dependency focused checks are separate. Candid/PocketIC remain benchmark
+dev dependencies; runtime is SDK/host-independent. Siblings remain read-only.
+No full CI, big-endian execution, installed-consumer or application-latency claim.
+Versions, staging, commits, pushes and releases remain maintainer-owned.

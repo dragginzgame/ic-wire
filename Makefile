@@ -47,11 +47,11 @@ check-benchmarks:
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10; do \
+	+@for corpus in toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
 	    cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --test roundtrip && \
 	    cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in toko derive-scale packed-i16 packed-scale; do \
+	+@for corpus in toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" && \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
@@ -118,7 +118,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md docs/history/candid-comparison.md docs/packed-fields.md docs/packed-consolidation-0611.md
 
 .PHONY: check-boundary
 check-boundary:
