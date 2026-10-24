@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.5]
+## [0.7.5] - 2026-10-24
 
 - Support host-only `Cow<str>` text metadata, including transparent consumer
   identifiers. Qualify owned/borrowed Rust and TypeScript frames, admission and
