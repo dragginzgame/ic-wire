@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.2]
+
+- Adopt IC Tooling 0.68.0 for diagnostic builds, benchmark lifecycle helpers
+  and the release metadata editor. Published runtime dependencies, wire bytes
+  and codec behavior are unchanged.
+
 ## [0.7.1] - 2026-10-24
 
 - Add opt-in host schema advice for ordinary primitive lists, exact-path

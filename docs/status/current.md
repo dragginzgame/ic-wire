@@ -1,11 +1,28 @@
 # Current handoff
 
-## Released baseline and pending 0.7.1
+## Released baseline and pending 0.7.2
 
-0.7.0 is released at `aa7cc32acbd54a58d77720bedfb1ae530926f57e`; package versions
-remain 0.7.0. This batch started clean. The open 0.7.1 changelog covers opt-in
-host bulk advice and Packed<i8>. Staging, versions, commits, publication and
-pushes remain maintainer-owned. No sibling was changed.
+0.7.1 is released at `2978dee37ddaf62c09ce1df411a0b1b6c9748bcd`; package versions
+remain 0.7.1. This adoption started clean. The open 0.7.2 changelog selects
+published IC Tooling 0.68.0 (supplier release `8f281177faaeee0adc51edc1031d4a7b268b0ce0`).
+Build, Testkit, host artifacts/filesystem/process packages and the release metadata
+editor move together from 0.67.0. The supplier's 0.68.1 notes are an unreleased
+draft, not an adopted dependency. Shared Tooling's snapshot remains unchanged.
+
+Only five dependency versions/checksums change in Cargo.lock. Wire's normal Wasm
+dependency tree is byte-identical before/after; runtime code, wire bytes, limits,
+normalization and retry contracts are unchanged. No codec performance claim is
+made or new codec benchmark required for this host/dev-tool-only adoption.
+Staging, versions, commits, publication and pushes remain maintainer-owned.
+Siblings were inspected read-only. Adoption logs are in `/tmp/wire-tooling-068/`.
+
+Adoption validation passes: typed diagnostics (nine expected failures plus a
+passing control), full benchmark gate/Clippy/MSRV/Wasm checks, dependency
+boundaries, release-editor admission and disposable release/Make fixtures.
+A real PocketIC 16.1.0 run through Testkit 0.68.0 reproduces all 2,180 retained
+IC rows with identical input/frame hashes and instruction samples. This validates
+host lifecycle/transport against retained Wasms; it is not a new codec optimization.
+Formatting, diff and local document-link checks pass. No real release was run.
 
 ## Implemented work
 
@@ -62,5 +79,5 @@ Ordinary-vector controls and their large gaps remain visible. See the
 [bulk field guide](../packed-fields.md) and [runtime contract](../runtime.md).
 
 Shared Tooling is pinned at `4c0f198e`, recorded version 0.26.10. IC Build/Host/
-Testkit are 0.67.0 and Platform 0.6.14. Siblings remain read-only. Do not infer
+Testkit are 0.68.0 and Platform 0.6.14. Siblings remain read-only. Do not infer
 policy from mutable siblings or patch snapshot-owned files.
