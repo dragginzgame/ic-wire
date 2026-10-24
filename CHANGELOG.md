@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.11]
+## [0.6.11] - 2026-10-24
 
 - Qualify the Blob-shaped manifest boundary for packed hashes, preserving exact
   hash/header bytes and frame-limit rejection without changing consumer storage.
