@@ -229,9 +229,14 @@ TypeScript, `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
 
 Keep the existing Serde derives and add `ic_wire::Wire` in the host
 generator build. For shared contract packages, gate it with a local feature:
-`wire-schema = ["ic-wire/typescript"]`. Enable that feature in the generator,
-not the deployed canister. No JSON or TypeScript generation dependency is needed
-by the deployed codec.
+`wire-schema = ["ic-wire/typescript"]`. Enable that feature in the generator.
+On Wasm targets, forwarding it keeps the runtime codec but omits Wire's metadata
+module, metadata trait implementations and optional JSON/byte-schema dependencies.
+`ic_wire::Wire` emits metadata implementations only for native targets. Gate calls
+to `ic_wire::typescript` and consumer-owned metadata implementations with
+`#[cfg(not(target_family = "wasm"))]`. A direct consumer dependency such as
+`serde_json` still needs its own native target gate; Wire cannot gate it for you.
+Serde implementations, frames and runtime limits are independent of this feature.
 
 ```rust
 # #[cfg(feature = "typescript")]

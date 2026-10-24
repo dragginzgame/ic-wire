@@ -81,7 +81,13 @@ make check-typescript
 operators must prepare the pinned Node/npm environment and locked package above
 before starting the offline validation phase. Hosted CI prepares them on every
 supported host. The target also runs feature-enabled Rust runtime/borrowed tests,
-strict Clippy and the generator's Rust 1.91 library check.
+strict Clippy and the generator's Rust 1.91 library check. It also runs a disposable
+consumer that forwards a local schema feature: native metadata and exact runtime
+frames must work, while Wasm builds with and without forwarding exclude Wire's
+optional `serde_json`/`serde_bytes` metadata dependencies from the normal graph.
+The forwarded Wasm build is checked on Rust 1.91 too. Run only this boundary check
+with `bash scripts/ci/check-schema-targets.sh`; evidence remains under
+`target/schema-targets/`. These graph checks do not measure installed Wasm size.
 
 This package contains only the TypeScript compiler. The generated codec imports
 no transport or browser SDK. Rust vectors, strict typechecking and Node mutation

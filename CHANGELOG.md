@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.13]
+
+- Keep TypeScript metadata and its optional dependencies native-only even when
+  a consumer forwards the schema feature into a Wasm build. Derives still leave
+  Serde implementations and runtime codecs available. Add consumer/graph checks
+  alongside existing strict TypeScript conformance. Fixes the remaining feature
+  boundary in [#17](https://github.com/dragginzgame/ic-wire/issues/17); wire bytes,
+  acceptance rules, canonical hashing and limits are unchanged.
+- Adopt Shared Tooling 0.26.9 at `3657c044`, including the reviewed Cargo setup
+  owner-withdrawal and cache-initialization corrections requested by
+  [#18](https://github.com/dragginzgame/ic-wire/issues/18). Preserve tool pins and
+  explicitly re-prepare Cargo tools for the changed build-policy identity.
+
 ## [0.6.12] - 2026-10-24
 
 - Restore deterministic packed fuzz seeds on every run, without requiring the

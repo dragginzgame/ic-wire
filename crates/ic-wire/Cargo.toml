@@ -13,13 +13,15 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 typescript = ["dep:serde_json", "dep:serde_bytes"]
 
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+serde_bytes = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+
 [dependencies]
 bytemuck.workspace = true
 ic-wire-derive.workspace = true
 postcard.workspace = true
 serde.workspace = true
-serde_bytes = { workspace = true, optional = true }
-serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 clap.workspace = true

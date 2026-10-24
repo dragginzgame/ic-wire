@@ -11,8 +11,9 @@ mod float;
 mod packed;
 pub use packed::{Packed, PackedElement};
 pub mod native;
-/// Optional host-side TypeScript generation; never required by a canister.
-#[cfg(feature = "typescript")]
+/// Optional TypeScript generation on native hosts.
+/// Forwarding the feature on Wasm retains only the runtime codec.
+#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
 pub mod typescript;
 pub use bounded::{Bytes, BytesRef, List, PackedI16, Text, TextRef};
 pub use float::{FiniteF32, FiniteF64};
@@ -22,7 +23,7 @@ pub use ic_wire_derive::Wire;
 #[doc(hidden)]
 pub mod __private {
     pub use serde;
-    #[cfg(feature = "typescript")]
+    #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
     pub use serde_json;
 }
 

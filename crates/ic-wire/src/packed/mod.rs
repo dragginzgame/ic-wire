@@ -12,7 +12,7 @@ pub trait PackedElement: sealed::Word {}
 mod sealed {
     use super::*;
     pub trait Word: bytemuck::Pod + Debug + Eq {
-        #[cfg(feature = "typescript")]
+        #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
         const SCHEMA: &'static str;
         fn read_le(bytes: &[u8]) -> Self;
         #[cfg(any(target_endian = "big", test))]
@@ -24,7 +24,7 @@ mod sealed {
     ($($ty:ty),*) => {$(
         impl super::PackedElement for $ty {}
         impl Word for $ty {
-            #[cfg(feature = "typescript")]
+            #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
             const SCHEMA: &'static str = stringify!($ty);
             #[inline]
             fn read_le(bytes: &[u8]) -> Self {
@@ -41,7 +41,7 @@ mod sealed {
     words!(i16, u16, i32, u32, i64, u64);
     impl super::PackedElement for [u8; 32] {}
     impl Word for [u8; 32] {
-        #[cfg(feature = "typescript")]
+        #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
         const SCHEMA: &'static str = "hash32";
         #[inline]
         fn read_le(bytes: &[u8]) -> Self {

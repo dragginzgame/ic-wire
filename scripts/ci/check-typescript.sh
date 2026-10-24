@@ -11,3 +11,4 @@ cargo run --locked -p ic-wire --features typescript --example typescript-conform
 "$root/examples/browser/node_modules/.bin/tsc" --ignoreConfig --strict --noUncheckedIndexedAccess --exactOptionalPropertyTypes --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck --outDir "$out/compiled" "$out"/*.ts
 node "$out/checks.mjs"
 node crates/ic-wire/examples/typescript_conformance/endian.mjs "$out/compiled/wire-runtime.js"
+bash "$root/scripts/ci/check-schema-targets.sh"

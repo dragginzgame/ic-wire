@@ -203,6 +203,9 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         .push(parse_quote!(Self: ::ic_wire::__private::serde::Serialize));
     let (implementation, ty, constraints) = generics.split_for_impl();
     Ok(quote! {
+        // Metadata is a native host capability even when a consumer forwards its
+        // schema feature to a Wasm runtime build. Serde impls remain consumer-owned.
+        #[cfg(not(target_family = "wasm"))]
         impl #implementation ::ic_wire::typescript::Wire for #name #ty #constraints {
             fn native_schema(#context: &mut ::ic_wire::typescript::SchemaContext)
                 -> ::core::result::Result<::ic_wire::__private::serde_json::Value, ::ic_wire::typescript::GenerationError>

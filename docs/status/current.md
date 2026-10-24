@@ -2,11 +2,33 @@
 
 ## Released baseline and pending batch
 
-0.6.11 is released at `445aa56`. Pending 0.6.12 work strengthens packed-field
-qualification and records two rejected optimization screens. Production runtime,
-wire bytes, admission rules, metadata and exact retries are unchanged.
-The incoming Cargo.lock changes are preserved; no package versions were changed.
-Staging, commits, publication, pushes and releases remain maintainer-owned.
+0.6.12 is released at `b17c077`. Pending 0.6.13 fixes the remaining native-schema
+feature boundary in [#17](https://github.com/dragginzgame/ic-wire/issues/17) and
+adopts the committed setup corrections in
+[#18](https://github.com/dragginzgame/ic-wire/issues/18).
+Staging, versions, commits, publication, pushes and releases remain maintainer-owned.
+
+## Pending issue fixes
+
+Wire's optional metadata dependencies, module and packed schema constants are
+native-only. Wire derive emits its metadata implementation only on native targets.
+Forwarding a consumer schema feature on Wasm keeps Serde/runtime code available
+without Wire's optional serde_json/serde_bytes dependencies. Native metadata calls
+and consumer-written metadata impls need their own target guards. Consumer-owned
+JSON dependencies retain their own target selection responsibility.
+Bytes, runtime admission, canonical hashing and retry rules are unchanged.
+The maintained disposable consumer check is included in check-typescript; it
+checks generic metadata, exact frames, normal Wasm graphs with/without forwarding,
+and the forwarded Rust 1.91 Wasm build. No runtime/generator algorithm or schema
+output changed; graph/build checks apply instead of a codec timing benchmark.
+
+Shared Tooling 0.26.9 at `3657c044` was exported from an isolated clean copy of the
+committed revision; sibling dirty work was untouched. The preview updated only
+local-setup documentation and the two setup helpers, preserving entrypoints/pins.
+Common Cargo formatters and the release editor were explicitly re-prepared;
+old generations remain retained. Native tool admission and Shared's Cargo-tool
+contention/cache fixture pass. Installed-consumer and macOS qualification are not
+claimed. Issues remain open until delivery and their applicable hosted checks.
 
 ## Packed qualification
 
@@ -70,7 +92,8 @@ principals remain on the Candid side. No SDK or platform dependency enters runti
 
 ## Tooling
 
-Shared Tooling is 0.26.7 at `3e8d7cd`. Current incoming dependency selection includes
-Platform 0.6.12 and Testkit 0.66.2. Matched experiments retain their own exact pins;
-do not combine measurements from different locks. Candid/PocketIC remain benchmark
+Shared Tooling is 0.26.9 at `3657c044`. Current dependency selection includes
+Platform 0.6.12 and Testkit 0.66.3. The lockfile's concurrent IC Host/Build/Testkit
+0.66.3 updates were observed during this task and preserved, outside this batch.
+Matched experiments retain their own exact pins; do not combine different locks. Candid/PocketIC remain benchmark
 dev dependencies. Use focused checks and check for shared-target builds first.
