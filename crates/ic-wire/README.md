@@ -191,7 +191,11 @@ and qualify traversal budgets when changing that field. `Wire` does not rewrite
 Serde derives. Existing `#[serde(with = "serde_bytes")]` fields also derive
 byte metadata, without changing the field type or serializer. Supported inputs
 are `Vec<u8>`, `[u8]`, `serde_bytes::ByteBuf`/`Bytes` and references to those types;
-aliases of these Rust types work too. Fixed arrays and arbitrary custom adapters
+`Option<T>` of these inputs projects to `null | { some: Uint8Array }` (and
+nested options retain each tag). Aliases and generic fields with the required
+Serde adapter bounds work through their types, not their spelling. `None`,
+`Some(empty)` and `Some([0,128,255])` retain payloads `00`, `01 00` and
+`01 03 00 80 ff`. Fixed arrays and arbitrary custom adapters
 still require explicit verified metadata. Use the standard dependency under its
 `serde_bytes` name (the absolute `::serde_bytes` path is also recognized).
 This uses the already-measured byte path, not a new runtime optimization: at
@@ -388,8 +392,13 @@ one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other
 types require an explicit supported projection; they are not guessed. Apart
 from container-level `transparent`/`deny_unknown_fields`, field/newtype-variant
-`borrow` and the qualified field-level `serde_bytes` adapter, Serde attributes
-are rejected, including rename, skip, flatten, tagging and custom serializers. Rust raw
+`borrow`, symmetric field/variant `rename = "name"` and the qualified field-level
+`serde_bytes` adapter, Serde attributes are rejected. This includes asymmetric
+serialize/deserialize renames, `rename_all`, `alias`, skip, flatten, tagging and
+custom serializers. Duplicate resulting field/variant labels reject. Renames
+change browser object keys/tags only: declaration-order fields and variant
+ordinals retain identical Postcard bytes. Regenerate clients and preserve the
+existing browser labels when replacing manual metadata. Rust raw
 identifiers retain their unescaped names in the TypeScript object.
 Slices use the same length-prefixed sequence metadata as Vec, including `&[u8]`.
 Use `serde_bytes::Bytes` for byte-oriented `Uint8Array` metadata; slice metadata

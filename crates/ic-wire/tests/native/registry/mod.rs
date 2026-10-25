@@ -214,3 +214,66 @@ fn directional_limit_projection_checks_exact_numbers_without_heap_claims() {
         );
     }
 }
+
+#[derive(Serialize, Wire)]
+struct ByteAdapter<T: serde_bytes::Serialize> {
+    #[serde(with = "serde_bytes")]
+    value: T,
+}
+
+#[test]
+fn optional_byte_adapters_follow_types_and_preserve_option_tags() {
+    type Cursor = Option<Vec<u8>>;
+    let schema = typescript::native_schema::<ByteAdapter<Cursor>>().unwrap();
+    assert_eq!(
+        schema["fields"][0]["value"],
+        json!({"k":"option","item":{"k":"bytes"}})
+    );
+    assert_eq!(
+        typescript::native_schema::<ByteAdapter<&Cursor>>().unwrap(),
+        schema
+    );
+    assert_eq!(
+        typescript::native_schema::<ByteAdapter<Option<Cursor>>>().unwrap()["fields"][0]["value"],
+        json!({"k":"option","item":{"k":"option","item":{"k":"bytes"}}})
+    );
+    assert_eq!(
+        typescript::native_schema::<ByteAdapter<Vec<u8>>>().unwrap()["fields"][0]["value"],
+        json!({"k":"bytes"})
+    );
+    for (value, expected) in [
+        (None, vec![0]),
+        (Some(vec![]), vec![1, 0]),
+        (Some(vec![0, 128, 255]), vec![1, 3, 0, 128, 255]),
+    ] {
+        assert_eq!(
+            ic_wire::native::encode(&ByteAdapter { value }, super::LIMITS).unwrap(),
+            expected
+        );
+    }
+    let mut registry = SchemaRegistry::new();
+    registry.register::<ByteAdapter<Cursor>>("Request").unwrap();
+    typescript::generate_registry(&registry.finish().unwrap(), &[], "./runtime.js").unwrap();
+}
+
+#[derive(Serialize, Wire)]
+enum RenamedValue {
+    #[serde(rename = "Int")]
+    Int64(i64),
+    List(Vec<Self>),
+}
+
+#[test]
+fn renamed_recursive_variants_keep_declaration_ordinals() {
+    let value = RenamedValue::List(vec![RenamedValue::Int64(-7)]);
+    assert_eq!(
+        ic_wire::native::encode(&value, super::LIMITS).unwrap(),
+        [1, 1, 0, 13]
+    );
+    let mut registry = SchemaRegistry::new();
+    registry.register::<RenamedValue>("Value").unwrap();
+    let types = registry.finish().unwrap();
+    assert_eq!(types["Value"]["variants"][0]["name"], "Int");
+    assert_eq!(types["Value"]["variants"][0]["id"], 0);
+    typescript::generate_registry(&types, &[], "./runtime.js").unwrap();
+}

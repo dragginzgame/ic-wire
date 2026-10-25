@@ -25,6 +25,7 @@ impl<'ast> Visit<'ast> for RecursiveType<'_> {
 struct Projection {
     transparent: bool,
     bytes: bool,
+    rename: Option<String>,
 }
 
 fn attributes(
@@ -37,6 +38,7 @@ fn attributes(
     let mut borrow = false;
     let mut bytes = false;
     let mut deny_unknown = false;
+    let mut rename = None;
     for attr in attrs {
         if attr.path().is_ident("wire") {
             return Err(syn::Error::new_spanned(
@@ -61,6 +63,9 @@ fn attributes(
                     }
                     bytes = true;
                     Ok(())
+                } else if !allow_transparent && meta.path.is_ident("rename") && rename.is_none() {
+                    rename = Some(meta.value()?.parse::<syn::LitStr>()?.value());
+                    Ok(())
                 } else if allow_borrow && meta.path.is_ident("borrow") && !borrow {
                     // Borrowing changes Deserialize lifetimes, not Serde's layout.
                     // Previously rejected DTOs can now derive the same metadata;
@@ -77,7 +82,11 @@ fn attributes(
             })?;
         }
     }
-    Ok(Projection { transparent, bytes })
+    Ok(Projection {
+        transparent,
+        bytes,
+        rename,
+    })
 }
 
 fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Result<TokenStream> {
@@ -110,14 +119,33 @@ fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Resu
     Ok(match fields {
         Fields::Unit => quote!(#json!({"k":"unit"})),
         Fields::Named(fields) => {
-            let names = fields.named.iter().map(|f| {
-                f.ident
-                    .as_ref()
-                    .unwrap()
-                    .to_string()
-                    .trim_start_matches("r#")
-                    .to_owned()
-            });
+            // Previously renamed fields could not derive metadata. Project their
+            // browser labels without changing positional bytes or field order;
+            // consumers adopting the derive must retain their existing labels.
+            let mut unique = std::collections::BTreeSet::new();
+            let names = fields
+                .named
+                .iter()
+                .map(|f| {
+                    let name = attributes(&f.attrs, false, true, true)?
+                        .rename
+                        .unwrap_or_else(|| {
+                            f.ident
+                                .as_ref()
+                                .unwrap()
+                                .to_string()
+                                .trim_start_matches("r#")
+                                .to_owned()
+                        });
+                    if !unique.insert(name.clone()) {
+                        return Err(syn::Error::new_spanned(
+                            f,
+                            "duplicate Wire field name after Serde rename",
+                        ));
+                    }
+                    Ok(name)
+                })
+                .collect::<syn::Result<Vec<_>>>()?;
             quote!(#json!({"k":"record","fields":[#({"name":#names,"value":#values}),*]}))
         }
         Fields::Unnamed(_) if values.len() == 1 => {
@@ -139,16 +167,29 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         Data::Struct(data) => fields(&data.fields, &context, transparent)?,
         Data::Enum(data) if !transparent && !data.variants.is_empty() => {
             let mut variants = Vec::new();
+            let mut unique = std::collections::BTreeSet::new();
             for (id, variant) in data.variants.iter().enumerate() {
                 let newtype = matches!(&variant.fields, Fields::Unnamed(f) if f.unnamed.len() == 1);
                 // Serde also permits borrow on a newtype variant: it applies to
                 // the sole field's lifetimes and leaves the tag/payload unchanged.
-                attributes(&variant.attrs, false, newtype, false)?;
-                let name = variant
-                    .ident
-                    .to_string()
-                    .trim_start_matches("r#")
-                    .to_owned();
+                // Previously symmetric renames were rejected. Only browser labels
+                // change: Int64 renamed Int keeps its declaration-order tag 00.
+                // No field sorting/IDs or byte changes; regenerate client labels.
+                let name = attributes(&variant.attrs, false, newtype, false)?
+                    .rename
+                    .unwrap_or_else(|| {
+                        variant
+                            .ident
+                            .to_string()
+                            .trim_start_matches("r#")
+                            .to_owned()
+                    });
+                if !unique.insert(name.clone()) {
+                    return Err(syn::Error::new_spanned(
+                        variant,
+                        "duplicate Wire variant name after Serde rename",
+                    ));
+                }
                 let value = fields(&variant.fields, &context, newtype)?;
                 variants.push(quote!({"name":#name,"id":#id,"value":#value}));
             }
@@ -228,6 +269,11 @@ mod tests {
             "#[serde(untagged)] enum E { A(u8) }",
             "#[serde(tag = \"kind\")] enum E { A }",
             "#[serde(rename_all = \"snake_case\")] struct A { a: u8 }",
+            r#"struct A { #[serde(rename(serialize = "a", deserialize = "b"))] a: u8 }"#,
+            r#"struct A { #[serde(alias = "b")] a: u8 }"#,
+            r#"struct A { #[serde(rename = "b")] a: u8, b: u8 }"#,
+            r#"enum A { #[serde(rename = "B")] A, B }"#,
+            r#"enum A { #[serde(rename = "a", rename = "b")] A }"#,
             "struct A { #[serde(skip)] a: u8 }",
             "struct A { #[serde(flatten)] a: u8 }",
             "struct A { #[serde(with = \"custom\")] a: u8 }",

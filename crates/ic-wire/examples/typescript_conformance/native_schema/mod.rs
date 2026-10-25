@@ -34,6 +34,22 @@ struct AdaptedBlob {
     #[serde(with = "serde_bytes")]
     data: Vec<u8>,
 }
+type OptionalBytes = Option<Vec<u8>>;
+#[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+struct OptionalBlob {
+    #[serde(with = "serde_bytes", rename = "cursor")]
+    data: OptionalBytes,
+}
+#[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+enum Renamed {
+    #[serde(rename = "Int")]
+    Int64(i64),
+    #[serde(rename = "Record")]
+    Named {
+        #[serde(rename = "items")]
+        values: Vec<Option<u8>>,
+    },
+}
 // Recommended mixed DTO: bulk binary/numeric/hash fields and an ordinary
 // collection of labels. This is a new fixture, not a migration of User/Page;
 // their ordinary-vector layouts remain compatibility and small-value controls.
@@ -354,7 +370,46 @@ export function createCodec(method: unknown, types: unknown) {
         );
         add(directory, &mut checks, 21 + offset * 2, owned, &javascript);
     }
+    for (offset, (value, js)) in [
+        (None, "{cursor:null}"),
+        (Some(vec![]), "{cursor:{some:new Uint8Array()}}"),
+        (
+            Some(vec![0, 128, 255]),
+            "{cursor:{some:new Uint8Array([0,128,255])}}",
+        ),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        add(
+            directory,
+            &mut checks,
+            24 + offset,
+            OptionalBlob { data: value },
+            js,
+        );
+    }
+    add(
+        directory,
+        &mut checks,
+        27,
+        Renamed::Int64(-7),
+        "{tag:'Int',value:-7n}",
+    );
+    add(
+        directory,
+        &mut checks,
+        28,
+        Renamed::Named {
+            values: vec![None, Some(7)],
+        },
+        "{tag:'Record',value:{items:[null,{some:7}]}}",
+    );
     checks.push_str(r#"
+rejects(() => projection26.encodeRequest({cursor:{some:[0,128,255]}}), 'value');
+rejects(() => projection27.encodeRequest({tag:'Int64',value:-7n}), 'value');
+rejects(() => projection28.encodeRequest({tag:'Record',value:{values:[]}}), 'value');
+
 rejects(() => projection14.encodeRequest({data:new Uint8Array(),extra:1}), 'value');
 for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.encodeRequest(bad), 'value');
@@ -362,7 +417,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 24 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 29 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

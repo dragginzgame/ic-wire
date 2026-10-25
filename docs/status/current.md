@@ -1,80 +1,52 @@
 # Current handoff
 
-## Released baseline and pending 0.7.7
+## Released baseline and pending 0.7.8
 
-0.7.6 is released at `accf8158d0c932e1fed614a59d06e2f4cc751f78`; package
-versions remain 0.7.6. Incoming 0.7.7 cleanup work is preserved. This batch adds
-host-only recursive registry collection and typed browser-budget projection for
-[#20](https://github.com/dragginzgame/ic-wire/issues/20) and
-[#21](https://github.com/dragginzgame/ic-wire/issues/21), plus incremental browser
-encode allocation for [#22](https://github.com/dragginzgame/ic-wire/issues/22).
-These require publication;
-local implementation does not complete that acceptance gate. No issue was closed.
+The checkout is at release 0.7.7 (`6d1f8a1bbde6ad16d24d1d857b1a30292d5b26b0`).
+Package versions remain 0.7.7. Pending 0.7.8 addresses host metadata blockers
+[#23](https://github.com/dragginzgame/ic-wire/issues/23) and
+[#24](https://github.com/dragginzgame/ic-wire/issues/24). Publication is part of
+both acceptance criteria and remains outstanding. No issue was closed.
 Staging, commits, versions, publication and pushes remain maintainer-owned.
 No sibling repository was changed.
 
-## Browser writer
+## Serde projection additions
 
-The TypeScript writer starts at at most 64 bytes and grows within its directional
-ceiling. Outputs remain independently owned; bytes, admission rules and validator
-visits are unchanged. Regenerate clients after publication; no contract migration
-is needed. Growth can increase cumulative allocation and copying for tight limits.
-The [writer evidence](../evidence/typescript-writer-077/README.md) retains matched
-23-case Node timing/allocation measurements, source snapshots and replay commands.
-The full TypeScript gate passes, including tiny/invalid allocation regressions,
-exact byte ceilings, UTF-8, packed values, both float widths and callback counts.
-This is a browser allocation change, with no Rust runtime or IC performance claim.
+The sealed serde_bytes field qualification now carries its projected layout.
+Options retain their tag and project to options of byte buffers rather than
+ordinary numeric lists. Aliases, references and qualified generic fields use
+trait resolution, without token-name guesses. None / Some(empty) / Some(nonempty)
+remain distinct; Option<Vec<u16>> remains rejected.
 
-## Host metadata additions
+Symmetric field/variant Serde renames project browser keys/tags while preserving
+field order and declaration-order variant ordinals. Duplicate labels reject.
+Asymmetric renames, rename_all, alias and custom serializers remain unsupported;
+manual serializers still need explicitly verified metadata. Recursive registries
+work with the renamed variants. No new codec or compatibility lane was added.
 
-`SchemaRegistry` collects concrete native shapes using existing describe calls and
-ref grammar. It supports self/mutual recursion, distinct generic instantiations
-and shared roots, rejects duplicate names, validates refs/alias cycles and bounds
-metadata work. Encountered projections are rechecked so compiler diagnostic type
-names cannot silently conflate conflicting layouts. Manual projections must remain
-deterministic and verified against Serde. Inline native_schema output/refusals stay
-unchanged. No new helper is required by generated derives; concrete mutual types
-avoid redundant cyclic where-predicates. No new codec or serializer exists.
+[Projection evidence](../evidence/serde-projection-078/README.md) records exact
+frames, admission boundaries, focused validation and repeated host timing controls.
+The full TypeScript gate passes 159 ordinary vectors, 33,560 mutations, 29 native
+projection vectors, 16 admission shapes and 54 simulated-endian cases. Optional
+byte adapters retain a measured Rust/TS node-charge difference; copying equal
+budgets is not an acceptance-parity guarantee. Regenerate clients and preserve
+consumer browser labels when replacing manual metadata. Runtime bytes, framing,
+identity, admission and production codecs are unchanged. No IC/Wasm savings claim.
 
-`method_limits` projects request/response byte/node/depth settings independently
-through the generator's existing validator. It omits Rust allocation admission;
-this cannot be translated into JS heap bounds. Equal numeric allowances do not
-mean equal visitation charges. The packaged README includes migration examples,
-observed differences and the consumer qualification recipe.
+## Retained qualification
 
-The [host evidence](../evidence/native-registry-077/README.md) retains 13 cross-runtime
-shapes in both directions, frozen node/depth minima, byte boundaries and malformed
-mutation acceptance. Recursive generated modules type-check. Runtime bytes,
-envelopes and admission counters are unchanged; one-type opt-z/opt-3 Wasms remain
-byte-identical to the incoming cleanup. No fresh IC measurement is claimed.
-Three-run host sampling measures inline projection/render at 3,269 → 3,039 ns for
-one schema and 305,103 → 310,193 ns for 100 names (+1.67%); validated limit projection
-costs 189 ns versus 146 ns for handwritten JSON. These noisy host costs are separate
-from codec performance. Raw source/samples and replay commands are retained.
+0.7.7 delivered named recursive SchemaRegistry collection, typed method_limits
+projection and the incremental browser writer. See the packaged README for
+consumer qualification and the existing evidence for
+[host metadata](../evidence/native-registry-077/README.md) and
+[writer allocation](../evidence/typescript-writer-077/README.md).
+The writer starts at at most 64 bytes and grows within its directional ceiling;
+outputs remain owned. Growth can increase cumulative allocations for tight limits.
 
-Feature-enabled package tests/doctests (including 31 native tests), strict Clippy,
-Rust 1.91 host/Wasm forwarding and nine compiler diagnostics plus a passing control
-pass. The complete TypeScript gate passes 159 ordinary vectors, 33,560 mutations,
-24 prior native vectors, 13 new admission shapes and 54 simulated endian cases.
-Formatting, links and diff checks pass. Logs: `/tmp/wire-issues-20-21`.
-Full CI, fresh macOS execution, package publication and consumer adoption remain
-outside this local qualification. Sibling endpoint policy stays consumer-owned.
-
-## Preserved cleanup batch
-
-The private parser now takes only its existing Slice input; its unused Flavor
-generic/PhantomData and an unused finite-float macro argument were removed.
-Benchmark runners share a cohort catalogue and one matrix source snapshot;
-standalone runs retain source capture. Historical evaluation moved to its archive.
-The [parser evidence](../evidence/parser-cleanup-077/README.md) records 4,026 paired
-IC rows: successful decode never regresses; the worst rejection costs two extra
-instructions (+0.71%). Standard/1/100-type opt-z Wasms are byte-identical; opt-3
-saves 20/5/5 bytes. Runner dry runs cover 21 cohorts and standalone hotspots.
-
-Keep the separate packed implementations after the prior
-[consolidation screen](../packed-consolidation-0611.md). Packed tags already share
-TS runtime branches; the scaling macro, shared lint validation and borrowed privacy
-helpers remain intentional boundaries. No hard cut was needed for this batch.
+The [parser cleanup](../evidence/parser-cleanup-077/README.md) removed the unused
+input abstraction and preserved the selected codec. Keep separate packed
+implementations after the [consolidation screen](../packed-consolidation-0611.md).
+Historical evaluation remains archived rather than deleted.
 
 ## Production direction and tooling
 
@@ -84,6 +56,8 @@ Serde may normalize; retain original frames for retries and raw-byte signatures.
 Use ByteBuf/Bytes for binary data and Packed<T> for suitable bulk fields, preserving
 field bounds and small-varint controls. See the [runtime](../runtime.md) and
 [bulk guide](../packed-fields.md). Real big-endian execution remains unqualified.
+Full CI, fresh macOS execution, publication and consumer adoption were not performed
+in this local batch. Sibling endpoint policy stays consumer-owned.
 
 Build/Testkit and the release editor select 0.68.1; Platform selects 0.6.15.
 Shared Tooling remains 0.26.10 at `4c0f198e56d4c6d27b12a5c2d515e0e01070151e`.

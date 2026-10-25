@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.8]
+
+- Project optional `serde_bytes` adapter fields as options of byte buffers,
+  including aliases and qualified generic fields. `None` / `Some(empty)` remain
+  distinct (`00` / `01 00`); runtime bytes and admission are unchanged. Addresses
+  [#23](https://github.com/dragginzgame/ic-wire/issues/23).
+- Support symmetric Serde field/variant renames in native metadata; reject
+  duplicate labels and retain refusal of asymmetric/custom attributes. Labels
+  change browser keys/tags, not field order or variant ordinals. Regenerate
+  clients while preserving existing consumer labels. Addresses
+  [#24](https://github.com/dragginzgame/ic-wire/issues/24).
+
 ## [0.7.7] - 2026-10-25
 
 - Grow TypeScript encode buffers incrementally instead of allocating the full

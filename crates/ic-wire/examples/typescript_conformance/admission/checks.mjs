@@ -6,6 +6,9 @@
   // Frozen minima: Rust encode/decode, then TS encode/decode; nodes then depth.
   // These differences are deliberate qualification controls, not parity claims.
   const expected = {
+    'cursor-none':[[8,3,2,2],[4,2,2,2]],
+    'cursor-empty':[[12,4,3,3],[5,3,3,3]],
+    'cursor-bytes':[[12,4,3,3],[5,3,3,3]],
     scalar:[[4,1,1,1],[3,1,1,1]], record:[[16,6,4,4],[5,3,3,3]],
     option:[[8,2,2,2],[4,2,2,2]], newtype:[[8,2,2,2],[4,2,2,2]],
     transparent:[[4,1,1,1],[3,1,1,1]], 'enum-empty':[[4,3,2,2],[3,2,2,2]],
@@ -17,6 +20,7 @@
   const report = [];
   for (const c of cases) {
     const value = c.name === 'bytes' ? new Uint8Array(c.value) : c.name === 'packed' ? new Int16Array(c.value) : c.value;
+    if (c.name.startsWith('cursor-') && value.cursor !== null) value.cursor.some = new Uint8Array(value.cursor.some);
     const minima = {};
     for (const row of c.rows) {
       const codec = createCodec({...row.budgets,id:'17',request:c.root,response:c.root},c.types);

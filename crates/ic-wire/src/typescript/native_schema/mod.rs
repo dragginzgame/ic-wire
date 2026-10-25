@@ -18,12 +18,27 @@ pub trait Wire: serde::Serialize {
 }
 
 mod byte_field {
-    pub trait Sealed {}
-    impl Sealed for alloc::vec::Vec<u8> {}
-    impl Sealed for [u8] {}
-    impl Sealed for serde_bytes::ByteBuf {}
-    impl Sealed for serde_bytes::Bytes {}
-    impl<T: Sealed + ?Sized> Sealed for &T {}
+    pub trait Sealed {
+        type Layout: super::Wire;
+    }
+    impl Sealed for alloc::vec::Vec<u8> {
+        type Layout = serde_bytes::ByteBuf;
+    }
+    impl Sealed for [u8] {
+        type Layout = serde_bytes::ByteBuf;
+    }
+    impl Sealed for serde_bytes::ByteBuf {
+        type Layout = Self;
+    }
+    impl Sealed for serde_bytes::Bytes {
+        type Layout = serde_bytes::ByteBuf;
+    }
+    impl<T: Sealed + ?Sized> Sealed for &T {
+        type Layout = T::Layout;
+    }
+    impl<T: Sealed> Sealed for Option<T> {
+        type Layout = Option<T::Layout>;
+    }
 }
 
 /// Qualified inputs to the standard `serde_bytes` field adapter.
@@ -32,6 +47,10 @@ mod byte_field {
 /// ```compile_fail
 /// fn require_bytes<T: ic_wire::typescript::SerdeBytesField>() {}
 /// require_bytes::<Vec<u16>>();
+/// ```
+/// ```compile_fail
+/// fn require_bytes<T: ic_wire::typescript::SerdeBytesField>() {}
+/// require_bytes::<Option<Vec<u16>>>();
 /// ```
 #[doc(hidden)]
 pub trait SerdeBytesField: byte_field::Sealed {}
@@ -50,7 +69,10 @@ impl SchemaContext {
     pub fn describe_bytes<T: SerdeBytesField + ?Sized>(
         &mut self,
     ) -> Result<Value, GenerationError> {
-        self.describe::<serde_bytes::Bytes>()
+        // Previously optional adapters had no metadata. Preserve their Serde
+        // option tag: None = 00, Some(empty) = 01 00, not bare bytes. Existing
+        // byte fields are unchanged; regenerate clients for newly supported DTOs.
+        self.describe::<T::Layout>()
     }
     /// Describe a child, rejecting recursive or excessively large inline schemas.
     pub fn describe<T: Wire + ?Sized>(&mut self) -> Result<Value, GenerationError> {

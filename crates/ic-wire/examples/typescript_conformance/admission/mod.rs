@@ -25,6 +25,7 @@ struct Newtype(u8);
 struct Transparent(u8);
 #[derive(Serialize, Deserialize, Wire)]
 enum Tree {
+    #[serde(rename = "Nil")]
     Empty,
     Children(Vec<Tree>),
     Optional(Option<Box<Tree>>),
@@ -40,6 +41,12 @@ struct Right {
 #[derive(Serialize, Deserialize, Wire)]
 struct Link {
     next: Option<Box<Link>>,
+}
+
+#[derive(Serialize, Deserialize, Wire)]
+struct Cursor {
+    #[serde(with = "serde_bytes")]
+    cursor: Option<Vec<u8>>,
 }
 
 fn case<T: typescript::Wire + for<'de> Deserialize<'de>>(name: &str, value: T, js: Value) -> Value {
@@ -157,6 +164,25 @@ pub(super) fn generate(directory: &Path) -> String {
             },
             json!({"next":{"some":{"next":null}}}),
         ),
+        case(
+            "cursor-none",
+            Cursor { cursor: None },
+            json!({"cursor":null}),
+        ),
+        case(
+            "cursor-empty",
+            Cursor {
+                cursor: Some(vec![]),
+            },
+            json!({"cursor":{"some":[]}}),
+        ),
+        case(
+            "cursor-bytes",
+            Cursor {
+                cursor: Some(vec![0, 128, 255]),
+            },
+            json!({"cursor":{"some":[0,128,255]}}),
+        ),
         case("scalar", 7_u8, json!(7)),
         case(
             "record",
@@ -169,11 +195,7 @@ pub(super) fn generate(directory: &Path) -> String {
         case("option", Some(7_u8), json!({"some":7})),
         case("newtype", Newtype(7), json!(7)),
         case("transparent", Transparent(7), json!(7)),
-        case(
-            "enum-empty",
-            Tree::Empty,
-            json!({"tag":"Empty","value":null}),
-        ),
+        case("enum-empty", Tree::Empty, json!({"tag":"Nil","value":null})),
         case(
             "recursive-empty",
             Tree::Children(vec![]),
@@ -182,12 +204,12 @@ pub(super) fn generate(directory: &Path) -> String {
         case(
             "recursive-list",
             Tree::Children(vec![Tree::Empty]),
-            json!({"tag":"Children","value":[{"tag":"Empty","value":null}]}),
+            json!({"tag":"Children","value":[{"tag":"Nil","value":null}]}),
         ),
         case(
             "recursive-option",
             Tree::Optional(Some(Box::new(Tree::Empty))),
-            json!({"tag":"Optional","value":{"some":{"tag":"Empty","value":null}}}),
+            json!({"tag":"Optional","value":{"some":{"tag":"Nil","value":null}}}),
         ),
         case(
             "mutual",
