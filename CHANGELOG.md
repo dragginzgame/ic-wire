@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.12]
+## [0.7.12] - 2026-10-25
 
 - Document minimal unsigned big-endian magnitudes over existing `Bytes<N>` for
   lossless evidence beyond u128 (#26). Qualify external Nat conversion and exact
