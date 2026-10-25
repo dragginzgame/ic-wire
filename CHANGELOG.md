@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.10]
+## [0.7.10] - 2026-10-25
 
 - Parse derive field attributes once and reuse the validated projection for
   metadata labels and generic bounds. Serialize borrowed registries directly
