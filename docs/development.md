@@ -100,7 +100,7 @@ certificate verification, installed rollback or browser transport.
 See [consumer fixtures and packet inspection](consumer-fixtures.md).
 
 The same target runs packed codecs with simulated big-endian numeric typed-array
-storage, using DataView as an independent byte oracle. It checks all seven packed
+storage, using DataView as an independent byte oracle. It checks all supported packed
 types and bounded i16, signed/unsigned extrema, empty fields, both directions,
 unaligned frames, owned output and malformed widths. This executes the TypeScript
 swap branches; it does not qualify a native big-endian JavaScript engine.
@@ -146,7 +146,8 @@ sources with `cargo fetch --locked` before explicitly offline gates. Runtime
 normal/build dependencies remain separate from the private qualification package;
 IC Build is restricted to that unpublished package. Alternative-codec dependencies
 are retired.
-No platform SDK or simulator is selected in any workspace dependency role.
+Published crates have no platform SDK or simulator dependencies. The unpublished
+benchmark package uses Candid and PocketIC through Platform for qualification.
 
 ## Snapshot maintenance and release boundary
 
@@ -204,6 +205,9 @@ compilation distinct from runtime performance or consumer deployment acceptance.
 ## Candid comparison benchmarks
 
 Run `make check-benchmarks` for corpus correctness, lint and Rust 1.91 checks.
+This is not a performance regression gate. A full measured comparison is a
+separate run; the [0.7.10 report](full-comparison-0710.md) records the latest
+full matrix and matched previous-release qualification.
 For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
 prepared server and run `make evaluate-codec-matrix`. The 21 cohorts cover the
 standard/Toko corpora, 1/10/100 ordinary derived records, bounded packed-i16 and
@@ -220,7 +224,7 @@ NEW_OUTPUT` for another run. It is an explicit experiment, outside ordinary CI.
 
 Run `make evaluate-codecs` for native timing, allocation counts, peak live heap
 and Wasm footprint under both optimization profiles. It requires the prepared
-`wasm32-unknown-unknown` target, `gzip` and `shasum`; it does not install tools.
+`wasm32-unknown-unknown` target and `shasum`; it does not install tools.
 Set `POCKET_IC_BIN` to an explicitly prepared server to include IC instruction
 measurements. The driver uses IC Testkit for server admission/lifecycle and never
 downloads it implicitly. Output directories must not already exist. Use

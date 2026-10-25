@@ -17,8 +17,14 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
         "Atom".into(),
         json!({"k":"text","check":"decimal","max":32}),
     )]);
-    let source =
-        generate_registry(&types, std::slice::from_ref(&method), "./native-runtime.js").unwrap();
+    let source = generate_registry(
+        &types,
+        std::slice::from_ref(&method),
+        "./native-runtime.js",
+        &Default::default(),
+        |report| eprint!("{report}"),
+    )
+    .unwrap();
     assert!(source.contains("\"check\":\"decimal\""));
     assert!(source.contains("export type Atom = string;"));
     for check in [json!(null), json!(7), json!(true), json!([]), json!({})] {
@@ -30,7 +36,13 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
             let mut invalid = method.clone();
             invalid["request"] = node;
             assert_eq!(
-                generate_registry(&types, &[invalid], "./runtime.js"),
+                generate_registry(
+                    &types,
+                    &[invalid],
+                    "./runtime.js",
+                    &Default::default(),
+                    |report| eprint!("{report}")
+                ),
                 Err(GenerationError::Schema)
             );
         }
@@ -48,12 +60,24 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
         let mut invalid = method.clone();
         invalid["name"] = json!(name);
         assert_eq!(
-            generate_registry(&types, &[invalid], "./runtime.js"),
+            generate_registry(
+                &types,
+                &[invalid],
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
         let invalid = BTreeMap::from([(name.into(), json!({"k":"unit"}))]);
         assert_eq!(
-            generate_registry(&invalid, &[], "./runtime.js"),
+            generate_registry(
+                &invalid,
+                &[],
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
@@ -69,18 +93,36 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
     ] {
         let invalid = BTreeMap::from([("Atom".into(), node)]);
         assert_eq!(
-            generate_registry(&invalid, &[], "./runtime.js"),
+            generate_registry(
+                &invalid,
+                &[],
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
     assert_eq!(
-        generate_registry(&types, &[method.clone(), method.clone()], "./runtime.js"),
+        generate_registry(
+            &types,
+            &[method.clone(), method.clone()],
+            "./runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}")
+        ),
         Err(GenerationError::Schema)
     );
     let mut invalid = method;
     invalid["requestNodes"] = json!(1_u64 << 53);
     assert_eq!(
-        generate_registry(&types, &[invalid], "./runtime.js"),
+        generate_registry(
+            &types,
+            &[invalid],
+            "./runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}")
+        ),
         Err(GenerationError::Complexity)
     );
     let mut deep = json!({"k":"unit"});
@@ -91,7 +133,9 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
         generate_registry(
             &BTreeMap::from([("Deep".into(), deep)]),
             &[],
-            "./runtime.js"
+            "./runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}")
         ),
         Err(GenerationError::Complexity)
     );
@@ -115,7 +159,13 @@ fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
         )]),
     ] {
         assert_eq!(
-            generate_registry(&types, &[], "./runtime.js"),
+            generate_registry(
+                &types,
+                &[],
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
@@ -127,7 +177,9 @@ fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
         generate_registry(
             &BTreeMap::new(),
             std::slice::from_ref(&method),
-            "./runtime.js"
+            "./runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}")
         )
         .is_ok()
     );
@@ -143,7 +195,13 @@ fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
             let mut invalid = method.clone();
             invalid[key] = json!(n);
             assert_eq!(
-                generate_registry(&BTreeMap::new(), &[invalid], "./runtime.js"),
+                generate_registry(
+                    &BTreeMap::new(),
+                    &[invalid],
+                    "./runtime.js",
+                    &Default::default(),
+                    |report| eprint!("{report}")
+                ),
                 Err(GenerationError::Limits)
             );
         }
@@ -171,7 +229,9 @@ fn typescript_registry_requires_an_exact_array_length() {
             generate_registry(
                 &BTreeMap::from([("ArrayValue".into(), node)]),
                 &[],
-                "./runtime.js"
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
             ),
             Err(GenerationError::Schema)
         );
@@ -181,7 +241,10 @@ fn typescript_registry_requires_an_exact_array_length() {
             "ArrayValue".into(),
             json!({"k":"array","max":length,"item":{"k":"unit"}}),
         )]);
-        let result = generate_registry(&types, &[], "./runtime.js");
+        let result =
+            generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
+                eprint!("{report}")
+            });
         if length == 1_u64 << 53 {
             assert_eq!(result, Err(GenerationError::Complexity));
         } else {
@@ -209,7 +272,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
                 generate_registry(
                     &BTreeMap::from([("Bounded".into(), node)]),
                     &[],
-                    "./runtime.js"
+                    "./runtime.js",
+                    &Default::default(),
+                    |report| eprint!("{report}")
                 )
                 .is_err()
             );
@@ -223,7 +288,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
                 generate_registry(
                     &BTreeMap::from([("Bounded".into(), node)]),
                     &[],
-                    "./runtime.js"
+                    "./runtime.js",
+                    &Default::default(),
+                    |report| eprint!("{report}")
                 )
                 .is_ok()
             );
@@ -244,7 +311,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
             generate_registry(
                 &BTreeMap::from([("Packed".into(), node)]),
                 &[],
-                "./runtime.js"
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
             )
             .is_ok(),
             valid
@@ -267,7 +336,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
             generate_registry(
                 &BTreeMap::from([("Packed".into(), json!({"k":"packed","word":word}))]),
                 &[],
-                "./runtime.js"
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
             )
             .is_ok(),
             valid
@@ -279,7 +350,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
             generate_registry(
                 &BTreeMap::from([("Bounded".into(), node)]),
                 &[],
-                "./runtime.js"
+                "./runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}")
             ),
             Err(GenerationError::Schema)
         );
@@ -301,7 +374,9 @@ fn typescript_registry_validates_float_bounds() {
                     generate_registry(
                         &BTreeMap::from([("Scalar".into(), node)]),
                         &[],
-                        "./runtime.js"
+                        "./runtime.js",
+                        &Default::default(),
+                        |report| eprint!("{report}")
                     ),
                     Err(GenerationError::Schema)
                 );
@@ -318,7 +393,9 @@ fn typescript_registry_validates_float_bounds() {
                 generate_registry(
                     &BTreeMap::from([("Scalar".into(), node)]),
                     &[],
-                    "./runtime.js"
+                    "./runtime.js",
+                    &Default::default(),
+                    |report| eprint!("{report}")
                 )
                 .is_ok(),
                 valid
@@ -356,7 +433,9 @@ fn typescript_registry_validates_integer_bounds_without_precision_loss() {
                         generate_registry(
                             &BTreeMap::from([("Scalar".into(), node)]),
                             &[],
-                            "./runtime.js"
+                            "./runtime.js",
+                            &Default::default(),
+                            |report| eprint!("{report}")
                         ),
                         Err(error)
                     );
@@ -373,7 +452,9 @@ fn typescript_registry_validates_integer_bounds_without_precision_loss() {
                     generate_registry(
                         &BTreeMap::from([("Scalar".into(), node)]),
                         &[],
-                        "./runtime.js"
+                        "./runtime.js",
+                        &Default::default(),
+                        |report| eprint!("{report}")
                     )
                     .is_ok(),
                     valid

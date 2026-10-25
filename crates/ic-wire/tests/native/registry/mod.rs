@@ -48,7 +48,10 @@ fn finite_recursive_registries_preserve_inline_behavior_and_generic_shapes() {
     registry.register::<Pair<u8>>("SmallPage").unwrap();
     registry.register::<Tree<u64>>("WideTree").unwrap();
     let types = registry.finish().unwrap();
-    typescript::generate_registry(&types, &[], "./runtime.js").unwrap();
+    typescript::generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
+        eprint!("{report}")
+    })
+    .unwrap();
     let fields = types["Roots"]["fields"].as_array().unwrap();
     let a = fields[0]["value"]["name"].as_str().unwrap();
     let b = fields[1]["value"]["name"].as_str().unwrap();
@@ -253,7 +256,14 @@ fn optional_byte_adapters_follow_types_and_preserve_option_tags() {
     }
     let mut registry = SchemaRegistry::new();
     registry.register::<ByteAdapter<Cursor>>("Request").unwrap();
-    typescript::generate_registry(&registry.finish().unwrap(), &[], "./runtime.js").unwrap();
+    typescript::generate_registry(
+        &registry.finish().unwrap(),
+        &[],
+        "./runtime.js",
+        &Default::default(),
+        |report| eprint!("{report}"),
+    )
+    .unwrap();
 }
 
 #[derive(Serialize, Wire)]
@@ -275,5 +285,8 @@ fn renamed_recursive_variants_keep_declaration_ordinals() {
     let types = registry.finish().unwrap();
     assert_eq!(types["Value"]["variants"][0]["name"], "Int");
     assert_eq!(types["Value"]["variants"][0]["id"], 0);
-    typescript::generate_registry(&types, &[], "./runtime.js").unwrap();
+    typescript::generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
+        eprint!("{report}")
+    })
+    .unwrap();
 }

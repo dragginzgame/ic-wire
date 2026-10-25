@@ -14,8 +14,14 @@ pub(super) fn generate(directory: &Path) -> String {
     let method = serde_json::json!({"name":"codec","mode":"query","id":id.to_string(),"request":schema,"response":schema,"requestBytes":limits.bytes,"responseBytes":limits.bytes,"requestNodes":limits.nodes,"responseNodes":limits.nodes,"requestDepth":limits.depth,"responseDepth":limits.depth});
     fs::write(
         directory.join("large.ts"),
-        ic_wire::typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
-            .unwrap(),
+        ic_wire::typescript::generate_registry(
+            &Default::default(),
+            &[method],
+            "./wire-runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
+        .unwrap(),
     )
     .unwrap();
     fs::write(

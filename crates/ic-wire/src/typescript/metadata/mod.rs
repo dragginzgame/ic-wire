@@ -312,10 +312,23 @@ pub(super) fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), Ge
 /// range; use a named consumer check for wider bigint constraints. Numeric bounds
 /// cannot be inverted. A `check` annotation must be a string naming a consumer
 /// validator. Other custom scalar constraints remain consumer-owned.
+///
+/// Bulk advice is always computed and delivered to `diagnostics` once on success,
+/// before source is returned. Host tools must display it (for example,
+/// `|report| eprint!("{report}")`); build.rs can emit Cargo warning directives.
+/// Exact-path acknowledgements with nonempty reasons silence intentional lists.
+/// Paths start with /methods/NAME/request or /methods/NAME/response; without
+/// methods, all exported types are reviewed under /types/NAME. With methods,
+/// only their reachable shapes are advised. Stale acknowledgements are warnings.
+/// Traversal uses the rooted lint's depth/work bounds and can return Complexity.
+/// This host API replaces the former three-argument, silent generator; generated
+/// TypeScript, wire bytes, identities and runtime admission are unchanged.
 pub fn generate_registry(
     types: &BTreeMap<String, Value>,
     methods: &[Value],
     runtime_module: &str,
+    acknowledgements: &BTreeMap<String, String>,
+    diagnostics: impl FnOnce(super::BulkLintReport),
 ) -> Result<String, GenerationError> {
     let mut remaining = 65536;
     let mut source = format!(
@@ -357,5 +370,7 @@ pub fn generate_registry(
             name_json = json!(name), mode = method["mode"],
         ));
     }
+    let report = super::bulk_lint::lint_generated(types, methods, acknowledgements)?;
+    diagnostics(report);
     Ok(source)
 }

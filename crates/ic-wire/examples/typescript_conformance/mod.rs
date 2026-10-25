@@ -20,8 +20,14 @@ const LIMITS: Limits = Limits {
 fn generate<T: ic_wire::typescript::Wire>() -> String {
     let schema = ic_wire::typescript::native_schema::<T>().unwrap();
     let method = serde_json::json!({"name":"codec","mode":"query","id":ID.to_string(),"request":schema,"response":schema,"requestBytes":LIMITS.bytes,"responseBytes":LIMITS.bytes,"requestNodes":LIMITS.nodes,"responseNodes":LIMITS.nodes,"requestDepth":LIMITS.depth,"responseDepth":LIMITS.depth});
-    ic_wire::typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
-        .unwrap()
+    ic_wire::typescript::generate_registry(
+        &Default::default(),
+        &[method],
+        "./wire-runtime.js",
+        &Default::default(),
+        |report| eprint!("{report}"),
+    )
+    .unwrap()
 }
 #[derive(serde::Serialize, serde::Deserialize, Wire)]
 struct Record {
@@ -243,6 +249,8 @@ fn main() {
                 &Default::default(),
                 &[shadow],
                 "./wire-runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}"),
             )
             .unwrap(),
         )
@@ -254,8 +262,14 @@ fn main() {
     proto["response"] = proto["request"].clone();
     fs::write(
         directory.join("native.ts"),
-        ic_wire::typescript::generate_registry(&types, &[method, proto], "./wire-runtime.js")
-            .unwrap(),
+        ic_wire::typescript::generate_registry(
+            &types,
+            &[method, proto],
+            "./wire-runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
+        .unwrap(),
     )
     .unwrap();
     let mut f = Fixture {

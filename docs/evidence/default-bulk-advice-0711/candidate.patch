@@ -1,0 +1,789 @@
+diff --git a/crates/ic-wire/README.md b/crates/ic-wire/README.md
+index 1dfd33a..91cd50e 100644
+--- a/crates/ic-wire/README.md
++++ b/crates/ic-wire/README.md
+@@ -323,7 +323,7 @@ the supported 64/128-bit integer payload range.
+ Ordinary native Serde metadata can be derived as described below. Domain validation
+ and endpoint identities remain consumer-owned.
+ Host generators can pass that normalized registry and method list to
+-`typescript::generate_registry(&types, &methods, "./native-runtime.js")`. It
++`typescript::generate_registry(&types, &methods, "./native-runtime.js", &acknowledgements, diagnostics)`. It
+ emits named TypeScript types and typed query/update codec objects. The selected module must export
+ `createCodec`; a consumer adapter can supply its scalar validators to the shared
+ runtime. Custom serialization projections and domain-specific constraints stay
+@@ -429,13 +429,22 @@ method.as_object_mut().unwrap().extend(serde_json::json!({
+     "name":"queryValue", "mode":"query", "id":"17",
+     "request":root, "response":root
+ }).as_object().unwrap().clone());
+-let module = generate_registry(&types, &[method], "./wire-runtime.js")?;
++let acknowledgements = std::collections::BTreeMap::new();
++let module = generate_registry(&types, &[method], "./wire-runtime.js",
++    &acknowledgements, |report| eprint!("{report}"))?;
+ # let _ = module;
+ # Ok(())
+ # }
+ ```
+ 
+ Register explicit roots once and reuse their returned references for methods.
++Generation always computes bulk-field advice and calls the required diagnostic
++handler before returning source. CLI tools can print the report as above. In
++`build.rs`, emit each warning with `println!("cargo::warning={warning}")` and
++report stale acknowledgements too. CI can reject a non-clean report with
++`assert!(report.is_clean())`. Exact diagnostic paths map to nonempty suppression
++reasons; no optional warning feature or separate lint call is needed. See the
++[bulk advice guide](../../docs/packed-fields.md#host-side-bulk-advice-and-ci).
+ Nested derived declarations are collected automatically, including mutual recursion
+ and distinct generic instantiations. Registering an already collected type under
+ a new root name produces an alias; duplicate names reject without overwriting.
+diff --git a/crates/ic-wire/examples/bulk_lint/mod.rs b/crates/ic-wire/examples/bulk_lint/mod.rs
+index b838e80..419d25d 100644
+--- a/crates/ic-wire/examples/bulk_lint/mod.rs
++++ b/crates/ic-wire/examples/bulk_lint/mod.rs
+@@ -29,15 +29,7 @@ fn run() -> Result<ExitCode, String> {
+     };
+     let report = lint_bulk_fields(&types, &acknowledged)
+         .map_err(|e| format!("invalid bulk-lint input: {e:?}"))?;
+-    for warning in &report.warnings {
+-        eprintln!(
+-            "warning: {}: consider {}; preserve constraints and measure small-value size tradeoffs",
+-            warning.path, warning.representation
+-        );
+-    }
+-    for path in &report.stale_acknowledgements {
+-        eprintln!("warning: {path}: stale acknowledgement");
+-    }
++    eprint!("{report}");
+     Ok(if args.get_flag("deny-warnings") && !report.is_clean() {
+         ExitCode::FAILURE
+     } else {
+diff --git a/crates/ic-wire/examples/typescript_conformance/admission/mod.rs b/crates/ic-wire/examples/typescript_conformance/admission/mod.rs
+index 91b995a..22338f3 100644
+--- a/crates/ic-wire/examples/typescript_conformance/admission/mod.rs
++++ b/crates/ic-wire/examples/typescript_conformance/admission/mod.rs
+@@ -243,7 +243,14 @@ pub(super) fn generate(directory: &Path) -> String {
+         let types = serde_json::from_value(case["types"].clone()).unwrap();
+         fs::write(
+             directory.join(format!("admission{index}.ts")),
+-            typescript::generate_registry(&types, &[method], "./wire-runtime.js").unwrap(),
++            typescript::generate_registry(
++                &types,
++                &[method],
++                "./wire-runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}"),
++            )
++            .unwrap(),
+         )
+         .unwrap();
+     }
+diff --git a/crates/ic-wire/examples/typescript_conformance/large_bytes/mod.rs b/crates/ic-wire/examples/typescript_conformance/large_bytes/mod.rs
+index 60c83e0..7cfe828 100644
+--- a/crates/ic-wire/examples/typescript_conformance/large_bytes/mod.rs
++++ b/crates/ic-wire/examples/typescript_conformance/large_bytes/mod.rs
+@@ -14,8 +14,14 @@ pub(super) fn generate(directory: &Path) -> String {
+     let method = serde_json::json!({"name":"codec","mode":"query","id":id.to_string(),"request":schema,"response":schema,"requestBytes":limits.bytes,"responseBytes":limits.bytes,"requestNodes":limits.nodes,"responseNodes":limits.nodes,"requestDepth":limits.depth,"responseDepth":limits.depth});
+     fs::write(
+         directory.join("large.ts"),
+-        ic_wire::typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
+-            .unwrap(),
++        ic_wire::typescript::generate_registry(
++            &Default::default(),
++            &[method],
++            "./wire-runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}"),
++        )
++        .unwrap(),
+     )
+     .unwrap();
+     fs::write(
+diff --git a/crates/ic-wire/examples/typescript_conformance/mod.rs b/crates/ic-wire/examples/typescript_conformance/mod.rs
+index fa345a7..8408427 100644
+--- a/crates/ic-wire/examples/typescript_conformance/mod.rs
++++ b/crates/ic-wire/examples/typescript_conformance/mod.rs
+@@ -20,8 +20,14 @@ const LIMITS: Limits = Limits {
+ fn generate<T: ic_wire::typescript::Wire>() -> String {
+     let schema = ic_wire::typescript::native_schema::<T>().unwrap();
+     let method = serde_json::json!({"name":"codec","mode":"query","id":ID.to_string(),"request":schema,"response":schema,"requestBytes":LIMITS.bytes,"responseBytes":LIMITS.bytes,"requestNodes":LIMITS.nodes,"responseNodes":LIMITS.nodes,"requestDepth":LIMITS.depth,"responseDepth":LIMITS.depth});
+-    ic_wire::typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
+-        .unwrap()
++    ic_wire::typescript::generate_registry(
++        &Default::default(),
++        &[method],
++        "./wire-runtime.js",
++        &Default::default(),
++        |report| eprint!("{report}"),
++    )
++    .unwrap()
+ }
+ #[derive(serde::Serialize, serde::Deserialize, Wire)]
+ struct Record {
+@@ -243,6 +249,8 @@ fn main() {
+                 &Default::default(),
+                 &[shadow],
+                 "./wire-runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}"),
+             )
+             .unwrap(),
+         )
+@@ -254,8 +262,14 @@ fn main() {
+     proto["response"] = proto["request"].clone();
+     fs::write(
+         directory.join("native.ts"),
+-        ic_wire::typescript::generate_registry(&types, &[method, proto], "./wire-runtime.js")
+-            .unwrap(),
++        ic_wire::typescript::generate_registry(
++            &types,
++            &[method, proto],
++            "./wire-runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}"),
++        )
++        .unwrap(),
+     )
+     .unwrap();
+     let mut f = Fixture {
+diff --git a/crates/ic-wire/examples/typescript_conformance/native_schema/mod.rs b/crates/ic-wire/examples/typescript_conformance/native_schema/mod.rs
+index 193242f..3ae2898 100644
+--- a/crates/ic-wire/examples/typescript_conformance/native_schema/mod.rs
++++ b/crates/ic-wire/examples/typescript_conformance/native_schema/mod.rs
+@@ -135,8 +135,14 @@ fn add<T: typescript::Wire + serde::de::DeserializeOwned + PartialEq + std::fmt:
+         "requestBytes":4096,"responseBytes":4096,"requestNodes":512,"responseNodes":512,"requestDepth":32,"responseDepth":32});
+     fs::write(
+         directory.join(format!("projection{index}.ts")),
+-        typescript::generate_registry(&BTreeMap::new(), &[method], "./projection-runtime.js")
+-            .unwrap(),
++        typescript::generate_registry(
++            &BTreeMap::new(),
++            &[method],
++            "./projection-runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}"),
++        )
++        .unwrap(),
+     )
+     .unwrap();
+     let request = native::encode_request(17, &value, LIMITS).unwrap();
+@@ -452,7 +458,14 @@ fn benchmark(directory: &Path) {
+                     )
+                 })
+                 .collect();
+-            typescript::generate_registry(&types, &[], "./wire-runtime.js").unwrap()
++            typescript::generate_registry(
++                &types,
++                &[],
++                "./wire-runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}"),
++            )
++            .unwrap()
+         };
+         assert_eq!(render(false), render(true));
+         black_box(render(false));
+diff --git a/crates/ic-wire/src/typescript/bulk_lint/mod.rs b/crates/ic-wire/src/typescript/bulk_lint/mod.rs
+index b813638..41f0c80 100644
+--- a/crates/ic-wire/src/typescript/bulk_lint/mod.rs
++++ b/crates/ic-wire/src/typescript/bulk_lint/mod.rs
+@@ -1,4 +1,4 @@
+-//! Optional host-side advice; never changes a schema or emitted bytes.
++//! Host-side advice; never changes a schema or emitted bytes.
+ use super::{GenerationError, metadata};
+ use alloc::{
+     collections::{BTreeMap, BTreeSet},
+@@ -17,6 +17,16 @@ pub struct BulkWarning {
+     pub representation: &'static str,
+ }
+ 
++impl core::fmt::Display for BulkWarning {
++    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
++        write!(
++            f,
++            "{}: consider {}; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs",
++            self.path, self.representation
++        )
++    }
++}
++
+ /// Advisory results suitable for printing locally or enforcing in consumer CI.
+ #[derive(Clone, Debug, Eq, PartialEq)]
+ pub struct BulkLintReport {
+@@ -33,6 +43,18 @@ impl BulkLintReport {
+     }
+ }
+ 
++impl core::fmt::Display for BulkLintReport {
++    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
++        for warning in &self.warnings {
++            writeln!(f, "warning: {warning}")?;
++        }
++        for path in &self.stale_acknowledgements {
++            writeln!(f, "warning: {path}: stale acknowledgement")?;
++        }
++        Ok(())
++    }
++}
++
+ /// Find ordinary primitive lists in resolved Wire metadata, on the host only.
+ ///
+ /// Pass named schema roots (including request/response schemas not otherwise in
+@@ -92,6 +114,58 @@ fn lint(
+             metadata::ty(node, types, 0, &mut remaining)?;
+         }
+     }
++    lint_validated(
++        roots
++            .iter()
++            .map(|(name, node)| (format!("/{}", escape(name)), node)),
++        types,
++        acknowledgements,
++        rooted,
++    )
++}
++
++// Generation has already validated all metadata. Reuse the bounded traversal
++// without copying schemas or repeating the generator's validation pass.
++pub(super) fn lint_generated(
++    types: &BTreeMap<String, Value>,
++    methods: &[Value],
++    acknowledgements: &BTreeMap<String, String>,
++) -> Result<BulkLintReport, GenerationError> {
++    if methods.is_empty() {
++        lint_validated(
++            types
++                .iter()
++                .map(|(name, node)| (format!("/types/{}", escape(name)), node)),
++            types,
++            acknowledgements,
++            true,
++        )
++    } else {
++        lint_validated(
++            methods.iter().flat_map(|method| {
++                ["request", "response"].map(|direction| {
++                    (
++                        format!(
++                            "/methods/{}/{direction}",
++                            escape(method["name"].as_str().unwrap())
++                        ),
++                        &method[direction],
++                    )
++                })
++            }),
++            types,
++            acknowledgements,
++            true,
++        )
++    }
++}
++
++fn lint_validated<'a>(
++    roots: impl Iterator<Item = (String, &'a Value)>,
++    types: &BTreeMap<String, Value>,
++    acknowledgements: &BTreeMap<String, String>,
++    rooted: bool,
++) -> Result<BulkLintReport, GenerationError> {
+     if acknowledgements
+         .values()
+         .any(|reason| reason.trim().is_empty())
+@@ -104,15 +178,8 @@ fn lint(
+         active: BTreeSet::new(),
+         remaining: 65536,
+     };
+-    for (name, node) in roots {
+-        walk(
+-            node,
+-            &format!("/{}", escape(name)),
+-            types,
+-            &mut warnings,
+-            &mut traversal,
+-            0,
+-        )?;
++    for (path, node) in roots {
++        walk(node, &path, types, &mut warnings, &mut traversal, 0)?;
+     }
+     let paths: BTreeSet<_> = warnings.iter().map(|warning| &warning.path).collect();
+     let stale_acknowledgements = acknowledgements
+diff --git a/crates/ic-wire/src/typescript/metadata/mod.rs b/crates/ic-wire/src/typescript/metadata/mod.rs
+index 26ab4a5..23789fc 100644
+--- a/crates/ic-wire/src/typescript/metadata/mod.rs
++++ b/crates/ic-wire/src/typescript/metadata/mod.rs
+@@ -312,10 +312,23 @@ pub(super) fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), Ge
+ /// range; use a named consumer check for wider bigint constraints. Numeric bounds
+ /// cannot be inverted. A `check` annotation must be a string naming a consumer
+ /// validator. Other custom scalar constraints remain consumer-owned.
++///
++/// Bulk advice is always computed and delivered to `diagnostics` once on success,
++/// before source is returned. Host tools must display it (for example,
++/// `|report| eprint!("{report}")`); build.rs can emit Cargo warning directives.
++/// Exact-path acknowledgements with nonempty reasons silence intentional lists.
++/// Paths start with /methods/NAME/request or /methods/NAME/response; without
++/// methods, all exported types are reviewed under /types/NAME. With methods,
++/// only their reachable shapes are advised. Stale acknowledgements are warnings.
++/// Traversal uses the rooted lint's depth/work bounds and can return Complexity.
++/// This host API replaces the former three-argument, silent generator; generated
++/// TypeScript, wire bytes, identities and runtime admission are unchanged.
+ pub fn generate_registry(
+     types: &BTreeMap<String, Value>,
+     methods: &[Value],
+     runtime_module: &str,
++    acknowledgements: &BTreeMap<String, String>,
++    diagnostics: impl FnOnce(super::BulkLintReport),
+ ) -> Result<String, GenerationError> {
+     let mut remaining = 65536;
+     let mut source = format!(
+@@ -357,5 +370,7 @@ pub fn generate_registry(
+             name_json = json!(name), mode = method["mode"],
+         ));
+     }
++    let report = super::bulk_lint::lint_generated(types, methods, acknowledgements)?;
++    diagnostics(report);
+     Ok(source)
+ }
+diff --git a/crates/ic-wire/tests/native/bulk_lint/mod.rs b/crates/ic-wire/tests/native/bulk_lint/mod.rs
+index 1a1f67a..74c251c 100644
+--- a/crates/ic-wire/tests/native/bulk_lint/mod.rs
++++ b/crates/ic-wire/tests/native/bulk_lint/mod.rs
+@@ -257,4 +257,123 @@ fn rooted_aliases_recursion_inline_errors_and_work_limits() {
+         lint_bulk_roots(&roots, &dag, &BTreeMap::new()),
+         Err(GenerationError::Complexity)
+     );
++    assert_eq!(
++        ic_wire::typescript::generate_registry(
++            &dag,
++            &[],
++            "./runtime.js",
++            &BTreeMap::new(),
++            |_| panic!("excessive expansion must not emit a partial report"),
++        ),
++        Err(GenerationError::Complexity)
++    );
++}
++
++#[test]
++fn generation_always_reports_use_sites_and_preserves_source_when_acknowledged() {
++    use ic_wire::typescript::generate_registry;
++    let types = BTreeMap::from([
++        (
++            "Words".into(),
++            json!({"k":"list","item":{"k":"u","bits":8}}),
++        ),
++        (
++            "Message".into(),
++            json!({"k":"record","fields":[{"name":"data","value":{"k":"ref","name":"Words"}}]}),
++        ),
++    ]);
++    let method = json!({"name":"upload","mode":"update","id":"1",
++        "request":{"k":"ref","name":"Message"},"response":{"k":"ref","name":"Message"},
++        "requestBytes":128,"responseBytes":128,"requestNodes":128,"responseNodes":128,
++        "requestDepth":8,"responseDepth":8});
++    let methods = [method];
++    let mut seen = None;
++    let source = generate_registry(
++        &types,
++        &methods,
++        "./runtime.js",
++        &BTreeMap::new(),
++        |report| seen = Some(report),
++    )
++    .unwrap();
++    let report = seen.unwrap();
++    assert_eq!(
++        report
++            .warnings
++            .iter()
++            .map(|w| w.path.as_str())
++            .collect::<Vec<_>>(),
++        [
++            "/methods/upload/request/fields/data/list/u8",
++            "/methods/upload/response/fields/data/list/u8",
++        ]
++    );
++    assert!(report.to_string().contains("truncated-input rejection"));
++    let mut acknowledged =
++        BTreeMap::from([(report.warnings[0].path.clone(), "At most four bytes".into())]);
++    assert_eq!(
++        source,
++        generate_registry(&types, &methods, "./runtime.js", &acknowledged, |report| {
++            assert_eq!(report.warnings.len(), 1);
++            assert_eq!(
++                report.warnings[0].path,
++                "/methods/upload/response/fields/data/list/u8"
++            );
++        })
++        .unwrap()
++    );
++    acknowledged.insert(report.warnings[1].path.clone(), "Small response".into());
++    assert_eq!(
++        source,
++        generate_registry(
++            &types,
++            &methods,
++            "./runtime.js",
++            &acknowledged,
++            |report| assert!(report.is_clean())
++        )
++        .unwrap()
++    );
++    acknowledged.insert("/old".into(), "Removed field".into());
++    generate_registry(&types, &methods, "./runtime.js", &acknowledged, |report| {
++        assert!(!report.is_clean());
++        assert_eq!(report.stale_acknowledgements, ["/old"]);
++        assert!(report.to_string().contains("stale acknowledgement"));
++    })
++    .unwrap();
++}
++
++#[test]
++fn generation_reports_exported_types_and_never_emits_partial_diagnostics() {
++    use ic_wire::typescript::generate_registry;
++    let types = BTreeMap::from([("Samples".into(), native_schema::<Vec<i16>>().unwrap())]);
++    generate_registry(&types, &[], "./runtime.js", &BTreeMap::new(), |report| {
++        assert_eq!(report.warnings[0].path, "/types/Samples/list/i16");
++    })
++    .unwrap();
++    let empty_reason = BTreeMap::from([("/types/Samples/list/i16".into(), " ".into())]);
++    assert_eq!(
++        generate_registry(&types, &[], "./runtime.js", &empty_reason, |_| panic!(
++            "invalid input must not emit"
++        )),
++        Err(GenerationError::Schema)
++    );
++    assert_eq!(
++        generate_registry(
++            &types,
++            &[json!({})],
++            "./runtime.js",
++            &BTreeMap::new(),
++            |_| panic!("invalid method must not emit")
++        ),
++        Err(GenerationError::Schema)
++    );
++    generate_registry(
++        &BTreeMap::new(),
++        &[],
++        "./runtime.js",
++        &BTreeMap::new(),
++        |report| assert!(report.is_clean()),
++    )
++    .unwrap();
+ }
+diff --git a/crates/ic-wire/tests/native/registry/mod.rs b/crates/ic-wire/tests/native/registry/mod.rs
+index cad60dd..0938659 100644
+--- a/crates/ic-wire/tests/native/registry/mod.rs
++++ b/crates/ic-wire/tests/native/registry/mod.rs
+@@ -48,7 +48,10 @@ fn finite_recursive_registries_preserve_inline_behavior_and_generic_shapes() {
+     registry.register::<Pair<u8>>("SmallPage").unwrap();
+     registry.register::<Tree<u64>>("WideTree").unwrap();
+     let types = registry.finish().unwrap();
+-    typescript::generate_registry(&types, &[], "./runtime.js").unwrap();
++    typescript::generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
++        eprint!("{report}")
++    })
++    .unwrap();
+     let fields = types["Roots"]["fields"].as_array().unwrap();
+     let a = fields[0]["value"]["name"].as_str().unwrap();
+     let b = fields[1]["value"]["name"].as_str().unwrap();
+@@ -253,7 +256,14 @@ fn optional_byte_adapters_follow_types_and_preserve_option_tags() {
+     }
+     let mut registry = SchemaRegistry::new();
+     registry.register::<ByteAdapter<Cursor>>("Request").unwrap();
+-    typescript::generate_registry(&registry.finish().unwrap(), &[], "./runtime.js").unwrap();
++    typescript::generate_registry(
++        &registry.finish().unwrap(),
++        &[],
++        "./runtime.js",
++        &Default::default(),
++        |report| eprint!("{report}"),
++    )
++    .unwrap();
+ }
+ 
+ #[derive(Serialize, Wire)]
+@@ -275,5 +285,8 @@ fn renamed_recursive_variants_keep_declaration_ordinals() {
+     let types = registry.finish().unwrap();
+     assert_eq!(types["Value"]["variants"][0]["name"], "Int");
+     assert_eq!(types["Value"]["variants"][0]["id"], 0);
+-    typescript::generate_registry(&types, &[], "./runtime.js").unwrap();
++    typescript::generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
++        eprint!("{report}")
++    })
++    .unwrap();
+ }
+diff --git a/crates/ic-wire/tests/runtime/mod.rs b/crates/ic-wire/tests/runtime/mod.rs
+index ae61802..f304641 100644
+--- a/crates/ic-wire/tests/runtime/mod.rs
++++ b/crates/ic-wire/tests/runtime/mod.rs
+@@ -17,8 +17,14 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
+         "Atom".into(),
+         json!({"k":"text","check":"decimal","max":32}),
+     )]);
+-    let source =
+-        generate_registry(&types, std::slice::from_ref(&method), "./native-runtime.js").unwrap();
++    let source = generate_registry(
++        &types,
++        std::slice::from_ref(&method),
++        "./native-runtime.js",
++        &Default::default(),
++        |report| eprint!("{report}"),
++    )
++    .unwrap();
+     assert!(source.contains("\"check\":\"decimal\""));
+     assert!(source.contains("export type Atom = string;"));
+     for check in [json!(null), json!(7), json!(true), json!([]), json!({})] {
+@@ -30,7 +36,13 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
+             let mut invalid = method.clone();
+             invalid["request"] = node;
+             assert_eq!(
+-                generate_registry(&types, &[invalid], "./runtime.js"),
++                generate_registry(
++                    &types,
++                    &[invalid],
++                    "./runtime.js",
++                    &Default::default(),
++                    |report| eprint!("{report}")
++                ),
+                 Err(GenerationError::Schema)
+             );
+         }
+@@ -48,12 +60,24 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
+         let mut invalid = method.clone();
+         invalid["name"] = json!(name);
+         assert_eq!(
+-            generate_registry(&types, &[invalid], "./runtime.js"),
++            generate_registry(
++                &types,
++                &[invalid],
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
++            ),
+             Err(GenerationError::Schema)
+         );
+         let invalid = BTreeMap::from([(name.into(), json!({"k":"unit"}))]);
+         assert_eq!(
+-            generate_registry(&invalid, &[], "./runtime.js"),
++            generate_registry(
++                &invalid,
++                &[],
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
++            ),
+             Err(GenerationError::Schema)
+         );
+     }
+@@ -69,18 +93,36 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
+     ] {
+         let invalid = BTreeMap::from([("Atom".into(), node)]);
+         assert_eq!(
+-            generate_registry(&invalid, &[], "./runtime.js"),
++            generate_registry(
++                &invalid,
++                &[],
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
++            ),
+             Err(GenerationError::Schema)
+         );
+     }
+     assert_eq!(
+-        generate_registry(&types, &[method.clone(), method.clone()], "./runtime.js"),
++        generate_registry(
++            &types,
++            &[method.clone(), method.clone()],
++            "./runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}")
++        ),
+         Err(GenerationError::Schema)
+     );
+     let mut invalid = method;
+     invalid["requestNodes"] = json!(1_u64 << 53);
+     assert_eq!(
+-        generate_registry(&types, &[invalid], "./runtime.js"),
++        generate_registry(
++            &types,
++            &[invalid],
++            "./runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}")
++        ),
+         Err(GenerationError::Complexity)
+     );
+     let mut deep = json!({"k":"unit"});
+@@ -91,7 +133,9 @@ fn typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata() {
+         generate_registry(
+             &BTreeMap::from([("Deep".into(), deep)]),
+             &[],
+-            "./runtime.js"
++            "./runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}")
+         ),
+         Err(GenerationError::Complexity)
+     );
+@@ -115,7 +159,13 @@ fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
+         )]),
+     ] {
+         assert_eq!(
+-            generate_registry(&types, &[], "./runtime.js"),
++            generate_registry(
++                &types,
++                &[],
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
++            ),
+             Err(GenerationError::Schema)
+         );
+     }
+@@ -127,7 +177,9 @@ fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
+         generate_registry(
+             &BTreeMap::new(),
+             std::slice::from_ref(&method),
+-            "./runtime.js"
++            "./runtime.js",
++            &Default::default(),
++            |report| eprint!("{report}")
+         )
+         .is_ok()
+     );
+@@ -143,7 +195,13 @@ fn typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets() {
+             let mut invalid = method.clone();
+             invalid[key] = json!(n);
+             assert_eq!(
+-                generate_registry(&BTreeMap::new(), &[invalid], "./runtime.js"),
++                generate_registry(
++                    &BTreeMap::new(),
++                    &[invalid],
++                    "./runtime.js",
++                    &Default::default(),
++                    |report| eprint!("{report}")
++                ),
+                 Err(GenerationError::Limits)
+             );
+         }
+@@ -171,7 +229,9 @@ fn typescript_registry_requires_an_exact_array_length() {
+             generate_registry(
+                 &BTreeMap::from([("ArrayValue".into(), node)]),
+                 &[],
+-                "./runtime.js"
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
+             ),
+             Err(GenerationError::Schema)
+         );
+@@ -181,7 +241,10 @@ fn typescript_registry_requires_an_exact_array_length() {
+             "ArrayValue".into(),
+             json!({"k":"array","max":length,"item":{"k":"unit"}}),
+         )]);
+-        let result = generate_registry(&types, &[], "./runtime.js");
++        let result =
++            generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
++                eprint!("{report}")
++            });
+         if length == 1_u64 << 53 {
+             assert_eq!(result, Err(GenerationError::Complexity));
+         } else {
+@@ -209,7 +272,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
+                 generate_registry(
+                     &BTreeMap::from([("Bounded".into(), node)]),
+                     &[],
+-                    "./runtime.js"
++                    "./runtime.js",
++                    &Default::default(),
++                    |report| eprint!("{report}")
+                 )
+                 .is_err()
+             );
+@@ -223,7 +288,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
+                 generate_registry(
+                     &BTreeMap::from([("Bounded".into(), node)]),
+                     &[],
+-                    "./runtime.js"
++                    "./runtime.js",
++                    &Default::default(),
++                    |report| eprint!("{report}")
+                 )
+                 .is_ok()
+             );
+@@ -244,7 +311,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
+             generate_registry(
+                 &BTreeMap::from([("Packed".into(), node)]),
+                 &[],
+-                "./runtime.js"
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
+             )
+             .is_ok(),
+             valid
+@@ -267,7 +336,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
+             generate_registry(
+                 &BTreeMap::from([("Packed".into(), json!({"k":"packed","word":word}))]),
+                 &[],
+-                "./runtime.js"
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
+             )
+             .is_ok(),
+             valid
+@@ -279,7 +350,9 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
+             generate_registry(
+                 &BTreeMap::from([("Bounded".into(), node)]),
+                 &[],
+-                "./runtime.js"
++                "./runtime.js",
++                &Default::default(),
++                |report| eprint!("{report}")
+             ),
+             Err(GenerationError::Schema)
+         );
+@@ -301,7 +374,9 @@ fn typescript_registry_validates_float_bounds() {
+                     generate_registry(
+                         &BTreeMap::from([("Scalar".into(), node)]),
+                         &[],
+-                        "./runtime.js"
++                        "./runtime.js",
++                        &Default::default(),
++                        |report| eprint!("{report}")
+                     ),
+                     Err(GenerationError::Schema)
+                 );
+@@ -318,7 +393,9 @@ fn typescript_registry_validates_float_bounds() {
+                 generate_registry(
+                     &BTreeMap::from([("Scalar".into(), node)]),
+                     &[],
+-                    "./runtime.js"
++                    "./runtime.js",
++                    &Default::default(),
++                    |report| eprint!("{report}")
+                 )
+                 .is_ok(),
+                 valid
+@@ -356,7 +433,9 @@ fn typescript_registry_validates_integer_bounds_without_precision_loss() {
+                         generate_registry(
+                             &BTreeMap::from([("Scalar".into(), node)]),
+                             &[],
+-                            "./runtime.js"
++                            "./runtime.js",
++                            &Default::default(),
++                            |report| eprint!("{report}")
+                         ),
+                         Err(error)
+                     );
+@@ -373,7 +452,9 @@ fn typescript_registry_validates_integer_bounds_without_precision_loss() {
+                     generate_registry(
+                         &BTreeMap::from([("Scalar".into(), node)]),
+                         &[],
+-                        "./runtime.js"
++                        "./runtime.js",
++                        &Default::default(),
++                        |report| eprint!("{report}")
+                     )
+                     .is_ok(),
+                     valid

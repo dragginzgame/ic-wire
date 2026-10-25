@@ -149,6 +149,52 @@ reserialization. Consumers own normalization and retain exact retry frames.
 
 ## Host-side bulk advice and CI
 
+`generate_registry` now always runs bulk advice. Its host API takes an
+acknowledgement map and a required diagnostic handler; the former silent
+three-argument call is removed. This is a host API cut only: generated TypeScript,
+wire bytes, identities and runtime admission do not change.
+
+```rust,ignore
+let source = generate_registry(&types, &methods, "./wire-runtime.js",
+    &acknowledgements, |report| eprint!("{report}"))?;
+```
+
+The handler runs once on successful validation, even for a clean report. It must
+display warnings in the consumer's normal build output. A `build.rs` integration
+uses Cargo's warning channel:
+
+```rust,ignore
+|report| {
+    for warning in &report.warnings {
+        println!("cargo::warning={warning}");
+    }
+    for path in &report.stale_acknowledgements {
+        println!("cargo::warning={path}: stale bulk acknowledgement");
+    }
+    // Optional CI enforcement:
+    // assert!(report.is_clean(), "review bulk-field advice");
+}
+```
+
+Advice explains per-element encoding and truncated-input rejection costs without
+claiming a slowdown for every payload. Suppress a field by mapping its exact path
+to a nonempty reason, for example
+`/methods/upload/request/fields/data/list/u8` → `At most four bytes`.
+Request/response and method use sites remain independent. A changed primitive
+width or removed field leaves a stale acknowledgement that the handler reports.
+With methods, advice follows their request/response shapes through references;
+unreachable exported definitions are not separate roots. With no methods, every
+exported type is reviewed under `/types/NAME`. Rooted traversal limits still apply;
+invalid input or exhausted traversal returns an error without partial diagnostics.
+
+Canic and other consumers must adopt the new call and connect the handler to their
+build output. Wire does not modify sibling build pipelines. Plain Serde types
+outside metadata generation remain outside this advice. The host TypeScript
+feature remains useful for keeping JSON/generation out of pure Rust consumers;
+there is no new opt-in feature for warnings and no canister logging code.
+
+The standalone lint APIs remain useful for schema review without generation:
+
 For field-specific review of `SchemaRegistry` output, use `lint_bulk_roots` with
 an explicit map of public root labels to schemas/refs, the registry, and a map
 of acknowledgement paths to nonempty reasons. For example, map `Reply` to the
@@ -200,8 +246,9 @@ cargo run -p ic-wire --features typescript --example bulk-lint -- schemas.json -
 
 The first command prints advice and succeeds; the second fails on unacknowledged
 candidates or stale acknowledgements. Invalid schemas or empty reasons fail in
-both modes. This is opt-in host tooling, with no canister code, emitted-byte or
-schema changes. It does not automatically rewrite fields or predict a slowdown:
+both modes. This separate review command is optional; generation already runs
+advice automatically. Neither changes canister code, emitted bytes or schemas.
+It does not automatically rewrite fields or predict a slowdown:
 short lists and small values may favor ordinary encoding. Preserve bounds,
 newtype validation and other consumer constraints when adopting a suggestion.
 

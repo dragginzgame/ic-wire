@@ -243,7 +243,14 @@ pub(super) fn generate(directory: &Path) -> String {
         let types = serde_json::from_value(case["types"].clone()).unwrap();
         fs::write(
             directory.join(format!("admission{index}.ts")),
-            typescript::generate_registry(&types, &[method], "./wire-runtime.js").unwrap(),
+            typescript::generate_registry(
+                &types,
+                &[method],
+                "./wire-runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}"),
+            )
+            .unwrap(),
         )
         .unwrap();
     }

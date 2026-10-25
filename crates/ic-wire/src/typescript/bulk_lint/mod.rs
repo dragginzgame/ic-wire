@@ -1,4 +1,4 @@
-//! Optional host-side advice; never changes a schema or emitted bytes.
+//! Host-side advice; never changes a schema or emitted bytes.
 use super::{GenerationError, metadata};
 use alloc::{
     collections::{BTreeMap, BTreeSet},
@@ -17,6 +17,16 @@ pub struct BulkWarning {
     pub representation: &'static str,
 }
 
+impl core::fmt::Display for BulkWarning {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
+            "{}: consider {}; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs",
+            self.path, self.representation
+        )
+    }
+}
+
 /// Advisory results suitable for printing locally or enforcing in consumer CI.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BulkLintReport {
@@ -30,6 +40,18 @@ impl BulkLintReport {
     /// A consumer may assert this in CI; linting itself never fails on warnings.
     pub fn is_clean(&self) -> bool {
         self.warnings.is_empty() && self.stale_acknowledgements.is_empty()
+    }
+}
+
+impl core::fmt::Display for BulkLintReport {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        for warning in &self.warnings {
+            writeln!(f, "warning: {warning}")?;
+        }
+        for path in &self.stale_acknowledgements {
+            writeln!(f, "warning: {path}: stale acknowledgement")?;
+        }
+        Ok(())
     }
 }
 
@@ -92,6 +114,58 @@ fn lint(
             metadata::ty(node, types, 0, &mut remaining)?;
         }
     }
+    lint_validated(
+        roots
+            .iter()
+            .map(|(name, node)| (format!("/{}", escape(name)), node)),
+        types,
+        acknowledgements,
+        rooted,
+    )
+}
+
+// Generation has already validated all metadata. Reuse the bounded traversal
+// without copying schemas or repeating the generator's validation pass.
+pub(super) fn lint_generated(
+    types: &BTreeMap<String, Value>,
+    methods: &[Value],
+    acknowledgements: &BTreeMap<String, String>,
+) -> Result<BulkLintReport, GenerationError> {
+    if methods.is_empty() {
+        lint_validated(
+            types
+                .iter()
+                .map(|(name, node)| (format!("/types/{}", escape(name)), node)),
+            types,
+            acknowledgements,
+            true,
+        )
+    } else {
+        lint_validated(
+            methods.iter().flat_map(|method| {
+                ["request", "response"].map(|direction| {
+                    (
+                        format!(
+                            "/methods/{}/{direction}",
+                            escape(method["name"].as_str().unwrap())
+                        ),
+                        &method[direction],
+                    )
+                })
+            }),
+            types,
+            acknowledgements,
+            true,
+        )
+    }
+}
+
+fn lint_validated<'a>(
+    roots: impl Iterator<Item = (String, &'a Value)>,
+    types: &BTreeMap<String, Value>,
+    acknowledgements: &BTreeMap<String, String>,
+    rooted: bool,
+) -> Result<BulkLintReport, GenerationError> {
     if acknowledgements
         .values()
         .any(|reason| reason.trim().is_empty())
@@ -104,15 +178,8 @@ fn lint(
         active: BTreeSet::new(),
         remaining: 65536,
     };
-    for (name, node) in roots {
-        walk(
-            node,
-            &format!("/{}", escape(name)),
-            types,
-            &mut warnings,
-            &mut traversal,
-            0,
-        )?;
+    for (path, node) in roots {
+        walk(node, &path, types, &mut warnings, &mut traversal, 0)?;
     }
     let paths: BTreeSet<_> = warnings.iter().map(|warning| &warning.path).collect();
     let stale_acknowledgements = acknowledgements

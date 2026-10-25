@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.11]
+
+- Run bulk field advice automatically during host TypeScript generation. Replace
+  the silent three-argument `generate_registry` API with an acknowledgement map
+  and mandatory diagnostic handler. Exact-path reasons silence intentional
+  choices; stale acknowledgements remain visible. Consumers must connect the
+  handler to their build output. Reuse the existing bounded lint traversal without
+  adding a warning feature or runtime machinery. Generated source, protocol bytes,
+  identities and runtime admission are unchanged.
+
+- Refresh the full Wire/Candid comparison with released 0.7.10, the focused
+  hotspot corpus and matched 0.7.9 regression checks. Retain IC instructions,
+  frame bytes, native timing/allocation/heap samples and uncompressed Wasm/code
+  sizes with reproducible source and analysis. Clarify that benchmark correctness
+  checks do not run the performance matrix. Production code, protocol bytes,
+  admission rules and generated clients are unchanged.
+
 ## [0.7.10] - 2026-10-25
 
 - Parse derive field attributes once and reuse the validated projection for

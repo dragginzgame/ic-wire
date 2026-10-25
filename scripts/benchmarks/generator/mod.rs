@@ -26,18 +26,18 @@ fn main() {
                 };
                 types.insert("Payload".into(), node);
             }
-            let expected = generate_registry(&types, &methods, "./wire-runtime.js").unwrap();
+            let expected = generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap();
             if let Some(directory) = std::env::args().nth(1) {
                 std::fs::write(format!("{directory}/{kind}-{count}.ts"), &expected).unwrap();
             }
             for _ in 0..100 {
-                black_box(generate_registry(&types, &methods, "./wire-runtime.js").unwrap());
+                black_box(generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap());
             }
             let mut repetitions = 1;
             loop {
                 let start = Instant::now();
                 for _ in 0..repetitions {
-                    black_box(generate_registry(&types, &methods, "./wire-runtime.js").unwrap());
+                    black_box(generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap());
                 }
                 if start.elapsed().as_millis() >= 20 || repetitions >= 4096 {
                     break;
@@ -47,7 +47,7 @@ fn main() {
             for batch in 0..11 {
                 let start = Instant::now();
                 for _ in 0..repetitions {
-                    black_box(generate_registry(&types, &methods, "./wire-runtime.js").unwrap());
+                    black_box(generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap());
                 }
                 println!(
                     "{kind},{count},{batch},{repetitions},{},{:.3}",

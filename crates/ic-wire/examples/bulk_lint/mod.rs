@@ -29,15 +29,7 @@ fn run() -> Result<ExitCode, String> {
     };
     let report = lint_bulk_fields(&types, &acknowledged)
         .map_err(|e| format!("invalid bulk-lint input: {e:?}"))?;
-    for warning in &report.warnings {
-        eprintln!(
-            "warning: {}: consider {}; preserve constraints and measure small-value size tradeoffs",
-            warning.path, warning.representation
-        );
-    }
-    for path in &report.stale_acknowledgements {
-        eprintln!("warning: {path}: stale acknowledgement");
-    }
+    eprint!("{report}");
     Ok(if args.get_flag("deny-warnings") && !report.is_clean() {
         ExitCode::FAILURE
     } else {

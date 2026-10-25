@@ -323,7 +323,7 @@ the supported 64/128-bit integer payload range.
 Ordinary native Serde metadata can be derived as described below. Domain validation
 and endpoint identities remain consumer-owned.
 Host generators can pass that normalized registry and method list to
-`typescript::generate_registry(&types, &methods, "./native-runtime.js")`. It
+`typescript::generate_registry(&types, &methods, "./native-runtime.js", &acknowledgements, diagnostics)`. It
 emits named TypeScript types and typed query/update codec objects. The selected module must export
 `createCodec`; a consumer adapter can supply its scalar validators to the shared
 runtime. Custom serialization projections and domain-specific constraints stay
@@ -429,13 +429,22 @@ method.as_object_mut().unwrap().extend(serde_json::json!({
     "name":"queryValue", "mode":"query", "id":"17",
     "request":root, "response":root
 }).as_object().unwrap().clone());
-let module = generate_registry(&types, &[method], "./wire-runtime.js")?;
+let acknowledgements = std::collections::BTreeMap::new();
+let module = generate_registry(&types, &[method], "./wire-runtime.js",
+    &acknowledgements, |report| eprint!("{report}"))?;
 # let _ = module;
 # Ok(())
 # }
 ```
 
 Register explicit roots once and reuse their returned references for methods.
+Generation always computes bulk-field advice and calls the required diagnostic
+handler before returning source. CLI tools can print the report as above. In
+`build.rs`, emit each warning with `println!("cargo::warning={warning}")` and
+report stale acknowledgements too. CI can reject a non-clean report with
+`assert!(report.is_clean())`. Exact diagnostic paths map to nonempty suppression
+reasons; no optional warning feature or separate lint call is needed. See the
+[bulk advice guide](../../docs/packed-fields.md#host-side-bulk-advice-and-ci).
 Nested derived declarations are collected automatically, including mutual recursion
 and distinct generic instantiations. Registering an already collected type under
 a new root name produces an alias; duplicate names reject without overwriting.

@@ -4,74 +4,80 @@ IC Wire has one production Serde/Postcard codec. Wire derives host layout
 metadata; Serde owns serialization. Packed<T> is an explicit field representation.
 Candid and PocketIC remain in the unpublished benchmark package.
 
-## Pending 0.7.0 decoding cut
+The [0.7.10 full comparison](full-comparison-0710.md) is the current measured
+baseline. It covers all 21 maintained cohorts plus the focused hotspot corpus,
+with both optimization profiles, IC instructions, frame bytes, repeated native
+timing, allocation/heap measurements and uncompressed Wasm/code-section sizes.
+It also checks released 0.7.9 with matched fixtures, including a separate
+normalization to isolate Wire code from dependency/version changes.
+All 13,590 Wire IC rows match 0.7.9 exactly. Wire code-section sizes are unchanged;
+total Wasm differs by at most two bytes. The normalized host-cleanup comparison
+produces 88 byte-identical artifacts. Candid-control differences are retained
+in the report rather than folded into a Wire improvement claim.
 
-The [one-pass qualification](evidence/one-pass-070/README.md) records the approved
-normalization contract change, matched 87-case IC/native results and 100-record
-Wasm sizes. Earlier full matrices below describe the old decoding contract; their
-encoding results remain historical controls, not a rerun of the new decoder.
+## Main results
 
-## Which report to use
+At opt-3, the standard Wire fixture uses **573,482 total / 518,734 code bytes**
+versus Candid's **1,386,033 / 1,306,893**. The 100 ordinary-type fixture uses
+**398,739 / 364,245** versus **2,081,252 / 2,012,071**. These are complete benchmark
+modules, not projected net savings in an application retaining external Candid
+endpoints. See the full report for every cohort/profile and the regression verdict.
 
-| Question | Evidence |
-| --- | --- |
-| What changed in the largest instruction losses? | [Ordinary-list hotspot follow-up](hotspot-encoding-0613.md): matched i16 improvement, residual gaps, byte-buffer selection and measured regressions |
-| What is the latest full comparison? | [Expanded 0.6.13 matrix](full-comparison-0613.md): 21 cohorts, 1,101 overlapping case entries, both profiles and all cost metrics |
-| How was public Packed qualified? | [Promotion qualification](packed-promotion-0611.md): prototype/public equivalence |
-| What was the previous broad baseline? | [0.6.11 matrix](full-comparison-0611.md): thirteen cohorts and 597 overlapping case entries |
-| Why choose runtime-limited packed fields? | [Design study](bulk-fields-0611.md): ordinary vectors, const bounds and selected prototype |
-| Why are ordinary vectors expensive? | [Cost breakdown](cost-breakdown-0611.md): admission, preflight, canonical checking and raw Postcard controls |
-| What did bounded decoder sharing save? | [Packed sharing](packed-sharing-0611.md): exact limits across many DTOs |
-| What happened to native/TypeScript timing follow-ups? | [Qualification and rejected screens](packed-0612.md): layout sensitivity and tiny-array tradeoffs |
-| Which field should consumers select? | [Packed guide](packed-fields.md) and [runtime contract](runtime.md) |
+The 298-case standard corpus favors Wire on **233 encodes and 275 decodes** at
+opt-3. A byte-oriented 1 MiB blob decodes in **1,049,508 instructions**, versus
+Candid's **1,065,374**. Its Wire frame is two bytes larger. The earlier report's
+owned-blob decoding disadvantage does not describe this current result.
 
-## Full-matrix baseline
+Large ordinary vectors remain explicit weak cases: generic 1 MiB Vec<u8> encode
+costs **37.23× Candid**, and 16,384 wide i16 values cost **32.82×**, at opt-3.
+At opt-z, ordinary wide u16 encode reaches **119.67×**, and signed-byte lists
+reach **13.39×**. Current Packed supports i8 as well as the wider words. These are current comparisons,
+not evidence that 0.7.10 introduced those gaps.
 
-The subsequent [hotspot follow-up](hotspot-encoding-0613.md) retains a
-byte-identical i16 writer. Its matched standard rerun reduces wide-i16 opt-3
-encoding from 49.94x to 32.82x Candid, with 673 additional total/code Wasm bytes.
-It records regressions and leaves the generic-byte-vector gap unchanged. The
-figures below describe the full matrix before that optimization.
+Byte-oriented fields avoid generic byte-vector work. For the matched wide-i16
+case, bounded packed Wire uses about **33,489 encode / 33,476 decode instructions**
+versus Candid's **80,320 / 1,408,211**, with two more frame bytes. Packed fields
+can expand small values relative to ordinary Wire varints. Select representations
+for the contract and workload; coordinate existing schemas and preserve retry bytes.
+See the [field selection guide](packed-fields.md). The 109-case generic Packed
+cohort wins all 436 primary encode/decode instruction comparisons across both
+profiles, including the signed-byte cases.
 
-Wire total/code Wasm is smaller in all 42 matched cohort/profile pairs. At opt-3,
-100 ordinary records use 424,179 total / 389,650 code bytes versus Candid's
-2,081,252 / 2,012,071. The 100 mixed-bulk records use 655,798 / 620,658 versus
-2,639,766 / 2,570,257. These are whole fixtures, not installed application savings.
-Applications retaining external Candid endpoints still retain their required code.
+Malformed-input cost is separate: at opt-3, rejecting a truncated 1 MiB ordinary
+Vec<u8> costs **42,472,926 instructions** versus Candid's **24,367**. The
+byte-oriented blob counterpart costs **636** versus **24,861**. Ordinary sequences
+can traverse a long valid prefix before discovering truncation; byte-oriented
+fields can reject an unavailable byte range before copying it. The full report
+keeps these rejection losses visible alongside successful-codec results.
 
-All 840 generic packed-field/record IC encode/decode comparisons favor Wire.
-The 298-case standard corpus wins 232/298 encodes and 236/298 decodes at opt-3.
-Ordinary wide-i16 encode still costs 49.94x Candid, generic 1 MiB Vec<u8> encode
-37.23x, signed-byte list encode 8.61x at 4,096 items, and owned byte-oriented
-1 MiB blob decode 2.37x. Ordinary wide-u16 encode reaches 123.85x at opt-z.
-Packed does not implicitly alter normal vectors and does not support i8 today.
+## Measurement boundaries
 
-Small packed values can expand payloads relative to ordinary Wire varints.
-Select byte-oriented fields for binary data, and packed words where their fixed
-encoding suits the contract. Coordinate schemas/clients and preserve retry bytes.
-Runtime container benchmarks do not establish automatic TypeScript metadata
-support for every Rust collection. Borrowed/reuse lanes remain separately labelled.
+The current run locks Candid 0.10.39, Postcard 1.1.3 and Platform 0.6.16, using
+Rust 1.99.1 and an explicit PocketIC 16.0.0 server admitted by Testkit. Historical
+matrices used different source, dependencies and server versions; their numbers
+are not matched regression baselines for this run.
 
-## Measurement and reproduction
+`make check-benchmarks` checks correctness, lint and compiler-floor support.
+It does **not** execute a performance regression gate. Use an explicitly prepared
+`POCKET_IC_BIN` with `make evaluate-codec-matrix`, plus the separate hotspot run,
+for the full comparison. See [development](development.md) and the report's
+[retained evidence](evidence/full-comparison-0710/README.md) for reproduction.
 
-The archived run uses Platform 0.6.12; a concurrent 0.6.14 lock update was preserved
-but was not rebuilt for these figures. Use the report's exact source/lock pins.
-
-Use `POCKET_IC_BIN=/prepared/server make evaluate-codec-matrix` for the full run;
-see [development](development.md) and the report's frozen source/runner evidence.
-Compare identical inputs, compiler, lock, flags, target, profiles and limits.
-Keep native time, IC instructions, allocations/heap, frame bytes, total raw Wasm
-and code-section bytes distinct. Gzip is not an optimization objective.
+Native time, IC instructions, allocations/heap, frame bytes, total raw Wasm and
+code-section bytes are separate measurements. Gzip is not an optimization goal.
 Hash-array Candid fixtures retain their nested schema; flat byte-oriented manifest
-controls are also measured. Resource policies and evolution guarantees differ.
-
-The full report records an outer-runner tail error after all cohorts completed,
-its cause and corrected-runner checks. All measurement data independently validate.
-No broad CI, installed endpoint, application-latency or new protocol claim follows.
+controls are also measured. Resource policies and schema-evolution guarantees
+differ. Borrowing/reuse lanes are labelled separately, and container roundtrips
+do not qualify every Rust collection for generated TypeScript metadata.
+This is codec qualification, not endpoint authentication, latency or deployment proof.
 
 ## Historical evidence
 
-[Earlier comparisons](history/candid-comparison.md) retain finite-codec and rejected
-experiments. Their pending/current labels belong to their recorded source, not
-today's API. The serializer-generating finite Wire API is retired; old commands
-must run against their pinned revision.
+- [One-pass decoding cut](evidence/one-pass-070/README.md): the released change
+  transferring collection/custom-Serde normalization to consumers.
+- [Expanded 0.6.13 matrix](full-comparison-0613.md) and
+  [hotspot follow-up](hotspot-encoding-0613.md): earlier decoder and encoder results.
+- [Packed promotion](packed-promotion-0611.md), [design study](bulk-fields-0611.md)
+  and [sharing study](packed-sharing-0611.md): field representation decisions.
+- [Earlier comparisons](history/candid-comparison.md): retired finite-codec and
+  rejected experiments, reproducible only at their recorded source revisions.

@@ -257,4 +257,123 @@ fn rooted_aliases_recursion_inline_errors_and_work_limits() {
         lint_bulk_roots(&roots, &dag, &BTreeMap::new()),
         Err(GenerationError::Complexity)
     );
+    assert_eq!(
+        ic_wire::typescript::generate_registry(
+            &dag,
+            &[],
+            "./runtime.js",
+            &BTreeMap::new(),
+            |_| panic!("excessive expansion must not emit a partial report"),
+        ),
+        Err(GenerationError::Complexity)
+    );
+}
+
+#[test]
+fn generation_always_reports_use_sites_and_preserves_source_when_acknowledged() {
+    use ic_wire::typescript::generate_registry;
+    let types = BTreeMap::from([
+        (
+            "Words".into(),
+            json!({"k":"list","item":{"k":"u","bits":8}}),
+        ),
+        (
+            "Message".into(),
+            json!({"k":"record","fields":[{"name":"data","value":{"k":"ref","name":"Words"}}]}),
+        ),
+    ]);
+    let method = json!({"name":"upload","mode":"update","id":"1",
+        "request":{"k":"ref","name":"Message"},"response":{"k":"ref","name":"Message"},
+        "requestBytes":128,"responseBytes":128,"requestNodes":128,"responseNodes":128,
+        "requestDepth":8,"responseDepth":8});
+    let methods = [method];
+    let mut seen = None;
+    let source = generate_registry(
+        &types,
+        &methods,
+        "./runtime.js",
+        &BTreeMap::new(),
+        |report| seen = Some(report),
+    )
+    .unwrap();
+    let report = seen.unwrap();
+    assert_eq!(
+        report
+            .warnings
+            .iter()
+            .map(|w| w.path.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "/methods/upload/request/fields/data/list/u8",
+            "/methods/upload/response/fields/data/list/u8",
+        ]
+    );
+    assert!(report.to_string().contains("truncated-input rejection"));
+    let mut acknowledged =
+        BTreeMap::from([(report.warnings[0].path.clone(), "At most four bytes".into())]);
+    assert_eq!(
+        source,
+        generate_registry(&types, &methods, "./runtime.js", &acknowledged, |report| {
+            assert_eq!(report.warnings.len(), 1);
+            assert_eq!(
+                report.warnings[0].path,
+                "/methods/upload/response/fields/data/list/u8"
+            );
+        })
+        .unwrap()
+    );
+    acknowledged.insert(report.warnings[1].path.clone(), "Small response".into());
+    assert_eq!(
+        source,
+        generate_registry(
+            &types,
+            &methods,
+            "./runtime.js",
+            &acknowledged,
+            |report| assert!(report.is_clean())
+        )
+        .unwrap()
+    );
+    acknowledged.insert("/old".into(), "Removed field".into());
+    generate_registry(&types, &methods, "./runtime.js", &acknowledged, |report| {
+        assert!(!report.is_clean());
+        assert_eq!(report.stale_acknowledgements, ["/old"]);
+        assert!(report.to_string().contains("stale acknowledgement"));
+    })
+    .unwrap();
+}
+
+#[test]
+fn generation_reports_exported_types_and_never_emits_partial_diagnostics() {
+    use ic_wire::typescript::generate_registry;
+    let types = BTreeMap::from([("Samples".into(), native_schema::<Vec<i16>>().unwrap())]);
+    generate_registry(&types, &[], "./runtime.js", &BTreeMap::new(), |report| {
+        assert_eq!(report.warnings[0].path, "/types/Samples/list/i16");
+    })
+    .unwrap();
+    let empty_reason = BTreeMap::from([("/types/Samples/list/i16".into(), " ".into())]);
+    assert_eq!(
+        generate_registry(&types, &[], "./runtime.js", &empty_reason, |_| panic!(
+            "invalid input must not emit"
+        )),
+        Err(GenerationError::Schema)
+    );
+    assert_eq!(
+        generate_registry(
+            &types,
+            &[json!({})],
+            "./runtime.js",
+            &BTreeMap::new(),
+            |_| panic!("invalid method must not emit")
+        ),
+        Err(GenerationError::Schema)
+    );
+    generate_registry(
+        &BTreeMap::new(),
+        &[],
+        "./runtime.js",
+        &BTreeMap::new(),
+        |report| assert!(report.is_clean()),
+    )
+    .unwrap();
 }

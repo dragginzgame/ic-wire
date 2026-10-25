@@ -1,0 +1,46 @@
+{
+  "measured_on": "2026-10-25",
+  "source_revision": "c2adbfb47da6c180bc470c0d5204a35d7b61d574",
+  "baseline_revision": "00b1686a80cd7a3068be0a24aaee0dc8239009c7",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "host": "Linux ripper 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+  "current_lock_sha256": "9530ea236eec30a310cd0ae895cd7f359cfd43ec319cfa5d96da3b8ebe801ba6",
+  "original_baseline_lock_sha256": "83102e6e84bb15c09c1329ad66bacb4346cbcb67e7dafb21e640b8e94762e069",
+  "normalized_baseline_lock_sha256": "9530ea236eec30a310cd0ae895cd7f359cfd43ec319cfa5d96da3b8ebe801ba6",
+  "source_archive_sha256": "bebd979af06467e30271656612d68e8137fec3cd844f178426087a33c33edb63",
+  "previous_source_patch_sha256": "d13795590d3dbdc18784cc26b213ac7c15f12100365cb07c7bf265c15883ee82",
+  "normalization_patch_sha256": "042286a14d205c345335fceba3b0e19621de90d1614ed147d2d4a0a59b7fb481",
+  "versions": {
+    "candid": "0.10.39",
+    "postcard": "1.1.3",
+    "serde": "1.0.229",
+    "platform": "0.6.16",
+    "testkit": "0.68.2",
+    "pocket_ic_server": "16.0.0"
+  },
+  "wire_limits": {
+    "allocation": 268435456,
+    "bytes": 2097152,
+    "depth": 64,
+    "nodes": 8388608
+  },
+  "candid_limits": {
+    "decoding_quota": 134217728,
+    "header_bytes": 65536,
+    "reply_bytes": 2097152,
+    "skipping_quota": 134217728,
+    "type_entries": 4096
+  },
+  "native_runs": 2,
+  "native_samples": 11,
+  "minimum_batch_ms": 2,
+  "ic_samples": 3,
+  "profiles": [
+    "evaluation",
+    "benchmark-speed"
+  ],
+  "runtime_changes": false,
+  "scope": "Released 0.7.10; concurrent checkout Build/Testkit/host 0.68.3 lockfile update preserved and excluded.",
+  "analysis_sha256": "4f246c041fcad007c590b7ab0582edb5842ffd384604c0f94056d8508702ebed",
+  "baseline_runner_sha256": "7bf18e2c70b95ab93aceca45b1301c702a1bd6f2cde4f83766aa3cf12880b581"
+}

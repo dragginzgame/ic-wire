@@ -135,8 +135,14 @@ fn add<T: typescript::Wire + serde::de::DeserializeOwned + PartialEq + std::fmt:
         "requestBytes":4096,"responseBytes":4096,"requestNodes":512,"responseNodes":512,"requestDepth":32,"responseDepth":32});
     fs::write(
         directory.join(format!("projection{index}.ts")),
-        typescript::generate_registry(&BTreeMap::new(), &[method], "./projection-runtime.js")
-            .unwrap(),
+        typescript::generate_registry(
+            &BTreeMap::new(),
+            &[method],
+            "./projection-runtime.js",
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
+        .unwrap(),
     )
     .unwrap();
     let request = native::encode_request(17, &value, LIMITS).unwrap();
@@ -452,7 +458,14 @@ fn benchmark(directory: &Path) {
                     )
                 })
                 .collect();
-            typescript::generate_registry(&types, &[], "./wire-runtime.js").unwrap()
+            typescript::generate_registry(
+                &types,
+                &[],
+                "./wire-runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}"),
+            )
+            .unwrap()
         };
         assert_eq!(render(false), render(true));
         black_box(render(false));
