@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.7]
+## [0.7.7] - 2026-10-25
 
 - Grow TypeScript encode buffers incrementally instead of allocating the full
   directional byte allowance for every call. Preserve owned outputs, exact wire
