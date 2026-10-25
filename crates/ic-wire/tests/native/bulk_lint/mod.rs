@@ -121,3 +121,140 @@ fn all_supported_list_words_and_enum_result_paths() {
     assert_eq!(report.warnings[6].path, "/Root/variants/Words/ok/items/6");
     assert_eq!(report.warnings[6].representation, "Packed<u64>");
 }
+
+#[test]
+fn rooted_review_distinguishes_shared_fields_and_ignores_intern_names() {
+    use ic_wire::typescript::{SchemaRegistry, lint_bulk_roots};
+    #[derive(serde::Serialize, ic_wire::Wire)]
+    struct Reply {
+        field_ids: Vec<u32>,
+        other_ids: Vec<u32>,
+    }
+    let collect = |extra| {
+        let mut registry = SchemaRegistry::new();
+        if extra {
+            registry.register::<Option<String>>("Unrelated").unwrap();
+        }
+        let root = registry.register::<Reply>("Reply").unwrap();
+        (
+            BTreeMap::from([("Reply".into(), root)]),
+            registry.finish().unwrap(),
+        )
+    };
+    let (roots, types) = collect(false);
+    let acknowledged = BTreeMap::from([(
+        "/Reply/fields/field_ids/list/u32".into(),
+        "Small IDs".into(),
+    )]);
+    let report = lint_bulk_roots(&roots, &types, &acknowledged).unwrap();
+    assert_eq!(report.warnings.len(), 1);
+    assert_eq!(report.warnings[0].path, "/Reply/fields/other_ids/list/u32");
+    let (other_roots, other_types) = collect(true);
+    assert_eq!(
+        lint_bulk_roots(&other_roots, &other_types, &acknowledged).unwrap(),
+        report
+    );
+    let mut removed = types.clone();
+    removed.get_mut("Reply").unwrap()["fields"]
+        .as_array_mut()
+        .unwrap()
+        .remove(0);
+    assert_eq!(
+        lint_bulk_roots(&roots, &removed, &acknowledged)
+            .unwrap()
+            .stale_acknowledgements,
+        ["/Reply/fields/field_ids/list/u32"]
+    );
+    for replacement in [
+        json!({"k":"bytes"}),
+        json!({"k":"list","item":{"k":"u","bits":64}}),
+    ] {
+        let mut changed = types.clone();
+        changed.get_mut("Reply").unwrap()["fields"][0]["value"] = replacement;
+        let report = lint_bulk_roots(&roots, &changed, &acknowledged).unwrap();
+        assert_eq!(
+            report.stale_acknowledgements,
+            ["/Reply/fields/field_ids/list/u32"]
+        );
+        assert!(
+            report
+                .warnings
+                .iter()
+                .any(|w| w.path == "/Reply/fields/other_ids/list/u32")
+        );
+    }
+}
+
+#[test]
+fn rooted_aliases_recursion_inline_errors_and_work_limits() {
+    use ic_wire::typescript::lint_bulk_roots;
+    for invalid in [json!({"k":"missing"}), json!({"k":"ref","name":"Missing"})] {
+        assert_eq!(
+            lint_bulk_roots(
+                &BTreeMap::from([("Root".into(), invalid)]),
+                &BTreeMap::new(),
+                &BTreeMap::new()
+            ),
+            Err(GenerationError::Schema)
+        );
+    }
+    let bulk = BTreeMap::from([
+        ("Bytes".into(), json!({"k":"bytes"})),
+        ("Packed".into(), json!({"k":"packed","word":"u32"})),
+    ]);
+    assert!(
+        lint_bulk_roots(&bulk, &BTreeMap::new(), &BTreeMap::new())
+            .unwrap()
+            .is_clean()
+    );
+    let mut types = BTreeMap::from([
+        (
+            "Words".into(),
+            json!({"k":"list","item":{"k":"u","bits":32,"max":17}}),
+        ),
+        ("Alias".into(), json!({"k":"ref","name":"Words"})),
+        (
+            "Tree".into(),
+            json!({"k":"enum","variants":[
+                {"id":0,"name":"Leaf","value":{"k":"ref","name":"Alias"}},
+                {"id":1,"name":"Next","value":{"k":"record","fields":[
+                    {"name":"values","value":{"k":"ref","name":"Words"}},
+                    {"name":"next","value":{"k":"option","item":{"k":"ref","name":"Tree"}}}
+                ]}}
+            ]}),
+        ),
+    ]);
+    let roots = BTreeMap::from([(
+        "query/reply".into(),
+        json!({"k":"result","ok":{"k":"ref","name":"Tree"},"err":{"k":"ref","name":"Alias"}}),
+    )]);
+    let report = lint_bulk_roots(&roots, &types, &BTreeMap::new()).unwrap();
+    assert_eq!(
+        report
+            .warnings
+            .iter()
+            .map(|w| w.path.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "/query~1reply/ok/variants/Leaf/list/u32",
+            "/query~1reply/ok/variants/Next/fields/values/list/u32",
+            "/query~1reply/err/list/u32",
+        ]
+    );
+    types.insert("Alias".into(), json!({"k":"ref","name":"Missing"}));
+    assert_eq!(
+        lint_bulk_roots(&roots, &types, &BTreeMap::new()),
+        Err(GenerationError::Schema)
+    );
+    // A tiny acyclic DAG can expand exponentially; refuse it before generating
+    // an unbounded report, even though the definitions individually validate.
+    let mut dag = BTreeMap::from([("N0".into(), json!({"k":"list","item":{"k":"u","bits":32}}))]);
+    for n in 1..18 {
+        dag.insert(format!("N{n}"),json!({"k":"tuple","items":[{"k":"ref","name":format!("N{}",n-1)},{"k":"ref","name":format!("N{}",n-1)}]}));
+    }
+    let roots = BTreeMap::from([("Root".into(), json!({"k":"ref","name":"N17"}))]);
+    assert_eq!(
+        lint_bulk_roots(&roots, &dag, &BTreeMap::new()),
+        Err(GenerationError::Complexity)
+    );
+}

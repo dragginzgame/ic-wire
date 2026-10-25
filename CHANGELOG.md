@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.9]
+
+- Add host-only `lint_bulk_roots` for field/use-site bulk review across interned
+  registries. Explicit root labels and primitive-word path suffixes preserve
+  independent acknowledgements, with bounded reference traversal and recursion
+  guards. Existing definition-level lint semantics, wire bytes, admission and
+  codecs remain unchanged. Addresses
+  [#25](https://github.com/dragginzgame/ic-wire/issues/25).
+
 ## [0.7.8] - 2026-10-25
 
 - Project optional `serde_bytes` adapter fields as options of byte buffers,

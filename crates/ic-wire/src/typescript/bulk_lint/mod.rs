@@ -54,11 +54,44 @@ pub fn lint_bulk_fields(
     types: &BTreeMap<String, Value>,
     acknowledgements: &BTreeMap<String, String>,
 ) -> Result<BulkLintReport, GenerationError> {
+    lint(types, types, acknowledgements, false)
+}
+
+/// Review primitive lists at explicit public use sites, resolving named references.
+///
+/// Root labels are consumer-owned identities; values may be inline schemas or
+/// registry refs. Reference names never enter diagnostic paths. Each reference
+/// is expanded per use site, stopping when it is already active on that path;
+/// sibling uses remain independent. Paths end in /list/u32 (or the other word)
+/// so changing a candidate's primitive width makes an old acknowledgement stale.
+/// Bounds/custom checks still require consumer review; they are not inferred.
+/// Empty reasons and invalid schemas return Schema; depth/work exhaustion returns
+/// Complexity without a partial report. Byte/packed fields are not candidates.
+/// Runtime bytes, budgets and generator output are unchanged.
+pub fn lint_bulk_roots(
+    roots: &BTreeMap<String, Value>,
+    types: &BTreeMap<String, Value>,
+    acknowledgements: &BTreeMap<String, String>,
+) -> Result<BulkLintReport, GenerationError> {
+    lint(roots, types, acknowledgements, true)
+}
+
+fn lint(
+    roots: &BTreeMap<String, Value>,
+    types: &BTreeMap<String, Value>,
+    acknowledgements: &BTreeMap<String, String>,
+    rooted: bool,
+) -> Result<BulkLintReport, GenerationError> {
     let mut remaining = 65536;
     for node in types.values() {
         metadata::ty(node, types, 0, &mut remaining)?;
     }
     metadata::validate_aliases(types)?;
+    if rooted {
+        for node in roots.values() {
+            metadata::ty(node, types, 0, &mut remaining)?;
+        }
+    }
     if acknowledgements
         .values()
         .any(|reason| reason.trim().is_empty())
@@ -66,8 +99,20 @@ pub fn lint_bulk_fields(
         return Err(GenerationError::Schema);
     }
     let mut warnings = Vec::new();
-    for (name, node) in types {
-        walk(node, &format!("/{}", escape(name)), types, &mut warnings)?;
+    let mut traversal = Traversal {
+        rooted,
+        active: BTreeSet::new(),
+        remaining: 65536,
+    };
+    for (name, node) in roots {
+        walk(
+            node,
+            &format!("/{}", escape(name)),
+            types,
+            &mut warnings,
+            &mut traversal,
+            0,
+        )?;
     }
     let paths: BTreeSet<_> = warnings.iter().map(|warning| &warning.path).collect();
     let stale_acknowledgements = acknowledgements
@@ -89,23 +134,22 @@ fn escape(name: &str) -> String {
 fn representation<'a>(
     mut node: &'a Value,
     types: &'a BTreeMap<String, Value>,
-) -> Result<Option<&'static str>, GenerationError> {
-    // Follow scalar aliases only. Structural recursion is visited at its named
-    // definition, so recursive records never expand into an unbounded walk.
+) -> Result<Option<(&'static str, &'static str)>, GenerationError> {
+    // Follow scalar aliases only; structural traversal has its own cycle guard.
     for _ in 0..64 {
         match node["k"].as_str().unwrap() {
             "ref" => node = &types[node["name"].as_str().unwrap()],
             "newtype" => node = &node["item"],
             kind => {
                 return Ok(match (kind, node["bits"].as_u64()) {
-                    ("u", Some(8)) => Some("ByteBuf / Bytes<N> / serde_bytes"),
-                    ("i", Some(8)) => Some("Packed<i8>"),
-                    ("i", Some(16)) => Some("Packed<i16>"),
-                    ("u", Some(16)) => Some("Packed<u16>"),
-                    ("i", Some(32)) => Some("Packed<i32>"),
-                    ("u", Some(32)) => Some("Packed<u32>"),
-                    ("i", Some(64)) => Some("Packed<i64>"),
-                    ("u", Some(64)) => Some("Packed<u64>"),
+                    ("u", Some(8)) => Some(("u8", "ByteBuf / Bytes<N> / serde_bytes")),
+                    ("i", Some(8)) => Some(("i8", "Packed<i8>")),
+                    ("i", Some(16)) => Some(("i16", "Packed<i16>")),
+                    ("u", Some(16)) => Some(("u16", "Packed<u16>")),
+                    ("i", Some(32)) => Some(("i32", "Packed<i32>")),
+                    ("u", Some(32)) => Some(("u32", "Packed<u32>")),
+                    ("i", Some(64)) => Some(("i64", "Packed<i64>")),
+                    ("u", Some(64)) => Some(("u64", "Packed<u64>")),
                     _ => None,
                 });
             }
@@ -114,25 +158,62 @@ fn representation<'a>(
     Err(GenerationError::Complexity)
 }
 
+struct Traversal {
+    rooted: bool,
+    active: BTreeSet<String>,
+    remaining: usize,
+}
+
 fn walk(
     node: &Value,
     path: &str,
     types: &BTreeMap<String, Value>,
     warnings: &mut Vec<BulkWarning>,
+    traversal: &mut Traversal,
+    depth: usize,
 ) -> Result<(), GenerationError> {
+    if traversal.rooted {
+        if depth >= 64 || traversal.remaining == 0 {
+            return Err(GenerationError::Complexity);
+        }
+        traversal.remaining -= 1;
+    }
     match node["k"].as_str().unwrap() {
+        "ref" if traversal.rooted => {
+            let name = node["name"].as_str().unwrap();
+            if traversal.active.insert(name.into()) {
+                walk(&types[name], path, types, warnings, traversal, depth + 1)?;
+                traversal.active.remove(name);
+            }
+        }
         "list" => {
-            if let Some(representation) = representation(&node["item"], types)? {
+            if let Some((word, representation)) = representation(&node["item"], types)? {
                 warnings.push(BulkWarning {
-                    path: path.into(),
+                    path: if traversal.rooted {
+                        format!("{path}/list/{word}")
+                    } else {
+                        path.into()
+                    },
                     representation,
                 });
             }
-            walk(&node["item"], &format!("{path}/item"), types, warnings)?;
+            walk(
+                &node["item"],
+                &format!("{path}/item"),
+                types,
+                warnings,
+                traversal,
+                depth + 1,
+            )?;
         }
-        "array" | "option" | "newtype" => {
-            walk(&node["item"], &format!("{path}/item"), types, warnings)?
-        }
+        "array" | "option" | "newtype" => walk(
+            &node["item"],
+            &format!("{path}/item"),
+            types,
+            warnings,
+            traversal,
+            depth + 1,
+        )?,
         "record" | "enum" => {
             let key = if node["k"] == "record" {
                 "fields"
@@ -145,17 +226,33 @@ fn walk(
                     &format!("{path}/{key}/{}", escape(field["name"].as_str().unwrap())),
                     types,
                     warnings,
+                    traversal,
+                    depth + 1,
                 )?;
             }
         }
         "tuple" => {
             for (index, item) in node["items"].as_array().unwrap().iter().enumerate() {
-                walk(item, &format!("{path}/items/{index}"), types, warnings)?;
+                walk(
+                    item,
+                    &format!("{path}/items/{index}"),
+                    types,
+                    warnings,
+                    traversal,
+                    depth + 1,
+                )?;
             }
         }
         "result" => {
             for key in ["ok", "err"] {
-                walk(&node[key], &format!("{path}/{key}"), types, warnings)?;
+                walk(
+                    &node[key],
+                    &format!("{path}/{key}"),
+                    types,
+                    warnings,
+                    traversal,
+                    depth + 1,
+                )?;
             }
         }
         _ => {} // Scalars, bulk fields, and references to separately visited definitions.

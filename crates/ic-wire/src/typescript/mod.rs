@@ -1,6 +1,6 @@
 //! Host-side TypeScript projection of Serde layouts.
 mod bulk_lint;
-pub use bulk_lint::{BulkLintReport, BulkWarning, lint_bulk_fields};
+pub use bulk_lint::{BulkLintReport, BulkWarning, lint_bulk_fields, lint_bulk_roots};
 mod limits;
 mod metadata;
 pub use limits::method_limits;

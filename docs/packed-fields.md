@@ -149,6 +149,21 @@ reserialization. Consumers own normalization and retain exact retry frames.
 
 ## Host-side bulk advice and CI
 
+For field-specific review of `SchemaRegistry` output, use `lint_bulk_roots` with
+an explicit map of public root labels to schemas/refs, the registry, and a map
+of acknowledgement paths to nonempty reasons. For example, map `Reply` to the
+ref returned by `registry.register::<Reply>("Reply")`. Diagnostics such as
+`/Reply/fields/field_ids/list/u32` resolve references without exposing generated
+type names. Acknowledging that path leaves `other_ids` visible even when both
+fields share one interned `Vec<u32>`. Inline request/error roots work too.
+Aliases add no path segments; cycles stop at references already active on the
+current path, while siblings are inspected independently. Depth/work limits
+refuse expansion with `Complexity`, not partial advice. The primitive-word suffix
+requires fresh review after a word change; bounds/custom validators remain the
+consumer's responsibility. When migrating from definition-level review, rerun
+the rooted lint and explicitly review each new path instead of copying a
+synthetic definition acknowledgement to every use site.
+
 With the host-only `typescript` feature, `typescript::lint_bulk_fields` scans
 resolved schemas for ordinary primitive lists and recommends byte buffers or
 `Packed<T>`. Rust type aliases are resolved by `native_schema`; nested schemas

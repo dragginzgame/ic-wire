@@ -516,7 +516,21 @@ are confined to unpublished benchmarks; production remains platform-independent.
 
 ### Bulk-field advice on native hosts
 
-With `typescript`, `typescript::lint_bulk_fields` reports ordinary primitive
+With `typescript`, `typescript::lint_bulk_roots` reviews primitive lists at
+consumer-selected public roots, resolving registry references per use site.
+Use this with `SchemaRegistry` when acknowledgements must apply to individual
+fields. Root labels are chosen by the consumer, not synthetic type names;
+`/Reply/fields/field_ids/list/u32` and `/Reply/fields/other_ids/list/u32` are
+independent decisions even when both fields share one interned container.
+Aliases add no path segments. Recursion stops at a reference already active on
+the current path; sibling references are still inspected. Traversal is bounded
+to 64 levels and 65,536 visits and returns `Complexity`, never a partial report.
+Renaming/removing a field or changing its primitive word makes its former
+acknowledgement stale. Bounds and custom scalar constraints still need consumer
+review; these paths are not full contract fingerprints. Pass inline request/error
+schemas as named roots when they are not registered types.
+
+`typescript::lint_bulk_fields` retains definition-level advice for ordinary primitive
 lists that may benefit from byte buffers or `Packed<T>`. Pass a map of named
 schemas and a map of exact diagnostic paths to acknowledgement reasons. Inspect
 `report.warnings` and `report.stale_acknowledgements`; optionally require

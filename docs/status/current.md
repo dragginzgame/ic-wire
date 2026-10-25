@@ -1,64 +1,62 @@
 # Current handoff
 
-## Released baseline and pending 0.7.8
+## Released 0.7.8; pending 0.7.9
 
-The checkout is at release 0.7.7 (`6d1f8a1bbde6ad16d24d1d857b1a30292d5b26b0`).
-Package versions remain 0.7.7. Pending 0.7.8 addresses host metadata blockers
-[#23](https://github.com/dragginzgame/ic-wire/issues/23) and
-[#24](https://github.com/dragginzgame/ic-wire/issues/24). Publication is part of
-both acceptance criteria and remains outstanding. No issue was closed.
-Staging, commits, versions, publication and pushes remain maintainer-owned.
-No sibling repository was changed.
+The checkout is at released 0.7.8 (`dece7fccbf98f059994e71adf3b9bcc532057522`).
+Both registry package caches identify that exact release commit. The hosted
+[release CI](https://github.com/dragginzgame/ic-wire/actions/runs/40175224140)
+passed Ubuntu and Apple Silicon macOS; Intel macOS remained in progress at the
+last inspection. Issues #23/#24 remain open until the required matrix completes.
+No release/publication was rerun, and no issue was closed during this batch.
 
-## Serde projection additions
+The user authorized release closeout, IcyDB adoption and a consumer-gap audit.
+IcyDB already has active uncommitted Wire adoption work, which was left untouched.
+Its published-0.7.8 audit exposed [#25](https://github.com/dragginzgame/ic-wire/issues/25),
+a prerequisite for replacing its reflection projection without weakening field
+review. No isolated adoption PR was created over the active owner's work.
 
-The sealed serde_bytes field qualification now carries its projected layout.
-Options retain their tag and project to options of byte buffers rather than
-ordinary numeric lists. Aliases, references and qualified generic fields use
-trait resolution, without token-name guesses. None / Some(empty) / Some(nonempty)
-remain distinct; Option<Vec<u16>> remains rejected.
+## Rooted bulk review
 
-Symmetric field/variant Serde renames project browser keys/tags while preserving
-field order and declaration-order variant ordinals. Duplicate labels reject.
-Asymmetric renames, rename_all, alias and custom serializers remain unsupported;
-manual serializers still need explicitly verified metadata. Recursive registries
-work with the renamed variants. No new codec or compatibility lane was added.
+Pending `lint_bulk_roots` accepts explicit public root labels and traverses
+registry refs per use site. Synthetic type names do not enter diagnostic identity.
+A word suffix distinguishes changed primitive types; field removal/renaming or
+conversion to bulk makes the old acknowledgement stale. Cycles stop on active
+references; shared siblings remain independent. Expansion is depth/work bounded.
+The existing definition-level `lint_bulk_fields` API retains its semantics;
+both use the same walker and candidate detector. No protocol, runtime codec,
+resource-admission or generated-TypeScript change is included.
 
-[Projection evidence](../evidence/serde-projection-078/README.md) records exact
-frames, admission boundaries, focused validation and repeated host timing controls.
-The full TypeScript gate passes 159 ordinary vectors, 33,560 mutations, 29 native
-projection vectors, 16 admission shapes and 54 simulated-endian cases. Optional
-byte adapters retain a measured Rust/TS node-charge difference; copying equal
-budgets is not an acceptance-parity guarantee. Regenerate clients and preserve
-consumer browser labels when replacing manual metadata. Runtime bytes, framing,
-identity, admission and production codecs are unchanged. No IC/Wasm savings claim.
+[Evidence](../evidence/rooted-bulk-lint-079/README.md) retains source and repeated
+host-cost controls. 35 native tests, strict all-target Clippy, doctests and
+Rust 1.91 host checks pass. Legacy lint controls remain within ordinary timing
+noise; rooted review has additional per-use traversal cost. No IC/Wasm savings
+are claimed. Publication and consumer migration remain outstanding.
 
-## Retained qualification
+Consumers should select stable DTO or method/direction roots and explicitly
+review rooted paths, for example `/Reply/fields/field_ids/list/u32`. Do not copy
+one synthetic-container acknowledgement to all fields. Custom scalar constraints
+and endpoint policy remain consumer-owned; paths are not full contract hashes.
 
-0.7.7 delivered named recursive SchemaRegistry collection, typed method_limits
-projection and the incremental browser writer. See the packaged README for
-consumer qualification and the existing evidence for
-[host metadata](../evidence/native-registry-077/README.md) and
-[writer allocation](../evidence/typescript-writer-077/README.md).
-The writer starts at at most 64 bytes and grows within its directional ceiling;
-outputs remain owned. Growth can increase cumulative allocations for tight limits.
+## Retained qualification and production direction
 
-The [parser cleanup](../evidence/parser-cleanup-077/README.md) removed the unused
-input abstraction and preserved the selected codec. Keep separate packed
-implementations after the [consolidation screen](../packed-consolidation-0611.md).
-Historical evaluation remains archived rather than deleted.
+0.7.8 delivered optional serde_bytes and symmetric Serde rename projection;
+see [projection evidence](../evidence/serde-projection-078/README.md). Keep existing
+browser labels and optional byte tags when replacing manual metadata. Unsupported
+custom serializers still need explicitly verified metadata.
+0.7.7 delivered [recursive metadata](../evidence/native-registry-077/README.md),
+[incremental browser allocation](../evidence/typescript-writer-077/README.md) and
+[parser cleanup](../evidence/parser-cleanup-077/README.md). Historical evidence is
+retained; no compatibility codec or fallback was introduced.
 
-## Production direction and tooling
+One Serde/Postcard codec remains. Metadata follows declaration order without field
+IDs. Consumers own identities and coordinated layout changes. Keep original frames
+for retries and raw-byte signatures; collection/custom Serde normalization remains
+consumer-owned. Use ByteBuf/Bytes for binary fields and Packed<T> where measured,
+retaining bounds and small-varint controls. See [runtime](../runtime.md) and
+[bulk guidance](../packed-fields.md). Real big-endian execution remains unqualified.
 
-One Serde/Postcard codec remains. Metadata follows Serde declaration order without
-field IDs. Consumers assign identities and coordinate layouts. Collections/custom
-Serde may normalize; retain original frames for retries and raw-byte signatures.
-Use ByteBuf/Bytes for binary data and Packed<T> for suitable bulk fields, preserving
-field bounds and small-varint controls. See the [runtime](../runtime.md) and
-[bulk guide](../packed-fields.md). Real big-endian execution remains unqualified.
-Full CI, fresh macOS execution, publication and consumer adoption were not performed
-in this local batch. Sibling endpoint policy stays consumer-owned.
-
-Build/Testkit and the release editor select 0.68.1; Platform selects 0.6.15.
-Shared Tooling remains 0.26.10 at `4c0f198e56d4c6d27b12a5c2d515e0e01070151e`.
-The [evaluation guide](../evaluation.md) indexes maintained and historical evidence.
+Build/Testkit and release editor select 0.68.1; Platform selects 0.6.15.
+Shared Tooling is 0.26.10 at `4c0f198e56d4c6d27b12a5c2d515e0e01070151e`.
+Own versions remain 0.7.8. This ordinary follow-up leaves staging, commits and
+publication of pending 0.7.9 to the maintainer. Full CI and consumer suites were
+not run for this local change.
