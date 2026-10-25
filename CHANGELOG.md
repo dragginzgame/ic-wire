@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.8]
+## [0.7.8] - 2026-10-25
 
 - Project optional `serde_bytes` adapter fields as options of byte buffers,
   including aliases and qualified generic fields. `None` / `Some(empty)` remain
