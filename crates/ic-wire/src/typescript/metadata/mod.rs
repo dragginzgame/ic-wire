@@ -3,7 +3,7 @@ use super::{GenerationError, MAX_SAFE_INTEGER};
 use alloc::{
     collections::{BTreeMap, BTreeSet},
     format,
-    string::{String, ToString},
+    string::String,
     vec::Vec,
 };
 use serde_json::{Value, json};
@@ -332,8 +332,10 @@ pub fn generate_registry(
     // Computed __proto__ keys preserve the own properties JSON.parse previously
     // produced. JSON escapes quotes inside strings, so this matches keys only.
     // Registry meaning and wire schemas stay unchanged; no consumer migration.
-    let registry = json!(types)
-        .to_string()
+    // Serialize the borrowed registry directly instead of constructing a second
+    // Value tree. JSON bytes, validation and consumer contracts are unchanged.
+    let registry = serde_json::to_string(types)
+        .map_err(|_| GenerationError::Schema)?
         .replace("\"__proto__\":", "[\"__proto__\"]:");
     source.push_str(&format!("const $types = {registry};\n"));
     let mut names = BTreeSet::new();

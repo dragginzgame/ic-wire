@@ -89,13 +89,24 @@ fn attributes(
     })
 }
 
-fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Result<TokenStream> {
-    let values: Vec<_> = fields
+fn fields<'a>(
+    fields: &'a Fields,
+    context: &syn::Ident,
+    transparent: bool,
+    collected: &mut Vec<(&'a syn::Field, Projection)>,
+) -> syn::Result<TokenStream> {
+    // Parse once in declaration order; metadata labels and generic bounds share
+    // the same validated field projection. Emitted layouts and refusals are unchanged.
+    let start = collected.len();
+    for field in fields {
+        collected.push((field, attributes(&field.attrs, false, true, true)?));
+    }
+    let projections = &collected[start..];
+    let values: Vec<_> = projections
         .iter()
-        .map(|f| {
+        .map(|(f, projection)| {
             let ty = &f.ty;
-            let projection = attributes(&f.attrs, false, true, true)?;
-            Ok(if projection.bytes {
+            if projection.bytes {
                 // serde_bytes encodes a byte buffer rather than visiting a list.
                 // Existing annotated fields keep their bytes and budgets; only
                 // previously unavailable metadata becomes Uint8Array. Regenerate
@@ -103,9 +114,9 @@ fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Resu
                 quote!(#context.describe_bytes::<#ty>()?)
             } else {
                 quote!(#context.describe::<#ty>()?)
-            })
+            }
         })
-        .collect::<syn::Result<_>>()?;
+        .collect();
     let json = quote!(::ic_wire::__private::serde_json::json);
     if transparent {
         if values.len() != 1 {
@@ -118,25 +129,22 @@ fn fields(fields: &Fields, context: &syn::Ident, transparent: bool) -> syn::Resu
     }
     Ok(match fields {
         Fields::Unit => quote!(#json!({"k":"unit"})),
-        Fields::Named(fields) => {
+        Fields::Named(_) => {
             // Previously renamed fields could not derive metadata. Project their
             // browser labels without changing positional bytes or field order;
             // consumers adopting the derive must retain their existing labels.
             let mut unique = std::collections::BTreeSet::new();
-            let names = fields
-                .named
+            let names = projections
                 .iter()
-                .map(|f| {
-                    let name = attributes(&f.attrs, false, true, true)?
-                        .rename
-                        .unwrap_or_else(|| {
-                            f.ident
-                                .as_ref()
-                                .unwrap()
-                                .to_string()
-                                .trim_start_matches("r#")
-                                .to_owned()
-                        });
+                .map(|(f, projection)| {
+                    let name = projection.rename.clone().unwrap_or_else(|| {
+                        f.ident
+                            .as_ref()
+                            .unwrap()
+                            .to_string()
+                            .trim_start_matches("r#")
+                            .to_owned()
+                    });
                     if !unique.insert(name.clone()) {
                         return Err(syn::Error::new_spanned(
                             f,
@@ -163,8 +171,9 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
     // projection instead describes unchanged Serde bytes: declaration-order fields
     // and zero-based variant indices. Reordering is a protocol change requiring
     // coordinated consumers; no tags, compatibility reader or serializer is added.
+    let mut collected = Vec::new();
     let body = match &input.data {
-        Data::Struct(data) => fields(&data.fields, &context, transparent)?,
+        Data::Struct(data) => fields(&data.fields, &context, transparent, &mut collected)?,
         Data::Enum(data) if !transparent && !data.variants.is_empty() => {
             let mut variants = Vec::new();
             let mut unique = std::collections::BTreeSet::new();
@@ -190,7 +199,7 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
                         "duplicate Wire variant name after Serde rename",
                     ));
                 }
-                let value = fields(&variant.fields, &context, newtype)?;
+                let value = fields(&variant.fields, &context, newtype, &mut collected)?;
                 variants.push(quote!({"name":#name,"id":#id,"value":#value}));
             }
             quote!(
@@ -206,13 +215,8 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
     };
     let name = &input.ident;
     let mut generics = input.generics.clone();
-    let fields: Vec<_> = match &input.data {
-        Data::Struct(data) => data.fields.iter().collect(),
-        Data::Enum(data) => data.variants.iter().flat_map(|v| &v.fields).collect(),
-        Data::Union(_) => unreachable!(),
-    };
     let mut recursive = false;
-    for field in fields {
+    for (field, projection) in collected {
         let mut visitor = RecursiveType { name, found: false };
         visitor.visit_type(&field.ty);
         recursive |= visitor.found;
@@ -221,7 +225,7 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         // would instead make trait selection cycle before projection can start.
         if !visitor.found && input.generics.type_params().next().is_some() {
             let ty = &field.ty;
-            let bound = if attributes(&field.attrs, false, true, true)?.bytes {
+            let bound = if projection.bytes {
                 quote!(::ic_wire::typescript::SerdeBytesField)
             } else {
                 quote!(::ic_wire::typescript::Wire)

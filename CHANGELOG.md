@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.10]
+
+- Parse derive field attributes once and reuse the validated projection for
+  metadata labels and generic bounds. Serialize borrowed registries directly
+  during TypeScript generation instead of building a duplicate JSON tree.
+  Generated tokens/client source, protocol bytes and acceptance rules are
+  unchanged; collision, cycle and traversal checks remain intact.
+
 ## [0.7.9] - 2026-10-25
 
 - Add host-only `lint_bulk_roots` for field/use-site bulk review across interned
