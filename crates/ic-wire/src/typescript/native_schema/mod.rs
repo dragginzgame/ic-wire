@@ -2,6 +2,8 @@
 use super::GenerationError;
 use alloc::{borrow::Cow, boxed::Box, string::String, vec::Vec};
 use serde_json::{Value, json};
+mod registry;
+pub use registry::SchemaRegistry;
 
 /// Metadata for a native Postcard serialization layout, not a runtime resource bound.
 ///
@@ -36,10 +38,11 @@ pub trait SerdeBytesField: byte_field::Sealed {}
 impl<T: byte_field::Sealed + ?Sized> SerdeBytesField for T {}
 
 /// Bounded traversal used by derived and explicitly implemented metadata.
-/// Constructed by [`native_schema`]; it does not infer codec resource allowances.
+/// Constructed by [`native_schema`] or [`SchemaRegistry`]; no codec limits are inferred.
 pub struct SchemaContext {
     depth: usize,
     remaining: usize,
+    names: Option<Box<registry::Names>>,
 }
 impl SchemaContext {
     /// Describe a qualified `serde_bytes` field while retaining traversal checks.
@@ -56,7 +59,7 @@ impl SchemaContext {
         }
         self.depth += 1;
         self.remaining -= 1;
-        let result = T::native_schema(self);
+        let result = self.named::<T>(T::native_schema);
         self.depth -= 1;
         result
     }
@@ -67,10 +70,12 @@ impl SchemaContext {
 /// Generic parameters must be instantiated (for example `Page<User>`). Schemas
 /// are inlined, with a 64-level/65,536-node traversal ceiling; recursive types
 /// return Complexity. Method identity and runtime budgets remain caller-owned.
+/// Use [`SchemaRegistry`] to collect named recursive declarations instead.
 pub fn native_schema<T: Wire + ?Sized>() -> Result<Value, GenerationError> {
     SchemaContext {
         depth: 0,
         remaining: 65536,
+        names: None,
     }
     .describe::<T>()
 }

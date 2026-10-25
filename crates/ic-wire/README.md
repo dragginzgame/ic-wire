@@ -400,9 +400,44 @@ inside transparent identifiers. Borrowed and owned equal strings encode identica
 Ordinary Serde deserialization produces `Cow::Owned`; use `&str` when the contract
 requires a borrowed view of the input frame.
 
-The first version inlines concrete schemas and rejects recursive types or schemas
+`native_schema` inlines concrete schemas and rejects recursive types or schemas
 exceeding 64 levels/65,536 visited nodes with `GenerationError::Complexity`.
-The existing explicit registry API still supports named recursive references.
+Use `SchemaRegistry` for finite named projection of recursive declarations:
+
+```rust
+# #[cfg(feature = "typescript")]
+# fn registry_example() -> Result<(), ic_wire::typescript::GenerationError> {
+use ic_wire::typescript::{SchemaRegistry, generate_registry, method_limits};
+#[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
+enum Value { Null, List(Vec<Value>) }
+let mut registry = SchemaRegistry::new();
+let root = registry.register::<Value>("Value")?;
+let types = registry.finish()?;
+let request = ic_wire::Limits { bytes: 4096, allocation: 65536, nodes: 4096, depth: 64 };
+let response = ic_wire::Limits { bytes: 8192, ..request };
+let mut method = method_limits(request, response)?;
+method.as_object_mut().unwrap().extend(serde_json::json!({
+    "name":"queryValue", "mode":"query", "id":"17",
+    "request":root, "response":root
+}).as_object().unwrap().clone());
+let module = generate_registry(&types, &[method], "./wire-runtime.js")?;
+# let _ = module;
+# Ok(())
+# }
+```
+
+Register explicit roots once and reuse their returned references for methods.
+Nested derived declarations are collected automatically, including mutual recursion
+and distinct generic instantiations. Registering an already collected type under
+a new root name produces an alias; duplicate names reject without overwriting.
+Any registration error invalidates the collector. `finish` checks shapes, references,
+alias cycles and complexity before returning the map. Generated nested names use
+compiler type names and traversal order for host-local interning; they are not
+stable schema hashes or method identities. Regenerate the complete registry together.
+Projection callbacks must be deterministic and can run more than once: collection
+rechecks encountered shapes, rejecting conflicting projections of the same label.
+Inline projection remains available with its existing output and limits.
+
 Metadata is trusted host configuration, not reflection over arbitrary serializers.
 A derive cannot inspect a handwritten Serialize/Deserialize implementation in
 another block: use it only alongside ordinary Serde derives on that declaration.
@@ -416,11 +451,54 @@ runtime adapter supplies `networkHex`; it must **throw** on anything except
 Missing named checks fail closed. Do not omit domain validation or add an
 unchecked fallback. The maintained native schema conformance fixture demonstrates
 this full Rust/TypeScript contract, including invalid and missing checks.
+Manual recursive projections participate through the existing
+`context.describe` child calls; no new derive helper or custom serializer is needed.
+Keep consumer reflection for shapes without supported metadata implementations and
+keep all custom scalar validators, identities and endpoint policies. This addition
+does not infer handwritten Serde layouts or change bytes, envelopes or admission.
+
+### Projecting browser budgets
+
+`method_limits(request, response)` validates and projects the six byte/node/depth
+properties from independent `Limits`. Byte allowances include the 11-byte envelope;
+values must fit JavaScript's exact integer range, bytes must be at least 11, and
+nodes/depth must be positive. The same validator checks manually authored method
+metadata. **Allocation is omitted:** Rust allocation admission is not a JavaScript
+heap bound. Equal numeric node/depth limits do not imply equal acceptance.
+
+The maintained cross-runtime fixtures freeze these minimum node allowances for
+their concrete values (Rust encode/decode versus TS encode/decode):
+
+| Value | Rust encode / decode | TS encode / decode |
+| --- | ---: | ---: |
+| u8, transparent u8, byte buffer or packed i16 buffer | 4 / 1 | 1 / 1 |
+| Some(u8) or a u8 newtype | 8 / 2 | 2 / 2 |
+| Record containing u8 and Some(u8) | 16 / 6 | 4 / 4 |
+| Recursive enum containing a list with one empty variant | 12 / 9 | 4 / 4 |
+
+Rust charges Serde adapter/seed visits; TS charges metadata value traversal.
+For a scalar, minimum depth is 3/1 in Rust encode/decode and 1/1 in TS. Bounds
+also differ for wrappers and recursive structures; there is no universal scaling
+factor. Exact frame byte ceilings agree for the qualified ordinary layouts.
+Decode success never guarantees re-encode under the same allowance.
+
+Consumer qualification: project each direction from its owning constants, test
+real values just below/at/above byte/node/depth boundaries in both runtimes, and
+record intentional differences. Include empty/nested/optional recursion, custom
+validators, malformed inputs and byte/packed fields. The reusable conformance
+example emits `admission.json` and `admission-results.json` with those checks;
+it does not qualify a consumer's custom Serde code, JS heap or endpoint transport.
 
 Native byte/allocation/node/depth budgets and method/direction binding are
 unchanged. Metadata does not infer allowances. JavaScript enforces its existing
 byte/node/depth limits; these are not a measurement of JavaScript heap allocation
 or a promise of identical traversal charges to Rust's Serde visitor.
+
+The TypeScript encoder starts with at most 64 bytes and grows its private buffer
+within the selected direction's byte ceiling. Each returned frame owns its bytes;
+there is no buffer pool or extra sizing pass that repeats custom validators.
+Growth copies and temporary text buffers mean cumulative allocation can exceed
+the frame ceiling; this is not a JavaScript heap bound.
 
 ## Package and license
 

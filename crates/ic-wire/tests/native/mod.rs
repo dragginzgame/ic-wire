@@ -3,6 +3,8 @@ mod adversarial;
 #[cfg(feature = "typescript")]
 mod bulk_lint;
 mod packed;
+#[cfg(feature = "typescript")]
+mod registry;
 use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};
 

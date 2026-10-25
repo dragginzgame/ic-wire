@@ -1,4 +1,5 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
+mod admission;
 mod large_bytes;
 mod native_schema;
 use ic_wire::{Bytes, Limits, List, Text, Wire};
@@ -481,5 +482,7 @@ fn main() {
     }
     f.checks.push_str(&large_bytes::generate(&f.directory));
     f.checks.push_str(&native_schema::generate(&f.directory));
+    f.checks.push_str(&admission::generate(&f.directory));
+    f.checks.push_str(include_str!("writer.mjs"));
     fs::write(f.directory.join("checks.mjs"), f.checks).unwrap();
 }

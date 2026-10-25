@@ -78,17 +78,27 @@ function validate(schema: Schema, value: unknown, checks: Checks): void {
   }
 }
 class Writer {
-  readonly bytes: Uint8Array;
-  private readonly view: DataView;
+  bytes: Uint8Array;
+  private view: DataView;
   offset = 11;
-  constructor(size: number, id: bigint, direction: number) {
-    this.bytes = new Uint8Array(size);
+  constructor(readonly limit: number, id: bigint, direction: number) {
+    // Previously every encode allocated the entire byte allowance. Grow one
+    // private buffer instead; the ceiling, bytes and callback visits are unchanged.
+    // Consumers can regenerate clients without changing contracts or retry bytes.
+    this.bytes = new Uint8Array(Math.min(limit, 64));
     this.bytes.set([73, 87]);
     this.view = new DataView(this.bytes.buffer);
     this.view.setBigUint64(2, id, true);
     this.bytes[10] = direction;
   }
-  byte(value: number) { if (this.offset === this.bytes.length) fail('limit'); this.bytes[this.offset++] = value; }
+  private grow(required: number) {
+    if (required > this.limit) fail('limit');
+    const bytes = new Uint8Array(Math.min(this.limit, Math.max(required, this.bytes.length * 2)));
+    bytes.set(this.bytes);
+    this.bytes = bytes;
+    this.view = new DataView(bytes.buffer);
+  }
+  byte(value: number) { if (this.offset === this.bytes.length) this.grow(this.offset + 1); this.bytes[this.offset++] = value; }
   varint(value: bigint) {
     do { const byte = Number(value & 127n); value >>= 7n; this.byte(value ? byte | 128 : byte); } while (value);
   }
@@ -98,12 +108,12 @@ class Writer {
   }
   float(value: number, bits: number) {
     const length = bits / 8;
-    if (length > this.bytes.length - this.offset) fail('limit');
+    if (length > this.bytes.length - this.offset) this.grow(this.offset + length);
     if (bits === 32) this.view.setFloat32(this.offset, value, true); else this.view.setFloat64(this.offset, value, true);
     this.offset += length;
   }
   raw(bytes: Uint8Array) {
-    if (bytes.length > this.bytes.length - this.offset) fail('limit');
+    if (bytes.length > this.bytes.length - this.offset) this.grow(this.offset + bytes.length);
     this.bytes.set(bytes, this.offset); this.offset += bytes.length;
   }
 }
@@ -195,7 +205,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (value.byteLength % width) return fail('value');
       if (s.k === 'packed-i16' && value.byteLength / width > s.max) fail('limit');
       out.varint(BigInt(value.byteLength));
-      if (value.byteLength > out.bytes.length - out.offset) fail('limit');
+      if (value.byteLength > out.limit - out.offset) fail('limit');
       const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
       if (littleEndian || kind === 'hash32') out.raw(bytes);
       else { const copy = new Uint8Array(bytes); swapWords(copy, width); out.raw(copy); }
@@ -203,7 +213,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
     }
     case 'text': {
       if (typeof value !== 'string') fail('value');
-      const text = value as string, remaining = Math.min(s.max ?? out.bytes.length, out.bytes.length - out.offset);
+      const text = value as string, remaining = Math.min(s.max ?? out.limit, out.limit - out.offset);
       if (text.length > remaining) fail('limit');
       // UTF-8 needs at most three bytes per UTF-16 code unit.
       const buffer = new Uint8Array(Math.min(remaining, text.length * 3)), result = utf16.encodeInto(text, buffer);
@@ -342,7 +352,8 @@ export function createCodec(metadata: unknown, registry: unknown = {}, checks: C
   function encode(value: unknown, direction: 0 | 1): Uint8Array {
     const out = new Writer(direction ? meta.responseBytes : meta.requestBytes, id, direction);
     write(direction ? meta.response : meta.request, value, out, new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth), 1, types, checks);
-    return out.bytes.slice(0, out.offset);
+    // A full private buffer is already an exact owned result; otherwise trim it.
+    return out.offset === out.bytes.length ? out.bytes : out.bytes.slice(0, out.offset);
   }
   function decode(bytes: Uint8Array, direction: 0 | 1): unknown {
     if (!(bytes instanceof Uint8Array)) return fail('value');

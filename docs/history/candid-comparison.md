@@ -249,7 +249,7 @@ The full five-cohort suite compares the isolated ordinary Serde-derive prototype
 against Candid, with **finite admission and bounded fields retained**. This does
 not replace the runtime with unrestricted native Serde and is not shipped code.
 The Toko cohort already uses native Serde and is an unchanged control. See the
-[derive experiment](../evaluation.md#standard-serde-derives-with-finite-admission-0523-experiment)
+[derive experiment](evaluation.md#standard-serde-derives-with-finite-admission-0523-experiment)
 for the prototype's custom-serializer and schema-identity limitations.
 
 There are 235 fixture cases across the five cohorts; scale cohorts overlap and

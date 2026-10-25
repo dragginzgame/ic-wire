@@ -1,12 +1,14 @@
 //! Host-side TypeScript projection of Serde layouts.
 mod bulk_lint;
 pub use bulk_lint::{BulkLintReport, BulkWarning, lint_bulk_fields};
+mod limits;
 mod metadata;
+pub use limits::method_limits;
 mod native_schema;
 pub use metadata::generate_registry;
 #[doc(hidden)]
 pub use native_schema::SerdeBytesField;
-pub use native_schema::{SchemaContext, Wire, native_schema};
+pub use native_schema::{SchemaContext, SchemaRegistry, Wire, native_schema};
 
 // JavaScript's safe-integer ceiling for generated numeric bounds.
 const MAX_SAFE_INTEGER: u64 = (1_u64 << 53) - 1;

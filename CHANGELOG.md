@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.7.7]
+
+- Grow TypeScript encode buffers incrementally instead of allocating the full
+  directional byte allowance for every call. Preserve owned outputs, exact wire
+  bytes, admission rules and custom-validator visits. Fixes the allocation issue
+  in [#22](https://github.com/dragginzgame/ic-wire/issues/22); generated clients
+  need regeneration to receive the change, with no contract migration.
+- Add host-only `SchemaRegistry` collection for named recursive native metadata,
+  including mutual recursion and concrete generic types. Add validated directional
+  `method_limits` projection and cross-runtime admission boundary fixtures.
+  Wire bytes, envelopes and runtime admission counters remain unchanged. Addresses
+  [#20 — recursive registries](https://github.com/dragginzgame/ic-wire/issues/20) and
+  [#21 — browser budget projection](https://github.com/dragginzgame/ic-wire/issues/21).
+- Simplify the private Postcard reader to its sole byte-slice input and remove an
+  unused finite-float macro argument. Public APIs, wire bytes and admission rules
+  are unchanged.
+- Centralize benchmark cohort selection and share one source snapshot across
+  matrix runs while keeping standalone runs self-contained. Separate historical
+  experiments from the current evaluation guide without deleting evidence.
+
 ## [0.7.6] - 2026-10-24
 
 - Strengthen adversarial decode qualification: verify envelope rejection before

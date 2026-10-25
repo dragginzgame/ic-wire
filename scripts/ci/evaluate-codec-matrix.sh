@@ -14,7 +14,7 @@ mkdir "$out"
 mkdir -p "$out/source/scripts/ci"
 cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
 cp -R crates "$out/source/"
-cp scripts/ci/evaluate-codecs.sh scripts/ci/evaluate-codec-matrix.sh "$out/source/scripts/ci/"
+cp scripts/ci/evaluate-codecs.sh scripts/ci/evaluate-codec-matrix.sh scripts/ci/codec-cohorts.psv "$out/source/scripts/ci/"
 git rev-parse HEAD > "$out/source-head.txt"
 git status --short > "$out/source-status.txt"
 git diff --binary HEAD > "$out/source-changes.patch"
@@ -24,33 +24,12 @@ matrix_target="${CARGO_TARGET_DIR:-$root/target/codec-matrix-build}"
 export CARGO_TARGET_DIR="$matrix_target"
 export CARGO_NET_OFFLINE=true RUSTUP_AUTO_INSTALL=0
 export RUNS="${RUNS:-2}" SAMPLES="${SAMPLES:-11}" BATCH_MS="${BATCH_MS:-2}"
-cat > "$out/cohorts.psv" <<'COHORTS'
-standard||wire-native
-toko|toko|wire-native
-derive-1|derive-scale-1|wire-bounded
-derive-10|derive-scale-10|wire-bounded
-derive-100|derive-scale|wire-bounded
-packed-i16|packed-i16|wire-packed-i16
-packed-control|packed-i16-baseline|wire-native
-packed-shared-1|packed-scale-shared,derive-scale-1|wire-bounded
-packed-shared-10|packed-scale-shared,derive-scale-10|wire-bounded
-packed-shared-100|packed-scale-shared|wire-bounded
-packed-varied-1|packed-scale,derive-scale-1|wire-bounded
-packed-varied-10|packed-scale,derive-scale-10|wire-bounded
-packed-varied-100|packed-scale|wire-bounded
-bulk|bulk|wire-bounded
-bulk-control|bulk,bulk-baseline|wire-bounded
-bulk-1|bulk-scale,derive-scale-1|wire-bounded
-bulk-10|bulk-scale,derive-scale-10|wire-bounded
-bulk-100|bulk-scale|wire-bounded
-bulk-control-1|bulk-scale,bulk-baseline,derive-scale-1|wire-bounded
-bulk-control-10|bulk-scale,bulk-baseline,derive-scale-10|wire-bounded
-bulk-control-100|bulk-scale,bulk-baseline|wire-bounded
-COHORTS
+cp scripts/ci/codec-cohorts.psv "$out/cohorts.psv"
 cd "$out/source"
 while IFS='|' read -r name features primary; do
+    [ "$name" != hotspots ] || continue
     printf 'Running %s (%s)\n' "$name" "$primary"
-    CORPUS_FEATURE="$features" bash "$out/source/scripts/ci/evaluate-codecs.sh" "$out/$name" > "$out/$name.log" 2>&1
+    CODEC_SOURCE_SNAPSHOT="$out/source" CORPUS_FEATURE="$features" bash "$out/source/scripts/ci/evaluate-codecs.sh" "$out/$name" > "$out/$name.log" 2>&1
     printf 'Completed %s\n' "$name"
 done < "$out/cohorts.psv"
 printf 'Full matrix evidence: %s\n' "$out"

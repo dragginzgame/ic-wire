@@ -6,13 +6,25 @@ cd "$root"
 out="${1:-$root/target/codec-comparison}"
 case "$out" in /*) ;; *) out="$root/$out" ;; esac
 corpus="${CORPUS_FEATURE:-}"
-case "$corpus" in ""|hotspots|bulk|bulk,bulk-baseline|bulk-scale|bulk-scale,bulk-baseline|bulk-scale,derive-scale-1|bulk-scale,derive-scale-10|bulk-scale,bulk-baseline,derive-scale-1|bulk-scale,bulk-baseline,derive-scale-10|toko|derive-scale|derive-scale-1|derive-scale-10|packed-i16|packed-i16-baseline|packed-scale|packed-scale-shared|packed-scale,derive-scale-1|packed-scale,derive-scale-10|packed-scale-shared,derive-scale-1|packed-scale-shared,derive-scale-10) ;; *) echo "unknown corpus: $corpus" >&2; exit 1;; esac
+primary=""
+while IFS='|' read -r name features lane; do
+    if [ "$corpus" = "$features" ]; then primary="$lane"; break; fi
+done < scripts/ci/codec-cohorts.psv
+[ -n "$primary" ] || { echo "unknown corpus: $corpus" >&2; exit 1; }
 extra="${corpus:+,$corpus}"
 mkdir "$out"
-mkdir -p "$out/source/scripts/ci"
-cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
-cp -R crates "$out/source/"
-cp scripts/ci/evaluate-codecs.sh "$out/source/scripts/ci/"
+if [ -n "${CODEC_SOURCE_SNAPSHOT:-}" ]; then
+    # Matrix cohorts execute from one frozen source tree. Retain its location
+    # rather than copying that same tree for every cohort.
+    [ "$CODEC_SOURCE_SNAPSHOT" = "$root" ] || { echo 'snapshot must be the executing source tree' >&2; exit 1; }
+    [ "$(cd "$out/.." && pwd)/source" = "$root" ] || { echo 'snapshot must be adjacent to cohort output' >&2; exit 1; }
+    printf '../source\n' > "$out/source-location.txt"
+else
+    mkdir -p "$out/source/scripts/ci"
+    cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
+    cp -R crates "$out/source/"
+    cp scripts/ci/evaluate-codecs.sh scripts/ci/codec-cohorts.psv "$out/source/scripts/ci/"
+fi
 runs="${RUNS:-2}"
 samples="${SAMPLES:-11}"
 batch_ms="${BATCH_MS:-2}"
@@ -46,11 +58,6 @@ for profile in evaluation benchmark-speed; do
         printf '%s,%s,%s,%s,%s\n' "$profile" "$codec" "$bytes" "${digest%% *}" "$code_bytes" >> "$out/wasm.csv"
     done
 done
-primary=wire-native
-case "$corpus" in
-    packed-i16) primary=wire-packed-i16;;
-    derive-scale*|packed-scale*|bulk*) primary=wire-bounded;;
-esac
 cargo run --locked -p ic-wire-benchmarks --example codec-report -- "$out" "$primary"
 if [ -n "${POCKET_IC_BIN:-}" ]; then
     cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features "wire,candid,ic$extra" -- "$out" > "$out/instructions.log" 2>&1

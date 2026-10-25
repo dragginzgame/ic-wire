@@ -8,7 +8,7 @@ use alloc::{
 };
 use serde_json::{Value, json};
 
-fn identifier(name: &str) -> Result<(), GenerationError> {
+pub(super) fn identifier(name: &str) -> Result<(), GenerationError> {
     // These names appear as executable declarations, unlike escaped field names.
     if name.is_empty()
         || !name
@@ -347,27 +347,7 @@ pub fn generate_registry(
         {
             return Err(GenerationError::Schema);
         }
-        for key in [
-            "requestBytes",
-            "responseBytes",
-            "requestNodes",
-            "responseNodes",
-            "requestDepth",
-            "responseDepth",
-        ] {
-            let n = method[key].as_u64().ok_or(GenerationError::Complexity)?;
-            if n > MAX_SAFE_INTEGER {
-                return Err(GenerationError::Complexity);
-            }
-            let minimum = if key.ends_with("Bytes") {
-                crate::contract::HEADER as u64
-            } else {
-                1
-            };
-            if n < minimum {
-                return Err(GenerationError::Limits);
-            }
-        }
+        super::limits::validate(method)?;
         let request = ty(&method["request"], types, 0, &mut remaining)?;
         let response = ty(&method["response"], types, 0, &mut remaining)?;
         source.push_str(&format!(

@@ -13,39 +13,32 @@ const fn varint_max<T>() -> usize {
 const fn max_of_last_byte<T>() -> u8 {
     (1 << (core::mem::size_of::<T>() * 8 % 7)) - 1
 }
-use core::marker::PhantomData;
 
-/// A `serde` compatible deserializer, generic over “Flavors” of deserializing plugins.
+/// A `serde` compatible deserializer for Wire's borrowed byte-slice input.
 ///
 /// Please note that postcard messages are not self-describing and therefore incompatible with
 /// [internally tagged enums](https://serde.rs/enum-representations.html#internally-tagged).
-pub(super) struct Deserializer<'de, F: Flavor<'de>> {
-    flavor: F,
-    _plt: PhantomData<&'de ()>,
+pub(super) struct Deserializer<'de> {
+    flavor: Slice<'de>,
 }
 
-impl<'de, F> Deserializer<'de, F>
-where
-    F: Flavor<'de> + 'de,
-{
-    /// Return the remaining (unused) bytes in the Deserializer along with any
-    /// additional data provided by the [`Flavor`]
-    pub(super) fn finalize(self) -> Result<F::Remainder> {
+impl<'de> Deserializer<'de> {
+    /// Return the remaining unused input bytes.
+    pub(super) fn finalize(self) -> Result<&'de [u8]> {
         self.flavor.finalize()
     }
 }
 
-impl<'de> Deserializer<'de, Slice<'de>> {
+impl<'de> Deserializer<'de> {
     /// Obtain a Deserializer from a slice of bytes
     pub(super) fn from_bytes(input: &'de [u8]) -> Self {
         Deserializer {
             flavor: Slice::new(input),
-            _plt: PhantomData,
         }
     }
 }
 
-impl<'de, F: Flavor<'de>> Deserializer<'de, F> {
+impl<'de> Deserializer<'de> {
     #[cfg(target_pointer_width = "16")]
     #[inline(always)]
     fn try_take_varint_usize(&mut self) -> Result<usize> {
@@ -183,12 +176,12 @@ impl<'de, F: Flavor<'de>> Deserializer<'de, F> {
     }
 }
 
-struct SeqAccess<'a, 'b, F: Flavor<'b>> {
-    deserializer: &'a mut Deserializer<'b, F>,
+struct SeqAccess<'a, 'b> {
+    deserializer: &'a mut Deserializer<'b>,
     len: usize,
 }
 
-impl<'a, 'b: 'a, F: Flavor<'b>> serde::de::SeqAccess<'b> for SeqAccess<'a, 'b, F> {
+impl<'a, 'b: 'a> serde::de::SeqAccess<'b> for SeqAccess<'a, 'b> {
     type Error = Error;
 
     #[inline]
@@ -213,12 +206,12 @@ impl<'a, 'b: 'a, F: Flavor<'b>> serde::de::SeqAccess<'b> for SeqAccess<'a, 'b, F
     }
 }
 
-struct MapAccess<'a, 'b, F: Flavor<'b>> {
-    deserializer: &'a mut Deserializer<'b, F>,
+struct MapAccess<'a, 'b> {
+    deserializer: &'a mut Deserializer<'b>,
     len: usize,
 }
 
-impl<'a, 'b: 'a, F: Flavor<'b>> serde::de::MapAccess<'b> for MapAccess<'a, 'b, F> {
+impl<'a, 'b: 'a> serde::de::MapAccess<'b> for MapAccess<'a, 'b> {
     type Error = Error;
 
     #[inline]
@@ -245,7 +238,7 @@ impl<'a, 'b: 'a, F: Flavor<'b>> serde::de::MapAccess<'b> for MapAccess<'a, 'b, F
     }
 }
 
-impl<'de, F: Flavor<'de>> de::Deserializer<'de> for &mut Deserializer<'de, F> {
+impl<'de> de::Deserializer<'de> for &mut Deserializer<'de> {
     type Error = Error;
 
     #[inline]
@@ -595,7 +588,7 @@ impl<'de, F: Flavor<'de>> de::Deserializer<'de> for &mut Deserializer<'de, F> {
     }
 }
 
-impl<'de, F: Flavor<'de>> serde::de::VariantAccess<'de> for &mut Deserializer<'de, F> {
+impl<'de> serde::de::VariantAccess<'de> for &mut Deserializer<'de> {
     type Error = Error;
 
     #[inline]
@@ -623,7 +616,7 @@ impl<'de, F: Flavor<'de>> serde::de::VariantAccess<'de> for &mut Deserializer<'d
     }
 }
 
-impl<'de, F: Flavor<'de>> serde::de::EnumAccess<'de> for &mut Deserializer<'de, F> {
+impl<'de> serde::de::EnumAccess<'de> for &mut Deserializer<'de> {
     type Error = Error;
     type Variant = Self;
 

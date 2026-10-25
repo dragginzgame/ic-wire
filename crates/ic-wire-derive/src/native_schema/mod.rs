@@ -175,7 +175,10 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         let mut visitor = RecursiveType { name, found: false };
         visitor.visit_type(&field.ty);
         recursive |= visitor.found;
-        if !visitor.found {
+        // Concrete fields need no where-clause: their calls are checked in the
+        // body. Redundant A: Wire / B: Wire clauses on mutually recursive types
+        // would instead make trait selection cycle before projection can start.
+        if !visitor.found && input.generics.type_params().next().is_some() {
             let ty = &field.ty;
             let bound = if attributes(&field.attrs, false, true, true)?.bytes {
                 quote!(::ic_wire::typescript::SerdeBytesField)

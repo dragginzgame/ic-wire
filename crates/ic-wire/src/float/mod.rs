@@ -2,7 +2,7 @@ use crate::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
 macro_rules! finite {
-    ($name:ident, $primitive:ty, $bits:literal) => {
+    ($name:ident, $primitive:ty) => {
         /// A finite IEEE-754 value encoded in Postcard's native little-endian form.
         ///
         /// NaN and infinity are rejected. All finite bits, including negative zero
@@ -36,5 +36,5 @@ macro_rules! finite {
         }
     };
 }
-finite!(FiniteF32, f32, 32);
-finite!(FiniteF64, f64, 64);
+finite!(FiniteF32, f32);
+finite!(FiniteF64, f64);
