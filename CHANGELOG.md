@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.9]
+## [0.7.9] - 2026-10-25
 
 - Add host-only `lint_bulk_roots` for field/use-site bulk review across interned
   registries. Explicit root labels and primitive-word path suffixes preserve
