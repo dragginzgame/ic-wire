@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.11]
+## [0.7.11] - 2026-10-25
 
 - Run bulk field advice automatically during host TypeScript generation. Replace
   the silent three-argument `generate_registry` API with an acknowledgement map
