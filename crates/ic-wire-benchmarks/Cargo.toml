@@ -35,6 +35,7 @@ derive-scale-10 = ["derive-scale"]
 [dev-dependencies]
 ic-platform = { workspace = true, features = ["candid", "ic0"] }
 ic-wire.workspace = true
+num-bigint.workspace = true
 serde.workspace = true
 serde_bytes.workspace = true
 serde_json.workspace = true
@@ -60,6 +61,16 @@ path = "examples/report/mod.rs"
 name = "codec-instructions"
 path = "examples/instructions/mod.rs"
 required-features = ["wire", "candid", "ic"]
+
+[[example]]
+name = "admission-wasm"
+path = "examples/admission_wasm/mod.rs"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "admission-instructions"
+path = "examples/admission_instructions/mod.rs"
+required-features = ["ic"]
 
 # IC exports require unsafe attributes, but the fixture uses only safe system calls.
 # Keep denial everywhere except the explicitly exported entrypoint.

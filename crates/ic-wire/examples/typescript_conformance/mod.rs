@@ -64,6 +64,12 @@ struct SqlPage {
     rows: List<List<SqlCell, 8>, 4>,
     next: Option<Bytes<16>>,
 }
+// Consumer-owned numeric evidence; Wire only owns the bounded byte layout.
+#[derive(serde::Serialize, serde::Deserialize, Wire)]
+struct MagnitudeEvidence {
+    cycles_sent: Option<Bytes<64>>,
+}
+
 // Native Serde shape oracle, independent of the JavaScript descriptor.
 #[derive(serde::Serialize)]
 struct NativeCount(u64);
@@ -478,6 +484,53 @@ fn main() {
         ic_wire::Packed::new(vec![[0xab_u8; 32], [0xcd; 32]]),
         "Uint8Array.from([...new Uint8Array(32).fill(0xab),...new Uint8Array(32).fill(0xcd)])",
     );
+    // Issue #26: owned arbitrary unsigned evidence uses bounded byte magnitudes.
+    // Canonical numeric conversion remains a consumer check; bytes are unchanged.
+    f.add(
+        MagnitudeEvidence { cycles_sent: None },
+        "{cycles_sent:null}",
+    );
+    for magnitude in [
+        vec![],
+        vec![255; 16],
+        [vec![1], vec![0; 16]].concat(),
+        [vec![1], vec![0; 32]].concat(),
+        vec![255; 64],
+    ] {
+        let javascript = format!("{{cycles_sent:{{some:new Uint8Array({magnitude:?})}}}}");
+        f.add(
+            MagnitudeEvidence {
+                cycles_sent: Some(Bytes::<64>::new(magnitude).unwrap()),
+            },
+            &javascript,
+        );
+    }
+    f.checks.push_str(r#"
+function magnitudeToBigInt(bytes) {
+  if (!(bytes instanceof Uint8Array) || bytes.length > 64 || bytes[0] === 0) throw new Error('unsigned magnitude');
+  let value = 0n;
+  for (const byte of bytes) value = (value << 8n) | BigInt(byte);
+  return value;
+}
+function bigIntToMagnitude(value) {
+  if (typeof value !== 'bigint' || value < 0n || (value >> 512n) !== 0n) throw new Error('unsigned magnitude');
+  const bytes = [];
+  while (value !== 0n) { bytes.push(Number(value & 255n)); value >>= 8n; }
+  return Uint8Array.from(bytes.reverse());
+}
+for (const value of [0n, (1n << 128n)-1n, 1n << 128n, 1n << 256n, (1n << 512n)-1n]) {
+  assert.equal(magnitudeToBigInt(bigIntToMagnitude(value)), value);
+}
+assert.throws(() => bigIntToMagnitude(-1n));
+assert.throws(() => bigIntToMagnitude(1n << 512n));
+assert.equal(magnitudeToBigInt(new Uint8Array()), 0n);
+assert.equal(magnitudeToBigInt(new Uint8Array(Array(16).fill(255))), (1n << 128n) - 1n);
+assert.equal(magnitudeToBigInt(new Uint8Array([1,...Array(16).fill(0)])), 1n << 128n);
+assert.equal(magnitudeToBigInt(new Uint8Array([1,...Array(32).fill(0)])), 1n << 256n);
+assert.throws(() => magnitudeToBigInt(new Uint8Array([0])));
+assert.throws(() => magnitudeToBigInt(new Uint8Array([0,1])));
+assert.throws(() => magnitudeToBigInt(new Uint8Array(65).fill(1)));
+"#);
     f.mutation_data.flush().unwrap();
     let codecs = (0..f.count)
         .map(|index| format!("m{index}"))

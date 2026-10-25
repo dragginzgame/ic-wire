@@ -987,6 +987,7 @@ dependencies = [
  "ic-platform",
  "ic-testkit",
  "ic-wire",
+ "num-bigint",
  "serde",
  "serde_bytes",
  "serde_json",

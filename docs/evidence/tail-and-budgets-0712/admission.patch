@@ -1,0 +1,207 @@
+diff --git a/crates/ic-wire-benchmarks/Cargo.toml b/crates/ic-wire-benchmarks/Cargo.toml
+index e7473f1..61422c5 100644
+--- a/crates/ic-wire-benchmarks/Cargo.toml
++++ b/crates/ic-wire-benchmarks/Cargo.toml
+@@ -61,6 +61,16 @@ name = "codec-instructions"
+ path = "examples/instructions/mod.rs"
+ required-features = ["wire", "candid", "ic"]
+ 
++[[example]]
++name = "admission-wasm"
++path = "examples/admission_wasm/mod.rs"
++crate-type = ["cdylib"]
++
++[[example]]
++name = "admission-instructions"
++path = "examples/admission_instructions/mod.rs"
++required-features = ["ic"]
++
+ # IC exports require unsafe attributes, but the fixture uses only safe system calls.
+ # Keep denial everywhere except the explicitly exported entrypoint.
+ [lints.rust]
+diff --git a/crates/ic-wire-benchmarks/fixtures/admission/mod.rs b/crates/ic-wire-benchmarks/fixtures/admission/mod.rs
+new file mode 100644
+index 0000000..0e1c288
+--- /dev/null
++++ b/crates/ic-wire-benchmarks/fixtures/admission/mod.rs
+@@ -0,0 +1,60 @@
++//! Illustrative admission budgets, not recommendations for an installed endpoint.
++use ic_wire::{ByteBuf, Error, Limits, native};
++use std::hint::black_box;
++
++pub const LENGTHS: [usize; 6] = [0, 1, 64, 1024, 65536, 1048576];
++pub const POLICIES: [&str; 4] = ["generous", "nodes-1024", "heap-headroom-64k", "frame-64k"];
++pub const KINDS: [&str; 3] = ["ordinary-u8", "byte-buffer", "ordinary-u64"];
++const ID: u64 = 7;
++
++pub fn limits(policy: usize) -> Limits {
++    let mut limits = Limits {
++        bytes: 16 * 1024 * 1024,
++        allocation: 256 * 1024 * 1024,
++        nodes: 8 * 1024 * 1024,
++        depth: 64,
++    };
++    match policy {
++        0 => {}
++        1 => limits.nodes = 1024,
++        2 => limits.allocation = limits.bytes + 65536,
++        3 => limits.bytes = 65536,
++        _ => panic!("unknown budget"),
++    }
++    limits
++}
++
++pub fn frame(kind: usize, length: usize, truncated: bool) -> Vec<u8> {
++    let mut bytes = match kind {
++        0 => native::encode_request(ID, &vec![42_u8; length], limits(0)),
++        1 => native::encode_request(ID, &ByteBuf::from(vec![42_u8; length]), limits(0)),
++        2 => native::encode_request(ID, &vec![u64::MAX; length], limits(0)),
++        _ => panic!("unknown field kind"),
++    }
++    .unwrap();
++    if truncated {
++        bytes.pop();
++    }
++    bytes
++}
++
++pub fn decode(kind: usize, bytes: &[u8], limits: Limits) -> u8 {
++    let result = match kind {
++        0 => native::decode_request::<Vec<u8>>(ID, bytes, limits).map(|v| {
++            black_box(v);
++        }),
++        1 => native::decode_request::<ByteBuf>(ID, bytes, limits).map(|v| {
++            black_box(v);
++        }),
++        2 => native::decode_request::<Vec<u64>>(ID, bytes, limits).map(|v| {
++            black_box(v);
++        }),
++        _ => panic!("unknown field kind"),
++    };
++    match result {
++        Ok(()) => 0,
++        Err(Error::Limit) => 1,
++        Err(Error::Malformed) => 2,
++        Err(error) => panic!("unexpected error: {error}"),
++    }
++}
+diff --git a/crates/ic-wire-benchmarks/examples/admission_wasm/mod.rs b/crates/ic-wire-benchmarks/examples/admission_wasm/mod.rs
+new file mode 100644
+index 0000000..81dfea0
+--- /dev/null
++++ b/crates/ic-wire-benchmarks/examples/admission_wasm/mod.rs
+@@ -0,0 +1,28 @@
++//! IC instruction costs for admission budgets and valid/truncated controls.
++#[path = "../../fixtures/admission/mod.rs"]
++mod admission;
++
++#[allow(unsafe_code)]
++#[cfg_attr(
++    target_arch = "wasm32",
++    unsafe(export_name = "canister_query benchmark")
++)]
++/// Measure one decode; setup and reply transport are outside the counter.
++pub extern "C" fn benchmark() {
++    let mut args = [0_u8; 4];
++    assert_eq!(ic_platform::ic0::msg_arg_data_size(), args.len());
++    ic_platform::ic0::msg_arg_data_copy(&mut args, 0);
++    let [kind, length, policy, truncated] = args.map(usize::from);
++    assert!(kind < admission::KINDS.len() && policy < admission::POLICIES.len());
++    assert!(truncated <= 1);
++    let bytes = admission::frame(kind, admission::LENGTHS[length], truncated != 0);
++    let limits = admission::limits(policy);
++    let expected = admission::decode(kind, &bytes, limits);
++    let start = ic_platform::ic0::performance_counter(0);
++    let result = admission::decode(kind, std::hint::black_box(&bytes), limits);
++    let count = ic_platform::ic0::performance_counter(0) - start;
++    assert_eq!(result, expected);
++    ic_platform::ic0::msg_reply_data_append(&count.to_le_bytes());
++    ic_platform::ic0::msg_reply_data_append(&[result]);
++    ic_platform::ic0::msg_reply();
++}
+diff --git a/crates/ic-wire-benchmarks/examples/admission_instructions/mod.rs b/crates/ic-wire-benchmarks/examples/admission_instructions/mod.rs
+new file mode 100644
+index 0000000..fa5b918
+--- /dev/null
++++ b/crates/ic-wire-benchmarks/examples/admission_instructions/mod.rs
+@@ -0,0 +1,80 @@
++//! Explicit PocketIC admission study; does not alter the production limits.
++#[path = "../../fixtures/admission/mod.rs"]
++mod admission;
++use ic_platform::{candid::contract::Principal, pocket_ic::PocketIcBuilder};
++use ic_testkit::pic::PocketIcStartupConfig;
++use serde_json::json;
++use sha2::{Digest, Sha256};
++use std::{fs, io::Write, path::PathBuf, time::Duration};
++
++fn main() -> Result<(), Box<dyn std::error::Error>> {
++    let mut args = std::env::args().skip(1);
++    let wasm_path = PathBuf::from(args.next().expect("Wasm artifact"));
++    let output = PathBuf::from(args.next().expect("new output directory"));
++    fs::create_dir(&output)?;
++    assert!(std::env::var_os("IC_TESTKIT_POCKET_IC_URL").is_none());
++    let server =
++        PathBuf::from(std::env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server"));
++    let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
++        .build_instance(PocketIcBuilder::new().with_application_subnet())?;
++    let pic = owned.instance();
++    let wasm = fs::read(wasm_path)?;
++    fs::write(
++        output.join("identity.json"),
++        serde_json::to_vec_pretty(&json!({
++            "wasm_sha256": format!("{:x}", Sha256::digest(&wasm)),
++            "server_sha256": format!("{:x}", Sha256::digest(fs::read(server)?)),
++            "lock_sha256": format!("{:x}", Sha256::digest(include_bytes!("../../../../Cargo.lock"))),
++            "fixture_sha256": format!("{:x}", Sha256::digest(include_bytes!("../../fixtures/admission/mod.rs"))),
++            "samples":3,"counter":"ic0.performance_counter(0)",
++            "notes":"Warm decode, including destruction; setup/transport excluded. Budgets are illustrative, not equivalent to Candid quotas."
++        }))?,
++    )?;
++    let canister = pic.create_canister();
++    pic.add_cycles(canister, 100_000_000_000_000);
++    pic.install_canister(canister, wasm, vec![], None);
++    let mut file = fs::File::create(output.join("samples.jsonl"))?;
++    for (kind, name) in admission::KINDS.iter().enumerate() {
++        for (index, length) in admission::LENGTHS.into_iter().enumerate() {
++            for truncated in [false, true] {
++                let bytes = admission::frame(kind, length, truncated);
++                for (policy, label) in admission::POLICIES.iter().enumerate() {
++                    let limits = admission::limits(policy);
++                    let expected = admission::decode(kind, &bytes, limits);
++                    if !truncated && length <= 64 {
++                        assert_eq!(expected, 0);
++                    }
++                    if truncated {
++                        assert_ne!(expected, 0);
++                    }
++                    let mut samples = Vec::new();
++                    for _ in 0..3 {
++                        let reply = pic
++                            .query_call(
++                                canister,
++                                Principal::anonymous(),
++                                "benchmark",
++                                vec![kind as u8, index as u8, policy as u8, u8::from(truncated)],
++                            )
++                            .unwrap();
++                        assert_eq!(reply.len(), 9);
++                        assert_eq!(reply[8], expected);
++                        samples.push(u64::from_le_bytes(reply[..8].try_into().unwrap()));
++                    }
++                    writeln!(
++                        file,
++                        "{}",
++                        json!({"kind":name,"length":length,"truncated":truncated,
++                        "policy":label,"bytes":limits.bytes,"allocation":limits.allocation,
++                        "nodes":limits.nodes,"depth":limits.depth,"frame_bytes":bytes.len(),
++                        "frame_sha256":format!("{:x}", Sha256::digest(&bytes)),
++                        "result":expected,"samples":samples})
++                    )?;
++                }
++            }
++        }
++    }
++    pic.stop_canister(canister, None).unwrap();
++    pic.delete_canister(canister, None).unwrap();
++    Ok(())
++}

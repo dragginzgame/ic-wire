@@ -77,6 +77,14 @@ element bound; generic `Packed<T>` has no per-field maximum.
 Choose one representation per field for all values, including empty and small
 inputs; do not switch layouts according to the current value's length.
 
+Unsigned observations beyond u128 can use `Bytes<N>` as a minimal unsigned
+big-endian magnitude: zero is empty bytes, and nonzero values start with a
+nonzero byte. The consumer checks numeric canonicality and converts its external
+arithmetic type losslessly; generic Wire byte decoding still accepts opaque
+leading zeroes. `Option<Bytes<N>>` keeps missing evidence distinct from zero.
+See the [unsigned evidence guide](../../docs/unsigned-magnitude.md) for bounds,
+exact payload examples, Nat conversion and generated browser handling.
+
 This complete DTO combines the recommended fields with an ordinary collection:
 
 ```rust

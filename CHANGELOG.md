@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.12]
+
+- Document minimal unsigned big-endian magnitudes over existing `Bytes<N>` for
+  lossless evidence beyond u128 (#26). Qualify external Nat conversion and exact
+  Rust/browser option frames, including overflow values and admission failures.
+  Zero is empty bytes; consumers reject leading zeroes at their numeric boundary.
+  No new runtime type, codec, Candid dependency or protocol rule is introduced.
+
+- Qualify default bulk advice through a real Cargo build script, including
+  per-field suppression and stale acknowledgements, in the TypeScript check.
+  Add a private IC admission-budget probe with valid/truncated controls. Reject
+  multi-byte parser sharing after measuring Wasm growth and instruction
+  regressions; keep the production codec and all protocol rules unchanged.
+
+- Strengthen adversarial qualification for shared nested-list budgets and forged
+  lengths with truncated prefixes. Record the Canic diagnostic-adoption gap and
+  a rejected Wasm parser-sharing experiment with matched Candid/IC counters.
+  No runtime, wire-byte, identity, admission-rule or generated-client change.
+
 ## [0.7.11] - 2026-10-25
 
 - Run bulk field advice automatically during host TypeScript generation. Replace

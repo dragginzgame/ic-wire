@@ -1,0 +1,9 @@
+{
+  "counter": "ic0.performance_counter(0)",
+  "fixture_sha256": "4b810104d13f84b866fde78b4007e679b24340b80fb6e11d5c7cd4abb70728f0",
+  "lock_sha256": "53b04a775958262886422a00f907ddf1c48ccaf2dc120146a4cceeccb17e26f9",
+  "notes": "Warm decode, including destruction; setup/transport excluded. Budgets are illustrative, not equivalent to Candid quotas.",
+  "samples": 3,
+  "server_sha256": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792",
+  "wasm_sha256": "f939426a1cc47cd4c6d0db1d4d8da05058b452b90b25701563e7f10fd274e6df"
+}

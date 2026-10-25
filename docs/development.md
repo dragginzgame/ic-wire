@@ -93,6 +93,11 @@ The forwarded Wasm build is checked on Rust 1.91 too. Run only this boundary che
 with `bash scripts/ci/check-schema-targets.sh`; evidence remains under
 `target/schema-targets/`. These graph checks do not measure installed Wasm size.
 
+The target also runs `bash scripts/ci/check-bulk-advice.sh`: a disposable Cargo
+build-script consumer checks default warning output, independent per-field
+suppression, complete acknowledgement and stale acknowledgement visibility.
+Its logs remain under `target/bulk-advice/`; no installed consumer is modified.
+
 This package contains only the TypeScript compiler. The generated codec imports
 no transport or browser SDK. Rust vectors, strict typechecking and Node mutation
 checks qualify byte conformance; they do not qualify endpoint authentication,

@@ -12,3 +12,5 @@ cargo run --locked -p ic-wire --features typescript --example typescript-conform
 node "$out/checks.mjs"
 node crates/ic-wire/examples/typescript_conformance/endian.mjs "$out/compiled/wire-runtime.js"
 bash "$root/scripts/ci/check-schema-targets.sh"
+
+bash "$root/scripts/ci/check-bulk-advice.sh"

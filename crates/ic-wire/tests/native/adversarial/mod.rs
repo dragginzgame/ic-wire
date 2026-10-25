@@ -105,3 +105,41 @@ fn zero_byte_collection_work_is_linear_and_forged_lengths_stop_at_budget() {
         }
     }
 }
+
+#[test]
+fn nested_collections_share_one_budget_and_truncated_prefix_work_is_bounded() {
+    // Each inner list is individually small; the enclosing list must not reset
+    // its allowance. The payload contains lengths only, so bytes cannot bound work.
+    let value = vec![vec![(); 16]; 16];
+    let raw = postcard::to_allocvec(&value).unwrap();
+    VISITS.with(|v| v.set(0));
+    let decoded = native::decode::<Vec<Vec<Tracked<()>>>>(&raw, LIMITS).unwrap();
+    assert_eq!(decoded.len(), 16);
+    assert!(decoded.iter().all(|row| row.len() == 16));
+    assert_eq!(VISITS.with(Cell::get), 256);
+    for nodes in [16, 32, 64] {
+        VISITS.with(|v| v.set(0));
+        assert_eq!(
+            native::decode::<Vec<Vec<Tracked<()>>>>(&raw, Limits { nodes, ..LIMITS }),
+            Err(Error::Limit)
+        );
+        assert!(VISITS.with(Cell::get) <= nodes);
+    }
+
+    // A normal byte list must parse its valid prefix before detecting EOF.
+    // Count visits rather than making a timing assertion. The declared length
+    // must not cause work beyond the available prefix and the failing element.
+    for available in [0, 1, 16, 127, 256] {
+        for declared in [1024_usize, 1 << 20, usize::MAX] {
+            let mut raw = postcard::to_allocvec(&declared).unwrap();
+            raw.extend(std::iter::repeat_n(42_u8, available));
+            VISITS.with(|v| v.set(0));
+            assert_eq!(
+                native::decode::<Vec<Tracked<u8>>>(&raw, LIMITS),
+                Err(Error::Malformed)
+            );
+            assert_eq!(VISITS.with(Cell::get), available + 1);
+            assert_eq!(native::decode::<Vec<u8>>(&[1, 7], LIMITS), Ok(vec![7]));
+        }
+    }
+}

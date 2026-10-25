@@ -96,6 +96,10 @@ engine heap. Big-endian TypeScript swap paths pass simulated typed-array storage
 Rust append helpers pass local unit tests. Real big-endian Rust serialization
 and JavaScript-engine execution remain unqualified. See [development](development.md).
 
+For unsigned evidence beyond u128, use the documented [bounded unsigned magnitude](unsigned-magnitude.md)
+convention over `Bytes<N>`, with lossless external Nat conversion and browser
+round trips. Numeric canonicality remains a consumer boundary check.
+
 ## Selection and evidence
 
 Choose packed fields for bulk wide integers and hash lists. Small-magnitude
@@ -146,6 +150,19 @@ not evidence of a bottleneck in this declaration. Manifest adoption and its
 installed instruction/Wasm measurement remains consumer-owned. Since the 0.7 cut,
 Wire validates primitives while reading but does not enforce byte-identical
 reserialization. Consumers own normalization and retain exact retry frames.
+
+## Budget selection
+
+Set operation limits from the largest legitimate payload and its actual field
+representations, then test valid maxima as well as malformed inputs. Node and
+allocation budgets can stop ordinary-list traversal early, but also refuse large
+valid lists. A byte-buffer field can carry many bytes using few traversal nodes;
+allocation and frame limits still apply. Tight limits complement bulk fields.
+They do not make a large ordinary vector cheap to accept.
+
+The [budget study](evidence/tail-and-budgets-0712/README.md) measures these tradeoffs
+with small valid controls and truncated large inputs. Its example limits are not
+a universal endpoint recommendation or an IC instruction quota.
 
 ## Host-side bulk advice and CI
 

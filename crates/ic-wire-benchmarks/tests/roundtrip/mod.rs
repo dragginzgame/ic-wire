@@ -1,6 +1,7 @@
 //! Corpus correctness and fail-closed framing checks, independent of timing.
 #[path = "../../fixtures/mod.rs"]
 mod fixtures;
+mod unsigned_magnitude;
 #[test]
 fn corpus_roundtrips_and_rejects_damaged_frames() {
     let cases = fixtures::cases(); // Asserts semantic equality for every lane.
