@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.16]
+## [0.7.16] - 2026-10-26
 
 - Record five further encoder experiments, including matched IC counters, uncompressed
   Wasm/code-section sizes and allocation controls. Reject inlining regressions
