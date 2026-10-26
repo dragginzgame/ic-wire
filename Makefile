@@ -20,9 +20,12 @@ release-editor-check:
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
 .PHONY: publish check-package
+PUBLISH_PACKAGES ?= ic-wire-derive ic-wire
 publish:
+	$(if $(strip $(PUBLISH_PACKAGES)),,$(error PUBLISH_PACKAGES cannot be empty))
+	$(if $(filter-out ic-wire-derive ic-wire,$(PUBLISH_PACKAGES)),$(error PUBLISH_PACKAGES must select ic-wire-derive and/or ic-wire))
 	+@$(MAKE) lint
-	+@env cargo publish --locked -p ic-wire-derive -p ic-wire
+	+@env cargo publish --locked $(foreach package,$(PUBLISH_PACKAGES),-p $(package))
 
 check-package:
 	+@$(MAKE) lint

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.14]
+
+- Allow explicit `PUBLISH_PACKAGES` selection when resuming a partial registry
+  publication, keeping both public crates as the default and preserving the lint
+  gate. Reject empty/private selections and qualify the recipes with a stub Cargo
+  in disposable repositories. Runtime, generator and protocol are unchanged.
+
 ## [0.7.13] - 2026-10-26
 
 - Reject duplicate numeric method IDs during host TypeScript generation, across

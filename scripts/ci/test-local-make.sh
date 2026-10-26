@@ -87,6 +87,22 @@ for target in publish check-package; do
 done
 cp "$fixture/cargo-success" "$fixture/bin/cargo"
 
+# Resume partial uploads by explicitly selecting only unpublished packages.
+# Cargo is a sentinel: these checks cannot contact or upload to a registry.
+for selection in 'ic-wire-derive ic-wire' ic-wire ic-wire-derive; do
+    : > "$CARGO_CALLS"
+    PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES="$selection" > "$fixture/publish-selection.log" 2>&1
+    [[ "$(wc -l < "$CARGO_CALLS")" == 2 ]]
+    expected='publish --locked'
+    for package in $selection; do expected+=" -p $package"; done
+    [[ "$(tail -n 1 "$CARGO_CALLS")" == "${RUSTUP_TOOLCHAIN:-development}|$fixture/repo/target|$expected" ]]
+done
+for selection in '' ic-wire-qualification; do
+    : > "$CARGO_CALLS"
+    if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES="$selection" > "$fixture/publish-invalid.log" 2>&1; then exit 1; fi
+    [[ ! -s "$CARGO_CALLS" ]]
+done
+
 # Restore the reviewed runner before exercising the real formatting hook.
 cp -p "$root/scripts/ci/run-release.sh" "$fixture/repo/scripts/ci/run-release.sh"
 git -C "$fixture/repo" init -q

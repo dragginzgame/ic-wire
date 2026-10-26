@@ -196,6 +196,22 @@ cargo publish --dry-run --locked -p ic-wire-derive -p ic-wire --all-features
 make publish
 ```
 
+Publication is not atomic across packages. If a previous attempt uploaded the
+derive crate but stopped before the runtime, retain the released versions and
+resume only the remaining package after the derive version is available in the
+registry index:
+
+```sh
+make publish PUBLISH_PACKAGES=ic-wire
+```
+
+The default still selects both crates and runs lint first. Explicit selection
+avoids retrying an immutable uploaded version; it does not automatically infer
+registry state or ignore upload failures. Empty selections and private package
+names are rejected before Cargo runs. For a direct Cargo retry, use
+`cargo publish --locked -p ic-wire`. Check that the existing derive upload is the
+intended release; published versions cannot be replaced.
+
 Consumers retain Rust 1.91. Registry identity, credentials, publication status and
 repository visibility remain maintainer concerns. The qualification package remains
 `publish = false`.
