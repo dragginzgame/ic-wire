@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.17]
+
+- Adopt Shared Tooling 0.26.20 and align IC Build/Testkit and the release editor
+  with 0.68.7, plus Platform 0.6.18. Use the common task-specific reading and
+  validation rules without a local exception. Runtime, generator, wire bytes
+  and admission rules are unchanged.
+
 ## [0.7.16] - 2026-10-26
 
 - Record five further encoder experiments, including matched IC counters, uncompressed

@@ -1,11 +1,13 @@
 # IC Wire contributor instructions
 
-Read docs/status/current.md first, then README.md, docs/design.md and
- docs/evaluation.md. The Postcard runtime is qualified for bounded
-Rust integration; see docs/runtime.md for its implemented contract.
+Read [the current handoff](docs/status/current.md) and this overlay first.
+Use README.md for orientation when needed, docs/design.md for codec/architecture
+changes, docs/runtime.md for runtime contracts and docs/evaluation.md for codec
+qualification work. These guides are task-specific, not a startup reading list.
+The Postcard runtime is qualified for bounded Rust integration.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `37652c087fff16f55f83d18d27ba17c83f34021c` (recorded version 0.26.18).
+rules, vendored at `a7f85d45d4212d4c39225f58597580560a333550` (recorded version 0.26.20).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot
@@ -62,8 +64,7 @@ The unpublished `ic-wire-benchmarks` package compares Candid through an
 qualification controls, not production modes. Keep Candid out of published crates.
 The benchmark package denies unsafe code except its explicitly scoped IC export
 attribute; the entrypoint uses safe system-call wrappers. Other packages inherit
-the workspace's unsafe-code prohibition. Siblings are read-only unless separately
-authorized.
+the workspace's unsafe-code prohibition.
 
 Use focused checks for changed code. Check for an active build sharing target/
 before compiling. Do not run broad Canic or sibling suites. Keep compiler, target,
