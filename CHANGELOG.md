@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.17]
+## [0.7.17] - 2026-10-26
 
 - Adopt Shared Tooling 0.26.20 and align IC Build/Testkit and the release editor
   with 0.68.7, plus Platform 0.6.18. Use the common task-specific reading and
