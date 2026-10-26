@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { WireError } from './compiled/wire-runtime.js';
-import { nativeTree, prototypeName } from './compiled/native.js';
+import { nativeTree, prototypeName, unsignedByte, signedByte } from './compiled/native.js';
 const normalize = value => ArrayBuffer.isView(value) ? value : Array.isArray(value) ? value.map(normalize) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k, normalize(v)])) : value;
 function check(codec, value, request, response) {
   for (const [encode, decode, bytes] of [[codec.encodeRequest, codec.decodeRequest, request], [codec.encodeResponse, codec.decodeResponse, response]]) {
@@ -37,9 +37,17 @@ for (const direction of ['Request','Response']) {
   codec['decode'+direction](bytes).fill(0);
   assert.deepEqual(Uint8Array.from(bytes),original);
 }
-assert.deepEqual(prototypeName.encodeRequest(null), frame());
-assert.equal(prototypeName.decodeRequest(frame()), null);
 const rejects = (action, code) => assert.throws(action, error => error instanceof WireError && error.code === code);
+const prototypeFrame = frame(); prototypeFrame[2] = 2;
+assert.deepEqual(prototypeName.encodeRequest(null), prototypeFrame);
+assert.equal(prototypeName.decodeRequest(prototypeFrame), null);
+rejects(() => prototypeName.decodeRequest(frame()), 'identity');
+for (const direction of ['Request', 'Response']) {
+  const unsignedFrame = unsignedByte['encode'+direction](255);
+  assert.equal(unsignedFrame[11], 255);
+  rejects(() => signedByte['decode'+direction](unsignedFrame), 'identity');
+  assert.equal(signedByte['decode'+direction](signedByte['encode'+direction](-1)), -1);
+}
 for (const payload of [[128,0],[255,255,4],[128,128,128]]) rejects(() => probe({k:'u',bits:16}).decodeRequest(frame(...payload)), 'malformed');
 rejects(() => probe({k:'bool'}).decodeRequest(frame(2)), 'malformed');
 rejects(() => probe({k:'option',item:{k:'unit'}}).decodeRequest(frame(2)), 'malformed');

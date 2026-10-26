@@ -1,89 +1,53 @@
 # Current handoff
 
-## Released 0.7.11; pending 0.7.12
+## Released 0.7.12; pending 0.7.13
 
-Baseline is `a99a99cc3fadbde004e69d9ee4888c99711b3bee`. The preceding uncommitted
-adversarial test, report and changelog work is preserved. The follow-up adds
-private measurement/qualification fixtures and rejects another parser candidate.
-Production runtime, protocol bytes, identities, admission rules and generated
-TypeScript are unchanged. Staging, commits, own versions and releases remain
-maintainer-owned.
+Baseline is `974b6ff3e4a89c37a6c93081d7a26bee2e709f7b`; the checkout started clean.
+This batch fixes duplicate numeric method identities in host registry generation.
+Own versions, staging, commits, publication and releases remain maintainer-owned.
+A concurrent tooling lock update to 0.68.5 is preserved outside this fix; the
+benchmark uses identical isolated locks and does not qualify that update.
 
-## Issue #26: unsigned evidence
+## Numeric method identities
 
-Documented minimal unsigned big-endian magnitudes over existing `Bytes<N>`:
-zero is empty bytes, and consumers reject redundant leading zeroes before
-constructing their arithmetic type. No new Wire numeric wrapper or metadata kind
-is needed. [The guide](../unsigned-magnitude.md) includes lossless external Nat
-conversion and browser bigint helpers, with explicit field/admission boundaries.
+Previously distinct names could reuse one ID. A request payload ff admitted as
+u8=255 under ID 7 also decoded as i8=-1 under ID 7: the frame carries an identity
+and direction, not a payload schema or method name. `generate_registry` now
+rejects repeated parsed u64 IDs across names and query/update modes, including
+spellings such as `7`/`07`/`+7`. It returns Schema without returning source or
+emitting diagnostics. Conflicting consumers must assign distinct identities and
+coordinate clients. Unique zero/u64::MAX identities remain valid.
 
-The private Nat test checks None, zero, u128 maximum, 2^128, 2^256 and the admitted
-512-bit maximum, exact magnitude bytes, over-limit refusal and malformed forms.
-Generated metadata/browser vectors check the same option DTO in both directions.
-Candid/BigUint remain unpublished test dependencies; published runtime and
-generator code are unchanged. No new performance benchmark is applicable to this
-documentation/qualification change. Canic must adopt the documented projection
-and preserve its overflow classification, status/error union and external Candid.
-Focused Nat conversion tests pass on Rust 1.99.1 and 1.91; Clippy passes.
-`check-typescript` passes 165 exact-frame vectors and 35,228 differential
-mutations, including native/Wasm feature isolation. Issue closure/publication
-and installed consumer qualification remain outstanding.
+The native regression demonstrates reinterpretation with the same ID and refusal
+with a different ID. It fails against the old generator and passes with the fix.
+The browser fixture itself contained an ID-1 collision; its second method now uses
+ID 2. Added generated u8/i8 request and response checks use IDs 7/8 and reject
+cross-method frames. Existing valid generated output and all runtime bytes and
+admission rules remain unchanged. This tightens host metadata acceptance only.
 
-## Warning integration
+## Qualification and cost
 
-A disposable Cargo build-script consumer now checks default warning visibility,
-independent per-field suppression, complete acknowledgement and stale paths.
-It passes on Rust 1.99.1 and 1.91.0, and runs inside `check-typescript`.
-Run it alone with `bash scripts/ci/check-bulk-advice.sh`; logs remain under
-`target/bulk-advice/`. No extra warning feature or canister logging was added.
+All 39 native tests pass on Rust 1.99.1 and 1.91. The TypeScript gate passes
+165 vectors and 35,228 mutations, plus validation, diagnostics,
+exact frames, browser mutations, strict Clippy and native/Wasm feature boundaries.
+The matched host benchmark uses identical compiler/dependencies/settings and
+three paired runs, with small controls and 33 samples per cell. For 8/128/1,024
+methods, pooled medians change 9.36→9.40 / 144.11→147.34 / 1,254.78→1,252.15 µs.
+Controls drift by up to 4.5%; no speedup is claimed. All valid generated sources
+are byte-identical across variants. No IC-instruction or runtime Wasm-size change
+is claimed. See [raw results and reproduction](../evidence/method-ids-0713/README.md).
+Full CI and installed consumer suites were not run.
 
-Canic adoption remains separate: the prior read-only inspection found six old
-three-argument generator calls despite a 0.7.11 lock selection. No sibling was
-edited or built. See the [caller inventory](../evidence/followup-0712/README.md)
-and [migration examples](../packed-fields.md#host-side-bulk-advice-and-ci).
-The fixture qualifies the integration pattern, not installed Canic behavior.
+## Consumer boundaries and retained work
 
-## Rejection budgets
+Uniqueness is enforced within one generator call, not across independently built
+registries or direct codec calls. Field order/schema changes under the same ID
+remain a coordinated-deployment concern. Consumers bind clients to the deployed
+schema and retain original frames for signatures and exact retries; collection
+normalization may still change re-encoded bytes. See the [runtime contract](../runtime.md).
 
-The new `admission-wasm`/`admission-instructions` examples measure four explicit
-budget policies on ordinary u8/u64 vectors and byte buffers. Across 144 valid and
-truncated configurations, three repeated IC samples agree and host/Wasm outcomes
-match. All valid 0/1/64-element controls pass every policy.
-
-In this dedicated fixture, a truncated million-element ordinary byte vector costs
-69,211,213 instructions with generous limits, 36,030 with 1,024 nodes, and
-272,998 with 64 KiB allocation headroom. Both tighter settings also refuse the
-valid large ordinary vector. The node policy still accepts a valid 1 MiB byte
-buffer. A 64 KiB frame cap refuses oversized input in 226 instructions.
-These are illustrative tradeoffs, not automatic defaults or Candid-equivalent
-quotas. Do not compare this fixture's absolute counters against the broad suite
-as a runtime regression. See [selection guidance](../packed-fields.md#budget-selection)
-and the [study and reproduction](../evidence/tail-and-budgets-0712/README.md).
-
-The preceding adversarial test verifies nested budgets and forged-length prefix
-work. It found no admission bypass. Generic remaining-byte checks cannot reject
-all large collection counts because unit elements require no encoded bytes.
-
-## Parser experiments rejected
-
-Sharing entire varint readers saved 10,916 bytes in one fixture but regressed
-small-u16-list decode by 84.4%. Sharing only multi-byte tails saves 4,966 total
-bytes in standard opt-3, but grows the other three fixture/profile combinations.
-Small/wide u16-list decode still regresses 24.1%/38.3%; some small controls regress
-as well. Neither candidate is installed in the production library.
-
-The tail candidate has fresh counters for 298 standard cases / 7,006 operation
-rows; identical baseline Wasm reuses the preceding measured counters. Input/frame
-hashes match and Candid control counters are unchanged. The 100-type experiment
-is size-only. The broader [full comparison](../full-comparison-0710.md) remains
-historical qualification; this is not a new full matrix or native-time study.
-
-## Checks and boundaries
-
-Focused warning checks pass on both toolchains. New measurement examples pass
-strict Clippy, native Rust 1.91 and Wasm Rust 1.91 checks. Formatting and local
-links pass; full CI, browser conformance and broad sibling suites were not rerun
-for this fixture-only follow-up. The preceding runtime/adversarial checks remain
-recorded in their report. One Serde/Postcard codec remains; consumers retain
-normalization, transport, identity coordination and exact retry/signature bytes.
-See the [runtime contract](../runtime.md).
+Canic generator adoption, Toko's installed Wire path and reported application
+Wasm headroom were not requalified by this fix. Their earlier findings are not
+claims about their current working trees. The released [unsigned evidence guide](../unsigned-magnitude.md),
+[budget study](../evidence/tail-and-budgets-0712/README.md) and
+[full comparison](../full-comparison-0710.md) retain their own qualification scopes.

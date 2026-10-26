@@ -264,13 +264,26 @@ fn main() {
     }
     let mut proto = method.clone();
     proto["name"] = serde_json::json!("prototypeName");
+    // This independent method previously reused nativeTree's ID 1. Give it
+    // ID 2 so the fixture follows the registry uniqueness contract.
+    proto["id"] = serde_json::json!("2");
     proto["request"] = serde_json::json!({"k":"ref","name":"__proto__"});
     proto["response"] = proto["request"].clone();
+    let mut unsigned = method.clone();
+    unsigned["name"] = serde_json::json!("unsignedByte");
+    unsigned["id"] = serde_json::json!("7");
+    unsigned["request"] = serde_json::json!({"k":"u","bits":8});
+    unsigned["response"] = unsigned["request"].clone();
+    let mut signed = unsigned.clone();
+    signed["name"] = serde_json::json!("signedByte");
+    signed["id"] = serde_json::json!("8");
+    signed["request"] = serde_json::json!({"k":"i","bits":8});
+    signed["response"] = signed["request"].clone();
     fs::write(
         directory.join("native.ts"),
         ic_wire::typescript::generate_registry(
             &types,
-            &[method, proto],
+            &[method, proto, unsigned, signed],
             "./wire-runtime.js",
             &Default::default(),
             |report| eprint!("{report}"),

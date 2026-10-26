@@ -290,3 +290,74 @@ fn renamed_recursive_variants_keep_declaration_ordinals() {
     })
     .unwrap();
 }
+
+#[test]
+fn registry_rejects_numeric_method_id_collisions_before_emitting_diagnostics() {
+    let method = |name: &str, id: &str, mode: &str, kind: &str| {
+        json!({
+            "name":name,"id":id,"mode":mode,
+            "request":{"k":kind,"bits":8},"response":{"k":kind,"bits":8},
+            "requestBytes":128,"responseBytes":128,"requestNodes":32,"responseNodes":32,
+            "requestDepth":8,"responseDepth":8
+        })
+    };
+    // Identity does not include the payload schema: this demonstrates why the
+    // host must reject collisions rather than expecting the runtime to infer types.
+    let limits = ic_wire::Limits {
+        bytes: 128,
+        allocation: 4096,
+        nodes: 32,
+        depth: 8,
+    };
+    let frame = ic_wire::native::encode_request(7, &255_u8, limits).unwrap();
+    assert_eq!(
+        ic_wire::native::decode_request::<i8>(7, &frame, limits),
+        Ok(-1)
+    );
+    assert_eq!(
+        ic_wire::native::decode_request::<i8>(8, &frame, limits),
+        Err(ic_wire::Error::Identity)
+    );
+    for (first, second) in [
+        ("7", "7"),
+        ("7", "07"),
+        ("7", "+7"),
+        ("0", "00"),
+        ("18446744073709551615", "018446744073709551615"),
+    ] {
+        for mode in ["query", "update"] {
+            assert_eq!(
+                typescript::generate_registry(
+                    &Default::default(),
+                    &[
+                        method("unsigned", first, "query", "u"),
+                        method("signed", second, mode, "i")
+                    ],
+                    "./runtime.js",
+                    &Default::default(),
+                    |_| panic!("invalid registry emitted diagnostics"),
+                ),
+                Err(GenerationError::Schema)
+            );
+        }
+    }
+    let methods = [
+        method("zero", "0", "query", "u"),
+        method("seven", "7", "query", "u"),
+        method("eight", "8", "update", "i"),
+        method("maximum", "18446744073709551615", "query", "u"),
+    ];
+    let mut reports = 0;
+    typescript::generate_registry(
+        &Default::default(),
+        &methods,
+        "./runtime.js",
+        &Default::default(),
+        |report| {
+            assert!(report.is_clean());
+            reports += 1;
+        },
+    )
+    .unwrap();
+    assert_eq!(reports, 1);
+}

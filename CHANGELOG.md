@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.13]
+
+- Reject duplicate numeric method IDs during host TypeScript generation, across
+  names, query/update modes and equivalent spellings such as `7`/`07`. Previously
+  same-ID u8/i8 methods could interpret payload `ff` as 255/-1. Conflicting
+  registries must assign distinct IDs and coordinate clients. Valid generated
+  source, runtime frame bytes and admission remain unchanged; consumers still
+  own cross-registry schema binding and exact retained retry/signature bytes.
+
 ## [0.7.12] - 2026-10-25
 
 - Document minimal unsigned big-endian magnitudes over existing `Bytes<N>` for

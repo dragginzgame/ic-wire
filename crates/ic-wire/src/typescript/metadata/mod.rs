@@ -352,13 +352,22 @@ pub fn generate_registry(
         .replace("\"__proto__\":", "[\"__proto__\"]:");
     source.push_str(&format!("const $types = {registry};\n"));
     let mut names = BTreeSet::new();
+    let mut ids = BTreeSet::new();
     for method in methods {
         let name = text(method, "name")?;
         identifier(name)?;
+        let id = text(method, "id")?
+            .parse::<u64>()
+            .map_err(|_| GenerationError::Schema)?;
+        // Previously distinct names could reuse an identity (including "7"/"07"),
+        // letting the same frame acquire incompatible payload meanings. Reject
+        // numeric collisions within this registry, across query/update modes.
+        // Valid bytes are unchanged; consumers must assign distinct IDs and
+        // coordinate affected clients. This is not cross-registry schema binding.
         if types.contains_key(name)
             || !names.insert(name)
             || !matches!(text(method, "mode")?, "query" | "update")
-            || text(method, "id")?.parse::<u64>().is_err()
+            || !ids.insert(id)
         {
             return Err(GenerationError::Schema);
         }

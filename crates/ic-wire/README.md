@@ -304,6 +304,12 @@ tests count consumer visits, checking zero-byte collections against node allowan
 and successful mixed-value decoding after failures. These are deterministic work
 checks, not IC instruction or peak-memory measurements; custom Serde remains trusted.
 
+`typescript::generate_registry` rejects duplicate numeric method IDs within one
+registry, including query/update pairs and spellings such as `"7"`/`"07"`.
+Previously those registries were accepted; assign distinct IDs and coordinate
+affected clients. Method names and payload schemas are not carried in the frame.
+Separate registries and direct codec calls still require consumer identity checks.
+
 Consumers own method/schema identity assignment and coordinated deployment. Native
 fields follow Serde declaration order, without field IDs; changing a layout requires
 coordinated consumers. Decode does not promise canonical re-encoding of normalized
