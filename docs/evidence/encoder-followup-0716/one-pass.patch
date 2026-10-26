@@ -1,0 +1,96 @@
+--- a/crates/ic-wire/src/contract/mod.rs
++++ b/crates/ic-wire/src/contract/mod.rs
+@@ -1,28 +1,43 @@
+ use crate::Error;
+ use alloc::vec::Vec;
++use core::cell::Cell;
+ use postcard::ser_flavors::Flavor;
+ 
+ pub(crate) const HEADER: usize = 11;
+ 
+-// Reserve fallibly once, then initialize only emitted bytes. Capacity is not
+-// the schema limit: allocators may return more capacity than requested.
+-pub(crate) struct Output {
++pub(crate) struct Output<'a> {
+     pub(crate) bytes: Vec<u8>,
+     pub(crate) limit: usize,
++    pub(crate) error: &'a Cell<Error>,
+ }
+-impl Flavor for Output {
++impl Output<'_> {
++    fn reserve(&mut self, additional: usize) -> postcard::Result<()> {
++        if additional > self.limit - self.bytes.len() {
++            self.error.set(Error::Limit);
++            return Err(postcard::Error::SerializeBufferFull);
++        }
++        if additional > self.bytes.capacity() - self.bytes.len() {
++            let capacity = (self.bytes.len() + additional)
++                .max(self.bytes.capacity().saturating_mul(2))
++                .max(64)
++                .min(self.limit);
++            self.bytes.try_reserve_exact(capacity - self.bytes.len()).map_err(|_| {
++                self.error.set(Error::Allocation);
++                postcard::Error::SerializeBufferFull
++            })?;
++        }
++        Ok(())
++    }
++}
++impl Flavor for Output<'_> {
+     type Output = Vec<u8>;
+     fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
+-        if self.bytes.len() == self.limit {
+-            return Err(postcard::Error::SerializeBufferFull);
+-        }
++        self.reserve(1)?;
+         self.bytes.push(byte);
+         Ok(())
+     }
+     fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+-        if bytes.len() > self.limit - self.bytes.len() {
+-            return Err(postcard::Error::SerializeBufferFull);
+-        }
++        self.reserve(bytes.len())?;
+         self.bytes.extend_from_slice(bytes);
+         Ok(())
+     }
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -119,24 +119,21 @@
+     bytes: &mut Vec<u8>,
+ ) -> Result<(), Error> {
+     bytes.clear();
+-    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
+-    bytes
+-        .try_reserve_exact(size + prefix.len())
+-        .map_err(|_| Error::Allocation)?;
+-    bytes.extend_from_slice(prefix);
++    payload_limits(limits, prefix.len())?;
+     let budget = Budget::new(limits);
++    if budget.refused.get() {
++        return Err(Error::Limit);
++    }
++    let error = Cell::new(Error::Malformed);
++    let mut output = contract::Output {
++        bytes: core::mem::take(bytes),
++        limit: limits.bytes,
++        error: &error,
++    };
++    postcard::ser_flavors::Flavor::try_extend(&mut output, prefix).map_err(|_| error.get())?;
+     *bytes = postcard::serialize_with_flavor(
+-        &encode::Bounded {
+-            value,
+-            budget: &budget,
+-            depth: 1,
+-        },
+-        contract::Output {
+-            bytes: core::mem::take(bytes),
+-            limit: size + prefix.len(),
+-        },
+-    )
+-    .map_err(|_| budget.error())?;
++        &encode::Bounded { value, budget: &budget, depth: 1 }, output,
++    ).map_err(|_| if budget.refused.get() { Error::Limit } else { error.get() })?;
+     Ok(())
+ }
+ 

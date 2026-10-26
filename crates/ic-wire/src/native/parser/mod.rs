@@ -59,33 +59,27 @@ impl<'de> Deserializer<'de> {
 
     #[inline]
     fn try_take_varint_u16(&mut self) -> Result<u16> {
-        // Read the common one-byte representation locally; multi-byte values
-        // retain this width's original checks. Bytes and rejection rules do not change.
+        // Three explicit groups replace the u16 tail loop. Keep the same shortest
+        // representation and overflow checks: 80 00 and ff ff 04 stay invalid;
+        // ff ff 03 remains 65535. Bytes, admission and consumers are unchanged.
         let first = self.flavor.pop()?;
         if first < 128 {
             return Ok(first as u16);
         }
-        let mut out = (first & 0x7f) as u16;
-        for i in 1..varint_max::<u16>() {
-            let val = self.flavor.pop()?;
-            let carry = (val & 0x7F) as u16;
-            out |= carry << (7 * i);
-
-            if (val & 0x80) == 0 {
-                // Previously reserialization rejected redundant groups as Noncanonical.
-                // Reject them here as Malformed: 80 00 is not the encoding of zero.
-                // Encoders are unchanged; consumers must update typed-error handling.
-                if i > 0 && val == 0 {
-                    return Err(Error::DeserializeBadVarint);
-                }
-                if i == varint_max::<u16>() - 1 && val > max_of_last_byte::<u16>() {
-                    return Err(Error::DeserializeBadVarint);
-                } else {
-                    return Ok(out);
-                }
-            }
+        let second = self.flavor.pop()?;
+        let value = (first & 127) as u16 | ((second & 127) as u16) << 7;
+        if second < 128 {
+            return if second == 0 {
+                Err(Error::DeserializeBadVarint)
+            } else {
+                Ok(value)
+            };
         }
-        Err(Error::DeserializeBadVarint)
+        let last = self.flavor.pop()?;
+        if !(1..=3).contains(&last) {
+            return Err(Error::DeserializeBadVarint);
+        }
+        Ok(value | (last as u16) << 14)
     }
 
     #[inline]

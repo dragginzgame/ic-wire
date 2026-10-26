@@ -1,0 +1,298 @@
+{
+  "output-hints": [
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 377817,
+      "code": 337789,
+      "sha256": "aa13c3f9b66d3d91799368ce0e55c9a36630bb08a97b7e62b27aae44da5ebf4a"
+    },
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 573226,
+      "code": 518516,
+      "sha256": "36d3860e1d0c18213707a07c246239bb33ee1705ee7732297835b2e0145c0407"
+    },
+    {
+      "cohort": "standard",
+      "variant": "push",
+      "profile": "evaluation",
+      "total": 377781,
+      "code": 337753,
+      "sha256": "69adc8b8f5609d4114838fa8aa216ca5ded3915acfe0e0f59ceea384897c9618"
+    },
+    {
+      "cohort": "standard",
+      "variant": "push",
+      "profile": "benchmark-speed",
+      "total": 576720,
+      "code": 521983,
+      "sha256": "b8c0a8105ef215d3dcd32a6b1cc833c9736d833a73deacbf487ea4c572430f3f"
+    },
+    {
+      "cohort": "standard",
+      "variant": "extend",
+      "profile": "evaluation",
+      "total": 377787,
+      "code": 337761,
+      "sha256": "d7f9a25523164fd3015e41eb66873a4fd2d62f61cf9d253aca8f687f00abe324"
+    },
+    {
+      "cohort": "standard",
+      "variant": "extend",
+      "profile": "benchmark-speed",
+      "total": 572803,
+      "code": 518076,
+      "sha256": "353925a5aab17484e072858ee678fd01e2f0e36c7afebb239f008beeccfc7d5d"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 310738,
+      "code": 291971,
+      "sha256": "cefd1b86cd8e32d2d3553565958e761639221f464313ac61831b78c0dc04f1d7"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 398739,
+      "code": 364245,
+      "sha256": "84a217dffb5f67171a1acbba7fd8b0e5040daaedf070763a1205c11b44479c4a"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "push",
+      "profile": "evaluation",
+      "total": 310738,
+      "code": 291971,
+      "sha256": "cefd1b86cd8e32d2d3553565958e761639221f464313ac61831b78c0dc04f1d7"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "push",
+      "profile": "benchmark-speed",
+      "total": 396230,
+      "code": 361740,
+      "sha256": "75c91541b5bca452344f64b8dbc800f1540e1547977b63f90d76a41ef860a70a"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "extend",
+      "profile": "evaluation",
+      "total": 310287,
+      "code": 291522,
+      "sha256": "9c0911f19e9e9431c5359cec568c479fd281f222218a80b87940c62c00ad1860"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "extend",
+      "profile": "benchmark-speed",
+      "total": 398440,
+      "code": 363950,
+      "sha256": "6c6efd53f2ea6dd43702f769f8b64bfb52e0b2347f3940c77c11d8e992f4db55"
+    }
+  ],
+  "one-pass": [
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 377817,
+      "code": 337789,
+      "sha256": "aa13c3f9b66d3d91799368ce0e55c9a36630bb08a97b7e62b27aae44da5ebf4a"
+    },
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 573226,
+      "code": 518516,
+      "sha256": "36d3860e1d0c18213707a07c246239bb33ee1705ee7732297835b2e0145c0407"
+    },
+    {
+      "cohort": "standard",
+      "variant": "candidate",
+      "profile": "evaluation",
+      "total": 365133,
+      "code": 325163,
+      "sha256": "a48bf704f0cbad2531ba6a657dd7963caca220ef7b401692b5b8b85bd383f885"
+    },
+    {
+      "cohort": "standard",
+      "variant": "candidate",
+      "profile": "benchmark-speed",
+      "total": 578349,
+      "code": 523634,
+      "sha256": "d388744db775bd2ba8bebc46158010f06ea61890a27d490a6fec46ac5707377c"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 310738,
+      "code": 291971,
+      "sha256": "cefd1b86cd8e32d2d3553565958e761639221f464313ac61831b78c0dc04f1d7"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 398739,
+      "code": 364245,
+      "sha256": "84a217dffb5f67171a1acbba7fd8b0e5040daaedf070763a1205c11b44479c4a"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "candidate",
+      "profile": "evaluation",
+      "total": 302083,
+      "code": 283357,
+      "sha256": "be0270b5bc2007ebff8f59988dd9b2a94219290bd37d6a4ec093fe01ec2c1ee5"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "candidate",
+      "profile": "benchmark-speed",
+      "total": 389346,
+      "code": 354857,
+      "sha256": "c06dc1f101fd207b28929122f351bc2d1e9c5d05be711c8c23e45b1051e6883d"
+    }
+  ],
+  "one-pass-shared": [
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 377817,
+      "code": 337789,
+      "sha256": "aa13c3f9b66d3d91799368ce0e55c9a36630bb08a97b7e62b27aae44da5ebf4a"
+    },
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 573226,
+      "code": 518516,
+      "sha256": "36d3860e1d0c18213707a07c246239bb33ee1705ee7732297835b2e0145c0407"
+    },
+    {
+      "cohort": "standard",
+      "variant": "candidate",
+      "profile": "evaluation",
+      "total": 365133,
+      "code": 325163,
+      "sha256": "a48bf704f0cbad2531ba6a657dd7963caca220ef7b401692b5b8b85bd383f885"
+    },
+    {
+      "cohort": "standard",
+      "variant": "candidate",
+      "profile": "benchmark-speed",
+      "total": 565769,
+      "code": 511073,
+      "sha256": "484c1a6cde7125674eb4a7649bfcd3a52b38a45e3769dcd36a5f28bbb8a0ea63"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 310738,
+      "code": 291971,
+      "sha256": "cefd1b86cd8e32d2d3553565958e761639221f464313ac61831b78c0dc04f1d7"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 398739,
+      "code": 364245,
+      "sha256": "84a217dffb5f67171a1acbba7fd8b0e5040daaedf070763a1205c11b44479c4a"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "candidate",
+      "profile": "evaluation",
+      "total": 302083,
+      "code": 283357,
+      "sha256": "be0270b5bc2007ebff8f59988dd9b2a94219290bd37d6a4ec093fe01ec2c1ee5"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "candidate",
+      "profile": "benchmark-speed",
+      "total": 382082,
+      "code": 347599,
+      "sha256": "f154d31d388cba976bdd41ce8168b7367db2a5ab440dba00156dae5f0bbfa299"
+    }
+  ],
+  "one-pass-fast": [
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 377817,
+      "code": 337789,
+      "sha256": "aa13c3f9b66d3d91799368ce0e55c9a36630bb08a97b7e62b27aae44da5ebf4a"
+    },
+    {
+      "cohort": "standard",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 573226,
+      "code": 518516,
+      "sha256": "36d3860e1d0c18213707a07c246239bb33ee1705ee7732297835b2e0145c0407"
+    },
+    {
+      "cohort": "standard",
+      "variant": "candidate",
+      "profile": "evaluation",
+      "total": 365191,
+      "code": 325221,
+      "sha256": "924ede196a9bfb3416a51d921147207b106eda98b3f646838fa15afa8286c45e"
+    },
+    {
+      "cohort": "standard",
+      "variant": "candidate",
+      "profile": "benchmark-speed",
+      "total": 573795,
+      "code": 519099,
+      "sha256": "edbd4f5f1a795d3a74065246a4a4c332f39b5fc6827407da10fa897f12e30b48"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "evaluation",
+      "total": 310738,
+      "code": 291971,
+      "sha256": "cefd1b86cd8e32d2d3553565958e761639221f464313ac61831b78c0dc04f1d7"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "baseline",
+      "profile": "benchmark-speed",
+      "total": 398739,
+      "code": 364245,
+      "sha256": "84a217dffb5f67171a1acbba7fd8b0e5040daaedf070763a1205c11b44479c4a"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "candidate",
+      "profile": "evaluation",
+      "total": 302141,
+      "code": 283415,
+      "sha256": "8ec0f0fd5f5b6a9c631df548097caefade502f91e0bba79351393e000e6d7daf"
+    },
+    {
+      "cohort": "hundred",
+      "variant": "candidate",
+      "profile": "benchmark-speed",
+      "total": 385094,
+      "code": 350605,
+      "sha256": "e4ae3320e984f1cd02c4003d34cce5e2ecd28216dbf691e5185544916a70bb8d"
+    }
+  ]
+}

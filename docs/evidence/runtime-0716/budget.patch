@@ -1,0 +1,28 @@
+diff --git a/crates/ic-wire/src/native/mod.rs b/crates/ic-wire/src/native/mod.rs
+index 38400e5..2450378 100644
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -41,18 +41,14 @@ impl Budget {
+     }
+     #[cfg_attr(target_arch = "wasm32", inline(always))]
+     fn enter_many(&self, depth: usize, size: usize, count: usize) -> bool {
+-        if self.refused.get() {
+-            return false;
+-        }
+-        let Some(nodes) = self.nodes.get().checked_sub(count) else {
+-            self.refused.set(true);
+-            return false;
+-        };
+-        if depth > self.depth || !self.bytes(size) {
++        let nodes = self.nodes.get();
++        let heap = self.heap_units.get();
++        if self.refused.get() | (depth > self.depth) | (nodes < count) | (heap < size) {
+             self.refused.set(true);
+             return false;
+         }
+-        self.nodes.set(nodes);
++        self.nodes.set(nodes - count);
++        self.heap_units.set(heap - size);
+         true
+     }
+     #[cfg_attr(target_arch = "wasm32", inline(always))]

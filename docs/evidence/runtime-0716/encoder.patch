@@ -1,0 +1,49 @@
+diff --git a/crates/ic-wire/src/native/encode/mod.rs b/crates/ic-wire/src/native/encode/mod.rs
+index 36f74f5..9ce6b5c 100644
+--- a/crates/ic-wire/src/native/encode/mod.rs
++++ b/crates/ic-wire/src/native/encode/mod.rs
+@@ -79,21 +79,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
+     // bytes. Payloads (-64 -> 7f, 64 -> 80 01, 32767 -> fe ff 03) and
+     // encoder admission are unchanged.
+     fn serialize_i16(self, value: i16) -> Result<Self::Ok, Self::Error> {
+-        let value = ((value << 1) ^ (value >> 15)) as u16;
+-        if value < 128 {
+-            return self.inner.serialize_u8(value as u8);
+-        }
+-        let mut tuple = self
+-            .inner
+-            .serialize_tuple(if value < 16384 { 2 } else { 3 })?;
+-        ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+-        if value < 16384 {
+-            ser::SerializeTuple::serialize_element(&mut tuple, &((value >> 7) as u8))?;
+-        } else {
+-            ser::SerializeTuple::serialize_element(&mut tuple, &(((value >> 7) as u8) | 128))?;
+-            ser::SerializeTuple::serialize_element(&mut tuple, &((value >> 14) as u8))?;
+-        }
+-        ser::SerializeTuple::end(tuple)
++        self.serialize_u16(((value << 1) ^ (value >> 15)) as u16)
+     }
+     // Previously i64 used Postcard's separate signed varint writer. Apply its
+     // identical zigzag mapping, then reuse our u64 writer and one-byte shortcut.
+@@ -109,10 +95,19 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
+     // consumers need no migration (127 -> 7f, 128 -> 80 01 for both types).
+     fn serialize_u16(self, value: u16) -> Result<Self::Ok, Self::Error> {
+         if value < 128 {
+-            self.inner.serialize_u8(value as u8)
++            return self.inner.serialize_u8(value as u8);
++        }
++        let mut tuple = self
++            .inner
++            .serialize_tuple(if value < 16384 { 2 } else { 3 })?;
++        ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
++        if value < 16384 {
++            ser::SerializeTuple::serialize_element(&mut tuple, &((value >> 7) as u8))?;
+         } else {
+-            self.inner.serialize_u16(value)
++            ser::SerializeTuple::serialize_element(&mut tuple, &(((value >> 7) as u8) | 128))?;
++            ser::SerializeTuple::serialize_element(&mut tuple, &((value >> 14) as u8))?;
+         }
++        ser::SerializeTuple::end(tuple)
+     }
+     fn serialize_u32(self, value: u32) -> Result<Self::Ok, Self::Error> {
+         if value < 128 {

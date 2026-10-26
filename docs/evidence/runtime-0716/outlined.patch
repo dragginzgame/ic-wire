@@ -1,0 +1,13 @@
+diff --git a/crates/ic-wire/src/native/mod.rs b/crates/ic-wire/src/native/mod.rs
+index 38400e5..8414cd8 100644
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -39,7 +39,7 @@ impl Budget {
+     fn enter(&self, depth: usize, size: usize) -> bool {
+         self.enter_many(depth, size, 1)
+     }
+-    #[cfg_attr(target_arch = "wasm32", inline(always))]
++    #[cfg_attr(target_arch = "wasm32", inline(never))]
+     fn enter_many(&self, depth: usize, size: usize, count: usize) -> bool {
+         if self.refused.get() {
+             return false;

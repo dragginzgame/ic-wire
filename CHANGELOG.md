@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.16]
+
+- Record five further encoder experiments, including matched IC counters, uncompressed
+  Wasm/code-section sizes and allocation controls. Reject inlining regressions
+  and keep one-pass growth as research; production encoding and protocol remain
+  unchanged.
+
+- Decode u16/i16 varints with three explicit byte-group checks instead of a
+  tail loop. Wide-list IC decode improves in both measured profiles; retain
+  small controls, native timing, Wasm-size tradeoffs and rejected experiments.
+  Payload bytes, shortest-form/overflow rejection, budgets and typed errors
+  are unchanged (for example, `ff ff 03` remains u16 65535; `80 00` and
+  `ff ff 04` remain malformed). No consumer migration is required.
+
 ## [0.7.15] - 2026-10-26
 
 - Adopt Shared Tooling 0.26.18 at `37652c0`. Normal releases start from current

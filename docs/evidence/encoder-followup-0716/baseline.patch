@@ -1,0 +1,165 @@
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -831,9 +831,9 @@
+ 
+ [[package]]
+ name = "ic-build"
+-version = "0.68.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e9c665a06fe2e501677d83351c3e0aeabf82cdff8192ae9790d9672564e23a09"
++version = "0.68.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fcb6d80905e49dbd8a215cf84bac74d967245adab0586ba183e49ade7895f84b"
+ dependencies = [
+  "cargo_metadata",
+  "ic-host-artifacts",
+@@ -862,9 +862,9 @@
+ 
+ [[package]]
+ name = "ic-host-artifacts"
+-version = "0.68.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d58589bc1d3e292b6ab090864b4d0f72ae22f4d11c8818ebbc03159517f55b56"
++version = "0.68.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "dd8df0cbaa8f0bd284169a4464e5e3955943853d08b930a1ce5f5e357d8052b5"
+ dependencies = [
+  "flate2",
+  "sha2",
+@@ -872,9 +872,9 @@
+ 
+ [[package]]
+ name = "ic-host-fs"
+-version = "0.68.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4bfaf4d4e82d1a49867de041e05de323131088d1e63fd441fea7681158fbe282"
++version = "0.68.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "c0d48acae2d3ef36b6efe4991d79d87938deb7b7f4ae30165b45985f03fa8d63"
+ dependencies = [
+  "ic-host-artifacts",
+  "rustix",
+@@ -883,9 +883,9 @@
+ 
+ [[package]]
+ name = "ic-host-process"
+-version = "0.68.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5c756020e605e69cf6c2c9ecdc0da9e28b2dde6742d4fde89e648dd09742368a"
++version = "0.68.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "406568ed0d195ecdeaacf3c6d5e6e7e9ada4db993f4cb885720bd6f7be7f801d"
+ dependencies = [
+  "command-fds",
+  "ic-host-artifacts",
+@@ -918,9 +918,9 @@
+ 
+ [[package]]
+ name = "ic-platform"
+-version = "0.6.16"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "caf3dbe36ae7e62f122a1d43e2d51dc537ec8ebf1004005ac9f36303068c69d1"
++version = "0.6.17"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "52bcf60b412c28eb1a461eab055aa6ea93b1413b177a6d208b78351b9afddccb"
+ dependencies = [
+  "candid",
+  "crc32fast",
+@@ -934,9 +934,9 @@
+ 
+ [[package]]
+ name = "ic-testkit"
+-version = "0.68.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "1224ea8643c009924ff793457ef5a25f97802860512421a51adf0ff8453030b9"
++version = "0.68.6"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "bd4d31fe40620fad322eee97188f6ede6828b328eed67de100f771b339e18a28"
+ dependencies = [
+  "ic-host-artifacts",
+  "ic-host-fs",
+--- a/crates/ic-wire/src/native/parser/mod.rs
++++ b/crates/ic-wire/src/native/parser/mod.rs
+@@ -59,33 +59,27 @@
+ 
+     #[inline]
+     fn try_take_varint_u16(&mut self) -> Result<u16> {
+-        // Read the common one-byte representation locally; multi-byte values
+-        // retain this width's original checks. Bytes and rejection rules do not change.
++        // Three explicit groups replace the u16 tail loop. Keep the same shortest
++        // representation and overflow checks: 80 00 and ff ff 04 stay invalid;
++        // ff ff 03 remains 65535. Bytes, admission and consumers are unchanged.
+         let first = self.flavor.pop()?;
+         if first < 128 {
+             return Ok(first as u16);
+         }
+-        let mut out = (first & 0x7f) as u16;
+-        for i in 1..varint_max::<u16>() {
+-            let val = self.flavor.pop()?;
+-            let carry = (val & 0x7F) as u16;
+-            out |= carry << (7 * i);
+-
+-            if (val & 0x80) == 0 {
+-                // Previously reserialization rejected redundant groups as Noncanonical.
+-                // Reject them here as Malformed: 80 00 is not the encoding of zero.
+-                // Encoders are unchanged; consumers must update typed-error handling.
+-                if i > 0 && val == 0 {
+-                    return Err(Error::DeserializeBadVarint);
+-                }
+-                if i == varint_max::<u16>() - 1 && val > max_of_last_byte::<u16>() {
+-                    return Err(Error::DeserializeBadVarint);
+-                } else {
+-                    return Ok(out);
+-                }
+-            }
+-        }
+-        Err(Error::DeserializeBadVarint)
++        let second = self.flavor.pop()?;
++        let value = (first & 127) as u16 | ((second & 127) as u16) << 7;
++        if second < 128 {
++            return if second == 0 {
++                Err(Error::DeserializeBadVarint)
++            } else {
++                Ok(value)
++            };
++        }
++        let last = self.flavor.pop()?;
++        if !(1..=3).contains(&last) {
++            return Err(Error::DeserializeBadVarint);
++        }
++        Ok(value | (last as u16) << 14)
+     }
+ 
+     #[inline]
+--- a/crates/ic-wire/tests/native/mod.rs
++++ b/crates/ic-wire/tests/native/mod.rs
+@@ -715,3 +715,29 @@
+         );
+     }
+ }
++
++#[test]
++fn u16_three_group_decoder_matches_canonical_postcard_control() {
++    // Exhaust continuations for extreme low groups against an independent
++    // decode/re-encode oracle. All valid u16/i16 values are covered above too.
++    for first in [128_u8, 255] {
++        for second in 0_u8..=255 {
++            for third in 0_u8..=255 {
++                let bytes = [first, second, third];
++                let expected = postcard::take_from_bytes::<u16>(&bytes)
++                    .map_err(|_| Error::Malformed)
++                    .and_then(|(value, remaining)| {
++                        let consumed = bytes.len() - remaining.len();
++                        if postcard::to_allocvec(&value).unwrap() != bytes[..consumed] {
++                            Err(Error::Malformed)
++                        } else if !remaining.is_empty() {
++                            Err(Error::Trailing)
++                        } else {
++                            Ok(value)
++                        }
++                    });
++                assert_eq!(native::decode::<u16>(&bytes, LIMITS), expected, "{bytes:?}");
++            }
++        }
++    }
++}

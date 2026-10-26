@@ -1,0 +1,20 @@
+diff --git a/crates/ic-wire/src/contract/mod.rs b/crates/ic-wire/src/contract/mod.rs
+index 3e1e93a..374a0ea 100644
+--- a/crates/ic-wire/src/contract/mod.rs
++++ b/crates/ic-wire/src/contract/mod.rs
+@@ -12,6 +12,7 @@ pub(crate) struct Output {
+ }
+ impl Flavor for Output {
+     type Output = Vec<u8>;
++    #[cfg_attr(target_arch = "wasm32", inline(always))]
+     fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
+         if self.bytes.len() == self.limit {
+             return Err(postcard::Error::SerializeBufferFull);
+@@ -19,6 +20,7 @@ impl Flavor for Output {
+         self.bytes.push(byte);
+         Ok(())
+     }
++    #[cfg_attr(target_arch = "wasm32", inline(always))]
+     fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+         if bytes.len() > self.limit - self.bytes.len() {
+             return Err(postcard::Error::SerializeBufferFull);

@@ -8,6 +8,16 @@ The [protocol probe](protocol-study.md) and the generator probe below remain
 available for matched runtime and host-generation experiments. These timings do
 not establish deployed endpoint latency or IC instruction costs.
 
+The [0.7.16 runtime study](evidence/runtime-0716/README.md) retains matched IC
+instructions, native timing and uncompressed Wasm/code-section measurements for
+the explicit u16 decoder, including small controls, regressions and rejected
+candidates. Its source/lock and reproduction runners are frozen independently
+of later tooling dependency updates.
+
+The [encoder follow-up](evidence/encoder-followup-0716/README.md) isolates output
+inlining and one-pass growth. It retains size wins alongside instruction and
+allocation regressions; none of these additional candidates is promoted.
+
 ## Retired alternative-codec comparisons
 
 The nine-case Postcard/bitcode/wincode suite and the 27-workload MessagePack suite

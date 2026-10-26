@@ -715,3 +715,29 @@ fn packed_i16_bytes_bounds_and_canonicality() {
         );
     }
 }
+
+#[test]
+fn u16_three_group_decoder_matches_canonical_postcard_control() {
+    // Exhaust continuations for extreme low groups against an independent
+    // decode/re-encode oracle. All valid u16/i16 values are covered above too.
+    for first in [128_u8, 255] {
+        for second in 0_u8..=255 {
+            for third in 0_u8..=255 {
+                let bytes = [first, second, third];
+                let expected = postcard::take_from_bytes::<u16>(&bytes)
+                    .map_err(|_| Error::Malformed)
+                    .and_then(|(value, remaining)| {
+                        let consumed = bytes.len() - remaining.len();
+                        if postcard::to_allocvec(&value).unwrap() != bytes[..consumed] {
+                            Err(Error::Malformed)
+                        } else if !remaining.is_empty() {
+                            Err(Error::Trailing)
+                        } else {
+                            Ok(value)
+                        }
+                    });
+                assert_eq!(native::decode::<u16>(&bytes, LIMITS), expected, "{bytes:?}");
+            }
+        }
+    }
+}
