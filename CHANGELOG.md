@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.15]
+## [0.7.15] - 2026-10-26
 
 - Adopt Shared Tooling 0.26.18 at `37652c0`. Normal releases start from current
   committed metadata while explicit resume retains its recovery checks. Qualify
