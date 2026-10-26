@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.13]
+## [0.7.13] - 2026-10-26
 
 - Reject duplicate numeric method IDs during host TypeScript generation, across
   names, query/update modes and equivalent spellings such as `7`/`07`. Previously
