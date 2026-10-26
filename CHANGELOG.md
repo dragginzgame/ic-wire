@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.15]
+
+- Adopt Shared Tooling 0.26.18 at `37652c0`. Normal releases start from current
+  committed metadata while explicit resume retains its recovery checks. Qualify
+  Wire's adapter with malformed historical plans and retained evidence; update
+  the expected early dirty-source diagnostic. Clarify that partial publication
+  selection applies only to the same package version. Codec/protocol unchanged.
+
 ## [0.7.14] - 2026-10-26
 
 - Allow explicit `PUBLISH_PACKAGES` selection when resuming a partial registry

@@ -205,6 +205,12 @@ registry index:
 make publish PUBLISH_PACKAGES=ic-wire
 ```
 
+The runtime-only retry applies to the same released version. If another release
+has advanced the workspace version, its matching derive version must be published
+too: use `make publish PUBLISH_PACKAGES="ic-wire-derive ic-wire"`. A tooling or Git
+release does not publish either crate, and a new release is not required merely
+to finish an earlier partial publication.
+
 The default still selects both crates and runs lint first. Explicit selection
 avoids retrying an immutable uploaded version; it does not automatically infer
 registry state or ignore upload failures. Empty selections and private package

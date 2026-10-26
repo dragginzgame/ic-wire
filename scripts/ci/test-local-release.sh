@@ -52,11 +52,14 @@ git init -q --bare "$fixture/remote.git"
 git remote add origin "$fixture/remote.git"
 git push -q -u origin main
 source="$(git rev-parse HEAD)"
+# Normal releases must ignore malformed historical plans and retain their evidence.
+mkdir -p .git/release-state/broken.plan
+printf 'retained historical plan\n' > .git/release-state/0.0.1.plan
 # Dirty source must refuse before gate or version effects.
 printf '\nfixture edit\n' >> README.md
 if make release-patch > "$fixture/dirty.log" 2>&1; then exit 1; fi
 [[ ! -e .git/fixture-gates && "$(make -s release-version)" == "$previous" ]]
-grep -F 'README.md' "$fixture/dirty.log" >/dev/null
+grep -F 'commit or restore worktree changes' "$fixture/dirty.log" >/dev/null
 git restore README.md
 # Candidate conflict must refuse before tools or validation.
 cp CHANGELOG.md "$fixture/changelog"
@@ -110,5 +113,7 @@ if RELEASE_COMMIT='' bash scripts/ci/cargo-release-metadata.sh check ic-wire --m
 RELEASE_COMMIT="$commit" bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped > "$fixture/grouped-committed.log" 2>&1
 cmp Cargo.toml <(perl -0pe 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' "$fixture/grouped-manifest")
 cp "$fixture/grouped-manifest" Cargo.toml
+[[ "$(cat .git/release-state/0.0.1.plan)" == 'retained historical plan' ]]
+[[ -d .git/release-state/broken.plan ]]
 complete=true
 printf '%s\n' 'Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.'

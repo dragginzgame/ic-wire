@@ -1,42 +1,51 @@
 # Current handoff
 
-## Released 0.7.13; pending 0.7.14
+## Released 0.7.14; pending 0.7.15
 
-The checkout started clean at `b2f2f2e` (Release 0.7.13). This batch adds explicit
-package selection to the local registry publication recipe after a partial upload.
-Runtime, generator, protocol bytes and acceptance rules are unchanged. Own versions,
-staging, commits and actual publication remain maintainer-owned.
+The checkout started clean at `5cfd762` (Release 0.7.14). Adopted Shared Tooling
+0.26.18 at `37652c087fff16f55f83d18d27ba17c83f34021c` through the canonical
+exporter after reviewing its impact report. AGENTS.md and the 107-file snapshot
+record the selected revision. Pins, compilers, Cargo dependencies and own package
+versions remain unchanged. No commit, push, release or publication was performed.
 
-## Partial publication retry
+## What the update fixes
 
-The reported crates.io response says ic-wire-derive 0.7.13 already exists and
-Cargo stopped before publishing ic-wire. Keep the released versions and select
-only the remaining package:
+Normal releases start fresh from current committed metadata instead of scanning
+historical release plans. Explicit `release-resume VERSION=X.Y.Z` still owns
+recovery and checks the saved source, validation receipt, refs and destination.
+The local adapter fixture now includes malformed historical plans and verifies
+that normal release delivery succeeds while preserving that historical evidence.
+Its dirty-source assertion follows the new runner's earlier refusal diagnostic.
+All release effects in qualification are confined to disposable repositories and
+local bare remotes.
+
+Cargo publication helpers did not change between the adopted snapshots. This
+update does not make an already-uploaded version replaceable or supply a missing
+derive dependency. The checkout is 0.7.14, so a runtime-only retry requires derive
+0.7.14 to be available. Select both for a new version:
 
 ```sh
-make publish PUBLISH_PACKAGES=ic-wire
+make publish PUBLISH_PACKAGES='ic-wire-derive ic-wire'
 ```
 
-The default selects both public crates. Every selection retains the lint gate;
-empty selections and private/unknown package names fail before Cargo runs.
-Registry state is not inferred automatically, and upload errors are not suppressed.
-The operator should confirm the already uploaded derive crate is the intended
-release. If the runtime cannot resolve that version, wait for index propagation.
-A read-only sparse-index response still showed 0.7.12 during this inspection;
-it does not override the registry's reported already-uploaded response.
-No live publication, release, staging or commit was performed in this batch.
+The previous non-uploading Cargo dry run for that exact selection passed. A
+runtime-only retry applies to the same already partially published version;
+advancing the workspace version requires publishing its matching derive too.
+Actual registry visibility and successful uploads still need maintainer execution.
+See [publication recovery](../development.md#first-publication).
 
-## Validation
+## Validation and scope
 
-The disposable local Make fixture passes: both packages and either individual
-package route to the expected locked Cargo command, lint refusal prevents uploads,
-and invalid selections invoke no Cargo. Cargo is a stub for these checks, so
-neither the real checkout nor a registry receives publication effects. Formatting,
-shell syntax, documentation links and whitespace checks pass. Runtime/codec
-benchmarks are not applicable to this publication-recipe-only change; full CI
-was not rerun. See [publication recovery](../development.md#first-publication).
+Snapshot integrity, local Make/hook/publication routing, disposable release and
+resume/receipt checks, formatting, documentation links and whitespace pass.
+Tool catalogs/pins are unchanged, and existing tool admission passed without
+installation. No production codec/generator code changed, so runtime benchmarks
+are not applicable. Full CI and fresh macOS qualification were not run.
 
-The released [method identity fix](../evidence/method-ids-0713/README.md),
-[unsigned evidence guide](../unsigned-magnitude.md) and
-[full comparison](../full-comparison-0710.md) retain their own qualification scopes.
-Installed Canic/Toko adoption and application Wasm headroom were not requalified.
+The new RPC-budget rule keeps policy with consumers and codec semantics with Wire;
+no default limits or runtime policy were introduced by snapshot adoption.
+The GitHub description was corrected from "unpublished investigation" to the
+published bounded Serde/Postcard contracts and generated TypeScript scope, as
+required during baseline adoption. The sibling Shared checkout stayed unchanged.
+The released [method-ID qualification](../evidence/method-ids-0713/README.md) and
+[unsigned evidence guide](../unsigned-magnitude.md) retain their existing scopes.
