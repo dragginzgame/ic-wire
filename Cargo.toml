@@ -30,9 +30,9 @@ syn = { version = "3.0.9", features = ["visit"] }
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 dhat = "0.3.3"
-ic-build = { version = "0.68.7", default-features = false }
-ic-platform = { version = "0.6.18", default-features = false }
-ic-testkit = { version = "0.68.7", default-features = false }
+ic-build = { version = "0.68.8", default-features = false }
+ic-platform = { version = "0.6.19", default-features = false }
+ic-testkit = { version = "0.68.8", default-features = false }
 ic-wire = { path = "crates/ic-wire", version = "0.7.17" }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"

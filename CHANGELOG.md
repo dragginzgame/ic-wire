@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.18]
+
+### 📝 Summary
+
+- Adopt Shared Tooling 0.26.21, IC Build/Testkit and the release editor 0.68.8,
+  and Platform 0.6.19. Keep the current root changelog's emoji section layout.
+  Runtime/generator code, wire bytes and admission rules are unchanged.
+
 ## [0.7.17] - 2026-10-26
 
 ### 📝 Summary
