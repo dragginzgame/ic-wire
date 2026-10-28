@@ -1,56 +1,85 @@
 # Current handoff
 
-## Released 0.7.17; pending 0.7.18 upstream adoption
+## Released 0.7.18; pending 0.7.19 issue fixes
 
-Local HEAD `85eea63acddbf34f0ccbff5458788b36ca071a91` includes the authorized
-merges of [#27](https://github.com/dragginzgame/ic-wire/pull/27) and
-[#28](https://github.com/dragginzgame/ic-wire/pull/28). #27 was reconciled with the
-already-adopted common workflow before merging; its obsolete local exception
-was not restored. #28 adds the current root changelog's emoji Summary section.
-The checkout was fast-forwarded without changing the incoming lockfile edits.
+HEAD remains `c748379325266d7fa614fefee9d745eb4a88acca`. The compatible patch
+adds APIs and metadata support; it changes no existing frames, identities,
+primitive acceptance, native admission or retained retry/hash inputs. Own package
+versions remain 0.7.18. Staging, commits, publication and release remain maintainer-owned.
 
-The current uncommitted adoption selects Shared Tooling 0.26.21 at
-`66c91c4412856baa147482e648fc80428db8b179` through the canonical exporter.
-IC Build/Testkit minimums and the managed editor select 0.68.8; Platform selects
-0.6.19. The incoming lockfile already selected these versions, including its
-OpenSSL probe update, and is preserved byte-for-byte. Own package versions remain
-0.7.17; no release, tag or publication was performed. Leave adoption commits and
-release delivery to the maintainer.
+Both [#29](https://github.com/dragginzgame/ic-wire/issues/29) and
+[#30](https://github.com/dragginzgame/ic-wire/issues/30) are implemented locally.
+Keep them open until delivery and required producer qualification; SDK adoption
+and installed endpoint behavior remain consumer-owned. No consumer checkout was
+changed and no remote code delivery is claimed.
 
-## Runtime and qualification
+## Delivered local behavior
 
-There is one production Serde/Postcard codec. This adoption changes no runtime
-or generator source, protocol bytes, identities, admission rules or typed errors.
-The production encoder retains two-pass admission/sizing; primitive decoding
-remains one pass. Consumers own collection/custom-Serde normalization and must
-retain original frames for exact retries and signatures.
+Serde's container `crate = "path"` attribute now works with Wire. Direct and
+re-exported paths retain identical metadata tokens, positional fields, variant
+indices and frames. Unsupported layout attributes and invalid placement/duplicates
+still reject. Rust and executable TypeScript fixtures cover records and enums.
 
-The [runtime study](../evidence/runtime-0716/README.md) owns the released u16/i16
-optimization's IC, native-time and Wasm tradeoffs, including small-input
-regressions. It uses frozen Build/Testkit/host 0.68.5 and Platform 0.6.16. The
-[encoder study](../evidence/encoder-followup-0716/README.md) uses 0.68.6/0.6.17;
-those results do not qualify the newer dependency graph. Later temporary
-experiments retained no runtime change. No new runtime speed or Wasm saving is
-claimed for this tooling adoption.
+TypeScript adds `createPayloadCodec`; host `generate_payload_registry` and
+`payload_limits` share the existing registry validation, traversal, scalar checks
+and mandatory bulk advice. Payload unit is empty; u64 7 and `(7u64,)` are `07`.
+Framed APIs retain the IW/ID/direction envelope. Payload choice is explicit;
+changing an endpoint layout still requires coordinated consumers. Named recursive
+schemas, tuple arguments, records/enums, malformed inputs and budgets are qualified.
 
-Issues #20–#26 were closed after checking their delivered Wire implementations,
-published source and complete release CI. Consumer rollout and installed endpoint
-acceptance remain consumer-owned.
+Rust adds `encode_to_slice`, `encode_request_to_slice` and
+`encode_response_to_slice`, using Postcard's slice output through the same bounded
+Serde adapter and two-pass sizing/admission. Short buffers reject before writing;
+other output-pass failures return no successful slice and leave unspecified
+storage contents. Consumers publish only Ok and own scratch size/fallback and async
+lifetimes. The result cannot outlive storage. No inline/spill writer was added.
 
-## Current validation and boundaries
+The [SDK recipe](../sdk-integration.md) explains consumer-owned scalar serialization,
+checks versus value conversion, typed facades and compiling the shared runtime
+into JavaScript. A facade is compiled and executed against generated payload code.
 
-Focused Linux checks pass: snapshot integrity, dependency pins/boundaries, actual
-Make/hook routing, release-editor recovery, compiler diagnostics, benchmark corpus
-roundtrips and strict Clippy for the IC Build and Testkit consumers. The 0.68.8
-editor is installed and admitted. The existing PocketIC admission probe passes
-144 valid/truncated and budget cases with three samples each, exercising owned
-startup/cleanup. Local evidence: `target/tooling-adoption.O8cpIY/results`.
+The earlier allocation report remains a documentation/test clarification, not a
+unit-conversion fix. A 22-byte response with `bytes: 64` needs allocation 832 to
+encode and 704 to decode; 512 rejects and 1,024 admits both. Division by eight
+preserves the deliberately weighted traversal ledger. Public regressions and the
+independent overflow/remainder reference remain in place.
 
-The PR merges were authorized with no enforced branch checks. #28's hosted CI was
-still running at merge; no hosted pass is claimed for that run or this local
-adoption. Full CI, the complete Candid performance matrix and fresh macOS
-execution were not run locally. Use the maintainer's release gate for delivery.
+## Evidence and tradeoffs
 
-Consumers choose byte buffers/Packed for bulk fields and bind schemas to deployed
-identities. See the [runtime contract](../runtime.md) and
-[field adoption guide](../packed-fields.md#adopting-an-existing-field).
+The [caller-storage study](../evidence/caller-storage-0719/README.md) retains matched
+0.7.18 controls, source/compiler/dependency identities, repeated raw IC and native
+samples, allocator/live-heap/capacity data, host generation, JS timing and
+uncompressed total/code Wasm sizes. Full local artifacts are under
+`target/caller-storage-0719-qualified/`; the earlier failed fixture attempt is
+preserved separately and is not qualification evidence.
+
+Existing Vec Wasm is byte-identical before/after in both profiles, with identical
+IC counts. Slice output lowers fixture Wasm by 1,151/190 bytes at opt-z/opt-3;
+ordinary Vec-4096 encoding uses 6.61%/7.13% fewer IC instructions. Opt-3 unit costs
+20 more instructions. Native opt-3 large-blob timing regresses 9.46%; JS framed
+unit decode regresses about 21 ns (+19.40%) in the aggregate. No universal speed-up
+or installed-canister saving is claimed. Caller storage remains a real memory cost.
+
+## Focused checks and remaining boundaries
+
+Passing checks: 46 native and 16 runtime tests with TypeScript, two derive tests,
+nine compile-fail diagnostics plus passing control, nine successful and five
+compile-fail doctests, strict library/derive Clippy, and the Rust 1.91 forwarded
+Wasm library build. Final generated strict TS/Node conformance passes 165 framed
+vectors, 35,228 differential mutations, 29 native projection vectors, new payload
+and facade cases, cross-runtime admission and 54 simulated-endian packed cases.
+220 existing generated TS modules remain byte-identical; shared runtime changes
+and new payload modules are explicit. Measurements run separately from these gates.
+
+Incoming dependency edits remain intact: lockfile Build/Testkit/host 0.68.12 and
+Platform 0.6.21; no manifest minimums or managed tooling were adopted in this batch.
+Shared snapshot remains 0.26.21 at `66c91c4412856baa147482e648fc80428db8b179`.
+An incoming dirty edit in `crates/ic-wire-benchmarks/fixtures/mod.rs` changes
+`derive(CandidType)` to `derive(ype)`. It is untouched and would break the Candid
+feature's gate; correct it before release validation. Full CI/Candid comparison,
+macOS and installed SDK qualification were not run here.
+
+Historical studies remain at [runtime 0.7.16](../evidence/runtime-0716/README.md)
+and [encoder follow-up](../evidence/encoder-followup-0716/README.md). Their frozen
+dependency graphs do not qualify the incoming graph. Consumers retain ownership
+of normalization, original retry bytes, authentication, transport and rollback.

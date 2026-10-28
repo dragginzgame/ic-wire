@@ -1,4 +1,4 @@
-// Canonical Postcard inside the IC Wire envelope. Metadata and scalar validators
+// Postcard payloads and explicit IC Wire envelopes. Metadata and scalar validators
 // are trusted consumer declarations. Traversal limits do not bound JS engine heap.
 export class WireError extends Error {
   constructor(readonly code: 'limit' | 'malformed' | 'identity' | 'value') {
@@ -22,6 +22,7 @@ export type Schema = ( { k: 'unit' | 'bool' }
   | { k: 'enum'; variants: readonly (Field & { id: number })[] }
   | { k: 'ref'; name: string }) & { check?: string };
 type Method = { id: string; request: Schema; response: Schema; requestBytes: number; responseBytes: number; requestNodes: number; responseNodes: number; requestDepth: number; responseDepth: number };
+type Payload = { schema: Schema; bytes: number; nodes: number; depth: number };
 type Types = Readonly<Record<string, Schema>>;
 type Checks = Readonly<Record<string, (value: unknown) => void>>;
 const fail = (code: WireError['code']): never => { throw new WireError(code); };
@@ -80,14 +81,15 @@ function validate(schema: Schema, value: unknown, checks: Checks): void {
 class Writer {
   bytes: Uint8Array;
   private view: DataView;
-  offset = 11;
-  constructor(readonly limit: number, id: bigint, direction: number) {
+  constructor(readonly limit: number, public offset = 0) {
     // Previously every encode allocated the entire byte allowance. Grow one
     // private buffer instead; the ceiling, bytes and callback visits are unchanged.
     // Consumers can regenerate clients without changing contracts or retry bytes.
     this.bytes = new Uint8Array(Math.min(limit, 64));
-    this.bytes.set([73, 87]);
     this.view = new DataView(this.bytes.buffer);
+  }
+  header(id: bigint, direction: number) {
+    this.bytes.set([73, 87]);
     this.view.setBigUint64(2, id, true);
     this.bytes[10] = direction;
   }
@@ -118,9 +120,8 @@ class Writer {
   }
 }
 class Reader {
-  offset = 11;
   readonly view: DataView;
-  constructor(readonly bytes: Uint8Array) {
+  constructor(readonly bytes: Uint8Array, public offset = 11) {
     this.view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   }
   float(bits: number): number {
@@ -342,6 +343,34 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
   }
 }
 // Accept only generated trusted metadata. No SDK/auth/transport policy lives here.
+export function createPayloadCodec(metadata: unknown, registry: unknown = {}, checks: Checks = {}) {
+  const meta = metadata as Payload, types = registry as Types;
+  if (!Number.isSafeInteger(meta.bytes) || meta.bytes < 0) fail('value');
+  for (const value of [meta.nodes, meta.depth]) {
+    if (!Number.isSafeInteger(value) || value < 1) fail('value');
+  }
+  return {
+    encode(value: unknown): Uint8Array {
+      // Start directly at byte zero (7n -> 07), without a synthetic frame.
+      // The same traversal serves both APIs; existing envelopes are unchanged.
+      const out = new Writer(meta.bytes);
+      write(meta.schema, value, out, new Budget(meta.nodes, meta.depth), 1, types, checks);
+      return out.offset === out.bytes.length ? out.bytes : out.bytes.slice(0, out.offset);
+    },
+    decode(bytes: Uint8Array): unknown {
+      if (!(bytes instanceof Uint8Array)) return fail('value');
+      if (bytes.length > meta.bytes) return fail('limit');
+      try {
+        const input = new Reader(bytes, 0);
+        const value = read(meta.schema, input, new Budget(meta.nodes, meta.depth), 1, types, checks);
+        if (input.offset !== bytes.length) return fail('malformed');
+        return value;
+      } catch (error) { if (error instanceof WireError) throw error; return fail('malformed'); }
+    }
+  };
+}
+
+// The envelope is explicit: payload codecs never strip or synthesize a frame.
 export function createCodec(metadata: unknown, registry: unknown = {}, checks: Checks = {}) {
   const meta = metadata as Method, types = registry as Types, id = BigInt(meta.id);
   if (id < 0n || id >= (1n << 64n)) fail('value');
@@ -350,7 +379,8 @@ export function createCodec(metadata: unknown, registry: unknown = {}, checks: C
   }
   if (meta.requestBytes < 11 || meta.responseBytes < 11) fail('value');
   function encode(value: unknown, direction: 0 | 1): Uint8Array {
-    const out = new Writer(direction ? meta.responseBytes : meta.requestBytes, id, direction);
+    const out = new Writer(direction ? meta.responseBytes : meta.requestBytes, 11);
+    out.header(id, direction);
     write(direction ? meta.response : meta.request, value, out, new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth), 1, types, checks);
     // A full private buffer is already an exact owned result; otherwise trim it.
     return out.offset === out.bytes.length ? out.bytes : out.bytes.slice(0, out.offset);

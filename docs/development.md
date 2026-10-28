@@ -130,6 +130,13 @@ unchanged; on hosts where ptrace prevents LeakSanitizer shutdown, an explicit
 
 ### Allocation timing modes
 
+For the focused caller-slice versus owned/reused output study, see
+[caller-storage qualification](evidence/caller-storage-0719/README.md) and run
+`bash scripts/ci/evaluate-caller-storage.sh NEW_DIRECTORY BASELINE_COMMIT` with
+an explicitly prepared `POCKET_IC_BIN`. It retains IC instructions, separate
+native timing/allocation/heap samples and uncompressed Wasm/code sizes. The
+ignored benchmark tests are explicit measurements, not ordinary CI gates.
+
 `make evaluate-allocation` retains decoding plus the application checksum as the
 default. To isolate codec work, select a fresh output directory:
 

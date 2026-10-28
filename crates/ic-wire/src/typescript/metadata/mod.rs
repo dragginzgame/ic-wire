@@ -330,27 +330,7 @@ pub fn generate_registry(
     acknowledgements: &BTreeMap<String, String>,
     diagnostics: impl FnOnce(super::BulkLintReport),
 ) -> Result<String, GenerationError> {
-    let mut remaining = 65536;
-    let mut source = format!(
-        "// Generated from IC Wire metadata; edit the source contracts.\nimport {{ createCodec as $createCodec }} from {};\n",
-        json!(runtime_module)
-    );
-    for (name, node) in types {
-        identifier(name)?;
-        let rendered = ty(node, types, 0, &mut remaining)?;
-        source.push_str(&format!("export type {name} = {rendered};\n"));
-    }
-    validate_aliases(types)?;
-    // `$` is outside consumer identifiers, so helpers cannot capture exports.
-    // Computed __proto__ keys preserve the own properties JSON.parse previously
-    // produced. JSON escapes quotes inside strings, so this matches keys only.
-    // Registry meaning and wire schemas stay unchanged; no consumer migration.
-    // Serialize the borrowed registry directly instead of constructing a second
-    // Value tree. JSON bytes, validation and consumer contracts are unchanged.
-    let registry = serde_json::to_string(types)
-        .map_err(|_| GenerationError::Schema)?
-        .replace("\"__proto__\":", "[\"__proto__\"]:");
-    source.push_str(&format!("const $types = {registry};\n"));
+    let (mut source, mut remaining) = registry_source(types, runtime_module, "createCodec")?;
     let mut names = BTreeSet::new();
     let mut ids = BTreeSet::new();
     for method in methods {
@@ -382,4 +362,83 @@ pub fn generate_registry(
     let report = super::bulk_lint::lint_generated(types, methods, acknowledgements)?;
     diagnostics(report);
     Ok(source)
+}
+
+/// Generate explicit payload codecs using the same schemas and runtime as frames.
+///
+/// Each payload has `name`, `schema`, `bytes`, `nodes` and `depth`. Names must be
+/// unique and distinct from exported type names. Byte limits exclude envelopes
+/// and may be zero; node/depth limits are positive. Use [`super::payload_limits`]
+/// to project native policy. Schema/reference validation and complexity bounds
+/// match [`generate_registry`]. Scalar checks belong in the runtime adapter.
+/// Bulk advice is mandatory and uses `/payloads/NAME/...` acknowledgement paths.
+/// Consumers explicitly choose payload APIs; framed bytes and identities are
+/// unchanged. For example u64 7 encodes as `07`, with no synthetic method ID.
+pub fn generate_payload_registry(
+    types: &BTreeMap<String, Value>,
+    payloads: &[Value],
+    runtime_module: &str,
+    acknowledgements: &BTreeMap<String, String>,
+    diagnostics: impl FnOnce(super::BulkLintReport),
+) -> Result<String, GenerationError> {
+    let (mut source, mut remaining) = registry_source(types, runtime_module, "createPayloadCodec")?;
+    let mut names = BTreeSet::new();
+    for payload in payloads {
+        let name = text(payload, "name")?;
+        identifier(name)?;
+        if types.contains_key(name) || !names.insert(name) {
+            return Err(GenerationError::Schema);
+        }
+        super::limits::validate_payload(payload)?;
+        let rendered = ty(&payload["schema"], types, 0, &mut remaining)?;
+        source.push_str(&format!(
+            "export const {name} = (() => {{ const codec = $createCodec({payload}, $types); return {{ encode: (value: {rendered}): globalThis.Uint8Array => codec.encode(value), decode: (bytes: globalThis.Uint8Array): {rendered} => codec.decode(bytes) as {rendered} }}; }})();\n"
+        ));
+    }
+    let report = if payloads.is_empty() {
+        super::bulk_lint::lint_generated(types, &[], acknowledgements)?
+    } else {
+        super::bulk_lint::lint_validated(
+            payloads.iter().map(|payload| {
+                (
+                    format!("/payloads/{}", payload["name"].as_str().unwrap()),
+                    &payload["schema"],
+                )
+            }),
+            types,
+            acknowledgements,
+            true,
+        )?
+    };
+    diagnostics(report);
+    Ok(source)
+}
+
+fn registry_source(
+    types: &BTreeMap<String, Value>,
+    runtime_module: &str,
+    factory: &str,
+) -> Result<(String, usize), GenerationError> {
+    let mut remaining = 65536;
+    let mut source = format!(
+        "// Generated from IC Wire metadata; edit the source contracts.\nimport {{ {factory} as $createCodec }} from {};\n",
+        json!(runtime_module)
+    );
+    for (name, node) in types {
+        identifier(name)?;
+        let rendered = ty(node, types, 0, &mut remaining)?;
+        source.push_str(&format!("export type {name} = {rendered};\n"));
+    }
+    validate_aliases(types)?;
+    // `$` is outside consumer identifiers, so helpers cannot capture exports.
+    // Computed __proto__ keys preserve the own properties JSON.parse previously
+    // produced. JSON escapes quotes inside strings, so this matches keys only.
+    // Registry meaning and wire schemas stay unchanged; no consumer migration.
+    // Serialize the borrowed registry directly instead of constructing a second
+    // Value tree. JSON bytes, validation and consumer contracts are unchanged.
+    let registry = serde_json::to_string(types)
+        .map_err(|_| GenerationError::Schema)?
+        .replace("\"__proto__\":", "[\"__proto__\"]:");
+    source.push_str(&format!("const $types = {registry};\n"));
+    Ok((source, remaining))
 }

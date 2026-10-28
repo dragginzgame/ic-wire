@@ -1,0 +1,3 @@
+e4c001d0b19d77f0fd014c88b43c732d0e6ee33fc513a904fd991cf2b0fa3675  Cargo.lock
+69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792  /home/adam/.cache/canic/pocket-ic-server-16.0.0-pocket-ic-x86_64-linux/pocket-ic
+9af380891c088bfe136e657925a66006c54a3f6bd4b6641917cb1172d40a6306  crates/ic-wire-benchmarks/examples/caller_storage/mod.rs

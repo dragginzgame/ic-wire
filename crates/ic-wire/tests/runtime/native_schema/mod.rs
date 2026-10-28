@@ -3,6 +3,63 @@ use serde::Serialize;
 use serde_json::json;
 use std::borrow::Cow;
 
+mod serde_owner {
+    pub use serde;
+}
+
+#[test]
+fn serde_crate_paths_preserve_record_and_enum_contracts() {
+    #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize, Wire)]
+    #[serde(crate = "serde")]
+    struct Record {
+        value: u32,
+    }
+    #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize, Wire)]
+    #[serde(crate = "self::serde_owner::serde")]
+    enum Choice {
+        Empty,
+        Value(Record),
+    }
+    let schema = native_schema::<Choice>().unwrap();
+    assert_eq!(
+        schema,
+        json!({"k":"enum","variants":[
+            {"name":"Empty","id":0,"value":{"k":"unit"}},
+            {"name":"Value","id":1,"value":{"k":"record","fields":[
+                {"name":"value","value":{"k":"u","bits":32}}
+            ]}}
+        ]})
+    );
+    let limits = ic_wire::Limits {
+        bytes: 64,
+        allocation: 4096,
+        nodes: 64,
+        depth: 16,
+    };
+    for (value, payload) in [
+        (Choice::Empty, vec![0]),
+        (Choice::Value(Record { value: 128 }), vec![1, 128, 1]),
+    ] {
+        let frame = ic_wire::native::encode_response(7, &value, limits).unwrap();
+        assert_eq!(&frame[11..], payload);
+        assert_eq!(
+            ic_wire::native::decode_response(7, &frame, limits),
+            Ok(value)
+        );
+    }
+    let method = json!({"name":"codec","mode":"query","id":"7","request":schema,"response":schema,
+        "requestBytes":64,"responseBytes":64,"requestNodes":64,"responseNodes":64,"requestDepth":16,"responseDepth":16});
+    let generated = ic_wire::typescript::generate_registry(
+        &Default::default(),
+        &[method],
+        "./runtime.js",
+        &Default::default(),
+        |report| assert!(report.is_clean()),
+    )
+    .unwrap();
+    assert!(generated.contains("{ readonly tag: \"Empty\"; readonly value: null } | { readonly tag: \"Value\"; readonly value: { readonly \"value\": number } }"));
+}
+
 #[derive(Debug, PartialEq, Serialize, serde::Deserialize, Wire)]
 #[serde(transparent)]
 struct CowText<'a>(Cow<'a, str>);

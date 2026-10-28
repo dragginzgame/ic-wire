@@ -38,6 +38,7 @@ fn attributes(
     let mut borrow = false;
     let mut bytes = false;
     let mut deny_unknown = false;
+    let mut serde_crate = false;
     let mut rename = None;
     for attr in attrs {
         if attr.path().is_ident("wire") {
@@ -55,6 +56,14 @@ fn attributes(
                     // This changes map-format input handling, not Postcard's
                     // positional layout. TS already rejects extra record keys.
                     deny_unknown = true;
+                    Ok(())
+                } else if allow_transparent && meta.path.is_ident("crate") && !serde_crate {
+                    // Crate selection changes generated Rust paths, not Serde's
+                    // layout. Previously rejected containers now describe their
+                    // existing bytes; metadata/admission and consumers are unchanged.
+                    // Serde owns validation and resolution of the supplied path.
+                    meta.value()?.parse::<syn::LitStr>()?;
+                    serde_crate = true;
                     Ok(())
                 } else if allow_bytes && meta.path.is_ident("with") && !bytes {
                     let adapter = meta.value()?.parse::<syn::LitStr>()?;
@@ -284,6 +293,10 @@ mod tests {
             "struct A { #[serde(serialize_with = \"custom\")] a: u8 }",
             "struct A { #[serde(deny_unknown_fields)] a: u8 }",
             "#[serde(deny_unknown_fields, deny_unknown_fields)] struct A { a: u8 }",
+            "#[serde(crate = 1)] struct A { a: u8 }",
+            "#[serde(crate = \"serde\", crate = \"serde\")] struct A { a: u8 }",
+            "struct A { #[serde(crate = \"serde\")] a: u8 }",
+            "enum A { #[serde(crate = \"serde\")] B }",
             "struct A { #[serde(with = \"serde_bytes\", with = \"serde_bytes\")] a: Vec<u8> }",
             "struct A { #[serde(with = \"serde_bytes\", deserialize_with = \"custom\")] a: Vec<u8> }",
             "#[serde(borrow)] struct A { a: u8 }",
@@ -301,6 +314,23 @@ mod tests {
                 super::expand(syn::parse_str(source).unwrap()).is_err(),
                 "{source}"
             );
+        }
+    }
+
+    #[test]
+    fn crate_paths_emit_the_same_metadata_implementation() {
+        for source in [
+            "struct A { value: u32 }",
+            "struct A;",
+            "struct A(u16);",
+            "enum A<T> { Empty, Value(T) }",
+        ] {
+            let plain = super::expand(syn::parse_str(source).unwrap()).unwrap();
+            for path in ["serde", "::owner::reexport::serde"] {
+                let attributed = format!("#[serde(crate = {path:?})] {source}");
+                let projected = super::expand(syn::parse_str(&attributed).unwrap()).unwrap();
+                assert_eq!(plain.to_string(), projected.to_string());
+            }
         }
     }
 }

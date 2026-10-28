@@ -1,0 +1,118 @@
+# SDK integration
+
+Wire owns one Serde/Postcard codec, resource admission and typed codec errors.
+The SDK owns endpoint selection, authentication, copying IC arguments, replies,
+transport, retries, persistence and rollback. No IC SDK is needed by Wire's runtime.
+These interfaces address [#29](https://github.com/dragginzgame/ic-wire/issues/29).
+
+## Payloads and explicit frames
+
+Use Rust `native::encode` / `native::decode` when the enclosing protocol selects
+the contract, for example an IC method name with a parameter tuple and a direct
+return value. Their TypeScript counterpart is `createPayloadCodec`; the host
+`generate_payload_registry` emits typed `encode` / `decode` wrappers. A payload
+entry contains `name`, `schema`, `bytes`, `nodes` and `depth`. Obtain the last
+three fields from `typescript::payload_limits`; obtain the schema from
+`native_schema` or a `SchemaRegistry` reference. Pass the same registry to the
+payload generator. Recursive definitions use the existing named registry.
+
+Payload unit is empty; u64 7 and the one-element tuple `(7u64,)` both encode as
+`07`. Payload limits count no header and allow a zero-byte unit payload. Node
+and depth limits remain positive. Scalar checks, primitive validation,
+full-consumption checks, bulk advice and schema complexity limits still apply.
+Payload diagnostic paths begin `/payloads/NAME`; exact-path acknowledgements
+work as with the framed generator.
+
+`generate_registry` and `createCodec` retain their explicit 11-byte
+`IW`/method-ID/direction envelope and request/response methods. Payload codecs
+never strip or construct a temporary envelope. Selecting a different public
+endpoint layout requires coordinated consumers; adding these APIs changes no
+existing framed bytes, identities or acceptance rules. Neither API binds a schema
+to a deployment automatically. Retain original bytes for exact retries/signatures.
+
+## Caller-owned output
+
+`native::encode_to_slice`, `encode_request_to_slice` and
+`encode_response_to_slice` return a mutable slice of only the completed encoding.
+Their lifetime is tied to the caller's storage. Use scoped or stack storage when
+appropriate, and publish the returned bytes synchronously only after success.
+The SDK owns any buffer loan across an await; Wire supplies no async machinery.
+
+```rust
+fn main() -> Result<(), ic_wire::Error> {
+    let limits = ic_wire::Limits { bytes: 64, allocation: 1024, nodes: 64, depth: 16 };
+    let mut storage = [0_u8; 64];
+    let bytes = ic_wire::native::encode_to_slice(&7_u64, limits, &mut storage)?;
+    assert_eq!(bytes, [7]);
+    Ok(())
+}
+```
+
+A short buffer returns `Error::Limit` before writing. If a custom serializer
+fails during the output pass, no successful slice is returned and storage contents
+are unspecified. Discard that attempt. This API retains the owned encoder's
+admission/sizing pass and bounded output pass, using Postcard's slice flavor
+through the same Serde admission adapter. It introduces no inline/spill writer,
+callback escape mechanism or automatic fallback. Caller storage does not lower
+`Limits::allocation`; its conservative ledger is unchanged. Custom Serde remains
+trusted and may allocate independently of codec output.
+
+The SDK can choose the existing `encode` / `encode_into` for owned output and
+can copy a successful slice when retention is required. Buffer sizing, fallback
+and synchronous reply/rollback policy stay in the SDK. See the
+[caller-storage study](evidence/caller-storage-0719/README.md) for matched
+instruction, allocation and uncompressed Wasm measurements and their limits.
+
+## Custom scalar values and public client types
+
+Implement the scalar's Serde representation and verified `Wire` metadata in the
+consumer. A metadata `check` names a validator; it does not change the serialized
+representation, convert a value or change its TypeScript type. An adapter module
+can forward both `createCodec` and `createPayloadCodec` to Wire's shared runtime,
+supplying the consumer's check map. Select that module through `runtime_module`.
+Existing Principal-like, arbitrary unsigned and signed representations remain
+consumer-owned; Wire does not impose a replacement scalar convention.
+
+Generated types describe serialized values. Expose application classes or other
+ergonomic types through an ordinary typed facade that converts to/from those
+values. For example, if generated `count` encodes bigint, the consumer can write:
+
+```typescript
+import { count } from './payloads.js';
+export class Counter {
+  constructor(readonly value: bigint) {
+    if (value < 0n) throw new RangeError('negative counter');
+  }
+}
+export const counter = {
+  encode: (value: Counter): Uint8Array => count.encode(value.value),
+  decode: (bytes: Uint8Array): Counter => new Counter(count.decode(bytes))
+};
+```
+
+The facade owns the public type and both conversions. For nested records/enums,
+convert their scalar fields explicitly and preserve the generated wire types at
+the codec boundary. Wire adds no inference of SDK types or custom serializer
+layouts. These conversions must preserve the actual consumer Serde contract;
+changing its byte representation remains a coordinated contract change.
+The conformance fixture compiles and executes the facade against the generated
+payload codec, alongside separate scalar-check tests.
+
+## Shipping JavaScript
+
+A host generator can write `typescript::RUNTIME` to `wire-runtime.ts` next to
+its generated modules. Compile them with the consumer's pinned TypeScript
+compiler, for example:
+
+```sh
+tsc --strict --noUncheckedIndexedAccess --exactOptionalPropertyTypes \
+  --target ES2022 --module NodeNext --moduleResolution NodeNext \
+  --outDir build/generated generated/*.ts
+```
+
+Keep the consumer's Node/module package configuration consistent with its output.
+The runtime imports no transport or SDK. Ship the compiled JavaScript with its
+generated clients; there is no separately maintained JavaScript implementation.
+Host generation stays outside the deployed Wasm dependency graph. Qualify the
+installed SDK path separately, including response failures and rollback; these
+codec tests do not establish endpoint lifecycle or production throughput.

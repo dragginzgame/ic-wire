@@ -1,0 +1,7 @@
+profile,lane,total_wasm_bytes,code_section_bytes
+evaluation,before-vec,22847,20532
+evaluation,after-vec,22847,20532
+evaluation,after-slice,21696,19218
+benchmark-speed,before-vec,22390,20329
+benchmark-speed,after-vec,22390,20329
+benchmark-speed,after-slice,22200,20046

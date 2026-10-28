@@ -19,6 +19,32 @@ pub fn method_limits(request: Limits, response: Limits) -> Result<Value, Generat
     Ok(value)
 }
 
+/// Project payload-only byte/node/depth policy; zero bytes can admit unit.
+/// Allocation remains native-only, as with [`method_limits`].
+pub fn payload_limits(limits: Limits) -> Result<Value, GenerationError> {
+    let value = json!({"bytes":limits.bytes,"nodes":limits.nodes,"depth":limits.depth});
+    validate_payload(&value)?;
+    Ok(value)
+}
+
+pub(super) fn validate_payload(payload: &Value) -> Result<(), GenerationError> {
+    for (key, minimum) in [("bytes", 0), ("nodes", 1), ("depth", 1)] {
+        allowance(&payload[key], minimum)?;
+    }
+    Ok(())
+}
+
+fn allowance(value: &Value, minimum: u64) -> Result<(), GenerationError> {
+    let n = value.as_u64().ok_or(GenerationError::Complexity)?;
+    if n > MAX_SAFE_INTEGER {
+        return Err(GenerationError::Complexity);
+    }
+    if n < minimum {
+        return Err(GenerationError::Limits);
+    }
+    Ok(())
+}
+
 pub(super) fn validate(method: &Value) -> Result<(), GenerationError> {
     for key in [
         "requestBytes",
@@ -28,18 +54,12 @@ pub(super) fn validate(method: &Value) -> Result<(), GenerationError> {
         "requestDepth",
         "responseDepth",
     ] {
-        let n = method[key].as_u64().ok_or(GenerationError::Complexity)?;
-        if n > MAX_SAFE_INTEGER {
-            return Err(GenerationError::Complexity);
-        }
         let minimum = if key.ends_with("Bytes") {
             crate::contract::HEADER as u64
         } else {
             1
         };
-        if n < minimum {
-            return Err(GenerationError::Limits);
-        }
+        allowance(&method[key], minimum)?;
     }
     Ok(())
 }

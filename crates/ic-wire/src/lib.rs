@@ -40,7 +40,7 @@ pub mod __private {
 /// Typed codec/admission failure, distinct from transport and application errors.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
-    /// Wire, collection or text allowance exceeded.
+    /// Wire, collection, text or caller-output allowance exceeded.
     Limit,
     /// Allocation failed within an admitted allowance.
     Allocation,
@@ -63,7 +63,10 @@ impl core::error::Error for Error {}
 pub struct Limits {
     /// Maximum encoding bytes; framed APIs include the 11-byte header.
     pub bytes: usize,
-    /// Maximum value heap plus codec scratch (excludes caller input).
+    /// Conservative traversal allowance in bytes, not measured heap usage.
+    /// Reserves the entire [`Self::bytes`] allowance, then charges eight times
+    /// visited value sizes and text/byte lengths. Excludes caller input.
+    /// Encoding and decoding can require different allowances; see the crate guide.
     pub allocation: usize,
     /// Maximum visited value nodes, including unit elements.
     pub nodes: usize,

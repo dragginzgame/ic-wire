@@ -160,7 +160,7 @@ pub(super) fn lint_generated(
     }
 }
 
-fn lint_validated<'a>(
+pub(super) fn lint_validated<'a>(
     roots: impl Iterator<Item = (String, &'a Value)>,
     types: &BTreeMap<String, Value>,
     acknowledgements: &BTreeMap<String, String>,

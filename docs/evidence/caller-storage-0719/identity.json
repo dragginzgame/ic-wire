@@ -1,0 +1,32 @@
+{
+  "baseline_commit": "c748379325266d7fa614fefee9d745eb4a88acca",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "host": {
+    "platform": "linux",
+    "arch": "x64",
+    "kernel": "7.0.0-38-generic"
+  },
+  "node": "v24.21.0",
+  "typescript": "7.0.2",
+  "lock_sha256": "e4c001d0b19d77f0fd014c88b43c732d0e6ee33fc513a904fd991cf2b0fa3675",
+  "fixture_sha256": "9af380891c088bfe136e657925a66006c54a3f6bd4b6641917cb1172d40a6306",
+  "artifacts": {
+    "benchmark-speed-after-slice.wasm": "e8a7a9f77797dfd863275eb300a6a08c481488f917031288f736ed3271215f41",
+    "benchmark-speed-after-vec.wasm": "f6ba3fbc15f17c90b813f1c1deb977751b03e4d75afa59bbb6a313c156f61ce0",
+    "benchmark-speed-before-vec.wasm": "f6ba3fbc15f17c90b813f1c1deb977751b03e4d75afa59bbb6a313c156f61ce0",
+    "evaluation-after-slice.wasm": "28649919177f19a6225077f5fb5626d6711c2c55e77639df7be3eb729b73a808",
+    "evaluation-after-vec.wasm": "c49f209a7436a62af301f48cbd82bea52e491cfeb73d102699f1f2080ab093e0",
+    "evaluation-before-vec.wasm": "c49f209a7436a62af301f48cbd82bea52e491cfeb73d102699f1f2080ab093e0"
+  },
+  "typescript_source_sha256": {
+    "before": "6f45f98317135690ef5f35ca200fdc99cd35d6874ea9d3a57deb563f48d01bf5",
+    "after": "e87f3110dbd3778869a0395bfdb1801236891d60df7fbfaa01c04ad8d20a2073"
+  },
+  "rustflags": {
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "CARGO_BUILD_TARGET": null,
+    "CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS": null
+  }
+}

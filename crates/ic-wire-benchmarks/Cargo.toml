@@ -19,6 +19,8 @@ ic = ["ic-platform/pocket-ic"]
 toko = []
 # Focused ordinary-list/output-writer qualification, not a production mode.
 hotspots = []
+# Qualification of caller storage, never a production codec selection.
+caller-slice = []
 # Benchmark cohort selection, never a production codec mode.
 packed-i16 = []
 packed-i16-baseline = ["packed-i16"]
@@ -61,6 +63,11 @@ path = "examples/report/mod.rs"
 name = "codec-instructions"
 path = "examples/instructions/mod.rs"
 required-features = ["wire", "candid", "ic"]
+
+[[example]]
+name = "caller-storage"
+path = "examples/caller_storage/mod.rs"
+crate-type = ["cdylib"]
 
 [[example]]
 name = "admission-wasm"

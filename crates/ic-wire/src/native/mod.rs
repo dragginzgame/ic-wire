@@ -112,6 +112,69 @@ pub fn encode_into<T: Serialize + ?Sized>(
 ) -> Result<(), Error> {
     encode_prefixed_into(value, limits, &[], bytes)
 }
+
+/// Encode a payload into caller-owned storage without allocating codec output.
+///
+/// Returns only the completed encoding. A short buffer returns [`Error::Limit`]
+/// before writing; on any other error storage contents are unspecified and must
+/// not be published. The returned slice borrows storage, not the value. Admission,
+/// two-pass sizing and trusted custom Serde rules match [`encode_into`]; storage
+/// capacity does not replace or reduce the configured allocation allowance.
+pub fn encode_to_slice<'a, T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    encode_prefixed_to_slice(value, limits, &[], storage)
+}
+
+/// Encode a complete request into caller storage; follows [`encode_to_slice`].
+pub fn encode_request_to_slice<'a, T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    encode_prefixed_to_slice(value, limits, &contract::header(id, 0), storage)
+}
+
+/// Encode a complete response into caller storage; follows [`encode_to_slice`].
+pub fn encode_response_to_slice<'a, T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    encode_prefixed_to_slice(value, limits, &contract::header(id, 1), storage)
+}
+
+fn encode_prefixed_to_slice<'a, T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    prefix: &[u8],
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
+    let output = storage.get_mut(..size + prefix.len()).ok_or(Error::Limit)?;
+    output[..prefix.len()].copy_from_slice(prefix);
+    let budget = Budget::new(limits);
+    // New storage API, same Postcard bytes and admission as Vec output. The
+    // slice flavor bounds every write, including inconsistent custom Serialize
+    // passes. Only Ok publishes a completed prefix; no inline/spill policy or
+    // framing change is introduced, and existing consumers need no migration.
+    let payload = postcard::to_slice(
+        &encode::Bounded {
+            value,
+            budget: &budget,
+            depth: 1,
+        },
+        &mut output[prefix.len()..],
+    )
+    .map_err(|_| budget.error())?;
+    let written = prefix.len() + payload.len();
+    Ok(&mut output[..written])
+}
+
 fn encode_prefixed_into<T: Serialize + ?Sized>(
     value: &T,
     limits: Limits,

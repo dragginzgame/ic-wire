@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.7.19]
+
+### 📝 Summary
+
+- Accept Serde's container-level crate-path attribute in `Wire` metadata derives,
+  including re-exported Serde paths ([#30](https://github.com/dragginzgame/ic-wire/issues/30)).
+  Unsupported layout attributes still reject; existing frames and generated layouts
+  are unchanged.
+- Add payload-only TypeScript codecs/generation and bounded Rust caller-slice
+  output, sharing the existing Postcard traversal
+  ([#29](https://github.com/dragginzgame/ic-wire/issues/29)). Document typed consumer
+  facades and JavaScript delivery. Existing framed identities and admission stay
+  unchanged; payload APIs explicitly omit the envelope (`7u64` becomes `07`).
+  Retain matched IC, allocation, native timing and uncompressed Wasm evidence,
+  including small-input regressions and unchanged owned-output controls.
+- Clarify that native allocation admission reserves the configured byte limit
+  and charges eight times visited value sizes, rather than measuring heap usage.
+  Add regression coverage for a 22-byte reply rejected at 512 allocation bytes
+  and admitted at 1,024, including exact encode/decode boundaries. Runtime,
+  protocol bytes and admission rules are unchanged.
+
 ## [0.7.18] - 2026-10-26
 
 ### 📝 Summary

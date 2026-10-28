@@ -3,6 +3,7 @@ use ic_wire::{
     Limits, Wire, native,
     typescript::{self, GenerationError, SchemaContext},
 };
+use serde as serde_reexport;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, fmt::Write as _, fs, path::Path};
@@ -12,6 +13,7 @@ use std::{collections::BTreeMap, fmt::Write as _, fs, path::Path};
 struct CowText(std::borrow::Cow<'static, str>);
 
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+#[serde(crate = "serde")]
 struct Page<T> {
     entries: Vec<T>,
     total: u64,
@@ -66,6 +68,7 @@ struct Transparent {
     value: Count,
 }
 #[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+#[serde(crate = "self::serde_reexport")]
 enum Choice<T> {
     Unit,
     One(T),

@@ -283,6 +283,18 @@ own traversal charges; it no longer charges a second serialization pass. Encodin
 has its own allowances, so successful decoding does not guarantee successful
 encoding under the same limits.
 
+In byte units, admission requires `allocation >= bytes + 8 * charged_value_bytes`.
+Here `bytes` is the configured allowance, even when the actual frame is smaller;
+`charged_value_bytes` includes repeated Serde visits, not just payload bytes.
+Internally the remaining allowance is divided by eight before subtracting value
+sizes, which implements this same weighting without per-visit multiplication.
+For example, a Serde record `struct Response { counts: [u64; 2] }` containing
+`[u64::MAX, 1]` produces a 22-byte response frame. With `bytes: 64`, it needs
+`allocation: 832` to encode and `allocation: 704` to decode: 512 rejects both,
+while 1,024 admits both. Setting `bytes: 22` lowers those thresholds to 790 and
+662. Qualify limits with the actual types, Serde implementations and target;
+frame length alone does not determine admission or peak memory use.
+
 Custom Serde code is trusted: work and allocations outside these visited boundaries
 must be bounded by its owner. Standard/custom Deserialize allocations may abort on
 allocator exhaustion; the adapter does not make arbitrary Serde allocation fallible.
@@ -296,6 +308,35 @@ its MIT notice is retained in `src/native/LICENSE-MIT`. IcyDB's numeric policies
 SQL semantics, endpoint roster and storage encodings are not imported.
 
 ## Consumer integration qualification
+
+### Caller-owned output
+
+`native::encode_to_slice`, `encode_request_to_slice` and `encode_response_to_slice`
+use caller-owned storage with the same bounded Serde/Postcard encoder and
+two-pass admission. Publish only a successful returned slice. A short buffer
+returns `Error::Limit` before writing; other failures may modify storage without
+returning a valid encoding. Storage capacity does not replace allocation policy.
+
+```rust
+let limits = ic_wire::Limits { bytes: 64, allocation: 1024, nodes: 64, depth: 16 };
+let mut storage = [0_u8; 64];
+let bytes = ic_wire::native::encode_to_slice(&7_u64, limits, &mut storage)?;
+assert_eq!(bytes, [7]);
+# Ok::<(), ic_wire::Error>(())
+```
+
+The result borrows storage and cannot outlive it:
+
+```compile_fail
+let limits = ic_wire::Limits { bytes: 64, allocation: 1024, nodes: 64, depth: 16 };
+let bytes = {
+    let mut storage = [0_u8; 64];
+    ic_wire::native::encode_to_slice(&7_u64, limits, &mut storage).unwrap()
+};
+println!("{bytes:?}");
+```
+
+### Endpoint boundaries
 
 Request/response decoding checks frame size, identity and direction before calling
 the payload's `Deserialize`. Input is already in caller custody: rejecting before
@@ -342,6 +383,14 @@ emits named TypeScript types and typed query/update codec objects. The selected 
 `createCodec`; a consumer adapter can supply its scalar validators to the shared
 runtime. Custom serialization projections and domain-specific constraints stay
 with the consumer.
+For explicit payload-only contracts, use `generate_payload_registry` with entries
+containing `name`, `schema`, `bytes`, `nodes` and `depth` (`payload_limits` projects
+native policy). Its runtime module exports `createPayloadCodec`, and generated
+objects expose typed `encode` / `decode`. Unit is empty and u64 7 is `07`, matching
+Rust `native::encode` without a synthetic method ID. Existing framed codecs keep
+their headers and identity/direction checks. See the
+[SDK integration recipe](../../docs/sdk-integration.md) for output ownership,
+consumer scalar conversions, typed client facades and compiling JavaScript.
 Generation checks names, references, supported type shapes and bounded metadata
 traversal; it preserves supplied wire metadata and never infers native limits.
 Registry names such as `__proto__` retain their ordinary own-property meaning.
@@ -405,7 +454,7 @@ Vec, slices, Option, Result, Box (including boxed slices), references, serializa
 one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other
 types require an explicit supported projection; they are not guessed. Apart
-from container-level `transparent`/`deny_unknown_fields`, field/newtype-variant
+from container-level `transparent`/`deny_unknown_fields`/`crate = "path"`, field/newtype-variant
 `borrow`, symmetric field/variant `rename = "name"` and the qualified field-level
 `serde_bytes` adapter, Serde attributes are rejected. This includes asymmetric
 serialize/deserialize renames, `rename_all`, `alias`, skip, flatten, tagging and
