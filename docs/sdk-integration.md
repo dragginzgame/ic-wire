@@ -23,6 +23,14 @@ full-consumption checks, bulk advice and schema complexity limits still apply.
 Payload diagnostic paths begin `/payloads/NAME`; exact-path acknowledgements
 work as with the framed generator.
 
+For standalone constructor arguments or payload schemas, use
+`typescript::validate_payload_schema(&types, &schema)` without generating a
+client module. It reuses the generator's schema checks, including references,
+identifiers, alias cycles, unused definitions and shared complexity allowance.
+It allows recursion through records and collections. This validates metadata;
+runtime limits and value/scalar checks still apply when encoding or decoding.
+Use `lint_bulk_roots` separately when reviewing bulk-field performance.
+
 `generate_registry` and `createCodec` retain their explicit 11-byte
 `IW`/method-ID/direction envelope and request/response methods. Payload codecs
 never strip or construct a temporary envelope. Selecting a different public
@@ -57,9 +65,28 @@ callback escape mechanism or automatic fallback. Caller storage does not lower
 `Limits::allocation`; its conservative ledger is unchanged. Custom Serde remains
 trusted and may allocate independently of codec output.
 
-The SDK can choose the existing `encode` / `encode_into` for owned output and
-can copy a successful slice when retention is required. Buffer sizing, fallback
-and synchronous reply/rollback policy stay in the SDK. See the
+`native::with_encoded(value, limits, scratch, consume)` chooses scratch when the
+admitted payload fits and owned output otherwise, before the output pass. It
+retains two-pass admission and the same allocation ledger. It drops an owned
+input before calling the synchronous consumer, and never calls it after encoding
+failure. Pass a reference when ownership should stay with the caller; root value
+size still participates in admission. Callback bytes cannot escape as a borrow
+or inside a future. Copy them when retaining retries or crossing an await.
+
+```rust
+let limits = ic_wire::Limits { bytes: 4096, allocation: 65536, nodes: 4096, depth: 32 };
+let mut scratch = [0; 128];
+ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| {
+    assert_eq!(bytes, [7]);
+    // An SDK may synchronously copy the completed payload into its reply here.
+})?;
+# Ok::<(), ic_wire::Error>(())
+```
+
+This helper encodes payloads only. Existing framed slice/owned APIs retain their
+identities and directions. The SDK can choose `encode` / `encode_into` when it
+needs owned bytes or a reusable Vec directly. Buffer sizing, synchronous reply
+and rollback policy stay in the SDK. See the
 [caller-storage study](evidence/caller-storage-0719/README.md) for matched
 instruction, allocation and uncompressed Wasm measurements and their limits.
 

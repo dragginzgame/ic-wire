@@ -311,6 +311,15 @@ SQL semantics, endpoint roster and storage encodings are not imported.
 
 ### Caller-owned output
 
+`native::with_encoded(value, limits, scratch, consume)` provides synchronous
+payload output with automatic owned fallback. It preflights once, chooses scratch
+when sufficient, otherwise allocates, then runs the bounded output pass. It drops
+owned input before the callback and never calls it on encoding failure. Passing
+a reference retains caller ownership; the root type's size still affects
+admission. Callback bytes cannot escape as a borrow/future; copy bytes needed for
+retries or asynchronous delivery. The existing allocation ledger, Postcard bytes
+and framing APIs are unchanged. See [SDK integration](https://github.com/dragginzgame/ic-wire/blob/main/docs/sdk-integration.md).
+
 `native::encode_to_slice`, `encode_request_to_slice` and `encode_response_to_slice`
 use caller-owned storage with the same bounded Serde/Postcard encoder and
 two-pass admission. Publish only a successful returned slice. A short buffer
@@ -393,6 +402,12 @@ their headers and identity/direction checks. See the
 consumer scalar conversions, typed client facades and compiling JavaScript.
 Generation checks names, references, supported type shapes and bounded metadata
 traversal; it preserves supplied wire metadata and never infers native limits.
+For constructors and other standalone payloads, call
+`typescript::validate_payload_schema(&types, &schema)` to apply those schema
+checks without emitting a module. It checks unused registry definitions too,
+rejects alias-only cycles and shares one complexity allowance across the registry
+and root. Resource policy, actual values and consumer scalar checks remain
+separate; use `lint_bulk_roots` for performance advice.
 Registry names such as `__proto__` retain their ordinary own-property meaning.
 Generation does not infer codec allowances or JavaScript heap bounds. The shared runtime compiles with strict
 TypeScript, `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.

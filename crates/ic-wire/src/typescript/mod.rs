@@ -5,7 +5,7 @@ mod limits;
 mod metadata;
 pub use limits::{method_limits, payload_limits};
 mod native_schema;
-pub use metadata::{generate_payload_registry, generate_registry};
+pub use metadata::{generate_payload_registry, generate_registry, validate_payload_schema};
 #[doc(hidden)]
 pub use native_schema::SerdeBytesField;
 pub use native_schema::{SchemaContext, SchemaRegistry, Wire, native_schema};

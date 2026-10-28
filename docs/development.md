@@ -20,9 +20,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.69.6 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.69.8 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.69.6 without default features; the CLI feature is only enabled for installation.
+0.69.8 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -63,11 +63,25 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `tools-report` | Aggregate offline host/Cargo/local-tool diagnostics; runs every checker |
 | `check-doc-links` | Maintained local documentation references |
 | `check-tooling`, `check-release` | Disposable Make/hook and release-adapter fixtures |
+| `ci-core`, `ci-typescript`, `ci-benchmarks` | Aggregate hosted CI groups; each admits prepared tools first |
 
 Use the smallest meaningful checks under the
 [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
 The complete `make ci` gate requires an explicit local request or the selected
 maintainer release operation. Configured hosted CI remains independent.
+
+Hosted CI runs those three groups independently on Linux x86_64, macOS ARM64
+and macOS Intel. Each matrix job owns its checkout, `target/`, tool preparation
+and failure artifacts. Only the TypeScript group prepares Node/npm. The existing
+`scaffold (OS)` status names remain final gates requiring success across every
+group and host, including refusal after failed, cancelled or skipped validation.
+
+The groups use the same reviewed validation runner and partition `make ci`'s
+complete target roster. Local/release `make ci` keeps its original sequential
+execution and gate order. Use separate checkouts for concurrent group execution;
+`make -j ci` does not parallelize the shared runner's sequential dispatch.
+Ordinary Rust tests already run concurrently within each test binary. Explicit
+timing/allocation studies remain outside these CI groups and run in isolation.
 
 ### Standalone TypeScript qualification
 
@@ -79,10 +93,13 @@ npm --prefix examples/browser ci
 make check-typescript
 ```
 
-`check-typescript` is included in `make ci` and release validation. Local release
-operators must prepare the pinned Node/npm environment and locked package above
-before starting the offline validation phase. Hosted CI prepares them on every
-supported host. The target also runs feature-enabled Rust runtime/borrowed tests,
+`check-typescript` is included in `make ci` and release validation. Generation
+retains stderr in `target/typescript-conformance/generation.log` and
+replays normal diagnostics. A synthetic benchmark-warning flood fails before
+replay. Benchmark timings still compute bulk advice but exclude its output.
+Local release operators must prepare the pinned Node/npm environment and locked
+package above before starting the offline validation phase. Hosted CI prepares them on every
+supported host. The target also runs feature-enabled Rust runtime/borrowed/native tests,
 strict Clippy and the generator's Rust 1.91 library check. It also runs a disposable
 consumer that forwards a local schema feature: native metadata and exact runtime
 frames must work, while Wasm builds with and without forwarding exclude Wire's

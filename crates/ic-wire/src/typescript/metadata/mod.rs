@@ -8,6 +8,8 @@ use alloc::{
 };
 use serde_json::{Value, json};
 
+const SCHEMA_WORK: usize = 65536;
+
 pub(super) fn identifier(name: &str) -> Result<(), GenerationError> {
     // These names appear as executable declarations, unlike escaped field names.
     if name.is_empty()
@@ -414,12 +416,43 @@ pub fn generate_payload_registry(
     Ok(source)
 }
 
+/// Validate a standalone payload schema and its complete named registry.
+///
+/// Uses the generator's shape, identifier, reference, alias-cycle and complexity
+/// checks without emitting a module. Recursive records/collections are allowed;
+/// alias-only cycles and invalid unused definitions are rejected. Registry and
+/// root share the generator's 65,536-node allowance and inline depth limit of 64.
+///
+/// This checks trusted metadata, not application values, resource policies or
+/// consumer scalar callbacks. It does not produce bulk advice; use
+/// [`super::lint_bulk_roots`] for that. Runtime acceptance and protocol bytes
+/// are unchanged; existing consumers need no migration.
+///
+/// ```
+/// use ic_wire::typescript::validate_payload_schema;
+/// let schema = serde_json::json!({"k":"tuple","items":[{"k":"u","bits":64},{"k":"text"}]});
+/// validate_payload_schema(&Default::default(), &schema)?;
+/// # Ok::<(), ic_wire::typescript::GenerationError>(())
+/// ```
+pub fn validate_payload_schema(
+    types: &BTreeMap<String, Value>,
+    schema: &Value,
+) -> Result<(), GenerationError> {
+    let mut remaining = SCHEMA_WORK;
+    for (name, node) in types {
+        identifier(name)?;
+        ty(node, types, 0, &mut remaining)?;
+    }
+    validate_aliases(types)?;
+    ty(schema, types, 0, &mut remaining).map(|_| ())
+}
+
 fn registry_source(
     types: &BTreeMap<String, Value>,
     runtime_module: &str,
     factory: &str,
 ) -> Result<(String, usize), GenerationError> {
-    let mut remaining = 65536;
+    let mut remaining = SCHEMA_WORK;
     let mut source = format!(
         "// Generated from IC Wire metadata; edit the source contracts.\nimport {{ {factory} as $createCodec }} from {};\n",
         json!(runtime_module)

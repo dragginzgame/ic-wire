@@ -1,0 +1,65 @@
+{
+  "base_commit": "1608df0661137003c7126040e8656598b98d5bd8",
+  "baseline": "Working tree after pending scoped-output and warning fixes, before standalone validator addition.",
+  "before_metadata_sha256": "c9bc604d64442629c38a43c6ef5d5acb7ed6466b8be4bf5317cb6546fe531d7d",
+  "before_typescript_module_sha256": "dbd0357ee24c924031bffe6eae8bfafcdca0507ba26d85bc199b8b460fe51499",
+  "after_metadata_sha256": "3dd2583cc80446155a4b7af96bcbd98df75ea20455b9c1f82820ccfa50321ac4",
+  "after_typescript_module_sha256": "a15f9916d797e26f4ac29563ad1eb3cfa5d659fc765d028c0b9637dc20fd10c3",
+  "benchmark_sha256": "5c12064ef9252338fb48d5d3bcb24a024f6e98fe4bb615e64b9becaf4fbfe1ec",
+  "lock_sha256": "93743857acaf74d00e2302b61c8cbcc4c7abe94f2928214cec8e160a70f82511",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "target": "x86_64-unknown-linux-gnu",
+  "profile": "evaluation",
+  "settings": {
+    "opt_level": "z",
+    "lto": "fat",
+    "codegen_units": 1,
+    "panic": "abort",
+    "strip": "symbols"
+  },
+  "inputs": "Page<u64> metadata prepared before timing; complete 1/100-type registries and ref Page0 root. Generation alternative emits one payload module, including limits and bulk advice, without printing.",
+  "samples": 7,
+  "iterations": 128,
+  "diagnostic_output": "excluded",
+  "comparisons": [
+    {
+      "types": 1,
+      "generate_median_ns": 5178,
+      "validate_median_ns": 1414,
+      "change_percent": -72.69215913480109,
+      "generate_range_ns": [
+        5122,
+        5252
+      ],
+      "validate_range_ns": [
+        1293,
+        1491
+      ]
+    },
+    {
+      "types": 100,
+      "generate_median_ns": 158205,
+      "validate_median_ns": 83863,
+      "change_percent": -46.99092949021839,
+      "generate_range_ns": [
+        151315,
+        224897
+      ],
+      "validate_range_ns": [
+        81938,
+        126145
+      ]
+    }
+  ],
+  "identical_generated_files": 229,
+  "changed_files": [
+    "method-limits-host-benchmark.json",
+    "native-schema-host-benchmark.json"
+  ],
+  "new_files": [
+    "schema-validator-host-benchmark.json"
+  ],
+  "normal_warnings": 36,
+  "normal_warnings_identical": true,
+  "synthetic_warnings": 0
+}

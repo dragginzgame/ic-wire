@@ -71,24 +71,39 @@ fn operation<T: Serialize>(
 ) -> usize {
     match lane {
         0 => {
-            let bytes = native::encode(black_box(value), LIMITS).unwrap();
+            // All lanes admit the same borrowed root (&T), including scoped
+            // encoding which takes that reference by value. This matters to
+            // the size-based admission ledger, not just payload equality.
+            let bytes = native::encode(&black_box(value), LIMITS).unwrap();
             black_box(bytes.as_slice());
             bytes.len()
         }
         1 => {
-            native::encode_into(black_box(value), LIMITS, reuse).unwrap();
+            native::encode_into(&black_box(value), LIMITS, reuse).unwrap();
             black_box(reuse.as_slice());
             reuse.len()
         }
-        _ => {
+        2 => {
             #[cfg(any(test, feature = "caller-slice"))]
             {
-                let bytes = native::encode_to_slice(black_box(value), LIMITS, scratch).unwrap();
+                let bytes = native::encode_to_slice(&black_box(value), LIMITS, scratch).unwrap();
                 black_box(&bytes);
                 bytes.len()
             }
             #[cfg(not(any(test, feature = "caller-slice")))]
             unreachable!("slice lane is not selected")
+        }
+        _ => {
+            #[cfg(any(test, feature = "caller-scoped"))]
+            {
+                native::with_encoded(black_box(value), LIMITS, &mut scratch[..128], |bytes| {
+                    black_box(bytes);
+                    bytes.len()
+                })
+                .unwrap()
+            }
+            #[cfg(not(any(test, feature = "caller-scoped")))]
+            unreachable!("scoped lane is not selected")
         }
     }
 }
@@ -108,7 +123,13 @@ pub extern "C" fn benchmark() {
     let mut reuse = Vec::new();
     let start = ic_platform::ic0::performance_counter(0);
     let length = input.run(
-        if cfg!(feature = "caller-slice") { 2 } else { 0 },
+        if cfg!(feature = "caller-scoped") {
+            3
+        } else if cfg!(feature = "caller-slice") {
+            2
+        } else {
+            0
+        },
         &mut scratch,
         &mut reuse,
     );
@@ -143,12 +164,14 @@ mod tests {
             let mut scratch = vec![0; CAPACITY];
             let mut reuse = Vec::new();
             let expected = input.run(1, &mut scratch, &mut reuse);
-            for lane in 0..3 {
+            for lane in 0..4 {
                 assert_eq!(input.run(lane, &mut scratch, &mut reuse), expected);
-                if lane == 2 {
+                if lane == 2 || (lane == 3 && expected <= 128) {
                     assert_eq!(&scratch[..expected], reuse);
                 }
-                let capacity = if lane == 2 {
+                let capacity = if lane == 3 {
+                    128
+                } else if lane == 2 {
                     scratch.len()
                 } else {
                     reuse.capacity()
@@ -184,7 +207,7 @@ mod tests {
                     };
                     samples.push(sample);
                 }
-                rows.push(json!({"case":label,"lane":(["vec-fresh","vec-reuse","slice"][lane]),"bytes":expected,"output_capacity":capacity,"samples":samples}));
+                rows.push(json!({"case":label,"lane":(["vec-fresh","vec-reuse","slice","scoped"][lane]),"bytes":expected,"caller_capacity":capacity,"samples":samples}));
             }
         }
         let output = PathBuf::from(
@@ -218,7 +241,7 @@ mod tests {
         let pic = owned.instance();
         let mut rows = Vec::new();
         for profile in ["evaluation", "benchmark-speed"] {
-            for lane in ["before-vec", "after-vec", "after-slice"] {
+            for lane in ["before-vec", "after-vec", "after-slice", "after-scoped"] {
                 let canister = pic.create_canister();
                 pic.add_cycles(canister, 100_000_000_000_000);
                 pic.install_canister(

@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.7.21]
+
+### ✨ Added
+
+- Add `native::with_encoded` for synchronous payload consumption using caller
+  scratch with owned fallback. Preserve two-pass admission, allocation allowances
+  and Postcard bytes; drop owned input before the callback and never publish
+  failed encodings. Existing APIs and protocol rules are unchanged.
+- Add host-only `typescript::validate_payload_schema` for standalone payload and
+  constructor metadata. Reuse generator checks for the complete registry and
+  root, including alias cycles and shared complexity limits, without emitting a
+  module. Existing generator interfaces and runtime acceptance are unchanged.
+
+### 🩹 Fixed
+
+- Stop the synthetic TypeScript generation benchmark printing repeated bulk-field
+  warnings. Keep normal contract diagnostics visible and fail CI if benchmark
+  warnings leak again. Host timings now exclude diagnostic output; generated
+  clients, runtime codecs and protocol rules are unchanged.
+
+### ⬆️ Dependencies
+
+- Adopt IC Build/Testkit 0.69.8 and Platform 0.7.4 for qualification, and select
+  IC Build 0.69.8 for the managed release editor. Preserve the incoming lockfile,
+  existing feature boundaries and production runtime/protocol contracts.
+
+### 🧪 Testing
+
+- Run core/tooling, TypeScript and benchmark qualification in independent CI
+  matrix jobs on all three supported hosts. Preserve the complete local/release
+  gate roster, existing final status names and per-job failure evidence. Execute
+  feature-enabled native tests in the TypeScript group as well as compiling them.
+- Record [scoped-output instruction, allocation and uncompressed Wasm measurements](docs/evidence/with-encoded-0721/README.md).
+  Existing owned-encoder Wasm stays byte-identical; the scoped fixture has small
+  size costs and an opt-3 unit regression. Retain all controls and raw samples.
+- Qualify standalone schema validation against full module generation, including
+  rejection boundaries, unchanged generated output and
+  [host timing controls](docs/evidence/schema-validator-0721/README.md).
+
 ## [0.7.20] - 2026-10-28
 
 ### 🩹 Fixed

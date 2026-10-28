@@ -466,7 +466,13 @@ fn benchmark(directory: &Path) {
                 &[],
                 "./wire-runtime.js",
                 &Default::default(),
-                |report| eprint!("{report}"),
+                |report| {
+                    // Each timed iteration still computes bulk advice. Printing
+                    // the synthetic Page0..Page99 warnings floods CI and measures
+                    // terminal IO instead of generation; ordinary fixtures keep
+                    // their visible diagnostic handlers above.
+                    black_box(report);
+                },
             )
             .unwrap()
         };
@@ -483,12 +489,66 @@ fn benchmark(directory: &Path) {
                 for _ in 0..100 {
                     black_box(render(derived));
                 }
-                rows.push(json!({"types":count,"derived":derived,"sample":sample,"iterations":100,"ns_per_iteration":start.elapsed().as_nanos() / 100}));
+                rows.push(json!({"types":count,"derived":derived,"sample":sample,"iterations":100,"diagnostic_output":"excluded","ns_per_iteration":start.elapsed().as_nanos() / 100}));
             }
         }
     }
     fs::write(
         directory.join("native-schema-host-benchmark.json"),
+        serde_json::to_vec_pretty(&rows).unwrap(),
+    )
+    .unwrap();
+    benchmark_validation(directory);
+}
+
+// Standalone SDK validation versus generating a disposable payload module.
+// Metadata is prepared outside timing; both paths validate the whole registry.
+fn benchmark_validation(directory: &Path) {
+    use std::{hint::black_box, time::Instant};
+    let mut rows = Vec::new();
+    for count in [1, 100] {
+        let schema = typescript::native_schema::<Page<u64>>().unwrap();
+        let types: BTreeMap<_, _> = (0..count)
+            .map(|i| (format!("Page{i}"), schema.clone()))
+            .collect();
+        let root = json!({"k":"ref","name":"Page0"});
+        let payload = json!({"name":"page","schema":root,"bytes":4096,"nodes":4096,"depth":64});
+        let run = |validate_only| {
+            if validate_only {
+                typescript::validate_payload_schema(black_box(&types), black_box(&root)).unwrap();
+            } else {
+                black_box(
+                    typescript::generate_payload_registry(
+                        black_box(&types),
+                        std::slice::from_ref(&payload),
+                        "./wire-runtime.js",
+                        &Default::default(),
+                        |report| {
+                            black_box(report);
+                        },
+                    )
+                    .unwrap(),
+                );
+            }
+        };
+        run(false);
+        run(true);
+        for sample in 0..7 {
+            for validate_only in if sample % 2 == 0 {
+                [false, true]
+            } else {
+                [true, false]
+            } {
+                let start = Instant::now();
+                for _ in 0..128 {
+                    run(validate_only);
+                }
+                rows.push(json!({"types":count,"validate_only":validate_only,"sample":sample,"iterations":128,"diagnostic_output":"excluded","ns_per_iteration":start.elapsed().as_nanos()/128}));
+            }
+        }
+    }
+    fs::write(
+        directory.join("schema-validator-host-benchmark.json"),
         serde_json::to_vec_pretty(&rows).unwrap(),
     )
     .unwrap();

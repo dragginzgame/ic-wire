@@ -8,6 +8,7 @@ mod packed;
 mod payload;
 #[cfg(feature = "typescript")]
 mod registry;
+mod scoped;
 mod slice;
 use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};

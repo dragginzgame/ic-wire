@@ -6,6 +6,107 @@ use serde_json::json;
 use std::{cell::Cell, collections::BTreeMap};
 
 #[test]
+fn standalone_schema_accepts_constructor_tuples_and_guarded_recursion() {
+    let types = BTreeMap::from([
+        ("Count".into(), json!({"k":"u","bits":64})),
+        (
+            "Tree".into(),
+            json!({"k":"record","fields":[
+                {"name":"value","value":{"k":"ref","name":"Count"}},
+                {"name":"children","value":{"k":"list","item":{"k":"ref","name":"Tree"}}}
+            ]}),
+        ),
+    ]);
+    for schema in [
+        json!({"k":"unit"}),
+        json!({"k":"ref","name":"Tree"}),
+        json!({"k":"tuple","items":[{"k":"ref","name":"Count"},{"k":"text","check":"consumerRule"}]}),
+    ] {
+        assert_eq!(typescript::validate_payload_schema(&types, &schema), Ok(()));
+    }
+}
+
+#[test]
+fn standalone_schema_reuses_generator_rejections_including_unused_definitions() {
+    for bad in [
+        json!({"k":"ref","name":"Missing"}),
+        json!({"k":"u","bits":7}),
+        json!({"k":"bytes","min":2,"max":1}),
+        json!({"k":"array","item":{"k":"unit"}}),
+        json!({"k":"unit","check":false}),
+        json!({"k":"unknown"}),
+    ] {
+        let types = BTreeMap::new();
+        assert_eq!(
+            typescript::validate_payload_schema(&types, &bad),
+            Err(GenerationError::Schema)
+        );
+        let payload = json!({"name":"codec","schema":bad,"bytes":64,"nodes":64,"depth":16});
+        assert_eq!(
+            typescript::generate_payload_registry(
+                &types,
+                &[payload],
+                "./runtime.js",
+                &Default::default(),
+                |_| panic!("invalid metadata")
+            ),
+            Err(GenerationError::Schema)
+        );
+        let types = BTreeMap::from([("Unused".into(), bad)]);
+        assert_eq!(
+            typescript::validate_payload_schema(&types, &json!({"k":"unit"})),
+            Err(GenerationError::Schema)
+        );
+    }
+    let types = BTreeMap::from([("bad-name".into(), json!({"k":"unit"}))]);
+    assert_eq!(
+        typescript::validate_payload_schema(&types, &json!({"k":"unit"})),
+        Err(GenerationError::Schema)
+    );
+    let aliases = BTreeMap::from([
+        ("Left".into(), json!({"k":"ref","name":"Right"})),
+        (
+            "Right".into(),
+            json!({"k":"newtype","item":{"k":"ref","name":"Left"}}),
+        ),
+    ]);
+    assert_eq!(
+        typescript::validate_payload_schema(&aliases, &json!({"k":"unit"})),
+        Err(GenerationError::Schema)
+    );
+}
+
+#[test]
+fn standalone_schema_shares_depth_and_total_work_allowances_with_registry() {
+    let types = BTreeMap::from([("Unused".into(), json!({"k":"unit"}))]);
+    let mut root = json!({"k":"unit"});
+    for _ in 0..64 {
+        root = json!({"k":"option","item":root});
+    }
+    assert_eq!(typescript::validate_payload_schema(&types, &root), Ok(()));
+    let deep = json!({"k":"option","item":root});
+    assert_eq!(
+        typescript::validate_payload_schema(&types, &deep),
+        Err(GenerationError::Complexity)
+    );
+    let mut root = json!({"k":"tuple","items":vec![json!({"k":"unit"});65534]});
+    assert_eq!(typescript::validate_payload_schema(&types, &root), Ok(()));
+    root["items"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"k":"unit"}));
+    // Registry + tuple + children = 65,537 nodes; roots do not get a fresh budget.
+    assert_eq!(
+        typescript::validate_payload_schema(&types, &root),
+        Err(GenerationError::Complexity)
+    );
+    assert_eq!(
+        typescript::validate_payload_schema(&BTreeMap::new(), &root),
+        Ok(())
+    );
+}
+
+#[test]
 fn payload_generation_validates_policy_references_names_and_diagnostics() {
     let policy = Limits {
         bytes: 0,

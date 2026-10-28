@@ -9,7 +9,7 @@ if [[ -n "${IC_TESTKIT_POCKET_IC_URL+x}" ]]; then
     exit 1
 fi
 out="${1:?new evidence directory}"
-baseline="${2:-c748379325266d7fa614fefee9d745eb4a88acca}"
+baseline="${2:-1608df0661137003c7126040e8656598b98d5bd8}"
 baseline="$(git rev-parse "${baseline}^{commit}")"
 case "$out" in /*) ;; *) out="$root/$out" ;; esac
 mkdir "$out"
@@ -26,9 +26,10 @@ git diff > "$out/dirty.patch"
 shasum -a 256 Cargo.lock "$POCKET_IC_BIN" crates/ic-wire-benchmarks/examples/caller_storage/mod.rs > "$out/hashes.txt"
 printf 'profile,lane,total_wasm_bytes,code_section_bytes\n' > "$out/wasm.csv"
 for profile in evaluation benchmark-speed; do
-    for lane in before-vec after-vec after-slice; do
+    for lane in before-vec after-vec after-slice after-scoped; do
         features=()
         if [[ "$lane" == after-slice ]]; then features=(--features caller-slice); fi
+        if [[ "$lane" == after-scoped ]]; then features=(--features caller-scoped); fi
         if [[ "$lane" == before-vec ]]; then
             CARGO_TARGET_DIR="$out/baseline-target" cargo build --locked --offline \
                 --manifest-path "$out/baseline/Cargo.toml" --profile "$profile" \

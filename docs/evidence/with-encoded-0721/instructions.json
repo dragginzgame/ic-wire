@@ -1,0 +1,794 @@
+[
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      424,
+      424,
+      424
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      842,
+      842,
+      842
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      1223,
+      1223,
+      1223
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      6975,
+      6975,
+      6975
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      2946298,
+      2946298,
+      2946298
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      1267,
+      1267,
+      1267
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      1409,
+      1409,
+      1409
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      67027,
+      67027,
+      67027
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      2583,
+      2583,
+      2583
+    ],
+    "lane": "before-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      424,
+      424,
+      424
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      842,
+      842,
+      842
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      1223,
+      1223,
+      1223
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      6975,
+      6975,
+      6975
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      2946298,
+      2946298,
+      2946298
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      1267,
+      1267,
+      1267
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      1409,
+      1409,
+      1409
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      67027,
+      67027,
+      67027
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      2583,
+      2583,
+      2583
+    ],
+    "lane": "after-vec",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      310,
+      310,
+      310
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      474,
+      474,
+      474
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      863,
+      863,
+      863
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      6295,
+      6295,
+      6295
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      2782110,
+      2782110,
+      2782110
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      868,
+      868,
+      868
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      1003,
+      1003,
+      1003
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      66633,
+      66633,
+      66633
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      2123,
+      2123,
+      2123
+    ],
+    "lane": "after-slice",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      291,
+      291,
+      291
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      425,
+      425,
+      425
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      807,
+      807,
+      807
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      6239,
+      6239,
+      6239
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      2938078,
+      2938078,
+      2938078
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      807,
+      807,
+      807
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      942,
+      942,
+      942
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      66995,
+      66995,
+      66995
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      2060,
+      2060,
+      2060
+    ],
+    "lane": "after-scoped",
+    "profile": "evaluation"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      255,
+      255,
+      255
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      586,
+      586,
+      586
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      674,
+      674,
+      674
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      2845,
+      2845,
+      2845
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      1094347,
+      1094347,
+      1094347
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      789,
+      789,
+      789
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      931,
+      931,
+      931
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      226928,
+      226928,
+      226928
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      1358,
+      1358,
+      1358
+    ],
+    "lane": "before-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      255,
+      255,
+      255
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      586,
+      586,
+      586
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      674,
+      674,
+      674
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      2845,
+      2845,
+      2845
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      1094347,
+      1094347,
+      1094347
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      789,
+      789,
+      789
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      931,
+      931,
+      931
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      226928,
+      226928,
+      226928
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      1358,
+      1358,
+      1358
+    ],
+    "lane": "after-vec",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      275,
+      275,
+      275
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      304,
+      304,
+      304
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      323,
+      323,
+      323
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      2484,
+      2484,
+      2484
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      1016326,
+      1016326,
+      1016326
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      466,
+      466,
+      466
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      603,
+      603,
+      603
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      66144,
+      66144,
+      66144
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      955,
+      955,
+      955
+    ],
+    "lane": "after-slice",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 0,
+    "case": "unit",
+    "ic_instructions": [
+      271,
+      271,
+      271
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "u64",
+    "ic_instructions": [
+      289,
+      289,
+      289
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "vec-empty",
+    "ic_instructions": [
+      306,
+      306,
+      306
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 41,
+    "case": "vec-8",
+    "ic_instructions": [
+      2474,
+      2474,
+      2474
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 20482,
+    "case": "vec-4096",
+    "ic_instructions": [
+      1090337,
+      1090337,
+      1090337
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 1,
+    "case": "blob-empty",
+    "ic_instructions": [
+      461,
+      461,
+      461
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 33,
+    "case": "blob-32",
+    "ic_instructions": [
+      598,
+      598,
+      598
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 65539,
+    "case": "blob-65536",
+    "ic_instructions": [
+      66484,
+      66484,
+      66484
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  },
+  {
+    "bytes": 18,
+    "case": "record",
+    "ic_instructions": [
+      945,
+      945,
+      945
+    ],
+    "lane": "after-scoped",
+    "profile": "benchmark-speed"
+  }
+]

@@ -1,0 +1,16 @@
+[
+{"iterations":1000,"ns_per_iteration":203,"sample":0,"typed":false},
+{"iterations":1000,"ns_per_iteration":312,"sample":0,"typed":true},
+{"iterations":1000,"ns_per_iteration":325,"sample":1,"typed":true},
+{"iterations":1000,"ns_per_iteration":277,"sample":1,"typed":false},
+{"iterations":1000,"ns_per_iteration":205,"sample":2,"typed":false},
+{"iterations":1000,"ns_per_iteration":316,"sample":2,"typed":true},
+{"iterations":1000,"ns_per_iteration":297,"sample":3,"typed":true},
+{"iterations":1000,"ns_per_iteration":205,"sample":3,"typed":false},
+{"iterations":1000,"ns_per_iteration":205,"sample":4,"typed":false},
+{"iterations":1000,"ns_per_iteration":309,"sample":4,"typed":true},
+{"iterations":1000,"ns_per_iteration":306,"sample":5,"typed":true},
+{"iterations":1000,"ns_per_iteration":205,"sample":5,"typed":false},
+{"iterations":1000,"ns_per_iteration":214,"sample":6,"typed":false},
+{"iterations":1000,"ns_per_iteration":308,"sample":6,"typed":true}
+]

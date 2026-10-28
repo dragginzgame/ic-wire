@@ -1,0 +1,63 @@
+{
+  "source_commit": "1608df0661137003c7126040e8656598b98d5bd8",
+  "lock_sha256": "93743857acaf74d00e2302b61c8cbcc4c7abe94f2928214cec8e160a70f82511",
+  "before_fixture_sha256": "8023171da6bfeeecbefdf846df6c8876980bd3e02e728e7db362bd6297209ebd",
+  "after_fixture_sha256": "73c4f5ff0c1dd06932be1e46ecd3eceb777aae5f9a243896b914b9a79765c38a",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "profile": "evaluation",
+  "target": "x86_64-unknown-linux-gnu",
+  "settings": {
+    "opt_level": "z",
+    "lto": true,
+    "codegen_units": 1,
+    "panic": "abort",
+    "strip": "symbols"
+  },
+  "samples": 7,
+  "iterations_per_sample": 100,
+  "synthetic_warnings_before": 141804,
+  "synthetic_warnings_after": 0,
+  "normal_warnings_before": 36,
+  "normal_warnings_after": 36,
+  "normal_warnings_identical": true,
+  "identical_generated_files": 229,
+  "unchanged_output_inventory_sha256": "8e1b2610936cc6ab722056e13188ef686402e692a5100b9d7ab4820fe53b096a",
+  "changed_files": [
+    "method-limits-host-benchmark.json",
+    "native-schema-host-benchmark.json"
+  ],
+  "excluded_validation_outputs": [
+    "admission-results.json",
+    "compiled/"
+  ],
+  "host_timing_comparisons": [
+    {
+      "types": 1,
+      "derived": false,
+      "before_ns": 9325,
+      "after_ns": 3106,
+      "change_percent": -66.6916890080429
+    },
+    {
+      "types": 1,
+      "derived": true,
+      "before_ns": 9873,
+      "after_ns": 3698,
+      "change_percent": -62.54431277220702
+    },
+    {
+      "types": 100,
+      "derived": false,
+      "before_ns": 864969,
+      "after_ns": 322059,
+      "change_percent": -62.7664112817916
+    },
+    {
+      "types": 100,
+      "derived": true,
+      "before_ns": 932459,
+      "after_ns": 364581,
+      "change_percent": -60.90112273032916
+    }
+  ]
+}

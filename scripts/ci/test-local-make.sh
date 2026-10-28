@@ -12,7 +12,7 @@ fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md)
+paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
 paths+=(scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh)
 # Include authored crate inputs automatically, including new untracked modules.
 # Git exclusions keep ignored build/cache output out of the disposable export.
@@ -102,6 +102,53 @@ for selection in '' ic-wire-qualification; do
     if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES="$selection" > "$fixture/publish-invalid.log" 2>&1; then exit 1; fi
     [[ ! -s "$CARGO_CALLS" ]]
 done
+
+# Verify the actual CI recipes partition the complete roster. Substitute only
+# dispatch: no broad gate or release effect runs in this disposable checkout.
+cat > "$fixture/repo/scripts/ci/run-validation-targets.sh" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$@" > "$CI_SELECTION"
+exit "${CI_FIXTURE_STATUS:-0}"
+STUB
+for target in ci ci-core ci-typescript ci-benchmarks; do
+    export CI_SELECTION="$fixture/$target-selection"
+    make -j4 --no-print-directory -C "$fixture/repo" "$target" IC_WIRE_CI_TARGETS=ignored > "$fixture/$target.log" 2>&1
+    [[ "$(head -n 1 "$CI_SELECTION")" == --fail-fast ]]
+    [[ "$(sed -n '2p' "$CI_SELECTION")" == tools-check ]]
+    tail -n +2 "$CI_SELECTION" > "$fixture/$target-roster"
+    if CI_FIXTURE_STATUS=37 make -j4 --no-print-directory -C "$fixture/repo" "$target" > "$fixture/$target-failed.log" 2>&1; then exit 1; fi
+done
+grep -Ev '^(check-benchmarks|check-typescript)$' "$fixture/ci-roster" > "$fixture/expected-core"
+cmp "$fixture/expected-core" "$fixture/ci-core-roster"
+printf '%s\n' tools-check check-typescript > "$fixture/expected-typescript"
+printf '%s\n' tools-check check-benchmarks > "$fixture/expected-benchmarks"
+cmp "$fixture/expected-typescript" "$fixture/ci-typescript-roster"
+cmp "$fixture/expected-benchmarks" "$fixture/ci-benchmarks-roster"
+
+# Each hosted suite uses the owning Make recipe, independent native runners and
+# unique failure artifacts. Keep the old scaffold check names as final gates.
+yq -o=json '.' "$fixture/repo/.github/workflows/ci.yml" > "$fixture/workflow.json"
+jq -e '
+    .jobs.validate as $job | .jobs.scaffold as $gate |
+    ($job.strategy.matrix.suite == ["core", "typescript", "benchmarks"]) and
+    ($job.strategy.matrix.os == ["ubuntu-24.04", "macos-15", "macos-15-intel"]) and
+    ($job["runs-on"] == "${{ matrix.os }}") and
+    ($job.needs == null) and ($job.strategy["fail-fast"] == false) and
+    ([$job.steps[] | select(.run == "make \"ci-$CI_GROUP\"")] | length == 1) and
+    ([$job.steps[] | select(.run == "make \"ci-$CI_GROUP\"")][0].env.CI_GROUP == "${{ matrix.suite }}") and
+    ([$job.steps[] | select(.uses == "./.github/actions/retain-failure-evidence")][0].with.name |
+        contains("matrix.suite") and contains("matrix.os")) and
+    ($gate.needs == "validate") and ($gate.if == "${{ always() }}") and
+    ($gate.name == null) and ($gate.strategy.matrix.os == $job.strategy.matrix.os) and
+    ($gate.steps[0].env.VALIDATION_RESULT == "${{ needs.validate.result }}") and
+    ($gate.steps[0].run == "test \"$VALIDATION_RESULT\" = success")
+' "$fixture/workflow.json" > /dev/null
+for result in success failure cancelled skipped; do
+    status=0
+    VALIDATION_RESULT="$result" bash -c 'test "$VALIDATION_RESULT" = success' || status=$?
+    if [[ "$result" == success ]]; then [[ "$status" == 0 ]]; else [[ "$status" != 0 ]]; fi
+done
+cp -p "$root/scripts/ci/run-validation-targets.sh" "$fixture/repo/scripts/ci/run-validation-targets.sh"
 
 # Restore the reviewed runner before exercising the real formatting hook.
 cp -p "$root/scripts/ci/run-release.sh" "$fixture/repo/scripts/ci/run-release.sh"

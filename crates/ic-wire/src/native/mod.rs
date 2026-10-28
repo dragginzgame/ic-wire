@@ -128,6 +128,74 @@ pub fn encode_to_slice<'a, T: Serialize + ?Sized>(
     encode_prefixed_to_slice(value, limits, &[], storage)
 }
 
+/// Encode a payload using scratch storage or owned fallback, then consume its bytes.
+///
+/// Preflight selects a destination once: scratch when the admitted payload fits,
+/// otherwise an owned buffer. Both paths retain [`encode`]'s two-pass admission
+/// and allocation allowance; custom serializers may still allocate independently.
+/// The owned `value` is dropped before the synchronous callback. Passing a
+/// reference instead keeps ownership with the caller.
+///
+/// Encoding failure never calls `consume`; scratch contents on error are
+/// unspecified. Only successful bytes may be published. Copy bytes that must
+/// survive the callback, including saved retries. No framing is added.
+///
+/// ```
+/// let limits = ic_wire::Limits { bytes: 128, allocation: 2048, nodes: 64, depth: 8 };
+/// let mut scratch = [0; 128];
+/// let length = ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| {
+///     assert_eq!(bytes, [7]);
+///     bytes.len()
+/// })?;
+/// assert_eq!(length, 1);
+/// # Ok::<(), ic_wire::Error>(())
+/// ```
+/// Callback bytes cannot escape as a borrow or inside a future:
+/// ```compile_fail
+/// let limits = ic_wire::Limits { bytes: 128, allocation: 2048, nodes: 64, depth: 8 };
+/// let mut scratch = [0; 128];
+/// ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| bytes);
+/// ```
+/// ```compile_fail
+/// let limits = ic_wire::Limits { bytes: 128, allocation: 2048, nodes: 64, depth: 8 };
+/// let mut scratch = [0; 128];
+/// ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| async move {
+///     bytes.len()
+/// });
+/// ```
+pub fn with_encoded<T: Serialize, R>(
+    value: T,
+    limits: Limits,
+    scratch: &mut [u8],
+    consume: impl FnOnce(&[u8]) -> R,
+) -> Result<R, Error> {
+    let size = encoded_len(&value, limits)?;
+    let budget = Budget::new(limits);
+    let bounded = encode::Bounded {
+        value: &value,
+        budget: &budget,
+        depth: 1,
+    };
+    // New destination selection only: both writers are capped at the preflight
+    // size. Postcard bytes and admission match encode; e.g. u64 7 remains 07.
+    // Existing endpoints/retries need no migration or alternate codec.
+    if let Some(storage) = scratch.get_mut(..size) {
+        let bytes = postcard::to_slice(&bounded, storage).map_err(|_| budget.error())?;
+        drop(value);
+        Ok(consume(bytes))
+    } else {
+        let mut bytes = Vec::new();
+        bytes
+            .try_reserve_exact(size)
+            .map_err(|_| Error::Allocation)?;
+        let bytes =
+            postcard::serialize_with_flavor(&bounded, contract::Output { bytes, limit: size })
+                .map_err(|_| budget.error())?;
+        drop(value);
+        Ok(consume(&bytes))
+    }
+}
+
 /// Encode a complete request into caller storage; follows [`encode_to_slice`].
 pub fn encode_request_to_slice<'a, T: Serialize + ?Sized>(
     id: u64,

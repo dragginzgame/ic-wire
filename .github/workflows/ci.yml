@@ -17,11 +17,13 @@ defaults:
     shell: /bin/bash --noprofile --norc -e -o pipefail {0}
 
 jobs:
-  scaffold:
+  validate:
+    name: ${{ matrix.suite }} (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-15, macos-15-intel]
+        suite: [core, typescript, benchmarks]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -37,25 +39,43 @@ jobs:
       - name: Install reviewed common tools
         run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
       - name: Prepare Node for TypeScript qualification
+        if: matrix.suite == 'typescript'
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: examples/browser/.nvmrc
           package-manager-cache: false
       - name: Prepare pinned npm and TypeScript compiler
+        if: matrix.suite == 'typescript'
         run: |
           npm install --global "$(node -p 'require("./examples/browser/package.json").packageManager')"
           npm --prefix examples/browser ci
       - name: Prepare locked workspace dependencies
         run: cargo fetch --locked
-      - name: Validate scaffold and contributor tooling
+      - name: Validate selected CI group
         env:
           VALIDATION_LOG_DIR: ${{ runner.temp }}/ic-wire-validation
-        run: make ci
+          CI_GROUP: ${{ matrix.suite }}
+        run: make "ci-$CI_GROUP"
       - name: Retain failure evidence
         if: ${{ failure() }}
         uses: ./.github/actions/retain-failure-evidence
         with:
-          name: scaffold-${{ matrix.os }}-${{ github.run_attempt }}
+          name: validation-${{ matrix.suite }}-${{ matrix.os }}-${{ github.run_attempt }}
           temp-root: ${{ runner.temp }}
           repository-root: ${{ github.workspace }}
           compact-successful-tools: 'true'
+
+  # Preserve the existing required check names. These light gates qualify the
+  # complete matrix; actual native execution happens in the jobs above.
+  scaffold:
+    if: ${{ always() }}
+    needs: validate
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require every validation group and host
+        env:
+          VALIDATION_RESULT: ${{ needs.validate.result }}
+        run: test "$VALIDATION_RESULT" = success

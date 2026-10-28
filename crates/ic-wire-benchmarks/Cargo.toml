@@ -21,6 +21,7 @@ toko = []
 hotspots = []
 # Qualification of caller storage, never a production codec selection.
 caller-slice = []
+caller-scoped = []
 # Benchmark cohort selection, never a production codec mode.
 packed-i16 = []
 packed-i16-baseline = ["packed-i16"]

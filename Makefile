@@ -6,7 +6,7 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.69.6
+RELEASE_EDITOR_VERSION := 0.69.8
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -18,7 +18,9 @@ install-release-editor:
 release-editor-check:
 	+@$(RELEASE_EDITOR_COMMAND) --check
 
-.PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci version
+.PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci ci-core ci-typescript ci-benchmarks version
+# One complete roster for local/release validation; hosted groups partition it.
+override IC_WIRE_CI_TARGETS := tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-benchmarks check-typescript check-wasm check-msrv
 .PHONY: publish check-package
 PUBLISH_PACKAGES ?= ic-wire-derive ic-wire
 publish:
@@ -102,6 +104,7 @@ help:
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
+		'Hosted CI groups: ci-core, ci-typescript, ci-benchmarks (separate runners)' \
 		'Releases: release-patch, release-minor, release-major, release-resume (Git delivery only)'
 
 build:
@@ -143,7 +146,16 @@ version: host-tools-check
 	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-benchmarks check-typescript check-wasm check-msrv
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast $(IC_WIRE_CI_TARGETS)
+
+ci-core:
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast $(filter-out check-benchmarks check-typescript,$(IC_WIRE_CI_TARGETS))
+
+ci-typescript:
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check check-typescript
+
+ci-benchmarks:
+	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check check-benchmarks
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct
