@@ -116,11 +116,13 @@ when changing interfaces, persistence or installation/recovery behavior.
 Do not submit DFINITY PRs or depend on future DFINITY work. Use available qualified
 dependencies or own the solution under the [maintenance contract](rules/engineering-details.md#dfinity-dependencies-own-the-solution).
 
-## Repository files: no symlinks
+<a id="repository-files-no-symlinks"></a>
 
-Maintain regular repository and package files. Read the [symlink contract and
-limited exceptions](rules/engineering-details.md#repository-files-no-symlinks)
-when changing generators, packaging or installation paths.
+## Repository files: self-contained source and packages
+
+Keep source and distributions self-contained; prefer regular files. Read the
+[file and symlink contract](rules/engineering-details.md#repository-files-no-symlinks)
+for justified internal links, packaging and filesystem security boundaries.
 
 ## CLI applications
 
@@ -129,9 +131,18 @@ when adding or changing commands.
 
 ## IC application encoding
 
-Use `ic-wire` for owned application endpoints; Candid adapts independently defined
-external protocols. Read the [encoding contract](rules/engineering-details.md#ic-application-encoding)
+Owned application types must not derive or implement `CandidType`. Use `ic-wire`
+for owned RPC; keep unavoidable Candid in dedicated external-protocol boundary
+types, not our domain, state or RPC models. Read the [encoding contract](rules/engineering-details.md#ic-application-encoding)
 and [RPC budgets](rules/rpc-budgets.md) for codecs, bindings or protocol changes.
+
+## Gzip encoding
+
+IC Tooling's `ic-host-artifacts::artifact::encode_gzip` owns gzip encoding.
+Production code, tests, examples and generators reuse it; consumers retain
+compression levels, budgets and artifact admission. Read the
+[gzip contract](rules/engineering-details.md#gzip-encoding) before changing
+encoders or compressed-byte identities.
 
 ## Pre-1.0 contracts
 
@@ -177,6 +188,11 @@ when changing platform behavior or CI. Routine CI cancels superseded runs while
 preserving required hosts on the retained run.
 
 ## Feedback and handoff
+
+Shared dependency defects and advisories have one remediation issue at the
+supplying owner. Do not create a waiting issue in every consumer; separate
+consumer issues need distinct actionable work. Apply the
+[dependency finding rule](rules/engineering-details.md#shared-dependency-findings).
 
 Use owning GitHub issues for follow-up; no parallel local trackers. CI/issue
 maintenance and scheduled work run only when activated. Read [feedback details](rules/engineering-details.md#feedback-and-handoff)

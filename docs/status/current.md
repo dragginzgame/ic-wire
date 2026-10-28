@@ -1,85 +1,82 @@
 # Current handoff
 
-## Released 0.7.18; pending 0.7.19 issue fixes
+## Released 0.7.18; pending 0.7.19 fixes and tooling adoption
 
-HEAD remains `c748379325266d7fa614fefee9d745eb4a88acca`. The compatible patch
-adds APIs and metadata support; it changes no existing frames, identities,
-primitive acceptance, native admission or retained retry/hash inputs. Own package
-versions remain 0.7.18. Staging, commits, publication and release remain maintainer-owned.
+HEAD is `95a4e30` (local 0.7.19 preparation). The working tree preserves the
+benchmark-fixture repair and adds the requested upstream adoption. Own package
+versions remain 0.7.18; staging, commits, releases and publication remain with
+the maintainer. No remote delivery or full release validation is claimed.
+
+## Selected tooling
+
+Shared Tooling is 0.27.3 at `7ee5c83744aa822ecd070703dbf0a7d95076d5f6`, exported
+from the clean committed source through its canonical impact/refresh workflow.
+All 111 payloads match that independently selected source commit, including modes;
+ordinary offline integrity checking also passes. The existing `.githooks` selection
+remains active; its disposable consumer proof exercises the new formatter driver.
+
+Root declarations, Cargo.lock and the managed release editor now select IC
+Build/Testkit/host 0.69.5 and Platform 0.7.1, the latest published versions verified
+at adoption. Only those six upstream package selections changed in Cargo.lock;
+other dependency updates already present at entry were preserved. Tooling 0.69's
+Platform 0.7 type boundary is aligned, with no consumer source migration needed.
+The editor was explicitly prepared through `make install-tools` and is admitted
+offline. Bootstrap remains before Cargo-tool setup. Snapshot-owned files were
+not patched locally; optional sccache and scheduled maintenance were not activated.
+
+These packages remain qualification/host dependencies. Published runtime crates
+remain independent of platform SDKs. This adoption changes no runtime/generator
+execution, protocol bytes, identities, admission rules, retry/hash inputs or
+consumer endpoint layout. No performance saving is claimed for dependency adoption.
+
+## Existing issue fixes in the pending patch
 
 Both [#29](https://github.com/dragginzgame/ic-wire/issues/29) and
-[#30](https://github.com/dragginzgame/ic-wire/issues/30) are implemented locally.
-Keep them open until delivery and required producer qualification; SDK adoption
-and installed endpoint behavior remain consumer-owned. No consumer checkout was
-changed and no remote code delivery is claimed.
+[#30](https://github.com/dragginzgame/ic-wire/issues/30) are implemented and have
+local evidence recorded in their threads. Keep them open pending delivery and
+required producer qualification; SDK rollout remains consumer-owned.
 
-## Delivered local behavior
+Wire metadata accepts container `serde(crate = "path")` without changing layouts.
+Unsupported layout-changing attributes, duplicates and invalid placements still
+reject. Direct/re-exported record/enum paths retain identical metadata tokens,
+frames and generated modules.
 
-Serde's container `crate = "path"` attribute now works with Wire. Direct and
-re-exported paths retain identical metadata tokens, positional fields, variant
-indices and frames. Unsupported layout attributes and invalid placement/duplicates
-still reject. Rust and executable TypeScript fixtures cover records and enums.
+Payload-only TS codecs/generation share existing schema validation, traversal,
+scalar checks and bulk advice. Unit is empty; u64 7 and `(7u64,)` are `07`.
+Existing framed IW/ID/direction APIs retain their contract. Rust caller-slice APIs
+share Postcard admission and two-pass sizing; short buffers reject before writing,
+other errors publish no successful slice, and output cannot outlive storage.
+The [SDK recipe](../sdk-integration.md) covers typed facades, scalar conversions,
+JavaScript delivery and SDK-owned buffer, transport, lifecycle and rollback policy.
 
-TypeScript adds `createPayloadCodec`; host `generate_payload_registry` and
-`payload_limits` share the existing registry validation, traversal, scalar checks
-and mandatory bulk advice. Payload unit is empty; u64 7 and `(7u64,)` are `07`.
-Framed APIs retain the IW/ID/direction envelope. Payload choice is explicit;
-changing an endpoint layout still requires coordinated consumers. Named recursive
-schemas, tuple arguments, records/enums, malformed inputs and budgets are qualified.
+Allocation admission still reserves the configured byte allowance and weights
+visited value/buffer sizes eightfold. For the documented 22-byte response with
+`bytes: 64`, allocation 832 encodes and 704 decodes; 512 rejects and 1,024 admits.
+The public docs and regression tests clarify this existing rule, not a unit bug.
+The retained release failure's `derive(ype)` typo is repaired to `CandidType` in
+the private packed-manifest comparison fixture; production code is unaffected.
 
-Rust adds `encode_to_slice`, `encode_request_to_slice` and
-`encode_response_to_slice`, using Postcard's slice output through the same bounded
-Serde adapter and two-pass sizing/admission. Short buffers reject before writing;
-other output-pass failures return no successful slice and leave unspecified
-storage contents. Consumers publish only Ok and own scratch size/fallback and async
-lifetimes. The result cannot outlive storage. No inline/spill writer was added.
+## Current focused validation
 
-The [SDK recipe](../sdk-integration.md) explains consumer-owned scalar serialization,
-checks versus value conversion, typed facades and compiling the shared runtime
-into JavaScript. A facade is compiled and executed against generated payload code.
+Linux evidence is retained under `target/tooling-adoption-0273/`:
 
-The earlier allocation report remains a documentation/test clarification, not a
-unit-conversion fix. A 22-byte response with `bytes: 64` needs allocation 832 to
-encode and 704 to decode; 512 rejects and 1,024 admits both. Division by eight
-preserves the deliberately weighted traversal ledger. Public regressions and the
-independent overflow/remainder reference remain in place.
+- Snapshot provenance/integrity, managed tool admission, dependency pins and
+  external-IC boundaries pass.
+- The real grouped formatting selection and maintained documentation links pass.
+- Actual Make routing, formatting hook and release-adapter recovery/delivery
+  fixtures pass in disposable repositories; no real release effects ran.
+- Strict Clippy passes for the benchmark targets (`wire,candid,ic`) and the
+  diagnostic example. Nine compile-fail cases plus a passing control pass through
+  IC Build 0.69.5; both standard Wire/Candid roundtrip tests pass.
+- The diagnostic and admission examples compile on Rust 1.91.
+- The current Wasm admission probe passes 144 valid/truncated/resource cases,
+  with three samples each, using an explicitly prepared PocketIC 16.0.0 server
+  and Testkit-owned lifecycle. Identities/raw results are in `admission-results/`.
 
-## Evidence and tradeoffs
-
-The [caller-storage study](../evidence/caller-storage-0719/README.md) retains matched
-0.7.18 controls, source/compiler/dependency identities, repeated raw IC and native
-samples, allocator/live-heap/capacity data, host generation, JS timing and
-uncompressed total/code Wasm sizes. Full local artifacts are under
-`target/caller-storage-0719-qualified/`; the earlier failed fixture attempt is
-preserved separately and is not qualification evidence.
-
-Existing Vec Wasm is byte-identical before/after in both profiles, with identical
-IC counts. Slice output lowers fixture Wasm by 1,151/190 bytes at opt-z/opt-3;
-ordinary Vec-4096 encoding uses 6.61%/7.13% fewer IC instructions. Opt-3 unit costs
-20 more instructions. Native opt-3 large-blob timing regresses 9.46%; JS framed
-unit decode regresses about 21 ns (+19.40%) in the aggregate. No universal speed-up
-or installed-canister saving is claimed. Caller storage remains a real memory cost.
-
-## Focused checks and remaining boundaries
-
-Passing checks: 46 native and 16 runtime tests with TypeScript, two derive tests,
-nine compile-fail diagnostics plus passing control, nine successful and five
-compile-fail doctests, strict library/derive Clippy, and the Rust 1.91 forwarded
-Wasm library build. Final generated strict TS/Node conformance passes 165 framed
-vectors, 35,228 differential mutations, 29 native projection vectors, new payload
-and facade cases, cross-runtime admission and 54 simulated-endian packed cases.
-220 existing generated TS modules remain byte-identical; shared runtime changes
-and new payload modules are explicit. Measurements run separately from these gates.
-
-Incoming dependency edits remain intact: lockfile Build/Testkit/host 0.68.12 and
-Platform 0.6.21; no manifest minimums or managed tooling were adopted in this batch.
-Shared snapshot remains 0.26.21 at `66c91c4412856baa147482e648fc80428db8b179`.
-An incoming dirty edit in `crates/ic-wire-benchmarks/fixtures/mod.rs` changes
-`derive(CandidType)` to `derive(ype)`. It is untouched and would break the Candid
-feature's gate; correct it before release validation. Full CI/Candid comparison,
-macOS and installed SDK qualification were not run here.
-
-Historical studies remain at [runtime 0.7.16](../evidence/runtime-0716/README.md)
-and [encoder follow-up](../evidence/encoder-followup-0716/README.md). Their frozen
-dependency graphs do not qualify the incoming graph. Consumers retain ownership
-of normalization, original retry bytes, authentication, transport and rollback.
+Earlier runtime/TS conformance evidence remains in the issue threads and
+[caller-storage study](../evidence/caller-storage-0719/README.md). Its original
+0.68.12/0.6.21 performance measurements do not qualify the new dependency graph;
+no full performance matrix was rerun. The frozen [0.7.16 runtime](../evidence/runtime-0716/README.md)
+and [encoder](../evidence/encoder-followup-0716/README.md) studies remain historical.
+Full CI, macOS and installed consumer qualification were not run in this batch.
+The maintainer's complete release gate remains required for delivery.

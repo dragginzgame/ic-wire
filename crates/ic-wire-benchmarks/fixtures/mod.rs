@@ -210,7 +210,7 @@ struct Manifest {
     hashes: Vec<[u8; 32]>,
 }
 #[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
-#[cfg_attr(feature = "candid", derive(ype))]
+#[cfg_attr(feature = "candid", derive(CandidType))]
 #[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
 struct PackedManifest {
     object: u128,

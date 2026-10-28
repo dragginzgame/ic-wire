@@ -4,6 +4,11 @@
 
 ### 📝 Summary
 
+- Adopt Shared Tooling 0.27.3 at `7ee5c83`, IC Build/Testkit/host packages and
+  the release editor 0.69.5, and Platform 0.7.1. Preserve the runtime codec,
+  protocol bytes and admission rules.
+- Restore the Candid derive on the packed-manifest benchmark fixture so the
+  Wire/Candid correctness gate compiles. Production codecs and protocol are unchanged.
 - Accept Serde's container-level crate-path attribute in `Wire` metadata derives,
   including re-exported Serde paths ([#30](https://github.com/dragginzgame/ic-wire/issues/30)).
   Unsupported layout attributes still reject; existing frames and generated layouts

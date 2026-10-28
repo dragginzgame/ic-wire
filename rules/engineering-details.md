@@ -139,29 +139,43 @@ product, release and recovery obligations remain binding when applicable.
   planned. Preserve unresolved local defects in their owning issues with a
   self-owned solution; closing an upstream plan does not mean the defect is fixed.
 
-## Repository files: no symlinks
+<a id="repository-files-no-symlinks"></a>
 
-- **Do not create or commit symlinks for maintained repository files or
-  directories.** This includes source, manifests, documentation, scripts, shared
-  snapshots, license files and shipped package assets. Generated source and
-  package outputs follow the same rule; fix their generator when necessary.
-- Use explicit dependency/configuration paths or the canonical package interface.
-  When packaging needs a local file, use a regular copy and verify it against
-  its owner. In particular, package-local `LICENSE` files must be regular files
-  containing the applicable complete terms and notices, never symlinks.
-- The permitted repository-tooling uses are generated selection pointers owned
-  and admitted by Shared Tooling's verified executable store, and deliberately
-  created symlinks in isolated rejection/security fixtures. Keep these outside
-  maintained source and shipped package assets; they do not authorize general
-  file aliases, package-license links or links into sibling checkouts.
-- Operating-system/toolchain layouts and directory aliases outside the maintained
-  repository tree remain external inputs, subject to each tool's path admission.
-  This rule does not authorize deleting existing installations, evidence or link
-  targets. Replace an obsolete repository link without modifying its target.
-- Review tracked Git modes, working-tree paths and actual package file lists
-  when adopting the rule. A clean index alone does not prove generated or packaged
-  files comply. Any other repository-owned use needs a scoped maintainer-approved
-  exception under the baseline's local-authority rules.
+## Repository files: self-contained source and packages
+
+- **Keep source and distributions self-contained; prefer regular files.** This
+  is a portability and reproducibility default, not a claim that symlinks are
+  unidiomatic. Use explicit dependencies/configuration paths or the canonical
+  package interface instead of repository links into sibling checkouts or
+  machine-specific external locations.
+- A narrow internal relative link is acceptable when it removes real maintenance
+  work and stays within the owning checkout. Document its purpose and qualify
+  checkout, tooling and packaging behavior on supported hosts. Avoid dangling
+  links, cycles and implicit external dependencies. Prefer an ordinary reference
+  when it serves the same purpose; do not introduce copied files and a syncing
+  mechanism merely to avoid a useful internal link.
+- Shared snapshots and shipped package assets remain regular, self-contained
+  files. Materialize packaging copies at their generator and verify them against
+  their canonical owner. Package-local `LICENSE` files contain the applicable
+  complete terms and notices as regular files. An internal source link does not
+  authorize shipping an unresolved link or omitting its target from an archive.
+- Generated selection pointers in the verified executable store and deliberate
+  symlinks in isolated security/rejection fixtures remain valid tooling uses.
+  Normal operating-system/toolchain layouts and aliased checkout paths should
+  work where practical; a repository-file preference alone is not a reason to
+  reject them. Preserve each tool's actual path and custody requirements.
+- Concentrate strict link/escape checks at packaging, installation and
+  security-sensitive read/write boundaries. Review Git modes, working paths and
+  package inventories when relevant, but do not build a general symlink scanner
+  into every command. The optional `check-no-symlinks.pl` helper enforces a
+  stricter all-regular inventory for repositories that choose it; it cannot
+  assess justified internal links. Such repositories should select appropriate
+  boundary checks rather than add a parallel exception framework merely to keep
+  that gate. Shared Tooling itself retains this stricter inventory check.
+- Preserve existing installations, evidence and link targets. Replacing an
+  obsolete repository link must not modify its target. Exceptions to the
+  self-contained dependency or shipped-file requirements still need scoped
+  maintainer approval under the baseline's local-authority rules.
 
 ## CLI applications
 
@@ -184,12 +198,25 @@ product, release and recovery obligations remain binding when applicable.
   endpoints called by third parties, owned canister RPC and frontend/client
   payloads. Caller location or endpoint visibility does not select the codec.
   Reuse Wire's encoding, decoding and generated bindings.
+- **Do not derive or implement `CandidType` on owned application types.** This
+  includes domain/state records, storage models, reports, and owned request/reply
+  DTOs. Conditional derives, optional Candid features, generic trait bounds and
+  Platform re-exports do not make an owned type an external protocol. Use Wire
+  and its normal Serde contracts for our payloads; do not maintain dual-codec
+  application types merely for convenience.
 - Candid adapts independently defined interfaces that require it, such as
   management/system canisters, NNS/SNS and ledger protocols. A third-party caller
   of our application is not itself an external Candid protocol. Record the
   required interface; existing derives or a Candid-first example are not reasons
   to retain it. Required external Candid dependencies still follow the
   [IC Platform boundary](cargo-dependencies.md#external-ic-dependency-boundary).
+- Reuse qualified external DTOs supplied by Platform before defining another
+  Candid projection. When a required external interface needs a local Rust shape,
+  keep it in that external adapter and explicitly convert to owned types. Record
+  the named protocol and actual encoder/decoder that requires it. A Rust struct
+  written in our repository can mirror an external contract; that narrow role
+  is different from giving an application model `CandidType`. Missing Platform
+  exports belong in an owning capability issue, not a duplicate public facade.
 - A missing released Wire capability requires an owning issue and qualification
   before adoption, or an expressly approved scoped exception. Do not introduce
   a local codec or a Candid fallback to bypass that work.
@@ -198,6 +225,14 @@ product, release and recovery obligations remain binding when applicable.
   in Wire merely to claim adoption. Storage layouts and canonical hash inputs
   retain their owning contracts. Existing persisted Candid checkpoint bytes are
   a compatibility obligation, not permission for new Candid storage formats.
+  Isolate any still-required historical Candid schema at its legacy boundary;
+  record its retained-byte obligation and retirement condition. Do not silently
+  change existing stored bytes or erase uncertain effects to remove a derive.
+- Tests, examples and generators follow the same owned-type rule. Dedicated
+  external-provider fixtures and explicit Candid-versus-Wire benchmark controls
+  may retain the Candid shapes needed for that protocol or comparison, isolated
+  from production application types. A fixture's privacy is not an exemption;
+  identify the external contract or measurement that requires the Candid shape.
 - IC Wire owns codecs, resource admission and codec generation. Consumers retain
   endpoint exports, transport, authentication, method identities, semantic
   validation, rollback and retry policy. Qualify the selected released APIs and
@@ -212,6 +247,35 @@ product, release and recovery obligations remain binding when applicable.
   affected callers, generated bindings and retained retry bytes accounted for.
   Follow the [pre-1.0 contract rules](#pre-10-contracts); do not silently change a
   public interface or introduce parallel codecs/fallback readers for adoption.
+
+## Gzip encoding
+
+- IC Tooling's `ic-host-artifacts::artifact::encode_gzip`, behind its `gzip`
+  feature, is the canonical gzip encoder. General gzip compression belongs in
+  Tooling; it does not move into IC Platform merely because IC artifacts use it.
+- Reuse that API in production, tests, fixtures, examples and generators rather
+  than constructing another `flate2` encoder or copying header/compression logic.
+  A local adapter is justified when it supplies product policy or necessary
+  translation; it must delegate encoding to the canonical helper.
+- Consumers own the explicit compression level, compressed-byte allowance,
+  input custody, staging and publication. Ordinary fixtures use the fastest
+  setting that preserves the tested property, normally level 1. Do not run a
+  production level such as Canic's level 9 merely to construct valid gzip input.
+  Use the product's adapter/settings when testing exact compressed bytes/hashes,
+  release parity or compression-sensitive limits; keep explicit level/backend
+  coverage at the codec owner. A stored member is suitable only when the test
+  does not require actual size reduction.
+- Keep independent encoder controls only for a named backend/interoperability or
+  noncanonical-format test. Document the property they prove and isolate them
+  from ordinary fixture construction. System archive tools used for bootstrap,
+  packaging or evidence remain infrastructure dependencies; do not use them as
+  alternate application or Wasm-artifact encoders.
+- Zero timestamps alone do not make compressed bytes canonical across backends,
+  feature selections or dependency versions. Before changing compression inputs,
+  check frozen hashes, retained artifacts and external compressed-byte contracts.
+  Preserve obligated bytes or explicitly qualify their migration; do not silently
+  rewrite expected hashes to make a test pass. Exact emitted-byte hashes remain
+  valid artifact identities; they are not interchangeable with raw-payload hashes.
 
 ## Complete, reviewable changes
 
@@ -426,6 +490,11 @@ contracts; ordinary development does not require rereading these mechanics.
 
 ## Rust workspaces and portable tooling
 
+- Governed tools target latest stable during authorized maintenance, while
+  builds keep exact reviewed versions and checksums. Retaining an older version
+  needs a documented compatibility blocker and owning follow-up. Use the
+  [tool freshness workflow](../tasks/cargo-tool-versions.md), including optional
+  sccache; never resolve latest dynamically in builds or create a second installer.
 - Directory names for repositories, workspaces, tooling and operational inputs
   must not contain line-feed (LF) or carriage-return (CR) characters, including
   ancestor directories and resolved symlink destinations. Do not create or select
@@ -453,9 +522,10 @@ contracts; ordinary development does not require rereading these mechanics.
   prepared Rust toolchains and system bootstrap packages separately.
   Adopt the [consumer Make interface](../docs/make-interface.md) from the reviewed
   snapshot for common commands and LOC reporting, replacing copied recipes;
-  CI calls the same targets. Keep product inputs and adapters local. Use paired
-  formatter command inputs for extra workspaces/frontends instead of replacing
-  the shared recipes; preserve all existing checks during adoption.
+  CI calls the same targets. Keep product inputs and adapters local. Use
+  declarative Rust formatter inputs for extra workspaces, derive sorting and
+  manifest order. Use paired custom commands for other policies/frontends
+  instead of replacing shared recipes; preserve all checks during adoption.
 - Shared Tooling owns common executable storage as well as installation commands.
   Its reviewed snapshot also owns the default common tool versions and digests.
   Adopt those catalogs with the installers; do not maintain independent default
@@ -607,7 +677,8 @@ contracts; ordinary development does not require rereading these mechanics.
   and the smallest useful verification.
 - Track upstream acceptance separately from verified consumer adoption. Close
   producer issues when their own delivered implementation and required checks
-  are complete; keep outstanding adoption in linked consumer-owned issues.
+  are complete; keep concrete, independently actionable adoption work in linked
+  consumer-owned issues. Shared waiting findings follow the rule below.
   Do not keep or reopen a completed producer issue solely for fleet adoption,
   or create a second open tracker for the same consumer obligations. The
   [issue maintenance procedure](agent-maintenance.md#issue-review-and-repair)
@@ -625,6 +696,32 @@ contracts; ordinary development does not require rereading these mechanics.
 - Report the outcome, changed files, relevant verification, skipped checks,
   remaining risks and open consumer actions. State compatibility and host impact
   when relevant. Do not claim a release proves publication, adoption or deployment.
+
+### Shared dependency findings
+
+- Keep **one active remediation issue per shared dependency root cause**, at the
+  repository that owns the supplying dependency or capability. A matching
+  advisory or inherited defect in multiple consumer graphs does not create
+  multiple implementation outcomes. IC Platform owns findings in its external
+  IC boundary, including the crypto/Agent dependencies supplied through it;
+  other capabilities retain their established owners.
+- Search open and closed issues before filing. Reuse the canonical issue and
+  respect closed consumer redirects. Attach materially new affected-consumer
+  source/lock identities, dependency paths and operation/target evidence there;
+  do not recreate mirrors, repeated unchanged comments or a Shared umbrella.
+- Open a separate consumer issue only for **distinct, independently actionable
+  consumer-owned work**, such as a direct boundary bypass, an integration defect
+  or adoption of an available qualified correction requiring local changes.
+  State that local action and link the supplying issue. Merely waiting for the
+  same supplier or observing the same advisory in another lock is insufficient.
+- Consolidate existing mirrors only after linking their unique evidence and
+  remaining migration requirements from the canonical issue. Close them as
+  superseded/not planned, with an explicit redirect. Preserve historical
+  discussions; do not describe the dependency as fixed or adoption as complete.
+- Tracking consolidation changes no advisory/release gate, scoped acceptance,
+  expiry date or qualification obligation. The supplier closes its issue on its
+  own correction or reviewed decision and required evidence; this neither
+  certifies fleet adoption nor makes each consumer an acknowledgement gate.
 
 ### Repository handoff files
 
