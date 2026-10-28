@@ -1,82 +1,81 @@
 # Current handoff
 
-## Released 0.7.18; pending 0.7.19 fixes and tooling adoption
+## Released 0.7.19; pending 0.7.20 IC Build repair adoption
 
-HEAD is `95a4e30` (local 0.7.19 preparation). The working tree preserves the
-benchmark-fixture repair and adds the requested upstream adoption. Own package
-versions remain 0.7.18; staging, commits, releases and publication remain with
-the maintainer. No remote delivery or full release validation is claimed.
+HEAD remains `793134aa4476b5cf7501004d6aab271687c7235f` / `v0.7.19`.
+Own package versions remain 0.7.19. The compatible 0.7.20 changelog draft records
+adoption of IC Build 0.69.6 for the library and managed release editor. Leave
+staging, commits, releases, publication and pushes to the maintainer.
 
-## Selected tooling
+The root Build minimum, Make editor pin and setup docs now select 0.69.6.
+At inspection, incoming Cargo.lock work had already selected Build/Testkit/host
+0.69.6 and Platform 0.7.3. This entire incoming lockfile is preserved byte-for-byte
+against `target/ic-build-adoption-0696/incoming.Cargo.lock`; no dependency update
+command was needed. Testkit/Platform declaration minimums remain unchanged.
+Shared Tooling remains 0.27.3 at `7ee5c83744aa822ecd070703dbf0a7d95076d5f6`.
+No runtime, generator, protocol bytes, identities or admission rules change.
+Build remains a qualification/host dependency, outside published runtime crates.
 
-Shared Tooling is 0.27.3 at `7ee5c83744aa822ecd070703dbf0a7d95076d5f6`, exported
-from the clean committed source through its canonical impact/refresh workflow.
-All 111 payloads match that independently selected source commit, including modes;
-ordinary offline integrity checking also passes. The existing `.githooks` selection
-remains active; its disposable consumer proof exercises the new formatter driver.
+## macOS correction and qualification boundary
 
-Root declarations, Cargo.lock and the managed release editor now select IC
-Build/Testkit/host 0.69.5 and Platform 0.7.1, the latest published versions verified
-at adoption. Only those six upstream package selections changed in Cargo.lock;
-other dependency updates already present at entry were preserved. Tooling 0.69's
-Platform 0.7 type boundary is aligned, with no consumer source migration needed.
-The editor was explicitly prepared through `make install-tools` and is admitted
-offline. Bootstrap remains before Cargo-tool setup. Snapshot-owned files were
-not patched locally; optional sccache and scheduled maintenance were not activated.
+Published IC Build 0.69.6, source `cba072ee8fe288eb92bb4a4ddf9753b8abc4b580`,
+contains the fix for [IC Tooling #262](https://github.com/dragginzgame/ic-tooling/issues/262).
+Its source inventory keeps native `Mode` values through permission masking and
+serializes `mode.bits()` into the existing numeric JSON projection. It removes
+0.69.5's Darwin u16-versus-u32 assignment while retaining the evidence format.
+This is source inspection of the published package, not a local downstream patch.
 
-These packages remain qualification/host dependencies. Published runtime crates
-remain independent of platform SDKs. This adoption changes no runtime/generator
-execution, protocol bytes, identities, admission rules, retry/hash inputs or
-consumer endpoint layout. No performance saving is claimed for dependency adoption.
+The producer's [0.69.6 optimizer run](https://github.com/dragginzgame/ic-tooling/actions/runs/40688824204)
+passes Ubuntu, macOS ARM64 and macOS Intel. Producer general CI was still running
+at inspection; no complete producer-matrix pass is claimed. Wire's own new-source
+macOS qualification has not run yet. No workflow was dispatched or rerun here.
 
-## Existing issue fixes in the pending patch
+The historical [Wire 0.7.19 CI](https://github.com/dragginzgame/ic-wire/actions/runs/40683192769)
+has Ubuntu success and both macOS failures during installation of the old 0.69.5
+release editor, before Wire validation. Preserve its failure artifacts. Once this
+adoption is delivered, use the latest delivered Wire source/CI for acceptance;
+do not require obsolete 0.7.19 jobs to rerun with different dependencies.
 
-Both [#29](https://github.com/dragginzgame/ic-wire/issues/29) and
-[#30](https://github.com/dragginzgame/ic-wire/issues/30) are implemented and have
-local evidence recorded in their threads. Keep them open pending delivery and
-required producer qualification; SDK rollout remains consumer-owned.
+## Focused local checks
 
-Wire metadata accepts container `serde(crate = "path")` without changing layouts.
-Unsupported layout-changing attributes, duplicates and invalid placements still
-reject. Direct/re-exported record/enum paths retain identical metadata tokens,
-frames and generated modules.
+Linux evidence is under `target/ic-build-adoption-0696/`:
 
-Payload-only TS codecs/generation share existing schema validation, traversal,
-scalar checks and bulk advice. Unit is empty; u64 7 and `(7u64,)` are `07`.
-Existing framed IW/ID/direction APIs retain their contract. Rust caller-slice APIs
-share Postcard admission and two-pass sizing; short buffers reject before writing,
-other errors publish no successful slice, and output cannot outlive storage.
-The [SDK recipe](../sdk-integration.md) covers typed facades, scalar conversions,
-JavaScript delivery and SDK-owned buffer, transport, lifecycle and rollback policy.
+- Explicit editor preparation reuses its verified 0.69.6 cache; offline
+  executable/receipt admission passes through `make release-editor-check`.
+- The real release adapter's disposable Git fixture passes source refusal,
+  failure retention, metadata/tag/push, resume and receipt checks. No release
+  effects occurred in this checkout.
+- Strict Clippy passes for the diagnostic example; IC Build 0.69.6 checks nine
+  compile-fail cases plus a passing control. The example compiles on Rust 1.91.
+- Both standard Wire/Candid roundtrip tests pass with the preserved incoming
+  graph. The Testkit admission example passes strict Clippy on that graph.
+- Dependency pins, external-IC boundaries, grouped formatting and documentation
+  links pass.
 
-Allocation admission still reserves the configured byte allowance and weights
-visited value/buffer sizes eightfold. For the documented 22-byte response with
-`bytes: 64`, allocation 832 encodes and 704 decodes; 512 rejects and 1,024 admits.
-The public docs and regression tests clarify this existing rule, not a unit bug.
-The retained release failure's `derive(ype)` typo is repaired to `CandidType` in
-the private packed-manifest comparison fixture; production code is unaffected.
+No runtime/generator cost changed, so no new performance experiment is applicable
+to this host-tool adoption and no speed/Wasm saving is claimed. Full Wire CI,
+macOS execution and a fresh full Candid performance matrix were not run locally.
 
-## Current focused validation
+## Delivered Wire issues
 
-Linux evidence is retained under `target/tooling-adoption-0273/`:
+[#29](https://github.com/dragginzgame/ic-wire/issues/29) and
+[#30](https://github.com/dragginzgame/ic-wire/issues/30) are implemented in published
+Wire/derive 0.7.19. Their registry archives identify the release commit above.
+The standalone registry consumer under `/tmp/ic-wire-0719-acceptance.pyWIBU/`
+passes direct/re-exported Serde crate paths, schema/frame checks, caller-slice
+output and generated TypeScript payload encode/decode with trailing-byte refusal.
+Issue #30 also has actual IcyDB consumer confirmation. Keep both producer issues
+open until current required native qualification is complete; consumer adoption
+is separately owned and is not another producer closure gate.
 
-- Snapshot provenance/integrity, managed tool admission, dependency pins and
-  external-IC boundaries pass.
-- The real grouped formatting selection and maintained documentation links pass.
-- Actual Make routing, formatting hook and release-adapter recovery/delivery
-  fixtures pass in disposable repositories; no real release effects ran.
-- Strict Clippy passes for the benchmark targets (`wire,candid,ic`) and the
-  diagnostic example. Nine compile-fail cases plus a passing control pass through
-  IC Build 0.69.5; both standard Wire/Candid roundtrip tests pass.
-- The diagnostic and admission examples compile on Rust 1.91.
-- The current Wasm admission probe passes 144 valid/truncated/resource cases,
-  with three samples each, using an explicitly prepared PocketIC 16.0.0 server
-  and Testkit-owned lifecycle. Identities/raw results are in `admission-results/`.
+The [SDK recipe](../sdk-integration.md) retains transport, scalar conversions,
+buffer/async custody and rollback ownership. There is one Serde/Postcard codec;
+payload APIs explicitly omit framing, and framed identities remain intact.
+Allocation admission retains its eightfold ledger. The earlier 22-byte example
+at `bytes: 64` needs allocation 832 for encode and 704 for decode.
 
-Earlier runtime/TS conformance evidence remains in the issue threads and
-[caller-storage study](../evidence/caller-storage-0719/README.md). Its original
-0.68.12/0.6.21 performance measurements do not qualify the new dependency graph;
-no full performance matrix was rerun. The frozen [0.7.16 runtime](../evidence/runtime-0716/README.md)
-and [encoder](../evidence/encoder-followup-0716/README.md) studies remain historical.
-Full CI, macOS and installed consumer qualification were not run in this batch.
-The maintainer's complete release gate remains required for delivery.
+The [caller-storage study](../evidence/caller-storage-0719/README.md) preserves its
+frozen 0.68.12/0.6.21 measurements and regressions; it does not qualify this new
+dependency graph or an installed SDK. Historical
+[runtime](../evidence/runtime-0716/README.md) and
+[encoder](../evidence/encoder-followup-0716/README.md) studies retain their inputs.

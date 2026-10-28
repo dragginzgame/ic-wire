@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.20]
+
+### 🩹 Fixed
+
+- Adopt IC Build 0.69.6 for the diagnostic library and release editor, replacing
+  0.69.5's macOS mode-type compilation failure
+  ([IC Tooling #262](https://github.com/dragginzgame/ic-tooling/issues/262)).
+  Runtime codecs, protocol bytes and admission rules are unchanged.
+
 ## [0.7.19] - 2026-10-28
 
 ### 📝 Summary

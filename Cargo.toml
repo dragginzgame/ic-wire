@@ -30,7 +30,7 @@ syn = { version = "3.0.9", features = ["visit"] }
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 dhat = "0.3.3"
-ic-build = { version = "0.69.5", default-features = false }
+ic-build = { version = "0.69.6", default-features = false }
 ic-platform = { version = "0.7.1", default-features = false }
 ic-testkit = { version = "0.69.5", default-features = false }
 ic-wire = { path = "crates/ic-wire", version = "0.7.19" }
