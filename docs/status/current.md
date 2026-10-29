@@ -1,121 +1,128 @@
 # Current handoff
 
-## Released 0.7.20; pending 0.7.21 SDK helpers, parallel CI and IC adoption
+## Released 0.7.21; pending 0.7.22 IC dependency adoption
 
-Baseline HEAD is `1608df0661137003c7126040e8656598b98d5bd8` / release 0.7.20.
-Own versions remain 0.7.20; the 0.7.21 changelog is a draft. Leave staging,
-commits, releases, publication and pushes to the maintainer. The pending batch
-preserves existing APIs, generated clients, protocol bytes, identities and
-admission rules; no consumer migration is required.
+HEAD is `15c8b7ac881c008b2af0bd2c3d79502605a36d0d` / release 0.7.21.
+Both published Wire and derive archives identify that exact source. The
+[matching CI run](https://github.com/dragginzgame/ic-wire/actions/runs/40726709588)
+passes all nine core/TypeScript/benchmark qualification jobs across Linux,
+macOS ARM64 and macOS Intel, plus all three final scaffold gates. This supersedes
+0.7.19's historical macOS release-editor installation failure for current acceptance.
+No workflow was dispatched or rerun during this reconciliation.
 
-## Hosted CI groups
+The published CI result above qualifies 0.7.21, not the pending dependency/fixture
+changes below. Own package versions remain 0.7.21; the 0.7.22 changelog is a draft.
+Leave staging, commits, versions, release and publication to the maintainer.
 
-The workflow now runs `ci-core`, `ci-typescript` and `ci-benchmarks` independently
-on each supported OS: nine validation jobs with separate checkouts/targets/tools
-and unique failure artifacts. Node/npm preparation belongs to TypeScript only.
-Existing `scaffold (OS)` status names remain lightweight final gates: all must
-refuse unless every validation job succeeds. Public rulesets were empty at
-inspection; classic branch-protection reads were forbidden, so existing status
-names were preserved without changing remote rules.
+Canonical SDK producer acceptance and remaining consumer boundaries are in
+[#29 — Payload-only client codecs and bounded caller storage for SDK integration](https://github.com/dragginzgame/ic-wire/issues/29#issuecomment-6475585612).
+No additional codec implementation was needed for that reconciliation. The new
+adoption also leaves Wire protocol bytes, identities and admission unchanged.
 
-One fixed Make roster owns the full gate list. Core filters out the two specialist
-targets; both specialist groups admit tools before their owning target. The full
-local/release `make ci` roster and order remain sequential and unchanged. No
-shared snapshot runner was modified. Performance/allocation studies stay outside
-ordinary CI. The TypeScript command now actually executes feature-enabled native
-tests, including schema validation, alongside runtime/borrowed tests.
+## Registry-backed consumer qualification
 
-Actionlint and the disposable Make fixture pass actual group routing, complete
-partition coverage, fail-fast/tool admission arguments, CLI roster-override
-refusal, failure propagation and workflow final-gate refusal for failed/cancelled/
-skipped results. The existing formatting/release-routing fixture also passes.
-Logs: `target/parallel-ci-0721/`. Before this split, concurrent execution of the
-three correctness binaries with eight threads each passed 75 tests (53 native,
-16 runtime, six borrowed); logs: `target/parallel-suite-audit/`. Hosted execution
-is pending delivery. No measured CI wall-time saving or full CI pass is claimed.
+Fresh isolated consumer: `/tmp/ic-wire-issue29-0721.xUugkv/`, with its own Cargo
+workspace, lock and target. Metadata confirms registry Wire and derive 0.7.21,
+without local path substitutions. Logs/generated output/metadata remain under
+`target/issue29-0721/`; `probe.path` records the scratch source location.
 
-## Synthetic warning flood
+The probe passes unit/tuple payload bytes, scoped scratch and owned fallback,
+admission and short-storage refusal, framed identity/direction checks and
+standalone schema validation. The published runtime and generated tuple client
+compile strictly with TypeScript 7.0.2 and execute on Node 24.21.0: exact `07`
+bytes, empty unit and malformed/trailing refusal pass. The delivered hosted suite
+covers recursive payloads, scalar facades, callback lifetime refusal and failures.
+This is library/client qualification, not installed cdk-rsx adoption or endpoint
+execution/rollback qualification. The [SDK recipe](../sdk-integration.md) retains
+transport, copying, authentication, persistence, retries and consumer ownership.
 
-The TypeScript host benchmark printed bulk advice on every iteration/control:
-141,804 synthetic warnings per run. It now black-boxes the computed report;
-all 36 normal warnings stay visible. The CI wrapper retains stderr in
-`target/typescript-conformance/generation.log`, refuses synthetic Page warnings
-before replay and preserves ordinary diagnostics/failure status.
+## Parallel hosted CI
 
-The [warning study](../evidence/generator-warnings-0721/README.md) records all
-settings/samples. All 229 generated files match; only host timings differ.
-Seven-sample medians fall 60.90–66.69% from removing diagnostic output, not codec
-or production generator work. Strict Clippy/TypeScript compilation, 165 vectors,
-35,228 mutations, native/payload/admission controls and 54 simulated-endian cases
-pass. Shell routing covers warning refusal/replay and generator exit 101.
-Local source/logs: `target/warning-output-0721/`.
+`ci-core`, `ci-typescript` and `ci-benchmarks` run independently on each supported
+OS, with separate checkouts/targets/tools and unique failure artifacts. Node/npm
+preparation belongs to TypeScript only. Existing `scaffold (OS)` status names
+remain final gates requiring success across every group and host.
 
-## Scoped payload output
+One fixed Make roster owns all 17 gates. Core filters out the specialist targets;
+both specialist groups admit tools first. Local/release `make ci` keeps its
+original sequential roster/order. No shared snapshot runner changed. TypeScript
+now executes feature-enabled native tests alongside runtime/borrowed tests.
+Actionlint and disposable routing/failure/formatting/release fixtures pass;
+logs: `target/parallel-ci-0721/`. Concurrent correctness execution passed 75 tests
+(53 native, 16 runtime, six borrowed); logs: `target/parallel-suite-audit/`.
+Hosted qualification is linked above; no CI wall-time saving was measured.
 
-`native::with_encoded(value, limits, scratch, consume)` selects scratch or owned
-fallback once after preflight, using existing bounded Postcard writers. Owned
-input is dropped before the synchronous callback, which never runs on encoding
-failure. Borrow/future escape is rejected. Existing payload/generator/slice APIs
-and framing are unchanged.
+## Warning output and SDK helpers
 
-The [output study](../evidence/with-encoded-0721/README.md) retains raw settings,
-samples and reproduction; local artifacts: `target/with-encoded-0721/`.
-Existing owned Wasm is byte-identical to 0.7.20. Scoped u64 instructions:
-opt-z 842 → 425 (-49.52%); opt-3 586 → 289 (-50.68%). Scratch-fitting output
-allocates zero; large fallback allocates once. Scoped fixture total/code costs
-+722/+704 bytes at opt-z, +2,490/+2,495 at opt-3. Regressions: opt-3 unit
-+16 instructions (+6.27%); native unit +7.53%, native large vector +0.51%.
-Query returns may reuse execution; native timings compare paths in one executable.
-Four integration tests, three slice tests, one executable/two compile-fail
-doctests, strict runtime/fixture Clippy and Rust 1.91 pass. Native allocation/heap
-and focused IC studies pass; local server binding required sandbox escalation.
+The synthetic TypeScript benchmark now consumes computed advice without printing
+141,804 repeated warnings; all 36 ordinary warnings remain visible. CI retains
+stderr in `target/typescript-conformance/generation.log` and refuses synthetic
+Page warnings before replay. The [warning study](../evidence/generator-warnings-0721/README.md)
+retains counts, identical generated files and shell failure/replay evidence.
+Its host timing reductions remove diagnostic IO, not production codec work.
 
-## Standalone schema validation
+`native::with_encoded` selects scratch/owned fallback after preflight, retains
+two-pass bounded Postcard encoding, drops owned input before its synchronous
+callback and never calls it on failure. Borrow/future escape is rejected.
+The [output study](../evidence/with-encoded-0721/README.md) records unchanged
+owned-control Wasm and scoped u64 instruction changes: opt-z 842 → 425 (-49.52%),
+opt-3 586 → 289 (-50.68%). Scoped fixture total/code costs +722/+704 bytes at
+opt-z and +2,490/+2,495 at opt-3. Opt-3 unit adds 16 instructions (+6.27%);
+native unit and large-vector regressions remain recorded. Scratch-fitting output
+allocates zero; large fallback allocates once. Query returns may reuse execution;
+native comparisons are paths within one executable.
 
-Host-only `typescript::validate_payload_schema` validates a root and complete
-registry with existing generator checks, including unused definitions, alias
-cycles and shared work/depth limits, without emitting a module. Three tests,
-the existing payload control, strict Clippy, a doctest and Rust 1.91 pass.
-The [validator study](../evidence/schema-validator-0721/README.md) records one/100-type
-medians of 1,414/83,863 ns versus 5,178/158,205 ns for generating a disposable
-module (-72.69%/-46.99%). All 229 generated files match. Transient generation
-regressions and repeats remain in evidence; no IC/Wasm cost change applies.
+Host-only `typescript::validate_payload_schema` checks the root and complete
+registry using existing shape/reference/alias-cycle and shared work/depth checks,
+without emitting a module. The [validator study](../evidence/schema-validator-0721/README.md)
+records one/100-type medians of 1,414/83,863 ns versus 5,178/158,205 ns for
+module generation (-72.69%/-46.99%). All 229 generated files match; transient
+existing-generation timing regressions and repeats are retained. This is not a
+production generator speedup or IC/Wasm cost claim.
 
-## Dependency and consumer boundaries
+## Dependency and measurement boundaries
 
-The root now requires Build/Testkit 0.69.8 and Platform 0.7.4; the managed
-release editor selects Build 0.69.8 with `cli`. The incoming lock already selected
-these packages and host companions, plus AWS-LC updates; it is preserved exactly
-against `target/ic-adoption-0698/incoming.Cargo.lock`. Shared Tooling stays 0.27.3
-at `7ee5c83744aa822ecd070703dbf0a7d95076d5f6`; no snapshot files changed.
+Root minima select Build/Testkit 0.69.12 and Platform 0.8.1; the managed release
+editor remains Build 0.69.12 with `cli`. The latest incoming lock already selected
+Build/Testkit and host helpers 0.69.14; those unrelated updates are retained.
+Platform 0.8.1 is added for the benchmark caller; Testkit still requires the 0.7
+line and retains Platform 0.7.6 internally. Both facades reuse the same external
+Candid/PocketIC type identities; benchmark host callers compile together.
+The incoming graph is retained in `target/platform-adoption-0722/incoming.Cargo.lock`;
+only the added Platform selection and its qualified dependency references differ.
 
-Published Tooling source is `cc9e544d1236c23c78d2732cfd04080e7e38052a`; Platform
-source is `ca2ac1eb3b65a4e3adec2eb64f06bf942ca22af9`. Tooling changes retain public
-APIs/recovery formats while simplifying custody and liveness handling. Platform's
-new external-protocol capabilities stay disabled. Existing Candid/PocketIC/ic0
-selections remain qualification-only; published Wire runtime has no SDK dependency.
+Platform 0.8.1's published source is
+`10c2610511d6a5525816185c999b25fd159c1d89`. The 0.8 cut separates Principal
+conversion/self-authentication features and owns selected ledger DTOs; Wire
+selects neither the affected owned Principal API nor ledger DTOs. The selected
+Candid implementation matches 0.7.6. Native profiler source changes are outside
+Wire's feature selection. No caller migration, Wire protocol change, production
+SDK dependency or new codec is introduced. The pre-1.0 patch draft stays valid
+because this dependency is qualification-only. Shared Tooling remains 0.27.3 at
+`7ee5c83744aa822ecd070703dbf0a7d95076d5f6`, with its snapshot intact.
 
-`target/ic-adoption-0698/` records passing strict diagnostic/Testkit caller Clippy,
-nine compiler-fail cases plus control, two standard Wire/Candid roundtrip tests,
-Rust 1.91 Build/Testkit native and scoped-output Wasm checks, pin/boundary checks,
-managed editor admission and the disposable real release-adapter fixture. Setup
-reused a verified editor cache after an escalation for its managed-store lock.
-Managed PocketIC startup/calls/stop/delete passes with the new host graph against
-eight retained known guest modules. This tests host lifecycle integration, not
-fresh guest builds or a new performance matrix. Retained IC replies/counters
-match the prior study. Local binding required sandbox escalation.
+Platform 0.7.5 introduced a 16-constructed-level bounded Candid nesting cap.
+The pending paired corpus therefore uses `tree-depth-7` (16 record/vector levels),
+with depth 8 explicitly covered as Wire-success / typed Candid nesting refusal.
+No raw-decoder bypass or unsupported-pair reporting lane was added. Historical
+depth-8 and new depth-7 rows must not be paired; old reports also exclude the
+new Candid admission cost.
 
-Earlier performance studies above freeze Build/Testkit 0.69.6 and Platform 0.7.3;
-their results were not relabelled or rerun for this adoption. No runtime/generator
-implementation changed and no new speed/Wasm saving is claimed.
-[#29](https://github.com/dragginzgame/ic-wire/issues/29) and
-[#30](https://github.com/dragginzgame/ic-wire/issues/30) landed in 0.7.19;
-registry-consumer evidence: `/tmp/ic-wire-0719-acceptance.pyWIBU/`. Native hosted
-qualification was their remaining producer closure gate at the previous check;
-issue/hosted status was not rechecked here. The [SDK recipe](../sdk-integration.md)
-retains transport, copying, rollback, retries and consumer adoption ownership.
-Allocation admission retains its eightfold ledger. Historical
+Latest focused logs are in `target/platform-adoption-0722/`: three standard
+corpus/boundary/Nat tests, strict benchmark all-target Clippy with both codecs and
+IC host callers, Rust 1.91 native and both-codec Wasm checks, dependency pin/
+boundary checks, documentation links and diff checks pass. Source and lock hashes
+are in `receipt.json`. No fresh PocketIC execution, full matrix, hosted CI or
+native macOS execution was run. No timing or Wasm saving is claimed: the
+production codec is unchanged and the selected Candid source is identical.
+
+Earlier `target/ic-adoption-06912/` logs qualify Build 0.69.12's managed editor
+and disposable release adapter, diagnostics, and that batch's older lock graph;
+they do not qualify the independently incoming Build/Testkit 0.69.14 update.
+Earlier adoption logs also remain under `target/ic-adoption-06911/` and
+`target/ic-adoption-0698/`. SDK studies freeze Build/Testkit 0.69.6 /
+Platform 0.7.3; historical
 [caller-storage](../evidence/caller-storage-0719/README.md),
 [runtime](../evidence/runtime-0716/README.md) and
-[encoder](../evidence/encoder-followup-0716/README.md) studies keep their frozen inputs.
-No full Candid matrix, installed SDK or native macOS qualification ran locally.
+[encoder](../evidence/encoder-followup-0716/README.md) studies retain their inputs.
+Installed SDK qualification remains consumer-owned.

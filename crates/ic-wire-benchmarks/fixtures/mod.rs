@@ -221,7 +221,7 @@ struct PackedManifest {
 #[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
 #[cfg_attr(feature = "candid", derive(CandidType))]
 #[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
-struct Node {
+pub(super) struct Node {
     value: u64,
     children: Vec<Node>,
 }
@@ -238,7 +238,7 @@ struct AccountSnapshot {
     samples: Vec<Option<i64>>,
     proofs: Vec<Blob>,
 }
-fn tree(depth: usize) -> Node {
+pub(super) fn tree(depth: usize) -> Node {
     Node {
         value: depth as u64,
         children: if depth == 0 {
@@ -537,7 +537,12 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
             detail: "permission denied".into(),
         },
     ));
-    for depth in [0, 1, 4, 8] {
+    // Platform 0.7.5 bounds Candid wire nesting to 16 constructed levels.
+    // Depth 7 has eight record/vector pairs; the former depth-8 performance
+    // row now rejects there. Keep depth 8 as an explicit Wire-success/Candid-
+    // refusal control in roundtrip tests, not a successful-decode speed ratio.
+    // Historical tree-depth-8 measurements must not be paired with depth 7.
+    for depth in [0, 1, 4, 7] {
         push!(case(&format!("tree-depth-{depth}"), tree(depth)));
     }
     // Append new cases so existing benchmark identities retain their indices.

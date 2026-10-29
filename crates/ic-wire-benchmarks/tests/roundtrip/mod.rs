@@ -2,6 +2,36 @@
 #[path = "../../fixtures/mod.rs"]
 mod fixtures;
 mod unsigned_magnitude;
+
+#[test]
+fn recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit() {
+    use ic_platform::candid::{self, nesting::NestingError};
+    let allowed = fixtures::tree(7);
+    let bytes = candid::contract::encode_one(&allowed).unwrap();
+    assert_eq!(
+        candid::decode_exactly_one::<fixtures::Node>(&bytes, fixtures::CANDID_LIMITS).unwrap(),
+        allowed
+    );
+    let deep = fixtures::tree(8);
+    let wire = ic_wire::native::encode_request(fixtures::METHOD, &deep, fixtures::LIMITS).unwrap();
+    assert_eq!(
+        ic_wire::native::decode_request::<fixtures::Node>(
+            fixtures::METHOD,
+            &wire,
+            fixtures::LIMITS
+        )
+        .unwrap(),
+        deep
+    );
+    let bytes = candid::contract::encode_one(&deep).unwrap();
+    let error =
+        candid::decode_exactly_one::<fixtures::Node>(&bytes, fixtures::CANDID_LIMITS).unwrap_err();
+    assert!(matches!(
+        error.nesting_error(),
+        Some(NestingError::ValueDepth { maximum: 16 })
+    ));
+}
+
 #[test]
 fn corpus_roundtrips_and_rejects_damaged_frames() {
     let cases = fixtures::cases(); // Asserts semantic equality for every lane.

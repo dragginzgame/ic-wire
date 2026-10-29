@@ -20,9 +20,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.69.8 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.69.12 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.69.8 without default features; the CLI feature is only enabled for installation.
+0.69.12 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -259,6 +259,13 @@ Run `make check-benchmarks` for corpus correctness, lint and Rust 1.91 checks.
 This is not a performance regression gate. A full measured comparison is a
 separate run; the [0.7.10 report](full-comparison-0710.md) records the latest
 full matrix and matched previous-release qualification.
+Platform 0.7.5's bounded Candid decoder admits at most 16 constructed wire levels.
+The shared tree comparison therefore uses depth 7 (eight record/vector pairs).
+Depth 8 stays covered as Wire-success / typed Candid nesting refusal, rather than
+a successful-decode speed comparison. Historical `tree-depth-8` measurements and
+the new `tree-depth-7` row have different inputs and must not be paired. The
+upstream guard also adds Candid admission work; old codec reports keep their
+recorded Platform version and do not quantify this new comparison cost.
 For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
 prepared server and run `make evaluate-codec-matrix`. The 21 cohorts cover the
 standard/Toko corpora, 1/10/100 ordinary derived records, bounded packed-i16 and

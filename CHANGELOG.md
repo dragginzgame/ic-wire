@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.22]
+
+### ⬆️ Dependencies
+
+- Adopt IC Build/Testkit 0.69.12 and Platform 0.8.1 for qualification, including
+  the managed Build release editor. Preserve existing feature selections and
+  unrelated lockfile updates. Wire runtime APIs, protocol bytes and admission rules are
+  unchanged; historical codec comparisons retain their recorded dependency graph.
+
+### 🧪 Testing
+
+- Adapt the shared recursive-tree comparison to Platform's bounded Candid
+  nesting limit: compare depth 7 and retain depth 8 as an explicit Wire-success /
+  Candid-refusal test. Historical depth-8 performance rows remain separate.
+
 ## [0.7.21] - 2026-10-28
 
 ### ✨ Added
