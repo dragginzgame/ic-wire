@@ -984,7 +984,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.7.21"
+version = "0.7.22"
 dependencies = [
  "bytemuck",
  "clap",
@@ -998,7 +998,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-benchmarks"
-version = "0.7.21"
+version = "0.7.22"
 dependencies = [
  "dhat",
  "ic-platform 0.8.1",
@@ -1014,7 +1014,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.7.21"
+version = "0.7.22"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1023,7 +1023,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-qualification"
-version = "0.7.21"
+version = "0.7.22"
 dependencies = [
  "clap",
  "ic-build",
