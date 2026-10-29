@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.23]
+
+### ⬆️ Dependencies
+
+- Adopt IC Build/Testkit 0.70.0 and the matching managed release editor. Align
+  qualification tooling on Platform 0.8.1 and remove the older Platform facade
+  from the locked graph. Existing features, Wire APIs and protocol rules remain
+  unchanged.
+
 ## [0.7.22] - 2026-10-29
 
 ### ⬆️ Dependencies
