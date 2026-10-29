@@ -9,7 +9,7 @@ default-members = ["crates/ic-wire"]
 resolver = "3"
 
 [workspace.package]
-version = "0.7.22"
+version = "0.7.23"
 edition = "2024"
 rust-version = "1.91"
 license = "MIT"
@@ -18,7 +18,7 @@ repository = "https://github.com/dragginzgame/ic-wire"
 [workspace.dependencies]
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.7.22" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.7.23" }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
@@ -33,7 +33,7 @@ dhat = "0.3.3"
 ic-build = { version = "0.70.0", default-features = false }
 ic-platform = { version = "0.8.1", default-features = false }
 ic-testkit = { version = "0.70.0", default-features = false }
-ic-wire = { path = "crates/ic-wire", version = "0.7.22" }
+ic-wire = { path = "crates/ic-wire", version = "0.7.23" }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"
