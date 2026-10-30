@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.25]
+
+### 🧹 Cleanup
+
+- Give the unpublished benchmark library ownership of its shared corpus and
+  admission fixtures. Remove path-based test, example and benchmark imports;
+  production codec dependencies and wire formats are unchanged.
+
 ## [0.7.24] - 2026-10-30
 
 ### ⬆️ Dependencies

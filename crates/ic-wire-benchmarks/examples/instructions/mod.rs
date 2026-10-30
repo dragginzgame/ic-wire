@@ -1,8 +1,7 @@
 //! IC instruction counter measurements using an explicitly prepared PocketIC server.
-#[path = "../../fixtures/mod.rs"]
-mod fixtures;
 use ic_platform::{candid::contract::Principal, pocket_ic::PocketIcBuilder};
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_wire_benchmarks::fixtures;
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::PathBuf, process::Command, time::Duration};
@@ -131,7 +130,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         serde_json::to_vec_pretty(
             &json!({"format":1,"counter":"ic0.performance_counter(0)","samples":samples,"small_repetitions":4,"large_repetitions":1,
         "server_version":String::from_utf8(version.stdout)?,"server_sha256":hash(&fs::read(server)?),"artifacts":artifacts,
-        "fixture_sha256":hash(include_bytes!("../../fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("../../fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("../../fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("../../fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("../../fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("../../fixtures/scale/mod.rs")),"driver_sha256":hash(include_bytes!("mod.rs")),"wasm_driver_sha256":hash(include_bytes!("../wasm/mod.rs")),
+        "fixture_sha256":hash(include_bytes!("../../src/fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("../../src/fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("../../src/fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("../../src/fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("../../src/fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("../../src/fixtures/scale/mod.rs")),"driver_sha256":hash(include_bytes!("mod.rs")),"wasm_driver_sha256":hash(include_bytes!("../wasm/mod.rs")),
         "lock_sha256":hash(include_bytes!("../../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         )?,
     )?;

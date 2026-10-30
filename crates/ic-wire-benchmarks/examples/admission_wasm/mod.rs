@@ -1,6 +1,5 @@
 //! IC instruction costs for admission budgets and valid/truncated controls.
-#[path = "../../fixtures/admission/mod.rs"]
-mod admission;
+use ic_wire_benchmarks::fixtures::admission;
 
 #[allow(unsafe_code)]
 #[cfg_attr(

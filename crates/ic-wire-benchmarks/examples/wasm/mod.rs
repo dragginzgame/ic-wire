@@ -1,6 +1,5 @@
 //! Isolated codec footprint and instruction fixture, without an endpoint SDK.
-#[path = "../../fixtures/mod.rs"]
-mod fixtures;
+use ic_wire_benchmarks::fixtures;
 use std::hint::black_box;
 
 // This fixture owns this export; all IC calls use safe wrappers.

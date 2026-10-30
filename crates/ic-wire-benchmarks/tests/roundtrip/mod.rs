@@ -1,6 +1,5 @@
 //! Corpus correctness and fail-closed framing checks, independent of timing.
-#[path = "../../fixtures/mod.rs"]
-mod fixtures;
+use ic_wire_benchmarks::fixtures;
 mod unsigned_magnitude;
 
 #[test]

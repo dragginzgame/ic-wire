@@ -1,5 +1,7 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
 #![allow(dead_code)]
+
+pub mod admission;
 #[cfg(any(feature = "bulk", feature = "bulk-scale"))]
 mod bulk;
 #[cfg(feature = "hotspots")]
@@ -221,7 +223,7 @@ struct PackedManifest {
 #[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
 #[cfg_attr(feature = "candid", derive(CandidType))]
 #[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
-pub(super) struct Node {
+pub struct Node {
     value: u64,
     children: Vec<Node>,
 }
@@ -238,7 +240,7 @@ struct AccountSnapshot {
     samples: Vec<Option<i64>>,
     proofs: Vec<Blob>,
 }
-pub(super) fn tree(depth: usize) -> Node {
+pub fn tree(depth: usize) -> Node {
     Node {
         value: depth as u64,
         children: if depth == 0 {

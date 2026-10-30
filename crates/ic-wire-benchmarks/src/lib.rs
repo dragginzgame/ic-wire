@@ -1,1 +1,4 @@
-//! Unpublished codec comparisons. All codecs and measurement tools are dev dependencies.
+//! Unpublished codec comparisons and shared benchmark inputs.
+
+#[doc(hidden)]
+pub mod fixtures;
