@@ -19,7 +19,7 @@ repository = "https://github.com/dragginzgame/ic-wire"
 [workspace.dependencies]
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
-ic-platform = { version = "0.8.3", default-features = false }
+ic-platform = { version = "0.9.1", default-features = false }
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.7.25" }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"

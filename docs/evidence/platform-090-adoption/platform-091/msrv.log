@@ -1,0 +1,6 @@
+   Compiling ic-platform-runtime-guard v0.9.1
+   Compiling ic-platform-macros v0.9.1
+    Checking ic-platform v0.9.1
+    Checking ic-wire v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint-fixture v0.7.25 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.95s

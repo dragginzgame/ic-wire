@@ -1,0 +1,139 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 7acbf24..c23af3f 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -1,9 +1,9 @@
+ [workspace]
+-members = ["crates/ic-call", "crates/ic-platform", "crates/ic-platform-macros"]
++members = ["crates/ic-call", "crates/ic-platform", "crates/ic-platform-macros", "crates/ic-platform-runtime-guard"]
+ resolver = "3"
+ 
+ [workspace.package]
+-version = "0.9.0"
++version = "0.9.1"
+ edition = "2024"
+ rust-version = "1.91.0"
+ license = "MIT"
+@@ -24,8 +24,9 @@ ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
+ ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
+ ic-host-artifacts = { version = "0.70.0", default-features = false, features = ["gzip"] }
+ ic-management-canister-types = "=0.11.0"
+-ic-platform = { version = "0.9.0", path = "crates/ic-platform", default-features = false }
+-ic-platform-macros = { version = "0.9.0", path = "crates/ic-platform-macros" }
++ic-platform = { version = "0.9.1", path = "crates/ic-platform", default-features = false }
++ic-platform-macros = { version = "0.9.1", path = "crates/ic-platform-macros" }
++ic-platform-runtime-guard = { version = "=0.9.1", path = "crates/ic-platform-runtime-guard", default-features = false }
+ ic-secp256k1 = "=0.3.0"
+ ic-stable-structures = { version = "=0.7.2", default-features = false }
+ ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
+diff --git a/crates/ic-platform-runtime-guard/Cargo.toml b/crates/ic-platform-runtime-guard/Cargo.toml
+new file mode 100644
+index 0000000..a1912f9
+--- /dev/null
++++ b/crates/ic-platform-runtime-guard/Cargo.toml
+@@ -0,0 +1,17 @@
++[package]
++name = "ic-platform-runtime-guard"
++description = "Internal Cargo singleton guard for the IC Platform executor"
++version.workspace = true
++edition.workspace = true
++rust-version.workspace = true
++license.workspace = true
++repository.workspace = true
++publish = ["crates-io"]
++links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
++include = ["src/**", "LICENSE", "Cargo.toml", "build.rs"]
++
++[features]
++default = []
++
++[lints]
++workspace = true
+diff --git a/crates/ic-platform-runtime-guard/LICENSE b/crates/ic-platform-runtime-guard/LICENSE
+new file mode 100644
+index 0000000..1459cd2
+--- /dev/null
++++ b/crates/ic-platform-runtime-guard/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2026 IC Testkit contributors
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/crates/ic-platform-runtime-guard/build.rs b/crates/ic-platform-runtime-guard/build.rs
+new file mode 100644
+index 0000000..7ac0dd6
+--- /dev/null
++++ b/crates/ic-platform-runtime-guard/build.rs
+@@ -0,0 +1,2 @@
++//! Cargo requires a build script for `links`; no native library is built.
++fn main() {}
+diff --git a/crates/ic-platform-runtime-guard/src/lib.rs b/crates/ic-platform-runtime-guard/src/lib.rs
+new file mode 100644
+index 0000000..c15c209
+--- /dev/null
++++ b/crates/ic-platform-runtime-guard/src/lib.rs
+@@ -0,0 +1,6 @@
++//! Internal Cargo packaging guard for IC Platform's sole executor.
++//!
++//! This package contains no executor or runtime API. The facade selects its exact
++//! coordinated version only when the executor feature is enabled. Its inherited
++//! `links` identity refuses other executor suppliers during dependency resolution.
++#![no_std]
+diff --git a/crates/ic-platform/Cargo.toml b/crates/ic-platform/Cargo.toml
+index 97d647e..42880c9 100644
+--- a/crates/ic-platform/Cargo.toml
++++ b/crates/ic-platform/Cargo.toml
+@@ -8,9 +8,7 @@ license = "MIT AND Apache-2.0"
+ repository.workspace = true
+ readme = "README.md"
+ publish = ["crates-io"]
+-# Preserve the executor's Cargo singleton guard, including against the old supplier.
+-links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
+-include = ["src/**", "README.md", "LICENSE", "Cargo.toml", "build.rs"]
++include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+ 
+ [features]
+ default = []
+@@ -35,7 +33,7 @@ runtime = ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserro
+ certification = ["dep:ic-certification"]
+ ecdsa = ["dep:k256"]
+ ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
+-executor = ["ic0", "dep:slotmap"]
++executor = ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"]
+ gzip = ["dep:ic-host-artifacts"]
+ ic0 = []
+ icrc-ledger-types = [
+@@ -72,6 +70,7 @@ ed25519-dalek = { workspace = true, optional = true }
+ hex = { workspace = true, optional = true }
+ ic-certification = { workspace = true, optional = true }
+ ic-platform-macros = { workspace = true, optional = true }
++ic-platform-runtime-guard = { workspace = true, optional = true }
+ ic-stable-structures = { workspace = true, optional = true }
+ ic-verify-bls-signature = { workspace = true, optional = true }
+ ic_principal = { workspace = true, optional = true }
+diff --git a/crates/ic-platform/build.rs b/crates/ic-platform/build.rs
+deleted file mode 100644
+index 7bb256e..0000000
+--- a/crates/ic-platform/build.rs
++++ /dev/null
+@@ -1,3 +0,0 @@
+-//! Cargo requires a build script for `links`. No native library is built:
+-//! the inherited executor identity prevents multiple runtimes in one graph.
+-fn main() {}

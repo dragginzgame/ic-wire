@@ -1,5 +1,4 @@
 //! Explicit PocketIC admission study; does not alter the production limits.
-#[path = "../../fixtures/admission/mod.rs"]
 mod admission;
 use ic_platform::{candid::contract::Principal, pocket_ic::PocketIcBuilder};
 use ic_testkit::pic::PocketIcStartupConfig;
@@ -24,8 +23,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         serde_json::to_vec_pretty(&json!({
             "wasm_sha256": format!("{:x}", Sha256::digest(&wasm)),
             "server_sha256": format!("{:x}", Sha256::digest(fs::read(server)?)),
-            "lock_sha256": format!("{:x}", Sha256::digest(include_bytes!("../../../../Cargo.lock"))),
-            "fixture_sha256": format!("{:x}", Sha256::digest(include_bytes!("../../fixtures/admission/mod.rs"))),
+            "lock_sha256": format!("{:x}", Sha256::digest(include_bytes!("../../../Cargo.lock"))),
+            "fixture_sha256": format!("{:x}", Sha256::digest(include_bytes!("admission/mod.rs"))),
             "samples":3,"counter":"ic0.performance_counter(0)",
             "notes":"Warm decode, including destruction; setup/transport excluded. Budgets are illustrative, not equivalent to Candid quotas."
         }))?,

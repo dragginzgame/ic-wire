@@ -51,7 +51,7 @@ No existing Wire payload or acceptance rule changes merely by publishing this gu
 
 The consumer owns the arithmetic dependency. With its existing external `Nat`
 and `num_bigint::BigUint`, use the following conversions. They are compiled and
-tested in the unpublished [boundary qualification](../crates/ic-wire-benchmarks/tests/roundtrip/unsigned_magnitude/mod.rs).
+tested in the unpublished [boundary qualification](../crates/ic-wire-benchmarks/drivers/unsigned_magnitude/mod.rs).
 No Candid or BigUint dependency is added to either published Wire crate.
 Project the external Nat explicitly; its own Serde representation is not this
 convention and should not be inferred from the external type.

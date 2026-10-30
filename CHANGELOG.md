@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.8.0]
+
+### ⚠️ Breaking
+
+- Adopt IC Platform 0.9.1 for the optional endpoint integration. Platform now
+  owns IC0 and the executor; endpoint consumers must coordinate their application
+  runtime dependencies on Platform 0.9. Core-only Wire users need no migration.
+  Handler syntax, wire bytes, identities, limits and accepted inputs are unchanged.
+  See the [endpoint migration](docs/endpoints.md).
+
+### 🩹 Fixed
+
+- Select Platform 0.9.1's feature-scoped executor guard, so native-only consumers
+  do not claim a runtime owner. Endpoint builds retain the singleton guard;
+  the upstream runtime and macro source are unchanged from 0.9.0. The
+  [follow-up checks](docs/evidence/platform-090-adoption/platform-091/README.md)
+  retain identical total/code-section Wasm sizes in both profiles.
+
+### 🧹 Cleanup
+
+- Adopt Shared Tooling 0.27.11 at `62edfbd43087a718bf0283e9040676a49211976d`
+  through its canonical exporter. Replace benchmark module-path overrides with
+  colocated target roots and ordinary modules, keeping Candid in dev dependencies.
+  Use checked lint expectations where applicable; retain a documented allowance
+  for configuration-dependent compile-fail diagnostic inputs.
+
+### 🧪 Testing
+
+- Qualify the [matched Platform adoption](docs/evidence/platform-090-adoption/README.md)
+  across all 17 endpoints and 178 cases. Total Wasm shrinks 3.54% at opt-z and
+  5.19% at opt-3; the largest instruction increase is 0.0264% for successful calls
+  and 0.1855% overall, on malformed input. Preserve exact frames and rollback
+  outcomes; reject external executor/IC0 suppliers in the endpoint graph.
+
 ## [0.7.25] - 2026-10-30
 
 ### ⬆️ Dependencies

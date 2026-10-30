@@ -18,7 +18,10 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
                         _ => mixed[i % mixed.len()],
                     })
                     .collect();
-                #[allow(unused_mut)]
+                #[cfg_attr(
+                    not(all(feature = "wire", not(feature = "packed-i16-baseline"))),
+                    expect(unused_mut, reason = "Only the packed Wire control adds a lane.")
+                )]
                 let mut case = case(&format!("i16-{distribution}-{n}"), values.clone());
                 #[cfg(all(feature = "wire", not(feature = "packed-i16-baseline")))]
                 {

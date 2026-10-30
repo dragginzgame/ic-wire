@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![expect(dead_code, reason = "The selected driver uses only part of the shared fixture surface.")]
 use ic_wire::{Limits, endpoint::query};
 const LIMITS: Limits = Limits {
     bytes: 128,

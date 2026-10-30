@@ -73,7 +73,10 @@ fn borrowed_endpoint(value: Borrowed<'_>) -> [u64; 3] {
     consume(value.mode, value.nonce, value.body.as_slice())
 }
 #[cfg(all(target_family = "wasm", not(feature = "endpoint-input")))]
-#[allow(unsafe_code)]
+#[expect(
+    unsafe_code,
+    reason = "This fixture owns the IC export; system calls use safe wrappers."
+)]
 #[unsafe(export_name = "canister_update consume")]
 /// Same endpoint lifecycle and bytes; only request ownership differs.
 pub extern "C" fn entry() {

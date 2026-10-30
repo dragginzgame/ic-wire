@@ -1,5 +1,17 @@
 //! Native codec measurements. Allocator instrumentation uses a separate build.
-#[path = "../../fixtures/mod.rs"]
+#[cfg_attr(
+    any(
+        feature = "hotspots",
+        feature = "toko",
+        feature = "derive-scale",
+        feature = "packed-i16",
+        feature = "bulk"
+    ),
+    expect(
+        dead_code,
+        reason = "Alternate cohorts leave the default corpus helpers unused."
+    )
+)]
 mod fixtures;
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -91,20 +103,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir(&directory)?;
     fs::write(
         directory.join("fixture.rs"),
-        include_bytes!("../../fixtures/mod.rs"),
+        include_bytes!("fixtures/mod.rs"),
     )?;
-    fs::write(directory.join("runner.rs"), include_bytes!("mod.rs"))?;
+    fs::write(directory.join("runner.rs"), include_bytes!("suite.rs"))?;
     fs::write(
         directory.join("Cargo.lock"),
-        include_bytes!("../../../../Cargo.lock"),
+        include_bytes!("../../../Cargo.lock"),
     )?;
     fs::write(
         directory.join("workspace.toml"),
-        include_bytes!("../../../../Cargo.toml"),
+        include_bytes!("../../../Cargo.toml"),
     )?;
     fs::write(
         directory.join("package.toml"),
-        include_bytes!("../../Cargo.toml"),
+        include_bytes!("../Cargo.toml"),
     )?;
     // Never replace an earlier run.
     let mut output = fs::File::create(directory.join("samples.jsonl"))?;
@@ -178,8 +190,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let manifest = json!({"format":1,"profile":profile,"mode":if cfg!(feature="allocations") {"allocation-counts"} else if cfg!(feature="heap") {"peak-heap"} else {"native-time"},
         "samples":samples,"minimum_batch_ms":millis,"case_count":cases.len(),"compiler":command("rustc", &["-vV"]),
         "host":command("uname", &["-a"]),"git_head":command("git", &["rev-parse","HEAD"]),
-        "git_status":command("git", &["status","--short"]),"lock_sha256":hash(include_bytes!("../../../../Cargo.lock")),
-        "fixture_sha256":hash(include_bytes!("../../fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("../../fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("../../fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("../../fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("../../fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("../../fixtures/scale/mod.rs")),"runner_sha256":hash(include_bytes!("mod.rs")),
+        "git_status":command("git", &["status","--short"]),"lock_sha256":hash(include_bytes!("../../../Cargo.lock")),
+        "fixture_sha256":hash(include_bytes!("fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("fixtures/scale/mod.rs")),"runner_sha256":hash(include_bytes!("suite.rs")),
         "executable_sha256":hash(&fs::read(std::env::current_exe()?)?),
         "native_executable_bytes":fs::metadata(std::env::current_exe()?)?.len(),
         "cpu_info":fs::read_to_string("/proc/cpuinfo").ok(),

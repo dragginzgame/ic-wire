@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "e026eb4c8a7a71d4e74b459d774a83490c351762",
+  "shared": {
+    "from": "61a173990683597c1c6a25f0145a2c87200c3cee",
+    "to": "62edfbd43087a718bf0283e9040676a49211976d",
+    "version": "0.27.11",
+    "files": 116
+  },
+  "platform": {
+    "before": "0.8.3",
+    "after": "0.9.0"
+  },
+  "source_workspaces": {
+    "baseline": "/tmp/wire-platform-090-baseline-verified/source",
+    "candidate": "/tmp/wire-platform-090-candidate/source"
+  },
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1",
+  "baseline_hashes": "36e063995730df089c78f00c09fc209417386bfd6efff58bf66c863899569471  /home/adam/projects/ic-profiler/.build/target/debug/pocket-ic-server\nd768e68c369a68546a05c026f9376b14a2c6e56713f02a2bcb0704139e5de459  /tmp/wire-platform-090-baseline-verified/source/Cargo.lock",
+  "candidate_hashes": "36e063995730df089c78f00c09fc209417386bfd6efff58bf66c863899569471  /home/adam/projects/ic-profiler/.build/target/debug/pocket-ic-server\n100f042be9e7ffbdd35ee6bde1d10388117666829808d0c25219288c9cfc7d41  /tmp/wire-platform-090-candidate/source/Cargo.lock",
+  "scope": "17 exports / 178 cases / eight measured repetitions after one excluded warmup / two profiles",
+  "runtime_and_protocol": "One Platform executor; existing Wire frames and acceptance unchanged; endpoint consumers must coordinate runtime dependencies on Platform 0.9.",
+  "final_fixture_change": "Driver-scoped lint expectations and an unused parameter rename after frozen runs do not affect endpoint/cost-matrix or codec-report source.",
+  "measured_logical_calls": 5696,
+  "measured_physical_executions": 6048
+}

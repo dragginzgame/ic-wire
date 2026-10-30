@@ -66,7 +66,7 @@ impl Input {
 fn operation<T: Serialize>(
     value: &T,
     lane: usize,
-    scratch: &mut [u8],
+    _scratch: &mut [u8],
     reuse: &mut Vec<u8>,
 ) -> usize {
     match lane {
@@ -86,7 +86,7 @@ fn operation<T: Serialize>(
         2 => {
             #[cfg(any(test, feature = "caller-slice"))]
             {
-                let bytes = native::encode_to_slice(&black_box(value), LIMITS, scratch).unwrap();
+                let bytes = native::encode_to_slice(&black_box(value), LIMITS, _scratch).unwrap();
                 black_box(&bytes);
                 bytes.len()
             }
@@ -96,7 +96,7 @@ fn operation<T: Serialize>(
         _ => {
             #[cfg(any(test, feature = "caller-scoped"))]
             {
-                native::with_encoded(black_box(value), LIMITS, &mut scratch[..128], |bytes| {
+                native::with_encoded(black_box(value), LIMITS, &mut _scratch[..128], |bytes| {
                     black_box(bytes);
                     bytes.len()
                 })
@@ -109,7 +109,10 @@ fn operation<T: Serialize>(
 }
 
 #[cfg(target_family = "wasm")]
-#[allow(unsafe_code)]
+#[expect(
+    unsafe_code,
+    reason = "This fixture owns the IC export; system calls use safe wrappers."
+)]
 #[unsafe(export_name = "canister_query benchmark")]
 /// One codec operation, including owned-output destruction; setup/transport excluded.
 pub extern "C" fn benchmark() {

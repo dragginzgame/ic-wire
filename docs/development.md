@@ -5,6 +5,10 @@ IC Wire provides a no_std + alloc Postcard runtime. See the
 for maintained qualification. The optional [endpoint integration](endpoints.md)
 delegates IC exports/execution to Platform; application policy remains consumer-owned.
 
+The benchmark package's `drivers/*.rs` files are Cargo target roots, colocated
+with their shared directory modules. This uses ordinary module discovery without
+`#[path]` overrides or turning benchmark-only dependencies into library dependencies.
+
 ## Setup
 
 Prepare Bash, Git, GNU Make, curl with CA certificates, tar, gzip, xz, Perl,

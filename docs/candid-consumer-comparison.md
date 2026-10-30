@@ -46,12 +46,12 @@ trillion-cycle balances/burns and a timestamp of 1,792,627,200 seconds. The vari
 request has a key, label, description, optional asset ID and display order.
 Filter cases contain 0/50/500/1,000 token IDs, eight tags, plus missing-attribute
 lists of `n/10` and `n/20` IDs. Other missing-field lists are empty. Inputs are
-fully specified in [the maintained fixture](../crates/ic-wire-benchmarks/fixtures/toko/mod.rs)
+fully specified in [the maintained fixture](../crates/ic-wire-benchmarks/drivers/fixtures/toko/mod.rs)
 and identified by hashes in the evidence.
 
 ## Derive cohorts
 
-The [derive fixture](../crates/ic-wire-benchmarks/fixtures/scale/mod.rs) selects
+The [derive fixture](../crates/ic-wire-benchmarks/drivers/fixtures/scale/mod.rs) selects
 1, 10 or 100 **distinct Rust record types**, not repeated instances of one type.
 Every type is runtime-selectable and exercised in the native/IC corpus. Wire-only
 artifacts instantiate `#[derive(ic_wire::Wire)]`; Candid-only artifacts instantiate

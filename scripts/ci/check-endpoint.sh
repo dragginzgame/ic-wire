@@ -16,7 +16,7 @@ cargo build --locked -p ic-wire-endpoint-fixture --lib --target wasm32-unknown-u
 cargo +1.91.0 check --locked -p ic-wire-endpoint-fixture --lib --target wasm32-unknown-unknown
 cargo tree --locked -p ic-wire --no-default-features --edges normal,build > "$output/core-graph.txt"
 cargo tree --locked -p ic-wire-endpoint-fixture --target wasm32-unknown-unknown --edges normal,build > "$output/endpoint-graph.txt"
-if grep -Eq 'ic-platform|canic|candid|pocket-ic' "$output/core-graph.txt" || grep -Eq 'canic|candid|pocket-ic' "$output/endpoint-graph.txt"; then
+if grep -Eq 'ic-platform|canic|candid|pocket-ic' "$output/core-graph.txt" || grep -Eq 'canic|candid|pocket-ic|ic-cdk-executor|ic0 v' "$output/endpoint-graph.txt"; then
     echo 'unexpected runtime dependency' >&2
     exit 1
 fi

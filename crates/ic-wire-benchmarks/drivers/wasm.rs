@@ -1,10 +1,19 @@
 //! Isolated codec footprint and instruction fixture, without an endpoint SDK.
-#[path = "../../fixtures/mod.rs"]
+#[expect(
+    dead_code,
+    reason = "This driver consumes only the selected operations from the shared corpus."
+)]
 mod fixtures;
 use std::hint::black_box;
 
 // This fixture owns this export; all IC calls use safe wrappers.
-#[allow(unsafe_code)]
+#[cfg_attr(
+    target_arch = "wasm32",
+    expect(
+        unsafe_code,
+        reason = "This fixture owns the IC export; system calls use safe wrappers."
+    )
+)]
 #[cfg_attr(
     target_arch = "wasm32",
     unsafe(export_name = "canister_query benchmark")

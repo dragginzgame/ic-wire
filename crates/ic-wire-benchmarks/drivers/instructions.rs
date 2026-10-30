@@ -1,5 +1,8 @@
 //! IC instruction counter measurements using an explicitly prepared PocketIC server.
-#[path = "../../fixtures/mod.rs"]
+#[expect(
+    dead_code,
+    reason = "This driver consumes only the selected operations from the shared corpus."
+)]
 mod fixtures;
 use ic_platform::{candid::contract::Principal, pocket_ic::PocketIcBuilder};
 use ic_testkit::pic::PocketIcStartupConfig;
@@ -138,8 +141,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &json!({"format":1,"counter":"ic0.performance_counter(0)","samples":samples,"small_repetitions":4,"large_repetitions":1,
         "sample_caller":"unique 8-byte little-endian principal per query; caller not read by guest",
         "server_version":String::from_utf8(version.stdout)?,"server_sha256":hash(&fs::read(server)?),"artifacts":artifacts,
-        "fixture_sha256":hash(include_bytes!("../../fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("../../fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("../../fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("../../fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("../../fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("../../fixtures/scale/mod.rs")),"driver_sha256":hash(include_bytes!("mod.rs")),"wasm_driver_sha256":hash(include_bytes!("../wasm/mod.rs")),
-        "lock_sha256":hash(include_bytes!("../../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
+        "fixture_sha256":hash(include_bytes!("fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("fixtures/scale/mod.rs")),"driver_sha256":hash(include_bytes!("instructions.rs")),"wasm_driver_sha256":hash(include_bytes!("wasm.rs")),
+        "lock_sha256":hash(include_bytes!("../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         )?,
     )?;
     Ok(())

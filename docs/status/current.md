@@ -1,11 +1,41 @@
 # Current handoff
 
-## Released 0.7.24; pending 0.7.25
+## Released source 0.7.25; pending 0.8.0
 
-HEAD is the maintainer's 0.7.24 release at `254f687`. Own package versions remain
-0.7.24; the undated 0.7.25 changelog is a compatible-addition/optimization draft.
-Leave staging, commits, versions, publication and releases to the maintainer.
-Incoming Shared Tooling adoption and benchmark evidence are preserved.
+HEAD is the maintainer's 0.7.25 release at `e026eb4`; own package versions remain
+0.7.25. Pending 0.8.0 coordinates the optional endpoint runtime on Platform 0.9.
+Core-only users need no migration. Leave staging, commits, versions, publication
+and release execution to the maintainer.
+
+## Shared Tooling and Platform adoption
+
+Shared Tooling is 0.27.11 at `62edfbd43087a718bf0283e9040676a49211976d`,
+refreshed through its canonical exporter (116 files). Only governance payloads
+changed; installer catalogs, release mechanics and publication routing are intact.
+Benchmark target roots now share ordinary directory modules under `drivers/`,
+without module-path overrides or new production dependencies. Scoped lint
+expectations replace allowances; compile-fail inputs retain a documented exception.
+
+Platform 0.9.1 and its macros own the sole canister executor/IC0 implementation.
+The endpoint graph rejects external executor/IC0 suppliers and remains Candid-free;
+the core codec graph remains Platform-free. Testkit 0.70.5 retains native-only
+Platform 0.8.3 without a second executor. Build/Testkit manifest minima and the
+release-editor CLI remain 0.70.3; their selected lock family stays 0.70.5.
+The Rust floor stays 1.91. Endpoint users must coordinate application runtime
+consumers (including timers) on Platform 0.9. Handler syntax, wire bytes, limits
+and acceptance rules are unchanged. See [endpoints](../endpoints.md).
+
+The [matched 0.9.0 adoption](../evidence/platform-090-adoption/README.md) passes all
+17 endpoints / 178 cases: 5,696 logical calls / 6,048 physical executions with
+matching frames, outcomes and rollback. Total Wasm falls 3,671 bytes (3.54%) at
+opt-z / 5,121 (5.19%) at opt-3; code falls 3,002 / 4,561 bytes. Largest successful
+instruction regression is 0.0264%; largest overall is 0.1855% on malformed input.
+Snapshot/boundary, endpoint/diagnostic, benchmark-corpus, strict Clippy, MSRV,
+formatting and link checks pass. No full CI/macOS or consumer adoption was run.
+The [0.9.1 follow-up](../evidence/platform-090-adoption/platform-091/README.md)
+scopes the Cargo guard to runtime features. Registry runtime/macro sources and
+both artifact sizes are unchanged; focused graph/lint/schema/MSRV checks pass.
+Physical instruction measurements were not rerun for this packaging-only patch.
 
 ## Retained Tripwire-inspired changes
 
@@ -18,22 +48,9 @@ No bytes, limits, accepted inputs, error messages or rollback rules change.
 For ID 7 / u8 42 the frame remains `49 57 07 00 00 00 00 00 00 00 00 2a`.
 No migration, alternate codec or compatibility lane is introduced.
 
-The [admission study](../evidence/tripwire-adoption-0725/README.md) qualifies all
-17 endpoints / 178 cases under both profiles: 5,696 measured logical calls /
-6,048 physical executions, with matching outcomes, frames and state oracles.
-A 64 KiB wrong-ID query falls about 37.6% in instructions; successful-call overhead
-is at most 0.257% in this matrix. Full fixture total Wasm changes −32 bytes at
-opt-z / +128 at opt-3; code changes −42 / +217. At 100 generated endpoints/types,
-total size falls 6,196 / 6,960 bytes. One endpoint grows 147 bytes in each profile.
-Both sizes and regressions are retained; these are not application linker deltas.
-
-Focused endpoint native/schema/diagnostic checks, strict Clippy, dependency
-boundaries and Rust 1.91 Wasm checks pass. Full CI/macOS were not run. Reproduction,
-source patches, raw traces, scale artifacts/hashes and host-generation samples are
-linked from the study. Host timings are noisy because sibling builds were active;
-no native generation speedup is claimed. Raw runs: `/tmp/wire-tripwire-adoption-0725/`.
-An initial shared-target attempt reused stale Cargo artifacts and is excluded;
-all reported candidates use separate targets for separate source workspaces.
+The [0.7.25 admission study](../evidence/tripwire-adoption-0725/README.md) retains
+costs and 1/10/100-type footprints on its original Platform graph, including
+regressions and excluded stale-target results. Use separate targets per workspace.
 
 ## Selective input remains research
 
@@ -53,29 +70,16 @@ integration remain unqualified. Platform's `decode_with` already receives a copi
 Vec; a Platform-owned pre-copy hook and safe scoped/ranged input API are the next
 integration requirements. No sibling checkout was changed or upstream PR opened.
 
-## Other pending work preserved
+## Earlier qualification and tooling
 
-Shared Tooling is 0.27.10 at `61a173990683597c1c6a25f0145a2c87200c3cee`, adopted via
-the canonical exporter (116 files). The [publication adapter](../cargo-publication.md)
-replaces the local recipe: exact public roster/version selectors, lint gate and
-retained attempts; `make publish-check` is dry-run and subsets use `PACKAGE`.
-`PUBLISH_PACKAGES` fails with guidance. Partial-upload reconciliation stays manual;
-there is no automatic retry, registry readback claim or release-triggered upload.
-Snapshot/tool admission, disposable Make/publication/release-resume fixtures and
-links pass. Uploads were substituted; no real publication or release was executed.
-Adoption evidence: `/tmp/wire-shared-02710/`. Snapshot files were not patched manually.
+The [publication adapter](../cargo-publication.md) retains attempts and the exact
+two-crate roster; partial-upload reconciliation stays manual. No real publication,
+release, sibling adoption or new tool installation was executed in this batch.
 
-Platform stays 0.8.3. Tool catalog/manifest selections stay 0.70.3; the incoming
-lock already resolves Build/Testkit/Host 0.70.4. Cargo.lock, Rust floor 1.91 and
-runtime dependency selections are unchanged by the current experiments.
-
-The [fresh Candid matrix](../evidence/candid-comparison-0725/README.md) covers 22
-cohorts / 1,208 case entries / 4,832 primary comparisons on the unchanged core codec.
-All 25,670 instruction rows match cache controls after the fresh-caller sampler
-fix. Snapshotting includes the endpoint workspace member; overlapping native
-samples were replaced serially and retained separately. Ordinary vectors remain
-weak cases; explicit Packed wins its 436 primary comparisons. This is not a matched
-regression comparison with the older 0.7.10 dependency/server graph.
+The [Candid matrix](../evidence/candid-comparison-0725/README.md) retains its
+22-cohort graph and fresh-query controls. Ordinary vectors remain weak cases;
+explicit Packed wins its 436 primary comparisons. This is not a matched regression
+comparison with older dependency/server graphs or this endpoint adoption.
 
 The [actual Tripwire comparison](../evidence/tripwire-comparison-0725/README.md)
 retains 1,280 physical calls on one pinned nightly/wasm32 graph. Its headline uses

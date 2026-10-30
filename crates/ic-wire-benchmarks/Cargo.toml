@@ -51,13 +51,13 @@ stats_alloc.workspace = true
 
 [[bench]]
 name = "suite"
-path = "benches/suite/mod.rs"
+path = "drivers/suite.rs"
 harness = false
 required-features = ["wire", "candid"]
 
 [[example]]
 name = "codec-wasm"
-path = "examples/wasm/mod.rs"
+path = "drivers/wasm.rs"
 crate-type = ["cdylib"]
 
 [[example]]
@@ -66,7 +66,7 @@ path = "examples/report/mod.rs"
 
 [[example]]
 name = "codec-instructions"
-path = "examples/instructions/mod.rs"
+path = "drivers/instructions.rs"
 required-features = ["wire", "candid", "ic"]
 
 [[example]]
@@ -81,12 +81,12 @@ crate-type = ["cdylib"]
 
 [[example]]
 name = "admission-wasm"
-path = "examples/admission_wasm/mod.rs"
+path = "drivers/admission_wasm.rs"
 crate-type = ["cdylib"]
 
 [[example]]
 name = "admission-instructions"
-path = "examples/admission_instructions/mod.rs"
+path = "drivers/admission_instructions.rs"
 required-features = ["ic"]
 
 # IC exports require unsafe attributes, but the fixture uses only safe system calls.
@@ -97,5 +97,5 @@ missing_docs = "warn"
 
 [[test]]
 name = "roundtrip"
-path = "tests/roundtrip/mod.rs"
+path = "drivers/roundtrip.rs"
 required-features = ["wire", "candid"]

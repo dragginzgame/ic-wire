@@ -1,8 +1,13 @@
 //! IC instruction costs for admission budgets and valid/truncated controls.
-#[path = "../../fixtures/admission/mod.rs"]
 mod admission;
 
-#[allow(unsafe_code)]
+#[cfg_attr(
+    target_arch = "wasm32",
+    expect(
+        unsafe_code,
+        reason = "This fixture owns the IC export; system calls use safe wrappers."
+    )
+)]
 #[cfg_attr(
     target_arch = "wasm32",
     unsafe(export_name = "canister_query benchmark")

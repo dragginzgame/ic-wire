@@ -1,5 +1,4 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
-#![allow(dead_code)]
 #[cfg(any(feature = "bulk", feature = "bulk-scale"))]
 mod bulk;
 #[cfg(feature = "hotspots")]

@@ -1,5 +1,17 @@
 //! Corpus correctness and fail-closed framing checks, independent of timing.
-#[path = "../../fixtures/mod.rs"]
+#[cfg_attr(
+    any(
+        feature = "hotspots",
+        feature = "toko",
+        feature = "derive-scale",
+        feature = "packed-i16",
+        feature = "bulk"
+    ),
+    expect(
+        dead_code,
+        reason = "Alternate cohorts leave the default corpus helpers unused."
+    )
+)]
 mod fixtures;
 mod unsigned_magnitude;
 

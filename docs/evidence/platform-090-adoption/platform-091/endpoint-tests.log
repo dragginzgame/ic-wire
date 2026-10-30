@@ -1,0 +1,14 @@
+   Compiling ic-platform-runtime-guard v0.9.1
+   Compiling ic-platform v0.9.1
+   Compiling ic-wire v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint-fixture v0.7.25 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.34s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire_endpoint_fixture-83995016d593e572)
+
+running 3 tests
+test tests::borrowed_fields_and_reply_retain_input_storage ... ok
+test tests::declaration_matches_types_constants_and_existing_projection ... ok
+test tests::defaults_and_overrides_bind_the_actual_contract ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

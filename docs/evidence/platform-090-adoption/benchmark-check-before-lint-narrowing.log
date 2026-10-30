@@ -1,0 +1,527 @@
+   Compiling gimli v0.34.0
+   Compiling object v0.40.0
+   Compiling rustc-demangle v0.1.28
+   Compiling ic-platform v0.9.0
+   Compiling thousands v0.2.0
+   Compiling rustc-hash v1.1.0
+   Compiling mintex v0.1.4
+   Compiling stats_alloc v0.1.10
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling ic-wire-derive v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-wire v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling addr2line v0.27.1
+   Compiling backtrace v0.3.77
+   Compiling dhat v0.3.3
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.60s
+     Running unittests examples/report/mod.rs (target/debug/examples/codec_report-7ce89cbfc914e9a4)
+
+running 3 tests
+test tests::code_size_counts_only_the_code_section_and_rejects_broken_framing ... ok
+test tests::artifact_uses_reported_paths_and_rejects_missing_or_ambiguous_outputs ... ok
+test tests::comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.61s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-c73dbf047c1d28c2)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.40s
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Checking ic-platform v0.9.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.73s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.66s
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+    Checking cfg-if v1.0.5
+   Compiling libc v0.2.191
+   Compiling serde_core v1.0.229
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling serde v1.0.229
+    Checking smallvec v1.16.4
+   Compiling version_check v0.9.5
+    Checking stable_deref_trait v1.2.1
+    Checking once_cell v1.21.4
+    Checking pin-project-lite v0.2.17
+   Compiling parking_lot_core v0.9.12
+    Checking itoa v1.0.18
+    Checking typenum v1.20.1
+    Checking scopeguard v1.2.0
+    Checking memchr v2.8.3
+    Checking bytes v1.12.1
+   Compiling fs_extra v1.3.0
+   Compiling dunce v1.0.5
+   Compiling pkg-config v0.3.34
+    Checking futures-core v0.3.34
+   Compiling crc32fast v1.5.3
+   Compiling object v0.39.1
+    Checking cpufeatures v0.2.17
+    Checking futures-sink v0.3.34
+   Compiling thiserror v2.0.18
+    Checking writeable v0.6.4
+   Compiling autocfg v1.5.1
+    Checking litemap v0.8.3
+    Checking zeroize v1.9.1
+    Checking utf_types v1.0.0
+   Compiling aws-lc-rs v1.19.0
+   Compiling icu_properties_data v2.4.0
+    Checking bitflags v2.13.2
+   Compiling icu_normalizer_data v2.4.0
+    Checking slab v0.4.12
+   Compiling zmij v1.0.23
+    Checking adler2 v2.0.1
+   Compiling binrw_derive v0.15.2
+   Compiling thiserror v1.0.69
+   Compiling rustversion v1.0.23
+    Checking simd-adler32 v0.3.10
+   Compiling serde_json v1.0.154
+   Compiling either v1.19.0
+    Checking percent-encoding v2.3.2
+    Checking equivalent v1.0.3
+   Compiling httparse v1.10.1
+    Checking hashbrown v0.17.1
+    Checking untrusted v0.9.0
+   Compiling binrw v0.15.2
+    Checking futures-io v0.3.34
+   Compiling paste v1.0.15
+    Checking bytemuck v1.25.2
+    Checking futures-task v0.3.34
+   Compiling anyhow v1.0.104
+   Compiling rustls v0.23.46
+    Checking atomic-waker v1.1.2
+    Checking arrayvec v0.5.2
+    Checking try-lock v0.2.5
+    Checking fnv v1.0.7
+    Checking subtle v2.6.1
+   Compiling lazy_static v1.5.1
+    Checking typed-arena v2.0.2
+    Checking log v0.4.34
+    Checking array-init v2.1.0
+    Checking tracing-core v0.1.36
+    Checking unicode-width v0.2.3
+   Compiling rustix v1.1.6
+    Checking data-encoding v2.11.1
+    Checking tower-service v0.3.3
+    Checking want v0.3.2
+    Checking regex-syntax v0.8.11
+   Compiling unicase v2.10.0
+    Checking linux-raw-sys v0.12.1
+   Compiling crossbeam-utils v0.8.23
+    Checking lock_api v0.4.14
+   Compiling generic-array v0.14.7
+    Checking futures-channel v0.3.34
+    Checking byteorder v1.5.0
+    Checking leb128 v0.2.7
+    Checking sync_wrapper v1.0.2
+    Checking time-core v0.1.9
+    Checking deranged v0.5.9
+    Checking num-conv v0.2.2
+    Checking ipnet v2.12.2
+    Checking powerfmt v0.2.1
+    Checking openssl-probe v0.2.2
+    Checking tower-layer v0.3.3
+    Checking utf8_iter v1.1.0
+   Compiling getrandom v0.4.3
+    Checking base64 v0.23.1
+    Checking thread_local v1.1.10
+    Checking mime v0.3.17
+    Checking fastrand v2.5.0
+   Compiling heck v0.5.0
+    Checking form_urlencoded v1.2.2
+   Compiling schemars v0.8.22
+    Checking half v1.8.3
+    Checking miniz_oxide v0.9.1
+    Checking nu-ansi-term v0.50.3
+   Compiling cfg_aliases v0.2.2
+    Checking rustls-pki-types v1.15.1
+    Checking sharded-slab v0.1.7
+    Checking dyn-clone v1.0.20
+    Checking symlink v0.1.0
+    Checking base64 v0.22.1
+   Compiling num-traits v0.2.19
+    Checking gimli v0.34.0
+    Checking object v0.40.0
+    Checking http v1.5.0
+    Checking rustc-demangle v0.1.28
+    Checking indexmap v2.14.2
+   Compiling ic-platform v0.9.0
+    Checking futures-util v0.3.34
+    Checking pretty v0.12.5
+    Checking thousands v0.2.0
+    Checking rustc-hash v1.1.0
+    Checking mintex v0.1.4
+    Checking stats_alloc v0.1.10
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling nix v0.31.3
+    Checking tracing-log v0.2.0
+   Compiling mime_guess v2.0.5
+    Checking rustls-native-certs v0.8.5
+    Checking backon v1.6.0
+    Checking flate2 v1.1.10
+    Checking regex-automata v0.4.18
+   Compiling slog v2.8.2
+    Checking crossbeam-channel v0.5.17
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+    Checking time v0.3.55
+    Checking http-body v1.1.0
+    Checking digest v0.10.7
+    Checking http-body-util v0.1.5
+    Checking num-integer v0.1.47
+    Checking sha2 v0.10.9
+   Compiling jobserver v0.1.35
+    Checking ic-host-artifacts v0.70.5
+   Compiling cc v1.10.0
+    Checking serde_bytes v0.11.19
+    Checking semver v1.0.28
+    Checking errno v0.3.14
+    Checking socket2 v0.6.5
+    Checking mio v1.2.4
+    Checking signal-hook-registry v1.4.8
+    Checking parking_lot v0.12.5
+    Checking addr2line v0.27.1
+    Checking matchers v0.2.0
+   Compiling cmake v0.1.58
+   Compiling stacker v0.1.25
+   Compiling aws-lc-sys v0.47.0
+    Checking tempfile v3.27.0
+   Compiling ar_archive_writer v0.5.3
+   Compiling synstructure v0.14.0
+   Compiling psm v0.1.32
+   Compiling serde_derive_internals v0.29.1
+    Checking backtrace v0.3.77
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.7
+   Compiling displaydoc v0.2.7
+   Compiling tokio-macros v2.7.2
+   Compiling serde_repr v0.1.21
+   Compiling ic-wire-derive v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling thiserror-impl v2.0.18
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v1.0.69
+   Compiling candid_derive v0.10.39
+   Compiling strum_macros v0.26.4
+   Compiling schemars_derive v0.8.22
+    Checking tokio v1.54.1
+    Checking zerofrom v0.1.8
+    Checking yoke v0.8.4
+    Checking tracing v0.1.44
+    Checking zerovec v0.11.9
+    Checking zerotrie v0.2.5
+    Checking command-fds v0.3.3
+    Checking cobs v0.3.0
+    Checking ic-host-fs v0.70.5
+    Checking strum v0.26.3
+    Checking tinystr v0.8.5
+    Checking potential_utf v0.1.6
+    Checking ic-host-process v0.70.5
+    Checking icu_collections v2.4.0
+    Checking icu_locale_core v2.4.0
+    Checking icu_provider v2.4.0
+    Checking icu_normalizer v2.4.0
+    Checking icu_properties v2.4.0
+    Checking hex v0.4.3
+    Checking ic_principal v0.1.5
+    Checking num-bigint v0.4.8
+    Checking tracing-serde v0.2.0
+    Checking erased-serde v0.3.31
+    Checking serde_cbor v0.11.2
+    Checking postcard v1.1.3
+    Checking dhat v0.3.3
+    Checking tracing-subscriber v0.3.23
+    Checking ic-certification v3.2.0
+    Checking ic-wire v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking idna_adapter v1.2.2
+    Checking idna v1.1.0
+    Checking candid v0.10.39
+    Checking url v2.5.8
+    Checking tracing-appender v0.2.5
+    Checking tokio-util v0.7.20
+    Checking tower v0.5.3
+    Checking tower-http v0.6.11
+    Checking h2 v0.4.20
+    Checking ic-management-canister-types v0.8.0
+    Checking ic-transport-types v0.49.3
+    Checking ic-management-canister-types v0.11.0
+    Checking hyper v1.12.0
+    Checking rustls-webpki v0.103.16
+    Checking hyper-util v0.1.21
+    Checking tokio-rustls v0.26.6
+    Checking rustls-platform-verifier v0.7.1
+    Checking hyper-rustls v0.27.10
+    Checking reqwest v0.13.5
+    Checking pocket-ic v16.1.0
+    Checking ic-platform v0.8.3
+    Checking ic-testkit v0.70.5
+warning: this lint expectation is unfulfilled
+ --> crates/ic-wire-benchmarks/drivers/fixtures/mod.rs:3:5
+  |
+3 |     dead_code,
+  |     ^^^^^^^^^
+  |
+  = note: The selected driver uses only part of the shared fixture surface.
+  = note: `#[warn(unfulfilled_lint_expectations)]` on by default
+
+warning: `ic-wire-benchmarks` (test "roundtrip") generated 1 warning
+warning: `ic-wire-benchmarks` (bench "suite") generated 1 warning (1 duplicate)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.72s
+   Compiling proc-macro2 v1.0.107
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+    Checking typenum v1.20.1
+   Compiling autocfg v1.5.1
+   Compiling thiserror v1.0.69
+   Compiling binrw_derive v0.15.2
+   Compiling binrw v0.15.2
+   Compiling paste v1.0.15
+   Compiling anyhow v1.0.104
+   Compiling either v1.19.0
+    Checking array-init v2.1.0
+   Compiling zmij v1.0.23
+   Compiling lazy_static v1.5.1
+    Checking byteorder v1.5.0
+   Compiling ic-platform v0.9.0
+   Compiling generic-array v0.14.7
+   Compiling serde_json v1.0.154
+    Checking leb128 v0.2.7
+    Checking hex v0.4.3
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Checking stats_alloc v0.1.10
+   Compiling num-traits v0.2.19
+   Compiling quote v1.0.47
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+    Checking num-integer v0.1.47
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+    Checking digest v0.10.7
+    Checking sha2 v0.10.9
+    Checking serde_bytes v0.11.19
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling thiserror-impl v2.0.18
+   Compiling thiserror-impl v1.0.69
+   Compiling candid_derive v0.10.39
+    Checking num-bigint v0.4.8
+    Checking ic_principal v0.1.5
+    Checking thiserror v2.0.18
+    Checking cobs v0.3.0
+    Checking postcard v1.1.3
+    Checking ic-wire v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking candid v0.10.39
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.00s
+make[1]: Entering directory '/home/adam/projects/ic-wire'
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.19s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-9887e33d2fb95706)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.78s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.23s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-d30d969645d20f34)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.77s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-9c2d10e29f0aa133)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.83s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.66s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-4f64c5f7dbc6e366)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.34s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.26s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-97c0664ac7007d76)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.61s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.96s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-eee56f41b430fb39)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.62s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.35s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-4b7e02dd2b04e81d)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.68s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.16s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-9f481fd727b15d0b)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.78s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.73s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-27688710cee314ed)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.21s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.58s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-537df71318af5590)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.78s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.36s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-127baa7bbb8bf2e9)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.70s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.08s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-36dc654d41a0bcb2)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.02s
+   Compiling ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.05s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-8bc2c9043c50d7cf)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.23s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.10s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.70s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.88s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.08s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.50s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.89s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.54s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.58s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.81s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.66s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.23s
+    Checking ic-wire-benchmarks v0.7.25 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.34s
+make[1]: Leaving directory '/home/adam/projects/ic-wire'
