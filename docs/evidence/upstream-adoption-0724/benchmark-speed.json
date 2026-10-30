@@ -1,0 +1,7729 @@
+{
+  "module_sha256": "2c0ce8c87469aa0dfb5f71a670fdd66fe9f157b73426c80ee94b53bdbdeb1c60",
+  "server_sha256": "1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571",
+  "total_wasm_bytes": 98503,
+  "code_section_bytes": 84974,
+  "exports": [
+    "canister_composite_query composite",
+    "canister_query async_query",
+    "canister_query borrowed_echo",
+    "canister_query count",
+    "canister_query default_blob",
+    "canister_query default_unit",
+    "canister_query echo",
+    "canister_query nodes",
+    "canister_query response_only",
+    "canister_query stable-name",
+    "canister_update async_mutate",
+    "canister_update async_ready",
+    "canister_update borrowed_mutate",
+    "canister_update composed",
+    "canister_update default_mutate",
+    "canister_update mutate",
+    "canister_update unit-call"
+  ],
+  "measured_calls": 880,
+  "excluded_warmups": 110,
+  "results": [
+    {
+      "method": "echo",
+      "mode": "query",
+      "case": "blob-0",
+      "outcome": "reply",
+      "request_bytes": 14,
+      "reply_bytes": [
+        14
+      ],
+      "ic_instructions": {
+        "mean": 247107,
+        "min": 247107,
+        "max": 247107,
+        "samples": [
+          247107,
+          247107,
+          247107,
+          247107,
+          247107,
+          247107,
+          247107,
+          247107
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "echo",
+      "mode": "query",
+      "case": "blob-32",
+      "outcome": "reply",
+      "request_bytes": 46,
+      "reply_bytes": [
+        46
+      ],
+      "ic_instructions": {
+        "mean": 249366,
+        "min": 249366,
+        "max": 249366,
+        "samples": [
+          249366,
+          249366,
+          249366,
+          249366,
+          249366,
+          249366,
+          249366,
+          249366
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_echo",
+      "mode": "query",
+      "case": "blob-0",
+      "outcome": "reply",
+      "request_bytes": 14,
+      "reply_bytes": [
+        14
+      ],
+      "ic_instructions": {
+        "mean": 247326,
+        "min": 247326,
+        "max": 247326,
+        "samples": [
+          247326,
+          247326,
+          247326,
+          247326,
+          247326,
+          247326,
+          247326,
+          247326
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_echo",
+      "mode": "query",
+      "case": "blob-32",
+      "outcome": "reply",
+      "request_bytes": 46,
+      "reply_bytes": [
+        46
+      ],
+      "ic_instructions": {
+        "mean": 249100,
+        "min": 249100,
+        "max": 249100,
+        "samples": [
+          249100,
+          249100,
+          249100,
+          249100,
+          249100,
+          249100,
+          249100,
+          249100
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "count",
+      "mode": "query",
+      "case": "unit",
+      "outcome": "reply",
+      "request_bytes": 11,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 246478,
+        "min": 246478,
+        "max": 246478,
+        "samples": [
+          246478,
+          246478,
+          246478,
+          246478,
+          246478,
+          246478,
+          246478,
+          246478
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "unit-call",
+      "mode": "update",
+      "case": "unit",
+      "outcome": "reply",
+      "request_bytes": 11,
+      "reply_bytes": [
+        11
+      ],
+      "ic_instructions": {
+        "mean": 484676,
+        "min": 484676,
+        "max": 484676,
+        "samples": [
+          484676,
+          484676,
+          484676,
+          484676,
+          484676,
+          484676,
+          484676,
+          484676
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6980676,
+        "min": 6980676,
+        "max": 6980676,
+        "samples": [
+          6980676,
+          6980676,
+          6980676,
+          6980676,
+          6980676,
+          6980676,
+          6980676,
+          6980676
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_query",
+      "mode": "query",
+      "case": "value-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        13
+      ],
+      "ic_instructions": {
+        "mean": 248491,
+        "min": 248491,
+        "max": 248491,
+        "samples": [
+          248491,
+          248491,
+          248491,
+          248491,
+          248491,
+          248491,
+          248491,
+          248491
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "stable-name",
+      "mode": "query",
+      "case": "value-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 245077,
+        "min": 245077,
+        "max": 245077,
+        "samples": [
+          245077,
+          245077,
+          245077,
+          245077,
+          245077,
+          245077,
+          245077,
+          245077
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_query",
+      "mode": "query",
+      "case": "value-18446744073709551615",
+      "outcome": "reply",
+      "request_bytes": 21,
+      "reply_bytes": [
+        22
+      ],
+      "ic_instructions": {
+        "mean": 249406,
+        "min": 249406,
+        "max": 249406,
+        "samples": [
+          249406,
+          249406,
+          249406,
+          249406,
+          249406,
+          249406,
+          249406,
+          249406
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "stable-name",
+      "mode": "query",
+      "case": "value-18446744073709551615",
+      "outcome": "reply",
+      "request_bytes": 21,
+      "reply_bytes": [
+        21
+      ],
+      "ic_instructions": {
+        "mean": 246115,
+        "min": 246115,
+        "max": 246115,
+        "samples": [
+          246115,
+          246115,
+          246115,
+          246115,
+          246115,
+          246115,
+          246115,
+          246115
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "response_only",
+      "mode": "query",
+      "case": "scalar",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 245077,
+        "min": 245077,
+        "max": 245077,
+        "samples": [
+          245077,
+          245077,
+          245077,
+          245077,
+          245077,
+          245077,
+          245077,
+          245077
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composite",
+      "mode": "composite_query",
+      "case": "self-call",
+      "outcome": "reply",
+      "request_bytes": 11,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 1469820,
+        "min": 1469820,
+        "max": 1469820,
+        "samples": [
+          1469820,
+          1469820,
+          1469820,
+          1469820,
+          1469820,
+          1469820,
+          1469820,
+          1469820
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 1440000,
+        "min": 1440000,
+        "max": 1440000,
+        "samples": [
+          1440000,
+          1440000,
+          1440000,
+          1440000,
+          1440000,
+          1440000,
+          1440000,
+          1440000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 3,
+        "min": 3,
+        "max": 3,
+        "samples": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "reply-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 485161,
+        "min": 485161,
+        "max": 485161,
+        "samples": [
+          485161,
+          485161,
+          485161,
+          485161,
+          485161,
+          485161,
+          485161,
+          485161
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6977161,
+        "min": 6977161,
+        "max": 6977161,
+        "samples": [
+          6977161,
+          6977161,
+          6977161,
+          6977161,
+          6977161,
+          6977161,
+          6977161,
+          6977161
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "reply-32",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        44
+      ],
+      "ic_instructions": {
+        "mean": 487381,
+        "min": 487381,
+        "max": 487381,
+        "samples": [
+          487381,
+          487381,
+          487381,
+          487381,
+          487381,
+          487381,
+          487381,
+          487381
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6979381,
+        "min": 6979381,
+        "max": 6979381,
+        "samples": [
+          6979381,
+          6979381,
+          6979381,
+          6979381,
+          6979381,
+          6979381,
+          6979381,
+          6979381
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "reply-116",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        128
+      ],
+      "ic_instructions": {
+        "mean": 491749,
+        "min": 491749,
+        "max": 491749,
+        "samples": [
+          491749,
+          491749,
+          491749,
+          491749,
+          491749,
+          491749,
+          491749,
+          491749
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6983749,
+        "min": 6983749,
+        "max": 6983749,
+        "samples": [
+          6983749,
+          6983749,
+          6983749,
+          6983749,
+          6983749,
+          6983749,
+          6983749,
+          6983749
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "reply-117",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484865,
+        "min": 484865,
+        "max": 484865,
+        "samples": [
+          484865,
+          484865,
+          484865,
+          484865,
+          484865,
+          484865,
+          484865,
+          484865
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6976865,
+        "min": 6976865,
+        "max": 6976865,
+        "samples": [
+          6976865,
+          6976865,
+          6976865,
+          6976865,
+          6976865,
+          6976865,
+          6976865,
+          6976865
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "reply-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 1229259,
+        "min": 1229259,
+        "max": 1229259,
+        "samples": [
+          1229259,
+          1229259,
+          1229259,
+          1229259,
+          1229259,
+          1229259,
+          1229259,
+          1229259
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 1200000,
+        "min": 1200000,
+        "max": 1200000,
+        "samples": [
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 18022259,
+        "min": 18022259,
+        "max": 18022259,
+        "samples": [
+          18022259,
+          18022259,
+          18022259,
+          18022259,
+          18022259,
+          18022259,
+          18022259,
+          18022259
+        ]
+      },
+      "physical_executions": {
+        "mean": 3,
+        "min": 3,
+        "max": 3,
+        "samples": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "reply-32",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        44
+      ],
+      "ic_instructions": {
+        "mean": 1231466,
+        "min": 1231466,
+        "max": 1231466,
+        "samples": [
+          1231466,
+          1231466,
+          1231466,
+          1231466,
+          1231466,
+          1231466,
+          1231466,
+          1231466
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 1200000,
+        "min": 1200000,
+        "max": 1200000,
+        "samples": [
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 18024466,
+        "min": 18024466,
+        "max": 18024466,
+        "samples": [
+          18024466,
+          18024466,
+          18024466,
+          18024466,
+          18024466,
+          18024466,
+          18024466,
+          18024466
+        ]
+      },
+      "physical_executions": {
+        "mean": 3,
+        "min": 3,
+        "max": 3,
+        "samples": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "reply-116",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        128
+      ],
+      "ic_instructions": {
+        "mean": 1235834,
+        "min": 1235834,
+        "max": 1235834,
+        "samples": [
+          1235834,
+          1235834,
+          1235834,
+          1235834,
+          1235834,
+          1235834,
+          1235834,
+          1235834
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 1200000,
+        "min": 1200000,
+        "max": 1200000,
+        "samples": [
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000,
+          1200000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 18028834,
+        "min": 18028834,
+        "max": 18028834,
+        "samples": [
+          18028834,
+          18028834,
+          18028834,
+          18028834,
+          18028834,
+          18028834,
+          18028834,
+          18028834
+        ]
+      },
+      "physical_executions": {
+        "mean": 3,
+        "min": 3,
+        "max": 3,
+        "samples": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "reply-117",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 1710736,
+        "min": 1710736,
+        "max": 1710736,
+        "samples": [
+          1710736,
+          1710736,
+          1710736,
+          1710736,
+          1710736,
+          1710736,
+          1710736,
+          1710736
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 1680000,
+        "min": 1680000,
+        "max": 1680000,
+        "samples": [
+          1680000,
+          1680000,
+          1680000,
+          1680000,
+          1680000,
+          1680000,
+          1680000,
+          1680000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 18503736,
+        "min": 18503736,
+        "max": 18503736,
+        "samples": [
+          18503736,
+          18503736,
+          18503736,
+          18503736,
+          18503736,
+          18503736,
+          18503736,
+          18503736
+        ]
+      },
+      "physical_executions": {
+        "mean": 4,
+        "min": 4,
+        "max": 4,
+        "samples": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "reply-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 487479,
+        "min": 487479,
+        "max": 487479,
+        "samples": [
+          487479,
+          487479,
+          487479,
+          487479,
+          487479,
+          487479,
+          487479,
+          487479
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6989479,
+        "min": 6989479,
+        "max": 6989479,
+        "samples": [
+          6989479,
+          6989479,
+          6989479,
+          6989479,
+          6989479,
+          6989479,
+          6989479,
+          6989479
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "reply-32",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        44
+      ],
+      "ic_instructions": {
+        "mean": 489686,
+        "min": 489686,
+        "max": 489686,
+        "samples": [
+          489686,
+          489686,
+          489686,
+          489686,
+          489686,
+          489686,
+          489686,
+          489686
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6991686,
+        "min": 6991686,
+        "max": 6991686,
+        "samples": [
+          6991686,
+          6991686,
+          6991686,
+          6991686,
+          6991686,
+          6991686,
+          6991686,
+          6991686
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "reply-116",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        128
+      ],
+      "ic_instructions": {
+        "mean": 494054,
+        "min": 494054,
+        "max": 494054,
+        "samples": [
+          494054,
+          494054,
+          494054,
+          494054,
+          494054,
+          494054,
+          494054,
+          494054
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6996054,
+        "min": 6996054,
+        "max": 6996054,
+        "samples": [
+          6996054,
+          6996054,
+          6996054,
+          6996054,
+          6996054,
+          6996054,
+          6996054,
+          6996054
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "reply-117",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 486550,
+        "min": 486550,
+        "max": 486550,
+        "samples": [
+          486550,
+          486550,
+          486550,
+          486550,
+          486550,
+          486550,
+          486550,
+          486550
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6988550,
+        "min": 6988550,
+        "max": 6988550,
+        "samples": [
+          6988550,
+          6988550,
+          6988550,
+          6988550,
+          6988550,
+          6988550,
+          6988550,
+          6988550
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "reply-0",
+      "outcome": "reply",
+      "request_bytes": 45,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 485586,
+        "min": 485586,
+        "max": 485586,
+        "samples": [
+          485586,
+          485586,
+          485586,
+          485586,
+          485586,
+          485586,
+          485586,
+          485586
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7063586,
+        "min": 7063586,
+        "max": 7063586,
+        "samples": [
+          7063586,
+          7063586,
+          7063586,
+          7063586,
+          7063586,
+          7063586,
+          7063586,
+          7063586
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "reply-32",
+      "outcome": "reply",
+      "request_bytes": 45,
+      "reply_bytes": [
+        44
+      ],
+      "ic_instructions": {
+        "mean": 487680,
+        "min": 487680,
+        "max": 487680,
+        "samples": [
+          487680,
+          487680,
+          487680,
+          487680,
+          487680,
+          487680,
+          487680,
+          487680
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7065680,
+        "min": 7065680,
+        "max": 7065680,
+        "samples": [
+          7065680,
+          7065680,
+          7065680,
+          7065680,
+          7065680,
+          7065680,
+          7065680,
+          7065680
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "reply-116",
+      "outcome": "reply",
+      "request_bytes": 45,
+      "reply_bytes": [
+        128
+      ],
+      "ic_instructions": {
+        "mean": 492048,
+        "min": 492048,
+        "max": 492048,
+        "samples": [
+          492048,
+          492048,
+          492048,
+          492048,
+          492048,
+          492048,
+          492048,
+          492048
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7070048,
+        "min": 7070048,
+        "max": 7070048,
+        "samples": [
+          7070048,
+          7070048,
+          7070048,
+          7070048,
+          7070048,
+          7070048,
+          7070048,
+          7070048
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "reply-117",
+      "outcome": "trap",
+      "request_bytes": 45,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485332,
+        "min": 485332,
+        "max": 485332,
+        "samples": [
+          485332,
+          485332,
+          485332,
+          485332,
+          485332,
+          485332,
+          485332,
+          485332
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7063332,
+        "min": 7063332,
+        "max": 7063332,
+        "samples": [
+          7063332,
+          7063332,
+          7063332,
+          7063332,
+          7063332,
+          7063332,
+          7063332,
+          7063332
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "nodes-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 244916,
+        "min": 244916,
+        "max": 244916,
+        "samples": [
+          244916,
+          244916,
+          244916,
+          244916,
+          244916,
+          244916,
+          244916,
+          244916
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "nodes-1",
+      "outcome": "reply",
+      "request_bytes": 13,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 245369,
+        "min": 245369,
+        "max": 245369,
+        "samples": [
+          245369,
+          245369,
+          245369,
+          245369,
+          245369,
+          245369,
+          245369,
+          245369
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "nodes-2",
+      "outcome": "trap",
+      "request_bytes": 14,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244558,
+        "min": 244558,
+        "max": 244558,
+        "samples": [
+          244558,
+          244558,
+          244558,
+          244558,
+          244558,
+          244558,
+          244558,
+          244558
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "blob-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 245095,
+        "min": 245095,
+        "max": 245095,
+        "samples": [
+          245095,
+          245095,
+          245095,
+          245095,
+          245095,
+          245095,
+          245095,
+          245095
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "reply-0",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        12
+      ],
+      "ic_instructions": {
+        "mean": 485166,
+        "min": 485166,
+        "max": 485166,
+        "samples": [
+          485166,
+          485166,
+          485166,
+          485166,
+          485166,
+          485166,
+          485166,
+          485166
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6993166,
+        "min": 6993166,
+        "max": 6993166,
+        "samples": [
+          6993166,
+          6993166,
+          6993166,
+          6993166,
+          6993166,
+          6993166,
+          6993166,
+          6993166
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "blob-32",
+      "outcome": "reply",
+      "request_bytes": 44,
+      "reply_bytes": [
+        44
+      ],
+      "ic_instructions": {
+        "mean": 247265,
+        "min": 247265,
+        "max": 247265,
+        "samples": [
+          247265,
+          247265,
+          247265,
+          247265,
+          247265,
+          247265,
+          247265,
+          247265
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "reply-32",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        44
+      ],
+      "ic_instructions": {
+        "mean": 487306,
+        "min": 487306,
+        "max": 487306,
+        "samples": [
+          487306,
+          487306,
+          487306,
+          487306,
+          487306,
+          487306,
+          487306,
+          487306
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6995306,
+        "min": 6995306,
+        "max": 6995306,
+        "samples": [
+          6995306,
+          6995306,
+          6995306,
+          6995306,
+          6995306,
+          6995306,
+          6995306,
+          6995306
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "blob-65522",
+      "outcome": "reply",
+      "request_bytes": 65536,
+      "reply_bytes": [
+        65536
+      ],
+      "ic_instructions": {
+        "mean": 3879223,
+        "min": 3879223,
+        "max": 3879223,
+        "samples": [
+          3879223,
+          3879223,
+          3879223,
+          3879223,
+          3879223,
+          3879223,
+          3879223,
+          3879223
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 400000,
+        "min": 400000,
+        "max": 400000,
+        "samples": [
+          400000,
+          400000,
+          400000,
+          400000,
+          400000,
+          400000,
+          400000,
+          400000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "reply-65522",
+      "outcome": "reply",
+      "request_bytes": 14,
+      "reply_bytes": [
+        65536
+      ],
+      "ic_instructions": {
+        "mean": 4213161,
+        "min": 4213161,
+        "max": 4213161,
+        "samples": [
+          4213161,
+          4213161,
+          4213161,
+          4213161,
+          4213161,
+          4213161,
+          4213161,
+          4213161
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 800000,
+        "min": 800000,
+        "max": 800000,
+        "samples": [
+          800000,
+          800000,
+          800000,
+          800000,
+          800000,
+          800000,
+          800000,
+          800000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 10725161,
+        "min": 10725161,
+        "max": 10725161,
+        "samples": [
+          10725161,
+          10725161,
+          10725161,
+          10725161,
+          10725161,
+          10725161,
+          10725161,
+          10725161
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "blob-65523",
+      "outcome": "trap",
+      "request_bytes": 65537,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "reply-65523",
+      "outcome": "trap",
+      "request_bytes": 14,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 710352,
+        "min": 710352,
+        "max": 710352,
+        "samples": [
+          710352,
+          710352,
+          710352,
+          710352,
+          710352,
+          710352,
+          710352,
+          710352
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 640000,
+        "min": 640000,
+        "max": 640000,
+        "samples": [
+          640000,
+          640000,
+          640000,
+          640000,
+          640000,
+          640000,
+          640000,
+          640000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7222352,
+        "min": 7222352,
+        "max": 7222352,
+        "samples": [
+          7222352,
+          7222352,
+          7222352,
+          7222352,
+          7222352,
+          7222352,
+          7222352,
+          7222352
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_unit",
+      "mode": "query",
+      "case": "unit",
+      "outcome": "reply",
+      "request_bytes": 11,
+      "reply_bytes": [
+        11
+      ],
+      "ic_instructions": {
+        "mean": 244666,
+        "min": 244666,
+        "max": 244666,
+        "samples": [
+          244666,
+          244666,
+          244666,
+          244666,
+          244666,
+          244666,
+          244666,
+          244666
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composed",
+      "mode": "update",
+      "case": "allow",
+      "outcome": "reply",
+      "request_bytes": 12,
+      "reply_bytes": [
+        13
+      ],
+      "ic_instructions": {
+        "mean": 485111,
+        "min": 485111,
+        "max": 485111,
+        "samples": [
+          485111,
+          485111,
+          485111,
+          485111,
+          485111,
+          485111,
+          485111,
+          485111
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6981111,
+        "min": 6981111,
+        "max": 6981111,
+        "samples": [
+          6981111,
+          6981111,
+          6981111,
+          6981111,
+          6981111,
+          6981111,
+          6981111,
+          6981111
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composed",
+      "mode": "update",
+      "case": "deny",
+      "outcome": "reject",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 483511,
+        "min": 483511,
+        "max": 483511,
+        "samples": [
+          483511,
+          483511,
+          483511,
+          483511,
+          483511,
+          483511,
+          483511,
+          483511
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6979511,
+        "min": 6979511,
+        "max": 6979511,
+        "samples": [
+          6979511,
+          6979511,
+          6979511,
+          6979511,
+          6979511,
+          6979511,
+          6979511,
+          6979511
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "echo",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 14,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244298,
+        "min": 244298,
+        "max": 244298,
+        "samples": [
+          244298,
+          244298,
+          244298,
+          244298,
+          244298,
+          244298,
+          244298,
+          244298
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "echo",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 15,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244588,
+        "min": 244588,
+        "max": 244588,
+        "samples": [
+          244588,
+          244588,
+          244588,
+          244588,
+          244588,
+          244588,
+          244588,
+          244588
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "echo",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "echo",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244597,
+        "min": 244597,
+        "max": 244597,
+        "samples": [
+          244597,
+          244597,
+          244597,
+          244597,
+          244597,
+          244597,
+          244597,
+          244597
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_echo",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 14,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244341,
+        "min": 244341,
+        "max": 244341,
+        "samples": [
+          244341,
+          244341,
+          244341,
+          244341,
+          244341,
+          244341,
+          244341,
+          244341
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_echo",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 15,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244707,
+        "min": 244707,
+        "max": 244707,
+        "samples": [
+          244707,
+          244707,
+          244707,
+          244707,
+          244707,
+          244707,
+          244707,
+          244707
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_echo",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_echo",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244720,
+        "min": 244720,
+        "max": 244720,
+        "samples": [
+          244720,
+          244720,
+          244720,
+          244720,
+          244720,
+          244720,
+          244720,
+          244720
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "count",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244294,
+        "min": 244294,
+        "max": 244294,
+        "samples": [
+          244294,
+          244294,
+          244294,
+          244294,
+          244294,
+          244294,
+          244294,
+          244294
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "count",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244316,
+        "min": 244316,
+        "max": 244316,
+        "samples": [
+          244316,
+          244316,
+          244316,
+          244316,
+          244316,
+          244316,
+          244316,
+          244316
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "count",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "count",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 10,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244336,
+        "min": 244336,
+        "max": 244336,
+        "samples": [
+          244336,
+          244336,
+          244336,
+          244336,
+          244336,
+          244336,
+          244336,
+          244336
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "unit-call",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484294,
+        "min": 484294,
+        "max": 484294,
+        "samples": [
+          484294,
+          484294,
+          484294,
+          484294,
+          484294,
+          484294,
+          484294,
+          484294
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6980294,
+        "min": 6980294,
+        "max": 6980294,
+        "samples": [
+          6980294,
+          6980294,
+          6980294,
+          6980294,
+          6980294,
+          6980294,
+          6980294,
+          6980294
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "unit-call",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484316,
+        "min": 484316,
+        "max": 484316,
+        "samples": [
+          484316,
+          484316,
+          484316,
+          484316,
+          484316,
+          484316,
+          484316,
+          484316
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6982316,
+        "min": 6982316,
+        "max": 6982316,
+        "samples": [
+          6982316,
+          6982316,
+          6982316,
+          6982316,
+          6982316,
+          6982316,
+          6982316,
+          6982316
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "unit-call",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6816914,
+        "min": 6816914,
+        "max": 6816914,
+        "samples": [
+          6816914,
+          6816914,
+          6816914,
+          6816914,
+          6816914,
+          6816914,
+          6816914,
+          6816914
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "unit-call",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 10,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484336,
+        "min": 484336,
+        "max": 484336,
+        "samples": [
+          484336,
+          484336,
+          484336,
+          484336,
+          484336,
+          484336,
+          484336,
+          484336
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6978336,
+        "min": 6978336,
+        "max": 6978336,
+        "samples": [
+          6978336,
+          6978336,
+          6978336,
+          6978336,
+          6978336,
+          6978336,
+          6978336,
+          6978336
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_query",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 245652,
+        "min": 245652,
+        "max": 245652,
+        "samples": [
+          245652,
+          245652,
+          245652,
+          245652,
+          245652,
+          245652,
+          245652,
+          245652
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_query",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 245838,
+        "min": 245838,
+        "max": 245838,
+        "samples": [
+          245838,
+          245838,
+          245838,
+          245838,
+          245838,
+          245838,
+          245838,
+          245838
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_query",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 243080,
+        "min": 243080,
+        "max": 243080,
+        "samples": [
+          243080,
+          243080,
+          243080,
+          243080,
+          243080,
+          243080,
+          243080,
+          243080
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_query",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 245871,
+        "min": 245871,
+        "max": 245871,
+        "samples": [
+          245871,
+          245871,
+          245871,
+          245871,
+          245871,
+          245871,
+          245871,
+          245871
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "stable-name",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244332,
+        "min": 244332,
+        "max": 244332,
+        "samples": [
+          244332,
+          244332,
+          244332,
+          244332,
+          244332,
+          244332,
+          244332,
+          244332
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "stable-name",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244518,
+        "min": 244518,
+        "max": 244518,
+        "samples": [
+          244518,
+          244518,
+          244518,
+          244518,
+          244518,
+          244518,
+          244518,
+          244518
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "stable-name",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "stable-name",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244551,
+        "min": 244551,
+        "max": 244551,
+        "samples": [
+          244551,
+          244551,
+          244551,
+          244551,
+          244551,
+          244551,
+          244551,
+          244551
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "response_only",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244332,
+        "min": 244332,
+        "max": 244332,
+        "samples": [
+          244332,
+          244332,
+          244332,
+          244332,
+          244332,
+          244332,
+          244332,
+          244332
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "response_only",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244518,
+        "min": 244518,
+        "max": 244518,
+        "samples": [
+          244518,
+          244518,
+          244518,
+          244518,
+          244518,
+          244518,
+          244518,
+          244518
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "response_only",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 65537,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "response_only",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244551,
+        "min": 244551,
+        "max": 244551,
+        "samples": [
+          244551,
+          244551,
+          244551,
+          244551,
+          244551,
+          244551,
+          244551,
+          244551
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composite",
+      "mode": "composite_query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485607,
+        "min": 485607,
+        "max": 485607,
+        "samples": [
+          485607,
+          485607,
+          485607,
+          485607,
+          485607,
+          485607,
+          485607,
+          485607
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composite",
+      "mode": "composite_query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485629,
+        "min": 485629,
+        "max": 485629,
+        "samples": [
+          485629,
+          485629,
+          485629,
+          485629,
+          485629,
+          485629,
+          485629,
+          485629
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composite",
+      "mode": "composite_query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 483080,
+        "min": 483080,
+        "max": 483080,
+        "samples": [
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composite",
+      "mode": "composite_query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 10,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485649,
+        "min": 485649,
+        "max": 485649,
+        "samples": [
+          485649,
+          485649,
+          485649,
+          485649,
+          485649,
+          485649,
+          485649,
+          485649
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484317,
+        "min": 484317,
+        "max": 484317,
+        "samples": [
+          484317,
+          484317,
+          484317,
+          484317,
+          484317,
+          484317,
+          484317,
+          484317
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6976317,
+        "min": 6976317,
+        "max": 6976317,
+        "samples": [
+          6976317,
+          6976317,
+          6976317,
+          6976317,
+          6976317,
+          6976317,
+          6976317,
+          6976317
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484409,
+        "min": 484409,
+        "max": 484409,
+        "samples": [
+          484409,
+          484409,
+          484409,
+          484409,
+          484409,
+          484409,
+          484409,
+          484409
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6978409,
+        "min": 6978409,
+        "max": 6978409,
+        "samples": [
+          6978409,
+          6978409,
+          6978409,
+          6978409,
+          6978409,
+          6978409,
+          6978409,
+          6978409
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6810914,
+        "min": 6810914,
+        "max": 6810914,
+        "samples": [
+          6810914,
+          6810914,
+          6810914,
+          6810914,
+          6810914,
+          6810914,
+          6810914,
+          6810914
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "mutate",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484439,
+        "min": 484439,
+        "max": 484439,
+        "samples": [
+          484439,
+          484439,
+          484439,
+          484439,
+          484439,
+          484439,
+          484439,
+          484439
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6974439,
+        "min": 6974439,
+        "max": 6974439,
+        "samples": [
+          6974439,
+          6974439,
+          6974439,
+          6974439,
+          6974439,
+          6974439,
+          6974439,
+          6974439
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485634,
+        "min": 485634,
+        "max": 485634,
+        "samples": [
+          485634,
+          485634,
+          485634,
+          485634,
+          485634,
+          485634,
+          485634,
+          485634
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6989634,
+        "min": 6989634,
+        "max": 6989634,
+        "samples": [
+          6989634,
+          6989634,
+          6989634,
+          6989634,
+          6989634,
+          6989634,
+          6989634,
+          6989634
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 486041,
+        "min": 486041,
+        "max": 486041,
+        "samples": [
+          486041,
+          486041,
+          486041,
+          486041,
+          486041,
+          486041,
+          486041,
+          486041
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6992041,
+        "min": 6992041,
+        "max": 6992041,
+        "samples": [
+          6992041,
+          6992041,
+          6992041,
+          6992041,
+          6992041,
+          6992041,
+          6992041,
+          6992041
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 483080,
+        "min": 483080,
+        "max": 483080,
+        "samples": [
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7223080,
+        "min": 7223080,
+        "max": 7223080,
+        "samples": [
+          7223080,
+          7223080,
+          7223080,
+          7223080,
+          7223080,
+          7223080,
+          7223080,
+          7223080
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_mutate",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485756,
+        "min": 485756,
+        "max": 485756,
+        "samples": [
+          485756,
+          485756,
+          485756,
+          485756,
+          485756,
+          485756,
+          485756,
+          485756
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6987756,
+        "min": 6987756,
+        "max": 6987756,
+        "samples": [
+          6987756,
+          6987756,
+          6987756,
+          6987756,
+          6987756,
+          6987756,
+          6987756,
+          6987756
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485629,
+        "min": 485629,
+        "max": 485629,
+        "samples": [
+          485629,
+          485629,
+          485629,
+          485629,
+          485629,
+          485629,
+          485629,
+          485629
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6987629,
+        "min": 6987629,
+        "max": 6987629,
+        "samples": [
+          6987629,
+          6987629,
+          6987629,
+          6987629,
+          6987629,
+          6987629,
+          6987629,
+          6987629
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 486036,
+        "min": 486036,
+        "max": 486036,
+        "samples": [
+          486036,
+          486036,
+          486036,
+          486036,
+          486036,
+          486036,
+          486036,
+          486036
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6990036,
+        "min": 6990036,
+        "max": 6990036,
+        "samples": [
+          6990036,
+          6990036,
+          6990036,
+          6990036,
+          6990036,
+          6990036,
+          6990036,
+          6990036
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 483080,
+        "min": 483080,
+        "max": 483080,
+        "samples": [
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080,
+          483080
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7221080,
+        "min": 7221080,
+        "max": 7221080,
+        "samples": [
+          7221080,
+          7221080,
+          7221080,
+          7221080,
+          7221080,
+          7221080,
+          7221080,
+          7221080
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "async_ready",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 485751,
+        "min": 485751,
+        "max": 485751,
+        "samples": [
+          485751,
+          485751,
+          485751,
+          485751,
+          485751,
+          485751,
+          485751,
+          485751
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6985751,
+        "min": 6985751,
+        "max": 6985751,
+        "samples": [
+          6985751,
+          6985751,
+          6985751,
+          6985751,
+          6985751,
+          6985751,
+          6985751,
+          6985751
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 45,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484649,
+        "min": 484649,
+        "max": 484649,
+        "samples": [
+          484649,
+          484649,
+          484649,
+          484649,
+          484649,
+          484649,
+          484649,
+          484649
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7062649,
+        "min": 7062649,
+        "max": 7062649,
+        "samples": [
+          7062649,
+          7062649,
+          7062649,
+          7062649,
+          7062649,
+          7062649,
+          7062649,
+          7062649
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 46,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484974,
+        "min": 484974,
+        "max": 484974,
+        "samples": [
+          484974,
+          484974,
+          484974,
+          484974,
+          484974,
+          484974,
+          484974,
+          484974
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7064974,
+        "min": 7064974,
+        "max": 7064974,
+        "samples": [
+          7064974,
+          7064974,
+          7064974,
+          7064974,
+          7064974,
+          7064974,
+          7064974,
+          7064974
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6828914,
+        "min": 6828914,
+        "max": 6828914,
+        "samples": [
+          6828914,
+          6828914,
+          6828914,
+          6828914,
+          6828914,
+          6828914,
+          6828914,
+          6828914
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "borrowed_mutate",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 44,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484657,
+        "min": 484657,
+        "max": 484657,
+        "samples": [
+          484657,
+          484657,
+          484657,
+          484657,
+          484657,
+          484657,
+          484657,
+          484657
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 7060657,
+        "min": 7060657,
+        "max": 7060657,
+        "samples": [
+          7060657,
+          7060657,
+          7060657,
+          7060657,
+          7060657,
+          7060657,
+          7060657,
+          7060657
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244296,
+        "min": 244296,
+        "max": 244296,
+        "samples": [
+          244296,
+          244296,
+          244296,
+          244296,
+          244296,
+          244296,
+          244296,
+          244296
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244356,
+        "min": 244356,
+        "max": 244356,
+        "samples": [
+          244356,
+          244356,
+          244356,
+          244356,
+          244356,
+          244356,
+          244356,
+          244356
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "nodes",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244370,
+        "min": 244370,
+        "max": 244370,
+        "samples": [
+          244370,
+          244370,
+          244370,
+          244370,
+          244370,
+          244370,
+          244370,
+          244370
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244296,
+        "min": 244296,
+        "max": 244296,
+        "samples": [
+          244296,
+          244296,
+          244296,
+          244296,
+          244296,
+          244296,
+          244296,
+          244296
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244367,
+        "min": 244367,
+        "max": 244367,
+        "samples": [
+          244367,
+          244367,
+          244367,
+          244367,
+          244367,
+          244367,
+          244367,
+          244367
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 65537,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_blob",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244370,
+        "min": 244370,
+        "max": 244370,
+        "samples": [
+          244370,
+          244370,
+          244370,
+          244370,
+          244370,
+          244370,
+          244370,
+          244370
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484317,
+        "min": 484317,
+        "max": 484317,
+        "samples": [
+          484317,
+          484317,
+          484317,
+          484317,
+          484317,
+          484317,
+          484317,
+          484317
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6992317,
+        "min": 6992317,
+        "max": 6992317,
+        "samples": [
+          6992317,
+          6992317,
+          6992317,
+          6992317,
+          6992317,
+          6992317,
+          6992317,
+          6992317
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484409,
+        "min": 484409,
+        "max": 484409,
+        "samples": [
+          484409,
+          484409,
+          484409,
+          484409,
+          484409,
+          484409,
+          484409,
+          484409
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6994409,
+        "min": 6994409,
+        "max": 6994409,
+        "samples": [
+          6994409,
+          6994409,
+          6994409,
+          6994409,
+          6994409,
+          6994409,
+          6994409,
+          6994409
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 65537,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 137648914,
+        "min": 137648914,
+        "max": 137648914,
+        "samples": [
+          137648914,
+          137648914,
+          137648914,
+          137648914,
+          137648914,
+          137648914,
+          137648914,
+          137648914
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_mutate",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484439,
+        "min": 484439,
+        "max": 484439,
+        "samples": [
+          484439,
+          484439,
+          484439,
+          484439,
+          484439,
+          484439,
+          484439,
+          484439
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6990439,
+        "min": 6990439,
+        "max": 6990439,
+        "samples": [
+          6990439,
+          6990439,
+          6990439,
+          6990439,
+          6990439,
+          6990439,
+          6990439,
+          6990439
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_unit",
+      "mode": "query",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244294,
+        "min": 244294,
+        "max": 244294,
+        "samples": [
+          244294,
+          244294,
+          244294,
+          244294,
+          244294,
+          244294,
+          244294,
+          244294
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_unit",
+      "mode": "query",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244316,
+        "min": 244316,
+        "max": 244316,
+        "samples": [
+          244316,
+          244316,
+          244316,
+          244316,
+          244316,
+          244316,
+          244316,
+          244316
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_unit",
+      "mode": "query",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 65537,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "default_unit",
+      "mode": "query",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 10,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 244336,
+        "min": 244336,
+        "max": 244336,
+        "samples": [
+          244336,
+          244336,
+          244336,
+          244336,
+          244336,
+          244336,
+          244336,
+          244336
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 240000,
+        "min": 240000,
+        "max": 240000,
+        "samples": [
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000,
+          240000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 0,
+        "min": 0,
+        "max": 0,
+        "samples": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composed",
+      "mode": "update",
+      "case": "wrong-id",
+      "outcome": "trap",
+      "request_bytes": 12,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484296,
+        "min": 484296,
+        "max": 484296,
+        "samples": [
+          484296,
+          484296,
+          484296,
+          484296,
+          484296,
+          484296,
+          484296,
+          484296
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6980296,
+        "min": 6980296,
+        "max": 6980296,
+        "samples": [
+          6980296,
+          6980296,
+          6980296,
+          6980296,
+          6980296,
+          6980296,
+          6980296,
+          6980296
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composed",
+      "mode": "update",
+      "case": "trailing",
+      "outcome": "trap",
+      "request_bytes": 13,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484333,
+        "min": 484333,
+        "max": 484333,
+        "samples": [
+          484333,
+          484333,
+          484333,
+          484333,
+          484333,
+          484333,
+          484333,
+          484333
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6982333,
+        "min": 6982333,
+        "max": 6982333,
+        "samples": [
+          6982333,
+          6982333,
+          6982333,
+          6982333,
+          6982333,
+          6982333,
+          6982333,
+          6982333
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composed",
+      "mode": "update",
+      "case": "oversized",
+      "outcome": "trap",
+      "request_bytes": 129,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 82914,
+        "min": 82914,
+        "max": 82914,
+        "samples": [
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914,
+          82914
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 80000,
+        "min": 80000,
+        "max": 80000,
+        "samples": [
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000,
+          80000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6814914,
+        "min": 6814914,
+        "max": 6814914,
+        "samples": [
+          6814914,
+          6814914,
+          6814914,
+          6814914,
+          6814914,
+          6814914,
+          6814914,
+          6814914
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "method": "composed",
+      "mode": "update",
+      "case": "truncated",
+      "outcome": "trap",
+      "request_bytes": 11,
+      "reply_bytes": [
+        null
+      ],
+      "ic_instructions": {
+        "mean": 484370,
+        "min": 484370,
+        "max": 484370,
+        "samples": [
+          484370,
+          484370,
+          484370,
+          484370,
+          484370,
+          484370,
+          484370,
+          484370
+        ]
+      },
+      "heap_page_instructions": {
+        "mean": 480000,
+        "min": 480000,
+        "max": 480000,
+        "samples": [
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000,
+          480000
+        ]
+      },
+      "cycles_debited": {
+        "mean": 6978370,
+        "min": 6978370,
+        "max": 6978370,
+        "samples": [
+          6978370,
+          6978370,
+          6978370,
+          6978370,
+          6978370,
+          6978370,
+          6978370,
+          6978370
+        ]
+      },
+      "physical_executions": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  ]
+}

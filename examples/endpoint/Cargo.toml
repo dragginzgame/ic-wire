@@ -1,0 +1,45 @@
+[package]
+name = "ic-wire-endpoint-fixture"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+ic-testkit.workspace = true
+ic-wire = { workspace = true, features = ["typescript"] }
+serde_json.workspace = true
+sha2.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+ic = ["ic-platform/pocket-ic"]
+schema = ["ic-wire/typescript"]
+# Qualification-only inline hook comparator, never a production encoding mode.
+inline-baseline = []
+
+[dependencies]
+ic-platform = { workspace = true, features = ["cdk"] }
+ic-wire = { workspace = true, features = ["endpoint"] }
+serde.workspace = true
+
+[[test]]
+name = "installed"
+path = "tests/installed/mod.rs"
+required-features = ["ic"]
+
+[[test]]
+name = "cost-matrix"
+path = "tests/cost_matrix/mod.rs"
+required-features = ["ic"]
+
+[[example]]
+name = "endpoint-cost"
+path = "examples/cost/mod.rs"
+crate-type = ["cdylib"]
+
+[lints]
+workspace = true

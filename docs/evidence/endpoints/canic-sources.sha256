@@ -1,0 +1,5 @@
+29fd12d8df6473db49f0575498910408af8864a869889774ca7d9aab462acdb8  /home/adam/projects/canic/crates/canic-macros/src/adapter/wire/mod.rs
+84aef53c91c1bd831229ffeba88018949b9caf38b1e07f0a78f31c5cf0fcb8d8  /home/adam/projects/canic/crates/canic-macros/src/adapter/mod.rs
+7972590f7ccf2e10817833b662b69f0750279531fd7bc0794c7969bbb851c286  /home/adam/projects/canic/crates/canic-macros/src/endpoint/expand/mod.rs
+f36712ea44cccd70e14b0d9ae9d774e319d1abeabe391df20b0b74d7b718065a  /home/adam/projects/canic/crates/canic-macros/src/endpoint/expand/wire/mod.rs
+babb4b4de21bf06061c398ce7d07015496fe0adf7e0e13c6e86124947b9c74b6  /home/adam/projects/canic/crates/canic/src/endpoint/registration/mod.rs

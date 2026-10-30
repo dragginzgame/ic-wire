@@ -4,6 +4,7 @@ members = [
     "crates/ic-wire-benchmarks",
     "crates/ic-wire-derive",
     "crates/ic-wire-qualification",
+    "examples/endpoint",
 ]
 default-members = ["crates/ic-wire"]
 resolver = "3"
@@ -18,6 +19,7 @@ repository = "https://github.com/dragginzgame/ic-wire"
 [workspace.dependencies]
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
+ic-platform = { version = "0.8.3", default-features = false }
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.7.23" }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
@@ -30,9 +32,8 @@ syn = { version = "3.0.9", features = ["visit"] }
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 dhat = "0.3.3"
-ic-build = { version = "0.70.0", default-features = false }
-ic-platform = { version = "0.8.1", default-features = false }
-ic-testkit = { version = "0.70.0", default-features = false }
+ic-build = { version = "0.70.3", default-features = false }
+ic-testkit = { version = "0.70.3", default-features = false }
 ic-wire = { path = "crates/ic-wire", version = "0.7.23" }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"

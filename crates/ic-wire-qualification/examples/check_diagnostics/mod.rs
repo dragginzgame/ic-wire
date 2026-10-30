@@ -18,9 +18,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .required(true)
                 .value_parser(clap::value_parser!(PathBuf)),
         )
+        .arg(
+            clap::Arg::new("endpoint")
+                .long("endpoint")
+                .action(clap::ArgAction::SetTrue),
+        )
         .get_matches();
     let run = arguments.get_one::<PathBuf>("directory").unwrap();
-    let source = root.join("crates/ic-wire/tests/ui");
+    let source = root.join(if arguments.get_flag("endpoint") {
+        "crates/ic-wire-qualification/tests/endpoint_ui"
+    } else {
+        "crates/ic-wire/tests/ui"
+    });
     let wire = library_artifact(
         File::open(run.join("artifacts.jsonl"))?,
         "ic_wire",

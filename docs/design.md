@@ -1,7 +1,8 @@
 # IC Wire scope and decisions
 
 IC Wire provides one selected Postcard encoding for controlled Rust endpoints.
-Consumers declare stable method identities; fields and variants follow Serde order.
+Consumers select stable method identities explicitly or through the endpoint
+integration's exported-name hash; fields and variants follow Serde order.
 The [runtime guide](runtime.md) specifies the maintained bytes, supported types,
 primitive validation, resource limits and typed errors.
 
@@ -10,18 +11,22 @@ primitive validation, resource limits and typed errors.
 | Owner | Responsibility |
 | --- | --- |
 | IC Wire | Encoding, bounds, derives, typed codec errors and TypeScript codecs |
+| IC Wire optional endpoint feature | Typed handlers connected to Platform through native Wire frames |
+| IC Platform | IC exports, query/update contexts and executor |
 | Consumer contract | Request/reply types, method identities and semantic validation |
-| Endpoint owner | Transport, authentication, dispatch, rollback and exports |
+| Application/framework owner | Authentication, dispatch policy and final artifact admission |
 | Delivery owner | Retry decisions, exact retained bytes and effect recovery |
 | Database owner | Storage layouts, ordered keys and persistence semantics |
 | IC Build | Compiler-diagnostic execution for the private qualification fixture |
 | Shared Tooling | Reviewed contributor setup, formatting and release mechanics |
 
-The runtime remains Wasm-safe and independent of platform and host tooling.
-Endpoint SDKs and browser transports remain consumer-owned. The unpublished
+The core codec remains Wasm-safe and independent of platform and host tooling.
+The opt-in `endpoint` feature uses published Platform's generator and executor;
+see [typed endpoints](endpoints.md). Browser transports remain consumer-owned. The unpublished
 benchmark crate may use Candid and PocketIC as dev dependencies for codec
-comparisons and IC instruction measurements; published crates remain independent
-of them.
+comparisons and IC instruction measurements. The standalone endpoint fixture also
+uses Platform/Testkit for installed qualification. Published runtime graphs retain
+no Candid or simulator dependencies.
 
 ## Contract discipline
 

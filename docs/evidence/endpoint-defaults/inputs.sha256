@@ -1,0 +1,4 @@
+f1cc81c4524ec2de9c0b91cbaa51838cbf0b10ff1ff4f1c7993f7801c2711388  Cargo.lock
+0809580963d8f1473242a57ed77753492215d27b1e56ec9457961d402049423c  /home/adam/projects/ic-wire/target/endpoint-defaults/generation-final/before/mod.rs
+82e624b39528ca63df3335c983b511634633d1f90809ce4f73d0d0bb4f4f30ad  /home/adam/projects/ic-wire/target/endpoint-defaults/generation-final/after/mod.rs
+bee0db1d0df146ed00cbcf5f0295f59cb5b47c0f37067633b6b258ecc60fb909  /home/adam/projects/ic-wire/target/endpoint-defaults/generation-final/main.rs

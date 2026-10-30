@@ -1,0 +1,3 @@
+lane,total_wasm_bytes,code_section_bytes
+owned,33550,29772
+borrowed,33349,29571

@@ -13,6 +13,9 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [lib]
 proc-macro = true
 
+[features]
+endpoint = ["syn/full"]
+
 [dependencies]
 proc-macro2.workspace = true
 quote.workspace = true

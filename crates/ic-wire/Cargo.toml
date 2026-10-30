@@ -11,6 +11,7 @@ readme = "README.md"
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
+endpoint = ["dep:ic-platform", "ic-wire-derive/endpoint"]
 typescript = ["dep:serde_json"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
@@ -18,6 +19,7 @@ serde_json = { workspace = true, optional = true }
 
 [dependencies]
 bytemuck.workspace = true
+ic-platform = { workspace = true, optional = true, features = ["cdk"] }
 ic-wire-derive.workspace = true
 postcard.workspace = true
 serde.workspace = true

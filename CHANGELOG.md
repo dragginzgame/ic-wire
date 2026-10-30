@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.7.24] - Unreleased
+
+### ⬆️ Dependencies
+
+- Adopt IC Platform 0.8.3 and IC Tooling 0.70.3 (Build, Testkit and the coordinated
+  Host family); align the managed release editor with 0.70.3. Preserve the incoming
+  lockfile, which already selected these versions. Refresh Shared Tooling through
+  its exporter to 0.27.9 at `3c458c28cca132784e6e70fbaf219bdea1e4cf8f`, including
+  the validation-input checkpoint companion. Codec/endpoint APIs, protocol bytes
+  and acceptance rules are unchanged by this adoption. The
+  [matched endpoint matrix](docs/evidence/upstream-adoption-0724/README.md) retains
+  identical instruction/cycle samples; opt-z total Wasm grows four bytes while
+  both code sections and opt-3 total size stay unchanged.
+
+### ➕ Added
+
+- Add an opt-in typed Wire endpoint integration using Platform's maintained
+  entrypoint generator and executor, without Canic. Bare attributes derive stable
+  exported-name IDs and default each direction to 64 KiB frames, 8 MiB traversal,
+  65,536 nodes and depth 32. Admit ingress before copying and trap on reply encoding
+  failure to preserve synchronous rollback. Optional typed contract metadata
+  reuses existing schema projection. Explicit ID/limit overrides retain their bytes
+  and admission; switching an existing declaration to defaults requires coordinated
+  clients. Canic policy and adoption stay downstream.
+
+- Support `borrow` on synchronous endpoint handlers. Retain Platform's copied
+  argument buffer through decoding, handler execution and reply encoding so
+  borrowed fields and replies avoid an extra copy. Async handlers remain owned;
+  frame bytes, limits, full-input validation and rollback semantics are unchanged.
+
+### 🧪 Testing
+
+- Add `evaluate-endpoints`: benchmark every compiled fixture endpoint under both
+  Wasm profiles, including async callbacks, borrowed handlers, defaults, guards,
+  malformed requests and reply traps. Record complete IC instructions, observed
+  cycle debits, frame bytes and uncompressed/code-section Wasm; fail on missing
+  export coverage or physical traces. Production code and protocol are unchanged.
+
+- Qualify generated borrowed endpoints against their owned counterparts in the
+  [endpoint borrowing study](docs/evidence/borrowed-endpoints-0724/README.md):
+  384 measured physical calls, lifetime diagnostics, malformed-request refusal
+  and installed reply-failure rollback. Record instruction and Wasm results,
+  including the small empty-input regression under opt-3.
+
+- Qualify owned versus borrowed request decoding through matched physical IC
+  updates, recording complete instructions, heap-page charges and uncompressed
+  Wasm in the [borrowing study](docs/evidence/input-borrowing-0724/README.md).
+  The study uses released 0.7.23 and changes no runtime or protocol behavior.
+
+- Add a standalone endpoint consumer, compiler diagnostics, installed transaction
+  cases and a reproducible [inline/extracted hook cost comparison](docs/evidence/endpoints/README.md).
+
 ## [0.7.23] - 2026-10-29
 
 ### ⬆️ Dependencies

@@ -1,0 +1,39 @@
+{
+  "baseline": "e90aed4f7dc0cd7ee31a9bcfb211044220ab0cec",
+  "target": "wasm32-unknown-unknown",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "server_sha256": "1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571",
+  "profiles": {
+    "evaluation": {
+      "raw_evidence": "/tmp/wire-input-borrowing-z-20261030",
+      "hashes": {
+        "owned.wasm": "7335fb7e6d32a778bf0aeef766c2f36e692f49933fc9a7be3d0e1d1b431e387a",
+        "borrowed.wasm": "3bfaad0db28f0b192ed8b2221a19a533c544f6470b1f1e0eeef03bdad24c9dce",
+        "owned-executions.json": "5fd71dc985cf8a34a8e5b4ae518363d2d0083cc4ca4eb62d5576766c8ccbe714",
+        "borrowed-executions.json": "c228379b51e2e0ed0bb9fd7cb33b67a563c8de8eed21fa64ced20c13f5bd6a30",
+        "owned-summary.json": "617cd490a2478c200db8cd67ea046e1aac37c86ec7d84b83ba8a96f96a91fe76",
+        "borrowed-summary.json": "7dfe80baa3cdf05a1604616e279bf6a66e2b3b7d3d8eb35bec83f20ccb4b23ab"
+      }
+    },
+    "benchmark-speed": {
+      "raw_evidence": "/tmp/wire-input-borrowing-speed-20261030",
+      "hashes": {
+        "owned.wasm": "2bdd51bead27aba29e962bac6616cab71a112f34bd435e20f3dff6d1d672dd60",
+        "borrowed.wasm": "04b9a941115690c78062ba71b7c6b69453d1a6a039a09112dcef7a301843aeaa",
+        "owned-executions.json": "8346cb608d181d0258ae45bd6595897fcd0fd4ddd9498c0dc541f2795b67f28c",
+        "borrowed-executions.json": "9a2602f97c099a098d9472ce9a0ae924ef82eaad366cf256b9cf88dc4bc8ae53",
+        "owned-summary.json": "a6ac49192bb376dec12519d6555d2592e851c0843ee28e7fb276ff0106585927",
+        "borrowed-summary.json": "70c5459ab00f2f1fe0c0fba213ed7011a33023ed92c1894b35d53ebd48aea1b3"
+      }
+    }
+  },
+  "sources": {
+    "Cargo.toml": "39e332bc4b7118bbeb75e256742a0c244860cc4e59d82ffb5793fe8be467839c",
+    "Cargo.lock": "f89b8a4882b5bd8975e92e0e0b47d136ef6be7c13cebb70c40d70b4751987975",
+    "crates/ic-wire/src/native/mod.rs": "df8f7c627e77ade866c1b2d8e56d7f4590eae3261f00a3b7b8517809ee149331",
+    "crates/ic-wire/src/native/parser/mod.rs": "90effd865fbc06ca6c4cb2681dbd11a0810ec8143e700e56704171c886fdd35a",
+    "crates/ic-wire-benchmarks/examples/input_borrowing/mod.rs": "9c8668057a10f0208521f8e1bc3b5d11bd99bcee41c0ec56b1a9fae8102421ac",
+    "scripts/ci/evaluate-input-borrowing.sh": "9accb82d73a9c41240ea76bd27cb29db28a796aa9021be8cec4065d547d7affb",
+    "scripts/ci/summarize-input-borrowing.mjs": "4103b310e948501b8ed5bc0f509fb2caf623b15f8267740654a1241fa46299a5"
+  }
+}

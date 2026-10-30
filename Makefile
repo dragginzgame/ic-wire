@@ -6,7 +6,7 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.70.0
+RELEASE_EDITOR_VERSION := 0.70.3
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -20,7 +20,7 @@ release-editor-check:
 
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci ci-core ci-typescript ci-benchmarks version
 # One complete roster for local/release validation; hosted groups partition it.
-override IC_WIRE_CI_TARGETS := tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-benchmarks check-typescript check-wasm check-msrv
+override IC_WIRE_CI_TARGETS := tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-endpoint check-benchmarks check-typescript check-wasm check-msrv
 .PHONY: publish check-package
 PUBLISH_PACKAGES ?= ic-wire-derive ic-wire
 publish:
@@ -88,6 +88,18 @@ check-qualification:
 check-typed-diagnostics:
 	+@bash scripts/ci/check-diagnostics.sh
 
+.PHONY: check-endpoint check-endpoint-ic evaluate-endpoints
+check-endpoint:
+	+@bash scripts/ci/check-endpoint.sh
+
+# Explicit prepared PocketIC only; not part of the ordinary native/compile gate.
+check-endpoint-ic:
+	+@bash scripts/ci/check-endpoint-ic.sh
+
+# Explicit cost study; EVIDENCE_DIR must be a new absolute directory.
+evaluate-endpoints:
+	+@bash scripts/ci/evaluate-endpoint-matrix.sh "$(EVIDENCE_DIR)"
+
 help:
 	@printf '%s\n' \
 		'IC Wire — bounded Postcard runtime' \
@@ -100,6 +112,8 @@ help:
 		'Evaluation: evaluate-allocation (borrowing, buffers and bounded/packed layouts)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Qualification: check-qualification (allocation fixtures and compiler support)' \
+		'Qualification: check-endpoint; check-endpoint-ic requires prepared POCKET_IC_BIN' \
+		'Evaluation: evaluate-endpoints EVIDENCE_DIR=/absolute/new/path (instrumented POCKET_IC_BIN)' \
 		'Registry: publish (uploads); check-package (no upload; registry access)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
@@ -127,6 +141,7 @@ check-msrv:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 
 check-doc-links:
+	@perl scripts/ci/check-documentation-links.pl --root . docs/endpoints.md docs/evidence/endpoints/README.md examples/endpoint/README.md docs/sdk-integration.md
 	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/full-comparison-0710.md docs/evidence/full-comparison-0710/README.md docs/full-comparison-0613.md docs/hotspot-encoding-0613.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/evidence/runtime-0716/README.md docs/evidence/encoder-followup-0716/README.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md docs/history/candid-comparison.md docs/history/evaluation.md docs/packed-fields.md docs/unsigned-magnitude.md docs/packed-consolidation-0611.md
 
 .PHONY: check-boundary

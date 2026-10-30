@@ -22,6 +22,10 @@ hotspots = []
 # Qualification of caller storage, never a production codec selection.
 caller-slice = []
 caller-scoped = []
+# Qualification-only ownership control; the wire representation is identical.
+borrowed-input = []
+# The same ownership probe through the optional generated endpoint integration.
+endpoint-input = ["ic-wire/endpoint"]
 # Benchmark cohort selection, never a production codec mode.
 packed-i16 = []
 packed-i16-baseline = ["packed-i16"]
@@ -68,6 +72,11 @@ required-features = ["wire", "candid", "ic"]
 [[example]]
 name = "caller-storage"
 path = "examples/caller_storage/mod.rs"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "input-borrowing"
+path = "examples/input_borrowing/mod.rs"
 crate-type = ["cdylib"]
 
 [[example]]

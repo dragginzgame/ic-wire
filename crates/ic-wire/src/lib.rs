@@ -10,6 +10,9 @@ mod contract;
 mod float;
 mod packed;
 pub use packed::{Packed, PackedElement};
+/// Optional typed IC entrypoints using Platform's export generator and executor.
+#[cfg(feature = "endpoint")]
+pub mod endpoint;
 pub mod native;
 /// Optional TypeScript generation on native hosts.
 /// Forwarding the feature on Wasm retains only the runtime codec.

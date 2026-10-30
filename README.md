@@ -2,7 +2,8 @@
 
 A bounded Postcard binary protocol for controlled Rust endpoints on the Internet
 Computer. IC Wire owns encoding, resource admission and typed
-codec errors. Consumers own transport, authentication, endpoint integration,
+codec errors. Its optional `endpoint` feature connects typed handlers to IC
+Platform entrypoints. Consumers own authentication,
 application semantics and retry policy.
 
 The production runtime uses ordinary Serde derives with one Postcard codec.
@@ -18,6 +19,12 @@ Start with the [runtime guide](docs/runtime.md), [design](docs/design.md),
 [evaluation scope](docs/evaluation.md) and [current handoff](docs/status/current.md).
 The runtime and derive crates were first published at 0.3.0; the private
 `ic-wire-qualification` package remains unpublished.
+
+Standalone canisters can use bare `ic_wire::endpoint::{query, update}` attributes
+with bounded defaults and automatic method IDs; explicit overrides remain available.
+See the [endpoint guide](docs/endpoints.md)
+and [standalone consumer](examples/endpoint/src/lib.rs). Platform owns IC exports
+and the executor; the core codec retains its runtime-independent default graph.
 
 For new contracts, default binary fields to `Bytes<N>`, `ic_wire::ByteBuf`
 or the `serde_bytes` adapter, and large homogeneous integer/hash arrays to

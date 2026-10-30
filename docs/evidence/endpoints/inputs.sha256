@@ -1,0 +1,9 @@
+f1cc81c4524ec2de9c0b91cbaa51838cbf0b10ff1ff4f1c7993f7801c2711388  Cargo.lock
+814cd8d64fd19d7ba18e209ac152b5b06217fd00cef4af649dccdfd341837f48  Cargo.toml
+d61841e18422d1b9c8e22483565afc592e478011287539719f6ec9c854a352df  crates/ic-wire/Cargo.toml
+777350df93f0ac8a7f0d68d1ae0667ce8dcf84b8c91c079a16c1ed70b0cca25b  crates/ic-wire-derive/Cargo.toml
+2d369960fecded5509ba36775b2f1d638e1044c30b5bd3b879a4402706dd8adb  crates/ic-wire-derive/src/endpoint/mod.rs
+8f883f77b4a0f18c893fd7a16527f08b962a79eaf15affb6e5375ba78eb9a5eb  crates/ic-wire/src/endpoint/mod.rs
+64c3d34bceff5bd06646ccc54fa67972afedfb86bd438a2301907a3f8525897b  examples/endpoint/Cargo.toml
+1d52403af899e0b9989c6f45a69723f1f96f1a1c9b4c12474c9dca8b5bdbc9c9  examples/endpoint/examples/cost/mod.rs
+69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792  /home/adam/.cache/canic/pocket-ic-server-16.0.0-pocket-ic-x86_64-linux/pocket-ic

@@ -1,10 +1,64 @@
-# Serde runtime and Canic integration
+# Serde runtime and optional IC entrypoints
 
 IC Wire has one production codec: bounded Serde traversal with Postcard encoding.
 Use `Serialize` / `Deserialize` on consumer DTOs and the `native` module for
 framing, resource admission and strict primitive validation. `Wire` generates
 host-only metadata; it never generates a serializer. Alternative codec and
 derive designs are research, not selectable runtime modes.
+
+## Optional typed IC endpoints
+
+Enable `ic-wire`'s `endpoint` feature to connect typed handlers to published
+IC Platform 0.8.3 entrypoints. Without this feature the core codec has no Platform
+dependency. This integration requires `std`, as does Platform's canister runtime;
+the default codec remains `no_std + alloc`. No Candid runtime is selected.
+
+```rust,ignore
+use ic_wire::endpoint::query;
+#[query]
+fn echo(value: u64) -> u64 { value }
+```
+
+`id`, `request` and `response` are optional constant-expression overrides. Both
+directions default to 64 KiB of full-frame bytes, 8 MiB of conservative traversal
+allowance, 65,536 nodes and depth 32. These defaults belong to `endpoint`, not the
+core codec. Allocation excludes ingress and is not a measured heap cap.
+The automatic ID is the compile-time `native::method_id` of the exported name:
+FNV-1a-64 over UTF-8 `ic-wire:method:` followed by that name. Rust module/type names
+do not participate. Export renames change the ID; `name = "stable-name"` preserves
+it across Rust renames. Consumers retain duplicate-ID checks; this is not authentication.
+
+A handler takes
+one owned Serde request, or no arguments for a framed unit request. Return values,
+including tuples and unit, use the existing native response codec. `update` and
+`query(composite, ...)` preserve Platform's sync/async execution. `name = "..."`
+overrides the IC method name; `crate = "path::to::wire"` supports re-exports.
+Use these attributes on module-level functions; do not stack another export macro.
+
+The ingress guard checks the full frame length before Platform copies arguments.
+Decode validates the identity, primitive representations, traversal budgets and
+complete input. Reply encoding is bounded and traps on failure, so synchronous
+mutations roll back. With asynchronous updates, an inter-canister await commits
+the preceding transaction; a later encoding trap rolls back only the current
+callback. Query mutations do not persist. Explicit IDs/limits keep their byte layouts
+and acceptance rules; application errors and authorization stay local. Removing an
+explicit ID or bounds selects different settings and requires coordinated clients.
+For example, `echo` defaults to ID 3346031142226386015 instead of explicit ID 7.
+There is no alternate-ID decoder or migration path.
+
+Optional `contract = ECHO` emits a `Contract<Request, Response>` constant using
+the exact handler types and constants. With `typescript` enabled on native hosts,
+`ECHO.request_schema()` and `ECHO.response_schema()` reuse Wire's existing schema
+projection. The constant also exposes `name`, `mode`, `id`, `request` and `response`.
+This adds no registry, Wasm metadata section or final-artifact admission.
+
+Frameworks can instead compose `endpoint::admit_request`, `decode_request` and
+`encode_response` with Platform's explicit hooks around their existing guarded
+handler. Admission must run before copying, and encoding failures must trap.
+Framework rejection branches may use Platform's `manual_reply` without encoding
+the access-denial wrapper as an application response. Authentication, Fleet
+admission, startup checks, dispatch instrumentation and artifact policy remain
+Canic-owned when Canic adopts this surface.
 
 ## One-pass decoding (0.7 hard cut)
 

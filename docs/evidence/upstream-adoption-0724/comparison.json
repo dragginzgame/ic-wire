@@ -1,0 +1,5530 @@
+{
+  "evaluation": {
+    "results": [
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "reply_bytes": [
+          14
+        ],
+        "ic_instructions": {
+          "before": 253966,
+          "after": 253966,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "blob-32",
+        "outcome": "reply",
+        "request_bytes": 46,
+        "reply_bytes": [
+          46
+        ],
+        "ic_instructions": {
+          "before": 256381,
+          "after": 256381,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "reply_bytes": [
+          14
+        ],
+        "ic_instructions": {
+          "before": 253758,
+          "after": 253758,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "blob-32",
+        "outcome": "reply",
+        "request_bytes": 46,
+        "reply_bytes": [
+          46
+        ],
+        "ic_instructions": {
+          "before": 255532,
+          "after": 255532,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "unit",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 251448,
+          "after": 251448,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "unit",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          11
+        ],
+        "ic_instructions": {
+          "before": 488803,
+          "after": 488803,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6984803,
+          "after": 6984803,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "value-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          13
+        ],
+        "ic_instructions": {
+          "before": 255293,
+          "after": 255293,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "value-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 249111,
+          "after": 249111,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "value-18446744073709551615",
+        "outcome": "reply",
+        "request_bytes": 21,
+        "reply_bytes": [
+          22
+        ],
+        "ic_instructions": {
+          "before": 257181,
+          "after": 257181,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "value-18446744073709551615",
+        "outcome": "reply",
+        "request_bytes": 21,
+        "reply_bytes": [
+          21
+        ],
+        "ic_instructions": {
+          "before": 251122,
+          "after": 251122,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "scalar",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 249111,
+          "after": 249111,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "self-call",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 1484952,
+          "after": 1484952,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 1440000,
+          "after": 1440000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 489999,
+          "after": 489999,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6981999,
+          "after": 6981999,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 492265,
+          "after": 492265,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6984265,
+          "after": 6984265,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 496633,
+          "after": 496633,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6988633,
+          "after": 6988633,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 487332,
+          "after": 487332,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6979332,
+          "after": 6979332,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 1245543,
+          "after": 1245543,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18038543,
+          "after": 18038543,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1200000,
+          "after": 1200000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 1247792,
+          "after": 1247792,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18040792,
+          "after": 18040792,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1200000,
+          "after": 1200000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 1252160,
+          "after": 1252160,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18045160,
+          "after": 18045160,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1200000,
+          "after": 1200000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 1727846,
+          "after": 1727846,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18520846,
+          "after": 18520846,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1680000,
+          "after": 1680000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 494324,
+          "after": 494324,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6996324,
+          "after": 6996324,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 496573,
+          "after": 496573,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6998573,
+          "after": 6998573,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 500941,
+          "after": 500941,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7002941,
+          "after": 7002941,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 490634,
+          "after": 490634,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6992634,
+          "after": 6992634,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 45,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 490733,
+          "after": 490733,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7068733,
+          "after": 7068733,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 45,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 492869,
+          "after": 492869,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7070869,
+          "after": 7070869,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 45,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 497237,
+          "after": 497237,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7075237,
+          "after": 7075237,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 45,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488014,
+          "after": 488014,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7066014,
+          "after": 7066014,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "nodes-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 249468,
+          "after": 249468,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "nodes-1",
+        "outcome": "reply",
+        "request_bytes": 13,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 250191,
+          "after": 250191,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "nodes-2",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 246494,
+          "after": 246494,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 249818,
+          "after": 249818,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 490007,
+          "after": 490007,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6998007,
+          "after": 6998007,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-32",
+        "outcome": "reply",
+        "request_bytes": 44,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 252026,
+          "after": 252026,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 492193,
+          "after": 492193,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7000193,
+          "after": 7000193,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-65522",
+        "outcome": "reply",
+        "request_bytes": 65536,
+        "reply_bytes": [
+          65536
+        ],
+        "ic_instructions": {
+          "before": 3884150,
+          "after": 3884150,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 400000,
+          "after": 400000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-65522",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "reply_bytes": [
+          65536
+        ],
+        "ic_instructions": {
+          "before": 4218214,
+          "after": 4218214,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 10730214,
+          "after": 10730214,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 800000,
+          "after": 800000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-65523",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-65523",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 712955,
+          "after": 712955,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7224955,
+          "after": 7224955,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 640000,
+          "after": 640000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "unit",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          11
+        ],
+        "ic_instructions": {
+          "before": 248700,
+          "after": 248700,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "allow",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          13
+        ],
+        "ic_instructions": {
+          "before": 489859,
+          "after": 489859,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6985859,
+          "after": 6985859,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "deny",
+        "outcome": "reject",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 486419,
+          "after": 486419,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6982419,
+          "after": 6982419,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245276,
+          "after": 245276,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 15,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 246604,
+          "after": 246604,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 246285,
+          "after": 246285,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245264,
+          "after": 245264,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 15,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 246310,
+          "after": 246310,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 246267,
+          "after": 246267,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245262,
+          "after": 245262,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245564,
+          "after": 245564,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245302,
+          "after": 245302,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485255,
+          "after": 485255,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6981255,
+          "after": 6981255,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485557,
+          "after": 485557,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6983557,
+          "after": 6983557,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6816912,
+          "after": 6816912,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485295,
+          "after": 485295,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6979295,
+          "after": 6979295,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 248459,
+          "after": 248459,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 248842,
+          "after": 248842,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 243558,
+          "after": 243558,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 248861,
+          "after": 248861,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245280,
+          "after": 245280,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245663,
+          "after": 245663,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245682,
+          "after": 245682,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245280,
+          "after": 245280,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245663,
+          "after": 245663,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245682,
+          "after": 245682,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488279,
+          "after": 488279,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488581,
+          "after": 488581,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483558,
+          "after": 483558,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488319,
+          "after": 488319,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485296,
+          "after": 485296,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6977296,
+          "after": 6977296,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485719,
+          "after": 485719,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6979719,
+          "after": 6979719,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6810912,
+          "after": 6810912,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485739,
+          "after": 485739,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6975739,
+          "after": 6975739,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488459,
+          "after": 488459,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6992459,
+          "after": 6992459,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 489197,
+          "after": 489197,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6995197,
+          "after": 6995197,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483558,
+          "after": 483558,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7223558,
+          "after": 7223558,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488902,
+          "after": 488902,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6990902,
+          "after": 6990902,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488172,
+          "after": 488172,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6990172,
+          "after": 6990172,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488910,
+          "after": 488910,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6992910,
+          "after": 6992910,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483558,
+          "after": 483558,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7221558,
+          "after": 7221558,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 488615,
+          "after": 488615,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6988615,
+          "after": 6988615,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 45,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485602,
+          "after": 485602,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7063602,
+          "after": 7063602,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 46,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 486569,
+          "after": 486569,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7066569,
+          "after": 7066569,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6828912,
+          "after": 6828912,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 44,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 486198,
+          "after": 486198,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7062198,
+          "after": 7062198,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245276,
+          "after": 245276,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245986,
+          "after": 245986,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245723,
+          "after": 245723,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245274,
+          "after": 245274,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245963,
+          "after": 245963,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245720,
+          "after": 245720,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485296,
+          "after": 485296,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6993296,
+          "after": 6993296,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485719,
+          "after": 485719,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6995719,
+          "after": 6995719,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 137648912,
+          "after": 137648912,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485739,
+          "after": 485739,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6991739,
+          "after": 6991739,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245255,
+          "after": 245255,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245557,
+          "after": 245557,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245295,
+          "after": 245295,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485250,
+          "after": 485250,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6981250,
+          "after": 6981250,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485662,
+          "after": 485662,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6983662,
+          "after": 6983662,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82912,
+          "after": 82912,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6814912,
+          "after": 6814912,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485665,
+          "after": 485665,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6979665,
+          "after": 6979665,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      }
+    ],
+    "total_wasm_bytes": {
+      "before": 103638,
+      "after": 103642,
+      "change_percent": 0.0038595881819425415
+    },
+    "code_section_bytes": {
+      "before": 89112,
+      "after": 89112,
+      "change_percent": 0.0
+    }
+  },
+  "benchmark-speed": {
+    "results": [
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "reply_bytes": [
+          14
+        ],
+        "ic_instructions": {
+          "before": 247107,
+          "after": 247107,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "blob-32",
+        "outcome": "reply",
+        "request_bytes": 46,
+        "reply_bytes": [
+          46
+        ],
+        "ic_instructions": {
+          "before": 249366,
+          "after": 249366,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "reply_bytes": [
+          14
+        ],
+        "ic_instructions": {
+          "before": 247326,
+          "after": 247326,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "blob-32",
+        "outcome": "reply",
+        "request_bytes": 46,
+        "reply_bytes": [
+          46
+        ],
+        "ic_instructions": {
+          "before": 249100,
+          "after": 249100,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "unit",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 246478,
+          "after": 246478,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "unit",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          11
+        ],
+        "ic_instructions": {
+          "before": 484676,
+          "after": 484676,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6980676,
+          "after": 6980676,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "value-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          13
+        ],
+        "ic_instructions": {
+          "before": 248491,
+          "after": 248491,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "value-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 245077,
+          "after": 245077,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "value-18446744073709551615",
+        "outcome": "reply",
+        "request_bytes": 21,
+        "reply_bytes": [
+          22
+        ],
+        "ic_instructions": {
+          "before": 249406,
+          "after": 249406,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "value-18446744073709551615",
+        "outcome": "reply",
+        "request_bytes": 21,
+        "reply_bytes": [
+          21
+        ],
+        "ic_instructions": {
+          "before": 246115,
+          "after": 246115,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "scalar",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 245077,
+          "after": 245077,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "self-call",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 1469820,
+          "after": 1469820,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 1440000,
+          "after": 1440000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 485161,
+          "after": 485161,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6977161,
+          "after": 6977161,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 487381,
+          "after": 487381,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6979381,
+          "after": 6979381,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 491749,
+          "after": 491749,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6983749,
+          "after": 6983749,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484865,
+          "after": 484865,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6976865,
+          "after": 6976865,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 1229259,
+          "after": 1229259,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18022259,
+          "after": 18022259,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1200000,
+          "after": 1200000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 1231466,
+          "after": 1231466,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18024466,
+          "after": 18024466,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1200000,
+          "after": 1200000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 1235834,
+          "after": 1235834,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18028834,
+          "after": 18028834,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1200000,
+          "after": 1200000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 1710736,
+          "after": 1710736,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 18503736,
+          "after": 18503736,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 1680000,
+          "after": 1680000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 487479,
+          "after": 487479,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6989479,
+          "after": 6989479,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 489686,
+          "after": 489686,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6991686,
+          "after": 6991686,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 494054,
+          "after": 494054,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6996054,
+          "after": 6996054,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 486550,
+          "after": 486550,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6988550,
+          "after": 6988550,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 45,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 485586,
+          "after": 485586,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7063586,
+          "after": 7063586,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 45,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 487680,
+          "after": 487680,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7065680,
+          "after": 7065680,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-116",
+        "outcome": "reply",
+        "request_bytes": 45,
+        "reply_bytes": [
+          128
+        ],
+        "ic_instructions": {
+          "before": 492048,
+          "after": 492048,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7070048,
+          "after": 7070048,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "reply-117",
+        "outcome": "trap",
+        "request_bytes": 45,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485332,
+          "after": 485332,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7063332,
+          "after": 7063332,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "nodes-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 244916,
+          "after": 244916,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "nodes-1",
+        "outcome": "reply",
+        "request_bytes": 13,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 245369,
+          "after": 245369,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "nodes-2",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244558,
+          "after": 244558,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 245095,
+          "after": 245095,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-0",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          12
+        ],
+        "ic_instructions": {
+          "before": 485166,
+          "after": 485166,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6993166,
+          "after": 6993166,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-32",
+        "outcome": "reply",
+        "request_bytes": 44,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 247265,
+          "after": 247265,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-32",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          44
+        ],
+        "ic_instructions": {
+          "before": 487306,
+          "after": 487306,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6995306,
+          "after": 6995306,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-65522",
+        "outcome": "reply",
+        "request_bytes": 65536,
+        "reply_bytes": [
+          65536
+        ],
+        "ic_instructions": {
+          "before": 3879223,
+          "after": 3879223,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 400000,
+          "after": 400000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-65522",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "reply_bytes": [
+          65536
+        ],
+        "ic_instructions": {
+          "before": 4213161,
+          "after": 4213161,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 10725161,
+          "after": 10725161,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 800000,
+          "after": 800000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "blob-65523",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "reply-65523",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 710352,
+          "after": 710352,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7222352,
+          "after": 7222352,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 640000,
+          "after": 640000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "unit",
+        "outcome": "reply",
+        "request_bytes": 11,
+        "reply_bytes": [
+          11
+        ],
+        "ic_instructions": {
+          "before": 244666,
+          "after": 244666,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "allow",
+        "outcome": "reply",
+        "request_bytes": 12,
+        "reply_bytes": [
+          13
+        ],
+        "ic_instructions": {
+          "before": 485111,
+          "after": 485111,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6981111,
+          "after": 6981111,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "deny",
+        "outcome": "reject",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483511,
+          "after": 483511,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6979511,
+          "after": 6979511,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244298,
+          "after": 244298,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 15,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244588,
+          "after": 244588,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "echo",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244597,
+          "after": 244597,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 14,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244341,
+          "after": 244341,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 15,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244707,
+          "after": 244707,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_echo",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244720,
+          "after": 244720,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244294,
+          "after": 244294,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244316,
+          "after": 244316,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "count",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244336,
+          "after": 244336,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484294,
+          "after": 484294,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6980294,
+          "after": 6980294,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484316,
+          "after": 484316,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6982316,
+          "after": 6982316,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6816914,
+          "after": 6816914,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "unit-call",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484336,
+          "after": 484336,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6978336,
+          "after": 6978336,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245652,
+          "after": 245652,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245838,
+          "after": 245838,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 243080,
+          "after": 243080,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_query",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 245871,
+          "after": 245871,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244332,
+          "after": 244332,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244518,
+          "after": 244518,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "stable-name",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244551,
+          "after": 244551,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244332,
+          "after": 244332,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244518,
+          "after": 244518,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "response_only",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244551,
+          "after": 244551,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485607,
+          "after": 485607,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485629,
+          "after": 485629,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483080,
+          "after": 483080,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composite",
+        "mode": "composite_query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485649,
+          "after": 485649,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484317,
+          "after": 484317,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6976317,
+          "after": 6976317,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484409,
+          "after": 484409,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6978409,
+          "after": 6978409,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6810914,
+          "after": 6810914,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484439,
+          "after": 484439,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6974439,
+          "after": 6974439,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485634,
+          "after": 485634,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6989634,
+          "after": 6989634,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 486041,
+          "after": 486041,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6992041,
+          "after": 6992041,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483080,
+          "after": 483080,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7223080,
+          "after": 7223080,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485756,
+          "after": 485756,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6987756,
+          "after": 6987756,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485629,
+          "after": 485629,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6987629,
+          "after": 6987629,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 486036,
+          "after": 486036,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6990036,
+          "after": 6990036,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 483080,
+          "after": 483080,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7221080,
+          "after": 7221080,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "async_ready",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 485751,
+          "after": 485751,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6985751,
+          "after": 6985751,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 45,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484649,
+          "after": 484649,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7062649,
+          "after": 7062649,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 46,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484974,
+          "after": 484974,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7064974,
+          "after": 7064974,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6828914,
+          "after": 6828914,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "borrowed_mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 44,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484657,
+          "after": 484657,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 7060657,
+          "after": 7060657,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244296,
+          "after": 244296,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244356,
+          "after": 244356,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "nodes",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244370,
+          "after": 244370,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244296,
+          "after": 244296,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244367,
+          "after": 244367,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_blob",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244370,
+          "after": 244370,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484317,
+          "after": 484317,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6992317,
+          "after": 6992317,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484409,
+          "after": 484409,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6994409,
+          "after": 6994409,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 137648914,
+          "after": 137648914,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_mutate",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484439,
+          "after": 484439,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6990439,
+          "after": 6990439,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244294,
+          "after": 244294,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244316,
+          "after": 244316,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 65537,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "default_unit",
+        "mode": "query",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 10,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 244336,
+          "after": 244336,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 0,
+          "after": 0,
+          "change_percent": null
+        },
+        "heap_page_instructions": {
+          "before": 240000,
+          "after": 240000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "wrong-id",
+        "outcome": "trap",
+        "request_bytes": 12,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484296,
+          "after": 484296,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6980296,
+          "after": 6980296,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "trailing",
+        "outcome": "trap",
+        "request_bytes": 13,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484333,
+          "after": 484333,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6982333,
+          "after": 6982333,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "oversized",
+        "outcome": "trap",
+        "request_bytes": 129,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 82914,
+          "after": 82914,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6814914,
+          "after": 6814914,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 80000,
+          "after": 80000,
+          "change_percent": 0
+        }
+      },
+      {
+        "method": "composed",
+        "mode": "update",
+        "case": "truncated",
+        "outcome": "trap",
+        "request_bytes": 11,
+        "reply_bytes": [
+          null
+        ],
+        "ic_instructions": {
+          "before": 484370,
+          "after": 484370,
+          "change_percent": 0
+        },
+        "cycles_debited": {
+          "before": 6978370,
+          "after": 6978370,
+          "change_percent": 0
+        },
+        "heap_page_instructions": {
+          "before": 480000,
+          "after": 480000,
+          "change_percent": 0
+        }
+      }
+    ],
+    "total_wasm_bytes": {
+      "before": 98503,
+      "after": 98503,
+      "change_percent": 0.0
+    },
+    "code_section_bytes": {
+      "before": 84974,
+      "after": 84974,
+      "change_percent": 0.0
+    }
+  }
+}

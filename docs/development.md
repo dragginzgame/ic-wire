@@ -2,7 +2,8 @@
 
 IC Wire provides a no_std + alloc Postcard runtime. See the
 [runtime guide](runtime.md) for the wire contract and [evaluation scope](evaluation.md)
-for maintained qualification. Transport and endpoint integration belong to consumers.
+for maintained qualification. The optional [endpoint integration](endpoints.md)
+delegates IC exports/execution to Platform; application policy remains consumer-owned.
 
 ## Setup
 
@@ -20,9 +21,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.70.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.70.3 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.70.0 without default features; the CLI feature is only enabled for installation.
+0.70.3 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -53,6 +54,9 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `check-wasm`, `check-msrv` | Runtime Wasm and minimum-toolchain checks |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
 | `check-qualification` | Allocation/borrowing fixtures and qualification lint/floor checks |
+| `check-endpoint` | Standalone typed endpoint/native metadata, compiler diagnostics, lint, Wasm/MSRV and dependency isolation |
+| `check-endpoint-ic` | Installed endpoint/rollback cases; explicitly prepared `POCKET_IC_BIN` required |
+| `evaluate-endpoints` | All exported endpoint costs and rejection paths; fresh absolute `EVIDENCE_DIR` and instrumented `POCKET_IC_BIN` required |
 | `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
 | `evaluate-codec-matrix` | Full 21-cohort Wire/Candid matrix; requires explicit prepared PocketIC |
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
@@ -175,8 +179,24 @@ sources with `cargo fetch --locked` before explicitly offline gates. Runtime
 normal/build dependencies remain separate from the private qualification package;
 IC Build is restricted to that unpublished package. Alternative-codec dependencies
 are retired.
-Published crates have no platform SDK or simulator dependencies. The unpublished
-benchmark package uses Candid and PocketIC through Platform for qualification.
+The default codec graph has no Platform or simulator dependencies. The opt-in
+`endpoint` feature selects Platform's Candid-free `cdk` surface. The unpublished
+benchmark and endpoint fixture packages use PocketIC through Platform and Testkit
+for qualification. Endpoint cost comparisons use
+`bash scripts/ci/evaluate-endpoint.sh NEW_OUTPUT_DIRECTORY` with an explicitly
+prepared `POCKET_IC_BIN`; see [scope and results](evidence/endpoints/README.md).
+
+For the complete exported-endpoint matrix, run
+`POCKET_IC_BIN=/path/to/instrumented/pocket-ic-server make evaluate-endpoints EVIDENCE_DIR=/absolute/new/path`.
+It freezes the working tree, builds both existing Wasm profiles, checks coverage
+against actual exports and records repeated full physical execution costs,
+observed cycle debits, frame sizes and whole-artifact Wasm sizes. Query cycle
+debits may be zero; instruction costs are measured independently. Async calls
+include self-call, reply callback and cleanup executions. See the
+[matrix evidence and limitations](evidence/endpoint-matrix-0724/README.md).
+This explicit benchmark is separate from ordinary compile checks and the older
+inline/extracted-hook comparison. It requires the profiler-enabled server in
+the evidence receipt; a standard PocketIC server lacks the trace API.
 
 ## Snapshot maintenance and release boundary
 

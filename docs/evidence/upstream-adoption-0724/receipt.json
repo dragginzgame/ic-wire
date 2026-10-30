@@ -1,0 +1,94 @@
+{
+  "base_commit": "e90aed4f7dc0cd7ee31a9bcfb211044220ab0cec",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "target": "wasm32-unknown-unknown",
+  "before_raw": "/tmp/wire-endpoint-matrix-final-20261030",
+  "after_raw": "/tmp/wire-adoption-endpoint-matrix-20261030",
+  "checks_raw": "/tmp/wire-adoption-20261030",
+  "platform_revision": "f69a759bb94e84f054d5f8701461d745b8f8eed4",
+  "tooling_revision": "c80d061f9030222d4da9ee1ed8b098b76ef5fd46",
+  "shared_revision": "3c458c28cca132784e6e70fbaf219bdea1e4cf8f",
+  "profiles": {
+    "evaluation": {
+      "server_sha256": "1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571",
+      "before": {
+        "endpoint.wasm": "a8659a578538c67c47d279df1b497f55bef8ae6e5a21f2bc999271d1cc72db11",
+        "samples.jsonl": "ecef10ff0ea28a8c2ef6d0270c5d5a60dd7aef6cbfb9f44ec08ebf1178e082f6",
+        "comparison.json": "ac551f4382d4e36e99330b054b7446ce2b2072b8ab765de02a6f6b46ed0fa10f",
+        "trace-header.json": "ee251efdbb3bbb0dd770711b238a26c773d6740f2c6b48f089f7dd40a439c390"
+      },
+      "after": {
+        "endpoint.wasm": "1ccfd2114897141a66eb7108c8a96db56b26abd95074c01d64e16dec45565abc",
+        "samples.jsonl": "bff70dedd14daafa3d9c50cad4cdf57fc8981c6ce0ff737f3cba7881dff9f7c3",
+        "comparison.json": "f4a8538798d41c04f289f93d677574173ea378fdd838a59623c538e7c454fcbd",
+        "trace-header.json": "3caf5cce6de747fc8b9882f7d5f41cf6c5e7f2a72c040d38cd4b7e6fb0849f40",
+        "ic.log": "303e61e9216f37d27afe4263b52708aaee8f7298232e62bbbdc84218054f0d61"
+      }
+    },
+    "benchmark-speed": {
+      "server_sha256": "1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571",
+      "before": {
+        "endpoint.wasm": "10e0991009ddbc8442ced3238764a63918070614d0a6ef458323c29e59fd35fd",
+        "samples.jsonl": "d2a95482cf6de2a8dc20fc904125131f3257ed8a2f8a75e14102d411e8fc52f2",
+        "comparison.json": "61feccc2f92868f1d86267aedf6749e72b61a945ee746eaee6f3eb73ff57ce89",
+        "trace-header.json": "6f457413de447c77aacedbde5b08c6c88490c9abdc05c8e9e12ae780a5104c72"
+      },
+      "after": {
+        "endpoint.wasm": "2c0ce8c87469aa0dfb5f71a670fdd66fe9f157b73426c80ee94b53bdbdeb1c60",
+        "samples.jsonl": "98ab86c39c48fa9d430fe9a0c5476c202333fc101cb76bebb6020efaf9d84dd1",
+        "comparison.json": "78b52f1ed4c66f3b7d9a1b724b7c7541770a31995d1a0dbc865718c9ce751b9b",
+        "trace-header.json": "37d5ff46d7e90959ea65fba2cef4977027b9d94b7ef41ef59037e54ac3da57e9",
+        "ic.log": "b14847fd9bd31ae29c722d7e86640b81f4b096cda7c0a6889a66ff4757643c1b"
+      }
+    }
+  },
+  "checks": {
+    "shared-impact.log": "4214fb0f4a94a4ec30f8b9cf41c814c7f9501fc787ced7351a23e2501dce689d",
+    "shared-refresh.log": "6b23ebc1a602028ed1a331f374b26adbe72db187c82b59a84c753996c5bd5328",
+    "shared-checks.log": "1151d1d40c00477450af9ee928330d4f5622d2a171b851e1d07a9ce021ce0be6",
+    "editor-install.log": "0aa28eac9cd00c5ccdd527c74e8b5a80efc55bfe79e0641fdfa06ffa76aa9003",
+    "editor-check.log": "09beb8846b3fee8a0781eaf05c6417612e9228a27608f334b7a476b288a29879",
+    "tools-check.log": "aec0ee7497970870978a77ecb8fa901ea9047c5cac048ef3427b2b6db1aa76bb",
+    "endpoint-check.log": "6325890c3f36f6960747058488b5d14250db2a46bda1fb8021496fa996e26464",
+    "installed.log": "0a436e74bfe327c2acb886b61eea807ec6472e0cc7726e7625666e2af85cfa89",
+    "make-fixture.log": "afe85896592febdbf7032e7d5ad66e2a643c5bc34b2a04932004828568dc151e",
+    "release-fixture.log": "0b2f1d5bf204717906bffac31f6ae694c06792100ef07d00f6a523c746f01ee1"
+  },
+  "sources": {
+    "/tmp/wire-endpoint-matrix-final-20261030/source/Cargo.toml": "814cd8d64fd19d7ba18e209ac152b5b06217fd00cef4af649dccdfd341837f48",
+    "/tmp/wire-adoption-endpoint-matrix-20261030/source/Cargo.toml": "df1397b4f9bb6adc4c2f711c5af0eae61eaa4734b947e7b98d0c6993e0ffe596",
+    "/tmp/wire-endpoint-matrix-final-20261030/source/Cargo.lock": "c4ff67c38b37a56c1c9eb5e2758f27028ba490ecf19bbff9560a1f481263f354",
+    "/tmp/wire-adoption-endpoint-matrix-20261030/source/Cargo.lock": "c4f8e2d97a7bb4574d45b132111111682880c19e79e444777941db2860b137c1",
+    "crates/ic-wire/src/lib.rs": "090122932aadbefbac4c6dfc075d400a082e0c208041a757f44fc97b4d4fd20a",
+    "crates/ic-wire/src/endpoint/mod.rs": "93253e1e8ef6b8aeabf9b334900525cac369e7f70f5a2000cfe6432ad5d6e2b0",
+    "crates/ic-wire/src/typescript/mod.rs": "a15f9916d797e26f4ac29563ad1eb3cfa5d659fc765d028c0b9637dc20fd10c3",
+    "crates/ic-wire/src/native/mod.rs": "df765940e967fe8ac983d9eac98bb9eca3e3458e697a2556e1350bcb1f8f6dad",
+    "crates/ic-wire/src/bounded/mod.rs": "2c968a3c58d98d6f8e72e2995c9b65ac90d292ef7b37a42f2ed7a0af002311b2",
+    "crates/ic-wire/src/packed/mod.rs": "a865d9d0fbe7ad2c40f6b3b0d2d61f67795eb0d4bea3ab4ed36f7059b068de2d",
+    "crates/ic-wire/src/contract/mod.rs": "e53e33cfc05b49e09ebde018c2450f43303ac6f682214dadbca5d53840b69d84",
+    "crates/ic-wire/src/float/mod.rs": "d8bd911399f435b899737510366d930ea68b2776f5c613a8d0330ce286dbe340",
+    "crates/ic-wire/src/typescript/bulk_lint/mod.rs": "fd150438d3245ce3dcc3d44802975d4881dfa27691631c6586e5912ed859f8f4",
+    "crates/ic-wire/src/typescript/metadata/mod.rs": "3dd2583cc80446155a4b7af96bcbd98df75ea20455b9c1f82820ccfa50321ac4",
+    "crates/ic-wire/src/typescript/limits/mod.rs": "0ddad141d8a2e4d6e22f552a22a5fa2b56ea01647309b5f861dd686db936474a",
+    "crates/ic-wire/src/typescript/native_schema/mod.rs": "b2e6801e0906c815cb03173c2537f08f546e04696abb62b42c54904bddd8be91",
+    "crates/ic-wire/src/typescript/native_schema/registry/mod.rs": "f46b2ad9385d975e402669a137cb20622cd4bf64e6e91f9b5cf771e9a9ca0bde",
+    "crates/ic-wire/src/native/encode/mod.rs": "57d078adce76cdc1ad446bb60a5fb676582847f5862e6754fd6564c27ebdd462",
+    "crates/ic-wire/src/native/decode/mod.rs": "0e23c8bba33c2fbe6d51bf1c1be514b95b3952a5b575c6ccbfcd4c64964b00df",
+    "crates/ic-wire/src/native/parser/mod.rs": "90effd865fbc06ca6c4cb2681dbd11a0810ec8143e700e56704171c886fdd35a",
+    "crates/ic-wire/src/native/tests/mod.rs": "3cd376a6f93da28d70650cbd2f3c0a5f9f850b078d234f4f7961bd2f6b3238df",
+    "crates/ic-wire/src/bounded/borrowed/mod.rs": "4e798fc0d339aacd70821e1d2e2ec6dd0bda7771f882c0f2a7850a758a45a883",
+    "crates/ic-wire/src/bounded/packed_i16/mod.rs": "50454c36332ed05118ee6c7e9c1b455aa905dea04585e5f2534ada8a25c13061",
+    "crates/ic-wire-derive/src/lib.rs": "62d087a4dde78b2a103aaa2b81e912fb6b639f871ab03ec0d1f9b5b648cac2b9",
+    "crates/ic-wire-derive/src/endpoint/mod.rs": "82e624b39528ca63df3335c983b511634633d1f90809ce4f73d0d0bb4f4f30ad",
+    "crates/ic-wire-derive/src/native_schema/mod.rs": "9d834e9016d405267c0da864df9b12cc547e495c985154c6ff5fedb1d2d89430",
+    "examples/endpoint/src/lib.rs": "dba8efa3377351169b1ba729ee3bd9bb6b08b490e8e6e6f2c70903dedc276991",
+    "examples/endpoint/tests/cost_matrix/mod.rs": "57dfd266191c409dfb9e0b20c3f070556519871842ca50ae229cbfc9fe85667b",
+    ".shared-tooling.snapshot": "9609cbcbc5ae5d4fdf2df77b76ac69605f9d8a8e5be315ebce77f0ad17d35b4c",
+    "Makefile": "5253475e1069c13feec19ef140d09b43bb581ddca0b3a7d05290214ad43bf52b",
+    "AGENTS.md": "398db4caa245c9f5f3ff114f95e8136e24ac646f2116bb575a7501e6bfec8062",
+    "scripts/ci/evaluate-endpoint-matrix.sh": "320089b707ef33f3cdedb3956f16c08be803f78cd1bbfbb7b6d4c9b7af8c8212",
+    "scripts/ci/summarize-endpoint-matrix.mjs": "7447c71f3a5d891ed52bfd5c309a6634d4e36116a4b2a82ad7aa06a228c50bfe"
+  },
+  "incoming_lock_preserved": true,
+  "all_call_oracles_and_cost_samples_match": true
+}

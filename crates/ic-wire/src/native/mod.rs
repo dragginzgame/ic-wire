@@ -16,6 +16,35 @@ use alloc::vec::Vec;
 use core::cell::Cell;
 use serde::{Deserialize, Serialize};
 
+/// Stable automatic endpoint identity from the exact exported IC method name.
+///
+/// FNV-1a-64 over UTF-8 `ic-wire:method:` followed by the name, using offset basis
+/// 14695981039346656037, prime 1099511628211 and wrapping u64 arithmetic. This is
+/// a routing identity, not authentication or a cryptographic schema fingerprint.
+/// Consumers retain duplicate-ID admission; 64-bit hashes can collide.
+///
+/// The endpoint macro evaluates this at compile time. Rust module paths, type
+/// spelling and execution mode do not participate. Renaming the exported method
+/// changes its ID; `name = "stable-name"` decouples it from a Rust function rename.
+/// Explicit IDs remain valid. Replacing one with this default requires coordinated
+/// clients unless the values match. The frame format itself remains unchanged.
+pub const fn method_id(name: &str) -> u64 {
+    let mut hash = 14_695_981_039_346_656_037u64;
+    let domain = b"ic-wire:method:";
+    let mut index = 0;
+    while index < domain.len() {
+        hash = (hash ^ domain[index] as u64).wrapping_mul(1_099_511_628_211);
+        index += 1;
+    }
+    let bytes = name.as_bytes();
+    index = 0;
+    while index < bytes.len() {
+        hash = (hash ^ bytes[index] as u64).wrapping_mul(1_099_511_628_211);
+        index += 1;
+    }
+    hash
+}
+
 struct Budget {
     nodes: Cell<usize>,
     heap_units: Cell<usize>,

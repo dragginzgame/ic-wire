@@ -1,0 +1,146 @@
+[
+  {
+    "ic_instructions_to_counter_field": [
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616
+    ],
+    "lane": "inline",
+    "length": null,
+    "request_bytes": 11
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862
+    ],
+    "lane": "inline",
+    "length": 0,
+    "request_bytes": 12
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296
+    ],
+    "lane": "inline",
+    "length": 32,
+    "request_bytes": 44
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001
+    ],
+    "lane": "inline",
+    "length": 65536,
+    "request_bytes": 65550
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616,
+      243616
+    ],
+    "lane": "extracted",
+    "length": null,
+    "request_bytes": 11
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862,
+      243862
+    ],
+    "lane": "extracted",
+    "length": 0,
+    "request_bytes": 12
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296,
+      244296
+    ],
+    "lane": "extracted",
+    "length": 32,
+    "request_bytes": 44
+  },
+  {
+    "ic_instructions_to_counter_field": [
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001,
+      762001
+    ],
+    "lane": "extracted",
+    "length": 65536,
+    "request_bytes": 65550
+  }
+]

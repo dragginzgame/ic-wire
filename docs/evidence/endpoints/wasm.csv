@@ -1,0 +1,5 @@
+profile,lane,total_wasm_bytes,code_section_bytes
+evaluation,inline,31806,28163
+evaluation,extracted,32414,28655
+benchmark-speed,inline,34622,30872
+benchmark-speed,extracted,34622,30872

@@ -2,7 +2,8 @@
 
 The maintained qualification exercises the selected Postcard codec, its
 generated TypeScript implementation and an isolated Candid comparison suite.
-Endpoint adapters and browser SDKs remain consumer-owned. The unpublished codec
+The optional typed endpoint integration has a standalone Platform/Testkit fixture;
+framework policies and browser SDKs remain consumer-owned. The unpublished codec
 benchmark package may use PocketIC for isolated IC instruction measurements;
 it does not qualify consumer endpoint integrations.
 
@@ -24,6 +25,9 @@ it is no longer maintained alongside the production Serde suite.
 | `check-consumer-benchmarks` | Toko-shaped and 1/10/100-type derive corpus, lint and MSRV checks |
 | `evaluate-codecs` | Repeated native timing, allocator counts, peak live heap and Wasm footprint |
 | `check-qualification` | Allocation/borrowing fixture tests, strict linting and compiler-floor checks |
+| `check-endpoint` | Typed endpoint/native schema checks, compiler diagnostics, lint, Wasm/MSRV and graph isolation |
+| `check-endpoint-ic` | Explicit installed endpoint/rollback and async qualification using a prepared PocketIC server |
+| `evaluate-endpoints` | Every exported fixture endpoint: repeated complete IC instructions, observed cycle debits, frame sizes and Wasm; explicitly prepared instrumented server |
 | `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.91 floor |
 
 The unpublished `ic-wire-qualification` package owns the maintained allocation,

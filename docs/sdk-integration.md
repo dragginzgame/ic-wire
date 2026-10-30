@@ -2,8 +2,11 @@
 
 Wire owns one Serde/Postcard codec, resource admission and typed codec errors.
 The SDK owns endpoint selection, authentication, copying IC arguments, replies,
-transport, retries, persistence and rollback. No IC SDK is needed by Wire's runtime.
+transport, retries, persistence and rollback. No IC SDK is needed by Wire's core codec.
 These interfaces address [#29](https://github.com/dragginzgame/ic-wire/issues/29).
+For typed IC exports using Platform's maintained generator, the separate opt-in
+[endpoint integration](endpoints.md) supplies framed I/O and pre-copy admission.
+SDK authentication, delivery and application policy remain local.
 
 ## Payloads and explicit frames
 
@@ -44,7 +47,8 @@ to a deployment automatically. Retain original bytes for exact retries/signature
 `encode_response_to_slice` return a mutable slice of only the completed encoding.
 Their lifetime is tied to the caller's storage. Use scoped or stack storage when
 appropriate, and publish the returned bytes synchronously only after success.
-The SDK owns any buffer loan across an await; Wire supplies no async machinery.
+The SDK owns any buffer loan across an await; these native codec APIs supply no
+async buffer custody.
 
 ```rust
 fn main() -> Result<(), ic_wire::Error> {

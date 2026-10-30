@@ -13,10 +13,10 @@ complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
 paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
-paths+=(scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh)
+paths+=(scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 # Include authored crate inputs automatically, including new untracked modules.
 # Git exclusions keep ignored build/cache output out of the disposable export.
-git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ > "$fixture/crate-paths"
+git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/endpoint/ > "$fixture/crate-paths"
 while IFS= read -r -d '' path; do
     [[ ! -f "$root/$path" ]] || paths+=("$path")
 done < "$fixture/crate-paths"

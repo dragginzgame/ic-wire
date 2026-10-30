@@ -7,7 +7,7 @@ qualification work. These guides are task-specific, not a startup reading list.
 The Postcard runtime is qualified for bounded Rust integration.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `7ee5c83744aa822ecd070703dbf0a7d95076d5f6` (recorded version 0.27.3).
+rules, vendored at `3c458c28cca132784e6e70fbaf219bdea1e4cf8f` (recorded version 0.27.9).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot
@@ -21,11 +21,15 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - Establish a reusable Rust developer experience and a substantial measured win
   before broad adoption. Postcard is selected for controlled RPC and owned user
   endpoints. Preserve the explicit runtime contract in docs/runtime.md.
-- Keep runtime code Wasm-safe and independent of platform SDKs and host tooling.
-- Keep workspace dependency roles limited to codec qualification. The unpublished
+- Keep the core codec Wasm-safe and independent of platform SDKs and host tooling.
+  The optional `endpoint` feature connects typed Wire handlers to published IC
+  Platform entrypoints; Platform owns exports and execution. Canic policies and
+  artifact admission remain downstream. Do not introduce another executor.
+- Keep other workspace dependency roles limited to codec qualification. The unpublished
   benchmark package may use Candid and PocketIC through IC Platform as dev
-  dependencies, with IC Testkit owning server admission/lifecycle. Do not add
-  endpoint SDKs or browser transports; application integration belongs to consumers.
+  dependencies, with IC Testkit owning server admission/lifecycle. The unpublished
+  standalone endpoint fixture qualifies the optional integration through the same
+  owners. Do not add browser transports; application policy belongs to consumers.
 - Use one selected wire encoding, not a configurable codec framework.
 - Default new contract examples to byte-oriented fields for binary data and
   `Packed<T>` for large homogeneous supported integer/hash arrays. Keep ordinary

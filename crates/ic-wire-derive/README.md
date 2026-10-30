@@ -1,5 +1,10 @@
 # IC Wire metadata derive
 
+The optional `endpoint` feature also implements the `query`/`update` attributes
+re-exported by `ic_wire::endpoint`. They supply Wire codec hooks to Platform's
+maintained entrypoint generator; they implement neither IC exports nor an executor.
+Consumers should enable the feature on `ic-wire`, not use this support crate directly.
+
 `Wire` describes ordinary Serde layouts for IC Wire’s optional host-side
 TypeScript generator. It generates no serializers and requires no field IDs.
 Use the re-export from `ic-wire` alongside ordinary `Serialize` / `Deserialize`.
