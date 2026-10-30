@@ -4,7 +4,9 @@
 [recorded commit](baseline-revision.txt), Platform 0.9.1, resolved Build/Testkit/Host
 0.70.5 and independently selected release-editor CLI 0.70.3. Candidate: Platform
 0.10.0 and Build/Testkit/Host plus the managed CLI at 0.71.0. See the retained
-[before lock](baseline-Cargo.lock), [after lock](Cargo.lock) and [manifest](Cargo.toml).
+[before lock](baseline-Cargo.lock), [after lock](Cargo.lock) and [manifest snapshot](Cargo.toml.snapshot).
+The manifest is stored as data so repository checks do not discover an incomplete
+workspace here; reproduction restores its `Cargo.toml` name in the isolated copy.
 Wire package versions stay 0.8.0; pending notes select 0.9.0 because endpoint users
 must coordinate runtime-consuming dependencies on Platform 0.10. Core-only Wire
 consumers need no migration. Shared Tooling stays at reviewed 0.27.11.

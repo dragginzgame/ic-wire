@@ -2,6 +2,12 @@
 
 ## [0.9.0]
 
+### 🩹 Fixed
+
+- Store the adoption evidence manifest as a snapshot so dependency-pin checks
+  do not discover an incomplete workspace under `docs/evidence`. The reproduction
+  script restores its Cargo filename only in the isolated study workspace.
+
 ### ⚠️ Breaking
 
 - Adopt IC Platform 0.10.0 for the optional endpoint integration. Endpoint users

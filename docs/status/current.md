@@ -2,7 +2,7 @@
 
 ## Released source 0.8.0; pending 0.9.0
 
-HEAD is the maintainer's 0.8.0 release at `25a7212`; own package versions remain
+The released baseline is 0.8.0 at `25a7212`; own package versions remain
 0.8.0. Pending 0.9.0 coordinates the optional endpoint runtime on Platform 0.10.
 Core-only users need no migration. Leave staging, commits, own versions,
 publication and release execution to the maintainer.
@@ -40,6 +40,12 @@ strict Clippy, benchmark driver compilation/roundtrips, MSRV, installed endpoint
 limits/rollback, editor admission and the disposable release fixture pass.
 No full CI, macOS or sibling adoption was run. Evidence and reproduction are
 linked from the study; raw runs are in `/tmp/wire-platform010-tooling071/`.
+
+The retained manifest uses `Cargo.toml.snapshot`, not an active Cargo filename,
+so `check-pins` does not discover an incomplete evidence workspace. Reproduction
+copies it back to `Cargo.toml` only in its isolated workspace. `make check-pins`,
+restored-workspace locked metadata, script syntax and documentation links pass.
+No runtime or protocol change is involved.
 
 ## Shared Tooling and earlier qualification
 
