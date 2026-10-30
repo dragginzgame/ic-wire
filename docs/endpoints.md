@@ -1,23 +1,23 @@
 # Typed Wire endpoints
 
 Enable `ic-wire`'s optional `endpoint` feature in a standalone canister. It
-connects ordinary Serde handlers to published IC Platform 0.10.0's maintained
+connects ordinary Serde handlers to published IC Platform 0.11.0's maintained
 query/update generator. The default Wire codec stays `no_std + alloc` and has no
 Platform dependency. The integration uses Platform's `std` runtime without Candid,
 Canic, an extra executor or a second encoding.
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.9.0", features = ["endpoint"] }
+ic-wire = { version = "0.10.0", features = ["endpoint"] }
 ```
 
-This guide describes the pending 0.9.0 integration; the version above becomes
+This guide describes the pending 0.10.0 integration; the version above becomes
 available only after publication. The
 [standalone fixture](../examples/endpoint/Cargo.toml) uses the local workspace
 package for qualification. Git releases and registry publication remain separate.
 
 Platform embeds its IC0 wrappers and executor. Endpoint users must adopt
-Platform 0.10 throughout their application's runtime dependencies, including timer
+Platform 0.11 throughout their application's runtime dependencies, including timer
 integrations; do not combine it with an older external executor. Cargo's singleton
 guard rejects conflicting runtime owners. Core-only Wire consumers need no runtime
 migration. Handler declarations, frame bytes, method identities and Wire admission

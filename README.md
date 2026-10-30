@@ -26,6 +26,11 @@ See the [endpoint guide](docs/endpoints.md)
 and [standalone consumer](examples/endpoint/src/lib.rs). Platform owns IC exports
 and the executor; the core codec retains its runtime-independent default graph.
 
+Enable `platform-types` for host `Wire` schemas on Platform's owned `Principal`
+and `Account`, independently of endpoints. This replaces Platform's `wire-schema`
+selection without changing bytes or budgets; see the
+[migration and representation rules](crates/ic-wire/README.md#optional-platform-identity-schemas).
+
 For new contracts, default binary fields to `Bytes<N>`, `ic_wire::ByteBuf`
 or the `serde_bytes` adapter, and large homogeneous integer/hash arrays to
 `Packed<T>`. Keep ordinary collections for records and small values where compact

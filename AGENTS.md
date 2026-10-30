@@ -25,6 +25,8 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
   The optional `endpoint` feature connects typed Wire handlers to published IC
   Platform entrypoints; Platform owns exports and execution. Canic policies and
   artifact admission remain downstream. Do not introduce another executor.
+  The independent `platform-types` feature owns host schema implementations for
+  Platform's owned Principal/Account; only `endpoint` selects Platform CDK.
 - Keep other workspace dependency roles limited to codec qualification. The unpublished
   benchmark package may use Candid and PocketIC through IC Platform as dev
   dependencies, with IC Testkit owning server admission/lifecycle. The unpublished

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "ic-platform",
+    "version": "0.11.0",
+    "source_identity": {
+      "files": 120,
+      "sha256": "19ce58c753efaa89884c6c172aa0962ddb0fc7d42d5301566f147ccc75d9cd43"
+    },
+    "matches_prepared": true,
+    "published_commit": "b8ecf498ec62705ae42069ff663d3d527d62af01",
+    "crate_checksum": "f25c04deaaa7906e751e2b963c1a54c84c0b1e6acdae77f16adf6fb62c5d1903"
+  },
+  {
+    "name": "ic-platform-macros",
+    "version": "0.11.0",
+    "source_identity": {
+      "files": 5,
+      "sha256": "7cd4eba7813b3e9e2ab93a83965d225d08033a492d4be31e949839c83c49bb61"
+    },
+    "matches_prepared": true,
+    "published_commit": "b8ecf498ec62705ae42069ff663d3d527d62af01",
+    "crate_checksum": "b51d66f2fd41c6abc756e85f2e97fe081a3cadce167b5bc651cb8ead3e2445a7"
+  },
+  {
+    "name": "ic-platform-runtime-guard",
+    "version": "0.11.0",
+    "source_identity": {
+      "files": 1,
+      "sha256": "4809c67bc44dbc5e8a08e3aa85d0570ef0d1fcd7dc516a6a1c2b277ffc9a433f"
+    },
+    "matches_prepared": true,
+    "published_commit": "b8ecf498ec62705ae42069ff663d3d527d62af01",
+    "crate_checksum": "e3de235b7eaaad3d515256550538a7044654ed210297f5af49a121e329aef767"
+  }
+]

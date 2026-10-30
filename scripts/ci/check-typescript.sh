@@ -25,3 +25,4 @@ node crates/ic-wire/examples/typescript_conformance/endian.mjs "$out/compiled/wi
 bash "$root/scripts/ci/check-schema-targets.sh"
 
 bash "$root/scripts/ci/check-bulk-advice.sh"
+bash "$root/scripts/ci/check-platform-types.sh"

@@ -9,6 +9,8 @@ mod bounded;
 mod contract;
 mod float;
 mod packed;
+#[cfg(all(feature = "platform-types", not(target_family = "wasm")))]
+mod platform_types;
 pub use packed::{Packed, PackedElement};
 /// Optional typed IC entrypoints using Platform's export generator and executor.
 #[cfg(feature = "endpoint")]

@@ -62,6 +62,7 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `check-endpoint-ic` | Installed endpoint/rollback cases; explicitly prepared `POCKET_IC_BIN` required |
 | `evaluate-endpoints` | All exported endpoint costs and rejection paths; fresh absolute `EVIDENCE_DIR` and instrumented `POCKET_IC_BIN` required |
 | `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
+| `check-platform-types` | Standalone Principal/Account derives, exact Rust/TS bytes and malformed inputs, Rust 1.91 host/Wasm, schema-only/combined endpoint graphs; included in `check-typescript` |
 | `evaluate-codec-matrix` | Full 21-cohort Wire/Candid matrix; requires explicit prepared PocketIC |
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
@@ -184,8 +185,10 @@ normal/build dependencies remain separate from the private qualification package
 IC Build is restricted to that unpublished package. Alternative-codec dependencies
 are retired.
 The default codec graph has no Platform or simulator dependencies. The opt-in
-`endpoint` feature selects Platform's Candid-free `cdk` surface. The unpublished
-benchmark and endpoint fixture packages use PocketIC through Platform and Testkit
+`endpoint` feature selects Platform's Candid-free `cdk` surface. The optional
+`platform-types` integration independently selects `principal` and host TypeScript
+support; its standalone consumer check also qualifies the combined endpoint graph.
+The unpublished benchmark and endpoint fixture packages use PocketIC through Platform and Testkit
 for qualification. Endpoint cost comparisons use
 `bash scripts/ci/evaluate-endpoint.sh NEW_OUTPUT_DIRECTORY` with an explicitly
 prepared `POCKET_IC_BIN`; see [scope and results](evidence/endpoints/README.md).

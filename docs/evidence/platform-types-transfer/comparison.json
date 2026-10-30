@@ -1,0 +1,1190 @@
+{
+  "logical": 384,
+  "physical": 608,
+  "reports": {
+    "evaluation": {
+      "wasm": {
+        "before": 99947,
+        "after": 99819,
+        "delta": -128,
+        "percent": -0.12806787597426636
+      },
+      "code": {
+        "before": 86068,
+        "after": 86068,
+        "delta": 0,
+        "percent": 0
+      },
+      "cases": [
+        {
+          "method": "echo",
+          "case": "blob-0",
+          "outcome": "reply",
+          "request_bytes": 14,
+          "instructions": {
+            "before": 253815,
+            "after": 253815,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 253815,
+              "min": 253815,
+              "max": 253815,
+              "samples": [
+                253815,
+                253815,
+                253815,
+                253815,
+                253815,
+                253815,
+                253815,
+                253815
+              ]
+            },
+            "after_samples": {
+              "mean": 253815,
+              "min": 253815,
+              "max": 253815,
+              "samples": [
+                253815,
+                253815,
+                253815,
+                253815,
+                253815,
+                253815,
+                253815,
+                253815
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 256230,
+            "after": 256230,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 256230,
+              "min": 256230,
+              "max": 256230,
+              "samples": [
+                256230,
+                256230,
+                256230,
+                256230,
+                256230,
+                256230,
+                256230,
+                256230
+              ]
+            },
+            "after_samples": {
+              "mean": 256230,
+              "min": 256230,
+              "max": 256230,
+              "samples": [
+                256230,
+                256230,
+                256230,
+                256230,
+                256230,
+                256230,
+                256230,
+                256230
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "borrowed_echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 255381,
+            "after": 255381,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 255381,
+              "min": 255381,
+              "max": 255381,
+              "samples": [
+                255381,
+                255381,
+                255381,
+                255381,
+                255381,
+                255381,
+                255381,
+                255381
+              ]
+            },
+            "after_samples": {
+              "mean": 255381,
+              "min": 255381,
+              "max": 255381,
+              "samples": [
+                255381,
+                255381,
+                255381,
+                255381,
+                255381,
+                255381,
+                255381,
+                255381
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "value-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 256985,
+            "after": 256985,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 256985,
+              "min": 256985,
+              "max": 256985,
+              "samples": [
+                256985,
+                256985,
+                256985,
+                256985,
+                256985,
+                256985,
+                256985,
+                256985
+              ]
+            },
+            "after_samples": {
+              "mean": 256985,
+              "min": 256985,
+              "max": 256985,
+              "samples": [
+                256985,
+                256985,
+                256985,
+                256985,
+                256985,
+                256985,
+                256985,
+                256985
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "composite",
+          "case": "self-call",
+          "outcome": "reply",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 1488232,
+            "after": 1488232,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1488232,
+              "min": 1488232,
+              "max": 1488232,
+              "samples": [
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232
+              ]
+            },
+            "after_samples": {
+              "mean": 1488232,
+              "min": 1488232,
+              "max": 1488232,
+              "samples": [
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232,
+                1488232
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1245511.25,
+            "after": 1245511.25,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1245511.25,
+              "min": 1245044,
+              "max": 1245578,
+              "samples": [
+                1245044,
+                1245578,
+                1245578,
+                1245578,
+                1245578,
+                1245578,
+                1245578,
+                1245578
+              ]
+            },
+            "after_samples": {
+              "mean": 1245511.25,
+              "min": 1245044,
+              "max": 1245578,
+              "samples": [
+                1245044,
+                1245578,
+                1245578,
+                1245578,
+                1245578,
+                1245578,
+                1245578,
+                1245578
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18038386.25,
+            "after": 18038386.25,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-117",
+          "outcome": "trap",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1727584,
+            "after": 1727584,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1727584,
+              "min": 1727584,
+              "max": 1727584,
+              "samples": [
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584
+              ]
+            },
+            "after_samples": {
+              "mean": 1727584,
+              "min": 1727584,
+              "max": 1727584,
+              "samples": [
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584,
+                1727584
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18520584,
+            "after": 18520584,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 44,
+          "instructions": {
+            "before": 252355,
+            "after": 252355,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 252355,
+              "min": 252355,
+              "max": 252355,
+              "samples": [
+                252355,
+                252355,
+                252355,
+                252355,
+                252355,
+                252355,
+                252355,
+                252355
+              ]
+            },
+            "after_samples": {
+              "mean": 252355,
+              "min": 252355,
+              "max": 252355,
+              "samples": [
+                252355,
+                252355,
+                252355,
+                252355,
+                252355,
+                252355,
+                252355,
+                252355
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_mutate",
+          "case": "reply-32",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 492549,
+            "after": 492549,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 492549,
+              "min": 492549,
+              "max": 492549,
+              "samples": [
+                492549,
+                492549,
+                492549,
+                492549,
+                492549,
+                492549,
+                492549,
+                492549
+              ]
+            },
+            "after_samples": {
+              "mean": 492549,
+              "min": 492549,
+              "max": 492549,
+              "samples": [
+                492549,
+                492549,
+                492549,
+                492549,
+                492549,
+                492549,
+                492549,
+                492549
+              ]
+            }
+          },
+          "cycles": {
+            "before": 7000549,
+            "after": 7000549,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-65522",
+          "outcome": "reply",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 3884431,
+            "after": 3884431,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 3884431,
+              "min": 3884431,
+              "max": 3884431,
+              "samples": [
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431
+              ]
+            },
+            "after_samples": {
+              "mean": 3884431,
+              "min": 3884431,
+              "max": 3884431,
+              "samples": [
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431,
+                3884431
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "truncated",
+          "outcome": "trap",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 249778,
+            "after": 249778,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 249778,
+              "min": 249778,
+              "max": 249778,
+              "samples": [
+                249778,
+                249778,
+                249778,
+                249778,
+                249778,
+                249778,
+                249778,
+                249778
+              ]
+            },
+            "after_samples": {
+              "mean": 249778,
+              "min": 249778,
+              "max": 249778,
+              "samples": [
+                249778,
+                249778,
+                249778,
+                249778,
+                249778,
+                249778,
+                249778,
+                249778
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "wrong-id-at-limit",
+          "outcome": "trap",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 243786,
+            "after": 243786,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 243786,
+              "min": 243786,
+              "max": 243786,
+              "samples": [
+                243786,
+                243786,
+                243786,
+                243786,
+                243786,
+                243786,
+                243786,
+                243786
+              ]
+            },
+            "after_samples": {
+              "mean": 243786,
+              "min": 243786,
+              "max": 243786,
+              "samples": [
+                243786,
+                243786,
+                243786,
+                243786,
+                243786,
+                243786,
+                243786,
+                243786
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        }
+      ]
+    },
+    "benchmark-speed": {
+      "wasm": {
+        "before": 93518,
+        "after": 93390,
+        "delta": -128,
+        "percent": -0.13687204602322547
+      },
+      "code": {
+        "before": 80630,
+        "after": 80630,
+        "delta": 0,
+        "percent": 0
+      },
+      "cases": [
+        {
+          "method": "echo",
+          "case": "blob-0",
+          "outcome": "reply",
+          "request_bytes": 14,
+          "instructions": {
+            "before": 247492,
+            "after": 247492,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 247492,
+              "min": 247492,
+              "max": 247492,
+              "samples": [
+                247492,
+                247492,
+                247492,
+                247492,
+                247492,
+                247492,
+                247492,
+                247492
+              ]
+            },
+            "after_samples": {
+              "mean": 247492,
+              "min": 247492,
+              "max": 247492,
+              "samples": [
+                247492,
+                247492,
+                247492,
+                247492,
+                247492,
+                247492,
+                247492,
+                247492
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 249729,
+            "after": 249729,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 249729,
+              "min": 249729,
+              "max": 249729,
+              "samples": [
+                249729,
+                249729,
+                249729,
+                249729,
+                249729,
+                249729,
+                249729,
+                249729
+              ]
+            },
+            "after_samples": {
+              "mean": 249729,
+              "min": 249729,
+              "max": 249729,
+              "samples": [
+                249729,
+                249729,
+                249729,
+                249729,
+                249729,
+                249729,
+                249729,
+                249729
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "borrowed_echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 249485,
+            "after": 249485,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 249485,
+              "min": 249485,
+              "max": 249485,
+              "samples": [
+                249485,
+                249485,
+                249485,
+                249485,
+                249485,
+                249485,
+                249485,
+                249485
+              ]
+            },
+            "after_samples": {
+              "mean": 249485,
+              "min": 249485,
+              "max": 249485,
+              "samples": [
+                249485,
+                249485,
+                249485,
+                249485,
+                249485,
+                249485,
+                249485,
+                249485
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "value-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 250138,
+            "after": 250138,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 250138,
+              "min": 250138,
+              "max": 250138,
+              "samples": [
+                250138,
+                250138,
+                250138,
+                250138,
+                250138,
+                250138,
+                250138,
+                250138
+              ]
+            },
+            "after_samples": {
+              "mean": 250138,
+              "min": 250138,
+              "max": 250138,
+              "samples": [
+                250138,
+                250138,
+                250138,
+                250138,
+                250138,
+                250138,
+                250138,
+                250138
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "composite",
+          "case": "self-call",
+          "outcome": "reply",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 1473022,
+            "after": 1473022,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1473022,
+              "min": 1473022,
+              "max": 1473022,
+              "samples": [
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022
+              ]
+            },
+            "after_samples": {
+              "mean": 1473022,
+              "min": 1473022,
+              "max": 1473022,
+              "samples": [
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022,
+                1473022
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1230033,
+            "after": 1230033,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1230033,
+              "min": 1229823,
+              "max": 1230063,
+              "samples": [
+                1229823,
+                1230063,
+                1230063,
+                1230063,
+                1230063,
+                1230063,
+                1230063,
+                1230063
+              ]
+            },
+            "after_samples": {
+              "mean": 1230033,
+              "min": 1229823,
+              "max": 1230063,
+              "samples": [
+                1229823,
+                1230063,
+                1230063,
+                1230063,
+                1230063,
+                1230063,
+                1230063,
+                1230063
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18022908,
+            "after": 18022908,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-117",
+          "outcome": "trap",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1711693,
+            "after": 1711693,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1711693,
+              "min": 1711693,
+              "max": 1711693,
+              "samples": [
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693
+              ]
+            },
+            "after_samples": {
+              "mean": 1711693,
+              "min": 1711693,
+              "max": 1711693,
+              "samples": [
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693,
+                1711693
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18504693,
+            "after": 18504693,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 44,
+          "instructions": {
+            "before": 247824,
+            "after": 247824,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 247824,
+              "min": 247824,
+              "max": 247824,
+              "samples": [
+                247824,
+                247824,
+                247824,
+                247824,
+                247824,
+                247824,
+                247824,
+                247824
+              ]
+            },
+            "after_samples": {
+              "mean": 247824,
+              "min": 247824,
+              "max": 247824,
+              "samples": [
+                247824,
+                247824,
+                247824,
+                247824,
+                247824,
+                247824,
+                247824,
+                247824
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_mutate",
+          "case": "reply-32",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 487891,
+            "after": 487891,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 487891,
+              "min": 487891,
+              "max": 487891,
+              "samples": [
+                487891,
+                487891,
+                487891,
+                487891,
+                487891,
+                487891,
+                487891,
+                487891
+              ]
+            },
+            "after_samples": {
+              "mean": 487891,
+              "min": 487891,
+              "max": 487891,
+              "samples": [
+                487891,
+                487891,
+                487891,
+                487891,
+                487891,
+                487891,
+                487891,
+                487891
+              ]
+            }
+          },
+          "cycles": {
+            "before": 6995891,
+            "after": 6995891,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-65522",
+          "outcome": "reply",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 3879734,
+            "after": 3879734,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 3879734,
+              "min": 3879734,
+              "max": 3879734,
+              "samples": [
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734
+              ]
+            },
+            "after_samples": {
+              "mean": 3879734,
+              "min": 3879734,
+              "max": 3879734,
+              "samples": [
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734,
+                3879734
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "truncated",
+          "outcome": "trap",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 246849,
+            "after": 246849,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 246849,
+              "min": 246849,
+              "max": 246849,
+              "samples": [
+                246849,
+                246849,
+                246849,
+                246849,
+                246849,
+                246849,
+                246849,
+                246849
+              ]
+            },
+            "after_samples": {
+              "mean": 246849,
+              "min": 246849,
+              "max": 246849,
+              "samples": [
+                246849,
+                246849,
+                246849,
+                246849,
+                246849,
+                246849,
+                246849,
+                246849
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "wrong-id-at-limit",
+          "outcome": "trap",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 243392,
+            "after": 243392,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 243392,
+              "min": 243392,
+              "max": 243392,
+              "samples": [
+                243392,
+                243392,
+                243392,
+                243392,
+                243392,
+                243392,
+                243392,
+                243392
+              ]
+            },
+            "after_samples": {
+              "mean": 243392,
+              "min": 243392,
+              "max": 243392,
+              "samples": [
+                243392,
+                243392,
+                243392,
+                243392,
+                243392,
+                243392,
+                243392,
+                243392
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        }
+      ]
+    }
+  }
+}

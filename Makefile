@@ -77,10 +77,13 @@ fuzz-runtime:
 
 .PHONY: check-typed-diagnostics
 .PHONY: check-release check-qualification
-.PHONY: check-typescript
+.PHONY: check-typescript check-platform-types
 
 check-typescript:
 	+@bash scripts/ci/check-typescript.sh
+
+check-platform-types:
+	+@bash scripts/ci/check-platform-types.sh
 
 check-qualification:
 	+@env cargo test --locked -p ic-wire-qualification --lib --tests --features allocation-fixture
@@ -109,6 +112,7 @@ help:
 		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
+		'Qualification: check-platform-types (standalone Principal/Account, MSRV and feature isolation)' \
 		'Evaluation: evaluate-codecs / evaluate-codec-matrix (timing, heap, Wasm, explicit PocketIC)' \
 		'Qualification: check-benchmarks (comparison corpus, lint and MSRV)' \
 		'Evaluation: evaluate-allocation (borrowing, buffers and bounded/packed layouts)' \

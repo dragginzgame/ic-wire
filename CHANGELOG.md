@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.0]
+
+### ⚠️ Breaking
+
+- Adopt published IC Platform 0.11.0 for both optional integrations. Endpoint
+  consumers must align runtime-consuming dependencies on Platform 0.11.
+  Remove Platform's retired `wire-schema` feature and enable Wire's
+  `platform-types` instead. Codec bytes, budgets, serialization and handler
+  syntax are unchanged; core-only users need no migration.
+
+### ➕ Added
+
+- Add opt-in `platform-types` schemas for Platform’s owned Principal and Account.
+  It enables host TypeScript support independently of endpoints; only `endpoint`
+  selects Platform CDK. Consumers replace Platform’s `wire-schema` selection
+  with Wire’s `platform-types`, preserving codec bytes, bounds and serialization.
+
+### 🧪 Testing
+
+- Transfer Principal/Account Rust–TypeScript conformance and malformed-input
+  checks into Wire, including standalone consumer derives, Rust 1.91 and
+  host/Wasm feature isolation with and without endpoints. The
+  [Platform 0.11 qualification](docs/evidence/platform-types-transfer/published/README.md)
+  covers the supplying registry release after its isolated source preparation.
+- Match package names in endpoint dependency checks so local source paths such
+  as `candidate` do not falsely report a Candid dependency.
+
 ## [0.9.0] - 2026-10-30
 
 ### 🩹 Fixed

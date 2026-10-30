@@ -12,6 +12,7 @@ primitive validation, resource limits and typed errors.
 | --- | --- |
 | IC Wire | Encoding, bounds, derives, typed codec errors and TypeScript codecs |
 | IC Wire optional endpoint feature | Typed handlers connected to Platform through native Wire frames |
+| IC Wire optional platform-types feature | Host schemas for Platform's owned Principal/Account; Platform retains Serde ownership |
 | IC Platform | IC exports, query/update contexts and executor |
 | Consumer contract | Request/reply types, method identities and semantic validation |
 | Application/framework owner | Authentication, dispatch policy and final artifact admission |
@@ -21,8 +22,10 @@ primitive validation, resource limits and typed errors.
 | Shared Tooling | Reviewed contributor setup, formatting and release mechanics |
 
 The core codec remains Wasm-safe and independent of platform and host tooling.
-The opt-in `endpoint` feature uses published Platform's generator and executor;
-see [typed endpoints](endpoints.md). Browser transports remain consumer-owned. The unpublished
+The independent `platform-types` feature selects only Platform `principal` and
+host schema support. The opt-in `endpoint` feature selects Platform CDK and uses
+its generator and executor; both use one optional Platform dependency.
+See [typed endpoints](endpoints.md). Browser transports remain consumer-owned. The unpublished
 benchmark crate may use Candid and PocketIC as dev dependencies for codec
 comparisons and IC instruction measurements. The standalone endpoint fixture also
 uses Platform/Testkit for installed qualification. Published runtime graphs retain

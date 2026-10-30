@@ -1,91 +1,83 @@
 # Current handoff
 
-## Released source 0.8.0; pending 0.9.0
+## Released source 0.9.0; pending 0.10.0
 
-The released baseline is 0.8.0 at `25a7212`; own package versions remain
-0.8.0. Pending 0.9.0 coordinates the optional endpoint runtime on Platform 0.10.
-Core-only users need no migration. Leave staging, commits, own versions,
-publication and release execution to the maintainer.
+Released baseline: `edb5d1b`, Wire 0.9.0. Own versions remain unchanged. Pending
+0.10.0 adds opt-in identity schemas and adopts published Platform 0.11. Leave staging,
+commits, versions, publication and release execution to the maintainer.
 
-## Platform 0.10 / IC Tooling 0.71 adoption
+## Principal/Account schema transfer
 
-Workspace requirements select Platform 0.10.0 and Build/Testkit 0.71.0; the lock
-selects their coordinated macros, runtime guard and Host family. Native Testkit
-retains Platform 0.9.1 without an executor. The actual canister graph has one
-Platform 0.10 runtime and excludes external executor/IC0, Candid and PocketIC.
-Core-only Wire remains Platform-free. Rust floor remains 1.91.
+`platform-types` implements the existing host `typescript::Wire` trait for
+Platform's owned Principal and Account. It enables `principal` with defaults
+disabled and host TypeScript support. Only `endpoint` selects CDK; both features
+share one optional Platform dependency. Core-only Wire remains Platform-free.
+No wrappers, extra crates, serializer alternatives or second schema trait.
 
-The managed release-editor selection is 0.71.0. Existing setup and offline
-admission passed; the actual editor passed the disposable release-adapter fixture.
-Only temporary repositories saw fixture commits/tags/pushes; validation gates
-were substituted. No real release or publication was performed.
+Consumers remove Platform `wire-schema` and select Wire `platform-types`.
+Principal stays bounded bytes (max 29); Account stays owner then optional
+32-byte subaccount. Absent and explicit zero remain distinct bytes despite
+Account equality. Serialization, budgets, identities, accepted inputs and
+retry bytes are unchanged. See the [migration](../../crates/ic-wire/README.md#optional-platform-identity-schemas).
 
-Endpoint consumers must align runtime-consuming dependencies on Platform 0.10.
-Handler syntax, wire bytes, identities, bounds, acceptance and retry bytes are
-unchanged. Platform's prepared-call API moved into its facade; Wire's existing
-transport/endpoint code is not rewritten to use it. See [endpoints](../endpoints.md).
-The registry review finds 118 existing Platform source files and all five macro
-files unchanged; only the root declaration and added call module differ.
+The single root dependency and lock now select published Platform 0.11.0, macros
+and runtime guard together. All 126 supplier source files match the isolated
+preparation; registry archive checksums match the lock. Endpoint consumers must
+align runtime-consuming dependencies on Platform 0.11. The coordinated runtime
+identity change makes the pending Wire release 0.10.0. No sibling checkout was
+modified and no publication, release or commit was performed.
 
-The [matched adoption study](../evidence/platform010-tooling071/README.md)
-measures 12 cases across seven exports, both profiles, eight repetitions after
-warmup: 384 logical calls / 608 physical executions. Complete instructions,
-observed cycle debits, frames, outcomes and transaction-state oracles match.
-Total Wasm grows eight bytes: 99,939 → 99,947 at opt-z and 93,510 → 93,518 at
-opt-3. Code sections stay 86,068 / 80,630 bytes. This is a focused comparison,
-not a new full Candid/178-case matrix or a general performance claim.
+## Qualification
 
-Locked metadata, dependency boundaries, endpoint native/schema/diagnostic checks,
-strict Clippy, benchmark driver compilation/roundtrips, MSRV, installed endpoint
-limits/rollback, editor admission and the disposable release fixture pass.
-No full CI, macOS or sibling adoption was run. Evidence and reproduction are
-linked from the study; raw runs are in `/tmp/wire-platform010-tooling071/`.
+[Prepared-source evidence](../evidence/platform-types-transfer/README.md) binds
+Platform 421edbc plus its prepared removal, the Wire transfer, exact compiler,
+locks, server and artifact hashes. Schema output and Rust frame vectors match
+between registry 0.10 and prepared 0.11. Rust 1.91 standalone derives, host/Wasm
+feature isolation, combined endpoint schemas, strict Clippy and Rust/TS
+byte/malformed tests pass. `make check-platform-types` runs this focused consumer
+proof and is included in the TypeScript CI group.
 
-The retained manifest uses `Cargo.toml.snapshot`, not an active Cargo filename,
-so `check-pins` does not discover an incomplete evidence workspace. Reproduction
-copies it back to `Cargo.toml` only in its isolated workspace. `make check-pins`,
-restored-workspace locked metadata, script syntax and documentation links pass.
-No runtime or protocol change is involved.
+[Published-supplier qualification](../evidence/platform-types-transfer/published/README.md)
+uses registry 0.11 for standalone schema/Serde consumers, Rust 1.91 host/Wasm,
+combined endpoint graphs and strict Clippy. Exact Rust/TS bytes and malformed
+cases pass. Endpoint native/schema tests, 11 compiler diagnostics and passing
+control, strict lint, Wasm/MSRV and installed limits/rollback pass. The Candid
+comparison corpus's three roundtrip/rejection tests pass on the new supplier.
 
-## Shared Tooling and earlier qualification
+Dependency checks match package names, avoiding a false Candid hit in local
+candidate paths. The canister graph has one runtime; Testkit's native-only
+Platform 0.9.1 stays outside it. Schema-only users select no Candid/executor;
+Wasm has no serde_json and core-only Wire remains Platform-free.
 
-Shared Tooling remains reviewed 0.27.11 at
-`62edfbd43087a718bf0283e9040676a49211976d` (116 selected files). No snapshot payload
-was changed in this batch. Benchmark roots use ordinary modules under `drivers/`;
-lint expectations are scoped, with explained compile-fail input exceptions.
-The [publication adapter](../cargo-publication.md) retains attempts and exact
-package selection. Partial-upload reconciliation remains manual.
+The published-supplier comparison covers 12 cases/seven exports, two profiles
+and eight repetitions after warmup: 384 measured logical calls / 608 physical
+executions. Every instruction/cycle sample matches, as do frames and outcomes.
+Code sections remain 86,068 B (opt-z) and 80,630 B (opt-3); total Wasm is
+99,947 → 99,950 B (+3 B, +0.003%) and 93,518 → 93,518 B. Raw outputs are
+`/tmp/wire-platform011-published/`. The prepared study stays separately scoped.
 
-The [Platform 0.9 study](../evidence/platform-090-adoption/README.md) and
-[0.9.1 follow-up](../evidence/platform-090-adoption/platform-091/README.md) retain
-their original dependency graphs, full endpoint matrix and size/instruction
-tradeoffs. Their older server identities are not this adoption's baseline.
-The [0.7.25 admission study](../evidence/tripwire-adoption-0725/README.md) retains
-1/10/100-type footprints and early-header results, including regressions and
-excluded stale-target attempts. Use separate targets for separate workspaces.
+Focused pin/boundary checks, format, script syntax and documentation links pass. No full CI, macOS or
+sibling suite was run. Original prepared outputs remain
+`/tmp/wire-platform-types-transfer/`. Exact inputs and reproduction are in
+the evidence; the prepared study's source-path size difference is not a saving.
+
+## Maintained tooling and earlier studies
+
+Build/Testkit/managed release-editor remain 0.71.0. Shared Tooling remains reviewed
+0.27.11 at `62edfbd43087a718bf0283e9040676a49211976d`; no snapshot changes.
+The [previous supplier study](../evidence/platform010-tooling071/README.md) retains
+its own inputs and measurements. Evidence manifests use `.snapshot`, not active
+`Cargo.toml` names. [Publication](../cargo-publication.md) remains explicit.
 
 The [Candid matrix](../evidence/candid-comparison-0725/README.md) retains its
-22-cohort graph and fresh-query controls. Ordinary vectors remain weak cases;
-explicit Packed wins its 436 primary comparisons. The
-[Tripwire comparison](../evidence/tripwire-comparison-0725/README.md) remains a
-focused ingress probe, not general CDK-RSX or consumer qualification.
-
-## Selective input remains research
-
-The admission study's fixed-shape trailing-byte prototype retains unchanged
-Wire frames and strict malformed controls. It saves roughly 96% of prefix-read
-instructions against borrowed input but only 0.186% of observed ingress cycles;
-opt-z Wasm grows 856 bytes. Do not publish it as a generic Serde reader.
-General budgeting, arbitrary schemas, text validation and source lifetimes are
-unqualified. Platform's current decode hook already receives copied input;
-a Platform-owned pre-copy/scoped-range API remains the next integration step.
-No sibling checkout was changed or upstream PR opened in this batch.
-
-## Maintained integration boundaries
+22-cohort controls; ordinary vectors remain weak cases and explicit Packed wins
+its 436 primary comparisons. The [Tripwire comparison](../evidence/tripwire-comparison-0725/README.md)
+is a focused ingress probe, not general CDK-RSX or consumer qualification.
+The [admission study](../evidence/tripwire-adoption-0725/README.md) keeps selective
+input as research: its copied-input, fixed-shape prototype is not a generic
+Serde reader. No pre-copy API or consumer integration is added here.
 
 Platform owns exports/execution; consumers own authentication, dispatch, retries,
 persistence and deployment. Retain original retry/hash bytes. Synchronous reply
-failure traps and rolls back; after await only the current callback rolls back.
-See [endpoints](../endpoints.md), the [SDK recipe](../sdk-integration.md) and
-[#29 acceptance](https://github.com/dragginzgame/ic-wire/issues/29#issuecomment-6475585612)
-for consumer-owned integration obligations. Actual Canic adoption remains separate.
+failure rolls back; after await only the current callback rolls back. See
+[endpoints](../endpoints.md) and the [SDK recipe](../sdk-integration.md).

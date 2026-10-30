@@ -1,0 +1,127 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 2e0202b..d3299e9 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -29,7 +29,6 @@ ic-platform-runtime-guard = { version = "=0.10.0", path = "crates/ic-platform-ru
+ ic-secp256k1 = "=0.3.0"
+ ic-stable-structures = { version = "=0.7.2", default-features = false }
+ ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
+-ic-wire-metadata = { package = "ic-wire", version = "0.8.0", default-features = false, features = ["typescript"] }
+ ic_principal = { version = "0.1.5", default-features = false, features = ["convert"] }
+ k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
+ num-bigint = "0.4.6"
+@@ -41,7 +40,6 @@ quote = "1"
+ serde = { version = "1.0", default-features = false, features = ["derive"] }
+ serde_bytes = "0.11"
+ serde_cbor = "0.11.2"
+-serde_json = "1.0"
+ sha2 = "0.10"
+ slotmap = "1.1.1"
+ syn = { version = "2", features = ["full"] }
+@@ -52,7 +50,7 @@ assert_matches = "1.5"
+ ic-representation-independent-hash = "3.0"
+ ic-testkit = "0.71.0"
+ ic-timers = "0.32.3"
+-ic-wire = "0.8.0"
++ic-wire = "0.9.0"
+ libfuzzer-sys = "0.4.13"
+ serde_test = "1.0.177"
+ 
+diff --git a/crates/ic-platform/Cargo.toml b/crates/ic-platform/Cargo.toml
+index 42880c9..264fa21 100644
+--- a/crates/ic-platform/Cargo.toml
++++ b/crates/ic-platform/Cargo.toml
+@@ -58,7 +58,6 @@ signature-verification = [
+ pocket-ic = ["principal-external", "dep:pocket-ic"]
+ secp256k1 = ["principal-external", "dep:ic-secp256k1"]
+ stable-structures = ["dep:ic-stable-structures"]
+-wire-schema = ["principal", "dep:ic-wire-metadata", "dep:serde_json"]
+ 
+ [dependencies]
+ blake3 = { workspace = true, optional = true }
+@@ -91,9 +90,7 @@ ic-agent = { workspace = true, optional = true }
+ ic-host-artifacts = { workspace = true, optional = true }
+ ic-management-canister-types = { workspace = true, optional = true }
+ ic-secp256k1 = { workspace = true, optional = true }
+-ic-wire-metadata = { workspace = true, optional = true }
+ pocket-ic = { workspace = true, optional = true }
+-serde_json = { workspace = true, optional = true }
+ 
+ [dev-dependencies]
+ assert_matches.workspace = true
+@@ -252,11 +249,6 @@ name = "stable_structures_consumer"
+ path = "tests/stable_structures_consumer.rs"
+ required-features = ["stable-structures"]
+ 
+-[[test]]
+-name = "wire_schema_consumer"
+-path = "tests/wire_schema_consumer.rs"
+-required-features = ["wire-schema"]
+-
+ [[test]]
+ name = "external_contract_consumer"
+ path = "tests/external_contract_consumer.rs"
+diff --git a/crates/ic-platform/src/account/mod.rs b/crates/ic-platform/src/account/mod.rs
+index 89446b2..af4234e 100644
+--- a/crates/ic-platform/src/account/mod.rs
++++ b/crates/ic-platform/src/account/mod.rs
+@@ -15,9 +15,6 @@ use crate::{Principal, PrincipalError};
+ use serde::{Deserialize, Serialize};
+ use std::{fmt, hash::Hash, str::FromStr};
+ 
+-#[cfg(all(feature = "wire-schema", not(target_family = "wasm")))]
+-mod wire_schema;
+-
+ /// The 32-byte ledger subaccount; no principal or Candid marker is embedded.
+ pub type Subaccount = [u8; 32];
+ 
+diff --git a/crates/ic-platform/src/account/wire_schema/mod.rs b/crates/ic-platform/src/account/wire_schema/mod.rs
+deleted file mode 100644
+index ac6815d..0000000
+--- a/crates/ic-platform/src/account/wire_schema/mod.rs
++++ /dev/null
+@@ -1,15 +0,0 @@
+-//! Metadata follows Account's existing ordered Serde fields without normalization.
+-
+-impl ic_wire_metadata::typescript::Wire for super::Account {
+-    fn native_schema(
+-        context: &mut ic_wire_metadata::typescript::SchemaContext,
+-    ) -> Result<serde_json::Value, ic_wire_metadata::typescript::GenerationError> {
+-        Ok(serde_json::json!({
+-            "k": "record",
+-            "fields": [
+-                {"name": "owner", "value": context.describe::<crate::Principal>()?},
+-                {"name": "subaccount", "value": context.describe::<Option<super::Subaccount>>()?}
+-            ]
+-        }))
+-    }
+-}
+diff --git a/crates/ic-platform/src/principal/mod.rs b/crates/ic-platform/src/principal/mod.rs
+index 64c7bde..4eee72f 100644
+--- a/crates/ic-platform/src/principal/mod.rs
++++ b/crates/ic-platform/src/principal/mod.rs
+@@ -10,9 +10,6 @@
+ //! ic_platform::candid::contract::encode_one(ic_platform::Principal::anonymous()).unwrap();
+ //! ```
+ 
+-#[cfg(all(feature = "wire-schema", not(target_family = "wasm")))]
+-mod wire_schema;
+-
+ use serde::{Deserialize, Serialize};
+ use std::convert::TryFrom;
+ 
+diff --git a/crates/ic-platform/src/principal/wire_schema/mod.rs b/crates/ic-platform/src/principal/wire_schema/mod.rs
+deleted file mode 100644
+index 20bc7db..0000000
+--- a/crates/ic-platform/src/principal/wire_schema/mod.rs
++++ /dev/null
+@@ -1,9 +0,0 @@
+-//! Native metadata only; Principal's existing Serde implementation owns bytes.
+-
+-impl ic_wire_metadata::typescript::Wire for super::Principal {
+-    fn native_schema(
+-        context: &mut ic_wire_metadata::typescript::SchemaContext,
+-    ) -> Result<serde_json::Value, ic_wire_metadata::typescript::GenerationError> {
+-        context.describe::<ic_wire_metadata::Bytes<{ Self::MAX_LENGTH_IN_BYTES }>>()
+-    }
+-}

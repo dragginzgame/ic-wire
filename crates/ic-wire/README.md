@@ -6,11 +6,36 @@ framing, resource admission and strict primitive validation. `Wire` generates
 host-only metadata; it never generates a serializer. Alternative codec and
 derive designs are research, not selectable runtime modes.
 
+## Optional Platform identity schemas
+
+Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on Platform's owned
+`Principal` and `Account`. It selects Platform `principal` with defaults disabled
+and Wire's host-only TypeScript support. It does not select CDK, an executor,
+Candid or endpoints. Enable `endpoint` separately if needed; both integrations
+use the same Platform dependency. Core-only Wire remains Platform-free.
+
+Consumers migrating from Platform's `wire-schema` feature remove that selection
+and enable Wire's `platform-types` instead. Derive `serde::Serialize`,
+`serde::Deserialize` and (on native metadata hosts) `ic_wire::Wire` on the same
+DTOs, using `ic_platform::Principal` and `ic_platform::Account` directly. There
+are no wrappers, Cargo patches or second schema trait. Use a matching Platform
+0.11 release in direct dependencies. Platform 0.11 removes its old schema feature;
+Wire's pending 0.10 release supplies this integration.
+
+Principal's schema stays bounded bytes with maximum length 29. Account stays an
+ordered record of `owner: Principal`, then `subaccount: Option<[u8; 32]>`.
+Serialization, budgets and accepted bytes are unchanged: for an anonymous owner,
+Account payload `01 04 00` (absent subaccount) remains distinct from
+`01 04 01` followed by 32 zero bytes (explicit zero subaccount), even though the
+two accounts compare equal. Preserve the original representation for retry/hash
+inputs. These implementations cover owned Platform types, not external Candid
+principal types or Candid serialization.
+
 ## Optional typed IC endpoints
 
 Enable `ic-wire`'s `endpoint` feature to connect typed handlers to published
-IC Platform 0.8.3 entrypoints. Without this feature the core codec has no Platform
-dependency. This integration requires `std`, as does Platform's canister runtime;
+IC Platform entrypoints. Without `endpoint` or `platform-types`, the core codec
+has no Platform dependency. This integration requires `std`, as does Platform's canister runtime;
 the default codec remains `no_std + alloc`. No Candid runtime is selected.
 
 ```rust,ignore
@@ -653,7 +678,8 @@ the frame ceiling; this is not a JavaScript heap bound.
 ## Package and license
 
 Runtime and derive crates use the MIT License. Candid and simulator dependencies
-are confined to unpublished benchmarks; production remains platform-independent.
+are confined to unpublished qualification packages. The default codec remains
+platform-independent; `endpoint` and `platform-types` are explicit integrations.
 
 ### Bulk-field advice on native hosts
 

@@ -14,9 +14,10 @@ cargo build --locked -p ic-wire --features endpoint --message-format=json > "$ou
 cargo run --locked -p ic-wire-qualification --example check-diagnostics -- "$output" --endpoint
 cargo build --locked -p ic-wire-endpoint-fixture --lib --target wasm32-unknown-unknown --profile evaluation
 cargo +1.91.0 check --locked -p ic-wire-endpoint-fixture --lib --target wasm32-unknown-unknown
-cargo tree --locked -p ic-wire --no-default-features --edges normal,build > "$output/core-graph.txt"
-cargo tree --locked -p ic-wire-endpoint-fixture --target wasm32-unknown-unknown --edges normal,build > "$output/endpoint-graph.txt"
-if grep -Eq 'ic-platform|canic|candid|pocket-ic' "$output/core-graph.txt" || grep -Eq 'canic|candid|pocket-ic|ic-cdk-executor|ic0 v' "$output/endpoint-graph.txt"; then
+cargo tree --locked -p ic-wire --no-default-features --edges normal,build --prefix none > "$output/core-graph.txt"
+cargo tree --locked -p ic-wire-endpoint-fixture --target wasm32-unknown-unknown --edges normal,build --prefix none > "$output/endpoint-graph.txt"
+# Match package names, not local source paths (for example, a "candidate" copy).
+if grep -Eq '^(ic-platform|canic|candid|pocket-ic) v' "$output/core-graph.txt" || grep -Eq '^(canic|candid|pocket-ic|ic-cdk-executor|ic0) v' "$output/endpoint-graph.txt"; then
     echo 'unexpected runtime dependency' >&2
     exit 1
 fi
