@@ -993,7 +993,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.7.23"
+version = "0.7.24"
 dependencies = [
  "bytemuck",
  "clap",
@@ -1008,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-benchmarks"
-version = "0.7.23"
+version = "0.7.24"
 dependencies = [
  "dhat",
  "ic-platform",
@@ -1024,7 +1024,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.7.23"
+version = "0.7.24"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1033,7 +1033,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-endpoint-fixture"
-version = "0.7.23"
+version = "0.7.24"
 dependencies = [
  "ic-platform",
  "ic-testkit",
@@ -1045,7 +1045,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-qualification"
-version = "0.7.23"
+version = "0.7.24"
 dependencies = [
  "clap",
  "ic-build",

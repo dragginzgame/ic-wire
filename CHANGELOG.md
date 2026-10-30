@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.24] - Unreleased
+## [0.7.24] - 2026-10-30
 
 ### ⬆️ Dependencies
 
