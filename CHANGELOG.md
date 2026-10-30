@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.9.0]
+
+### ⚠️ Breaking
+
+- Adopt IC Platform 0.10.0 for the optional endpoint integration. Endpoint users
+  must align runtime-consuming dependencies on Platform 0.10 to retain one
+  executor owner. Core-only users need no migration. Wire handler syntax, frame
+  bytes, identities, bounds and accepted inputs are unchanged.
+
+### ⬆️ Dependencies
+
+- Adopt IC Build/Testkit and their coordinated Host dependencies at 0.71.0.
+  Prepare and select the managed release-metadata editor at 0.71.0. Testkit's
+  native-only Platform 0.9.1 dependency remains separate from the canister runtime.
+  Shared Tooling remains at the reviewed 0.27.11 snapshot.
+
+### 🧪 Testing
+
+- Qualify the [Platform/Tooling adoption](docs/evidence/platform010-tooling071/README.md)
+  with installed endpoint/rollback checks and a matched 12-case instruction probe.
+  Instructions and observed cycle debits match; total Wasm grows eight bytes in
+  each profile while code-section sizes stay unchanged. The actual 0.71 editor
+  passes offline admission and the disposable release-adapter fixture.
+
 ## [0.8.0] - 2026-10-30
 
 ### ⚠️ Breaking

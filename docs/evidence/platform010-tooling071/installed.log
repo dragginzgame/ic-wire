@@ -1,0 +1,11 @@
+   Compiling ic-platform v0.10.0
+   Compiling ic-wire v0.8.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint-fixture v0.8.0 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.04s
+     Running tests/installed/mod.rs (target/debug/deps/installed-dba19b13965515cf)
+
+running 1 test
+test typed_calls_limits_and_transactions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.80s
+

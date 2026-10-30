@@ -1,0 +1,6 @@
+    Checking ic-wire-benchmarks v0.8.0 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling ic-wire-derive v0.8.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking dhat v0.3.3
+    Checking ic-platform v0.10.0
+    Checking ic-wire v0.8.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.08s

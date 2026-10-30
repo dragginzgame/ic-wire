@@ -1,0 +1,22 @@
+--- a/examples/endpoint/tests/cost_matrix/mod.rs
++++ b/examples/endpoint/tests/cost_matrix/mod.rs
+@@ -349,7 +349,18 @@
+     );
+     let mut samples = fs::File::create(out.join("samples.jsonl")).unwrap();
+     let mut server = None;
+-    for (case_index, case) in cases.into_iter().enumerate() {
++    // This isolated adoption probe measures twelve representative cases only.
++    let selected = cases.into_iter().filter(|case| matches!((case.method, case.label.as_str()),
++        ("echo", "blob-0" | "blob-32") |
++        ("borrowed_echo", "blob-32") |
++        ("async_query", "value-0" | "truncated") |
++        ("composite", "self-call") |
++        ("async_mutate", "reply-0" | "reply-117") |
++        ("default_blob", "blob-32" | "blob-65522" | "wrong-id-at-limit") |
++        ("default_mutate", "reply-32")
++    )).collect::<Vec<_>>();
++    assert_eq!(selected.len(), 12);
++    for (case_index, case) in selected.into_iter().enumerate() {
+         for repetition in 0..9 {
+             let state = count();
+             // Clear only this owned private recorder after earlier receipts have
