@@ -12,7 +12,7 @@ ic-testkit.workspace = true
 
 [features]
 wire = []
-candid = ["ic-platform/candid"]
+candid = []
 allocations = []
 heap = []
 ic = ["ic-platform/pocket-ic"]
@@ -40,7 +40,7 @@ derive-scale-1 = ["derive-scale"]
 derive-scale-10 = ["derive-scale"]
 
 [dependencies]
-ic-platform = { workspace = true, features = ["ic0"] }
+ic-platform = { workspace = true, features = ["candid", "ic0"] }
 ic-wire.workspace = true
 num-bigint.workspace = true
 serde.workspace = true
