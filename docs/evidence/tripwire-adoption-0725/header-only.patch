@@ -1,0 +1,71 @@
+--- a/crates/ic-wire/src/endpoint/mod.rs
++++ b/crates/ic-wire/src/endpoint/mod.rs
+@@ -70,6 +70,12 @@
+ }
+ 
+ impl<Request, Response> Contract<Request, Response> {
++    /// Check frame size, identity and direction before copying the full ingress.
++    /// Run as a Platform guard; payload validation still occurs during decoding.
++    pub fn admit_request(&self) {
++        admit_frame(self.id, self.request);
++    }
++
+     /// Construct the declaration used by the endpoint attribute.
+     #[doc(hidden)]
+     pub const fn new(
+@@ -113,12 +119,34 @@
+ 
+ /// Trap on an oversized ingress before Platform allocates/copies argument bytes.
+ pub fn admit_request(limits: Limits) {
++    admit_request_len(limits);
++}
++
++fn admit_request_len(limits: Limits) -> usize {
+     // This moves Canic's pre-copy check to Wire without changing its acceptance
+     // rule: the full native frame counts toward bytes, including its 11-byte header.
+     // Consumers retain their existing method IDs and limits; no wire migration.
+-    if ic_platform::ic0::msg_arg_data_size() > limits.bytes {
++    let length = ic_platform::ic0::msg_arg_data_size();
++    if length > limits.bytes {
+         ic_platform::cdk::api::trap("Wire request exceeds byte allowance");
+     }
++    length
++}
++
++#[cfg_attr(target_arch = "wasm32", inline(never))]
++fn admit_frame(id: u64, limits: Limits) {
++    let length = admit_request_len(limits);
++    if length < crate::contract::HEADER {
++        ic_platform::cdk::api::trap(crate::Error::Malformed.to_string());
++    }
++    let mut header = [0; crate::contract::HEADER];
++    ic_platform::ic0::msg_arg_data_copy(&mut header, 0);
++    // Previously identity/direction were checked after copying the complete
++    // ingress. Check the same eleven bytes first, using the same validator.
++    // Bytes and accepted frames are unchanged; no consumer migration. Payload
++    // validation remains mandatory, including the existing decoder header check.
++    crate::contract::payload(id, 0, &header)
++        .unwrap_or_else(|error| ic_platform::cdk::api::trap(error.to_string()));
+ }
+ 
+ /// Decode a complete native request frame, trapping on typed codec failure.
+--- a/crates/ic-wire-derive/src/endpoint/mod.rs
++++ b/crates/ic-wire-derive/src/endpoint/mod.rs
+@@ -172,7 +172,7 @@
+             const _: () = {
+                 const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
+                 fn #admit() -> ::core::result::Result<(), ::std::string::String> {
+-                    #wire::endpoint::admit_request(#settings.request);
++                    #settings.admit_request();
+                     Ok(())
+                 }
+                 fn #decode(bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> { bytes }
+@@ -197,7 +197,7 @@
+             type #result_type = #response_type;
+             const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
+             fn #admit() -> ::core::result::Result<(), ::std::string::String> {
+-                #wire::endpoint::admit_request(#settings.request);
++                #settings.admit_request();
+                 Ok(())
+             }
+             fn #decode(bytes: ::std::vec::Vec<u8>) -> #request_type {

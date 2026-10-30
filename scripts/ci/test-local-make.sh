@@ -71,37 +71,71 @@ EOF
 sed "s/^development|/${RUSTUP_TOOLCHAIN:-development}|/" "$fixture/expected-calls" > "$fixture/expected-environment"
 cmp "$fixture/expected-environment" "$CARGO_CALLS"
 
-# Publication/package entrypoints must stop at lint, including parallel Make.
-cp "$fixture/bin/cargo" "$fixture/cargo-success"
+# Real workspace metadata and Git identity; Cargo upload remains a sentinel.
+export FIXTURE_CARGO_METADATA="$fixture/publication-metadata.json"
+(cd "$fixture/repo" && cargo metadata --no-deps --locked --offline --format-version 1) > "$FIXTURE_CARGO_METADATA"
+fixture_version="$(jq -r '.packages[] | select(.name == "ic-wire") | .version' "$FIXTURE_CARGO_METADATA")"
+git -C "$fixture/repo" init -q
+git -C "$fixture/repo" add -- .
+git -C "$fixture/repo" -c user.name=Fixture -c user.email=fixture@example.invalid -c core.hooksPath=/dev/null commit -qm 'Disposable publication baseline'
 cat > "$fixture/bin/cargo" <<'STUB'
 #!/usr/bin/env bash
-printf '%s\n' "$*" >> "$CARGO_CALLS"
-[[ "$1" != clippy ]] || exit 41
-exit 0
+set -euo pipefail
+printf '%s|%s|%s\n' "${RUSTUP_TOOLCHAIN:-development}" "${CARGO_TARGET_DIR:-}" "$*" >> "$CARGO_CALLS"
+case "$1" in
+    metadata) cat "$FIXTURE_CARGO_METADATA" ;;
+    clippy) exit "${FIXTURE_LINT_STATUS:-0}" ;;
+    publish) printf 'Substituted Cargo publication\n'; exit "${FIXTURE_PUBLISH_STATUS:-0}" ;;
+esac
 STUB
-for target in publish check-package; do
-    : > "$CARGO_CALLS"
-    if PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
-    [[ "$(wc -l < "$CARGO_CALLS")" == 1 ]]
-    grep -Fx 'clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings' "$CARGO_CALLS" >/dev/null
-done
-cp "$fixture/cargo-success" "$fixture/bin/cargo"
 
-# Resume partial uploads by explicitly selecting only unpublished packages.
-# Cargo is a sentinel: these checks cannot contact or upload to a registry.
-for selection in 'ic-wire-derive ic-wire' ic-wire ic-wire-derive; do
+# All three commands retain the lint gate, including parallel Make. Metadata
+# admission may precede lint; neither packaging nor upload can follow its failure.
+for target in publish publish-check check-package; do
     : > "$CARGO_CALLS"
-    PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES="$selection" > "$fixture/publish-selection.log" 2>&1
-    [[ "$(wc -l < "$CARGO_CALLS")" == 2 ]]
-    expected='publish --locked'
-    for package in $selection; do expected+=" -p $package"; done
-    [[ "$(tail -n 1 "$CARGO_CALLS")" == "${RUSTUP_TOOLCHAIN:-development}|$fixture/repo/target|$expected" ]]
+    if FIXTURE_LINT_STATUS=41 PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
+    grep -F '|clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings' "$CARGO_CALLS" >/dev/null
+    if grep -Eq '\|(publish|package) ' "$CARGO_CALLS"; then exit 1; fi
 done
-for selection in '' ic-wire-qualification; do
+
+# Both defaults and explicitly reconciled subsets resolve exact workspace
+# versions, retain the registry and dispatch once; publish-check is always dry.
+for target in publish publish-check; do
+    for selection in default 'ic-wire-derive ic-wire' ic-wire ic-wire-derive; do
+        : > "$CARGO_CALLS"
+        args=()
+        packages="$selection"
+        if [[ "$selection" == default ]]; then packages='ic-wire-derive ic-wire'; else args=("PACKAGE=$selection"); fi
+        PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" ${args[@]+"${args[@]}"} > "$fixture/publication-selection.log" 2>&1
+        [[ "$(wc -l < "$CARGO_CALLS")" == 3 ]]
+        expected='publish --locked --registry crates-io'
+        for package in $packages; do expected+=" --package $package@$fixture_version"; done
+        [[ "$target" != publish-check ]] || expected+=' --dry-run'
+        [[ "$(tail -n 1 "$CARGO_CALLS")" == "${RUSTUP_TOOLCHAIN:-development}|$fixture/repo/target|$expected" ]]
+    done
+done
+for selection in '' ic-wire-qualification 'ic-wire ic-wire'; do
     : > "$CARGO_CALLS"
-    if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES="$selection" > "$fixture/publish-invalid.log" 2>&1; then exit 1; fi
-    [[ ! -s "$CARGO_CALLS" ]]
+    if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish "PACKAGE=$selection" > "$fixture/publish-invalid.log" 2>&1; then exit 1; fi
+    [[ "$(wc -l < "$CARGO_CALLS")" == 1 ]]
+    grep -F '|metadata --no-deps --locked --offline --format-version 1' "$CARGO_CALLS" >/dev/null
 done
+: > "$CARGO_CALLS"
+if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES=ic-wire > "$fixture/retired-selector.log" 2>&1; then exit 1; fi
+[[ ! -s "$CARGO_CALLS" ]]
+grep -F 'PUBLISH_PACKAGES was replaced by PACKAGE' "$fixture/retired-selector.log" >/dev/null
+
+# A failed attempt stays failed with one dispatch and retained status; no retry.
+: > "$CARGO_CALLS"
+if FIXTURE_PUBLISH_STATUS=37 PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PACKAGE=ic-wire > "$fixture/publish-failed.log" 2>&1; then exit 1; fi
+[[ "$(grep -c '|publish ' "$CARGO_CALLS")" == 1 ]]
+grep -rlx 37 "$fixture/repo/target/publication" | grep '/cargo-status$' >/dev/null
+# Dirty source is refused before the simulated Cargo upload as well.
+printf '\nDirty publication fixture.\n' >> "$fixture/repo/docs/runtime.md"
+: > "$CARGO_CALLS"
+if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish > "$fixture/publish-dirty.log" 2>&1; then exit 1; fi
+if grep -q '|publish ' "$CARGO_CALLS"; then exit 1; fi
+git -C "$fixture/repo" restore docs/runtime.md
 
 # Verify the actual CI recipes partition the complete roster. Substitute only
 # dispatch: no broad gate or release effect runs in this disposable checkout.

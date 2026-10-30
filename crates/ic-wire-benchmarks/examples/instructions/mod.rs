@@ -41,6 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "loop-control",
     ];
     let samples = 3;
+    let mut sample_caller = 0_u64;
     let mut results = fs::File::create(output.join("samples.jsonl"))?;
     let mut summary = fs::File::create(output.join("summary.csv"))?;
     writeln!(
@@ -70,14 +71,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         4_u32
                     };
                     let mut counts = vec![Vec::new(); 6];
+                    let mut sample_caller_ids = Vec::with_capacity(samples);
                     for _ in 0..samples {
+                        // An identical query can hit PocketIC's query cache. Give
+                        // every sample a distinct caller so it executes the guest;
+                        // the measured fixture does not read the caller identity.
+                        sample_caller += 1;
+                        sample_caller_ids.push(sample_caller);
+                        let caller = Principal::from_slice(&sample_caller.to_le_bytes());
                         let args = [case_id as u32, lane_id as u32, repetitions]
                             .into_iter()
                             .flat_map(u32::to_le_bytes)
                             .collect();
-                        let reply = pic
-                            .query_call(canister, Principal::anonymous(), "benchmark", args)
-                            .unwrap();
+                        let reply = pic.query_call(canister, caller, "benchmark", args).unwrap();
                         assert!(reply.len() >= 56);
                         let length = u64::from_le_bytes(reply[48..56].try_into().unwrap()) as usize;
                         assert_eq!(length, lane.bytes.len());
@@ -111,7 +117,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             "{}",
                             json!({"profile":profile,"case_id":case_id,"case":case.name,"codec":lane.name,"operation":operations[op],
                             "encoded_bytes":lane.bytes.len(),"payload_sha256":hash(&lane.bytes),"input_sha256":hash(&case.input_json),"repetitions":repetitions,
-                            "samples_instructions":values,"median_instructions_per_op":sorted[samples/2] as f64 / f64::from(repetitions)})
+                            "samples_instructions":values,"sample_caller_ids":sample_caller_ids,"median_instructions_per_op":sorted[samples/2] as f64 / f64::from(repetitions)})
                         )?;
                     }
                 }
@@ -130,6 +136,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         output.join("identity.json"),
         serde_json::to_vec_pretty(
             &json!({"format":1,"counter":"ic0.performance_counter(0)","samples":samples,"small_repetitions":4,"large_repetitions":1,
+        "sample_caller":"unique 8-byte little-endian principal per query; caller not read by guest",
         "server_version":String::from_utf8(version.stdout)?,"server_sha256":hash(&fs::read(server)?),"artifacts":artifacts,
         "fixture_sha256":hash(include_bytes!("../../fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("../../fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("../../fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("../../fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("../../fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("../../fixtures/scale/mod.rs")),"driver_sha256":hash(include_bytes!("mod.rs")),"wasm_driver_sha256":hash(include_bytes!("../wasm/mod.rs")),
         "lock_sha256":hash(include_bytes!("../../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),

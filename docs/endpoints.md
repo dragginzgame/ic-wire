@@ -11,9 +11,9 @@ Canic, an extra executor or a second encoding.
 ic-wire = { version = "0.7.24", features = ["endpoint"] }
 ```
 
-The version above describes the pending release; this working tree remains
-0.7.23 and has not been published. The [standalone fixture](../examples/endpoint/Cargo.toml)
-uses the local workspace package to qualify it now.
+This guide describes the 0.7.24 API. The
+[standalone fixture](../examples/endpoint/Cargo.toml) uses the local workspace
+package for qualification. Git releases and registry publication remain separate.
 
 ```rust,ignore
 use ic_wire::endpoint::query;
@@ -113,6 +113,13 @@ prior transactions have committed: a later reply-encoding trap rolls back only
 the current callback's changes. Query state never persists. Consumers retain
 application transaction design, retries and error policy.
 
+Generated guards now check the existing eleven-byte header before copying the
+complete argument. Previously they checked only the frame-size allowance before
+the copy; identity and direction were checked during decoding. Accepted frames,
+bytes, limits and errors are unchanged, and decoding still performs full validation.
+The [admission study](evidence/tripwire-adoption-0725/README.md) records the small
+valid-call overhead and reductions in large invalid-request costs.
+
 ## Schema projection and framework composition
 
 `contract = ECHO` is optional. It emits a constant with the handler's exact
@@ -127,6 +134,10 @@ projection alone does not prove Wasm type/layout parity or final export admissio
 Frameworks can use the same lower-level helpers with Platform's generator around
 their existing guarded function. This is useful for Canic's transport-rejection
 branch, whose wrapper `Result` is not the declared Wire response:
+
+When a typed contract constant is available, its `admit_request()` method performs
+both size and header admission. The standalone `admit_request(Limits)` used below
+checks size only; `decode_request` subsequently validates the complete frame.
 
 ```rust,ignore
 fn admit() -> Result<(), String> {

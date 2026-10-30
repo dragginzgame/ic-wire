@@ -1,0 +1,24 @@
+{
+  "source_head": "254f687f5b80a5e3816a2d569ed219c6f3206b38",
+  "baseline": {
+    "Cargo.toml": "214fe5423610f8a80ed0ea0bd0bd7c59c461f2c7877082cd4dedb18f455bc3fd",
+    "Cargo.lock": "c2b4456ebc9feeca3dfe15f6b2d314a3f9972b1973b649a4c16bd641b7c50879",
+    "rust-toolchain.toml": "c979a7d4d66b770a4d59d6d56e3c078aeab1993af658480bfd1f89f90220457d",
+    "crates/ic-wire/src/endpoint/mod.rs": "93253e1e8ef6b8aeabf9b334900525cac369e7f70f5a2000cfe6432ad5d6e2b0",
+    "crates/ic-wire-derive/src/endpoint/mod.rs": "82e624b39528ca63df3335c983b511634633d1f90809ce4f73d0d0bb4f4f30ad",
+    "examples/endpoint/src/lib.rs": "dba8efa3377351169b1ba729ee3bd9bb6b08b490e8e6e6f2c70903dedc276991",
+    "examples/endpoint/Cargo.toml": "f1cfd03d99567c8d73f54de54af60ad8233c837d1aa1aee28fdfe42f980d129a"
+  },
+  "candidate": {
+    "crates/ic-wire/src/endpoint/mod.rs": "203acb8ff382712d4c0ff13cac49976a1559be55ba91f8a92e33ba07a4472f90",
+    "crates/ic-wire-derive/src/endpoint/mod.rs": "2e71338f3e670880ef5e9d0183c71563809969f59b53106c37f22fc6ec22b540"
+  },
+  "server_sha256": "36e063995730df089c78f00c09fc209417386bfd6efff58bf66c863899569471",
+  "source_root": "/tmp/wire-tripwire-adoption-0725",
+  "note": "Compared workspaces use separate target directories. The original shared-target candidate artifacts were stale and are excluded. Selective fixture tests retain measured contents under a directory module path; guest source is byte-identical.",
+  "selective_fixture_sha256": {
+    "mod.rs": "08d445005d8b64539bf37c00ab577c33d315c55842a4ad0543958d4a538410fb",
+    "tests/mod.rs": "e1aa0b4d3d11d384da4fe31146b2d0af78fe8f45ea9a2d41fd8253c09279e311",
+    "tests/physical/mod.rs": "2ac4b159ea362a2bce23864788a24857f1e0f762e89ed3e020b3640ca0ec33e6"
+  }
+}

@@ -172,7 +172,7 @@ pub(super) fn expand(
             const _: () = {
                 const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
                 fn #admit() -> ::core::result::Result<(), ::std::string::String> {
-                    #wire::endpoint::admit_request(#settings.request);
+                    #settings.admit_request();
                     Ok(())
                 }
                 fn #decode(bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> { bytes }
@@ -197,7 +197,7 @@ pub(super) fn expand(
             type #result_type = #response_type;
             const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
             fn #admit() -> ::core::result::Result<(), ::std::string::String> {
-                #wire::endpoint::admit_request(#settings.request);
+                #settings.admit_request();
                 Ok(())
             }
             fn #decode(bytes: ::std::vec::Vec<u8>) -> #request_type {

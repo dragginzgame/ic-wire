@@ -70,6 +70,12 @@ pub struct Contract<Request, Response> {
 }
 
 impl<Request, Response> Contract<Request, Response> {
+    /// Check frame size, identity and direction before copying the full ingress.
+    /// Run as a Platform guard; payload validation still occurs during decoding.
+    pub fn admit_request(&self) {
+        admit_frame(self.id, self.request);
+    }
+
     /// Construct the declaration used by the endpoint attribute.
     #[doc(hidden)]
     pub const fn new(
@@ -113,12 +119,33 @@ pub mod __private {
 
 /// Trap on an oversized ingress before Platform allocates/copies argument bytes.
 pub fn admit_request(limits: Limits) {
+    admit_request_len(limits);
+}
+
+fn admit_request_len(limits: Limits) -> usize {
     // This moves Canic's pre-copy check to Wire without changing its acceptance
     // rule: the full native frame counts toward bytes, including its 11-byte header.
     // Consumers retain their existing method IDs and limits; no wire migration.
-    if ic_platform::ic0::msg_arg_data_size() > limits.bytes {
+    let length = ic_platform::ic0::msg_arg_data_size();
+    if length > limits.bytes {
         ic_platform::cdk::api::trap("Wire request exceeds byte allowance");
     }
+    length
+}
+
+#[cfg_attr(target_arch = "wasm32", inline(never))]
+fn admit_frame(id: u64, limits: Limits) {
+    let length = admit_request_len(limits);
+    if length < crate::contract::HEADER {
+        trap_error(crate::Error::Malformed);
+    }
+    let mut header = [0; crate::contract::HEADER];
+    ic_platform::ic0::msg_arg_data_copy(&mut header, 0);
+    // Previously identity/direction were checked after copying the complete
+    // ingress. Check the same eleven bytes first, using the same validator.
+    // Bytes and accepted frames are unchanged; no consumer migration. Payload
+    // validation remains mandatory, including the existing decoder header check.
+    crate::contract::payload(id, 0, &header).unwrap_or_else(|error| trap_error(error));
 }
 
 /// Decode a complete native request frame, trapping on typed codec failure.
@@ -127,8 +154,7 @@ pub fn admit_request(limits: Limits) {
 /// preserves native identity, traversal, primitive and complete-input validation.
 /// Borrowed fields refer to `bytes`; the caller must retain it through their use.
 pub fn decode_request<'de, T: Deserialize<'de>>(bytes: &'de [u8], id: u64, limits: Limits) -> T {
-    native::decode_request(id, bytes, limits)
-        .unwrap_or_else(|error| ic_platform::cdk::api::trap(error.to_string()))
+    native::decode_request(id, bytes, limits).unwrap_or_else(|error| trap_error(error))
 }
 
 /// Encode the native response frame within its allowances, trapping on failure.
@@ -136,6 +162,12 @@ pub fn decode_request<'de, T: Deserialize<'de>>(bytes: &'de [u8], id: u64, limit
 /// A trap (rather than a rejection or error reply) preserves synchronous mutation
 /// rollback. Earlier async transactions remain committed; see the module docs.
 pub fn encode_response<T: Serialize + ?Sized>(value: &T, id: u64, limits: Limits) -> Vec<u8> {
-    native::encode_response(id, value, limits)
-        .unwrap_or_else(|error| ic_platform::cdk::api::trap(error.to_string()))
+    native::encode_response(id, value, limits).unwrap_or_else(|error| trap_error(error))
+}
+
+// Keep failure formatting shared across request/reply types and admission.
+#[cold]
+#[inline(never)]
+fn trap_error(error: crate::Error) -> ! {
+    ic_platform::cdk::api::trap(error.to_string())
 }

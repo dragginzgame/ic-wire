@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.7.25]
+
+### ⬆️ Dependencies
+
+- Adopt Shared Tooling 0.27.10 at `61a173990683597c1c6a25f0145a2c87200c3cee`
+  through the canonical exporter. Runtime dependencies and protocol are unchanged.
+
+### 🔧 Changed
+
+- Check generated endpoint request headers before copying the complete ingress,
+  using the existing contract validator. Add typed `Contract::admit_request()`
+  and share cold error formatting across admission, decoding and reply encoding.
+  Existing size-only admission stays available. Bytes, limits, accepted inputs,
+  failure messages and rollback behavior are unchanged; no consumer migration.
+- Replace the local publication recipe with Shared Tooling's retained-attempt
+  adapter. Keep the public two-crate roster and lint gate; resolve exact workspace
+  versions, retain attempt logs/status and add `make publish-check`. Explicit
+  subsets now use `PACKAGE=ic-wire`; the retired `PUBLISH_PACKAGES` option fails
+  with migration guidance. No automatic upload retry or registry reconciliation.
+
+### 🧪 Testing
+
+- Qualify [Tripwire-inspired admission and input experiments](docs/evidence/tripwire-adoption-0725/README.md):
+  matched costs for all 17 endpoints / 178 cases, 1/10/100-type Wasm footprints,
+  and a separate selective-blob prototype with strict malformed-frame controls.
+  Keep valid-call and small-module regressions visible. Selective/direct-range
+  input remains research only; no second codec or lazy production validation.
+- Refresh the [full Candid comparison](docs/evidence/candid-comparison-0725/README.md):
+  22 cohorts, 1,208 case entries and 4,832 primary comparisons across both profiles,
+  including native time, IC instructions, allocations, frame bytes and raw/code
+  Wasm sizes. Audit all 25,670 instruction rows with fresh queries; retain ordinary
+  vector losses and excluded overlapping native timings. Protocol unchanged.
+- Add a [matched Wire/Candid/Tripwire ingress study](docs/evidence/tripwire-comparison-0725/README.md)
+  with 1,280 checked physical updates, owned/borrowed/selective input controls,
+  small and large payloads, raw/code-section Wasm, complete instructions and
+  observed cycle debits. Keep the opt-z reply-generation regression visible.
+  Tripwire remains isolated research; production code and protocol are unchanged.
+- Include the endpoint example when freezing codec benchmark workspaces, so the
+  snapshot contains every declared workspace member.
+- Give each IC codec sample a distinct caller to prevent repeated identical
+  queries from reusing PocketIC's cached reply. Guest artifacts, codec operations
+  and protocol bytes are unchanged.
+
 ## [0.7.24] - 2026-10-30
 
 ### ⬆️ Dependencies

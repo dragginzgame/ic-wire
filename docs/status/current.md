@@ -1,180 +1,99 @@
 # Current handoff
 
-## Released 0.7.23; pending 0.7.24 endpoints and upstream adoption
+## Released 0.7.24; pending 0.7.25
 
-HEAD is `e90aed4f7dc0cd7ee31a9bcfb211044220ab0cec` / release 0.7.23.
-Package versions remain 0.7.23; 0.7.24 is a changelog draft only. Leave staging,
-commits, version changes, publication and releases to the maintainer. No hosted
-workflow, publication or deployment was performed. No Canic/Platform source was
-edited. Concurrent borrowed-input work below was preserved.
+HEAD is the maintainer's 0.7.24 release at `254f687`. Own package versions remain
+0.7.24; the undated 0.7.25 changelog is a compatible-addition/optimization draft.
+Leave staging, commits, versions, publication and releases to the maintainer.
+Incoming Shared Tooling adoption and benchmark evidence are preserved.
 
-Current Platform minimum/lock is 0.8.3. Build/Testkit and the managed release editor
-select 0.70.3, with Host Artifacts/FS/Process locked to the same family. Rust 1.91
-remains the floor. The latest adoption preserves its incoming lockfile exactly;
-it already contained these selections. Local Tooling 0.70.4 is an unpublished
-draft and was not adopted. No package versions or sibling sources were changed.
+## Retained Tripwire-inspired changes
 
-Shared Tooling is 0.27.9 at `3c458c28cca132784e6e70fbaf219bdea1e4cf8f`:
-reviewed impact preview, canonical refresh, 112 verified files including the new
-validation-input checkpoint companion. Host/Cargo/IC executable catalog pins are
-unchanged. No snapshot-owned file was hand-patched. Current adoption logs and its
-incoming Make/manifest/lock/snapshot receipts live in `/tmp/wire-adoption-20261030/`.
+Generated endpoint guards now call `Contract::admit_request()`: check size and
+the existing eleven-byte identity/direction header before copying full ingress.
+The standalone `admit_request(Limits)` remains the size-only primitive; both use
+one size check. The existing decoder still owns full validation. A private cold
+error helper shares formatting across admission, decode and response encoding.
+No bytes, limits, accepted inputs, error messages or rollback rules change.
+For ID 7 / u8 42 the frame remains `49 57 07 00 00 00 00 00 00 00 00 2a`.
+No migration, alternate codec or compatibility lane is introduced.
 
-Earlier endpoint and borrowing evidence below retains Platform 0.8.2 and Tooling
-0.70.2 in its frozen graphs; it is not silently relabelled as new-version evidence.
-The original endpoint-task lock remains at `target/wire-endpoint/incoming.Cargo.lock`.
+The [admission study](../evidence/tripwire-adoption-0725/README.md) qualifies all
+17 endpoints / 178 cases under both profiles: 5,696 measured logical calls /
+6,048 physical executions, with matching outcomes, frames and state oracles.
+A 64 KiB wrong-ID query falls about 37.6% in instructions; successful-call overhead
+is at most 0.257% in this matrix. Full fixture total Wasm changes −32 bytes at
+opt-z / +128 at opt-3; code changes −42 / +217. At 100 generated endpoints/types,
+total size falls 6,196 / 6,960 bytes. One endpoint grows 147 bytes in each profile.
+Both sizes and regressions are retained; these are not application linker deltas.
 
-## Current adoption qualification
+Focused endpoint native/schema/diagnostic checks, strict Clippy, dependency
+boundaries and Rust 1.91 Wasm checks pass. Full CI/macOS were not run. Reproduction,
+source patches, raw traces, scale artifacts/hashes and host-generation samples are
+linked from the study. Host timings are noisy because sibling builds were active;
+no native generation speedup is claimed. Raw runs: `/tmp/wire-tripwire-adoption-0725/`.
+An initial shared-target attempt reused stale Cargo artifacts and is excluded;
+all reported candidates use separate targets for separate source workspaces.
 
-Snapshot integrity, dependency pins/boundaries, all selected tool checks and the
-0.70.3 editor's offline admission pass. Focused endpoint native/schema/diagnostic,
-strict Clippy, Wasm and Rust 1.91 gates pass; standard PocketIC validates installed
-sync/async/composite/borrowed/guarded calls and rollback. Disposable Make/hook and
-release/resume fixtures pass without real-checkout release effects.
+## Selective input remains research
 
-The [matched adoption matrix](../evidence/upstream-adoption-0724/README.md) repeats
-all 17 endpoints / 110 cases under both profiles: 1,760 measured calls and 1,936
-physical executions pass. Every instruction, page-charge and cycle-debit sample
-matches the old graph exactly (0% change for nonzero values). Request/reply hashes
-match too. Opt-z total Wasm grows 103,638 → 103,642 bytes (+4; 0.0039%); its code
-section stays 89,112 bytes. Opt-3 stays 98,503 total / 84,974 code bytes. No protocol
-change or performance saving is claimed. Raw candidate evidence:
-`/tmp/wire-adoption-endpoint-matrix-20261030/`. Full CI, macOS and the broad Candid
-matrix were not rerun; frozen historical studies retain their original scope.
+The study also retains a known-shape trailing-byte-field prototype using Wire's
+strict parser and unchanged encoder. Native boundaries and over 10,000 mutations
+match owned/borrowed typed failures. All 1,536 measured physical updates pass,
+including rejection without reading the body. Opt-3 one-MiB prefix instructions
+fall about 96% against borrowed input, but cycle debit falls only 0.186%.
+Selective total Wasm grows 856 bytes at opt-z and shrinks 25 at opt-3.
+The safe initialized-buffer owned-range control improves on ordinary owned input
+but remains slower than borrowed input. No unsafe allocation helper was added.
 
-## Typed endpoint integration
+Do not promote this DTO-specific locator as a generic Serde reader. It uses fixed
+nonbinding traversal allowances and raw synchronous exports. General budget
+accounting, arbitrary schemas, text validation, source lifetime and actual endpoint
+integration remain unqualified. Platform's `decode_with` already receives a copied
+Vec; a Platform-owned pre-copy hook and safe scoped/ranged input API are the next
+integration requirements. No sibling checkout was changed or upstream PR opened.
 
-The optional `endpoint` feature supplies `ic_wire::endpoint::{query, update}`
-and pre-copy admission / bounded decode / trap-on-encode helpers. Platform owns
-exports, protected spawn and query/update executor contexts. The default codec
-stays independent of Platform; the endpoint Wasm graph has no Canic, Candid or
-PocketIC dependency. The private standalone consumer lives in `examples/endpoint`.
-See the [API and ownership audit](../endpoints.md).
+## Other pending work preserved
 
-Bare attributes select stable exported-name IDs and per-direction defaults:
-64 KiB frames, 8 MiB traversal, 65,536 nodes and depth 32. Overrides remain available.
-Handlers support
-one owned request or framed unit, sync/async queries, composite queries and updates.
-The explicit `borrow` option supports one synchronous borrowed request/reply.
-Optional `contract = NAME` binds schema projection and constants to the actual
-handler signature. Existing native schema projection is reused; no registry or
-Wasm metadata section is added. Canic keeps authentication, Fleet admission,
-startup/dispatch, role bundles, metadata sections and final artifact admission.
-Its later adoption replaces only generic Wire I/O and Wire-branch export glue.
+Shared Tooling is 0.27.10 at `61a173990683597c1c6a25f0145a2c87200c3cee`, adopted via
+the canonical exporter (116 files). The [publication adapter](../cargo-publication.md)
+replaces the local recipe: exact public roster/version selectors, lint gate and
+retained attempts; `make publish-check` is dry-run and subsets use `PACKAGE`.
+`PUBLISH_PACKAGES` fails with guidance. Partial-upload reconciliation stays manual;
+there is no automatic retry, registry readback claim or release-triggered upload.
+Snapshot/tool admission, disposable Make/publication/release-resume fixtures and
+links pass. Uploads were substituted; no real publication or release was executed.
+Adoption evidence: `/tmp/wire-shared-02710/`. Snapshot files were not patched manually.
 
-Explicit declarations retain their protocol bytes, IDs, limits and acceptance.
-For ID 7 / u8 42, the request remains
-`49 57 07 00 00 00 00 00 00 00 00 2a`; reply direction is 01 at offset 10.
-Omitting the ID for `echo` now selects `native::method_id("echo")` =
-3346031142226386015, yielding `49 57 5f 5c cc 87 98 7d 6f 2e 00 2a`.
-Removing existing overrides requires coordinated clients/schema regeneration.
-No legacy lanes or automatic migration. Preserve exact retry/hash bytes.
-Synchronous reply failure traps and rolls back mutation. After a real async await,
-only the current callback rolls back; prior committed mutations remain.
+Platform stays 0.8.3. Tool catalog/manifest selections stay 0.70.3; the incoming
+lock already resolves Build/Testkit/Host 0.70.4. Cargo.lock, Rust floor 1.91 and
+runtime dependency selections are unchanged by the current experiments.
 
-Focused native/schema tests, eight compile-fail cases plus valid control, strict
-core/derive/fixture Clippy, Wasm build, Rust 1.91 Wasm check and dependency graph
-isolation pass. Installed PocketIC cases pass typed/unit calls, malformed and
-wrong-identity frames, request/reply limits, sync/ready-async rollback, actual
-async/composite self-calls and one-dispatch guarded composition. Raw logs are in
-`target/wire-endpoint/`; diagnostics in `target/endpoint-check.CH8ejI/`.
-`make check-endpoint` joins the core roster; `make check-endpoint-ic` explicitly
-requires a prepared PocketIC server. Full CI/macOS were not run.
-Documentation/dependency boundary checks and the disposable Make/formatting
-adapter fixture also pass; no real-checkout release effects were invoked.
+The [fresh Candid matrix](../evidence/candid-comparison-0725/README.md) covers 22
+cohorts / 1,208 case entries / 4,832 primary comparisons on the unchanged core codec.
+All 25,670 instruction rows match cache controls after the fresh-caller sampler
+fix. Snapshotting includes the endpoint workspace member; overlapping native
+samples were replaced serially and retained separately. Ordinary vectors remain
+weak cases; explicit Packed wins its 436 primary comparisons. This is not a matched
+regression comparison with the older 0.7.10 dependency/server graph.
 
-The defaults follow-up qualifies fixed ASCII/UTF-8 ID vectors, default-sized and
-one-byte-over frames, independent overrides and reply-failure rollback. Latest
-logs are in `target/endpoint-defaults/` (11 diagnostic cases plus valid control).
-The [host expansion study](../evidence/endpoint-defaults/README.md) retains repeated
-before/after/default samples and its concurrent-change limitations. ID derivation
-and default selection are compile-time constants, not message work.
+The [actual Tripwire comparison](../evidence/tripwire-comparison-0725/README.md)
+retains 1,280 physical calls on one pinned nightly/wasm32 graph. Its headline uses
+Platform's real direct-initialization ingress copy; the older zero-filled control
+is separate. It is a focused blob probe, not full CDK-RSX/consumer qualification.
 
-The [matched hook study](../evidence/endpoints/README.md) compares equivalent
-inline Platform hooks with extracted hooks, not a complete Canic application.
-Eleven samples per input/profile preserve unit/empty/32-byte/64-KiB controls.
-Opt-z sampled IC cost increases 0.027–0.083%; total Wasm grows 608 bytes (1.91%)
-and code section 492 bytes (1.75%). Opt-3 costs/sizes match. Native timings and
-all regressions are recorded separately; concurrent host builds prevent speedup
-claims. Host macro-generation time was not isolated. Protocol unchanged.
+## Maintained integration boundaries
 
-## Retained qualification boundaries
+See [endpoints](../endpoints.md) for generated owned/borrowed sync/async/composite
+entrypoints, stable default IDs/budgets and schema projection. Platform owns exports
+and execution; consumers own auth, dispatch, retries, persistence and deployment.
+Retain original retry/hash bytes. Synchronous reply failure traps and rolls back;
+after a real await only the current callback rolls back, not earlier transactions.
 
-Released Tooling adoption evidence remains under `target/tooling-adoption-0723/`,
-`target/platform-adoption-0722/` and the recorded `target/ic-adoption-*` studies.
-Those results retain their own dependency graphs. Earlier hosted 0.7.21 evidence
-is historical, not qualification of this working tree. No full codec matrix or
-native macOS result is claimed for this batch.
-
-The [SDK recipe](../sdk-integration.md) and
+The [prior endpoint matrix](../evidence/endpoint-matrix-0724/README.md),
+[matched adoption](../evidence/upstream-adoption-0724/README.md) and
+[borrowed endpoint study](../evidence/borrowed-endpoints-0724/README.md) retain their
+original graphs and scope. The [SDK recipe](../sdk-integration.md) and
 [#29 acceptance](https://github.com/dragginzgame/ic-wire/issues/29#issuecomment-6475585612)
-retain consumer-owned auth, transport, retries, persistence and deployment.
-Registry 0.7.21 payload/schema/TypeScript qualification remains in
-`target/issue29-0721/`; it was not installed endpoint qualification.
-Hosted core/TypeScript/benchmark groups retain their supported host matrix and
-final scaffold gates; this batch adds the focused endpoint compile gate.
-
-The [scoped-output study](../evidence/with-encoded-0721/README.md),
-[schema-validator study](../evidence/schema-validator-0721/README.md),
-[warning study](../evidence/generator-warnings-0721/README.md),
-[caller-storage](../evidence/caller-storage-0719/README.md),
-[runtime](../evidence/runtime-0716/README.md) and
-[encoder](../evidence/encoder-followup-0716/README.md) preserve their frozen inputs.
-Platform Candid comparisons use tree-depth-7 under the 16-level cap; historical
-depth-8 rows cannot be paired. Depth 8 remains Wire-success/typed-Candid-refusal.
-Installed SDK/framework adoption remains consumer-owned.
-
-## Borrowed-input qualification
-
-The [borrowed-input study](../evidence/input-borrowing-0724/README.md) isolates
-released 0.7.23 from concurrent endpoint work. All 384 physical updates pass;
-1 MiB prefix/rejection costs fall about 41%, full scans 15–21%, total Wasm
-226–365 bytes. Both existing profiles retain small-input controls, exact bytes,
-full validation and recorded page charges. No runtime/protocol change or installed
-SDK qualification is claimed by that initial raw-export study.
-
-The subsequent [generated-endpoint study](../evidence/borrowed-endpoints-0724/README.md)
-qualifies `borrow` through actual Platform exports: another 384 physical updates
-pass. At 1 MiB, prefix/business rejection instructions fall 46.8%, full scans
-15.4–22.8%; total Wasm falls 344 bytes (opt-z) / 201 bytes (opt-3), code falls
-342 / 201 bytes. Empty opt-3 calls increase 66 instructions (0.014%); all other
-measured cohorts improve. Existing owned Wasm is byte-identical before/after in
-both profiles. No protocol change, lazy validation or async borrowing.
-
-Focused endpoint checks pass native custody/schema tests, 11 compile-fail cases
-plus valid borrowed controls, Clippy, Rust 1.91 and Wasm/dependency checks.
-Installed checks pass borrowed reply encoding, pre-handler malformed/trailing/
-wrong-ID/oversized refusal, reply-failure rollback and existing sync/async cases.
-Logs: `/tmp/wire-endpoint-borrow-{check,installed}.log`; diagnostics:
-`target/endpoint-check.hPZNMZ/`. Evidence receipts retain frozen source and raw
-traces. Full CI, macOS and actual Canic adoption were not run; no push/release.
-Shared staging/releases remain untouched.
-
-
-## Complete endpoint cost matrix
-
-`make evaluate-endpoints EVIDENCE_DIR=/absolute/new/path` now freezes source and
-measures every compiled fixture export with a prepared instrumented PocketIC.
-The [matrix](../evidence/endpoint-matrix-0724/README.md) covers all 17 endpoints and
-110 cases under both existing profiles: 1,760 measured logical calls / 1,936
-physical executions pass, plus 220 excluded warmups. Success/refusal and state
-oracles cover owned/borrowed, ready/suspending async, composite self-calls, unit,
-defaults/overrides, guarded dispatch, malformed input, node limits and reply traps.
-Each export has a valid control plus wrong-ID/trailing/oversized/truncated cases.
-Coverage is checked against the actual Wasm exports; new unbenchmarked exports
-fail the run. Full physical IC instructions, page charges, observed cycle debits,
-frame sizes and whole-artifact uncompressed/code sizes remain separate metrics.
-
-Query result caching is excluded with distinct callers and pre-sample simulator
-round publication; missing physical records fail, rather than imply zero cost.
-Query debit is zero on this simulator, not zero instruction work. Async costs
-include self-call/callback/cleanup; state observation stays outside the interval.
-This is the first complete matrix baseline, not a runtime optimization claim.
-The runtime, endpoint generator, protocol and consumer code are unchanged by this
-batch. The only lock change adds existing sha2 to private fixture host dev deps.
-
-Focused host Clippy, script syntax, full installed matrix, raw receipt auditing
-and cross-profile call-oracle/source identity checks pass. Full CI/macOS were not
-run. Raw immutable run: `/tmp/wire-endpoint-matrix-final-20261030/`; failed harness
-query-trace attempts are retained separately and contribute no accepted samples.
-All versions/staging/commits/releases remain with the maintainer.
+retain consumer-owned integration obligations. Actual Canic adoption and native
+macOS qualification were not performed in this batch.

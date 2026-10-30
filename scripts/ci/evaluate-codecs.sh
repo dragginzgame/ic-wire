@@ -22,7 +22,7 @@ if [ -n "${CODEC_SOURCE_SNAPSHOT:-}" ]; then
 else
     mkdir -p "$out/source/scripts/ci"
     cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
-    cp -R crates "$out/source/"
+    cp -R crates examples "$out/source/"
     cp scripts/ci/evaluate-codecs.sh scripts/ci/codec-cohorts.psv "$out/source/scripts/ci/"
 fi
 runs="${RUNS:-2}"

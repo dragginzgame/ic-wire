@@ -1,0 +1,24 @@
+--- a/fixture/lib.rs
++++ b/fixture/lib.rs
+@@ -120,7 +120,9 @@
+     let input = {
+         let n = ic_platform::ic0::msg_arg_data_size();
+         assert!(n <= MAX + 128);
+-        ic_platform::cdk::api::msg_arg_data()
++        let mut v = vec![0; n];
++        ic_platform::ic0::msg_arg_data_copy(&mut v, 0);
++        v
+     };
+     #[cfg(feature = "wire_owned")]
+     let result = {
+--- a/fixture/Cargo.toml.in
++++ b/fixture/Cargo.toml.in
+@@ -15,7 +15,7 @@
+ [dependencies]
+ ic-wire = { path = "@WIRE_SOURCE@/crates/ic-wire", optional = true }
+ cdk-rsx-tripwire = { path = "@TRIPWIRE_SOURCE@/ver1/crates/cdk-rsx-tripwire", optional = true }
+-ic-platform = { version = "=0.8.3", default-features = false, features = ["ic0", "cdk"] }
++ic-platform = { version = "=0.8.3", default-features = false, features = ["ic0"] }
+ serde = { version = "1", features = ["derive"] }
+ serde_bytes = "0.11"
+ [dev-dependencies]

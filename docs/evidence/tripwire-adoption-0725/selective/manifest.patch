@@ -1,0 +1,29 @@
+--- a/crates/ic-wire-benchmarks/Cargo.toml
++++ b/crates/ic-wire-benchmarks/Cargo.toml
+@@ -12,6 +12,8 @@
+ 
+ [features]
+ wire = []
++selective-input = []
++direct-owned-input = []
+ candid = []
+ allocations = []
+ heap = []
+@@ -40,7 +42,7 @@
+ derive-scale-10 = ["derive-scale"]
+ 
+ [dev-dependencies]
+-ic-platform = { workspace = true, features = ["candid", "ic0"] }
++ic-platform = { workspace = true, features = ["candid", "ic0", "cdk"] }
+ ic-wire.workspace = true
+ num-bigint.workspace = true
+ serde.workspace = true
+@@ -99,3 +101,8 @@
+ name = "roundtrip"
+ path = "tests/roundtrip/mod.rs"
+ required-features = ["wire", "candid"]
++
++[[example]]
++name = "selective-input"
++path = "examples/selective_input/mod.rs"
++crate-type = ["cdylib"]

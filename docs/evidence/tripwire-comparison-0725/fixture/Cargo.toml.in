@@ -1,0 +1,35 @@
+[package]
+name = "wire-tripwire-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+[workspace]
+[lib]
+crate-type = ["cdylib", "rlib"]
+[features]
+wire_owned = ["dep:ic-wire"]
+wire_borrowed = ["dep:ic-wire"]
+candid = ["ic-platform/candid"]
+tripwire_owned = ["dep:cdk-rsx-tripwire"]
+tripwire_selective = ["dep:cdk-rsx-tripwire"]
+[dependencies]
+ic-wire = { path = "@WIRE_SOURCE@/crates/ic-wire", optional = true }
+cdk-rsx-tripwire = { path = "@TRIPWIRE_SOURCE@/ver1/crates/cdk-rsx-tripwire", optional = true }
+ic-platform = { version = "=0.8.3", default-features = false, features = ["ic0", "cdk"] }
+serde = { version = "1", features = ["derive"] }
+serde_bytes = "0.11"
+[dev-dependencies]
+ic-platform = { version = "=0.8.3", default-features = false, features = ["pocket-ic", "candid"] }
+ic-testkit = { version = "=0.70.4", default-features = false }
+serde_json = "1"
+sha2 = "0.10"
+[profile.evaluation]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+[profile.benchmark-speed]
+inherits = "evaluation"
+opt-level = 3

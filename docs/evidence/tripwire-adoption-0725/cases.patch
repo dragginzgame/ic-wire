@@ -1,0 +1,33 @@
+--- a/examples/endpoint/tests/cost_matrix/mod.rs
++++ b/examples/endpoint/tests/cost_matrix/mod.rs
+@@ -240,13 +240,29 @@
+         if !methods.insert(base.method) {
+             continue;
+         }
+-        for label in ["wrong-id", "trailing", "oversized", "truncated"] {
++        for label in [
++            "wrong-id",
++            "wrong-magic",
++            "wrong-direction",
++            "short-header",
++            "wrong-id-at-limit",
++            "trailing",
++            "oversized",
++            "truncated",
++        ] {
+             let mut row = base.clone();
+             row.label = label.into();
+             row.expected = Expected::Trap;
+             row.mutation = 0;
+             match label {
+                 "wrong-id" => row.frame[2] ^= 1,
++                "wrong-magic" => row.frame[0] ^= 1,
++                "wrong-direction" => row.frame[10] = 1,
++                "short-header" => row.frame.truncate(10),
++                "wrong-id-at-limit" => {
++                    row.frame.resize(row.limits.bytes, 0);
++                    row.frame[2] ^= 1;
++                }
+                 "trailing" => row.frame.push(0),
+                 "oversized" => row.frame = vec![0; row.limits.bytes + 1],
+                 _ => {

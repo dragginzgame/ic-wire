@@ -10,6 +10,15 @@ RELEASE_EDITOR_VERSION := 0.70.3
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
+override CARGO_PUBLISH_PACKAGES := ic-wire-derive ic-wire
+override CARGO_PUBLISH_REGISTRY := crates-io
+override CARGO_PUBLISH_VERIFY_TARGETS := lint
+# Reject the retired selector rather than silently publishing the default roster.
+ifneq ($(filter publish publish-check,$(MAKECMDGOALS)),)
+ifneq ($(origin PUBLISH_PACKAGES),undefined)
+$(error PUBLISH_PACKAGES was replaced by PACKAGE; use PACKAGE=ic-wire for a selected attempt)
+endif
+endif
 include make/consumer.mk
 
 .PHONY: install-release-editor release-editor-check
@@ -21,14 +30,7 @@ release-editor-check:
 .PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci ci-core ci-typescript ci-benchmarks version
 # One complete roster for local/release validation; hosted groups partition it.
 override IC_WIRE_CI_TARGETS := tools-check lint shared-tooling-check check-pins check-boundary check-doc-links check-tooling check-release fmt-check check test check-typed-diagnostics check-qualification check-endpoint check-benchmarks check-typescript check-wasm check-msrv
-.PHONY: publish check-package
-PUBLISH_PACKAGES ?= ic-wire-derive ic-wire
-publish:
-	$(if $(strip $(PUBLISH_PACKAGES)),,$(error PUBLISH_PACKAGES cannot be empty))
-	$(if $(filter-out ic-wire-derive ic-wire,$(PUBLISH_PACKAGES)),$(error PUBLISH_PACKAGES must select ic-wire-derive and/or ic-wire))
-	+@$(MAKE) lint
-	+@env cargo publish --locked $(foreach package,$(PUBLISH_PACKAGES),-p $(package))
-
+.PHONY: check-package
 check-package:
 	+@$(MAKE) lint
 	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
@@ -114,7 +116,7 @@ help:
 		'Qualification: check-qualification (allocation fixtures and compiler support)' \
 		'Qualification: check-endpoint; check-endpoint-ic requires prepared POCKET_IC_BIN' \
 		'Evaluation: evaluate-endpoints EVIDENCE_DIR=/absolute/new/path (instrumented POCKET_IC_BIN)' \
-		'Registry: publish (uploads); check-package (no upload; registry access)' \
+		'Registry: publish (uploads); publish-check (dry run); PACKAGE selects a subset; check-package (archives)' \
 		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \

@@ -7,7 +7,7 @@ qualification work. These guides are task-specific, not a startup reading list.
 The Postcard runtime is qualified for bounded Rust integration.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `3c458c28cca132784e6e70fbaf219bdea1e4cf8f` (recorded version 0.27.9).
+rules, vendored at `61a173990683597c1c6a25f0145a2c87200c3cee` (recorded version 0.27.10).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot

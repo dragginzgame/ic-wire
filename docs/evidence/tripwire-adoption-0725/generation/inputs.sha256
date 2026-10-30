@@ -1,0 +1,4 @@
+c2b4456ebc9feeca3dfe15f6b2d314a3f9972b1973b649a4c16bd641b7c50879  Cargo.lock
+82e624b39528ca63df3335c983b511634633d1f90809ce4f73d0d0bb4f4f30ad  /tmp/wire-tripwire-adoption-0725/generation/before/mod.rs
+2e71338f3e670880ef5e9d0183c71563809969f59b53106c37f22fc6ec22b540  /tmp/wire-tripwire-adoption-0725/generation/after/mod.rs
+bee0db1d0df146ed00cbcf5f0295f59cb5b47c0f37067633b6b258ecc60fb909  /tmp/wire-tripwire-adoption-0725/generation/main.rs

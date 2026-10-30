@@ -1,0 +1,10 @@
+   Compiling ic-wire-benchmarks v0.7.24 (/tmp/wire-tripwire-adoption-0725/research/source/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+     Running unittests examples/selective_input/mod.rs (/tmp/wire-tripwire-adoption-0725/research-target/debug/examples/selective_input-1a8b8dbe73ce6596)
+
+running 2 tests
+test tests::malformed_frames_match_full_decoder_before_business_access ... ok
+test tests::known_shape_matches_full_decoder_and_reads_only_selected_bytes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.34s
+

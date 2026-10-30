@@ -236,7 +236,7 @@ After committing and releasing the reviewed source, the maintainer may rehearse
 or execute the separately authorized publication with Cargo 1.99:
 
 ```sh
-cargo publish --dry-run --locked -p ic-wire-derive -p ic-wire --all-features
+make publish-check
 make publish
 ```
 
@@ -246,19 +246,28 @@ resume only the remaining package after the derive version is available in the
 registry index:
 
 ```sh
-make publish PUBLISH_PACKAGES=ic-wire
+make publish PACKAGE=ic-wire
 ```
 
 The runtime-only retry applies to the same released version. If another release
 has advanced the workspace version, its matching derive version must be published
-too: use `make publish PUBLISH_PACKAGES="ic-wire-derive ic-wire"`. A tooling or Git
+too: use `make publish PACKAGE="ic-wire-derive ic-wire"`. A tooling or Git
 release does not publish either crate, and a new release is not required merely
 to finish an earlier partial publication.
 
-The default still selects both crates and runs lint first. Explicit selection
-avoids retrying an immutable uploaded version; it does not automatically infer
-registry state or ignore upload failures. Empty selections and private package
-names are rejected before Cargo runs. For a direct Cargo retry, use
+The shared [publication adapter](cargo-publication.md) selects both crates by
+default. It observes locked offline workspace metadata, admits the public roster,
+resolves exact `name@version` selectors, runs lint, then makes one Cargo attempt
+against `crates-io`. `publish-check` uses the same selection and gates with
+`--dry-run`; both require clean source. Keep `check-package` for dirty-source,
+all-feature archive review. Selection/attempt logs and exit statuses stay under
+`target/publication`; interrupted attempts retain a lock for inspection.
+
+Explicit selection avoids retrying an immutable uploaded version; it does not
+automatically infer registry state or ignore upload failures. Empty, duplicate
+and private-package selections are rejected before validation or upload. The old
+`PUBLISH_PACKAGES` option is refused; use command-line `PACKAGE` instead.
+For a direct Cargo retry, use
 `cargo publish --locked -p ic-wire`. Check that the existing derive upload is the
 intended release; published versions cannot be replaced.
 
@@ -277,8 +286,10 @@ compilation distinct from runtime performance or consumer deployment acceptance.
 
 Run `make check-benchmarks` for corpus correctness, lint and Rust 1.91 checks.
 This is not a performance regression gate. A full measured comparison is a
-separate run; the [0.7.10 report](full-comparison-0710.md) records the latest
-full matrix and matched previous-release qualification.
+separate run; the [current report](evidence/candid-comparison-0725/README.md)
+records the latest full matrix. The [0.7.10 report](full-comparison-0710.md)
+retains its matched previous-release qualification; the current refresh is not
+a matched regression comparison against that older dependency/server graph.
 Platform 0.7.5's bounded Candid decoder admits at most 16 constructed wire levels.
 The shared tree comparison therefore uses depth 7 (eight record/vector pairs).
 Depth 8 stays covered as Wire-success / typed Candid nesting refusal, rather than
