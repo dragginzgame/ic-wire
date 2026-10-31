@@ -34,6 +34,13 @@ generator probe. Five report tests, focused strict Clippy and Rust 1.91 checks
 pass. The Wasm benchmark graph excludes Clap. No full performance matrix was run
 for CLI mechanics. Logs: `/tmp/wire-issues-31-34/`. Leave #31 open until delivery.
 
+CI follow-up: the CLI batch omitted `ic-wire-benchmarks` from the consumer-owned
+Clap dependency allowlist. Add that package to `ci/cargo-dependency-boundaries.json`;
+keep the shared checker unchanged and Clap host-only/dev-only. This is policy
+alignment, with no runtime or protocol change. `make check-boundary` passes;
+the Wasm benchmark graph excludes Clap. Documentation links and diff checks pass.
+No full CI or codec benchmark was rerun for this metadata fix.
+
 [#32](https://github.com/dragginzgame/ic-wire/issues/32) is closed after qualifying
 registry-only Wire 0.10.0 / Platform 0.11.1 together: five combined endpoint/schema
 tests, Rust 1.91 Wasm compilation and feature isolation pass without patches.

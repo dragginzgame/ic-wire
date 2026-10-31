@@ -3,6 +3,7 @@
     "dependency": "clap",
     "allowed_packages": [
       "ic-wire",
+      "ic-wire-benchmarks",
       "ic-wire-qualification"
     ]
   },

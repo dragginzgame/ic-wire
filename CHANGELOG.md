@@ -19,6 +19,8 @@
   Help and argument errors now complete before output/server/measurement effects;
   surplus report arguments are rejected. Retain create-only evidence and all
   benchmark workloads ([#31](https://github.com/dragginzgame/ic-wire/issues/31)).
+  Register the benchmark package in the consumer-owned Clap dependency boundary
+  policy; Clap remains a host-only development dependency.
   Production dependencies and the protocol are unchanged.
 
 ### ⬆️ Dependencies
