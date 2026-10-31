@@ -1,0 +1,33 @@
+#[cfg(test)]
+mod tests {
+    #[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
+    struct Report {
+        counter: ic_metrics::MeasurementCounter,
+        owner: ic_platform::Principal,
+        account: ic_platform::Account,
+    }
+
+    #[test]
+    fn published_schemas_and_typed_calls_share_wire_identity() {
+        use ic_testkit::pic::{WireCallError, WireCallSpec};
+        use ic_wire::{Error, Limits};
+        let limits = Limits { bytes: 512, allocation: 65_536, nodes: 1024, depth: 16 };
+        let spec = WireCallSpec { method: "echo", method_id: 7, request_limits: limits, response_limits: limits };
+        let contract = ic_wire_endpoint::Contract::<ic_platform::Principal, ic_platform::Account>::new("echo", "query", 7, spec.request_limits, spec.response_limits);
+        assert_eq!(contract.request.bytes, 512);
+        ic_wire::typescript::native_schema::<Report>().unwrap();
+        ic_wire::typescript::native_schema::<ic_metrics::MeasurementCounter>().unwrap();
+        ic_wire::typescript::native_schema::<ic_metrics::MeasurementAggregate>().unwrap();
+        ic_wire::typescript::native_schema::<ic_metrics::MeasurementSummary>().unwrap();
+        ic_wire::typescript::native_schema::<ic_metrics::MeasurementHistogram<3>>().unwrap();
+        fn codec_cause(error: WireCallError) -> Option<Error> {
+            match error {
+                WireCallError::Encode { source, .. } | WireCallError::Decode { source, .. } => Some(source),
+                _ => None,
+            }
+        }
+        let _ = codec_cause;
+        let _ = ic_testkit::pic::query_wire::<ic_platform::Principal, ic_platform::Principal>;
+        let _ = ic_testkit::pic::update_wire::<ic_platform::Account, ic_platform::Account>;
+    }
+}

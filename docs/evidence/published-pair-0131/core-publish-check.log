@@ -1,0 +1,32 @@
+Publication selection evidence: /home/adam/projects/ic-wire/target/publication/selection.rlZ3Th
+   Compiling ic-wire-derive v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-wire v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.86s
+Publication evidence: /home/adam/projects/ic-wire/target/publication/check.selection.rlZ3Th
+    Updating crates.io index
+   Packaging ic-wire-derive v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Updating crates.io index
+    Packaged 9 files, 31.2KiB (9.7KiB compressed)
+   Packaging ic-wire v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+warning: ignoring example `bulk-lint` as `examples/bulk_lint/mod.rs` is not included in the published package
+warning: ignoring example `typescript-conformance` as `examples/typescript_conformance/mod.rs` is not included in the published package
+warning: ignoring test `borrowed` as `tests/borrowed/mod.rs` is not included in the published package
+warning: ignoring test `native` as `tests/native/mod.rs` is not included in the published package
+warning: ignoring test `runtime` as `tests/runtime/mod.rs` is not included in the published package
+warning: ignoring test `ui` as `tests/ui/mod.rs` is not included in the published package
+    Updating crates.io index
+    Packaged 28 files, 206.4KiB (56.6KiB compressed)
+   Verifying ic-wire-derive v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-wire-derive v0.13.1 (/home/adam/projects/ic-wire/target/package/ic-wire-derive-0.13.1)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.60s
+   Verifying ic-wire v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Updating crates.io index
+   Unpacking ic-wire-derive v0.13.1 (registry `/home/adam/projects/ic-wire/target/package/tmp-registry`)
+   Compiling ic-wire-derive v0.13.1
+   Compiling ic-wire v0.13.1 (/home/adam/projects/ic-wire/target/package/ic-wire-0.13.1)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.06s
+   Uploading ic-wire-derive v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+warning: aborting upload due to dry run
+   Uploading ic-wire v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+warning: aborting upload due to dry run

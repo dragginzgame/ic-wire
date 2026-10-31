@@ -1,0 +1,41 @@
+{
+  "ic-platform": {
+    "before": "0.15.2",
+    "after": "0.15.3",
+    "before_files": 112,
+    "after_files": 112,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "f6b3293e2d6adabf65bd5afdf0194463b84330ea"
+      },
+      "path_in_vcs": "crates/ic-platform"
+    }
+  },
+  "ic-platform-macros": {
+    "before": "0.15.2",
+    "after": "0.15.3",
+    "before_files": 5,
+    "after_files": 5,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "f6b3293e2d6adabf65bd5afdf0194463b84330ea"
+      },
+      "path_in_vcs": "crates/ic-platform-macros"
+    }
+  },
+  "ic-platform-runtime-guard": {
+    "before": "0.15.2",
+    "after": "0.15.3",
+    "before_files": 1,
+    "after_files": 1,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "f6b3293e2d6adabf65bd5afdf0194463b84330ea"
+      },
+      "path_in_vcs": "crates/ic-platform-runtime-guard"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+Publication selection evidence: /home/adam/projects/ic-wire/target/publication/selection.I3m59g
+   Compiling ic-wire-derive v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-wire v0.13.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.45s
+Publication evidence: /home/adam/projects/ic-wire/target/publication/check.selection.I3m59g
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+   Packaging ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Blocking waiting for file lock on package cache
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+    Packaged 7 files, 19.1KiB (7.1KiB compressed)
+   Verifying ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling ic-wire-derive v0.13.1
+   Compiling ic-wire v0.13.1
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/target/package/ic-wire-endpoint-0.2.1)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.10s
+   Uploading ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+warning: aborting upload due to dry run

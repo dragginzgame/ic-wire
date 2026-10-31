@@ -1,0 +1,16 @@
+Publication selection evidence: /home/adam/projects/ic-wire/target/publication/selection.N7zcn4
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
+Publication evidence: /home/adam/projects/ic-wire/target/publication/publish.selection.N7zcn4
+    Updating crates.io index
+   Packaging ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+    Packaged 7 files, 19.1KiB (7.1KiB compressed)
+   Verifying ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/target/package/ic-wire-endpoint-0.2.1)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+   Uploading ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Uploaded ic-wire-endpoint v0.2.1 to registry `crates-io`
+note: waiting for ic-wire-endpoint v0.2.1 to be available at registry `crates-io`
+help: you may press ctrl-c to skip waiting; the crate should be available shortly
+   Published ic-wire-endpoint v0.2.1 at registry `crates-io`

@@ -1,0 +1,9 @@
+{
+  "source_commit": "203a97cb91ae6fec95d77a658325a6b34154fa93",
+  "core": "974510a88590f2bd54e8ea45de90e0830e928063",
+  "endpoint": "a6cfed5b367fff84997985a357ceeb6731ec5400",
+  "local_ci_seconds": {
+    "core": 673,
+    "endpoint": 731
+  }
+}
