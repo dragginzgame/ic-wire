@@ -59,6 +59,14 @@ Use focused targets for changed behavior. `make ci` is the complete scaffold gat
 and requires an explicit local request. Release commands deliver Git versions
 and tags; registry publication is a separate maintainer action.
 
+The release policy can select `RELEASE_GROUP` after adopting Shared Tooling's
+[explicit group mechanism](https://github.com/dragginzgame/shared-tooling/issues/328)
+and a supplying managed editor. It then uses the approved group's version,
+ledger, exact metadata files and receipts while retaining the complete gate.
+No group configuration or independently versioned package is activated by this
+adapter support; [#36](https://github.com/dragginzgame/ic-wire/issues/36) owns that
+boundary and its Platform prerequisite.
+
 ## License
 
 Licensed under the [MIT License](LICENSE).

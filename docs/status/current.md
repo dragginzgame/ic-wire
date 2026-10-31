@@ -1,5 +1,18 @@
 # Current handoff
 
+## Release-group adapter contribution
+
+The isolated Shared #328 contribution makes the local release policy consume
+an explicitly selected group, its ledger/file inventory and distinct receipts.
+No production group, package, version or vendored payload is changed. Group use
+requires a reviewed Shared snapshot and a published supplying IC Build editor.
+The real adapter passes coordinated and endpoint-group preparation/delivery/
+resume fixtures with candidate Shared/editor inputs in a disposable checkout;
+the expensive CI/tool setup gates are substitutes. ShellCheck passes. These
+checks are Linux evidence, not native macOS or registry delivery. Shared owns
+[the mechanism](https://github.com/dragginzgame/shared-tooling/issues/328);
+[#36](https://github.com/dragginzgame/ic-wire/issues/36) retains boundary ownership.
+
 ## Released 0.10.0; pending 0.11.0
 
 Released baseline is `c9d4e7b`. PR [#35](https://github.com/dragginzgame/ic-wire/pull/35)

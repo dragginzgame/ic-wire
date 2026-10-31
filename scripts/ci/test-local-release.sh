@@ -5,7 +5,8 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
 unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND CARGO_RELEASE_METADATA_EDITOR
 # Reuse the offline-admitted real editor; fixture tool setup is substituted.
-FIXTURE_RELEASE_EDITOR="$(make --no-print-directory -s -C "$root" release-editor-check)"
+FIXTURE_RELEASE_EDITOR="${FIXTURE_RELEASE_EDITOR:-$(make --no-print-directory -s -C "$root" release-editor-check)}"
+[[ "$FIXTURE_RELEASE_EDITOR" == /* && -f "$FIXTURE_RELEASE_EDITOR" && -x "$FIXTURE_RELEASE_EDITOR" ]] || exit 1
 export FIXTURE_RELEASE_EDITOR
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 export RELEASE_CACHE_PREPARE=0
@@ -115,5 +116,35 @@ cmp Cargo.toml <(perl -0pe 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' "$fi
 cp "$fixture/grouped-manifest" Cargo.toml
 [[ "$(cat .git/release-state/0.0.1.plan)" == 'retained historical plan' ]]
 [[ -d .git/release-state/broken.plan ]]
+# Once the reviewed Shared group mechanism is adopted, exercise the actual Wire
+# policy on a disposable endpoint group. Before adoption, selection refuses with
+# the adapter's explicit diagnostic; no vendored fallback is supplied here.
+if [[ -f scripts/ci/cargo-release-group.sh ]]; then
+    unset RELEASE_VERSION RELEASE_DATE
+    mkdir -p fixture-endpoint/src docs/changelog
+    printf '[package]\nname = "ic-wire-release-fixture-endpoint"\nversion = "0.1.0"\nedition.workspace = true\npublish = false\n' > fixture-endpoint/Cargo.toml
+    printf 'pub fn fixture() {}\n' > fixture-endpoint/src/lib.rs
+    perl -0pi -e 's/members = \[\n/members = [\n    "fixture-endpoint",\n/; s/\[workspace.dependencies\]\n/[workspace.dependencies]\nfixture-endpoint = { package = "ic-wire-release-fixture-endpoint", path = "fixture-endpoint", version = "0.1.0" }\n/' Cargo.toml
+    cat > ci/cargo-release-groups.json <<'JSON'
+{"schema":1,"groups":[
+ {"name":"codec","primary":"ic-wire","version":"workspace","members":["ic-wire","ic-wire-derive","ic-wire-benchmarks","ic-wire-qualification","ic-wire-endpoint-fixture"],"changelog":"CHANGELOG.md","dependencies":["ic-wire","ic-wire-derive"]},
+ {"name":"endpoint","primary":"ic-wire-release-fixture-endpoint","version":"package","members":["ic-wire-release-fixture-endpoint"],"changelog":"docs/changelog/fixture-endpoint.md","dependencies":["fixture-endpoint"]}
+]}
+JSON
+    printf '# Endpoint fixture\n\n## [0.2.0]\n\n- Fixture change.\n\n## [0.1.0] - 2000-01-01\n\n- Baseline.\n' > docs/changelog/fixture-endpoint.md
+    cargo metadata --offline --format-version 1 > /dev/null
+    cargo sort --workspace --grouped
+    git add -- Cargo.toml Cargo.lock ci/cargo-release-groups.json fixture-endpoint docs/changelog/fixture-endpoint.md
+    git commit -qm 'Define disposable release groups'
+    if make release-patch > "$fixture/group-required.log" 2>&1; then exit 1; fi
+    grep -F 'grouped workspace requires explicit RELEASE_GROUP' "$fixture/group-required.log" > /dev/null
+    RELEASE_GROUP=endpoint make release-minor > "$fixture/endpoint-group.log" 2>&1
+    [[ "$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)" == "$candidate" ]]
+    [[ "$(git log -1 --format=%s)" == 'Release endpoint 0.2.0' ]]
+    [[ "$(git rev-parse 'endpoint-v0.2.0^{commit}')" == "$(git rev-parse HEAD)" ]]
+    [[ "$(git rev-parse "v$candidate^{commit}")" == "$commit" ]]
+    [[ -z "$(git status --porcelain)" ]]
+    RELEASE_GROUP=endpoint make release-resume VERSION=0.2.0 > "$fixture/group-resume.log" 2>&1
+fi
 complete=true
 printf '%s\n' 'Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.'

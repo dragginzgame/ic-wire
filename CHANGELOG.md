@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.11.1] - Unreleased
+
+### ➕ Added
+
+- Let the release policy select an explicitly approved package group, its own
+  ledger, exact file set and receipts after adopting Shared release-group support.
+  Existing coordinated releases remain the default. No package boundary,
+  version, group configuration or publication changes in this adapter update
+  ([#36](https://github.com/dragginzgame/ic-wire/issues/36)).
+
 ## [0.11.0] - 2026-10-31
 
 ### ⚠️ Breaking
