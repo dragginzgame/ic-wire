@@ -31,7 +31,7 @@ bytemuck = { version = "1.25.2", default-features = false, features = ["must_cas
 # The Types supplier identity changes; codec bytes, budgets and acceptance do not.
 ic-platform = { version = "0.15.0", default-features = false }
 ic-platform-types = { version = "0.15.0", default-features = false }
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.12.1" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.13.0" }
 ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.1.0" }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
@@ -46,7 +46,7 @@ clap = { version = "4.6.7", default-features = false, features = ["std", "help",
 dhat = "0.3.3"
 ic-build = { version = "0.73.0", default-features = false }
 ic-testkit = { version = "0.73.0", default-features = false }
-ic-wire = { path = "crates/ic-wire", version = "0.12.1" }
+ic-wire = { path = "crates/ic-wire", version = "0.13.0" }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"
