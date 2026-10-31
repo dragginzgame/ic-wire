@@ -1,0 +1,82 @@
+Validation summary:
+  PASS     9s  tools-check
+  PASS     1s  lint
+  PASS     1s  shared-tooling-check
+  PASS     1s  check-pins
+  PASS     1s  check-boundary
+  PASS     0s  check-doc-links
+  PASS    16s  check-tooling
+  PASS   327s  check-release
+  PASS     1s  fmt-check
+  PASS     0s  check
+  PASS     1s  test
+  PASS     3s  check-typed-diagnostics
+  PASS     7s  check-qualification
+  PASS     5s  check-endpoint
+  PASS   113s  check-benchmarks
+  PASS    45s  check-typescript
+  PASS     0s  check-wasm
+  PASS     1s  check-msrv
+VALIDATION PASSED: all requested targets succeeded.
+Validation logs retained at: /home/adam/projects/ic-wire/.git/release-state/ic-wire-0.13.2/validation/validation.Wo8RHO
+
+Validation summary:
+  PASS   532s  ci
+VALIDATION PASSED: all requested targets succeeded.
+Validation logs retained at: /home/adam/projects/ic-wire/.git/release-state/ic-wire-0.13.2/validation/validation.0eWQHm
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --preflight
+make --no-print-directory install-host-tools
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env"
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory install-rust-tools
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env"
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=selection-reuse outcome=passed elapsed=0s status=0
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=selection-reuse outcome=passed elapsed=0s status=0
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+Cargo tool setup: package=ic-build version=0.73.2 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.2 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=ic-build version=0.73.2 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.2 phase=selection-reuse outcome=passed elapsed=0s status=0
+/home/adam/projects/ic-wire/.tools/rust/selected-79ae70020166c0a42cd22ee2ed23bc14fa7871d235addd20e6ea278b0443a20c/bin/ic-build-release-metadata
+make --no-print-directory host-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory rust-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+/home/adam/projects/ic-wire/.tools/rust/selected-79ae70020166c0a42cd22ee2ed23bc14fa7871d235addd20e6ea278b0443a20c/bin/ic-build-release-metadata
+Release preparation originals retained: /tmp/cargo-group-backup.RJW54Y
+Checking ic-wire...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+Checking ic-wire...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Checking ic-wire...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Manifest sorting [.]... ok (0.02s)
+Rust formatting [.]... ok (0.15s)
+Pre-commit formatting passed; refreshed only the selected files.
+[main eff8c18] Release core 0.13.2
+ 8 files changed, 16 insertions(+), 16 deletions(-)

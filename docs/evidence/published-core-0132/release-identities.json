@@ -1,0 +1,7 @@
+{
+  "source_commit": "1029a8f1315c73b5d36b3f610fde8d67edc583a9",
+  "core": "eff8c18d053506be5e0d3a8676f1e48ae9ce99d0",
+  "core_tag": "core-v0.13.2",
+  "endpoint_unchanged": "0.2.1",
+  "local_ci_seconds": 532
+}
