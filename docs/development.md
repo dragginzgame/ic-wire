@@ -25,14 +25,14 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.73.1 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.73.2 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.73.1 without default features; the CLI feature is only enabled for installation.
+0.73.2 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
-Native endpoint/codec controls select Testkit 0.75.0; Build/Host retain the
-independently versioned 0.73.1 foundation.
+Native endpoint/codec controls select Testkit 0.75.1; Build/Host retain the
+independently versioned 0.73.2 foundation.
 
 Installation is explicit; checks install nothing. IC Wire selects only the
 reviewed common host and Cargo toolsets. Platform executables are not part of its

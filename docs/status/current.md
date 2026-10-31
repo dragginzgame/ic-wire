@@ -1,5 +1,27 @@
 # Current handoff
 
+## Pending Core 0.13.2 tooling adoption
+
+Select published **Build/Host 0.73.2**, **Testkit 0.75.1** and **Metrics 0.24.1**.
+The incoming lock already selected them and is byte-identical after this work;
+root requirements, managed CLI editor and current docs now agree. Metrics remains
+arithmetic-only through Testkit, with native metadata qualified in the registry
+consumer. No unused Host Tools/native-measurement package is introduced.
+Own versions remain Core 0.13.1 / Endpoint 0.2.1. Compatible Core notes select
+**0.13.2**; Endpoint has no new package change. No staging, commits, releases,
+publication or sibling edits were performed.
+
+[Focused evidence and reproduction](../evidence/tooling0732-metrics0241/README.md)
+retain source review, diagnostic runner, four qualification tests, default corpus,
+Rust 1.91 benchmark builds, installed endpoint limits/rollback, actual editor
+preparation/checks for both isolated groups and a registry-only native schema/
+typed-call consumer. One Metrics 0.24.1 now resolves across that consumer and
+Testkit, replacing the old two-Metrics pairing. Formatting/pins/boundaries/links
+and runner syntax pass. The production endpoint Wasm graph equals delivered
+source; runtime/generator inputs, protocol bytes/budgets/acceptance and rollback
+are unchanged. No new performance benchmark or speed/size saving is claimed.
+No full local CI or new hosted/macOS matrix ran for this uncommitted adoption.
+
 ## Delivered Core 0.13.1 / Endpoint 0.2.1
 
 The maintainer's delegated Git/crates.io deployment is complete:
@@ -16,7 +38,8 @@ All three public non-yanked registry checksums match downloaded/upload archives
 and clean VCS provenance matches the exact tags. [Delivery and reproduction](../evidence/published-pair-0131/README.md)
 retain the effect/consumer proof. Do not replay these effects. Logs remain under
 target/deploy-0131 and the standard .git/release-state plans/validation journals.
-No sibling checkout or cleanup was touched. No new pending version is selected.
+No sibling checkout or cleanup was touched. The new pending tooling adoption is
+described above; these delivered entries remain finalized.
 
 The recorded Shared snapshot is **0.27.21** at
 `143a9abb9ae81feae9400ff3844b03b1ddfdd75a` (upstream commit calls its follow-up
@@ -26,7 +49,7 @@ complete alias rosters update private/unused entries too. No extra dependency
 edges result from catalog-only entries. Independent release groups and ordinary
 whole-target Cargo cleanup remain intact.
 
-## Actual suppliers and acceptance
+## Delivered suppliers and original acceptance
 
 The release lock selects Platform/macros/guard **0.15.3** (compatible declared
 minimum 0.15.2), canonical Types **0.15.1**, Build/Host **0.73.1** and Testkit

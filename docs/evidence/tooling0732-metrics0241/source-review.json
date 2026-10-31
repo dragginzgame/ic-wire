@@ -1,0 +1,97 @@
+{
+  "ic-build": {
+    "before": "0.73.1",
+    "after": "0.73.2",
+    "before_files": 71,
+    "after_files": 71,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "a930be3305b8dcd9477ac045308f1072e4e3142b"
+      },
+      "path_in_vcs": "crates/ic-build"
+    }
+  },
+  "ic-host-artifacts": {
+    "before": "0.73.1",
+    "after": "0.73.2",
+    "before_files": 32,
+    "after_files": 32,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "a930be3305b8dcd9477ac045308f1072e4e3142b"
+      },
+      "path_in_vcs": "crates/ic-host-artifacts"
+    }
+  },
+  "ic-host-fs": {
+    "before": "0.73.1",
+    "after": "0.73.2",
+    "before_files": 63,
+    "after_files": 63,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "a930be3305b8dcd9477ac045308f1072e4e3142b"
+      },
+      "path_in_vcs": "crates/ic-host-fs"
+    }
+  },
+  "ic-host-process": {
+    "before": "0.73.1",
+    "after": "0.73.2",
+    "before_files": 52,
+    "after_files": 52,
+    "changed_src_files": [
+      "src/tool/tests/version/mod.rs"
+    ],
+    "vcs": {
+      "git": {
+        "sha1": "a930be3305b8dcd9477ac045308f1072e4e3142b"
+      },
+      "path_in_vcs": "crates/ic-host-process"
+    }
+  },
+  "ic-testkit": {
+    "before": "0.75.0",
+    "after": "0.75.1",
+    "before_files": 28,
+    "after_files": 28,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "7898f58fc0ee0a909484c192a81cf454683120b4"
+      },
+      "path_in_vcs": "crates/ic-testkit"
+    }
+  },
+  "ic-metrics": {
+    "before": "0.23.2",
+    "after": "0.24.1",
+    "before_files": 30,
+    "after_files": 30,
+    "changed_src_files": [
+      "src/application.md"
+    ],
+    "vcs": {
+      "git": {
+        "sha1": "1e7193f77107a528cd99492b40df6750ddd445b5"
+      },
+      "path_in_vcs": "crates/ic-metrics"
+    }
+  },
+  "ic-metrics-native": {
+    "before": "0.24.0",
+    "after": "0.24.1",
+    "before_files": 30,
+    "after_files": 30,
+    "changed_src_files": [],
+    "vcs": {
+      "git": {
+        "sha1": "1e7193f77107a528cd99492b40df6750ddd445b5"
+      },
+      "path_in_vcs": "crates/ic-metrics"
+    }
+  }
+}

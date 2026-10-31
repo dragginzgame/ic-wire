@@ -36,8 +36,8 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - The maintainer approved and requested implementation of the
   [stable identity boundary](docs/stable-identities.md): coordinated ic-wire/
   ic-wire-derive and one independently versioned ic-wire-endpoint package.
-  Platform 0.15.2 / Types 0.15.1 and IC Build 0.73.1 supply the current suppliers;
-  native qualification uses Testkit 0.75.0. Use the
+  Platform 0.15.2 / Types 0.15.1 and IC Build 0.73.2 supply the current suppliers;
+  native qualification uses Testkit 0.75.1. Use the
   explicit core/endpoint release groups with literal member versions and ledgers
   under releases/<group>/. Release/resume/publication require explicit group
   selection; no publication is authorized.

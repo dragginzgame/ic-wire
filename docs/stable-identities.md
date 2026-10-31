@@ -4,8 +4,8 @@ The maintainer approved this boundary for [#36](https://github.com/dragginzgame/
 on 2026-10-31 and requested implementation after Platform publication. It is now
 delivered and published as core 0.13.0 / Endpoint 0.2.0. The original prerequisite is
 supplied by registry Platform/Types 0.15 and IC Build 0.73.
-Current compatible selections are Platform 0.15.2, Types 0.15.1, Build 0.73.1
-and native Testkit 0.75.0. No sibling checkout was modified.
+Current compatible selections are Platform 0.15.2, Types 0.15.1, Build 0.73.2
+and native Testkit 0.75.1. No sibling checkout was modified.
 
 ## Owners and release groups
 
@@ -69,7 +69,7 @@ with coordinated releases through 0.11.0 preserved once in `releases/history.md`
 No package paths, numeric versions, tags or historical scope were changed. The real
 adapter uses the shared group plan's exact files for metadata/source admission,
 receipts and post-commit checks. Group-specific tags/plans prevent collisions.
-The metadata editor is published IC Build 0.73.1 with `group-manifest`.
+The metadata editor is published IC Build 0.73.2 with `group-manifest`.
 
 ```sh
 make release-version RELEASE_GROUP=core

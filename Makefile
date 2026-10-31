@@ -16,7 +16,7 @@ ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
 endif
-RELEASE_EDITOR_VERSION := 0.73.1
+RELEASE_EDITOR_VERSION := 0.73.2
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli

@@ -48,8 +48,8 @@ syn = { version = "3.0.9", features = ["visit"] }
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 dhat = "0.3.3"
-ic-build = { version = "0.73.1", default-features = false }
-ic-testkit = { version = "0.75.0", default-features = false }
+ic-build = { version = "0.73.2", default-features = false }
+ic-testkit = { version = "0.75.1", default-features = false }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"

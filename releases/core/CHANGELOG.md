@@ -5,6 +5,15 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.13.2]
+
+### ⬆️ Dependencies
+
+- Adopt Build/Host 0.73.2, including the managed release metadata editor, and
+  Testkit 0.75.1 with arithmetic-only Metrics 0.24.1. Preserve the production
+  codec/Endpoint dependency graph, protocol bytes, resource budgets and Rust 1.91
+  support. No consumer migration or runtime performance saving is implied.
+
 ## [0.13.1] - 2026-10-31
 
 ### ⬆️ Dependencies
