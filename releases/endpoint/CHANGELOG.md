@@ -4,7 +4,7 @@ Covers ic-wire-endpoint. Its independent series begins at 0.1.0; pre-extraction
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
-## [0.2.0]
+## [0.2.0] - 2026-10-31
 
 - Move this group's canonical ledger to `releases/endpoint/CHANGELOG.md` and
   require explicit endpoint selection for release/resume/publication, including

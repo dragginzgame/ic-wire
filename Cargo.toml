@@ -32,7 +32,7 @@ bytemuck = { version = "1.25.2", default-features = false, features = ["must_cas
 ic-platform = { version = "0.15.0", default-features = false }
 ic-platform-types = { version = "0.15.0", default-features = false }
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.13.0" }
-ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.1.0" }
+ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.2.0" }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
