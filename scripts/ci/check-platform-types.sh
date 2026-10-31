@@ -20,7 +20,8 @@ node - "$root" "$fixture" <<'JS'
 const fs=require('node:fs'),path=require('node:path');
 const [root,fixture]=process.argv.slice(2),m=JSON.parse(fs.readFileSync(`${fixture}/workspace.json`));
 const wire=m.packages.find(p=>p.name==='ic-wire'&&p.manifest_path===`${root}/crates/ic-wire/Cargo.toml`);
-const dep=m.resolve.nodes.find(n=>n.id===wire.id).deps.find(d=>d.name==='ic_platform');
+const endpoint=m.packages.find(p=>p.name==='ic-wire-endpoint'&&p.manifest_path===`${root}/crates/ic-wire-endpoint/Cargo.toml`);
+const dep=m.resolve.nodes.find(n=>n.id===endpoint.id).deps.find(d=>d.name==='ic_platform');
 const platform=m.packages.find(p=>p.id===dep.pkg);
 const source=platform.source===null?`, path = ${JSON.stringify(path.dirname(platform.manifest_path))}`:'';
 fs.writeFileSync(`${fixture}/Cargo.toml`, `[workspace]
@@ -29,10 +30,11 @@ name = "wire-platform-types-consumer"
 version = "0.0.0"
 edition = "2024"
 [features]
-endpoint = ["ic-wire/endpoint"]
+endpoint = ["dep:ic-wire-endpoint"]
 [dependencies]
 ic-wire = { path = ${JSON.stringify(`${root}/crates/ic-wire`)}, default-features = false, features = ["platform-types"] }
 ic-platform = { version = "=${platform.version}"${source}, default-features = false, features = ["principal"] }
+ic-wire-endpoint = { path = ${JSON.stringify(`${root}/crates/ic-wire-endpoint`)}, optional = true, features = ["typescript"] }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 [dev-dependencies]
 serde_bytes = "0.11"

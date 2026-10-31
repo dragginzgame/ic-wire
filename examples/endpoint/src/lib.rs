@@ -22,36 +22,36 @@ pub struct Request {
 }
 
 /// Record query, preserving a single typed value.
-#[ic_wire::endpoint::query(contract = ECHO, id = 7, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::query(contract = ECHO, id = 7, request = LIMITS, response = LIMITS)]
 pub fn echo(request: Request) -> Request {
     request
 }
 
 /// Unit requests still require a complete identity-checked Wire frame.
-#[ic_wire::endpoint::query(contract = COUNT_CONTRACT, id = 8, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::query(contract = COUNT_CONTRACT, id = 8, request = LIMITS, response = LIMITS)]
 pub fn count() -> u64 {
     COUNT.get()
 }
 
 /// Synchronous mutation followed by bounded reply encoding.
-#[ic_wire::endpoint::update(contract = MUTATE, id = 9, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(contract = MUTATE, id = 9, request = LIMITS, response = LIMITS)]
 pub fn mutate(size: u32) -> ByteBuf {
     COUNT.set(COUNT.get() + 1);
     ByteBuf::from(vec![42; size as usize])
 }
 
 /// Explicit unit input/output and non-Rust export name.
-#[ic_wire::endpoint::update(name = "unit-call", contract = UNIT, id = 10, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(name = "unit-call", contract = UNIT, id = 10, request = LIMITS, response = LIMITS)]
 pub fn unit(_: ()) {}
 
 /// A normal async query that completes without inter-canister suspension.
-#[ic_wire::endpoint::query(contract = ASYNC_QUERY, id = 11, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::query(contract = ASYNC_QUERY, id = 11, request = LIMITS, response = LIMITS)]
 pub async fn async_query(value: u64) -> (u64, bool) {
     (value, true)
 }
 
 /// Composite query with an actual inter-canister await through Platform.
-#[ic_wire::endpoint::query(composite, contract = COMPOSITE, id = 12, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::query(composite, contract = COMPOSITE, id = 12, request = LIMITS, response = LIMITS)]
 pub async fn composite() -> u64 {
     remote_count().await
 }
@@ -67,7 +67,7 @@ async fn remote_count() -> u64 {
 }
 
 /// After an await, only the callback mutation rolls back on encoding failure.
-#[ic_wire::endpoint::update(id = 13, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(id = 13, request = LIMITS, response = LIMITS)]
 pub async fn async_mutate(size: u32) -> ByteBuf {
     COUNT.set(COUNT.get() + 10);
     let _ = remote_count().await;
@@ -76,41 +76,41 @@ pub async fn async_mutate(size: u32) -> ByteBuf {
 }
 
 /// Async ready execution has the same rollback boundary as a synchronous call.
-#[ic_wire::endpoint::update(id = 14, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(id = 14, request = LIMITS, response = LIMITS)]
 pub async fn async_ready(size: u32) -> ByteBuf {
     mutate(size)
 }
 
 /// A deliberately tight traversal budget, independent of frame bytes.
-#[ic_wire::endpoint::query(contract = NODES, id = 15, request = Limits { nodes: 3, ..LIMITS }, response = LIMITS)]
+#[ic_wire_endpoint::query(contract = NODES, id = 15, request = Limits { nodes: 3, ..LIMITS }, response = LIMITS)]
 pub fn nodes(values: Vec<u8>) -> u64 {
     values.len() as u64
 }
 
 /// Fully automatic identity and request/reply defaults.
-#[ic_wire::endpoint::query(contract = DEFAULT_BLOB)]
+#[ic_wire_endpoint::query(contract = DEFAULT_BLOB)]
 pub fn default_blob(value: ByteBuf) -> ByteBuf {
     value
 }
 
 /// Bare attributes also validate unit frames.
-#[ic_wire::endpoint::query]
+#[ic_wire_endpoint::query]
 pub fn default_unit() {}
 
 /// A stable export name determines identity, independently of the Rust name.
-#[ic_wire::endpoint::query(name = "stable-name", contract = NAMED, request = LIMITS)]
+#[ic_wire_endpoint::query(name = "stable-name", contract = NAMED, request = LIMITS)]
 pub fn renamed(value: u64) -> u64 {
     value
 }
 
 /// A response-only override leaves request admission at its default.
-#[ic_wire::endpoint::query(contract = RESPONSE_ONLY, response = LIMITS)]
+#[ic_wire_endpoint::query(contract = RESPONSE_ONLY, response = LIMITS)]
 pub fn response_only(value: u64) -> u64 {
     value
 }
 
 /// Default reply encoding retains synchronous transaction rollback.
-#[ic_wire::endpoint::update(contract = DEFAULT_MUTATE)]
+#[ic_wire_endpoint::update(contract = DEFAULT_MUTATE)]
 pub fn default_mutate(size: u32) -> ByteBuf {
     mutate(size)
 }
@@ -118,11 +118,11 @@ pub fn default_mutate(size: u32) -> ByteBuf {
 // Framework composition: one Platform export, one Wire decoder, one existing
 // guarded dispatch. Access refusal stays outside the declared response type.
 fn composed_admit() -> Result<(), String> {
-    ic_wire::endpoint::admit_request(LIMITS);
+    ic_wire_endpoint::admit_request(LIMITS);
     Ok(())
 }
 fn composed_decode(bytes: Vec<u8>) -> bool {
-    ic_wire::endpoint::decode_request(&bytes, 16, LIMITS)
+    ic_wire_endpoint::decode_request(&bytes, 16, LIMITS)
 }
 fn guarded_handler(allowed: bool) -> Result<u64, &'static str> {
     if !allowed {
@@ -139,7 +139,7 @@ fn guarded_handler(allowed: bool) -> Result<u64, &'static str> {
 fn composed(allowed: bool) {
     match guarded_handler(allowed) {
         Ok(value) => {
-            ic_platform::cdk::api::msg_reply(ic_wire::endpoint::encode_response(&value, 16, LIMITS))
+            ic_platform::cdk::api::msg_reply(ic_wire_endpoint::encode_response(&value, 16, LIMITS))
         }
         Err(error) => ic_platform::cdk::api::msg_reject(error),
     }
@@ -156,14 +156,14 @@ mod tests {
             bytes: ic_wire::Bytes::new(vec![1, 2]).unwrap(),
         };
         let frame = ic_wire::native::encode_request(17, &value, LIMITS).unwrap();
-        let view: RequestRef<'_> = ic_wire::endpoint::decode_request(&frame, 17, LIMITS);
+        let view: RequestRef<'_> = ic_wire_endpoint::decode_request(&frame, 17, LIMITS);
         assert_eq!(
             view.bytes.as_slice().as_ptr(),
             frame[frame.len() - 2..].as_ptr()
         );
         let reply = borrowed_echo(view);
         assert_eq!(
-            ic_wire::endpoint::encode_response(&reply, 17, LIMITS),
+            ic_wire_endpoint::encode_response(&reply, 17, LIMITS),
             ic_wire::native::encode_response(17, &value, LIMITS).unwrap()
         );
         #[cfg(feature = "schema")]
@@ -181,7 +181,7 @@ mod tests {
 
     #[test]
     fn defaults_and_overrides_bind_the_actual_contract() {
-        use ic_wire::endpoint::{DEFAULT_REQUEST_LIMITS, DEFAULT_RESPONSE_LIMITS};
+        use ic_wire_endpoint::{DEFAULT_REQUEST_LIMITS, DEFAULT_RESPONSE_LIMITS};
         let fields = |value: Limits| (value.bytes, value.allocation, value.nodes, value.depth);
         assert_eq!(
             fields(DEFAULT_REQUEST_LIMITS),
@@ -276,13 +276,13 @@ pub struct RequestRef<'a> {
 }
 
 /// A borrowed reply is encoded while the request buffer is still alive.
-#[ic_wire::endpoint::query(borrow, contract = BORROWED, id = 17, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::query(borrow, contract = BORROWED, id = 17, request = LIMITS, response = LIMITS)]
 pub fn borrowed_echo(value: RequestRef<'_>) -> RequestRef<'_> {
     value
 }
 
 /// Mutate only after borrowed request validation; an oversized reply traps.
-#[ic_wire::endpoint::update(borrow, id = 18, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(borrow, id = 18, request = LIMITS, response = LIMITS)]
 pub fn borrowed_mutate(value: RequestRef<'_>) -> ByteBuf {
     COUNT.set(COUNT.get() + 1);
     ByteBuf::from(vec![42; value.value as usize])

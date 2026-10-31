@@ -26,7 +26,7 @@ caller-scoped = []
 # Qualification-only ownership control; the wire representation is identical.
 borrowed-input = []
 # The same ownership probe through the optional generated endpoint integration.
-endpoint-input = ["ic-wire/endpoint"]
+endpoint-input = ["dep:ic-wire-endpoint"]
 # Benchmark cohort selection, never a production codec mode.
 packed-i16 = []
 packed-i16-baseline = ["packed-i16"]
@@ -39,6 +39,10 @@ bulk-scale = ["derive-scale"]
 derive-scale = []
 derive-scale-1 = ["derive-scale"]
 derive-scale-10 = ["derive-scale"]
+
+[dependencies]
+# Only the explicit endpoint ownership probe selects runtime glue.
+ic-wire-endpoint = { workspace = true, optional = true }
 
 [dev-dependencies]
 ic-platform = { workspace = true, features = ["candid", "ic0"] }

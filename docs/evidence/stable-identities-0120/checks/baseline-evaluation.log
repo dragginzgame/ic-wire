@@ -1,0 +1,9 @@
+   Compiling ic-wire-endpoint-fixture v0.11.0 (/tmp/wire-identity-split/comparison-final/host/examples/endpoint)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running tests/cost_matrix/mod.rs (/tmp/wire-identity-split/comparison-final/host-target/debug/deps/cost_matrix-683d38f9a9072436)
+
+running 1 test
+test all_endpoint_costs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.42s
+

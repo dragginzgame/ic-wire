@@ -1,22 +1,23 @@
 # Typed Wire endpoints
 
-Enable `ic-wire`'s optional `endpoint` feature in a standalone canister. It
-connects ordinary Serde handlers to published IC Platform 0.12.0's maintained
+Add the independent `ic-wire-endpoint` package in a standalone canister. It
+connects ordinary Serde handlers to published IC Platform 0.14.0's maintained
 query/update generator. The default Wire codec stays `no_std + alloc` and has no
 Platform dependency. The integration uses Platform's `std` runtime without Candid,
 Canic, an extra executor or a second encoding.
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.11.0", features = ["endpoint"] }
+ic-wire = "0.12.0"
+ic-wire-endpoint = "0.1.0"
 ```
 
-This guide describes pending Wire 0.11.0; that version becomes available only
+This guide describes pending Wire 0.12.0 and Endpoint 0.1.0; they become available only
 after publication. The [standalone fixture](../examples/endpoint/Cargo.toml) uses the local workspace
 package for qualification. Git releases and registry publication remain separate.
 
 Platform embeds its IC0 wrappers and executor. Endpoint users must adopt
-Platform 0.12 throughout their application's runtime dependencies, including timer
+Platform 0.14 throughout their application's runtime dependencies, including timer
 integrations; do not combine it with an older external executor. Cargo's singleton
 guard rejects conflicting runtime owners. Core-only Wire consumers need no runtime
 migration. Handler declarations, frame bytes, method identities and Wire admission
@@ -28,7 +29,7 @@ Platform dependencies can coexist without claiming another runtime; endpoint
 builds still select the guard and cannot mix executor owners.
 
 ```rust,ignore
-use ic_wire::endpoint::query;
+use ic_wire_endpoint::query;
 
 #[query]
 fn echo(value: u64) -> u64 { value }
@@ -74,7 +75,7 @@ struct RequestRef<'a> {
     data: ic_wire::BytesRef<'a, 32>,
 }
 
-#[ic_wire::endpoint::query(borrow, id = 7, request = REQUEST, response = RESPONSE)]
+#[ic_wire_endpoint::query(borrow, id = 7, request = REQUEST, response = RESPONSE)]
 fn echo(value: RequestRef<'_>) -> RequestRef<'_> { value }
 ```
 
@@ -153,11 +154,11 @@ checks size only; `decode_request` subsequently validates the complete frame.
 
 ```rust,ignore
 fn admit() -> Result<(), String> {
-    ic_wire::endpoint::admit_request(REQUEST);
+    ic_wire_endpoint::admit_request(REQUEST);
     Ok(())
 }
 fn decode(bytes: Vec<u8>) -> Request {
-    ic_wire::endpoint::decode_request(&bytes, METHOD_ID, REQUEST)
+    ic_wire_endpoint::decode_request(&bytes, METHOD_ID, REQUEST)
 }
 #[ic_platform::cdk::update(
     guard = "admit", decode_with = "decode", manual_reply
@@ -165,7 +166,7 @@ fn decode(bytes: Vec<u8>) -> Request {
 async fn entry(request: Request) {
     match existing_guarded_handler(request).await {
         Ok(response) => ic_platform::cdk::api::msg_reply(
-            ic_wire::endpoint::encode_response(&response, METHOD_ID, RESPONSE)
+            ic_wire_endpoint::encode_response(&response, METHOD_ID, RESPONSE)
         ),
         Err(access_error) => ic_platform::cdk::api::msg_reject(access_error.to_string()),
     }

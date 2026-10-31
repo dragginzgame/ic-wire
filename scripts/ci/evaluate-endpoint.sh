@@ -10,7 +10,7 @@ out="$(cd "$1" && pwd -P)"
 rustc -Vv > "$out/compiler.txt"
 uname -a > "$out/host.txt"
 cp Cargo.lock "$out/Cargo.lock"
-shasum -a 256 Cargo.lock Cargo.toml crates/ic-wire/Cargo.toml crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/endpoint/mod.rs crates/ic-wire/src/endpoint/mod.rs examples/endpoint/Cargo.toml examples/endpoint/examples/cost/mod.rs "$POCKET_IC_BIN" > "$out/inputs.sha256"
+shasum -a 256 Cargo.lock Cargo.toml crates/ic-wire/Cargo.toml crates/ic-wire-derive/Cargo.toml crates/ic-wire-derive/src/endpoint/mod.rs crates/ic-wire-endpoint/Cargo.toml crates/ic-wire-endpoint/src/lib.rs examples/endpoint/Cargo.toml examples/endpoint/examples/cost/mod.rs "$POCKET_IC_BIN" > "$out/inputs.sha256"
 printf 'profile,lane,total_wasm_bytes,code_section_bytes\n' > "$out/wasm.csv"
 for profile in evaluation benchmark-speed; do
     mkdir "$out/$profile"

@@ -1,0 +1,14 @@
+   Compiling ic-wire-derive v0.11.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking serde v1.0.229
+    Checking command-fds v0.3.3
+    Checking ic-host-fs v0.73.0
+    Checking ic-host-process v0.73.0
+    Checking ic-platform-types v0.1.0
+    Checking postcard v1.1.3
+    Checking cargo_metadata v0.23.1
+    Checking ic-platform v0.14.0
+    Checking ic-wire v0.11.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-build v0.73.0
+    Checking ic-wire-qualification v0.11.0 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Checking ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.68s

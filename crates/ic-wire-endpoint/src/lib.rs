@@ -1,4 +1,4 @@
-//! Typed IC entrypoints, available only with the `endpoint` feature.
+//! Typed IC entrypoints, owned by the independently released endpoint integration.
 //!
 //! Bare `query` and `update` derive an identity from the exported method name and
 //! use [`DEFAULT_REQUEST_LIMITS`] / [`DEFAULT_RESPONSE_LIMITS`]. Optional `id`,
@@ -10,7 +10,7 @@
 //! Async handlers remain owned. Framing, budgets and validation are unchanged.
 //! `query(composite, ...)` selects a composite query. Async handlers use Platform's
 //! protected executor. `name = "..."` overrides the export name; `crate = "path"`
-//! selects a renamed/re-exported Wire crate.
+//! selects a renamed/re-exported endpoint crate.
 //!
 //! Optional `contract = NAME` exposes a typed [`Contract`] constant taken from the
 //! exact signature and settings. Its native schema methods delegate to existing
@@ -27,8 +27,12 @@
 //! before its argument copy. Framework access refusals, dispatch, registration and
 //! final artifact checks remain framework-owned; do not stack two export macros.
 
-use crate::{Limits, native};
+extern crate alloc;
+
 use alloc::{string::ToString, vec::Vec};
+#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
+pub use ic_wire::typescript;
+pub use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};
 
 pub use ic_wire_derive::{query, update};
@@ -136,16 +140,16 @@ fn admit_request_len(limits: Limits) -> usize {
 #[cfg_attr(target_arch = "wasm32", inline(never))]
 fn admit_frame(id: u64, limits: Limits) {
     let length = admit_request_len(limits);
-    if length < crate::contract::HEADER {
+    if length < native::REQUEST_HEADER_BYTES {
         trap_error(crate::Error::Malformed);
     }
-    let mut header = [0; crate::contract::HEADER];
+    let mut header = [0; native::REQUEST_HEADER_BYTES];
     ic_platform::ic0::msg_arg_data_copy(&mut header, 0);
     // Previously identity/direction were checked after copying the complete
     // ingress. Check the same eleven bytes first, using the same validator.
     // Bytes and accepted frames are unchanged; no consumer migration. Payload
     // validation remains mandatory, including the existing decoder header check.
-    crate::contract::payload(id, 0, &header).unwrap_or_else(|error| trap_error(error));
+    native::validate_request_header(id, &header).unwrap_or_else(|error| trap_error(error));
 }
 
 /// Decode a complete native request frame, trapping on typed codec failure.

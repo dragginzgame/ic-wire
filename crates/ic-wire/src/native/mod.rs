@@ -402,3 +402,47 @@ fn payload_limits(limits: Limits, prefix: usize) -> Result<Limits, Error> {
         ..limits
     })
 }
+
+/// Native request frame header size, including magic, identity and direction.
+pub const REQUEST_HEADER_BYTES: usize = crate::contract::HEADER;
+
+/// Validate only the fixed request header before a transport copies the payload.
+/// The complete request still requires normal decoding and resource admission.
+/// This delegates to the same validator previously used inside Wire's endpoint
+/// module: accepted bytes and error ordering are unchanged after its package move.
+pub fn validate_request_header(
+    id: u64,
+    header: &[u8; REQUEST_HEADER_BYTES],
+) -> Result<(), crate::Error> {
+    crate::contract::payload(id, 0, header).map(|_| ())
+}
+
+#[cfg(test)]
+mod header_admission_tests {
+    #[test]
+    fn pre_copy_header_agrees_with_complete_frame_admission() {
+        let id = 7;
+        let frame = super::encode_request(
+            id,
+            &(),
+            crate::Limits {
+                bytes: 64,
+                allocation: 1024,
+                nodes: 8,
+                depth: 8,
+            },
+        )
+        .unwrap();
+        let header: [u8; super::REQUEST_HEADER_BYTES] =
+            frame[..super::REQUEST_HEADER_BYTES].try_into().unwrap();
+        assert_eq!(super::validate_request_header(id, &header), Ok(()));
+        for index in [0, 2, 10] {
+            let mut damaged = header;
+            damaged[index] ^= 1;
+            assert_eq!(
+                super::validate_request_header(id, &damaged),
+                Err(crate::Error::Identity)
+            );
+        }
+    }
+}

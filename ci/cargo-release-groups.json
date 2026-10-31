@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "groups": [
+    {
+      "name": "core",
+      "primary": "ic-wire",
+      "version": "workspace",
+      "members": [
+        "ic-wire",
+        "ic-wire-derive",
+        "ic-wire-benchmarks",
+        "ic-wire-qualification",
+        "ic-wire-endpoint-fixture"
+      ],
+      "changelog": "CHANGELOG.md",
+      "dependencies": [
+        "ic-wire",
+        "ic-wire-derive"
+      ]
+    },
+    {
+      "name": "endpoint",
+      "primary": "ic-wire-endpoint",
+      "version": "package",
+      "members": [
+        "ic-wire-endpoint"
+      ],
+      "changelog": "crates/ic-wire-endpoint/CHANGELOG.md",
+      "dependencies": [
+        "ic-wire-endpoint"
+      ]
+    }
+  ]
+}

@@ -7,7 +7,7 @@ qualification work. These guides are task-specific, not a startup reading list.
 The Postcard runtime is qualified for bounded Rust integration.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `62edfbd43087a718bf0283e9040676a49211976d` (recorded version 0.27.11).
+rules, vendored at `b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57` (recorded version 0.27.14).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot
@@ -22,17 +22,22 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
   before broad adoption. Postcard is selected for controlled RPC and owned user
   endpoints. Preserve the explicit runtime contract in docs/runtime.md.
 - Keep the core codec Wasm-safe and independent of platform SDKs and host tooling.
-  The optional `endpoint` feature connects typed Wire handlers to published IC
+  The independent `ic-wire-endpoint` package connects typed Wire handlers to published IC
   Platform entrypoints; Platform owns exports and execution. Canic policies and
   artifact admission remain downstream. Do not introduce another executor.
   The independent `platform-types` feature owns host schema implementations for
-  Platform's owned Principal/Account; only `endpoint` selects Platform CDK.
+  Platform Types' owned Principal/Account; only the endpoint package selects CDK.
 - Keep other workspace dependency roles limited to codec qualification. The unpublished
   benchmark package may use Candid and PocketIC through IC Platform as dev
   dependencies, with IC Testkit owning server admission/lifecycle. The unpublished
   standalone endpoint fixture qualifies the optional integration through the same
   owners. Do not add browser transports; application policy belongs to consumers.
 - Use one selected wire encoding, not a configurable codec framework.
+- The maintainer approved and requested implementation of the
+  [stable identity boundary](docs/stable-identities.md): coordinated ic-wire/
+  ic-wire-derive and one independently versioned ic-wire-endpoint package.
+  Platform 0.14 / Types 0.1 and IC Build 0.73 supply the prerequisites. Use the
+  explicit core/endpoint release groups; no publication is authorized.
 - Default new contract examples to byte-oriented fields for binary data and
   `Packed<T>` for large homogeneous supported integer/hash arrays. Keep ordinary
   collections for general records and small-value varint use cases. Preserve

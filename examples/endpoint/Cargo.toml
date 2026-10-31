@@ -17,13 +17,14 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 ic = ["ic-platform/pocket-ic"]
-schema = ["ic-wire/typescript"]
+schema = ["ic-wire/typescript", "ic-wire-endpoint/typescript"]
 # Qualification-only inline hook comparator, never a production encoding mode.
 inline-baseline = []
 
 [dependencies]
 ic-platform = { workspace = true, features = ["cdk"] }
-ic-wire = { workspace = true, features = ["endpoint"] }
+ic-wire.workspace = true
+ic-wire-endpoint.workspace = true
 serde.workspace = true
 
 [[test]]

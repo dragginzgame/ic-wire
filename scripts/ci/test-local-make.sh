@@ -62,7 +62,7 @@ cat > "$fixture/expected-calls" <<EOF
 development|$fixture/repo/target|build --locked -p ic-wire
 development|$fixture/repo/target|check --locked -p ic-wire --all-targets
 development|$fixture/repo/target|test --locked -p ic-wire
-development|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings
+development|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint --all-targets -- -D warnings
 development|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib
 1.91.0|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
@@ -74,7 +74,6 @@ cmp "$fixture/expected-environment" "$CARGO_CALLS"
 # Real workspace metadata and Git identity; Cargo upload remains a sentinel.
 export FIXTURE_CARGO_METADATA="$fixture/publication-metadata.json"
 (cd "$fixture/repo" && cargo metadata --no-deps --locked --offline --format-version 1) > "$FIXTURE_CARGO_METADATA"
-fixture_version="$(jq -r '.packages[] | select(.name == "ic-wire") | .version' "$FIXTURE_CARGO_METADATA")"
 git -C "$fixture/repo" init -q
 git -C "$fixture/repo" add -- .
 git -C "$fixture/repo" -c user.name=Fixture -c user.email=fixture@example.invalid -c core.hooksPath=/dev/null commit -qm 'Disposable publication baseline'
@@ -94,7 +93,7 @@ STUB
 for target in publish publish-check check-package; do
     : > "$CARGO_CALLS"
     if FIXTURE_LINT_STATUS=41 PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
-    grep -F '|clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings' "$CARGO_CALLS" >/dev/null
+    grep -F '|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint --all-targets -- -D warnings' "$CARGO_CALLS" >/dev/null
     if grep -Eq '\|(publish|package) ' "$CARGO_CALLS"; then exit 1; fi
 done
 
@@ -105,11 +104,11 @@ for target in publish publish-check; do
         : > "$CARGO_CALLS"
         args=()
         packages="$selection"
-        if [[ "$selection" == default ]]; then packages='ic-wire-derive ic-wire'; else args=("PACKAGE=$selection"); fi
+        if [[ "$selection" == default ]]; then packages='ic-wire-derive ic-wire ic-wire-endpoint'; else args=("PACKAGE=$selection"); fi
         PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" ${args[@]+"${args[@]}"} > "$fixture/publication-selection.log" 2>&1
         [[ "$(wc -l < "$CARGO_CALLS")" == 3 ]]
         expected='publish --locked --registry crates-io'
-        for package in $packages; do expected+=" --package $package@$fixture_version"; done
+        for package in $packages; do version="$(jq -r --arg name "$package" '.packages[] | select(.name == $name) | .version' "$FIXTURE_CARGO_METADATA")"; expected+=" --package $package@$version"; done
         [[ "$target" != publish-check ]] || expected+=' --dry-run'
         [[ "$(tail -n 1 "$CARGO_CALLS")" == "${RUSTUP_TOOLCHAIN:-development}|$fixture/repo/target|$expected" ]]
     done

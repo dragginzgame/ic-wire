@@ -15,7 +15,7 @@ pub struct AccountRequest {
 }
 
 #[cfg(feature = "endpoint")]
-#[ic_wire::endpoint::query(contract = ACCOUNT_CONTRACT)]
+#[ic_wire_endpoint::query(contract = ACCOUNT_CONTRACT)]
 pub fn echo_account(value: AccountRequest) -> AccountRequest {
     value
 }

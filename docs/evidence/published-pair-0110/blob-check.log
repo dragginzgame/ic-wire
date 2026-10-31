@@ -1,0 +1,5 @@
+     Locking 1 package to latest Rust 1.91.0 compatible version
+    Updating ic-metrics v0.21.0 -> v0.22.0
+    Checking ic-metrics v0.22.0
+    Checking ic-blob-storage-contracts v0.60.0 (/tmp/wire-issue34-36/blob/crates/ic-blob-storage-contracts)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.65s

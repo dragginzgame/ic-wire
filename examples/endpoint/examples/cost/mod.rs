@@ -28,7 +28,7 @@ impl<T: Serialize> Serialize for Measured<T> {
     }
 }
 
-#[cfg_attr(not(feature = "inline-baseline"), ic_wire::endpoint::query(id = 21, request = LIMITS, response = LIMITS))]
+#[cfg_attr(not(feature = "inline-baseline"), ic_wire_endpoint::query(id = 21, request = LIMITS, response = LIMITS))]
 #[cfg_attr(
     feature = "inline-baseline",
     ic_platform::cdk::query(
@@ -41,7 +41,7 @@ fn echo(value: ByteBuf) -> Measured<ByteBuf> {
     Measured(value)
 }
 
-#[cfg_attr(not(feature = "inline-baseline"), ic_wire::endpoint::query(id = 22, request = LIMITS, response = LIMITS))]
+#[cfg_attr(not(feature = "inline-baseline"), ic_wire_endpoint::query(id = 22, request = LIMITS, response = LIMITS))]
 #[cfg_attr(
     feature = "inline-baseline",
     ic_platform::cdk::query(
@@ -139,8 +139,8 @@ mod tests {
         if lane == "inline" {
             before_encode(&Measured(before_decode::<T>(frame, id)), id)
         } else {
-            ic_wire::endpoint::encode_response(
-                &Measured(ic_wire::endpoint::decode_request::<T>(frame, id, LIMITS)),
+            ic_wire_endpoint::encode_response(
+                &Measured(ic_wire_endpoint::decode_request::<T>(frame, id, LIMITS)),
                 id,
                 LIMITS,
             )

@@ -8,22 +8,18 @@ derive designs are research, not selectable runtime modes.
 
 ## Optional Platform identity schemas
 
-Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on Platform's owned
-`Principal` and `Account`. It selects Platform `principal` with defaults disabled
-and Wire's host-only TypeScript support. It does not select CDK, an executor,
-Candid or endpoints. Enable `endpoint` separately if needed; both integrations
-use the same Platform dependency. Core-only Wire remains Platform-free.
+Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on the canonical
+`ic-platform-types` 0.1 owned Principal and Account. This selects host TypeScript
+support with no CDK, executor, Candid or runtime facade. Platform 0.14 reexports
+these exact identities; direct `ic_platform_types` imports work too.
 
-Consumers migrating from Platform's `wire-schema` feature remove that selection
-and enable Wire's `platform-types` instead. Derive `serde::Serialize`,
-`serde::Deserialize` and (on native metadata hosts) `ic_wire::Wire` on the same
-DTOs, using `ic_platform::Principal` and `ic_platform::Account` directly. There
-are no wrappers, Cargo patches or second schema trait. Use a matching Platform
-0.12 release in direct dependencies for the pending Wire 0.11 release. Wire 0.10
-introduced this integration with Platform 0.11, which removed its `wire-schema`
-feature. The 0.12 adoption preserves representation but changes the supplying
-Rust type identity; consumers must align direct Platform dependencies. Align
-native typed clients that expose Wire limits/errors with the supplying Wire minor.
+Consumers remove Platform's retired `wire-schema` selection and enable Wire's
+`platform-types`. Keep ordinary Serde derives alongside native `ic_wire::Wire`.
+For the pending Wire 0.12 migration, align facade users on Platform 0.14 and
+native typed clients/metadata producers on the supplying Wire minor. Afterwards,
+runtime integration upgrades can retain the codec and stable identity suppliers.
+Published Wire 0.11 still pairs with Platform 0.12. There are no wrappers, Cargo
+patches or second schema trait.
 
 Principal's schema stays bounded bytes with maximum length 29. Account stays an
 ordered record of `owner: Principal`, then `subaccount: Option<[u8; 32]>`.
@@ -36,13 +32,14 @@ principal types or Candid serialization.
 
 ## Optional typed IC endpoints
 
-Enable `ic-wire`'s `endpoint` feature to connect typed handlers to published
-IC Platform entrypoints. Without `endpoint` or `platform-types`, the core codec
-has no Platform dependency. This integration requires `std`, as does Platform's canister runtime;
+Add `ic-wire-endpoint` to connect typed handlers to published IC Platform
+entrypoints. Move attributes/helpers from `ic_wire::endpoint` to
+`ic_wire_endpoint`; the old feature is removed. The codec retains no runtime
+facade dependency. This integration requires `std`, as does Platform's canister runtime;
 the default codec remains `no_std + alloc`. No Candid runtime is selected.
 
 ```rust,ignore
-use ic_wire::endpoint::query;
+use ic_wire_endpoint::query;
 #[query]
 fn echo(value: u64) -> u64 { value }
 ```

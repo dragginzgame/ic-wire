@@ -1,0 +1,1137 @@
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -935,22 +935,36 @@
+  "crc32fast",
+  "data-encoding",
+  "ic-management-canister-types 0.11.0",
++ "ic_principal",
++ "pocket-ic",
++ "serde",
++ "serde_bytes",
++ "thiserror 2.0.18",
++]
++
++[[package]]
++name = "ic-platform"
++version = "0.14.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1fab241dbdb0d76bcea92af4c6be89e563bb27f7830bea635a2aded3ce43c33e"
++dependencies = [
++ "candid",
+  "ic-platform-macros",
+  "ic-platform-runtime-guard",
++ "ic-platform-types",
+  "ic_principal",
+  "pin-project-lite",
+  "pocket-ic",
+  "serde",
+- "serde_bytes",
+  "slotmap",
+  "thiserror 2.0.18",
+ ]
+ 
+ [[package]]
+ name = "ic-platform-macros"
+-version = "0.13.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ef7f0886f261abf6b5485c3d87ec6258a09f3d412d19567da3ccc049d8cbdeec"
++version = "0.14.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "8d1a4f6f049e940feabd1c3b2b1666ec4b08acde1404c4a8111d5018e146e0ae"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -959,9 +973,22 @@
+ 
+ [[package]]
+ name = "ic-platform-runtime-guard"
+-version = "0.13.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "714038027dbc8bee4a3429a7d15299769ebfa7a24d674b4c28732d8ef3812e9c"
++version = "0.14.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "95f015bf18f152528f35c9c347198068d9d58cede64834ad01bf9effbb09117d"
++
++[[package]]
++name = "ic-platform-types"
++version = "0.1.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "5bd24886e060da435e9fb66b508ddf00ae1edaa70a03ea2b3da576b2c727fb76"
++dependencies = [
++ "crc32fast",
++ "data-encoding",
++ "ic_principal",
++ "serde",
++ "thiserror 2.0.18",
++]
+ 
+ [[package]]
+ name = "ic-testkit"
+@@ -973,7 +1000,7 @@
+  "ic-host-fs",
+  "ic-host-process",
+  "ic-metrics",
+- "ic-platform",
++ "ic-platform 0.13.0",
+  "libc",
+  "thiserror 2.0.18",
+  "tokio",
+@@ -1003,7 +1030,7 @@
+ dependencies = [
+  "bytemuck",
+  "clap",
+- "ic-platform",
++ "ic-platform-types",
+  "ic-wire-derive",
+  "libfuzzer-sys",
+  "postcard",
+@@ -1018,9 +1045,10 @@
+ dependencies = [
+  "clap",
+  "dhat",
+- "ic-platform",
++ "ic-platform 0.14.0",
+  "ic-testkit",
+  "ic-wire",
++ "ic-wire-endpoint",
+  "num-bigint",
+  "serde",
+  "serde_bytes",
+@@ -1039,12 +1067,24 @@
+ ]
+ 
+ [[package]]
++name = "ic-wire-endpoint"
++version = "0.1.0"
++dependencies = [
++ "ic-platform 0.14.0",
++ "ic-wire",
++ "ic-wire-derive",
++ "serde",
++ "serde_json",
++]
++
++[[package]]
+ name = "ic-wire-endpoint-fixture"
+ version = "0.11.0"
+ dependencies = [
+- "ic-platform",
++ "ic-platform 0.14.0",
+  "ic-testkit",
+  "ic-wire",
++ "ic-wire-endpoint",
+  "serde",
+  "serde_json",
+  "sha2",
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -3,6 +3,7 @@
+     "crates/ic-wire",
+     "crates/ic-wire-benchmarks",
+     "crates/ic-wire-derive",
++    "crates/ic-wire-endpoint",
+     "crates/ic-wire-qualification",
+     "examples/endpoint",
+ ]
+@@ -19,10 +20,11 @@
+ [workspace.dependencies]
+ # Production dependencies
+ bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
+-# Both integrations share the consumer's Platform 0.13 type/runtime identity.
+-# Supplier identity changes only: codec bytes, budgets and acceptance stay unchanged.
+-ic-platform = { version = "0.13.0", default-features = false }
++# Runtime and stable identity suppliers evolve independently; protocol bytes stay unchanged.
++ic-platform = { version = "0.14.0", default-features = false }
++ic-platform-types = { version = "0.1.0", default-features = false }
+ ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.11.0" }
++ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.1.0" }
+ postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
+ proc-macro2 = "1.0.107"
+ quote = "1.0.47"
+--- a/crates/ic-wire-benchmarks/Cargo.toml
++++ b/crates/ic-wire-benchmarks/Cargo.toml
+@@ -26,7 +26,7 @@
+ # Qualification-only ownership control; the wire representation is identical.
+ borrowed-input = []
+ # The same ownership probe through the optional generated endpoint integration.
+-endpoint-input = ["ic-wire/endpoint"]
++endpoint-input = []
+ # Benchmark cohort selection, never a production codec mode.
+ packed-i16 = []
+ packed-i16-baseline = ["packed-i16"]
+@@ -43,6 +43,7 @@
+ [dev-dependencies]
+ ic-platform = { workspace = true, features = ["candid", "ic0"] }
+ ic-wire.workspace = true
++ic-wire-endpoint.workspace = true
+ num-bigint.workspace = true
+ serde.workspace = true
+ serde_bytes.workspace = true
+--- a/crates/ic-wire-benchmarks/examples/input_borrowing/mod.rs
++++ b/crates/ic-wire-benchmarks/examples/input_borrowing/mod.rs
+@@ -59,7 +59,7 @@
+     feature = "endpoint-input",
+     not(feature = "borrowed-input")
+ ))]
+-#[ic_wire::endpoint::update(name = "consume", id = ID, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(name = "consume", id = ID, request = LIMITS, response = LIMITS)]
+ fn owned_endpoint(value: Owned) -> [u64; 3] {
+     consume(value.mode, value.nonce, value.body.as_slice())
+ }
+@@ -68,7 +68,7 @@
+     feature = "endpoint-input",
+     feature = "borrowed-input"
+ ))]
+-#[ic_wire::endpoint::update(borrow, name = "consume", id = ID, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(borrow, name = "consume", id = ID, request = LIMITS, response = LIMITS)]
+ fn borrowed_endpoint(value: Borrowed<'_>) -> [u64; 3] {
+     consume(value.mode, value.nonce, value.body.as_slice())
+ }
+--- a/crates/ic-wire-derive/src/endpoint/mod.rs
++++ b/crates/ic-wire-derive/src/endpoint/mod.rs
+@@ -15,7 +15,7 @@
+     let mut response: Option<Expr> = None;
+     let mut name: Option<LitStr> = None;
+     let mut contract: Option<syn::Ident> = None;
+-    let mut wire: Path = syn::parse_quote!(::ic_wire);
++    let mut wire: Path = syn::parse_quote!(::ic_wire_endpoint);
+     let mut composite = false;
+     let mut borrow = false;
+     let mut seen = std::collections::BTreeSet::new();
+@@ -74,11 +74,11 @@
+         |value| quote!(#value),
+     );
+     let request = request.map_or_else(
+-        || quote!(#wire::endpoint::DEFAULT_REQUEST_LIMITS),
++        || quote!(#wire::DEFAULT_REQUEST_LIMITS),
+         |value| quote!(#value),
+     );
+     let response = response.map_or_else(
+-        || quote!(#wire::endpoint::DEFAULT_RESPONSE_LIMITS),
++        || quote!(#wire::DEFAULT_RESPONSE_LIMITS),
+         |value| quote!(#value),
+     );
+     let (request_type, takes_argument) = match signature.inputs.first() {
+@@ -126,7 +126,7 @@
+     };
+     let composite = composite.then(|| quote!(composite,));
+     let cdk_path = LitStr::new(
+-        &format!("{}::endpoint::__private::cdk", quote!(#wire)),
++        &format!("{}::__private::cdk", quote!(#wire)),
+         function_name.span(),
+     );
+     let visibility = &function.vis;
+@@ -136,7 +136,7 @@
+         .filter(|attr| attr.path().is_ident("cfg") || attr.path().is_ident("cfg_attr"))
+         .collect();
+     let settings = crate::fresh_ident(&source, "__WIRE_CONTRACT");
+-    let declaration = quote!(#wire::endpoint::Contract::<#request_type, #response_type>::new(
++    let declaration = quote!(#wire::Contract::<#request_type, #response_type>::new(
+         #export, #mode, #id, #request, #response
+     ));
+     let (metadata, settings_value) = if let Some(contract) = contract {
+@@ -144,7 +144,7 @@
+             quote! {
+                 #(#cfg)*
+                 #[doc = "Wire contract derived from the handler; no registry or artifact admission is implied."]
+-                #visibility const #contract: #wire::endpoint::Contract<#request_type, #response_type> = #declaration;
++                #visibility const #contract: #wire::Contract<#request_type, #response_type> = #declaration;
+             },
+             quote!(#contract),
+         )
+@@ -170,21 +170,21 @@
+             #metadata
+             #(#cfg)*
+             const _: () = {
+-                const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
++                const #settings: #wire::Contract<#request_type, #response_type> = #settings_value;
+                 fn #admit() -> ::core::result::Result<(), ::std::string::String> {
+                     #settings.admit_request();
+                     Ok(())
+                 }
+                 fn #decode(bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> { bytes }
+-                #[#wire::endpoint::__private::cdk::#attribute(
++                #[#wire::__private::cdk::#attribute(
+                     name = #export, #composite crate = #cdk_path,
+                     guard = #admit_path, decode_with = #decode_path, encode_with = #decode_path
+                 )]
+                 fn #entry(#bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> {
+-                    let #value: #request_type = #wire::endpoint::decode_request(
++                    let #value: #request_type = #wire::decode_request(
+                         &#bytes, #settings.id, #settings.request);
+                     let #reply = #function_name(#value);
+-                    #wire::endpoint::encode_response(&#reply, #settings.id, #settings.response)
++                    #wire::encode_response(&#reply, #settings.id, #settings.response)
+                 }
+             };
+         });
+@@ -195,18 +195,18 @@
+         #(#cfg)*
+         const _: () = {
+             type #result_type = #response_type;
+-            const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
++            const #settings: #wire::Contract<#request_type, #response_type> = #settings_value;
+             fn #admit() -> ::core::result::Result<(), ::std::string::String> {
+                 #settings.admit_request();
+                 Ok(())
+             }
+             fn #decode(bytes: ::std::vec::Vec<u8>) -> #request_type {
+-                #wire::endpoint::decode_request(&bytes, #settings.id, #settings.request)
++                #wire::decode_request(&bytes, #settings.id, #settings.request)
+             }
+             fn #encode(value: #response_type) -> ::std::vec::Vec<u8> {
+-                #wire::endpoint::encode_response(&value, #settings.id, #settings.response)
+-            }
+-            #[#wire::endpoint::__private::cdk::#attribute(
++                #wire::encode_response(&value, #settings.id, #settings.response)
++            }
++            #[#wire::__private::cdk::#attribute(
+                 name = #export, #composite crate = #cdk_path,
+                 guard = #admit_path, decode_with = #decode_path, encode_with = #encode_path
+             )]
+--- /dev/null
++++ b/crates/ic-wire-endpoint/CHANGELOG.md
+@@ -0,0 +1,7 @@
++# Changelog
++
++## [0.1.0]
++
++- Extract typed endpoint integration from ic-wire, using Platform 0.14.0.
++  Keep codec/schema/limits identities with ic-wire and Platform identities with
++  ic-platform-types. Bytes, admission, budgets and rollback rules are unchanged.
+--- /dev/null
++++ b/crates/ic-wire-endpoint/Cargo.toml
+@@ -0,0 +1,26 @@
++[package]
++name = "ic-wire-endpoint"
++description = "Typed IC Platform entrypoints for IC Wire contracts"
++version = "0.1.0"
++edition.workspace = true
++rust-version.workspace = true
++license.workspace = true
++repository.workspace = true
++publish = ["crates-io"]
++readme = "README.md"
++include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
++
++[features]
++typescript = ["ic-wire/typescript", "dep:serde_json"]
++
++[target.'cfg(not(target_family = "wasm"))'.dependencies]
++serde_json = { workspace = true, optional = true }
++
++[dependencies]
++ic-platform = { workspace = true, features = ["cdk"] }
++ic-wire.workspace = true
++ic-wire-derive = { workspace = true, features = ["endpoint"] }
++serde.workspace = true
++
++[lints]
++workspace = true
+--- /dev/null
++++ b/crates/ic-wire-endpoint/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2026 IC Wire contributors
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+--- /dev/null
++++ b/crates/ic-wire-endpoint/README.md
+@@ -0,0 +1,11 @@
++# IC Wire Endpoint
++
++Typed `query` and `update` entrypoints backed by IC Platform 0.14. Core codec,
++Limits/Error and schema identities remain owned by `ic-wire` independently of
++runtime integration releases. Platform owns execution and the singleton guard.
++
++Replace Wire's removed `endpoint` feature with an `ic-wire-endpoint` dependency.
++Move attributes/helpers from `ic_wire::endpoint` to `ic_wire_endpoint`; retain
++codec and schema imports from `ic_wire`. Enable `typescript` here for native
++Contract schema projection. Frame bytes, bounds, acceptance and rollback rules
++are unchanged. See the repository endpoint guide for handler examples.
+--- /dev/null
++++ b/crates/ic-wire-endpoint/src/lib.rs
+@@ -0,0 +1,177 @@
++//! Typed IC entrypoints, owned by the independently released endpoint integration.
++//!
++//! Bare `query` and `update` derive an identity from the exported method name and
++//! use [`DEFAULT_REQUEST_LIMITS`] / [`DEFAULT_RESPONSE_LIMITS`]. Optional `id`,
++//! `request` and `response` constant expressions override those choices.
++//! A handler takes zero arguments (a framed unit request) or one owned Serde value.
++//! Synchronous handlers can select `borrow` with one request: borrowed fields and
++//! replies refer to Platform's argument vector, retained through reply encoding.
++//! This avoids a second field copy; the initial ingress copy is still required.
++//! Async handlers remain owned. Framing, budgets and validation are unchanged.
++//! `query(composite, ...)` selects a composite query. Async handlers use Platform's
++//! protected executor. `name = "..."` overrides the export name; `crate = "path"`
++//! selects a renamed/re-exported Wire crate.
++//!
++//! Optional `contract = NAME` exposes a typed [`Contract`] constant taken from the
++//! exact signature and settings. Its native schema methods delegate to existing
++//! Wire projection; no automatic registry, custom Wasm metadata section or
++//! artifact admission is installed.
++//!
++//! Encoding failures trap, rolling back a synchronous update's mutations.
++//! Async updates follow ordinary IC transactions: state committed before an
++//! inter-canister await cannot be rolled back by a later reply-encoding trap.
++//! Only the current callback's changes roll back. Query state is not persisted.
++//!
++//! Frameworks may instead pass the helpers below to Platform's codec hooks around
++//! their existing guarded handlers. Admission must run as a Platform `guard`
++//! before its argument copy. Framework access refusals, dispatch, registration and
++//! final artifact checks remain framework-owned; do not stack two export macros.
++
++extern crate alloc;
++
++use alloc::{string::ToString, vec::Vec};
++#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
++pub use ic_wire::typescript;
++pub use ic_wire::{Error, Limits, native};
++use serde::{Deserialize, Serialize};
++
++pub use ic_wire_derive::{query, update};
++
++/// Default full-frame request limits for the optional endpoint integration.
++///
++/// 64 KiB of frame bytes, 8 MiB conservative traversal allowance, 65,536 charged
++/// value visits and depth 32. The allocation allowance excludes the ingress copy;
++/// it is not a measured heap cap. Field bounds and application validation still
++/// apply. These are endpoint policy, not implicit limits in the core codec.
++pub const DEFAULT_REQUEST_LIMITS: Limits = Limits {
++    bytes: 64 * 1024,
++    allocation: 8 * 1024 * 1024,
++    nodes: 65_536,
++    depth: 32,
++};
++
++/// Default full-frame response limits, with the same values as the request defaults.
++/// Request and response overrides remain independent; reply failure still traps.
++pub const DEFAULT_RESPONSE_LIMITS: Limits = DEFAULT_REQUEST_LIMITS;
++
++/// A handler's types and explicit frame settings, without a registry or transport.
++///
++/// Prefer the attribute's `contract = NAME` output to a separately maintained
++/// declaration. Native schemas do not prove target-specific type-layout parity;
++/// the consumer still owns final artifact admission.
++pub struct Contract<Request, Response> {
++    /// IC method name.
++    pub name: &'static str,
++    /// IC mode: `query`, `composite_query`, or `update`.
++    pub mode: &'static str,
++    /// Native frame method identity.
++    pub id: u64,
++    /// Request limits, including the 11-byte frame header.
++    pub request: Limits,
++    /// Response limits, including the 11-byte frame header.
++    pub response: Limits,
++    types: core::marker::PhantomData<fn(Request) -> Response>,
++}
++
++impl<Request, Response> Contract<Request, Response> {
++    /// Check frame size, identity and direction before copying the full ingress.
++    /// Run as a Platform guard; payload validation still occurs during decoding.
++    pub fn admit_request(&self) {
++        admit_frame(self.id, self.request);
++    }
++
++    /// Construct the declaration used by the endpoint attribute.
++    #[doc(hidden)]
++    pub const fn new(
++        name: &'static str,
++        mode: &'static str,
++        id: u64,
++        request: Limits,
++        response: Limits,
++    ) -> Self {
++        Self {
++            name,
++            mode,
++            id,
++            request,
++            response,
++            types: core::marker::PhantomData,
++        }
++    }
++}
++
++#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
++impl<Request: crate::typescript::Wire, Response: crate::typescript::Wire>
++    Contract<Request, Response>
++{
++    /// Project the actual request type using the existing native schema owner.
++    pub fn request_schema(&self) -> Result<serde_json::Value, crate::typescript::GenerationError> {
++        crate::typescript::native_schema::<Request>()
++    }
++
++    /// Project the actual response type using the existing native schema owner.
++    pub fn response_schema(&self) -> Result<serde_json::Value, crate::typescript::GenerationError> {
++        crate::typescript::native_schema::<Response>()
++    }
++}
++
++/// Platform paths used by generated entrypoints, including renamed Wire imports.
++#[doc(hidden)]
++pub mod __private {
++    pub use ic_platform::cdk;
++}
++
++/// Trap on an oversized ingress before Platform allocates/copies argument bytes.
++pub fn admit_request(limits: Limits) {
++    admit_request_len(limits);
++}
++
++fn admit_request_len(limits: Limits) -> usize {
++    // This moves Canic's pre-copy check to Wire without changing its acceptance
++    // rule: the full native frame counts toward bytes, including its 11-byte header.
++    // Consumers retain their existing method IDs and limits; no wire migration.
++    let length = ic_platform::ic0::msg_arg_data_size();
++    if length > limits.bytes {
++        ic_platform::cdk::api::trap("Wire request exceeds byte allowance");
++    }
++    length
++}
++
++#[cfg_attr(target_arch = "wasm32", inline(never))]
++fn admit_frame(id: u64, limits: Limits) {
++    let length = admit_request_len(limits);
++    if length < native::REQUEST_HEADER_BYTES {
++        trap_error(crate::Error::Malformed);
++    }
++    let mut header = [0; native::REQUEST_HEADER_BYTES];
++    ic_platform::ic0::msg_arg_data_copy(&mut header, 0);
++    // Previously identity/direction were checked after copying the complete
++    // ingress. Check the same eleven bytes first, using the same validator.
++    // Bytes and accepted frames are unchanged; no consumer migration. Payload
++    // validation remains mandatory, including the existing decoder header check.
++    native::validate_request_header(id, &header).unwrap_or_else(|error| trap_error(error));
++}
++
++/// Decode a complete native request frame, trapping on typed codec failure.
++///
++/// Call [`admit_request`] before obtaining the argument buffer. This function
++/// preserves native identity, traversal, primitive and complete-input validation.
++/// Borrowed fields refer to `bytes`; the caller must retain it through their use.
++pub fn decode_request<'de, T: Deserialize<'de>>(bytes: &'de [u8], id: u64, limits: Limits) -> T {
++    native::decode_request(id, bytes, limits).unwrap_or_else(|error| trap_error(error))
++}
++
++/// Encode the native response frame within its allowances, trapping on failure.
++///
++/// A trap (rather than a rejection or error reply) preserves synchronous mutation
++/// rollback. Earlier async transactions remain committed; see the module docs.
++pub fn encode_response<T: Serialize + ?Sized>(value: &T, id: u64, limits: Limits) -> Vec<u8> {
++    native::encode_response(id, value, limits).unwrap_or_else(|error| trap_error(error))
++}
++
++// Keep failure formatting shared across request/reply types and admission.
++#[cold]
++#[inline(never)]
++fn trap_error(error: crate::Error) -> ! {
++    ic_platform::cdk::api::trap(error.to_string())
++}
+--- a/crates/ic-wire-qualification/examples/check_diagnostics/mod.rs
++++ b/crates/ic-wire-qualification/examples/check_diagnostics/mod.rs
+@@ -36,6 +36,16 @@
+         &TargetKind::Lib,
+         4 * 1024 * 1024,
+     )?;
++    let endpoint = if arguments.get_flag("endpoint") {
++        Some(library_artifact(
++            File::open(run.join("artifacts.jsonl"))?,
++            "ic_wire_endpoint",
++            &TargetKind::Lib,
++            4 * 1024 * 1024,
++        )?)
++    } else {
++        None
++    };
+     let mut cases = fs::read_dir(&source)?
+         .map(|entry| entry.map(|entry| entry.path()))
+         .collect::<Result<Vec<_>, _>>()?;
+@@ -69,13 +79,23 @@
+             .arg("-L")
+             .arg(format!(
+                 "dependency={}/deps",
+-                wire.parent().unwrap().display()
++                wire.parent()
++                    .unwrap()
++                    .parent()
++                    .filter(|_| wire.parent().unwrap().ends_with("deps"))
++                    .unwrap_or(wire.parent().unwrap())
++                    .display()
+             ))
+             .arg("--cfg")
+             .arg(format!("ui_case=\"{name}\""))
+             .arg(source.join("mod.rs"))
+             .arg("-o")
+             .arg(run.join(format!("{name}.rmeta")));
++        if let Some(endpoint) = &endpoint {
++            command
++                .arg("--extern")
++                .arg(format!("ic_wire_endpoint={}", endpoint.display()));
++        }
+         command
+     })?;
+     println!(
+--- a/crates/ic-wire-qualification/fixtures/platform_types/mod.rs
++++ b/crates/ic-wire-qualification/fixtures/platform_types/mod.rs
+@@ -15,7 +15,7 @@
+ }
+ 
+ #[cfg(feature = "endpoint")]
+-#[ic_wire::endpoint::query(contract = ACCOUNT_CONTRACT)]
++#[ic_wire_endpoint::query(contract = ACCOUNT_CONTRACT)]
+ pub fn echo_account(value: AccountRequest) -> AccountRequest {
+     value
+ }
+--- a/crates/ic-wire-qualification/tests/endpoint_ui/mod.rs
++++ b/crates/ic-wire-qualification/tests/endpoint_ui/mod.rs
+@@ -1,5 +1,6 @@
+ #![expect(dead_code, reason = "The selected driver uses only part of the shared fixture surface.")]
+-use ic_wire::{Limits, endpoint::query};
++use ic_wire::Limits;
++use ic_wire_endpoint::query;
+ const LIMITS: Limits = Limits {
+     bytes: 128,
+     allocation: 8192,
+@@ -10,11 +11,11 @@
+ #[cfg(ui_case = "valid")]
+ mod valid {
+     use super::*;
+-    use ic_wire as renamed;
++    use ic_wire_endpoint as renamed;
+     const ID: u64 = 17;
+     type Request = u64;
+     type Response = (u64, bool);
+-    #[renamed::endpoint::query(crate = "renamed", contract = CONTRACT, id = ID, request = LIMITS, response = LIMITS)]
++    #[renamed::query(crate = "renamed", contract = CONTRACT, id = ID, request = LIMITS, response = LIMITS)]
+     fn r#match(request: self::Request) -> self::Response {
+         (request, true)
+     }
+@@ -34,7 +35,7 @@
+         unreachable!()
+     }
+     const _: u64 = CONTRACT.id;
+-    #[renamed::endpoint::query(borrow, crate = "renamed", contract = BORROWED)]
++    #[renamed::query(borrow, crate = "renamed", contract = BORROWED)]
+     fn borrowed(value: &str) -> &str {
+         value
+     }
+@@ -90,7 +91,7 @@
+ fn nonserde(_: Unsupported) {}
+ 
+ #[cfg(ui_case = "composite_update")]
+-#[ic_wire::endpoint::update(composite, id = 1, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(composite, id = 1, request = LIMITS, response = LIMITS)]
+ fn composite_update() {}
+ 
+ #[cfg(ui_case = "name")]
+--- a/crates/ic-wire/Cargo.toml
++++ b/crates/ic-wire/Cargo.toml
+@@ -11,8 +11,7 @@
+ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+ 
+ [features]
+-endpoint = ["dep:ic-platform", "ic-platform/cdk", "ic-wire-derive/endpoint"]
+-platform-types = ["dep:ic-platform", "ic-platform/principal", "typescript"]
++platform-types = ["dep:ic-platform-types", "typescript"]
+ typescript = ["dep:serde_json"]
+ 
+ [target.'cfg(not(target_family = "wasm"))'.dependencies]
+@@ -20,7 +19,7 @@
+ 
+ [dependencies]
+ bytemuck.workspace = true
+-ic-platform = { workspace = true, optional = true }
++ic-platform-types = { workspace = true, optional = true }
+ ic-wire-derive.workspace = true
+ postcard.workspace = true
+ serde.workspace = true
+--- a/crates/ic-wire/README.md
++++ b/crates/ic-wire/README.md
+@@ -19,11 +19,12 @@
+ `serde::Deserialize` and (on native metadata hosts) `ic_wire::Wire` on the same
+ DTOs, using `ic_platform::Principal` and `ic_platform::Account` directly. There
+ are no wrappers, Cargo patches or second schema trait. Use a matching Platform
+-0.12 release in direct dependencies for the pending Wire 0.11 release. Wire 0.10
+-introduced this integration with Platform 0.11, which removed its `wire-schema`
+-feature. The 0.12 adoption preserves representation but changes the supplying
+-Rust type identity; consumers must align direct Platform dependencies. Align
+-native typed clients that expose Wire limits/errors with the supplying Wire minor.
++0.13 release in direct dependencies for the pending Wire 0.12 release. Published
++Wire 0.11 pairs with Platform 0.12; Wire 0.10 pairs with Platform 0.11, which
++removed its `wire-schema` feature. The 0.13 adoption preserves representation but
++changes the supplying Rust type identity; consumers must align direct Platform
++dependencies. Align native typed clients that expose Wire limits/errors with the
++supplying Wire minor.
+ 
+ Principal's schema stays bounded bytes with maximum length 29. Account stays an
+ ordered record of `owner: Principal`, then `subaccount: Option<[u8; 32]>`.
+--- a/crates/ic-wire/src/endpoint/mod.rs
++++ /dev/null
+@@ -1,173 +0,0 @@
+-//! Typed IC entrypoints, available only with the `endpoint` feature.
+-//!
+-//! Bare `query` and `update` derive an identity from the exported method name and
+-//! use [`DEFAULT_REQUEST_LIMITS`] / [`DEFAULT_RESPONSE_LIMITS`]. Optional `id`,
+-//! `request` and `response` constant expressions override those choices.
+-//! A handler takes zero arguments (a framed unit request) or one owned Serde value.
+-//! Synchronous handlers can select `borrow` with one request: borrowed fields and
+-//! replies refer to Platform's argument vector, retained through reply encoding.
+-//! This avoids a second field copy; the initial ingress copy is still required.
+-//! Async handlers remain owned. Framing, budgets and validation are unchanged.
+-//! `query(composite, ...)` selects a composite query. Async handlers use Platform's
+-//! protected executor. `name = "..."` overrides the export name; `crate = "path"`
+-//! selects a renamed/re-exported Wire crate.
+-//!
+-//! Optional `contract = NAME` exposes a typed [`Contract`] constant taken from the
+-//! exact signature and settings. Its native schema methods delegate to existing
+-//! Wire projection; no automatic registry, custom Wasm metadata section or
+-//! artifact admission is installed.
+-//!
+-//! Encoding failures trap, rolling back a synchronous update's mutations.
+-//! Async updates follow ordinary IC transactions: state committed before an
+-//! inter-canister await cannot be rolled back by a later reply-encoding trap.
+-//! Only the current callback's changes roll back. Query state is not persisted.
+-//!
+-//! Frameworks may instead pass the helpers below to Platform's codec hooks around
+-//! their existing guarded handlers. Admission must run as a Platform `guard`
+-//! before its argument copy. Framework access refusals, dispatch, registration and
+-//! final artifact checks remain framework-owned; do not stack two export macros.
+-
+-use crate::{Limits, native};
+-use alloc::{string::ToString, vec::Vec};
+-use serde::{Deserialize, Serialize};
+-
+-pub use ic_wire_derive::{query, update};
+-
+-/// Default full-frame request limits for the optional endpoint integration.
+-///
+-/// 64 KiB of frame bytes, 8 MiB conservative traversal allowance, 65,536 charged
+-/// value visits and depth 32. The allocation allowance excludes the ingress copy;
+-/// it is not a measured heap cap. Field bounds and application validation still
+-/// apply. These are endpoint policy, not implicit limits in the core codec.
+-pub const DEFAULT_REQUEST_LIMITS: Limits = Limits {
+-    bytes: 64 * 1024,
+-    allocation: 8 * 1024 * 1024,
+-    nodes: 65_536,
+-    depth: 32,
+-};
+-
+-/// Default full-frame response limits, with the same values as the request defaults.
+-/// Request and response overrides remain independent; reply failure still traps.
+-pub const DEFAULT_RESPONSE_LIMITS: Limits = DEFAULT_REQUEST_LIMITS;
+-
+-/// A handler's types and explicit frame settings, without a registry or transport.
+-///
+-/// Prefer the attribute's `contract = NAME` output to a separately maintained
+-/// declaration. Native schemas do not prove target-specific type-layout parity;
+-/// the consumer still owns final artifact admission.
+-pub struct Contract<Request, Response> {
+-    /// IC method name.
+-    pub name: &'static str,
+-    /// IC mode: `query`, `composite_query`, or `update`.
+-    pub mode: &'static str,
+-    /// Native frame method identity.
+-    pub id: u64,
+-    /// Request limits, including the 11-byte frame header.
+-    pub request: Limits,
+-    /// Response limits, including the 11-byte frame header.
+-    pub response: Limits,
+-    types: core::marker::PhantomData<fn(Request) -> Response>,
+-}
+-
+-impl<Request, Response> Contract<Request, Response> {
+-    /// Check frame size, identity and direction before copying the full ingress.
+-    /// Run as a Platform guard; payload validation still occurs during decoding.
+-    pub fn admit_request(&self) {
+-        admit_frame(self.id, self.request);
+-    }
+-
+-    /// Construct the declaration used by the endpoint attribute.
+-    #[doc(hidden)]
+-    pub const fn new(
+-        name: &'static str,
+-        mode: &'static str,
+-        id: u64,
+-        request: Limits,
+-        response: Limits,
+-    ) -> Self {
+-        Self {
+-            name,
+-            mode,
+-            id,
+-            request,
+-            response,
+-            types: core::marker::PhantomData,
+-        }
+-    }
+-}
+-
+-#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
+-impl<Request: crate::typescript::Wire, Response: crate::typescript::Wire>
+-    Contract<Request, Response>
+-{
+-    /// Project the actual request type using the existing native schema owner.
+-    pub fn request_schema(&self) -> Result<serde_json::Value, crate::typescript::GenerationError> {
+-        crate::typescript::native_schema::<Request>()
+-    }
+-
+-    /// Project the actual response type using the existing native schema owner.
+-    pub fn response_schema(&self) -> Result<serde_json::Value, crate::typescript::GenerationError> {
+-        crate::typescript::native_schema::<Response>()
+-    }
+-}
+-
+-/// Platform paths used by generated entrypoints, including renamed Wire imports.
+-#[doc(hidden)]
+-pub mod __private {
+-    pub use ic_platform::cdk;
+-}
+-
+-/// Trap on an oversized ingress before Platform allocates/copies argument bytes.
+-pub fn admit_request(limits: Limits) {
+-    admit_request_len(limits);
+-}
+-
+-fn admit_request_len(limits: Limits) -> usize {
+-    // This moves Canic's pre-copy check to Wire without changing its acceptance
+-    // rule: the full native frame counts toward bytes, including its 11-byte header.
+-    // Consumers retain their existing method IDs and limits; no wire migration.
+-    let length = ic_platform::ic0::msg_arg_data_size();
+-    if length > limits.bytes {
+-        ic_platform::cdk::api::trap("Wire request exceeds byte allowance");
+-    }
+-    length
+-}
+-
+-#[cfg_attr(target_arch = "wasm32", inline(never))]
+-fn admit_frame(id: u64, limits: Limits) {
+-    let length = admit_request_len(limits);
+-    if length < crate::contract::HEADER {
+-        trap_error(crate::Error::Malformed);
+-    }
+-    let mut header = [0; crate::contract::HEADER];
+-    ic_platform::ic0::msg_arg_data_copy(&mut header, 0);
+-    // Previously identity/direction were checked after copying the complete
+-    // ingress. Check the same eleven bytes first, using the same validator.
+-    // Bytes and accepted frames are unchanged; no consumer migration. Payload
+-    // validation remains mandatory, including the existing decoder header check.
+-    crate::contract::payload(id, 0, &header).unwrap_or_else(|error| trap_error(error));
+-}
+-
+-/// Decode a complete native request frame, trapping on typed codec failure.
+-///
+-/// Call [`admit_request`] before obtaining the argument buffer. This function
+-/// preserves native identity, traversal, primitive and complete-input validation.
+-/// Borrowed fields refer to `bytes`; the caller must retain it through their use.
+-pub fn decode_request<'de, T: Deserialize<'de>>(bytes: &'de [u8], id: u64, limits: Limits) -> T {
+-    native::decode_request(id, bytes, limits).unwrap_or_else(|error| trap_error(error))
+-}
+-
+-/// Encode the native response frame within its allowances, trapping on failure.
+-///
+-/// A trap (rather than a rejection or error reply) preserves synchronous mutation
+-/// rollback. Earlier async transactions remain committed; see the module docs.
+-pub fn encode_response<T: Serialize + ?Sized>(value: &T, id: u64, limits: Limits) -> Vec<u8> {
+-    native::encode_response(id, value, limits).unwrap_or_else(|error| trap_error(error))
+-}
+-
+-// Keep failure formatting shared across request/reply types and admission.
+-#[cold]
+-#[inline(never)]
+-fn trap_error(error: crate::Error) -> ! {
+-    ic_platform::cdk::api::trap(error.to_string())
+-}
+--- a/crates/ic-wire/src/lib.rs
++++ b/crates/ic-wire/src/lib.rs
+@@ -13,8 +13,6 @@
+ mod platform_types;
+ pub use packed::{Packed, PackedElement};
+ /// Optional typed IC entrypoints using Platform's export generator and executor.
+-#[cfg(feature = "endpoint")]
+-pub mod endpoint;
+ pub mod native;
+ /// Optional TypeScript generation on native hosts.
+ /// Forwarding the feature on Wasm retains only the runtime codec.
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -402,3 +402,17 @@
+         ..limits
+     })
+ }
++
++/// Native request frame header size, including magic, identity and direction.
++pub const REQUEST_HEADER_BYTES: usize = crate::contract::HEADER;
++
++/// Validate only the fixed request header before a transport copies the payload.
++/// The complete request still requires normal decoding and resource admission.
++/// This delegates to the same validator previously used inside Wire's endpoint
++/// module: accepted bytes and error ordering are unchanged after its package move.
++pub fn validate_request_header(
++    id: u64,
++    header: &[u8; REQUEST_HEADER_BYTES],
++) -> Result<(), crate::Error> {
++    crate::contract::payload(id, 0, header).map(|_| ())
++}
+--- a/crates/ic-wire/src/platform_types/mod.rs
++++ b/crates/ic-wire/src/platform_types/mod.rs
+@@ -6,19 +6,19 @@
+ 
+ use crate::typescript::{GenerationError, SchemaContext, Wire};
+ 
+-impl Wire for ic_platform::Principal {
++impl Wire for ic_platform_types::Principal {
+     fn native_schema(context: &mut SchemaContext) -> Result<serde_json::Value, GenerationError> {
+         context.describe::<crate::Bytes<{ Self::MAX_LENGTH_IN_BYTES }>>()
+     }
+ }
+ 
+-impl Wire for ic_platform::Account {
++impl Wire for ic_platform_types::Account {
+     fn native_schema(context: &mut SchemaContext) -> Result<serde_json::Value, GenerationError> {
+         Ok(serde_json::json!({
+             "k": "record",
+             "fields": [
+-                {"name": "owner", "value": context.describe::<ic_platform::Principal>()?},
+-                {"name": "subaccount", "value": context.describe::<Option<ic_platform::Subaccount>>()?}
++                {"name": "owner", "value": context.describe::<ic_platform_types::Principal>()?},
++                {"name": "subaccount", "value": context.describe::<Option<ic_platform_types::Subaccount>>()?}
+             ]
+         }))
+     }
+--- a/examples/endpoint/Cargo.toml
++++ b/examples/endpoint/Cargo.toml
+@@ -17,13 +17,14 @@
+ 
+ [features]
+ ic = ["ic-platform/pocket-ic"]
+-schema = ["ic-wire/typescript"]
++schema = ["ic-wire/typescript", "ic-wire-endpoint/typescript"]
+ # Qualification-only inline hook comparator, never a production encoding mode.
+ inline-baseline = []
+ 
+ [dependencies]
+ ic-platform = { workspace = true, features = ["cdk"] }
+-ic-wire = { workspace = true, features = ["endpoint"] }
++ic-wire.workspace = true
++ic-wire-endpoint.workspace = true
+ serde.workspace = true
+ 
+ [[test]]
+--- a/examples/endpoint/examples/cost/mod.rs
++++ b/examples/endpoint/examples/cost/mod.rs
+@@ -28,7 +28,7 @@
+     }
+ }
+ 
+-#[cfg_attr(not(feature = "inline-baseline"), ic_wire::endpoint::query(id = 21, request = LIMITS, response = LIMITS))]
++#[cfg_attr(not(feature = "inline-baseline"), ic_wire_endpoint::query(id = 21, request = LIMITS, response = LIMITS))]
+ #[cfg_attr(
+     feature = "inline-baseline",
+     ic_platform::cdk::query(
+@@ -41,7 +41,7 @@
+     Measured(value)
+ }
+ 
+-#[cfg_attr(not(feature = "inline-baseline"), ic_wire::endpoint::query(id = 22, request = LIMITS, response = LIMITS))]
++#[cfg_attr(not(feature = "inline-baseline"), ic_wire_endpoint::query(id = 22, request = LIMITS, response = LIMITS))]
+ #[cfg_attr(
+     feature = "inline-baseline",
+     ic_platform::cdk::query(
+@@ -139,8 +139,8 @@
+         if lane == "inline" {
+             before_encode(&Measured(before_decode::<T>(frame, id)), id)
+         } else {
+-            ic_wire::endpoint::encode_response(
+-                &Measured(ic_wire::endpoint::decode_request::<T>(frame, id, LIMITS)),
++            ic_wire_endpoint::encode_response(
++                &Measured(ic_wire_endpoint::decode_request::<T>(frame, id, LIMITS)),
+                 id,
+                 LIMITS,
+             )
+--- a/examples/endpoint/src/lib.rs
++++ b/examples/endpoint/src/lib.rs
+@@ -22,36 +22,36 @@
+ }
+ 
+ /// Record query, preserving a single typed value.
+-#[ic_wire::endpoint::query(contract = ECHO, id = 7, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::query(contract = ECHO, id = 7, request = LIMITS, response = LIMITS)]
+ pub fn echo(request: Request) -> Request {
+     request
+ }
+ 
+ /// Unit requests still require a complete identity-checked Wire frame.
+-#[ic_wire::endpoint::query(contract = COUNT_CONTRACT, id = 8, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::query(contract = COUNT_CONTRACT, id = 8, request = LIMITS, response = LIMITS)]
+ pub fn count() -> u64 {
+     COUNT.get()
+ }
+ 
+ /// Synchronous mutation followed by bounded reply encoding.
+-#[ic_wire::endpoint::update(contract = MUTATE, id = 9, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(contract = MUTATE, id = 9, request = LIMITS, response = LIMITS)]
+ pub fn mutate(size: u32) -> ByteBuf {
+     COUNT.set(COUNT.get() + 1);
+     ByteBuf::from(vec![42; size as usize])
+ }
+ 
+ /// Explicit unit input/output and non-Rust export name.
+-#[ic_wire::endpoint::update(name = "unit-call", contract = UNIT, id = 10, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(name = "unit-call", contract = UNIT, id = 10, request = LIMITS, response = LIMITS)]
+ pub fn unit(_: ()) {}
+ 
+ /// A normal async query that completes without inter-canister suspension.
+-#[ic_wire::endpoint::query(contract = ASYNC_QUERY, id = 11, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::query(contract = ASYNC_QUERY, id = 11, request = LIMITS, response = LIMITS)]
+ pub async fn async_query(value: u64) -> (u64, bool) {
+     (value, true)
+ }
+ 
+ /// Composite query with an actual inter-canister await through Platform.
+-#[ic_wire::endpoint::query(composite, contract = COMPOSITE, id = 12, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::query(composite, contract = COMPOSITE, id = 12, request = LIMITS, response = LIMITS)]
+ pub async fn composite() -> u64 {
+     remote_count().await
+ }
+@@ -67,7 +67,7 @@
+ }
+ 
+ /// After an await, only the callback mutation rolls back on encoding failure.
+-#[ic_wire::endpoint::update(id = 13, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(id = 13, request = LIMITS, response = LIMITS)]
+ pub async fn async_mutate(size: u32) -> ByteBuf {
+     COUNT.set(COUNT.get() + 10);
+     let _ = remote_count().await;
+@@ -76,41 +76,41 @@
+ }
+ 
+ /// Async ready execution has the same rollback boundary as a synchronous call.
+-#[ic_wire::endpoint::update(id = 14, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(id = 14, request = LIMITS, response = LIMITS)]
+ pub async fn async_ready(size: u32) -> ByteBuf {
+     mutate(size)
+ }
+ 
+ /// A deliberately tight traversal budget, independent of frame bytes.
+-#[ic_wire::endpoint::query(contract = NODES, id = 15, request = Limits { nodes: 3, ..LIMITS }, response = LIMITS)]
++#[ic_wire_endpoint::query(contract = NODES, id = 15, request = Limits { nodes: 3, ..LIMITS }, response = LIMITS)]
+ pub fn nodes(values: Vec<u8>) -> u64 {
+     values.len() as u64
+ }
+ 
+ /// Fully automatic identity and request/reply defaults.
+-#[ic_wire::endpoint::query(contract = DEFAULT_BLOB)]
++#[ic_wire_endpoint::query(contract = DEFAULT_BLOB)]
+ pub fn default_blob(value: ByteBuf) -> ByteBuf {
+     value
+ }
+ 
+ /// Bare attributes also validate unit frames.
+-#[ic_wire::endpoint::query]
++#[ic_wire_endpoint::query]
+ pub fn default_unit() {}
+ 
+ /// A stable export name determines identity, independently of the Rust name.
+-#[ic_wire::endpoint::query(name = "stable-name", contract = NAMED, request = LIMITS)]
++#[ic_wire_endpoint::query(name = "stable-name", contract = NAMED, request = LIMITS)]
+ pub fn renamed(value: u64) -> u64 {
+     value
+ }
+ 
+ /// A response-only override leaves request admission at its default.
+-#[ic_wire::endpoint::query(contract = RESPONSE_ONLY, response = LIMITS)]
++#[ic_wire_endpoint::query(contract = RESPONSE_ONLY, response = LIMITS)]
+ pub fn response_only(value: u64) -> u64 {
+     value
+ }
+ 
+ /// Default reply encoding retains synchronous transaction rollback.
+-#[ic_wire::endpoint::update(contract = DEFAULT_MUTATE)]
++#[ic_wire_endpoint::update(contract = DEFAULT_MUTATE)]
+ pub fn default_mutate(size: u32) -> ByteBuf {
+     mutate(size)
+ }
+@@ -118,11 +118,11 @@
+ // Framework composition: one Platform export, one Wire decoder, one existing
+ // guarded dispatch. Access refusal stays outside the declared response type.
+ fn composed_admit() -> Result<(), String> {
+-    ic_wire::endpoint::admit_request(LIMITS);
++    ic_wire_endpoint::admit_request(LIMITS);
+     Ok(())
+ }
+ fn composed_decode(bytes: Vec<u8>) -> bool {
+-    ic_wire::endpoint::decode_request(&bytes, 16, LIMITS)
++    ic_wire_endpoint::decode_request(&bytes, 16, LIMITS)
+ }
+ fn guarded_handler(allowed: bool) -> Result<u64, &'static str> {
+     if !allowed {
+@@ -139,7 +139,7 @@
+ fn composed(allowed: bool) {
+     match guarded_handler(allowed) {
+         Ok(value) => {
+-            ic_platform::cdk::api::msg_reply(ic_wire::endpoint::encode_response(&value, 16, LIMITS))
++            ic_platform::cdk::api::msg_reply(ic_wire_endpoint::encode_response(&value, 16, LIMITS))
+         }
+         Err(error) => ic_platform::cdk::api::msg_reject(error),
+     }
+@@ -156,14 +156,14 @@
+             bytes: ic_wire::Bytes::new(vec![1, 2]).unwrap(),
+         };
+         let frame = ic_wire::native::encode_request(17, &value, LIMITS).unwrap();
+-        let view: RequestRef<'_> = ic_wire::endpoint::decode_request(&frame, 17, LIMITS);
++        let view: RequestRef<'_> = ic_wire_endpoint::decode_request(&frame, 17, LIMITS);
+         assert_eq!(
+             view.bytes.as_slice().as_ptr(),
+             frame[frame.len() - 2..].as_ptr()
+         );
+         let reply = borrowed_echo(view);
+         assert_eq!(
+-            ic_wire::endpoint::encode_response(&reply, 17, LIMITS),
++            ic_wire_endpoint::encode_response(&reply, 17, LIMITS),
+             ic_wire::native::encode_response(17, &value, LIMITS).unwrap()
+         );
+         #[cfg(feature = "schema")]
+@@ -181,7 +181,7 @@
+ 
+     #[test]
+     fn defaults_and_overrides_bind_the_actual_contract() {
+-        use ic_wire::endpoint::{DEFAULT_REQUEST_LIMITS, DEFAULT_RESPONSE_LIMITS};
++        use ic_wire_endpoint::{DEFAULT_REQUEST_LIMITS, DEFAULT_RESPONSE_LIMITS};
+         let fields = |value: Limits| (value.bytes, value.allocation, value.nodes, value.depth);
+         assert_eq!(
+             fields(DEFAULT_REQUEST_LIMITS),
+@@ -276,13 +276,13 @@
+ }
+ 
+ /// A borrowed reply is encoded while the request buffer is still alive.
+-#[ic_wire::endpoint::query(borrow, contract = BORROWED, id = 17, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::query(borrow, contract = BORROWED, id = 17, request = LIMITS, response = LIMITS)]
+ pub fn borrowed_echo(value: RequestRef<'_>) -> RequestRef<'_> {
+     value
+ }
+ 
+ /// Mutate only after borrowed request validation; an oversized reply traps.
+-#[ic_wire::endpoint::update(borrow, id = 18, request = LIMITS, response = LIMITS)]
++#[ic_wire_endpoint::update(borrow, id = 18, request = LIMITS, response = LIMITS)]
+ pub fn borrowed_mutate(value: RequestRef<'_>) -> ByteBuf {
+     COUNT.set(COUNT.get() + 1);
+     ByteBuf::from(vec![42; value.value as usize])

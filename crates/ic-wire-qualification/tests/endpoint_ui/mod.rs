@@ -1,5 +1,6 @@
 #![expect(dead_code, reason = "The selected driver uses only part of the shared fixture surface.")]
-use ic_wire::{Limits, endpoint::query};
+use ic_wire::Limits;
+use ic_wire_endpoint::query;
 const LIMITS: Limits = Limits {
     bytes: 128,
     allocation: 8192,
@@ -10,11 +11,11 @@ const LIMITS: Limits = Limits {
 #[cfg(ui_case = "valid")]
 mod valid {
     use super::*;
-    use ic_wire as renamed;
+    use ic_wire_endpoint as renamed;
     const ID: u64 = 17;
     type Request = u64;
     type Response = (u64, bool);
-    #[renamed::endpoint::query(crate = "renamed", contract = CONTRACT, id = ID, request = LIMITS, response = LIMITS)]
+    #[renamed::query(crate = "renamed", contract = CONTRACT, id = ID, request = LIMITS, response = LIMITS)]
     fn r#match(request: self::Request) -> self::Response {
         (request, true)
     }
@@ -34,7 +35,7 @@ mod valid {
         unreachable!()
     }
     const _: u64 = CONTRACT.id;
-    #[renamed::endpoint::query(borrow, crate = "renamed", contract = BORROWED)]
+    #[renamed::query(borrow, crate = "renamed", contract = BORROWED)]
     fn borrowed(value: &str) -> &str {
         value
     }
@@ -90,7 +91,7 @@ struct Unsupported;
 fn nonserde(_: Unsupported) {}
 
 #[cfg(ui_case = "composite_update")]
-#[ic_wire::endpoint::update(composite, id = 1, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(composite, id = 1, request = LIMITS, response = LIMITS)]
 fn composite_update() {}
 
 #[cfg(ui_case = "name")]

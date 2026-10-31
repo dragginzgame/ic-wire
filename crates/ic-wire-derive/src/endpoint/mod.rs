@@ -15,7 +15,9 @@ pub(super) fn expand(
     let mut response: Option<Expr> = None;
     let mut name: Option<LitStr> = None;
     let mut contract: Option<syn::Ident> = None;
-    let mut wire: Path = syn::parse_quote!(::ic_wire);
+    // Package move only: default expansion now targets the independent endpoint
+    // facade. Consumers move attribute imports; frame bytes and settings stay the same.
+    let mut wire: Path = syn::parse_quote!(::ic_wire_endpoint);
     let mut composite = false;
     let mut borrow = false;
     let mut seen = std::collections::BTreeSet::new();
@@ -74,11 +76,11 @@ pub(super) fn expand(
         |value| quote!(#value),
     );
     let request = request.map_or_else(
-        || quote!(#wire::endpoint::DEFAULT_REQUEST_LIMITS),
+        || quote!(#wire::DEFAULT_REQUEST_LIMITS),
         |value| quote!(#value),
     );
     let response = response.map_or_else(
-        || quote!(#wire::endpoint::DEFAULT_RESPONSE_LIMITS),
+        || quote!(#wire::DEFAULT_RESPONSE_LIMITS),
         |value| quote!(#value),
     );
     let (request_type, takes_argument) = match signature.inputs.first() {
@@ -126,7 +128,7 @@ pub(super) fn expand(
     };
     let composite = composite.then(|| quote!(composite,));
     let cdk_path = LitStr::new(
-        &format!("{}::endpoint::__private::cdk", quote!(#wire)),
+        &format!("{}::__private::cdk", quote!(#wire)),
         function_name.span(),
     );
     let visibility = &function.vis;
@@ -136,7 +138,7 @@ pub(super) fn expand(
         .filter(|attr| attr.path().is_ident("cfg") || attr.path().is_ident("cfg_attr"))
         .collect();
     let settings = crate::fresh_ident(&source, "__WIRE_CONTRACT");
-    let declaration = quote!(#wire::endpoint::Contract::<#request_type, #response_type>::new(
+    let declaration = quote!(#wire::Contract::<#request_type, #response_type>::new(
         #export, #mode, #id, #request, #response
     ));
     let (metadata, settings_value) = if let Some(contract) = contract {
@@ -144,7 +146,7 @@ pub(super) fn expand(
             quote! {
                 #(#cfg)*
                 #[doc = "Wire contract derived from the handler; no registry or artifact admission is implied."]
-                #visibility const #contract: #wire::endpoint::Contract<#request_type, #response_type> = #declaration;
+                #visibility const #contract: #wire::Contract<#request_type, #response_type> = #declaration;
             },
             quote!(#contract),
         )
@@ -170,21 +172,21 @@ pub(super) fn expand(
             #metadata
             #(#cfg)*
             const _: () = {
-                const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
+                const #settings: #wire::Contract<#request_type, #response_type> = #settings_value;
                 fn #admit() -> ::core::result::Result<(), ::std::string::String> {
                     #settings.admit_request();
                     Ok(())
                 }
                 fn #decode(bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> { bytes }
-                #[#wire::endpoint::__private::cdk::#attribute(
+                #[#wire::__private::cdk::#attribute(
                     name = #export, #composite crate = #cdk_path,
                     guard = #admit_path, decode_with = #decode_path, encode_with = #decode_path
                 )]
                 fn #entry(#bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> {
-                    let #value: #request_type = #wire::endpoint::decode_request(
+                    let #value: #request_type = #wire::decode_request(
                         &#bytes, #settings.id, #settings.request);
                     let #reply = #function_name(#value);
-                    #wire::endpoint::encode_response(&#reply, #settings.id, #settings.response)
+                    #wire::encode_response(&#reply, #settings.id, #settings.response)
                 }
             };
         });
@@ -195,18 +197,18 @@ pub(super) fn expand(
         #(#cfg)*
         const _: () = {
             type #result_type = #response_type;
-            const #settings: #wire::endpoint::Contract<#request_type, #response_type> = #settings_value;
+            const #settings: #wire::Contract<#request_type, #response_type> = #settings_value;
             fn #admit() -> ::core::result::Result<(), ::std::string::String> {
                 #settings.admit_request();
                 Ok(())
             }
             fn #decode(bytes: ::std::vec::Vec<u8>) -> #request_type {
-                #wire::endpoint::decode_request(&bytes, #settings.id, #settings.request)
+                #wire::decode_request(&bytes, #settings.id, #settings.request)
             }
             fn #encode(value: #response_type) -> ::std::vec::Vec<u8> {
-                #wire::endpoint::encode_response(&value, #settings.id, #settings.response)
+                #wire::encode_response(&value, #settings.id, #settings.response)
             }
-            #[#wire::endpoint::__private::cdk::#attribute(
+            #[#wire::__private::cdk::#attribute(
                 name = #export, #composite crate = #cdk_path,
                 guard = #admit_path, decode_with = #decode_path, encode_with = #encode_path
             )]

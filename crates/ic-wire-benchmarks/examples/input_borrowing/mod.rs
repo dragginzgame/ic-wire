@@ -59,7 +59,7 @@ fn borrowed(input: &[u8]) -> Result<[u64; 3], ic_wire::Error> {
     feature = "endpoint-input",
     not(feature = "borrowed-input")
 ))]
-#[ic_wire::endpoint::update(name = "consume", id = ID, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(name = "consume", id = ID, request = LIMITS, response = LIMITS)]
 fn owned_endpoint(value: Owned) -> [u64; 3] {
     consume(value.mode, value.nonce, value.body.as_slice())
 }
@@ -68,7 +68,7 @@ fn owned_endpoint(value: Owned) -> [u64; 3] {
     feature = "endpoint-input",
     feature = "borrowed-input"
 ))]
-#[ic_wire::endpoint::update(borrow, name = "consume", id = ID, request = LIMITS, response = LIMITS)]
+#[ic_wire_endpoint::update(borrow, name = "consume", id = ID, request = LIMITS, response = LIMITS)]
 fn borrowed_endpoint(value: Borrowed<'_>) -> [u64; 3] {
     consume(value.mode, value.nonce, value.body.as_slice())
 }

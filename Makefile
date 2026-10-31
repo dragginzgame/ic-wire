@@ -6,11 +6,12 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.72.1
+export RELEASE_GROUP ?= core
+RELEASE_EDITOR_VERSION := 0.73.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
-override CARGO_PUBLISH_PACKAGES := ic-wire-derive ic-wire
+override CARGO_PUBLISH_PACKAGES := ic-wire-derive ic-wire ic-wire-endpoint
 override CARGO_PUBLISH_REGISTRY := crates-io
 override CARGO_PUBLISH_VERIFY_TARGETS := lint
 # Reject the retired selector rather than silently publishing the default roster.
@@ -33,7 +34,7 @@ override IC_WIRE_CI_TARGETS := tools-check lint shared-tooling-check check-pins 
 .PHONY: check-package
 check-package:
 	+@$(MAKE) lint
-	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire --all-features --target-dir target/publication-check
+	+@env cargo package --locked --allow-dirty -p ic-wire-derive -p ic-wire -p ic-wire-endpoint --all-features --target-dir target/publication-check
 
 .PHONY: evaluate-codecs evaluate-codec-matrix evaluate-codec-instructions check-benchmarks
 evaluate-codecs:
@@ -82,13 +83,17 @@ fuzz-runtime:
 
 .PHONY: check-typed-diagnostics
 .PHONY: check-release check-qualification
-.PHONY: check-typescript check-platform-types
+.PHONY: check-typescript check-platform-types check-stable-identities
 
 check-typescript:
 	+@bash scripts/ci/check-typescript.sh
 
+check-stable-identities:
+	+@bash scripts/ci/check-stable-identities.sh
+
 check-platform-types:
 	+@bash scripts/ci/check-platform-types.sh
+	+@bash scripts/ci/check-stable-identities.sh
 
 check-qualification:
 	+@env cargo test --locked -p ic-wire-qualification --lib --tests --features allocation-fixture
@@ -142,7 +147,7 @@ test:
 	+@env cargo test --locked -p ic-wire
 
 lint:
-	+@env cargo clippy --locked -p ic-wire -p ic-wire-derive --all-targets -- -D warnings
+	+@env cargo clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint --all-targets -- -D warnings
 
 check-wasm:
 	+@env cargo check --locked -p ic-wire --lib --target wasm32-unknown-unknown
@@ -163,7 +168,8 @@ check-pins: host-tools-check
 	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"
 
 check-release:
-	+@bash scripts/ci/test-local-release.sh
+	+@bash scripts/ci/test-local-release.sh core
+	+@bash scripts/ci/test-local-release.sh endpoint
 
 check-tooling:
 	+@bash scripts/ci/test-local-make.sh

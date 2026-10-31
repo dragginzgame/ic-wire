@@ -36,6 +36,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &TargetKind::Lib,
         4 * 1024 * 1024,
     )?;
+    let endpoint = if arguments.get_flag("endpoint") {
+        Some(library_artifact(
+            File::open(run.join("artifacts.jsonl"))?,
+            "ic_wire_endpoint",
+            &TargetKind::Lib,
+            4 * 1024 * 1024,
+        )?)
+    } else {
+        None
+    };
     let mut cases = fs::read_dir(&source)?
         .map(|entry| entry.map(|entry| entry.path()))
         .collect::<Result<Vec<_>, _>>()?;
@@ -69,13 +79,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .arg("-L")
             .arg(format!(
                 "dependency={}/deps",
-                wire.parent().unwrap().display()
+                wire.parent()
+                    .unwrap()
+                    .parent()
+                    .filter(|_| wire.parent().unwrap().ends_with("deps"))
+                    .unwrap_or(wire.parent().unwrap())
+                    .display()
             ))
             .arg("--cfg")
             .arg(format!("ui_case=\"{name}\""))
             .arg(source.join("mod.rs"))
             .arg("-o")
             .arg(run.join(format!("{name}.rmeta")));
+        if let Some(endpoint) = &endpoint {
+            command
+                .arg("--extern")
+                .arg(format!("ic_wire_endpoint={}", endpoint.display()));
+        }
         command
     })?;
     println!(

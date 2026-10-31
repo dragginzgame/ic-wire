@@ -8,9 +8,9 @@ output="$(mktemp -d "$PWD/target/endpoint-check.XXXXXX")"
 printf 'Endpoint compile evidence: %s\n' "$output"
 cargo test --locked -p ic-wire-endpoint-fixture --lib --features schema
 cargo test --locked -p ic-wire --lib automatic_method_identity_vectors_and_frame
-cargo clippy --locked -p ic-wire -p ic-wire-derive --lib --features ic-wire/endpoint,ic-wire/typescript -- -D warnings
+cargo clippy --locked -p ic-wire-endpoint -p ic-wire -p ic-wire-derive --lib --features ic-wire-endpoint/typescript -- -D warnings
 cargo clippy --locked -p ic-wire-endpoint-fixture --lib --tests --example endpoint-cost --features ic,schema,inline-baseline -- -D warnings
-cargo build --locked -p ic-wire --features endpoint --message-format=json > "$output/artifacts.jsonl"
+cargo build --locked -p ic-wire-endpoint --message-format=json > "$output/artifacts.jsonl"
 cargo run --locked -p ic-wire-qualification --example check-diagnostics -- "$output" --endpoint
 cargo build --locked -p ic-wire-endpoint-fixture --lib --target wasm32-unknown-unknown --profile evaluation
 cargo +1.91.0 check --locked -p ic-wire-endpoint-fixture --lib --target wasm32-unknown-unknown

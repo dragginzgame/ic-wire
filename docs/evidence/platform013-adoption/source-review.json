@@ -1,0 +1,59 @@
+{
+  "ic-platform": {
+    "unchanged_source_files": 118,
+    "changed_source_files": [
+      "src/gzip/mod.rs",
+      "src/lib.rs"
+    ],
+    "suppliers": [
+      {
+        "name": "ic-platform",
+        "version": "0.12.0",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "2aa0f99f96ecb4eb64146f09353633c6abefc822a3d962447a79a71f8e9e37af"
+      },
+      {
+        "name": "ic-platform",
+        "version": "0.13.0",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "69b5ca61398ae30351fc68bf0f726daf2aa3a2f7cc9161da7d6e6e231593e275"
+      }
+    ]
+  },
+  "ic-platform-macros": {
+    "unchanged_source_files": 5,
+    "changed_source_files": [],
+    "suppliers": [
+      {
+        "name": "ic-platform-macros",
+        "version": "0.12.0",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "40135ac50d7e7356bafc9604d93469f464bbbfe9226a2610b1c33487d9a71cb8"
+      },
+      {
+        "name": "ic-platform-macros",
+        "version": "0.13.0",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "ef7f0886f261abf6b5485c3d87ec6258a09f3d412d19567da3ccc049d8cbdeec"
+      }
+    ]
+  },
+  "ic-platform-runtime-guard": {
+    "unchanged_source_files": 1,
+    "changed_source_files": [],
+    "suppliers": [
+      {
+        "name": "ic-platform-runtime-guard",
+        "version": "0.12.0",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "31ee28e271ce87e1ff161419a254f12eda2ec454fc0602914fa9e4ffa2da1de3"
+      },
+      {
+        "name": "ic-platform-runtime-guard",
+        "version": "0.13.0",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "714038027dbc8bee4a3429a7d15299769ebfa7a24d674b4c28732d8ef3812e9c"
+      }
+    ]
+  }
+}

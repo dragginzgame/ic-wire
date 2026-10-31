@@ -1,0 +1,12 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/lib.rs (/tmp/wire-issue34-36/standalone/target/debug/deps/wire_published_composition_check-2fb9f91c74bfe068)
+
+running 5 tests
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::combined_endpoint_uses_the_same_schema_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::principal_schema_and_frames ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

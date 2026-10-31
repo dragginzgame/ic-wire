@@ -11,18 +11,10 @@ case "$profile" in evaluation|benchmark-speed) ;; *) exit 1;; esac
 case "$entry" in raw|endpoint) ;; *) exit 1;; esac
 mkdir "$out"
 mkdir "$out/source"
-if [[ "$entry" == raw ]]; then
-    # Freeze the released runtime, excluding concurrent endpoint implementation work.
-    git -C "$root" archive HEAD | tar -x -C "$out/source"
-    cp "$root/crates/ic-wire-benchmarks/Cargo.toml" "$out/source/crates/ic-wire-benchmarks/Cargo.toml"
-    # The released manifest has no endpoint feature; this runner does not use it.
-    sed 's/^endpoint-input = .*/endpoint-input = []/' "$root/crates/ic-wire-benchmarks/Cargo.toml" > "$out/source/crates/ic-wire-benchmarks/Cargo.toml"
-    cp -R "$root/crates/ic-wire-benchmarks/examples/input_borrowing" "$out/source/crates/ic-wire-benchmarks/examples/"
-else
-    # Freeze this working tree, including pending endpoint implementation, once.
-    cp "$root/Cargo.toml" "$root/Cargo.lock" "$root/rust-toolchain.toml" "$out/source/"
-    cp -R "$root/crates" "$root/examples" "$out/source/"
-fi
+# Freeze one current source selection for both raw and endpoint probes. Only
+# endpoint-input selects the optional runtime integration; codec bytes are shared.
+cp "$root/Cargo.toml" "$root/Cargo.lock" "$root/rust-toolchain.toml" "$out/source/"
+cp -R "$root/crates" "$root/examples" "$out/source/"
 cp "$0" "$out/runner.sh"
 cp "$root/scripts/ci/summarize-input-borrowing.mjs" "$out/summarize.mjs"
 printf '%s\n' "$profile" > "$out/profile.txt"

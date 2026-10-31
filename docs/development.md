@@ -25,9 +25,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.72.1 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.73.0 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.72.1 without default features; the CLI feature is only enabled for installation.
+0.73.0 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -63,6 +63,7 @@ The development compiler is Rust 1.99.1; the library floor is Rust 1.91.0.
 | `evaluate-endpoints` | All exported endpoint costs and rejection paths; fresh absolute `EVIDENCE_DIR` and instrumented `POCKET_IC_BIN` required |
 | `check-typescript` | Feature-enabled Rust tests/lints/MSRV, generated vectors and differential mutations |
 | `check-platform-types` | Standalone Principal/Account derives, exact Rust/TS bytes and malformed inputs, Rust 1.91 host/Wasm, schema-only/combined endpoint graphs; included in `check-typescript` |
+| `check-stable-identities` | Current and simulated next endpoint/runtime consumers retain identical codec/derive/Principal/Account package IDs; included in `check-platform-types` |
 | `evaluate-codec-matrix` | Full 21-cohort Wire/Candid matrix; requires explicit prepared PocketIC |
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |

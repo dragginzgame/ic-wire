@@ -1,0 +1,82 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -19,8 +19,9 @@
+ [workspace.dependencies]
+ # Production dependencies
+ bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
+-# Both integrations share the consumer's Platform 0.12 type/runtime identity.
+-ic-platform = { version = "0.12.0", default-features = false }
++# Both integrations share the consumer's Platform 0.13 type/runtime identity.
++# Supplier identity changes only: codec bytes, budgets and acceptance stay unchanged.
++ic-platform = { version = "0.13.0", default-features = false }
+ ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.11.0" }
+ postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
+ proc-macro2 = "1.0.107"
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -935,9 +935,9 @@
+ 
+ [[package]]
+ name = "ic-platform"
+-version = "0.12.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2aa0f99f96ecb4eb64146f09353633c6abefc822a3d962447a79a71f8e9e37af"
++version = "0.13.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "69b5ca61398ae30351fc68bf0f726daf2aa3a2f7cc9161da7d6e6e231593e275"
+ dependencies = [
+  "candid",
+  "crc32fast",
+@@ -954,9 +954,9 @@
+ 
+ [[package]]
+ name = "ic-platform-macros"
+-version = "0.12.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "40135ac50d7e7356bafc9604d93469f464bbbfe9226a2610b1c33487d9a71cb8"
++version = "0.13.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ef7f0886f261abf6b5485c3d87ec6258a09f3d412d19567da3ccc049d8cbdeec"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -965,9 +965,9 @@
+ 
+ [[package]]
+ name = "ic-platform-runtime-guard"
+-version = "0.12.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "31ee28e271ce87e1ff161419a254f12eda2ec454fc0602914fa9e4ffa2da1de3"
++version = "0.13.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "714038027dbc8bee4a3429a7d15299769ebfa7a24d674b4c28732d8ef3812e9c"
+ 
+ [[package]]
+ name = "ic-testkit"
+@@ -1008,7 +1008,7 @@
+ dependencies = [
+  "bytemuck",
+  "clap",
+- "ic-platform 0.12.0",
++ "ic-platform 0.13.0",
+  "ic-wire-derive",
+  "libfuzzer-sys",
+  "postcard",
+@@ -1023,7 +1023,7 @@
+ dependencies = [
+  "clap",
+  "dhat",
+- "ic-platform 0.12.0",
++ "ic-platform 0.13.0",
+  "ic-testkit",
+  "ic-wire",
+  "num-bigint",
+@@ -1047,7 +1047,7 @@
+ name = "ic-wire-endpoint-fixture"
+ version = "0.11.0"
+ dependencies = [
+- "ic-platform 0.12.0",
++ "ic-platform 0.13.0",
+  "ic-testkit",
+  "ic-wire",
+  "serde",
