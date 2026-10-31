@@ -1,0 +1,1190 @@
+{
+  "logical": 384,
+  "physical": 608,
+  "reports": {
+    "evaluation": {
+      "wasm": {
+        "before": 100441,
+        "after": 100441,
+        "delta": 0,
+        "percent": 0
+      },
+      "code": {
+        "before": 86544,
+        "after": 86544,
+        "delta": 0,
+        "percent": 0
+      },
+      "cases": [
+        {
+          "method": "echo",
+          "case": "blob-0",
+          "outcome": "reply",
+          "request_bytes": 14,
+          "instructions": {
+            "before": 253817,
+            "after": 253817,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 253817,
+              "min": 253817,
+              "max": 253817,
+              "samples": [
+                253817,
+                253817,
+                253817,
+                253817,
+                253817,
+                253817,
+                253817,
+                253817
+              ]
+            },
+            "after_samples": {
+              "mean": 253817,
+              "min": 253817,
+              "max": 253817,
+              "samples": [
+                253817,
+                253817,
+                253817,
+                253817,
+                253817,
+                253817,
+                253817,
+                253817
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 256238,
+            "after": 256238,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 256238,
+              "min": 256238,
+              "max": 256238,
+              "samples": [
+                256238,
+                256238,
+                256238,
+                256238,
+                256238,
+                256238,
+                256238,
+                256238
+              ]
+            },
+            "after_samples": {
+              "mean": 256238,
+              "min": 256238,
+              "max": 256238,
+              "samples": [
+                256238,
+                256238,
+                256238,
+                256238,
+                256238,
+                256238,
+                256238,
+                256238
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "borrowed_echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 255393,
+            "after": 255393,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 255393,
+              "min": 255393,
+              "max": 255393,
+              "samples": [
+                255393,
+                255393,
+                255393,
+                255393,
+                255393,
+                255393,
+                255393,
+                255393
+              ]
+            },
+            "after_samples": {
+              "mean": 255393,
+              "min": 255393,
+              "max": 255393,
+              "samples": [
+                255393,
+                255393,
+                255393,
+                255393,
+                255393,
+                255393,
+                255393,
+                255393
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "value-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 257009,
+            "after": 257009,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 257009,
+              "min": 257009,
+              "max": 257009,
+              "samples": [
+                257009,
+                257009,
+                257009,
+                257009,
+                257009,
+                257009,
+                257009,
+                257009
+              ]
+            },
+            "after_samples": {
+              "mean": 257009,
+              "min": 257009,
+              "max": 257009,
+              "samples": [
+                257009,
+                257009,
+                257009,
+                257009,
+                257009,
+                257009,
+                257009,
+                257009
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "composite",
+          "case": "self-call",
+          "outcome": "reply",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 1488195,
+            "after": 1488195,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1488195,
+              "min": 1488195,
+              "max": 1488195,
+              "samples": [
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195
+              ]
+            },
+            "after_samples": {
+              "mean": 1488195,
+              "min": 1488195,
+              "max": 1488195,
+              "samples": [
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195,
+                1488195
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1245459.75,
+            "after": 1245459.75,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1245459.75,
+              "min": 1244996,
+              "max": 1245526,
+              "samples": [
+                1244996,
+                1245526,
+                1245526,
+                1245526,
+                1245526,
+                1245526,
+                1245526,
+                1245526
+              ]
+            },
+            "after_samples": {
+              "mean": 1245459.75,
+              "min": 1244996,
+              "max": 1245526,
+              "samples": [
+                1244996,
+                1245526,
+                1245526,
+                1245526,
+                1245526,
+                1245526,
+                1245526,
+                1245526
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18038334.75,
+            "after": 18038334.75,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-117",
+          "outcome": "trap",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1727527,
+            "after": 1727527,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1727527,
+              "min": 1727527,
+              "max": 1727527,
+              "samples": [
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527
+              ]
+            },
+            "after_samples": {
+              "mean": 1727527,
+              "min": 1727527,
+              "max": 1727527,
+              "samples": [
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527,
+                1727527
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18520527,
+            "after": 18520527,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 44,
+          "instructions": {
+            "before": 252371,
+            "after": 252371,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 252371,
+              "min": 252371,
+              "max": 252371,
+              "samples": [
+                252371,
+                252371,
+                252371,
+                252371,
+                252371,
+                252371,
+                252371,
+                252371
+              ]
+            },
+            "after_samples": {
+              "mean": 252371,
+              "min": 252371,
+              "max": 252371,
+              "samples": [
+                252371,
+                252371,
+                252371,
+                252371,
+                252371,
+                252371,
+                252371,
+                252371
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_mutate",
+          "case": "reply-32",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 492565,
+            "after": 492565,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 492565,
+              "min": 492565,
+              "max": 492565,
+              "samples": [
+                492565,
+                492565,
+                492565,
+                492565,
+                492565,
+                492565,
+                492565,
+                492565
+              ]
+            },
+            "after_samples": {
+              "mean": 492565,
+              "min": 492565,
+              "max": 492565,
+              "samples": [
+                492565,
+                492565,
+                492565,
+                492565,
+                492565,
+                492565,
+                492565,
+                492565
+              ]
+            }
+          },
+          "cycles": {
+            "before": 7000565,
+            "after": 7000565,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-65522",
+          "outcome": "reply",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 3884447,
+            "after": 3884447,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 3884447,
+              "min": 3884447,
+              "max": 3884447,
+              "samples": [
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447
+              ]
+            },
+            "after_samples": {
+              "mean": 3884447,
+              "min": 3884447,
+              "max": 3884447,
+              "samples": [
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447,
+                3884447
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "truncated",
+          "outcome": "trap",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 249786,
+            "after": 249786,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 249786,
+              "min": 249786,
+              "max": 249786,
+              "samples": [
+                249786,
+                249786,
+                249786,
+                249786,
+                249786,
+                249786,
+                249786,
+                249786
+              ]
+            },
+            "after_samples": {
+              "mean": 249786,
+              "min": 249786,
+              "max": 249786,
+              "samples": [
+                249786,
+                249786,
+                249786,
+                249786,
+                249786,
+                249786,
+                249786,
+                249786
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "wrong-id-at-limit",
+          "outcome": "trap",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 243793,
+            "after": 243793,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 243793,
+              "min": 243793,
+              "max": 243793,
+              "samples": [
+                243793,
+                243793,
+                243793,
+                243793,
+                243793,
+                243793,
+                243793,
+                243793
+              ]
+            },
+            "after_samples": {
+              "mean": 243793,
+              "min": 243793,
+              "max": 243793,
+              "samples": [
+                243793,
+                243793,
+                243793,
+                243793,
+                243793,
+                243793,
+                243793,
+                243793
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        }
+      ]
+    },
+    "benchmark-speed": {
+      "wasm": {
+        "before": 94073,
+        "after": 94073,
+        "delta": 0,
+        "percent": 0
+      },
+      "code": {
+        "before": 81127,
+        "after": 81127,
+        "delta": 0,
+        "percent": 0
+      },
+      "cases": [
+        {
+          "method": "echo",
+          "case": "blob-0",
+          "outcome": "reply",
+          "request_bytes": 14,
+          "instructions": {
+            "before": 247520,
+            "after": 247520,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 247520,
+              "min": 247520,
+              "max": 247520,
+              "samples": [
+                247520,
+                247520,
+                247520,
+                247520,
+                247520,
+                247520,
+                247520,
+                247520
+              ]
+            },
+            "after_samples": {
+              "mean": 247520,
+              "min": 247520,
+              "max": 247520,
+              "samples": [
+                247520,
+                247520,
+                247520,
+                247520,
+                247520,
+                247520,
+                247520,
+                247520
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 249757,
+            "after": 249757,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 249757,
+              "min": 249757,
+              "max": 249757,
+              "samples": [
+                249757,
+                249757,
+                249757,
+                249757,
+                249757,
+                249757,
+                249757,
+                249757
+              ]
+            },
+            "after_samples": {
+              "mean": 249757,
+              "min": 249757,
+              "max": 249757,
+              "samples": [
+                249757,
+                249757,
+                249757,
+                249757,
+                249757,
+                249757,
+                249757,
+                249757
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "borrowed_echo",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 46,
+          "instructions": {
+            "before": 249513,
+            "after": 249513,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 249513,
+              "min": 249513,
+              "max": 249513,
+              "samples": [
+                249513,
+                249513,
+                249513,
+                249513,
+                249513,
+                249513,
+                249513,
+                249513
+              ]
+            },
+            "after_samples": {
+              "mean": 249513,
+              "min": 249513,
+              "max": 249513,
+              "samples": [
+                249513,
+                249513,
+                249513,
+                249513,
+                249513,
+                249513,
+                249513,
+                249513
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "value-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 250166,
+            "after": 250166,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 250166,
+              "min": 250166,
+              "max": 250166,
+              "samples": [
+                250166,
+                250166,
+                250166,
+                250166,
+                250166,
+                250166,
+                250166,
+                250166
+              ]
+            },
+            "after_samples": {
+              "mean": 250166,
+              "min": 250166,
+              "max": 250166,
+              "samples": [
+                250166,
+                250166,
+                250166,
+                250166,
+                250166,
+                250166,
+                250166,
+                250166
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "composite",
+          "case": "self-call",
+          "outcome": "reply",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 1473102,
+            "after": 1473102,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1473102,
+              "min": 1473102,
+              "max": 1473102,
+              "samples": [
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102
+              ]
+            },
+            "after_samples": {
+              "mean": 1473102,
+              "min": 1473102,
+              "max": 1473102,
+              "samples": [
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102,
+                1473102
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-0",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1230113,
+            "after": 1230113,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1230113,
+              "min": 1229903,
+              "max": 1230143,
+              "samples": [
+                1229903,
+                1230143,
+                1230143,
+                1230143,
+                1230143,
+                1230143,
+                1230143,
+                1230143
+              ]
+            },
+            "after_samples": {
+              "mean": 1230113,
+              "min": 1229903,
+              "max": 1230143,
+              "samples": [
+                1229903,
+                1230143,
+                1230143,
+                1230143,
+                1230143,
+                1230143,
+                1230143,
+                1230143
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18022988,
+            "after": 18022988,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "async_mutate",
+          "case": "reply-117",
+          "outcome": "trap",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 1711808,
+            "after": 1711808,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 1711808,
+              "min": 1711808,
+              "max": 1711808,
+              "samples": [
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808
+              ]
+            },
+            "after_samples": {
+              "mean": 1711808,
+              "min": 1711808,
+              "max": 1711808,
+              "samples": [
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808,
+                1711808
+              ]
+            }
+          },
+          "cycles": {
+            "before": 18504808,
+            "after": 18504808,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-32",
+          "outcome": "reply",
+          "request_bytes": 44,
+          "instructions": {
+            "before": 247852,
+            "after": 247852,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 247852,
+              "min": 247852,
+              "max": 247852,
+              "samples": [
+                247852,
+                247852,
+                247852,
+                247852,
+                247852,
+                247852,
+                247852,
+                247852
+              ]
+            },
+            "after_samples": {
+              "mean": 247852,
+              "min": 247852,
+              "max": 247852,
+              "samples": [
+                247852,
+                247852,
+                247852,
+                247852,
+                247852,
+                247852,
+                247852,
+                247852
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_mutate",
+          "case": "reply-32",
+          "outcome": "reply",
+          "request_bytes": 12,
+          "instructions": {
+            "before": 487919,
+            "after": 487919,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 487919,
+              "min": 487919,
+              "max": 487919,
+              "samples": [
+                487919,
+                487919,
+                487919,
+                487919,
+                487919,
+                487919,
+                487919,
+                487919
+              ]
+            },
+            "after_samples": {
+              "mean": 487919,
+              "min": 487919,
+              "max": 487919,
+              "samples": [
+                487919,
+                487919,
+                487919,
+                487919,
+                487919,
+                487919,
+                487919,
+                487919
+              ]
+            }
+          },
+          "cycles": {
+            "before": 6995919,
+            "after": 6995919,
+            "delta": 0,
+            "percent": 0
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "blob-65522",
+          "outcome": "reply",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 3879762,
+            "after": 3879762,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 3879762,
+              "min": 3879762,
+              "max": 3879762,
+              "samples": [
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762
+              ]
+            },
+            "after_samples": {
+              "mean": 3879762,
+              "min": 3879762,
+              "max": 3879762,
+              "samples": [
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762,
+                3879762
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "async_query",
+          "case": "truncated",
+          "outcome": "trap",
+          "request_bytes": 11,
+          "instructions": {
+            "before": 246912,
+            "after": 246912,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 246912,
+              "min": 246912,
+              "max": 246912,
+              "samples": [
+                246912,
+                246912,
+                246912,
+                246912,
+                246912,
+                246912,
+                246912,
+                246912
+              ]
+            },
+            "after_samples": {
+              "mean": 246912,
+              "min": 246912,
+              "max": 246912,
+              "samples": [
+                246912,
+                246912,
+                246912,
+                246912,
+                246912,
+                246912,
+                246912,
+                246912
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        },
+        {
+          "method": "default_blob",
+          "case": "wrong-id-at-limit",
+          "outcome": "trap",
+          "request_bytes": 65536,
+          "instructions": {
+            "before": 243454,
+            "after": 243454,
+            "delta": 0,
+            "percent": 0,
+            "before_samples": {
+              "mean": 243454,
+              "min": 243454,
+              "max": 243454,
+              "samples": [
+                243454,
+                243454,
+                243454,
+                243454,
+                243454,
+                243454,
+                243454,
+                243454
+              ]
+            },
+            "after_samples": {
+              "mean": 243454,
+              "min": 243454,
+              "max": 243454,
+              "samples": [
+                243454,
+                243454,
+                243454,
+                243454,
+                243454,
+                243454,
+                243454,
+                243454
+              ]
+            }
+          },
+          "cycles": {
+            "before": 0,
+            "after": 0,
+            "delta": 0,
+            "percent": null
+          }
+        }
+      ]
+    }
+  }
+}

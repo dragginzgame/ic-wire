@@ -944,9 +944,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fab241dbdb0d76bcea92af4c6be89e563bb27f7830bea635a2aded3ce43c33e"
+checksum = "38763d037a0a2a67562dd74ec7d0182145d7be1ec588318cbda0f6dd1bff5675"
 dependencies = [
  "candid",
  "ic-platform-macros",
@@ -962,9 +962,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d1a4f6f049e940feabd1c3b2b1666ec4b08acde1404c4a8111d5018e146e0ae"
+checksum = "65d49921aff6a2233838fa6de0eb85fb05aa7f788bfe4621fb4f5af9a7de9e77"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -973,15 +973,15 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.14.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95f015bf18f152528f35c9c347198068d9d58cede64834ad01bf9effbb09117d"
+checksum = "2d09bb17bc8587285a7d96f314d9bc0b793ec81903bcea4f0eeebeeaa96b7398"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.1.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bd24886e060da435e9fb66b508ddf00ae1edaa70a03ea2b3da576b2c727fb76"
+checksum = "d8fd9f1297e99ec97635c83813930a28f49a698d7391bcdf7f6718be4957471d"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1045,7 +1045,7 @@ version = "0.12.1"
 dependencies = [
  "clap",
  "dhat",
- "ic-platform 0.14.0",
+ "ic-platform 0.15.1",
  "ic-testkit",
  "ic-wire",
  "ic-wire-endpoint",
@@ -1070,7 +1070,7 @@ dependencies = [
 name = "ic-wire-endpoint"
 version = "0.1.0"
 dependencies = [
- "ic-platform 0.14.0",
+ "ic-platform 0.15.1",
  "ic-wire",
  "ic-wire-derive",
  "serde",
@@ -1081,7 +1081,7 @@ dependencies = [
 name = "ic-wire-endpoint-fixture"
 version = "0.12.1"
 dependencies = [
- "ic-platform 0.14.0",
+ "ic-platform 0.15.1",
  "ic-testkit",
  "ic-wire",
  "ic-wire-endpoint",

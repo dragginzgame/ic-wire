@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
+unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES RELEASE_GROUP
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 
 # Consumer qualification only. Git/index effects stay in this disposable export.
@@ -12,11 +12,11 @@ fixture="$(cd "$fixture" && pwd -P)"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
-paths+=(scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
+paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
+paths+=(scripts/ci/ic-wire-release.sh scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 # Include authored crate inputs automatically, including new untracked modules.
 # Git exclusions keep ignored build/cache output out of the disposable export.
-git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/endpoint/ > "$fixture/crate-paths"
+git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/endpoint/ releases/ > "$fixture/crate-paths"
 while IFS= read -r -d '' path; do
     [[ ! -f "$root/$path" ]] || paths+=("$path")
 done < "$fixture/crate-paths"
@@ -32,15 +32,30 @@ done
 # Check the real include graph and release admission, with an effect sentinel.
 make --no-print-directory -C "$fixture/repo" help > "$fixture/help.log"
 [[ ! -e "$fixture/repo/.tools" ]]
+# Exercise the real group authority and ledger inventory before effect stubs.
+for group in core endpoint; do
+    expected="$(cd "$root" && bash scripts/ci/cargo-release-group.sh version "$group")"
+    actual="$(PATH="$root/.tools/host/bin:$PATH" make --no-print-directory -s -C "$fixture/repo" release-version "RELEASE_GROUP=$group")"
+    [[ "$actual" == "$expected" && ! -e "$fixture/repo/.tools" ]]
+done
 cat > "$fixture/repo/scripts/ci/run-release.sh" <<'STUB'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$RELEASE_SENTINEL"
 exit 99
 STUB
 export RELEASE_SENTINEL="$fixture/release-ran"
+for selection in missing empty unknown; do
+    args=()
+    case "$selection" in empty) args=(RELEASE_GROUP=) ;; unknown) args=(RELEASE_GROUP=unknown) ;; esac
+    for target in release-patch release-minor release-major release-resume release-version publish publish-check; do
+        if make --no-print-directory -C "$fixture/repo" "$target" ${args[@]+"${args[@]}"} > "$fixture/refuse-$selection-$target.log" 2>&1; then exit 1; fi
+        [[ ! -e "$RELEASE_SENTINEL" && ! -e "$fixture/repo/.tools" ]]
+        grep -F 'Select RELEASE_GROUP=core or endpoint explicitly' "$fixture/refuse-$selection-$target.log" >/dev/null
+    done
+done
 for target in release-patch release-minor release-major release-resume; do
     status=0
-    make --no-print-directory -C "$fixture/repo" "$target" VERSION=0.1.0 > "$fixture/$target.log" 2>&1 || status=$?
+    make --no-print-directory -C "$fixture/repo" "$target" RELEASE_GROUP=core VERSION=0.1.0 > "$fixture/$target.log" 2>&1 || status=$?
     [[ "$status" == 2 && -e "$RELEASE_SENTINEL" ]]
     if [[ "$target" == release-resume ]]; then expected="resume 0.1.0 origin main"; else expected="${target#release-} origin main"; fi
     [[ "$(cat "$RELEASE_SENTINEL")" == "$expected" ]]
@@ -92,7 +107,7 @@ STUB
 # admission may precede lint; neither packaging nor upload can follow its failure.
 for target in publish publish-check check-package; do
     : > "$CARGO_CALLS"
-    if FIXTURE_LINT_STATUS=41 PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
+    if FIXTURE_LINT_STATUS=41 PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" RELEASE_GROUP=core > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
     grep -F '|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint --all-targets -- -D warnings' "$CARGO_CALLS" >/dev/null
     if grep -Eq '\|(publish|package) ' "$CARGO_CALLS"; then exit 1; fi
 done
@@ -100,39 +115,48 @@ done
 # Both defaults and explicitly reconciled subsets resolve exact workspace
 # versions, retain the registry and dispatch once; publish-check is always dry.
 for target in publish publish-check; do
-    for selection in default 'ic-wire-derive ic-wire' ic-wire ic-wire-derive; do
-        : > "$CARGO_CALLS"
-        args=()
-        packages="$selection"
-        if [[ "$selection" == default ]]; then packages='ic-wire-derive ic-wire ic-wire-endpoint'; else args=("PACKAGE=$selection"); fi
-        PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" ${args[@]+"${args[@]}"} > "$fixture/publication-selection.log" 2>&1
-        [[ "$(wc -l < "$CARGO_CALLS")" == 3 ]]
-        expected='publish --locked --registry crates-io'
-        for package in $packages; do version="$(jq -r --arg name "$package" '.packages[] | select(.name == $name) | .version' "$FIXTURE_CARGO_METADATA")"; expected+=" --package $package@$version"; done
-        [[ "$target" != publish-check ]] || expected+=' --dry-run'
-        [[ "$(tail -n 1 "$CARGO_CALLS")" == "${RUSTUP_TOOLCHAIN:-development}|$fixture/repo/target|$expected" ]]
+    for group in core endpoint; do
+        if [[ "$group" == core ]]; then selections=(default 'ic-wire-derive ic-wire' ic-wire ic-wire-derive); else selections=(default ic-wire-endpoint); fi
+        for selection in "${selections[@]}"; do
+            : > "$CARGO_CALLS"
+            args=("RELEASE_GROUP=$group")
+            packages="$selection"
+            if [[ "$selection" == default ]]; then
+                if [[ "$group" == core ]]; then packages='ic-wire-derive ic-wire'; else packages=ic-wire-endpoint; fi
+            else args+=("PACKAGE=$selection"); fi
+            PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" "${args[@]}" > "$fixture/publication-selection.log" 2>&1
+            [[ "$(wc -l < "$CARGO_CALLS")" == 3 ]]
+            expected='publish --locked --registry crates-io'
+            for package in $packages; do version="$(jq -r --arg name "$package" '.packages[] | select(.name == $name) | .version' "$FIXTURE_CARGO_METADATA")"; expected+=" --package $package@$version"; done
+            [[ "$target" != publish-check ]] || expected+=' --dry-run'
+            [[ "$(tail -n 1 "$CARGO_CALLS")" == "${RUSTUP_TOOLCHAIN:-development}|$fixture/repo/target|$expected" ]]
+        done
     done
 done
-for selection in '' ic-wire-qualification 'ic-wire ic-wire'; do
+for selection in '' ic-wire-qualification ic-wire-endpoint 'ic-wire ic-wire'; do
     : > "$CARGO_CALLS"
-    if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish "PACKAGE=$selection" > "$fixture/publish-invalid.log" 2>&1; then exit 1; fi
+    if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish RELEASE_GROUP=core "PACKAGE=$selection" > "$fixture/publish-invalid.log" 2>&1; then exit 1; fi
     [[ "$(wc -l < "$CARGO_CALLS")" == 1 ]]
     grep -F '|metadata --no-deps --locked --offline --format-version 1' "$CARGO_CALLS" >/dev/null
 done
+# A valid endpoint selection cannot publish a core package either.
 : > "$CARGO_CALLS"
-if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PUBLISH_PACKAGES=ic-wire > "$fixture/retired-selector.log" 2>&1; then exit 1; fi
+if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish RELEASE_GROUP=endpoint PACKAGE=ic-wire > "$fixture/endpoint-cross-group.log" 2>&1; then exit 1; fi
+[[ "$(wc -l < "$CARGO_CALLS")" == 1 ]]
+: > "$CARGO_CALLS"
+if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish RELEASE_GROUP=core PUBLISH_PACKAGES=ic-wire > "$fixture/retired-selector.log" 2>&1; then exit 1; fi
 [[ ! -s "$CARGO_CALLS" ]]
 grep -F 'PUBLISH_PACKAGES was replaced by PACKAGE' "$fixture/retired-selector.log" >/dev/null
 
 # A failed attempt stays failed with one dispatch and retained status; no retry.
 : > "$CARGO_CALLS"
-if FIXTURE_PUBLISH_STATUS=37 PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish PACKAGE=ic-wire > "$fixture/publish-failed.log" 2>&1; then exit 1; fi
+if FIXTURE_PUBLISH_STATUS=37 PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish RELEASE_GROUP=core PACKAGE=ic-wire > "$fixture/publish-failed.log" 2>&1; then exit 1; fi
 [[ "$(grep -c '|publish ' "$CARGO_CALLS")" == 1 ]]
 grep -rlx 37 "$fixture/repo/target/publication" | grep '/cargo-status$' >/dev/null
 # Dirty source is refused before the simulated Cargo upload as well.
 printf '\nDirty publication fixture.\n' >> "$fixture/repo/docs/runtime.md"
 : > "$CARGO_CALLS"
-if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish > "$fixture/publish-dirty.log" 2>&1; then exit 1; fi
+if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish RELEASE_GROUP=core > "$fixture/publish-dirty.log" 2>&1; then exit 1; fi
 if grep -q '|publish ' "$CARGO_CALLS"; then exit 1; fi
 git -C "$fixture/repo" restore docs/runtime.md
 

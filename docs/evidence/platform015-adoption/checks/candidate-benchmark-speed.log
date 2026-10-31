@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests/cost_matrix/mod.rs (/tmp/wire-platform-alignment/comparison/host-target/debug/deps/cost_matrix-56c23c148cbf4dd9)
+
+running 1 test
+test all_endpoint_costs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.35s
+

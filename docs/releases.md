@@ -10,12 +10,13 @@ a publishable package, must provide these Make targets:
 | `make release-minor` | Increment minor; reset patch | `0.2.0` |
 | `make release-major` | Increment major; reset minor and patch | `1.0.0` |
 
-These are user-operated commands. Preparing code or notes for a named release
-does not authorize an agent to invoke them, their recovery target or mutating
-adapters, or to perform their staging, commit, version or tag effects manually.
-Follow the [user-owned Git and release boundary](../rules/contributions.md#user-owned-git-and-release-flow)
-and any approved local maintainer-only restriction. Only an express delegation
-of execution permits an agent to run a release within that policy.
+Users or delegated agents operate these commands. A request to release, ship or
+deploy the scoped changes authorizes the corresponding workflow under
+[delegated delivery](../rules/contributions.md#delegated-delivery). The agent may
+select affected approved groups, semantic-version increments and dependency order,
+and execute necessary preparation and delivery without per-command confirmation.
+Preparing code/notes, asking how to deploy or checking readiness does not itself
+authorize execution. Preserve explicit target restrictions and required protections.
 
 The names, version arithmetic and recovery contract are shared across repositories.
 Each repository supplies its canonical version source, metadata file set,
@@ -84,8 +85,10 @@ The default `RELEASE_DELIVERY=direct` workflow is:
 
 These commands finish with the branch and tag on GitHub. They do not implicitly
 publish packages, create GitHub Release objects, deploy products, bump to another
-development version or clean build/evidence directories. Those actions require
-their own explicit commands and authority. Keep the finalized release at the
+development version or clean build/evidence directories. Those actions retain
+their own commands; a scoped ship/deploy request may already authorize publication
+or deployment, so do not request separate approval again. Cleanup and unrelated
+effects remain outside that scope. Keep the finalized release at the
 top of the changelog until subsequent work needs a new numbered, undated pending
 entry under the [automatic next-version rules](../rules/changelogs.md).
 
@@ -454,7 +457,8 @@ status **75** (GNU Make reports a failed recipe/status 2), with its URL and retr
 instructions. This is pending review, not release completion: a chained
 `&& make publish` cannot proceed.
 
-After the separately authorized merge, run `make release-resume VERSION=X.Y.Z`
+After an authorized merge (covered by a full delivery request or a separate merge
+instruction), run `make release-resume VERSION=X.Y.Z`
 with the same PR delivery policy.
 Merge, squash and rebase merges are accepted when GitHub's recorded merged commit
 is in the selected remote base history and its tree exactly equals the saved
@@ -616,19 +620,21 @@ not a deletion target. Existing adoption work is tracked in
 
 ### Authorized release effects
 
-The maintainer owns execution. Where local policy permits delegation, they may
-explicitly ask an agent to run the selected release for the identified repository
-and destination. Naming a version, preparing a release, completing validation or
-asking for push readiness is not that delegation. An explicit execution request
-covers the documented complete gate, version preparation, release commit, tag
+The maintainer may execute delivery or delegate its outcome to an agent under
+[delegated delivery](../rules/contributions.md#delegated-delivery). The agent then
+selects the affected groups and commands for the scoped repository and established
+destination. Naming a version, preparing notes, completing validation or asking
+for push readiness alone is not that delegation. A delivery request covers the
+documented complete gate, version preparation, release commit, tag
 and selected delivery effects. Direct delivery includes the atomic branch/tag
-push; PR delivery includes its branch/PR, fresh validation after an independently
-authorized merge, and exact tag push. Permission to fix code, create a commit, open a PR,
+push; PR delivery includes its branch/PR, fresh validation after an authorized
+merge, and exact tag push. Permission to fix code, create a commit, open a PR,
 push a topic branch or change a version alone is not permission to run this flow.
 Agents may inspect release state and prepare source, dependencies and changelog
 notes within existing scope. Mutating version preparation, staging and saved
-release recovery require their own explicit execution authority; calling a
-helper directly does not bypass the boundary.
+release recovery require execution authority, which a scoped delivery request
+supplies for its necessary substeps; calling a helper directly does not bypass
+that boundary.
 
 Ordinary contributions follow the [PR rules](../rules/contributions.md). The
 runner defaults to direct delivery and supports explicit PR delivery under
@@ -764,10 +770,10 @@ For direct low-level invocation, explicitly prepare the pinned published package
 then capture its offline-admitted selection before running the helper:
 
 ```sh
-bash scripts/dev/install-rust-tools.sh --package ic-build --version 0.18.0 \
-  --bin ic-build-release-metadata --profile debug || exit "$?"
+bash scripts/dev/install-rust-tools.sh --package ic-build --version 0.73.0 \
+  --bin ic-build-release-metadata --profile debug --features cli || exit "$?"
 CARGO_RELEASE_METADATA_EDITOR="$(bash scripts/dev/install-rust-tools.sh \
-  --package ic-build --version 0.18.0 --bin ic-build-release-metadata --profile debug \
+  --package ic-build --version 0.73.0 --bin ic-build-release-metadata --profile debug --features cli \
   --check --wait-seconds 30)" || exit "$?"
 export CARGO_RELEASE_METADATA_EDITOR
 export CARGO_RELEASE_METADATA_MAX_BYTES=8388608
@@ -849,6 +855,14 @@ when qualifying this adapter; it is not a fleet-wide automatic replacement.
 Independent release groups require the maintainer agreement described in
 [workspace boundaries](../rules/rust-workspaces.md#coordinated-versions-and-workspace-boundaries).
 Ordinary coordinated workspaces need no configuration or invocation changes.
+Keep related packages in their existing workspace; separate release identities
+do not require package moves or another lockfile. Make the declared groups easy
+to inspect using the root
+[`Cargo.toml` comment map](../rules/rust-workspaces.md#visible-release-group-map-in-cargotoml).
+Use [one changelog per group and retained shared history](../rules/changelogs.md#release-group-changelogs-and-shared-history);
+all ledgers live at `releases/<group>/CHANGELOG.md`. Root `CHANGELOG.md` is an
+index, and root `Cargo.toml` has no `workspace.package.version`. Comments, the
+index and the historical ledger are not executable release inputs.
 An approved consumer declares `ci/cargo-release-groups.json`, for example:
 
 ```json
@@ -858,9 +872,9 @@ An approved consumer declares `ci/cargo-release-groups.json`, for example:
     {
       "name": "codec",
       "primary": "ic-wire",
-      "version": "workspace",
+      "version": "package",
       "members": ["ic-wire", "ic-wire-derive", "ic-wire-benchmarks"],
-      "changelog": "CHANGELOG.md",
+      "changelog": "releases/codec/CHANGELOG.md",
       "dependencies": ["ic-wire", "ic-wire-derive"]
     },
     {
@@ -868,7 +882,7 @@ An approved consumer declares `ci/cargo-release-groups.json`, for example:
       "primary": "ic-wire-endpoint",
       "version": "package",
       "members": ["ic-wire-endpoint"],
-      "changelog": "docs/changelog/endpoint.md",
+      "changelog": "releases/endpoint/CHANGELOG.md",
       "dependencies": ["ic-wire-endpoint"]
     }
   ]
@@ -878,10 +892,44 @@ An approved consumer declares `ci/cargo-release-groups.json`, for example:
 This is an illustrative approved layout, not an instruction to create these
 packages or select their versions. Every actual workspace member, including
 private qualification packages, belongs to exactly one group. Names and ledgers
-are unique. A `workspace` group inherits `workspace.package.version`; at most one
-group uses that source. A `package` group owns literal `package.version` values
-in every member, all matching its primary member. No shadow version file is
-introduced. Member paths come from successful locked Cargo metadata.
+are unique. Every independent group uses `version: "package"`: literal
+`package.version` values in every member, all matching its primary member. The
+primary owns only that group's version; no group is the workspace master. No
+shadow version file is introduced. Member paths come from successful locked Cargo
+metadata. The helper/editor still understand `workspace` mode for existing
+adoptions and recorded recovery; that mechanism capability is not the current
+layout policy for independent groups.
+
+Adopt the layout without changing numeric versions: convert inherited versions
+to their existing values, move each independent ledger to its group directory,
+preserve coordinated entries once in `releases/history.md`, and make the root
+ledger an index. Update policy paths, root comments, documentation-link rosters,
+snapshot/export companions, archive inputs and local adapters/fixtures together
+where affected. Keep historical links and release evidence usable. Do not
+reinterpret an unfinished attempt under the new policy or file plan.
+
+A group may declare an optional `metadata_files` array for additional
+consumer-owned release metadata, for example a runtime qualification lockfile
+and an exact runtime-guard pin. Paths must name existing regular files beneath
+the repository, without symlink components. They must be unique across groups
+and cannot overlap workspace manifests, the root lockfile, group ledgers, the
+group policy or Git state. They are appended in declared order to the exact
+release-file plan and bound by the existing source/receipt checks.
+
+A workspace may additionally declare top-level `shared_metadata_files` for
+consumer metadata needed by multiple groups, such as one combined qualification
+lock. These paths have one explicit common declaration and are included exactly
+once in every group's file plan. The same regular-file, reserved-path and
+uniqueness rules apply across common and group-local metadata; repeating a common
+path in any group is rejected. Consumers retain selective rendering and semantic
+checks so a release preserves unrelated portions of common files. This is not
+permission to share conflicting group ownership or stage undeclared files.
+
+Shared preparation preserves these files byte-for-byte and restores them with
+its transaction on failure. The consumer owns their rendering, semantic checks
+and any recovery spanning its additional preparation steps; listing a file does
+not supply those checks or make the whole consumer adapter transactional.
+An unselected group's additional metadata remains outside the staging roster.
 
 `dependencies` explicitly lists root `workspace.dependencies` aliases with both
 path and version that refer to members of that group, including renamed aliases
@@ -894,8 +942,22 @@ that is workspace qualification, not publication of the other group's new
 dependency declaration under an already-published version. Release that consumer
 group separately when its own changed contract needs publication.
 
-Select `RELEASE_GROUP=endpoint` with the existing release commands and consumer
-policy adapter. The runner uses `endpoint-vX.Y.Z` tags, `Release endpoint X.Y.Z`
+Select `RELEASE_GROUP=endpoint` explicitly with the existing release commands and
+consumer policy adapter. In a workspace with independent groups, release, resume
+and publication entrypoints must reject missing, empty or unknown group selections
+before setup, validation or mutation. Do not install an implicit Make/environment
+default or infer the group from a `PACKAGE` override. An explicitly supplied
+environment selection is valid; any package subset must belong to that group.
+Workspace-wide read-only inventory and qualification may still inspect every
+group. Single-group repositories keep their existing commands.
+
+Consumer adoption must qualify these refusals at the public Make/CLI entrypoints,
+both groups' metadata transactions and preservation of unselected versions and
+ledgers, as well as exact files, publication selection and saved-attempt recovery.
+These are adoption requirements; updating this documentation does not change
+existing consumers' executable defaults or migrate their files automatically.
+
+The runner uses `endpoint-vX.Y.Z` tags, `Release endpoint X.Y.Z`
 commit subjects and `endpoint-X.Y.Z.plan` journals. Group PR delivery uses
 `release/endpoint-vX.Y.Z`. One repository-wide release lock still protects the
 shared lockfile and source. Group journals record the group explicitly, and
@@ -929,10 +991,10 @@ the existing bounded input contract. Its selection JSON explicitly names a
 projections. The existing lock editor already accepts a selected package set.
 Adopt a published supplying editor through the normal tool-selection mechanism;
 do not patch vendored scripts or silently use an unrelated executable. The
-standalone `test-cargo-release-groups.sh` fixture accepts an explicitly selected
-candidate editor for producer integration qualification; that evidence is not
-registry delivery. The default portable roster retains its released editor until
-a supplying release is available.
+`test-cargo-release-groups.sh` fixture is part of the portable CI roster and uses
+Shared's selected IC Build 0.73.0 editor with its explicit `cli` feature. Direct
+producer integration qualification may select a compiled candidate explicitly;
+that evidence is not registry delivery or installed-tool admission.
 
 Publication remains separate. Use the consumer's explicit selected package batch
 with the existing publication adapter; it admits each package's own version and

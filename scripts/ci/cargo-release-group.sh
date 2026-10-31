@@ -83,7 +83,7 @@ admit() {
         manifest="$(jq -er --arg name "$package" '.packages[] | select(.name == $name and .source == null) | .manifest_path' "$evidence/metadata.json")" || return
         [[ "$canonical" == "$manifest" ]] || { echo 'selected requirement is not an owned member' >&2; return 1; }
     done < "$evidence/dependencies"
-    jq -r '.groups[].changelog' "$root/$policy" > "$evidence/ledgers" || return
+    jq -r '(.shared_metadata_files // [])[], (.groups[] | .changelog, (.metadata_files // [])[])' "$root/$policy" > "$evidence/ledgers" || return
     while IFS= read -r path; do release_metadata_regular "$root" "$path" || return 1; done < "$evidence/ledgers"
     jq -r '.files[]' "$evidence/plan.json" > "$evidence/files" || return
     while IFS= read -r path; do release_metadata_regular "$root" "$path" || return 1; done < "$evidence/files"
@@ -108,7 +108,13 @@ render_group() {
     "$CARGO_RELEASE_METADATA_EDITOR" --max-input-bytes "$CARGO_RELEASE_METADATA_MAX_BYTES" lock \
         "$original/Cargo.lock" "$RELEASE_PREVIOUS" "$RELEASE_VERSION" "${packages[@]}" > "$candidate/Cargo.lock" || return
     awk -v version="$RELEASE_VERSION" -v previous="$RELEASE_PREVIOUS" -v date="$RELEASE_DATE" \
-        -f "$script_dir/finalize-release-changelog.awk" "$original/$changelog" > "$candidate/$changelog"
+        -f "$script_dir/finalize-release-changelog.awk" "$original/$changelog" > "$candidate/$changelog" || return
+    # Consumers render/check their additional metadata. Shared preserves it in
+    # this transaction and includes it in the exact staging and receipt roster.
+    jq -r '.metadata_files[]' "$temporary/admitted/plan.json" > "$temporary/metadata-files" || return
+    while IFS= read -r path; do
+        cp -p -- "$original/$path" "$candidate/$path" || return
+    done < "$temporary/metadata-files"
 }
 
 # shellcheck disable=SC2329 # Transaction callback.

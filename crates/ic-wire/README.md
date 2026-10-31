@@ -9,15 +9,17 @@ derive designs are research, not selectable runtime modes.
 ## Optional Platform identity schemas
 
 Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on the canonical
-`ic-platform-types` 0.1 owned Principal and Account. This selects host TypeScript
-support with no CDK, executor, Candid or runtime facade. Platform 0.14 reexports
+`ic-platform-types` 0.15 owned Principal and Account. This selects host TypeScript
+support with no CDK, executor, Candid or runtime facade. Platform 0.15 reexports
 these exact identities; direct `ic_platform_types` imports work too.
 
 Consumers remove Platform's retired `wire-schema` selection and enable Wire's
 `platform-types`. Keep ordinary Serde derives alongside native `ic_wire::Wire`.
-For the pending Wire 0.12 migration, align facade users on Platform 0.14 and
+For the pending Wire 0.13 migration, align facade users on Platform 0.15 and
 native typed clients/metadata producers on the supplying Wire minor. Afterwards,
-runtime integration upgrades can retain the codec and stable identity suppliers.
+runtime integration upgrades can retain the codec when the Types supplier stays
+fixed. Upstream now versions Types with Platform; incompatible Types version
+changes still require schema supplier alignment.
 Published Wire 0.11 still pairs with Platform 0.12. There are no wrappers, Cargo
 patches or second schema trait.
 

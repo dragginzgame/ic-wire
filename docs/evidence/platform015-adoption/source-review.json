@@ -1,0 +1,68 @@
+{
+  "ic-platform": {
+    "before": "0.14.0",
+    "after": "0.15.0",
+    "source_files": 112,
+    "changed_source_files": [],
+    "baseline": {
+      "version": "0.14.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "1fab241dbdb0d76bcea92af4c6be89e563bb27f7830bea635a2aded3ce43c33e"
+    },
+    "candidate": {
+      "version": "0.15.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "a204e89bc51dd43242661ede0f75af80d27c42314da9bf49cc76ed314f0cb37c"
+    }
+  },
+  "ic-platform-types": {
+    "before": "0.1.0",
+    "after": "0.15.0",
+    "source_files": 10,
+    "changed_source_files": [
+      "src/lib.rs"
+    ],
+    "baseline": {
+      "version": "0.1.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "5bd24886e060da435e9fb66b508ddf00ae1edaa70a03ea2b3da576b2c727fb76"
+    },
+    "candidate": {
+      "version": "0.15.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "d8fd9f1297e99ec97635c83813930a28f49a698d7391bcdf7f6718be4957471d"
+    }
+  },
+  "ic-platform-macros": {
+    "before": "0.14.0",
+    "after": "0.15.0",
+    "source_files": 5,
+    "changed_source_files": [],
+    "baseline": {
+      "version": "0.14.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "8d1a4f6f049e940feabd1c3b2b1666ec4b08acde1404c4a8111d5018e146e0ae"
+    },
+    "candidate": {
+      "version": "0.15.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "80e0a94068ed44bc7cf374e40feb9bc1b144b382ad0e9d554990d6938da73b68"
+    }
+  },
+  "ic-platform-runtime-guard": {
+    "before": "0.14.0",
+    "after": "0.15.0",
+    "source_files": 1,
+    "changed_source_files": [],
+    "baseline": {
+      "version": "0.14.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "95f015bf18f152528f35c9c347198068d9d58cede64834ad01bf9effbb09117d"
+    },
+    "candidate": {
+      "version": "0.15.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "e4500ac161c2d0821e13620cacda53c0539a942858f27a79fc009969eff31e1b"
+    }
+  }
+}

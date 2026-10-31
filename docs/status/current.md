@@ -1,37 +1,82 @@
 # Current handoff
 
-## Local core release 0.12.0; pending merge repair 0.12.1
+## Git core 0.12.1; pending Platform alignment 0.13 / Endpoint 0.2
 
-Local HEAD is core 0.12.0, `e870257`, following migration commit `2aefed9`.
-File resolutions for origin/main (`18f3f9d`, release-group PR #38) are prepared;
-remote delivery and registry publication of 0.12 are not established here.
-Package versions are 0.12.0; Endpoint remains 0.1.0. The open changelog is 0.12.1.
-Leave merge commits, pushes, releases and publication to the maintainer.
+Baseline is `ae9a3eda0449729008d849c6e078a8b7f849ab9e` (Git core 0.12.1),
+after completed merge `02c77d6`. Own versions stay core 0.12.1 / Endpoint 0.1.0.
+Open notes select core 0.13.0 and Endpoint 0.2.0 because Types 0.1 → 0.15 changes
+Principal/Account Rust identity. The maintainer has delegated delivery of this batch. Use the standard explicit
+group workflows, core before Endpoint; no sibling checkout changes are authorized.
 
-The merge retains the actual core/endpoint group policy and primary-package
-receipt paths. The maintainer explicitly approved staging only the five resolved
-files; the merge commit and any push remain maintainer-owned. Incoming literal
-Git exclusions and the validated editor override are retained. Its synthetic group fixture is superseded by the existing real
-core and endpoint preparation/delivery/resume tests; the synthetic policy would
-omit the new endpoint workspace member. Protocol/runtime behavior is unchanged;
-no new codec benchmark applies to this adapter/documentation repair.
-Both actual core/endpoint disposable release fixtures, Make/hook routing,
-ShellCheck, syntax, documentation links and diff checks pass. Repair logs are
-retained at `/tmp/wire-merge-repair/`. All five resolved files are staged with
-maintainer approval; the merge is ready for the maintainer commit.
+Current selections are published Platform, macros, guard and Types 0.15.0;
+Build/Testkit and managed `cli` editor remain 0.73.0. Shared Tooling now selects 0.27.19 at
+`54fc49e12f439dbe18d232f622a6d78e61773353`. The initial `99d04d1` export exposed
+a committed VERSION mismatch ([Shared #331](https://github.com/dragginzgame/shared-tooling/issues/331));
+upstream corrected VERSION only, and a canonical follow-up refresh selected the
+corrected revision. Selected payloads are unchanged, so qualification is reused. No other lock selections change. Endpoint 0.1.0 is already published; publish the supplying
+core minor before the new Endpoint minor through the two existing groups.
 
-Current selections: Platform 0.14.0, canonical Platform Types 0.1.0, Build/Testkit
-and managed `cli` release editor 0.73.0; all published registry suppliers.
-Shared Tooling remains reviewed 0.27.14 at
-`b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57`. Incoming log 0.4.35 is preserved.
+The supplier implementation is unchanged: 112 Platform source files, five macro
+files and the guard match; Types' ten source files differ only in its module
+versioning documentation. Published 0.15 aligned Types with its workspace. Platform #118 now reports a
+qualified local restoration of independent runtime/Types groups, retaining Types
+0.15.0 without a reset; maintainer delivery remains pending. This supersedes the
+intervening policy decision, not the published 0.15 identity.
+Wire's package separation isolates runtime changes while the selected Types
+identity stays fixed; it cannot preserve Rust identity across upstream Types minor
+bumps. No compatibility lane, schema mirror or range workaround was introduced.
+
+[Current qualification and reproduction](../evidence/platform015-adoption/README.md)
+retain standalone Rust/TypeScript exact bytes/refusals, Rust 1.91 host/Wasm,
+feature isolation, endpoint diagnostics/Clippy and installed limits/rollback.
+The prospective identity fixture now derives the current and simulated next
+versions from metadata, rather than hard-coded 0.14/0.15 values. Its simulated
+0.16 facade holds Types 0.15 fixed; that is not a claim about upstream release policy.
+All 384 logical measured calls / 608 physical executions retain identical
+instruction and cycle samples, frame hashes, outcomes and transaction oracles.
+Total Wasm stays 100,441 B (opt-z) / 94,073 B (opt-3); code sections stay
+86,544 / 81,127 B. No measured regression or optimization is claimed. Installed
+limits/rollback pass. Raw outputs: `/tmp/wire-platform-alignment/comparison`.
+No full CI/macOS, native-time or new Candid matrix was run. Measurements and
+limits remain specific to their recorded supplier selections.
+
+## Shared release-layout adoption
+
+The reviewed canonical refresh uses the existing 119-file selection, with no
+snapshot-owned edits. Current package paths, numeric versions and every resolved
+Cargo metadata field are unchanged (after source-path normalization); Cargo.lock
+is byte-identical to the incoming Platform 0.15 work. Root Cargo has no workspace
+version. Every member has its current literal version, and a comment map lists
+all groups/members/authorities/ledgers beside `[workspace]`.
+
+The root changelog is an index; canonical ledgers are
+[core](../../releases/core/CHANGELOG.md) and
+[endpoint](../../releases/endpoint/CHANGELOG.md). Coordinated history through
+0.11.0 is retained once in [history](../../releases/history.md). Finalized entry
+prose, headings/dates/scope and versions match the prior inputs, except rebased
+relative links. The former endpoint ledger is a navigation pointer.
+
+Make/hook routing, missing/empty/unknown group refusals and both publication
+rosters pass in disposable fixtures. Real group preparation/resume checks pass
+against both groups, including exact file custody and unchanged unselected
+manifests/ledgers. Snapshot integrity, dependency pins/boundaries and links pass.
+Logs and input preservation proof: `/tmp/wire-shared-02718/`; accepted runs are
+`release-final.log` (both groups) and `routing-final.log`. An earlier fixture
+was invalidated by editing its script mid-run; its retained failure is not used
+as acceptance. Final scripts were frozen before the successful rerun.
+The corrected supplier's [CI](https://github.com/dragginzgame/shared-tooling/actions/runs/41209009495)
+was still running at the bounded inspection; no upstream/native success is claimed.
+No runtime or
+generator code, feature graph or lock resolution changes; no new performance
+benchmark applies to this metadata/tooling batch. No full CI/macOS run is claimed.
 
 ## Implemented boundary and migration
 
 [#36](https://github.com/dragginzgame/ic-wire/issues/36) has a local implementation
 of the [approved boundary](../stable-identities.md). `ic-wire` retains codec,
 schema trait, Limits/Error and canonical Principal/Account schema impls. Its
-`platform-types` selects Types 0.1 directly, with no runtime facade/CDK dependency.
-Platform 0.14 reexports those exact types. New `ic-wire-endpoint` owns attributes,
+`platform-types` selects Types 0.15 directly, with no runtime facade/CDK dependency.
+Platform 0.15 reexports those exact types. New `ic-wire-endpoint` owns attributes,
 Contract, guards and trapping replies, with the same maintained derive generator.
 Remove `ic-wire/endpoint`, move `ic_wire::endpoint` imports to `ic_wire_endpoint`,
 and select Endpoint `typescript` for native Contract schemas. One-time typed
@@ -47,12 +92,16 @@ and explicit zero `01 04 01` plus 32 zero bytes stay distinct.
 
 Explicit `core`/`endpoint` release groups use shared plans for exact file custody,
 metadata preparation, receipts, tags and resume. Build 0.73 supplies `group-manifest`.
-The default group is core. Publication independently selects derive/core before
-Endpoint, with exact package versions; see the migration guide for commands.
-Initial Endpoint 0.1.0 is delivered with the core migration before independent
-incrementing releases. No real release or publication was executed.
+The 0.27.19 follow-up changes governance only; it delegates scoped shipping
+without per-command confirmation. Current explicit deployment targets are Git
+origin/main and crates.io, core 0.13 before Endpoint 0.2.
+No group defaults: release, resume and publication require explicit
+`RELEASE_GROUP=core` or `endpoint`. Publication selects only that group's public
+packages (derive before core) and refuses cross-group PACKAGE subsets.
+Endpoint 0.1.0 was the initial extraction. The current alignment has separate
+core 0.13 / Endpoint 0.2 notes; no release or publication was executed this batch.
 
-## Qualification
+## Retained extraction qualification
 
 [Evidence and reproducible runners](../evidence/stable-identities-0120/README.md)
 retain standalone derives, Rust 1.91 host/Wasm, core/schema/endpoint isolation,
@@ -88,13 +137,26 @@ timing or new full Candid performance matrix is claimed.
 
 ## Delivery and remaining issues
 
-#36 remains open pending delivery/required hosted checks and published consumer
-pairing. [#37](https://github.com/dragginzgame/ic-wire/issues/37)'s pending 0.13-only
-pairing is superseded by the stable 0.14 identity migration; it also remains open
-until the supplying Wire release and downstream registry check. Published Wire
-0.11 still pairs with Platform 0.12 / Metrics 0.22. Tooling
-[#274](https://github.com/dragginzgame/ic-tooling/issues/274) tracks matching typed
-client publication. Do not claim registry Metrics/Testkit already use Wire 0.12.
+Only [#36](https://github.com/dragginzgame/ic-wire/issues/36) remains open; there
+are no open PRs. It now records delivered core 0.12.1's complete successful
+[12-job CI matrix](https://github.com/dragginzgame/ic-wire/actions/runs/41201306818)
+on Linux/macOS ARM64/Intel separately from the dirty 0.15 supplier adoption.
+The latest Platform #118 report prepares independent groups at existing Types
+0.15; it awaits maintainer delivery and is not treated as a published new supplier.
+
+[#37](https://github.com/dragginzgame/ic-wire/issues/37) is closed as superseded
+(not completed historical Platform 0.13 support). Its remaining minimal/actual
+Blob schema pairing, bytes/budget/refusal and isolation obligations are recorded
+on #36. No legacy lane or source workaround was added. Deliver/qualify the current
+Wire supplier change and perform ordered core/Endpoint publication, then check
+the documented registry pairing. Consumer adoption remains with each owner;
+it is not an extra fleet-wide producer closure gate.
+
+[Tooling #274](https://github.com/dragginzgame/ic-tooling/issues/274) is already
+closed for its delivered Wire 0.11 adoption in Tooling 0.73; do not reopen it for
+later Wire minors. New public Limits/Error and Metrics metadata alignments need
+their current supplying releases. This inspection changed issue tracking and
+status documentation only; no new runtime benchmark or broad suite applies.
 
 #31 (CLI), #32 (old dependency cycle) and #34 (published 0.12 pairing) remain
 closed. [Published-pair evidence](../evidence/published-pair-0110/README.md)

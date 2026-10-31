@@ -1,0 +1,376 @@
+Endpoint compile evidence: /home/adam/projects/ic-wire/target/endpoint-check.cKbNUs
+    Blocking waiting for file lock on build directory
+   Compiling cfg-if v1.0.5
+   Compiling serde_core v1.0.229
+   Compiling smallvec v1.16.4
+   Compiling pin-project-lite v0.2.17
+   Compiling once_cell v1.21.4
+   Compiling stable_deref_trait v1.2.1
+   Compiling itoa v1.0.18
+   Compiling typenum v1.20.1
+   Compiling bytes v1.12.1
+   Compiling memchr v2.8.3
+   Compiling scopeguard v1.2.0
+   Compiling futures-core v0.3.34
+   Compiling cpufeatures v0.2.17
+   Compiling futures-sink v0.3.34
+   Compiling utf_types v1.0.0
+   Compiling writeable v0.6.4
+   Compiling zeroize v1.9.1
+   Compiling litemap v0.8.3
+   Compiling data-encoding v2.11.1
+   Compiling lazy_static v1.5.1
+   Compiling bitflags v2.13.2
+   Compiling slab v0.4.12
+   Compiling serde_json v1.0.154
+   Compiling bytemuck v1.25.2
+   Compiling percent-encoding v2.3.2
+   Compiling lock_api v0.4.14
+   Compiling equivalent v1.0.3
+   Compiling futures-task v0.3.34
+   Compiling hashbrown v0.17.1
+   Compiling futures-io v0.3.34
+   Compiling untrusted v0.9.0
+   Compiling fnv v1.0.7
+   Compiling arrayvec v0.5.2
+   Compiling subtle v2.6.1
+   Compiling try-lock v0.2.5
+   Compiling log v0.4.35
+   Compiling unicode-width v0.2.3
+   Compiling simd-adler32 v0.3.10
+   Compiling array-init v2.1.0
+   Compiling tower-service v0.3.3
+   Compiling adler2 v2.0.1
+   Compiling typed-arena v2.0.2
+   Compiling atomic-waker v1.1.2
+   Compiling linux-raw-sys v0.12.1
+   Compiling leb128 v0.2.7
+   Compiling libc v0.2.191
+   Compiling crc32fast v1.5.3
+   Compiling tracing-core v0.1.36
+   Compiling rustls-pki-types v1.15.1
+   Compiling zmij v1.0.23
+   Compiling icu_properties_data v2.4.0
+   Compiling icu_normalizer_data v2.4.0
+   Compiling futures-channel v0.3.34
+   Compiling want v0.3.2
+   Compiling regex-syntax v0.8.11
+   Compiling unicase v2.10.0
+   Compiling byteorder v1.5.0
+   Compiling sync_wrapper v1.0.2
+   Compiling form_urlencoded v1.2.2
+   Compiling time-core v0.1.9
+   Compiling ipnet v2.12.2
+   Compiling num-conv v0.2.2
+   Compiling openssl-probe v0.2.2
+   Compiling utf8_iter v1.1.0
+   Compiling num-traits v0.2.19
+   Compiling anyhow v1.0.104
+   Compiling miniz_oxide v0.9.1
+   Compiling httparse v1.10.1
+   Compiling tower-layer v0.3.3
+   Compiling deranged v0.5.9
+   Compiling base64 v0.23.1
+   Compiling powerfmt v0.2.1
+   Compiling sharded-slab v0.1.7
+   Compiling thread_local v1.1.10
+   Compiling fastrand v2.5.0
+   Compiling mime v0.3.17
+   Compiling nu-ansi-term v0.50.3
+   Compiling half v1.8.3
+   Compiling symlink v0.1.0
+   Compiling dyn-clone v1.0.20
+   Compiling base64 v0.22.1
+   Compiling candid_derive v0.10.39
+   Compiling pretty v0.12.5
+   Compiling crossbeam-utils v0.8.23
+   Compiling thiserror v2.0.18
+   Compiling thiserror v1.0.69
+   Compiling binrw v0.15.2
+   Compiling mime_guess v2.0.5
+   Compiling strum v0.26.3
+   Compiling slotmap v1.1.1
+   Compiling ic-platform-runtime-guard v0.15.0
+   Compiling zerofrom v0.1.8
+   Compiling futures-util v0.3.34
+   Compiling http v1.5.0
+   Compiling psm v0.1.32
+   Compiling aws-lc-sys v0.47.0
+   Compiling rustls-native-certs v0.8.5
+   Compiling cobs v0.3.0
+   Compiling rustix v1.1.6
+   Compiling backon v1.6.0
+   Compiling tracing v0.1.44
+   Compiling tracing-log v0.2.0
+   Compiling yoke v0.8.4
+   Compiling indexmap v2.14.2
+   Compiling zerovec v0.11.9
+   Compiling zerotrie v0.2.5
+   Compiling flate2 v1.1.10
+   Compiling generic-array v0.14.7
+   Compiling crossbeam-channel v0.5.17
+   Compiling num-integer v0.1.47
+   Compiling aws-lc-rs v1.19.0
+   Compiling http-body v1.1.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling tinystr v0.8.5
+   Compiling potential_utf v0.1.6
+   Compiling http-body-util v0.1.5
+   Compiling digest v0.10.7
+   Compiling icu_collections v2.4.0
+   Compiling regex-automata v0.4.18
+   Compiling icu_locale_core v2.4.0
+   Compiling time v0.3.55
+   Compiling sha2 v0.10.9
+   Compiling ic-host-artifacts v0.73.0
+   Compiling errno v0.3.14
+   Compiling parking_lot_core v0.9.12
+   Compiling mio v1.2.4
+   Compiling socket2 v0.6.5
+   Compiling stacker v0.1.25
+   Compiling getrandom v0.4.3
+   Compiling nix v0.31.3
+   Compiling signal-hook-registry v1.4.8
+   Compiling parking_lot v0.12.5
+   Compiling tokio v1.54.1
+   Compiling icu_provider v2.4.0
+   Compiling rustls-webpki v0.103.16
+   Compiling icu_properties v2.4.0
+   Compiling icu_normalizer v2.4.0
+   Compiling serde v1.0.229
+   Compiling serde_bytes v0.11.19
+   Compiling semver v1.0.28
+   Compiling command-fds v0.3.3
+   Compiling rustls v0.23.46
+   Compiling hex v0.4.3
+   Compiling num-bigint v0.4.8
+   Compiling ic_principal v0.1.5
+   Compiling tracing-serde v0.2.0
+   Compiling serde_cbor v0.11.2
+   Compiling erased-serde v0.3.31
+   Compiling ic-platform-types v0.15.0
+   Compiling postcard v1.1.3
+   Compiling ic-metrics v0.22.0
+   Compiling ic-platform v0.15.0
+   Compiling ic-certification v3.2.0
+   Compiling matchers v0.2.0
+   Compiling schemars v0.8.22
+   Compiling ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling tracing-subscriber v0.3.23
+   Compiling slog v2.8.2
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling tempfile v3.27.0
+   Compiling ic-host-fs v0.73.0
+   Compiling url v2.5.8
+   Compiling ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling candid v0.10.39
+   Compiling ic-host-process v0.73.0
+   Compiling tracing-appender v0.2.5
+   Compiling ic-management-canister-types v0.8.0
+   Compiling ic-transport-types v0.49.3
+   Compiling ic-management-canister-types v0.11.0
+   Compiling rustls-platform-verifier v0.7.1
+   Compiling tokio-util v0.7.20
+   Compiling tower v0.5.3
+   Compiling tokio-rustls v0.26.6
+   Compiling tower-http v0.6.11
+   Compiling h2 v0.4.20
+   Compiling hyper v1.12.0
+   Compiling hyper-util v0.1.21
+   Compiling hyper-rustls v0.27.10
+   Compiling reqwest v0.13.5
+   Compiling pocket-ic v16.1.0
+   Compiling ic-platform v0.13.0
+   Compiling ic-testkit v0.73.0
+   Compiling ic-wire-endpoint-fixture v0.12.1 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.37s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire_endpoint_fixture-eebf5d040a4113cc)
+
+running 3 tests
+test tests::defaults_and_overrides_bind_the_actual_contract ... ok
+test tests::declaration_matches_types_constants_and_existing_projection ... ok
+test tests::borrowed_fields_and_reply_retain_input_storage ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling proc-macro2 v1.0.107
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling anstyle v1.0.14
+   Compiling clap_lex v1.1.1
+   Compiling arbitrary v1.5.0
+   Compiling memchr v2.8.3
+   Compiling serde_bytes v0.11.19
+   Compiling clap_builder v4.6.7
+   Compiling serde_json v1.0.154
+   Compiling libfuzzer-sys v0.4.13
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling clap v4.6.7
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling cobs v0.3.0
+   Compiling postcard v1.1.3
+   Compiling ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.98s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire-d02a4ff3fc0ce921)
+
+running 1 test
+test native::tests::automatic_method_identity_vectors_and_frame ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+    Checking memchr v2.8.3
+   Compiling syn v2.0.119
+    Checking serde_core v1.0.229
+   Compiling syn v3.0.9
+    Checking proc-macro2 v1.0.107
+    Checking quote v1.0.47
+    Checking serde_bytes v0.11.19
+    Checking serde_json v1.0.154
+    Checking ic-wire-derive v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling thiserror-impl v2.0.18
+   Compiling ic-platform-macros v0.15.0
+   Compiling serde_derive v1.0.229
+    Checking thiserror v2.0.18
+    Checking cobs v0.3.0
+    Checking serde v1.0.229
+    Checking postcard v1.1.3
+    Checking ic-platform-types v0.15.0
+    Checking ic-platform v0.15.0
+    Checking ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.97s
+    Checking serde_bytes v0.11.19
+    Checking serde_json v1.0.154
+    Checking semver v1.0.28
+   Compiling ic-wire-derive v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking serde v1.0.229
+    Checking ic_principal v0.1.5
+    Checking hex v0.4.3
+    Checking num-bigint v0.4.8
+    Checking tracing-serde v0.2.0
+    Checking serde_cbor v0.11.2
+    Checking erased-serde v0.3.31
+    Checking postcard v1.1.3
+    Checking ic-metrics v0.22.0
+    Checking ic-platform-types v0.15.0
+    Checking ic-certification v3.2.0
+    Checking tracing-subscriber v0.3.23
+    Checking reqwest v0.13.5
+    Checking schemars v0.8.22
+    Checking ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking slog v2.8.2
+    Checking candid v0.10.39
+    Checking tracing-appender v0.2.5
+    Checking ic-management-canister-types v0.8.0
+    Checking ic-transport-types v0.49.3
+    Checking ic-management-canister-types v0.11.0
+    Checking pocket-ic v16.1.0
+    Checking ic-platform v0.15.0
+    Checking ic-platform v0.13.0
+    Checking ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking ic-testkit v0.73.0
+    Checking ic-wire-endpoint-fixture v0.12.1 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.06s
+   Compiling serde_core v1.0.229
+   Compiling ic-wire-derive v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling thiserror v2.0.18
+   Compiling cobs v0.3.0
+   Compiling serde v1.0.229
+   Compiling serde_bytes v0.11.19
+   Compiling postcard v1.1.3
+   Compiling ic-platform-types v0.15.0
+   Compiling ic-platform v0.15.0
+   Compiling ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.59s
+   Compiling rustix v1.1.6
+   Compiling winnow v1.0.4
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling serde_core v1.0.229
+   Compiling syn v3.0.9
+   Compiling thiserror v2.0.18
+   Compiling ic-host-artifacts v0.73.0
+   Compiling command-fds v0.3.3
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling serde_derive v1.0.229
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling serde_json v1.0.154
+   Compiling camino v1.2.6
+   Compiling cargo-platform v0.3.3
+   Compiling semver v1.0.28
+   Compiling serde_spanned v1.1.2
+   Compiling toml_edit v0.25.17+spec-1.1.0
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling ic-host-fs v0.73.0
+   Compiling serde v1.0.229
+   Compiling ic-host-process v0.73.0
+   Compiling cargo_metadata v0.23.1
+   Compiling ic-wire-qualification v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+   Compiling ic-build v0.73.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.97s
+     Running `target/debug/examples/check-diagnostics /home/adam/projects/ic-wire/target/endpoint-check.cKbNUs --endpoint`
+11 expected diagnostics and passing control verified
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+   Compiling version_check v0.9.5
+   Compiling cfg-if v1.0.5
+   Compiling ic-platform-runtime-guard v0.15.0
+   Compiling data-encoding v2.11.1
+   Compiling pin-project-lite v0.2.17
+   Compiling bytemuck v1.25.2
+   Compiling slotmap v1.1.1
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+   Compiling serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.18
+   Compiling ic-platform-macros v0.15.0
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling cobs v0.3.0
+   Compiling ic-platform-types v0.15.0
+   Compiling postcard v1.1.3
+   Compiling ic-platform v0.15.0
+   Compiling ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling ic-wire-endpoint-fixture v0.12.1 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `evaluation` profile [optimized] target(s) in 3.67s
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling version_check v0.9.5
+   Compiling crc32fast v1.5.3
+    Checking cfg-if v1.0.5
+   Compiling ic-platform-runtime-guard v0.15.0
+    Checking data-encoding v2.11.1
+    Checking pin-project-lite v0.2.17
+    Checking bytemuck v1.25.2
+   Compiling slotmap v1.1.1
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+    Checking serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.18
+   Compiling ic-platform-macros v0.15.0
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking cobs v0.3.0
+    Checking ic-platform-types v0.15.0
+    Checking postcard v1.1.3
+    Checking ic-platform v0.15.0
+    Checking ic-wire v0.12.1 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.1.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking ic-wire-endpoint-fixture v0.12.1 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.97s

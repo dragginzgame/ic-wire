@@ -49,15 +49,17 @@ apps/
   This is a standard layout, requiring no exception or nested `crates/` wrapper.
 - Keep ordinary module tests, examples and fixtures with their owning package;
   they do not need separate packages merely to follow this layout.
-- Declare the maintained members in the root workspace. Keep shared package
-  versions and common package metadata in `[workspace.package]`, with inherited
-  child values. Keep the complete direct dependency catalog in
+- Declare the maintained members in the root workspace. Keep common package
+  metadata in `[workspace.package]`, with inherited child values. Package versions
+  follow the [release-group rules](#coordinated-versions-and-workspace-boundaries):
+  a coordinated workspace uses root inheritance; independent groups all use
+  package literals. Keep the complete direct dependency catalog in
   `[workspace.dependencies]` under the [Cargo dependency rules](cargo-dependencies.md).
   Those rules allow documented package-specific MSRVs; a higher internal-tool
   floor must not become the public libraries' minimum through inheritance alone.
   Preserve package identities, selected dependencies and effective features.
   An `apps/` directory does not create an independent Cargo workspace: its
-  packages belong to the same root and inherit the same versions and dependencies.
+  packages belong to the same root, dependency catalog and declared release groups.
 - Keep the selected `Cargo.lock`, workspace profiles and workspace-wide Cargo
   configuration at their owning root. Preserve intentional `default-members`,
   target distinctions and publication selections; a directory move must not
@@ -74,25 +76,65 @@ apps/
 
 ## Coordinated versions and workspace boundaries
 
-Keep established workspace groupings and their coordinated versions by default,
-subject to the [core and integration graph boundary](#core-and-integration-graph-boundary).
-One release identity reduces internal version combinations and lets related
-packages qualify changes together. It does not merge package responsibilities,
-enable optional features or update downstream lockfiles automatically.
+Keep related crates together for development and qualification. A Cargo workspace
+does not require one release version: use a small number of explicit release
+groups when independent contracts otherwise force unrelated breaking releases.
+Each group has one coordinated version and one changelog. A workspace whose
+packages genuinely evolve together remains a single group, with the existing
+workspace-version inheritance and release commands.
 
-- Judge a proposed merge or split by actual shared types, dependency direction,
-  consumer upgrades and release obligations. Similar names or occasional
-  unchanged members in a release are insufficient reasons to reorganize.
+Prefer release groups within the existing workspace over moving public crates
+to new workspaces or repositories solely to give them independent versions.
+This retains one dependency catalog, lockfile and development workflow. It does
+not isolate Cargo resolution; the
+[core and integration graph boundary](#core-and-integration-graph-boundary)
+still governs demonstrated integration blockers.
+
+- Group packages by actual shared contracts, dependency direction, consumer
+  upgrades and release obligations. Keep tightly coupled generators/runtime
+  helpers coordinated; do not create one group per crate by default. Shared
+  ownership, directory placement or qualification alone does not require matching
+  versions. Similar names or occasional unchanged releases do not justify a split.
 - For independent public versions or workspace migrations beyond the scoped
   integration isolation below, show a recurring maintenance problem, why a local
   fix or release batching is insufficient, and the total migration and
   qualification cost for consumers.
-  Preserve approved independent graphs and require explicit maintainer agreement
-  for a boundary or versioning-policy change.
+  Preserve approved independent graphs and record maintainer agreement for the
+  selected boundary or versioning-policy change. Carry an existing approval
+  forward; do not request it again for implementing that agreed boundary.
   Approved release groups may keep one workspace and lockfile using the existing
   [explicit release-group contract](../docs/releases.md#explicit-cargo-release-groups).
   Its admitted member versions are the scoped exception to workspace-version
   inheritance; root dependency inheritance and full workspace qualification remain.
+- In a workspace with independent release groups, every member, including private
+  tooling and fixtures, belongs to one explicit group. Remove
+  `[workspace.package].version`; every member declares a literal package version
+  equal to its group's primary package. The primary is only that group's version
+  authority, not a master package for the workspace. Other common metadata may
+  still inherit from `[workspace.package]`.
+- Cargo has no per-group version-inheritance mechanism. Do not add an intermediate
+  group `Cargo.toml`, nested workspace, shadow version file or custom inheritance
+  syntax to represent a release group. Keep existing crate paths, one root
+  dependency catalog and lockfile, and the existing release runner. Group release
+  material lives under `releases/<group>/`; package relocation is not part of
+  adopting this convention.
+- Treat every group symmetrically: each owns
+  `releases/<group>/CHANGELOG.md`, and root `CHANGELOG.md` is an index. Release,
+  resume and publication commands require an explicit `RELEASE_GROUP`; never
+  silently default to the former root-version group or the whole public roster.
+  Follow the [selection contract](../docs/releases.md#explicit-cargo-release-groups)
+  and [history migration rules](changelogs.md#release-group-changelogs-and-shared-history).
+- Leave unaffected groups' versions and changelogs unchanged. Cross-group
+  requirements change only when needed for the selected dependency contract;
+  they need not numerically match the consumer's own version. Exposed Rust types,
+  runtime identities and wire/storage contracts still require real compatibility
+  assessment. A changed dependency declaration cannot be republished under an
+  already published package version.
+- Start each group from its existing package/release history. Do not reset
+  versions, rewrite tags or re-upload published identities when adopting groups.
+  Keep one [canonical changelog per group](changelogs.md#release-group-changelogs-and-shared-history)
+  and preserve the earlier shared history. Boundary approval alone does not
+  authorize version bumps, release execution or publication.
 - Prefer batching related, already-planned breaking changes into one coordinated
   release before downstream adoption. Avoid repeated consumer migrations for
   adjacent changes, but do not hold urgent fixes for unrelated work or enlarge a
@@ -102,6 +144,52 @@ enable optional features or update downstream lockfiles automatically.
   adoption, a common dependency or a common owner does not require fleet-wide
   version synchronization. Verify adoption through the consumer's
   [selected dependency graphs](../docs/cargo-graph-checks.md#coordinated-release-adoption).
+
+### Visible release-group map in Cargo.toml
+
+For a workspace with independent release groups, keep a concise comment map next
+to the root `[workspace]` table. List every group's name, member package names,
+canonical version source and changelog path. Include private members; identify
+them as qualification/tooling where helpful. For example:
+
+```toml
+# Release groups: ci/cargo-release-groups.json
+# codec: ic-wire, ic-wire-derive, ic-wire-benchmarks (private qualification)
+#   version: crates/ic-wire/Cargo.toml package.version
+#   changelog: releases/codec/CHANGELOG.md
+# endpoint: ic-wire-endpoint
+#   version: crates/ic-wire-endpoint/Cargo.toml package.version
+#   changelog: releases/endpoint/CHANGELOG.md
+[workspace]
+members = [
+    "crates/ic-wire",
+    "crates/ic-wire-benchmarks",
+    "crates/ic-wire-derive",
+    "crates/ic-wire-endpoint",
+]
+resolver = "3"
+```
+
+The example illustrates the convention, not an instruction to create or rename
+packages. Use version-source references rather than copying numeric versions into
+comments. The existing `ci/cargo-release-groups.json` is the executable policy;
+Cargo manifests supply actual versions and dependencies. Comments are a readable
+map, never parsed release authority or a separate configuration format.
+
+Review the map against the policy and actual Cargo members when membership,
+version ownership or changelog paths change. Keep it readable after the normal
+formatter runs; do not bypass formatting to preserve a visual grouping. The map
+can sit above the table without reordering the `members` array or replacing the
+[member-role comments](#workspace-member-roles). A single-group workspace needs
+no JSON policy solely for documentation; an optional comment may name its shared
+version source and root changelog.
+
+An explicit task to adopt this convention includes converting inherited versions
+to their existing numeric values, moving ledgers with preserved history and
+updating the policy, callers and fixtures. It does not authorize numeric version
+bumps, package moves, publication or changes to existing release identities.
+Reconcile unfinished attempts against their recorded source and policy; do not
+reinterpret old journals after changing version ownership or ledger paths.
 
 ## Core and integration graph boundary
 

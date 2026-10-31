@@ -4,7 +4,7 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
 unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND CARGO_RELEASE_METADATA_EDITOR
-export RELEASE_GROUP="${1:-core}"
+export RELEASE_GROUP="${1:?select the real fixture group}"
 plan="$(bash "$root/scripts/ci/cargo-release-group.sh" plan "$RELEASE_GROUP")"
 primary="$(printf '%s' "$plan" | jq -er .primary)"
 changelog_path="$(printf '%s' "$plan" | jq -er .changelog)"
@@ -125,5 +125,7 @@ cp "$fixture/grouped-manifest" Cargo.toml
 # Make check-release invokes this fixture for each real configured group. The
 # earlier synthetic endpoint policy is superseded: it omitted the now-real
 # independently versioned endpoint member and duplicated these delivery checks.
+# Exact changed-file custody plus the clean worktree checks above also prove
+# unselected manifests/ledgers remain unchanged; no separate hash roster is needed.
 complete=true
 printf '%s\n' 'Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.'

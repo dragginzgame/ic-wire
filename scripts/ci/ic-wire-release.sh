@@ -4,7 +4,8 @@ set -euo pipefail
 operation="${1:?release adapter operation}"
 # Preflight admits these selected tools before metadata and validation children.
 export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
-export RELEASE_GROUP="${RELEASE_GROUP:-core}"
+: "${RELEASE_GROUP:?select RELEASE_GROUP=core or endpoint explicitly}"
+export RELEASE_GROUP
 plan="$(bash scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP")"
 primary="$(printf '%s' "$plan" | jq -er .primary)"
 changelog="$(printf '%s' "$plan" | jq -er .changelog)"

@@ -59,7 +59,7 @@ Use focused targets for changed behavior. `make ci` is the complete scaffold gat
 and requires an explicit local request. Release commands deliver Git versions
 and tags; registry publication is a separate maintainer action.
 
-The release policy selects the default `core` group or `RELEASE_GROUP=endpoint`,
+The release policy requires `RELEASE_GROUP=core` or `RELEASE_GROUP=endpoint`,
 using each group's ledger, exact metadata files and receipts while retaining the
 complete gate. The [stable identity and release guide](docs/stable-identities.md)
 describes the implemented boundary, migration and publication order. Shared

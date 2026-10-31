@@ -4,7 +4,7 @@
     {
       "name": "core",
       "primary": "ic-wire",
-      "version": "workspace",
+      "version": "package",
       "members": [
         "ic-wire",
         "ic-wire-derive",
@@ -12,7 +12,7 @@
         "ic-wire-qualification",
         "ic-wire-endpoint-fixture"
       ],
-      "changelog": "CHANGELOG.md",
+      "changelog": "releases/core/CHANGELOG.md",
       "dependencies": [
         "ic-wire",
         "ic-wire-derive"
@@ -25,7 +25,7 @@
       "members": [
         "ic-wire-endpoint"
       ],
-      "changelog": "crates/ic-wire-endpoint/CHANGELOG.md",
+      "changelog": "releases/endpoint/CHANGELOG.md",
       "dependencies": [
         "ic-wire-endpoint"
       ]

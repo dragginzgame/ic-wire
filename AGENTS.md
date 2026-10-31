@@ -7,7 +7,7 @@ qualification work. These guides are task-specific, not a startup reading list.
 The Postcard runtime is qualified for bounded Rust integration.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57` (recorded version 0.27.14).
+rules, vendored at `54fc49e12f439dbe18d232f622a6d78e61773353` (recorded version 0.27.19).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot
@@ -36,8 +36,10 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - The maintainer approved and requested implementation of the
   [stable identity boundary](docs/stable-identities.md): coordinated ic-wire/
   ic-wire-derive and one independently versioned ic-wire-endpoint package.
-  Platform 0.14 / Types 0.1 and IC Build 0.73 supply the prerequisites. Use the
-  explicit core/endpoint release groups; no publication is authorized.
+  Platform 0.15 / Types 0.15 and IC Build 0.73 supply the current suppliers. Use the
+  explicit core/endpoint release groups with literal member versions and ledgers
+  under releases/<group>/. Release/resume/publication require explicit group
+  selection; no publication is authorized.
 - Default new contract examples to byte-oriented fields for binary data and
   `Packed<T>` for large homogeneous supported integer/hash arrays. Keep ordinary
   collections for general records and small-value varint use cases. Preserve
@@ -47,7 +49,9 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - IcyDB database storage/key encodings are outside initial scope.
 - Maintainer-operated releases use direct Git delivery to origin/main through
   Shared Tooling. Versioning, tags and pushes do not publish packages.
-  Ordinary agent work does not execute releases.
+  Ordinary agent work does not execute releases. An explicit scoped release,
+  ship or deploy request delegates the documented delivery workflow under the
+  Shared baseline, including registry publication when the established task calls for it.
 
 ## Development and validation
 

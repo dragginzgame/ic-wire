@@ -11,17 +11,21 @@ python3 - "$root" "$out" <<'PY'
 from pathlib import Path
 import json,sys,shutil
 root,out=map(Path,sys.argv[1:]);m=json.loads((out/'workspace.json').read_text())
-p=next(p for p in m['packages'] if p['name']=='ic-platform' and p['version']=='0.14.0')
+endpoint=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire-endpoint/Cargo.toml'))
+dep=next(d for n in m['resolve']['nodes'] if n['id']==endpoint['id'] for d in n['deps'] if d['name']=='ic_platform')
+p=next(p for p in m['packages'] if p['id']==dep['pkg'])
+major,minor,_=map(int,p['version'].split('.')); future=f'{major}.{minor+1}.0'
+ep_major,ep_minor,_=map(int,endpoint['version'].split('.')); future_endpoint=f'{ep_major}.{ep_minor+1}.0'
 source=Path(p['manifest_path']).parent
 shutil.copytree(source,out/'next-platform')
-f=out/'next-platform/Cargo.toml';f.write_text(f.read_text().replace('version = "0.14.0"','version = "0.15.0"',1))
+f=out/'next-platform/Cargo.toml';f.write_text(f.read_text().replace(f'version = "{p["version"]}"',f'version = "{future}"',1))
 # This prospective runtime generation changes only package identity. No claim
 # about an unpublished runtime implementation or its performance is made.
 next_endpoint=out/'next-endpoint';shutil.copytree(root/'crates/ic-wire-endpoint/src',next_endpoint/'src')
 (next_endpoint/'Cargo.toml').write_text(f'''[workspace]
 [package]
 name = "ic-wire-endpoint"
-version = "0.2.0"
+version = "{future_endpoint}"
 edition = "2024"
 [features]
 typescript = ["ic-wire/typescript", "dep:serde_json"]
@@ -36,7 +40,7 @@ serde = {{ version = "1", default-features = false, features = ["derive", "alloc
 for lane in ['current','next']:
  d=out/lane;(d/'src').mkdir(parents=True)
  shutil.copy2(root/'crates/ic-wire-qualification/fixtures/platform_types/mod.rs',d/'src/lib.rs')
- platform='version = "=0.14.0"' if lane=='current' else f'path = "{out}/next-platform"'
+ platform=f'version = "={p["version"]}"' if lane=='current' else f'path = "{out}/next-platform"'
  endpoint=root/'crates/ic-wire-endpoint' if lane=='current' else next_endpoint
  (d/'Cargo.toml').write_text(f'''[workspace]
 [package]

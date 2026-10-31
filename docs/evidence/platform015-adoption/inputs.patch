@@ -1,0 +1,90 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 78368be..eca8fca 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -944,9 +944,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-platform"
+-version = "0.14.0"
++version = "0.15.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "1fab241dbdb0d76bcea92af4c6be89e563bb27f7830bea635a2aded3ce43c33e"
++checksum = "a204e89bc51dd43242661ede0f75af80d27c42314da9bf49cc76ed314f0cb37c"
+ dependencies = [
+  "candid",
+  "ic-platform-macros",
+@@ -962,9 +962,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-platform-macros"
+-version = "0.14.0"
++version = "0.15.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8d1a4f6f049e940feabd1c3b2b1666ec4b08acde1404c4a8111d5018e146e0ae"
++checksum = "80e0a94068ed44bc7cf374e40feb9bc1b144b382ad0e9d554990d6938da73b68"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -973,15 +973,15 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-platform-runtime-guard"
+-version = "0.14.0"
++version = "0.15.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "95f015bf18f152528f35c9c347198068d9d58cede64834ad01bf9effbb09117d"
++checksum = "e4500ac161c2d0821e13620cacda53c0539a942858f27a79fc009969eff31e1b"
+ 
+ [[package]]
+ name = "ic-platform-types"
+-version = "0.1.0"
++version = "0.15.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5bd24886e060da435e9fb66b508ddf00ae1edaa70a03ea2b3da576b2c727fb76"
++checksum = "d8fd9f1297e99ec97635c83813930a28f49a698d7391bcdf7f6718be4957471d"
+ dependencies = [
+  "crc32fast",
+  "data-encoding",
+@@ -1045,7 +1045,7 @@ version = "0.12.1"
+ dependencies = [
+  "clap",
+  "dhat",
+- "ic-platform 0.14.0",
++ "ic-platform 0.15.0",
+  "ic-testkit",
+  "ic-wire",
+  "ic-wire-endpoint",
+@@ -1070,7 +1070,7 @@ dependencies = [
+ name = "ic-wire-endpoint"
+ version = "0.1.0"
+ dependencies = [
+- "ic-platform 0.14.0",
++ "ic-platform 0.15.0",
+  "ic-wire",
+  "ic-wire-derive",
+  "serde",
+@@ -1081,7 +1081,7 @@ dependencies = [
+ name = "ic-wire-endpoint-fixture"
+ version = "0.12.1"
+ dependencies = [
+- "ic-platform 0.14.0",
++ "ic-platform 0.15.0",
+  "ic-testkit",
+  "ic-wire",
+  "ic-wire-endpoint",
+diff --git a/Cargo.toml b/Cargo.toml
+index bc89c11..e897d58 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -21,8 +21,8 @@ repository = "https://github.com/dragginzgame/ic-wire"
+ # Production dependencies
+ bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
+ # Runtime and stable identity suppliers evolve independently; protocol bytes stay unchanged.
+-ic-platform = { version = "0.14.0", default-features = false }
+-ic-platform-types = { version = "0.1.0", default-features = false }
++ic-platform = { version = "0.15.0", default-features = false }
++ic-platform-types = { version = "0.15.0", default-features = false }
+ ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.12.1" }
+ ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.1.0" }
+ postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }

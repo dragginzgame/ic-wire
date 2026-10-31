@@ -1,3 +1,11 @@
+# Release groups: ci/cargo-release-groups.json
+# core: ic-wire, ic-wire-derive; ic-wire-benchmarks, ic-wire-qualification,
+#       ic-wire-endpoint-fixture (private qualification)
+#   version: crates/ic-wire/Cargo.toml package.version
+#   changelog: releases/core/CHANGELOG.md
+# endpoint: ic-wire-endpoint
+#   version: crates/ic-wire-endpoint/Cargo.toml package.version
+#   changelog: releases/endpoint/CHANGELOG.md
 [workspace]
 members = [
     "crates/ic-wire",
@@ -11,7 +19,6 @@ default-members = ["crates/ic-wire"]
 resolver = "3"
 
 [workspace.package]
-version = "0.12.1"
 edition = "2024"
 rust-version = "1.91"
 license = "MIT"
@@ -20,9 +27,10 @@ repository = "https://github.com/dragginzgame/ic-wire"
 [workspace.dependencies]
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
-# Runtime and stable identity suppliers evolve independently; protocol bytes stay unchanged.
-ic-platform = { version = "0.14.0", default-features = false }
-ic-platform-types = { version = "0.1.0", default-features = false }
+# Identity/runtime packages stay separate; upstream aligns their versions at 0.15.
+# The Types supplier identity changes; codec bytes, budgets and acceptance do not.
+ic-platform = { version = "0.15.0", default-features = false }
+ic-platform-types = { version = "0.15.0", default-features = false }
 ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.12.1" }
 ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.1.0" }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }

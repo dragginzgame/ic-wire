@@ -6,12 +6,31 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-export RELEASE_GROUP ?= core
+export RELEASE_GROUP
+# Refuse ambiguous group effects before any setup, gate or release runner.
+ifneq ($(filter-out release-editor-check,$(filter release-% publish publish-check version,$(MAKECMDGOALS))),)
+ifneq ($(words $(RELEASE_GROUP)),1)
+$(error Select RELEASE_GROUP=core or endpoint explicitly)
+endif
+ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
+$(error Select RELEASE_GROUP=core or endpoint explicitly)
+endif
+endif
 RELEASE_EDITOR_VERSION := 0.73.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
 override CARGO_PUBLISH_PACKAGES := ic-wire-derive ic-wire ic-wire-endpoint
+# Publication is scoped to an explicitly selected group, including PACKAGE subsets.
+ifneq ($(filter publish publish-check,$(MAKECMDGOALS)),)
+ifeq ($(RELEASE_GROUP),core)
+override CARGO_PUBLISH_PACKAGES := ic-wire-derive ic-wire
+else ifeq ($(RELEASE_GROUP),endpoint)
+override CARGO_PUBLISH_PACKAGES := ic-wire-endpoint
+else
+$(error Select RELEASE_GROUP=core or endpoint explicitly for publication)
+endif
+endif
 override CARGO_PUBLISH_REGISTRY := crates-io
 override CARGO_PUBLISH_VERIFY_TARGETS := lint
 # Reject the retired selector rather than silently publishing the default roster.
@@ -158,7 +177,7 @@ check-msrv:
 
 check-doc-links:
 	@perl scripts/ci/check-documentation-links.pl --root . docs/endpoints.md docs/evidence/endpoints/README.md examples/endpoint/README.md docs/sdk-integration.md
-	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/full-comparison-0710.md docs/evidence/full-comparison-0710/README.md docs/full-comparison-0613.md docs/hotspot-encoding-0613.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/evidence/runtime-0716/README.md docs/evidence/encoder-followup-0716/README.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md docs/history/candid-comparison.md docs/history/evaluation.md docs/packed-fields.md docs/unsigned-magnitude.md docs/packed-consolidation-0611.md
+	@perl scripts/ci/check-documentation-links.pl --root . AGENTS.md README.md crates/ic-wire/README.md crates/ic-wire-derive/README.md CHANGELOG.md releases/core/CHANGELOG.md releases/endpoint/CHANGELOG.md releases/history.md crates/ic-wire-endpoint/CHANGELOG.md docs/design.md docs/evaluation.md docs/candid-comparison.md docs/full-comparison-0710.md docs/evidence/full-comparison-0710/README.md docs/full-comparison-0613.md docs/hotspot-encoding-0613.md docs/candid-consumer-comparison.md docs/scaffold-validation.md docs/development.md docs/runtime.md docs/performance.md docs/evidence/runtime-0716/README.md docs/evidence/encoder-followup-0716/README.md docs/messagepack-comparison.md docs/runtime-optimization.md docs/allocation-comparison.md docs/bounded-allocation-study.md docs/consumer-fixtures.md docs/status/current.md docs/history/candid-comparison.md docs/history/evaluation.md docs/packed-fields.md docs/unsigned-magnitude.md docs/packed-consolidation-0611.md
 
 .PHONY: check-boundary
 check-boundary:
@@ -175,7 +194,7 @@ check-tooling:
 	+@bash scripts/ci/test-local-make.sh
 
 version: host-tools-check
-	+@bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
+	+@bash scripts/ci/ic-wire-release.sh version
 
 ci:
 	+@bash scripts/ci/run-validation-targets.sh --fail-fast $(IC_WIRE_CI_TARGETS)

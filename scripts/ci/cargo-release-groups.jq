@@ -8,7 +8,7 @@ def stable: type == "string" and test("^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[
 def admit_groups($config; $root; $manifests; $lock; $selected):
   . as $metadata |
   [.packages[] | select(.id as $id | $metadata.workspace_members | index($id))] as $owned |
-  if ($config | keys) != ["groups", "schema"] or $config.schema != 1 or
+  if ($config | keys - ["shared_metadata_files"]) != ["groups", "schema"] or $config.schema != 1 or
      ($config.groups | type) != "array" or ($config.groups | length) == 0 or
      ($owned | length) == 0 or
      ($owned | map(.id) | sort) != ($metadata.workspace_members | sort) or
@@ -16,7 +16,7 @@ def admit_groups($config; $root; $manifests; $lock; $selected):
      any($owned[]; .source != null or (.name | name | not) or (.version | stable | not))
   then error("invalid release-group workspace/configuration") else . end |
   $config.groups as $groups |
-  if any($groups[]; keys != ["changelog","dependencies","members","name","primary","version"] or
+  if any($groups[]; (keys - ["metadata_files"]) != ["changelog","dependencies","members","name","primary","version"] or
      (.name | name | not) or (.primary | name | not) or (.changelog | relative | not) or
      (.members | type) != "array" or (.members | length) == 0 or (.members | all(.[]; name) | not))
   then error("invalid release-group declaration") else . end |
@@ -30,6 +30,22 @@ def admit_groups($config; $root; $manifests; $lock; $selected):
      ($groups | map(select(.version == "workspace")) | length) > 1 or
      ([$groups[].members[]] | sort) != ($owned | map(.name) | sort)
   then error("missing/overlapping release-group members or identities") else . end |
+  if any($groups[]; has("metadata_files") and
+      ((.metadata_files | type) != "array" or (.metadata_files | all(.[]; relative) | not)))
+  then error("invalid release-group metadata files") else . end |
+  if ($config | has("shared_metadata_files")) and
+      (($config.shared_metadata_files | type) != "array" or
+       ($config.shared_metadata_files | all(.[]; relative) | not))
+  then error("invalid shared release metadata files") else . end |
+  ($config.shared_metadata_files // []) as $shared |
+  ([$groups[] | (.metadata_files // [])[]] + $shared) as $extra |
+  (["Cargo.toml", "Cargo.lock", "ci/cargo-release-groups.json"] +
+   [$groups[].changelog] +
+   [$owned[].manifest_path | ltrimstr($metadata.workspace_root + "/")]) as $reserved |
+  if ($extra | unique | length) != ($extra | length) or
+     any($extra[]; . as $path | ($reserved | index($path)) != null or
+       $path == ".git" or ($path | startswith(".git/")))
+  then error("overlapping or reserved release-group metadata files") else . end |
   ($groups | map(. as $g |
     ($owned | map(select(.name as $n | $g.members | index($n)))) as $members |
     ($members | map(select(.name == $g.primary))[0].version) as $version |
@@ -39,7 +55,7 @@ def admit_groups($config; $root; $manifests; $lock; $selected):
           $root.workspace.package.version != $version or $manifests[$p.name].package.version != {workspace:true}
         else $manifests[$p.name].package.version != $version end))
     then error("mismatched release-group versions/inheritance")
-    else . + {previous:$version} end)) as $admitted |
+    else . + {previous:$version, shared_metadata_files:$shared} end)) as $admitted |
   if ([$lock.package[] | select(.source == null) | {name,version}] | sort_by(.name)) !=
      ($owned | map({name,version}) | sort_by(.name))
   then error("stale or foreign local lock records") else . end |
@@ -61,11 +77,13 @@ def group_plan($group; $root; $owned; $directory; $next):
         . as $r | .prefix + ($next | split(".")[:($r.version | split(".") | length)] | join(".")))} end] as $dependencies |
   if ($dependencies | map(.alias) | sort) != ($group.dependencies | sort)
   then error("unknown or nonlocal group dependency selection") else . end |
+  (($group.shared_metadata_files // []) + ($group.metadata_files // [])) as $metadata_files |
   {group:$group.name, primary:$group.primary, previous:$group.previous, changelog:$group.changelog,
-   members:$group.members, dependencies:$dependencies,
+   members:$group.members, dependencies:$dependencies, metadata_files:$metadata_files,
    versions:($owned | map({key:.name,value:.version}) | from_entries),
    manifests:([{path:"Cargo.toml", version:(if $group.version == "workspace" then "workspace" elif any($members[]; .path == "Cargo.toml") then "package" else "unchanged" end),
      dependencies:($dependencies | map(select(.previous != .next) | {alias,previous,next}))}] +
      (if $group.version == "package" then $members | map(select(.path != "Cargo.toml") | {path,version:"package",dependencies:[]}) else [] end)),
    files:(["Cargo.toml","Cargo.lock",$group.changelog] +
-     (if $group.version == "package" then $members | map(.path | select(. != "Cargo.toml")) else [] end))};
+     (if $group.version == "package" then $members | map(.path | select(. != "Cargo.toml")) else [] end) +
+      $metadata_files)};

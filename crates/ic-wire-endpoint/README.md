@@ -1,6 +1,6 @@
 # IC Wire Endpoint
 
-Typed `query` and `update` entrypoints backed by IC Platform 0.14. Core codec,
+Typed `query` and `update` entrypoints backed by IC Platform 0.15. Core codec,
 Limits/Error and schema identities remain owned by `ic-wire` independently of
 runtime integration releases. Platform owns execution and the singleton guard.
 

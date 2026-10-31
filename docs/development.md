@@ -215,7 +215,7 @@ receipt helper. Update through the canonical exporter and reviewed adoption;
 do not patch snapshot-owned files. Product adapters stay local.
 
 The maintainer-operated `release-patch`, `release-minor` and `release-major`
-targets use one workflow: preflight, complete validation, version preparation,
+targets require explicit `RELEASE_GROUP=core` or `endpoint` and use one workflow: preflight, complete validation, version preparation,
 receipt checks, commit, tag and direct Git delivery to origin/main. They do not
 publish packages. Ordinary development leaves package versions, staging, commits,
 refs and release execution to the maintainer.
@@ -234,7 +234,7 @@ The Make fixture similarly confines hook/index effects to disposable repositorie
 The runtime and derive crates were first published at 0.3.0. Subsequent Git
 delivery and registry publication are separate maintainer operations.
 
-`make check-package` assembles and verifies both archives with all features,
+`make check-package` assembles and verifies all three archives with all features,
 permits dirty source for local review and may use the registry. Package allowlists
 exclude tests and evaluation artifacts. Each archive includes its README and the
 root MIT LICENSE as an identical package-local regular file; only the SPDX license
@@ -244,8 +244,11 @@ After committing and releasing the reviewed source, the maintainer may rehearse
 or execute the separately authorized publication with Cargo 1.99:
 
 ```sh
-make publish-check
-make publish
+make publish-check RELEASE_GROUP=core
+make publish RELEASE_GROUP=core
+# Independent endpoint publication, after its supplying core:
+make publish-check RELEASE_GROUP=endpoint
+make publish RELEASE_GROUP=endpoint
 ```
 
 Publication is not atomic across packages. If a previous attempt uploaded the
@@ -254,17 +257,18 @@ resume only the remaining package after the derive version is available in the
 registry index:
 
 ```sh
-make publish PACKAGE=ic-wire
+make publish RELEASE_GROUP=core PACKAGE=ic-wire
 ```
 
 The runtime-only retry applies to the same released version. If another release
-has advanced the workspace version, its matching derive version must be published
-too: use `make publish PACKAGE="ic-wire-derive ic-wire"`. A tooling or Git
+has advanced the core group version, its matching derive version must be published
+too: use `make publish RELEASE_GROUP=core PACKAGE="ic-wire-derive ic-wire"`. A tooling or Git
 release does not publish either crate, and a new release is not required merely
 to finish an earlier partial publication.
 
-The shared [publication adapter](cargo-publication.md) selects both crates by
-default. It observes locked offline workspace metadata, admits the public roster,
+The shared [publication adapter](cargo-publication.md) selects derive/core for
+explicit `RELEASE_GROUP=core`, or Endpoint for `RELEASE_GROUP=endpoint`. Missing,
+empty and unknown groups refuse before setup; PACKAGE subsets cannot cross groups. It observes locked offline workspace metadata, admits the public roster,
 resolves exact `name@version` selectors, runs lint, then makes one Cargo attempt
 against `crates-io`. `publish-check` uses the same selection and gates with
 `--dry-run`; both require clean source. Keep `check-package` for dirty-source,
