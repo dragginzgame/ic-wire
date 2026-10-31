@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Align `platform-types` and `endpoint` with published IC Platform 0.12.0.
+  Consumers using either integration must align their direct Platform selection
+  on 0.12; native typed clients must also use a matching Wire release.
+  This fixes Principal/Account schema derives with Platform 0.12 while preserving
+  codec bytes, bounds, handlers and core-only dependency isolation.
+  [#34 — Supply platform-types schemas compatible with published Platform 0.12](https://github.com/dragginzgame/ic-wire/issues/34).
+
 ## [0.10.0] - 2026-10-30
 
 ### ⚠️ Breaking

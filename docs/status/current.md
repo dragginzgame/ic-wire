@@ -1,10 +1,26 @@
 # Current handoff
 
-## Released source 0.9.0; pending 0.10.0
+## Released 0.10.0; pending Platform 0.12 integration
 
-Released baseline: `edb5d1b`, Wire 0.9.0. Own versions remain unchanged. Pending
-0.10.0 adds opt-in identity schemas and adopts published Platform 0.11. Leave staging,
-commits, versions, publication and release execution to the maintainer.
+Released baseline: `c9d4e7b`, Wire 0.10.0. The isolated contribution selects
+published Platform/macros/runtime guard 0.12.0 for both optional integrations.
+Own versions stay 0.10.0; the exposed schema/runtime identity change requires
+the pending 0.11.0 minor. Core-only consumers need no migration. Align direct
+Platform selections to 0.12 and native typed clients to the supplying Wire minor.
+[#34 — Supply platform-types schemas compatible with published Platform 0.12](https://github.com/dragginzgame/ic-wire/issues/34)
+owns the producer fix; [Tooling #274 — Align Testkit typed Wire calls](https://github.com/dragginzgame/ic-tooling/issues/274)
+tracks Testkit's exposed Limits/Error pairing. Auth retains its published pair
+until compatible suppliers are published. No publication or merge is authorized.
+
+Focused standalone schema and endpoint checks pass on the new supplier:
+Rust 1.91 native/Wasm, strict Clippy, exact Rust/TypeScript bytes and malformed
+inputs, 11 compiler diagnostics plus passing control, endpoint schema tests and
+dependency isolation. [Evidence and reproduction](../evidence/platform012-adoption/README.md)
+distinguish these results from the retained 0.10 studies below. Platform library,
+macro and runtime-guard Rust sources match 0.11.0 exactly; Wire Rust source is
+unchanged. No cost benchmark or performance claim is applicable to this batch.
+Normal sibling pending 0.10.1 work was preserved; this topic starts at the
+committed release and carries no unrelated Tooling adoption.
 
 ## Principal/Account schema transfer
 
@@ -20,11 +36,11 @@ Principal stays bounded bytes (max 29); Account stays owner then optional
 Account equality. Serialization, budgets, identities, accepted inputs and
 retry bytes are unchanged. See the [migration](../../crates/ic-wire/README.md#optional-platform-identity-schemas).
 
-The single root dependency and lock now select published Platform 0.11.0, macros
+The 0.10 release's single root dependency and lock selected Platform 0.11.0, macros
 and runtime guard together. All 126 supplier source files match the isolated
 preparation; registry archive checksums match the lock. Endpoint consumers must
 align runtime-consuming dependencies on Platform 0.11. The coordinated runtime
-identity change makes the pending Wire release 0.10.0. No sibling checkout was
+identity change required Wire 0.10.0. No sibling checkout was
 modified and no publication, release or commit was performed.
 
 ## Qualification
