@@ -5,12 +5,26 @@ operation="${1:?release adapter operation}"
 # Preflight admits these selected tools before metadata and validation children.
 export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 files=(Cargo.toml Cargo.lock CHANGELOG.md)
+primary=ic-wire changelog=CHANGELOG.md
+if [[ -n "${RELEASE_GROUP:-}" ]]; then
+    [[ -f scripts/ci/cargo-release-group.sh ]] || { echo 'adopt Shared release-group support before selecting RELEASE_GROUP' >&2; exit 1; }
+    plan="$(bash scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP")"
+    primary="$(printf '%s' "$plan" | jq -er .primary)"
+    changelog="$(printf '%s' "$plan" | jq -er .changelog)"
+    files=()
+    while IFS= read -r path; do files+=("$path"); done < <(printf '%s' "$plan" | jq -r '.files[]')
+fi
+version() {
+    if [[ -n "${RELEASE_GROUP:-}" ]]; then bash scripts/ci/cargo-release-group.sh version "$RELEASE_GROUP"
+    else bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml; fi
+}
 # shellcheck source=scripts/ci/release-receipts.sh
 source scripts/ci/release-receipts.sh
 fail() { echo "IC Wire release refused: $*" >&2; exit 1; }
 [[ "${RELEASE_DELIVERY:-direct}" == direct ]] || fail 'only direct delivery is configured'
 if [[ "$operation" == version ]]; then
-    exec bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml
+    version
+    exit
 fi
 if [[ "$operation" == files ]]; then
     printf '%s\0' "${files[@]}"
@@ -19,20 +33,22 @@ fi
 perl scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" >/dev/null
 perl scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
 [[ "${RELEASE_SOURCE:?}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail 'invalid source identity'
-state="$(git rev-parse --git-path release-state)/ic-wire-$RELEASE_VERSION"
+state="$(git rev-parse --git-path release-state)/ic-wire-${RELEASE_GROUP:+$RELEASE_GROUP-}$RELEASE_VERSION"
 metadata() {
     if [[ "$1" == prepare ]]; then
         CARGO_RELEASE_METADATA_EDITOR="$("${RELEASE_MAKE:-make}" --no-print-directory -s release-editor-check)" || return
         export CARGO_RELEASE_METADATA_EDITOR
     fi
     if [[ "$1" == check ]]; then
-        bash scripts/ci/cargo-release-metadata.sh check ic-wire --manifest-order-grouped
+        bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
     else
-        bash scripts/ci/cargo-release-metadata.sh "$1" ic-wire
+        bash scripts/ci/cargo-release-metadata.sh "$1" "$primary"
     fi
 }
 source_check() {
-    bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
+    local allowed=() path
+    for path in "${files[@]}"; do allowed+=(--allow "$path"); done
+    bash scripts/ci/check-release-source.sh "${allowed[@]}"
 }
 prepared() {
     release_receipt_check "$state/validated" release_receipt_identity || fail 'validation receipt missing or changed'
@@ -43,9 +59,9 @@ case "$operation" in
     preflight)
         bash scripts/ci/check-release-source.sh
         [[ "$(git rev-parse HEAD)" == "$RELEASE_SOURCE" ]] || fail 'source changed'
-        [[ "$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)" == "$RELEASE_PREVIOUS" ]] || fail 'previous version changed'
+        [[ "$(version)" == "$RELEASE_PREVIOUS" ]] || fail 'previous version changed'
         awk -v version="$RELEASE_VERSION" -v previous="$RELEASE_PREVIOUS" -v date="$RELEASE_DATE" \
-            -f scripts/ci/finalize-release-changelog.awk CHANGELOG.md >/dev/null
+            -f scripts/ci/finalize-release-changelog.awk "$changelog" >/dev/null
         bash scripts/ci/cargo-release-preflight.sh "$PWD" "${RELEASE_CACHE_PREPARE:-1}" \
             --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
             --prepare install-tools --prepare tools-check --check tools-check
@@ -79,7 +95,9 @@ case "$operation" in
     committed|tagged|push)
         [[ -n "${RELEASE_COMMIT:-}" ]] || fail 'missing selected release commit'
         prepared
-        git diff --quiet "$RELEASE_SOURCE" "$RELEASE_COMMIT" -- . ':!Cargo.toml' ':!Cargo.lock' ':!CHANGELOG.md' || fail 'release contains unrelated source'
+        exclusions=(.)
+        for path in "${files[@]}"; do exclusions+=(":(exclude,literal)$path"); done
+        git diff --quiet "$RELEASE_SOURCE" "$RELEASE_COMMIT" -- "${exclusions[@]}" || fail 'release contains unrelated source'
         if [[ "$operation" != committed ]]; then
             bash scripts/ci/check-release-tag.sh "$RELEASE_COMMIT" "$RELEASE_VERSION"
         fi
