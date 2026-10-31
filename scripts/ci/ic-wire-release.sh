@@ -86,9 +86,9 @@ case "$operation" in
     committed|tagged|push)
         [[ -n "${RELEASE_COMMIT:-}" ]] || fail 'missing selected release commit'
         prepared
-        exclusions=()
-        for path in "${files[@]}"; do exclusions+=(":!$path"); done
-        git diff --quiet "$RELEASE_SOURCE" "$RELEASE_COMMIT" -- . "${exclusions[@]}" || fail 'release contains unrelated source'
+        exclusions=(.)
+        for path in "${files[@]}"; do exclusions+=(":(exclude,literal)$path"); done
+        git diff --quiet "$RELEASE_SOURCE" "$RELEASE_COMMIT" -- "${exclusions[@]}" || fail 'release contains unrelated source'
         if [[ "$operation" != committed ]]; then
             bash scripts/ci/check-release-tag.sh "$RELEASE_COMMIT" "$RELEASE_VERSION"
         fi

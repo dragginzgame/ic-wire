@@ -1,11 +1,24 @@
 # Current handoff
 
-## Released 0.11.0; pending stable identity migration 0.12.0
+## Local core release 0.12.0; pending merge repair 0.12.1
 
-Published core is 0.11.0, release `568196014214a27b1a679b119ffde45284ed5eae`.
-Existing package versions remain 0.11.0; new Endpoint's initial package is 0.1.0.
-The pending changelog is 0.12.0. Leave staging, commits, existing version changes,
-release effects and publication to the maintainer. No sibling checkout changed.
+Local HEAD is core 0.12.0, `e870257`, following migration commit `2aefed9`.
+File resolutions for origin/main (`18f3f9d`, release-group PR #38) are prepared;
+remote delivery and registry publication of 0.12 are not established here.
+Package versions are 0.12.0; Endpoint remains 0.1.0. The open changelog is 0.12.1.
+Leave merge commits, pushes, releases and publication to the maintainer.
+
+The merge retains the actual core/endpoint group policy and primary-package
+receipt paths. The maintainer explicitly approved staging only the five resolved
+files; the merge commit and any push remain maintainer-owned. Incoming literal
+Git exclusions and the validated editor override are retained. Its synthetic group fixture is superseded by the existing real
+core and endpoint preparation/delivery/resume tests; the synthetic policy would
+omit the new endpoint workspace member. Protocol/runtime behavior is unchanged;
+no new codec benchmark applies to this adapter/documentation repair.
+Both actual core/endpoint disposable release fixtures, Make/hook routing,
+ShellCheck, syntax, documentation links and diff checks pass. Repair logs are
+retained at `/tmp/wire-merge-repair/`. All five resolved files are staged with
+maintainer approval; the merge is ready for the maintainer commit.
 
 Current selections: Platform 0.14.0, canonical Platform Types 0.1.0, Build/Testkit
 and managed `cli` release editor 0.73.0; all published registry suppliers.

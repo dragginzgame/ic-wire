@@ -9,7 +9,8 @@ plan="$(bash "$root/scripts/ci/cargo-release-group.sh" plan "$RELEASE_GROUP")"
 primary="$(printf '%s' "$plan" | jq -er .primary)"
 changelog_path="$(printf '%s' "$plan" | jq -er .changelog)"
 # Reuse the offline-admitted real editor; fixture tool setup is substituted.
-FIXTURE_RELEASE_EDITOR="$(make --no-print-directory -s -C "$root" release-editor-check)"
+FIXTURE_RELEASE_EDITOR="${FIXTURE_RELEASE_EDITOR:-$(make --no-print-directory -s -C "$root" release-editor-check)}"
+[[ "$FIXTURE_RELEASE_EDITOR" == /* && -f "$FIXTURE_RELEASE_EDITOR" && -x "$FIXTURE_RELEASE_EDITOR" ]] || exit 1
 export FIXTURE_RELEASE_EDITOR
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 export RELEASE_CACHE_PREPARE=0
@@ -121,5 +122,8 @@ cmp Cargo.toml <(perl -0pe 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' "$fi
 cp "$fixture/grouped-manifest" Cargo.toml
 [[ "$(cat .git/release-state/0.0.1.plan)" == 'retained historical plan' ]]
 [[ -d .git/release-state/broken.plan ]]
+# Make check-release invokes this fixture for each real configured group. The
+# earlier synthetic endpoint policy is superseded: it omitted the now-real
+# independently versioned endpoint member and duplicated these delivery checks.
 complete=true
 printf '%s\n' 'Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.'

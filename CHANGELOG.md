@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.12.1]
+
+### 🩹 Fixed
+
+- Reconcile the earlier release-group adapter contribution with the stable
+  identity/endpoint split. Preserve current groups and receipt paths, retain
+  literal metadata exclusions and the validated fixture-editor override, and
+  exercise both real groups instead of recreating an obsolete synthetic policy.
+  Protocol bytes, budgets and runtime behavior are unchanged.
+
 ## [0.12.0] - 2026-10-31
 
 ### ⚠️ Breaking
