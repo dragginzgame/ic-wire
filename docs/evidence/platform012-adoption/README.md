@@ -1,5 +1,11 @@
 # Platform 0.12 integration qualification
 
+PR [#35](https://github.com/dragginzgame/ic-wire/pull/35) merged as `2a6d186`.
+The initial contribution below is followed by additional Wire-side installed
+qualification against the pending Tooling 0.72.1 supplier. No codec bytes,
+budgets, accepted-input rules or retry/hash inputs change.
+
+
 2026-10-31; isolated Wire contribution from release
 `c9d4e7b45b9ba6d841d7e2a664877e3bea035a5b` (0.10.0).
 Only the optional Platform requirement, its three locked packages and migration
@@ -56,3 +62,55 @@ the registry packages' `src/` trees shows Platform, macros and runtime guard
 0.12.0 identical to 0.11.0; Wire Rust source is unchanged. The new package
 identity and optional gzip dependency are the supplier changes. Existing cost
 studies remain evidence for their own selections, not new measurements here.
+
+## Expanded Wire-side qualification
+
+The local follow-up compares Platform 0.11.1 → 0.12.0 while holding IC Tooling at
+0.72.1. [Baseline revision](baseline-revision.txt), [pending baseline inputs](baseline-inputs.patch)
+and [supplier-only patch](inputs.patch) reproduce that pair. The
+[source comparison](source-review.json) finds identical Platform/macros/guard
+`src/` trees. Rust code in Wire is unchanged. Both integrations share the root
+Platform 0.12 selection; Testkit 0.72.1 retains a native-only Platform 0.11.1.
+That development-only copy selects no second executor. Typed client adoption is
+still tracked separately in Tooling #274; this does not publish a new Wire identity.
+
+Focused endpoint, standalone type/schema, Rust 1.91 host/Wasm, feature isolation,
+strict Clippy, exact Rust/TypeScript bytes, malformed inputs and dependency checks
+pass again. The three Candid corpus roundtrip/rejection tests pass. Installed
+limits and rollback also pass on the actual candidate Wasm; see [logs](checks/).
+
+The matched seven-export, 12-case probe includes successful small inputs,
+large-blob fallback, async/inter-canister execution and malformed-input controls.
+Both profiles use eight measured repetitions after an excluded warmup:
+384 logical calls and 608 physical executions. Frame hashes, outcomes and
+transaction oracles match. Every instruction and cycle sample is identical.
+[Comparison](comparison.json) retains absolute results and per-case samples;
+[raw traces](samples.json.gz) bind artifact and server identities.
+
+| Profile | Total uncompressed Wasm | Code section |
+| --- | ---: | ---: |
+| opt-z | 99,951 → 99,947 B (−4 B, −0.004%) | 86,068 → 86,068 B |
+| opt-3 | 93,518 → 93,518 B | 80,630 → 80,630 B |
+
+The four-byte non-code difference is not a codec optimization claim. Gzip size
+is not an acceptance criterion. No native-time or new full Candid performance
+comparison is claimed. The first run detected the mutable profiler binary being
+rebuilt between profiles. The final receipt uses the [frozen binary identity](server.sha256):
+all samples and installed checks were rerun on it after restoring the original
+`log 0.4.34` selection in both lanes. Both guest artifacts were byte-identical
+after that lock alignment. Mixed-server evidence was not accepted.
+
+To reproduce with the [recorded compiler](compiler.txt), prepared locked registry
+packages and explicit instrumented server:
+
+```sh
+POCKET_IC_BIN=/absolute/path/to/prepared/pocket-ic-server \
+  bash docs/evidence/platform012-adoption/reproduce.sh /tmp/wire-platform012-repeat
+```
+
+The runner copies the server before building, prepares isolated source and target
+directories, installs disposable canisters and verifies exact traces. No sibling
+working checkout is changed. Local loopback permission is required. Raw outputs
+are retained at `/tmp/wire-platform012-adoption/`. This remains focused qualification,
+not full CI or a macOS run. Earlier Tooling/editor and Tripwire studies retain their
+original supplier identities.

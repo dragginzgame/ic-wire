@@ -1,0 +1,144 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Finished `evaluation` profile [optimized] target(s) in 0.12s
+    Finished `evaluation` profile [optimized] target(s) in 0.07s
+    Finished `benchmark-speed` profile [optimized] target(s) in 0.12s
+    Finished `benchmark-speed` profile [optimized] target(s) in 0.06s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests/installed/mod.rs (/tmp/wire-platform012-adoption/host-target/debug/deps/installed-6318246a0d0083b9)
+
+running 1 test
+test typed_calls_limits_and_transactions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+
+{
+  "logical": 384,
+  "physical": 608,
+  "profiles": {
+    "evaluation": {
+      "wasm": {
+        "before": 99951,
+        "after": 99947,
+        "delta": -4,
+        "percent": -0.004001960960870827
+      },
+      "code": {
+        "before": 86068,
+        "after": 86068,
+        "delta": 0,
+        "percent": 0
+      },
+      "worst": {
+        "method": "echo",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "instructions": {
+          "before": 253815,
+          "after": 253815,
+          "delta": 0,
+          "percent": 0,
+          "before_samples": {
+            "mean": 253815,
+            "min": 253815,
+            "max": 253815,
+            "samples": [
+              253815,
+              253815,
+              253815,
+              253815,
+              253815,
+              253815,
+              253815,
+              253815
+            ]
+          },
+          "after_samples": {
+            "mean": 253815,
+            "min": 253815,
+            "max": 253815,
+            "samples": [
+              253815,
+              253815,
+              253815,
+              253815,
+              253815,
+              253815,
+              253815,
+              253815
+            ]
+          }
+        },
+        "cycles": {
+          "before": 0,
+          "after": 0,
+          "delta": 0,
+          "percent": null
+        }
+      }
+    },
+    "benchmark-speed": {
+      "wasm": {
+        "before": 93518,
+        "after": 93518,
+        "delta": 0,
+        "percent": 0
+      },
+      "code": {
+        "before": 80630,
+        "after": 80630,
+        "delta": 0,
+        "percent": 0
+      },
+      "worst": {
+        "method": "echo",
+        "case": "blob-0",
+        "outcome": "reply",
+        "request_bytes": 14,
+        "instructions": {
+          "before": 247492,
+          "after": 247492,
+          "delta": 0,
+          "percent": 0,
+          "before_samples": {
+            "mean": 247492,
+            "min": 247492,
+            "max": 247492,
+            "samples": [
+              247492,
+              247492,
+              247492,
+              247492,
+              247492,
+              247492,
+              247492,
+              247492
+            ]
+          },
+          "after_samples": {
+            "mean": 247492,
+            "min": 247492,
+            "max": 247492,
+            "samples": [
+              247492,
+              247492,
+              247492,
+              247492,
+              247492,
+              247492,
+              247492,
+              247492
+            ]
+          }
+        },
+        "cycles": {
+          "before": 0,
+          "after": 0,
+          "delta": 0,
+          "percent": null
+        }
+      }
+    }
+  }
+}

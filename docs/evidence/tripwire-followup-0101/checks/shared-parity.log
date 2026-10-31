@@ -1,0 +1,9 @@
+   Compiling ic-wire v0.10.0 (/tmp/wire-tripwire-followup/shared/crates/ic-wire)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running unittests src/lib.rs (/tmp/wire-tripwire-followup/candidate-target/debug/deps/ic_wire-a93ce3f2d71e094f)
+
+running 1 test
+test native::tests::inline_reply_parity_and_boundary ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+

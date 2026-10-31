@@ -1,0 +1,13 @@
+patching file Cargo.lock
+patching file Cargo.toml
+patching file Makefile
+patching file src/export/mod.rs
+patching file Cargo.toml
+patching file Cargo.lock
+patching file crates/ic-wire/src/native/mod.rs
+patching file crates/ic-wire/src/native/tests/mod.rs
+patching file crates/ic-wire/src/endpoint/mod.rs
+patching file crates/ic-wire-derive/src/endpoint/mod.rs
+patching file examples/endpoint/src/lib.rs
+     Locking 1 package to highest Rust 1.91 compatible version
+      Adding lz4_flex v0.14.0

@@ -1,0 +1,28 @@
+[
+  {
+    "profile": "evaluation",
+    "before": {
+      "total": 20059,
+      "code": 17717,
+      "sha256": "e5acb02841c60840f41c60afadd0c84e5e052845a585b779dbb063818eaeb120"
+    },
+    "after": {
+      "total": 20828,
+      "code": 18242,
+      "sha256": "9d037ce5dc2a69c8b74028e9530bd06c5fdc6648bc846e06d878e056515d0276"
+    }
+  },
+  {
+    "profile": "benchmark-speed",
+    "before": {
+      "total": 21187,
+      "code": 19071,
+      "sha256": "6043b6e5430aef158fa701e00b729587c566e9bd9a237d0e551e028ba06ed593"
+    },
+    "after": {
+      "total": 21661,
+      "code": 19544,
+      "sha256": "67fdd4c7e9b16cd324e8b0f96ce2bef740d384c62460b22784486e938cae0e64"
+    }
+  }
+]

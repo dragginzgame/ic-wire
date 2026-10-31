@@ -84,22 +84,43 @@ fn measure(operation: &mut dyn FnMut(), samples: usize, millis: u128) -> serde_j
     }
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<_> = std::env::args()
-        .skip(1)
-        .filter(|a| a != "--bench")
-        .collect();
-    assert!(
-        (2..=4).contains(&args.len()),
-        "usage: suite OUTPUT PROFILE [SAMPLES=11] [BATCH_MS=2]"
-    );
+    let arguments = clap::Command::new("suite")
+        .about("Measure the selected native codec corpus in a new evidence directory")
+        .arg(
+            clap::Arg::new("output")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .arg(
+            clap::Arg::new("profile")
+                .required(true)
+                .value_parser(["evaluation", "benchmark-speed"]),
+        )
+        .arg(
+            clap::Arg::new("samples")
+                .default_value("11")
+                .value_parser(clap::builder::RangedU64ValueParser::<usize>::new().range(3..=101)),
+        )
+        .arg(
+            clap::Arg::new("batch-ms")
+                .default_value("2")
+                .value_parser(clap::builder::RangedU64ValueParser::<u128>::new().range(1..=100)),
+        )
+        // Cargo adds this to harness=false benchmarks. Admit it declaratively,
+        // without filtering argv or changing the measured workload.
+        .arg(
+            clap::Arg::new("bench")
+                .long("bench")
+                .hide(true)
+                .action(clap::ArgAction::Count),
+        )
+        .get_matches();
     let directory = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
-        .join(&args[0]);
-    let profile = &args[1];
-    assert!(["evaluation", "benchmark-speed"].contains(&profile.as_str()));
-    let samples: usize = args.get(2).map(|s| s.parse().unwrap()).unwrap_or(11);
-    let millis: u128 = args.get(3).map(|s| s.parse().unwrap()).unwrap_or(2);
-    assert!((3..=101).contains(&samples) && (1..=100).contains(&millis));
+        .join(arguments.get_one::<PathBuf>("output").unwrap());
+    let profile = arguments.get_one::<String>("profile").unwrap();
+    let samples = *arguments.get_one::<usize>("samples").unwrap();
+    let millis = *arguments.get_one::<u128>("batch-ms").unwrap();
     fs::create_dir(&directory)?;
     fs::write(
         directory.join("fixture.rs"),

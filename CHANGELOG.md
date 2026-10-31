@@ -1,15 +1,43 @@
 # Changelog
 
-## [0.11.0] - Unreleased
+## [0.11.0]
 
 ### ⚠️ Breaking
 
-- Align `platform-types` and `endpoint` with published IC Platform 0.12.0.
-  Consumers using either integration must align their direct Platform selection
-  on 0.12; native typed clients must also use a matching Wire release.
-  This fixes Principal/Account schema derives with Platform 0.12 while preserving
-  codec bytes, bounds, handlers and core-only dependency isolation.
-  [#34 — Supply platform-types schemas compatible with published Platform 0.12](https://github.com/dragginzgame/ic-wire/issues/34).
+- Adopt Platform 0.12.0 for both optional integrations. Consumers using
+  `platform-types` must select Platform 0.12 for Principal/Account schema trait
+  identity; endpoint consumers must align their runtime suppliers on 0.12.
+  Core-only users need no migration. Handler syntax, codec bytes, budgets,
+  malformed-input acceptance and retained retry/hash bytes are unchanged.
+  [#34 — Supply platform-types schemas compatible with Platform 0.12](https://github.com/dragginzgame/ic-wire/issues/34)
+  tracks publication; native typed clients must also align their Wire minor.
+
+### 🩹 Fixed
+
+- Replace benchmark/report CLI scanners with Clap declarations, including typed
+  native paths, report modes, numeric ranges/defaults and Cargo's `--bench` flag.
+  Help and argument errors now complete before output/server/measurement effects;
+  surplus report arguments are rejected. Retain create-only evidence and all
+  benchmark workloads ([#31](https://github.com/dragginzgame/ic-wire/issues/31)).
+  Production dependencies and the protocol are unchanged.
+
+### ⬆️ Dependencies
+
+- Adopt IC Build/Testkit 0.72.1 with their coordinated Host dependencies.
+  Select and prepare the managed release editor at 0.72.1.
+  This tooling update leaves serialization, budgets and protocol bytes unchanged;
+  Shared Tooling remains current at the reviewed 0.27.11 snapshot.
+
+### 🧪 Testing
+
+- Qualify the [Platform 0.12 adoption](docs/evidence/platform012-adoption/README.md)
+  through standalone schema and installed endpoint checks, a matched instruction/
+  cycle comparison; retain the prior Tooling 0.72.1 release-editor qualification.
+- Investigate three [Tripwire follow-ups](docs/evidence/tripwire-followup-0101/README.md)
+  on the new suppliers: small-reply inline storage, selective ingress copying,
+  and bounded LZ4 transport. Retain reproducible IC instruction, exact-byte and
+  uncompressed Wasm evidence; no experimental codec, dependency or endpoint API
+  is added to production.
 
 ## [0.10.0] - 2026-10-30
 

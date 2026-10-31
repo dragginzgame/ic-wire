@@ -6,29 +6,55 @@ use std::{
     io::Write,
     path::{Path, PathBuf},
 };
+fn command() -> clap::Command {
+    clap::Command::new("codec-report")
+        .about("Summarize codec evidence, inspect a Wasm code section, or find a Cargo artifact")
+        .arg(clap::Arg::new("directory").value_parser(clap::value_parser!(PathBuf)))
+        .arg(
+            clap::Arg::new("primary")
+                .value_parser(["wire-native", "wire-bounded", "wire-packed-i16"])
+                .default_value_if(
+                    "directory",
+                    clap::builder::ArgPredicate::IsPresent,
+                    "wire-native",
+                )
+                .requires("directory"),
+        )
+        .arg(
+            clap::Arg::new("code-size")
+                .long("code-size")
+                .value_name("WASM")
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .arg(
+            clap::Arg::new("artifact")
+                .long("artifact")
+                .value_name("CARGO_JSON")
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .group(
+            clap::ArgGroup::new("mode")
+                .args(["directory", "code-size", "artifact"])
+                .required(true),
+        )
+}
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut args = std::env::args().skip(1);
-    if let Some(first) = args.next() {
-        if first == "--code-size" {
-            let wasm = fs::read(args.next().ok_or("Wasm file required")?)?;
-            println!("{}", code_size(&wasm)?);
-        } else if first == "--artifact" {
-            let messages = fs::read_to_string(args.next().ok_or("Cargo JSON file required")?)?;
-            println!("{}", artifact(&messages)?.display());
-        } else {
-            let root = PathBuf::from(first);
-            let primary = args.next().unwrap_or_else(|| "wire-native".into());
-            let report = comparison(&root, &primary)?;
-            fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(root.join("comparison.csv"))?
-                .write_all(&report)?;
-        }
-        Ok(())
+    let arguments = command().get_matches();
+    if let Some(path) = arguments.get_one::<PathBuf>("code-size") {
+        println!("{}", code_size(&fs::read(path)?)?);
+    } else if let Some(path) = arguments.get_one::<PathBuf>("artifact") {
+        println!("{}", artifact(&fs::read_to_string(path)?)?.display());
     } else {
-        Err("evidence directory or --artifact Cargo JSON file required".into())
+        let root = arguments.get_one::<PathBuf>("directory").unwrap();
+        let primary = arguments.get_one::<String>("primary").unwrap();
+        let report = comparison(root, primary)?;
+        fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(root.join("comparison.csv"))?
+            .write_all(&report)?;
     }
+    Ok(())
 }
 
 // Read section framing only; this reports the code-section payload, not module
@@ -88,9 +114,6 @@ fn artifact(messages: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
 }
 
 fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    if !matches!(primary, "wire-native" | "wire-bounded" | "wire-packed-i16") {
-        return Err("expected wire-native, wire-bounded or wire-packed-i16 primary lane".into());
-    }
     let mut out = Vec::new();
     writeln!(
         out,

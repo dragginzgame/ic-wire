@@ -1,0 +1,55 @@
+Endpoint compile evidence: /home/adam/projects/ic-wire/target/endpoint-check.xn7Q5D
+   Compiling ic-platform-runtime-guard v0.12.0
+   Compiling ic-platform v0.11.1
+   Compiling ic-platform v0.12.0
+   Compiling ic-testkit v0.72.1
+   Compiling ic-wire v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint-fixture v0.10.0 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.76s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire_endpoint_fixture-a3295a3293bb05ce)
+
+running 3 tests
+test tests::defaults_and_overrides_bind_the_actual_contract ... ok
+test tests::borrowed_fields_and_reply_retain_input_storage ... ok
+test tests::declaration_matches_types_constants_and_existing_projection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire-faba4b321f5b7bfc)
+
+running 1 test
+test native::tests::automatic_method_identity_vectors_and_frame ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+   Compiling ic-platform-macros v0.12.0
+   Compiling ic-wire-derive v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-platform v0.12.0
+    Checking ic-wire v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.40s
+   Compiling ic-wire-derive v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-platform v0.12.0
+    Checking ic-platform v0.11.1
+    Checking ic-testkit v0.72.1
+    Checking ic-wire v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint-fixture v0.10.0 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.14s
+   Compiling ic-platform v0.12.0
+   Compiling ic-wire v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running `target/debug/examples/check-diagnostics /home/adam/projects/ic-wire/target/endpoint-check.xn7Q5D --endpoint`
+11 expected diagnostics and passing control verified
+   Compiling ic-platform-runtime-guard v0.12.0
+   Compiling ic-platform-macros v0.12.0
+   Compiling ic-platform v0.12.0
+   Compiling ic-wire v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint-fixture v0.10.0 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `evaluation` profile [optimized] target(s) in 1.33s
+   Compiling ic-platform-runtime-guard v0.12.0
+   Compiling ic-platform-macros v0.12.0
+    Checking ic-platform v0.12.0
+    Checking ic-wire v0.10.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint-fixture v0.10.0 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.01s

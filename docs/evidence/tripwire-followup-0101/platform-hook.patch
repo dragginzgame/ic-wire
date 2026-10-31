@@ -1,0 +1,11 @@
+--- a/src/export/mod.rs
++++ b/src/export/mod.rs
+@@ -427,7 +427,7 @@
+                     quote! { #encoder() }
+                 };
+                 quote! {
+-                    let bytes: ::std::vec::Vec<u8> = #return_bytes;
++                    let bytes = #return_bytes;
+                     #cratename::api::msg_reply(bytes);
+                 }
+             }

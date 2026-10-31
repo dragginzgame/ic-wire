@@ -1,0 +1,29 @@
+[
+  {
+    "package": "ic-platform",
+    "before": "0.11.1",
+    "after": "0.12.0",
+    "identical": true,
+    "files": 120,
+    "changed": [],
+    "tree_sha256": "20e7d68010eaf7673b6a330f236aec125c2d19da7d615b1f31798a2fd8129af7"
+  },
+  {
+    "package": "ic-platform-macros",
+    "before": "0.11.1",
+    "after": "0.12.0",
+    "identical": true,
+    "files": 5,
+    "changed": [],
+    "tree_sha256": "ae229703bc56a5abcf985ab9e47e794e6d84190967135b2e740bc6e0a8d288aa"
+  },
+  {
+    "package": "ic-platform-runtime-guard",
+    "before": "0.11.1",
+    "after": "0.12.0",
+    "identical": true,
+    "files": 1,
+    "changed": [],
+    "tree_sha256": "aa3b7323e83c8d8a9ef1cc1f4f8ca8ef16703d8230c43702181a68493609cd70"
+  }
+]

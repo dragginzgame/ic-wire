@@ -1,0 +1,168 @@
+Qualification date: 2026-10-31
+Fixture SHA-256: 994eab4bbe6637ea69c30c475d10e411071256cc35b19847ca52540b1ab53f72
+
+host.log
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling version_check v0.9.5
+   Compiling zmij v1.0.23
+   Compiling crc32fast v1.5.3
+   Compiling ic-platform-runtime-guard v0.11.1
+   Compiling cfg-if v1.0.5
+   Compiling serde_json v1.0.154
+   Compiling itoa v1.0.18
+   Compiling data-encoding v2.11.1
+   Compiling pin-project-lite v0.2.17
+   Compiling memchr v2.8.3
+   Compiling bytemuck v1.25.2
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling serde_bytes v0.11.19
+   Compiling ic-platform-macros v0.11.1
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.10.0
+   Compiling cobs v0.3.0
+   Compiling ic-platform v0.11.1
+   Compiling postcard v1.1.3
+   Compiling ic-wire v0.10.0
+   Compiling wire-published-composition-check v0.0.0 (/tmp/wire-issues-31-34/published)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.36s
+     Running unittests src/lib.rs (/tmp/wire-issues-31-34/published/target/debug/deps/wire_published_composition_check-53fd456ce5027589)
+
+running 5 tests
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::combined_endpoint_uses_the_same_schema_trait ... ok
+test tests::principal_schema_and_frames ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+wasm.log
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling version_check v0.9.5
+   Compiling ic-platform-runtime-guard v0.11.1
+   Compiling crc32fast v1.5.3
+    Checking cfg-if v1.0.5
+    Checking pin-project-lite v0.2.17
+    Checking data-encoding v2.11.1
+    Checking bytemuck v1.25.2
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+    Checking serde_bytes v0.11.19
+   Compiling ic-platform-macros v0.11.1
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.10.0
+    Checking cobs v0.3.0
+    Checking ic-platform v0.11.1
+    Checking postcard v1.1.3
+    Checking ic-wire v0.10.0
+    Checking wire-published-composition-check v0.0.0 (/tmp/wire-issues-31-34/published)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.96s
+
+schema-host.txt
+wire-published-composition-check v0.0.0 (/tmp/wire-issues-31-34/published) features=
+ic-platform v0.11.1 features=principal
+crc32fast v1.5.3 features=default,std
+cfg-if v1.0.5 features=
+data-encoding v2.11.1 features=alloc,default,std
+serde v1.0.229 features=alloc,derive,serde_derive
+serde_core v1.0.229 features=alloc,result,std
+serde_derive v1.0.229 (proc-macro) features=default
+proc-macro2 v1.0.107 features=default,proc-macro
+unicode-ident v1.0.27 features=
+quote v1.0.47 features=default,proc-macro
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+syn v3.0.9 features=clone-impls,default,derive,parsing,printing,proc-macro,visit
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+unicode-ident v1.0.27 features=
+thiserror v2.0.21 features=default,std
+thiserror-impl v2.0.21 (proc-macro) features=
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+syn v3.0.9 features=clone-impls,default,derive,parsing,printing,proc-macro,visit (*)
+ic-wire v0.10.0 features=platform-types,typescript
+bytemuck v1.25.2 features=must_cast
+ic-platform v0.11.1 features=principal (*)
+ic-wire-derive v0.10.0 (proc-macro) features=
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+syn v3.0.9 features=clone-impls,default,derive,parsing,printing,proc-macro,visit (*)
+postcard v1.1.3 features=alloc
+cobs v0.3.0 features=
+thiserror v2.0.21 features=default,std (*)
+serde v1.0.229 features=alloc,derive,serde_derive (*)
+serde v1.0.229 features=alloc,derive,serde_derive (*)
+serde_bytes v0.11.19 features=alloc
+serde_core v1.0.229 features=alloc,result,std
+serde_json v1.0.154 features=default,std
+itoa v1.0.18 features=
+memchr v2.8.3 features=alloc,std
+serde_core v1.0.229 features=alloc,result,std
+zmij v1.0.23 features=
+serde v1.0.229 features=alloc,derive,serde_derive (*)
+
+combined-wasm.txt
+wire-published-composition-check v0.0.0 (/tmp/wire-issues-31-34/published) features=endpoint
+ic-platform v0.11.1 features=cdk,executor,ic0,principal,runtime
+crc32fast v1.5.3 features=default,std
+cfg-if v1.0.5 features=
+data-encoding v2.11.1 features=alloc,default,std
+ic-platform-macros v0.11.1 (proc-macro) features=
+proc-macro2 v1.0.107 features=default,proc-macro
+unicode-ident v1.0.27 features=
+quote v1.0.47 features=default,proc-macro
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+syn v2.0.119 features=clone-impls,default,derive,full,parsing,printing,proc-macro
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+unicode-ident v1.0.27 features=
+ic-platform-runtime-guard v0.11.1 features=
+pin-project-lite v0.2.17 features=
+serde v1.0.229 features=alloc,derive,serde_derive
+serde_core v1.0.229 features=alloc,result
+serde_derive v1.0.229 (proc-macro) features=default
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+syn v3.0.9 features=clone-impls,default,derive,full,parsing,printing,proc-macro,visit
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+unicode-ident v1.0.27 features=
+slotmap v1.1.1 features=default,std
+version_check v0.9.5 features=
+thiserror v2.0.21 features=default,std
+thiserror-impl v2.0.21 (proc-macro) features=
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+syn v3.0.9 features=clone-impls,default,derive,full,parsing,printing,proc-macro,visit (*)
+ic-wire v0.10.0 features=endpoint,platform-types,typescript
+bytemuck v1.25.2 features=must_cast
+ic-platform v0.11.1 features=cdk,executor,ic0,principal,runtime (*)
+ic-wire-derive v0.10.0 (proc-macro) features=endpoint
+proc-macro2 v1.0.107 features=default,proc-macro (*)
+quote v1.0.47 features=default,proc-macro (*)
+syn v3.0.9 features=clone-impls,default,derive,full,parsing,printing,proc-macro,visit (*)
+postcard v1.1.3 features=alloc
+cobs v0.3.0 features=
+thiserror v2.0.21 features=default,std (*)
+serde v1.0.229 features=alloc,derive,serde_derive (*)
+serde v1.0.229 features=alloc,derive,serde_derive (*)
+serde_bytes v0.11.19 features=alloc
+serde_core v1.0.229 features=alloc,result
+serde v1.0.229 features=alloc,derive,serde_derive (*)
+

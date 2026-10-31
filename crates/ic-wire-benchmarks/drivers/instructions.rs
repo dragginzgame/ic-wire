@@ -13,11 +13,15 @@ fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = PathBuf::from(
-        std::env::args()
-            .nth(1)
-            .expect("completed native/Wasm evidence directory"),
-    );
+    let arguments = clap::Command::new("codec-instructions")
+        .about("Measure completed native/Wasm evidence using a prepared PocketIC server")
+        .arg(
+            clap::Arg::new("directory")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .get_matches();
+    let root = arguments.get_one::<PathBuf>("directory").unwrap();
     let output = root.join("instructions");
     fs::create_dir(&output)?;
     // Testkit admits explicit binary compatibility and owns process lifetime.

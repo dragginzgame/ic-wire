@@ -1,0 +1,82 @@
+[
+  {
+    "name": "ic-platform",
+    "before": "0.11.0",
+    "after": "0.11.1",
+    "source_identity": {
+      "files": 120,
+      "sha256": "19ce58c753efaa89884c6c172aa0962ddb0fc7d42d5301566f147ccc75d9cd43"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-platform-macros",
+    "before": "0.11.0",
+    "after": "0.11.1",
+    "source_identity": {
+      "files": 5,
+      "sha256": "7cd4eba7813b3e9e2ab93a83965d225d08033a492d4be31e949839c83c49bb61"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-platform-runtime-guard",
+    "before": "0.11.0",
+    "after": "0.11.1",
+    "source_identity": {
+      "files": 1,
+      "sha256": "4809c67bc44dbc5e8a08e3aa85d0570ef0d1fcd7dc516a6a1c2b277ffc9a433f"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-build",
+    "before": "0.71.0",
+    "after": "0.72.0",
+    "source_identity": {
+      "files": 71,
+      "sha256": "43d4a6275b920516c8ee5adeb63618910d21af43626832babda98867027eb4f1"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-testkit",
+    "before": "0.71.0",
+    "after": "0.72.0",
+    "source_identity": {
+      "files": 28,
+      "sha256": "af851ce74bb1169b18c6858f938ac529026e8e8c1001adb8ac95faa029a83d5b"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-host-artifacts",
+    "before": "0.71.0",
+    "after": "0.72.0",
+    "source_identity": {
+      "files": 32,
+      "sha256": "71a1ff955bf87eb0d5ba9e5267fcbf7dcd9de3f1eed8ac8bc14b097ce7ff2bbe"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-host-fs",
+    "before": "0.71.0",
+    "after": "0.72.0",
+    "source_identity": {
+      "files": 63,
+      "sha256": "761f63c813692279ab1211098e70301700d84adc7b2d3f4ee925fc8838ffd559"
+    },
+    "source_unchanged": true
+  },
+  {
+    "name": "ic-host-process",
+    "before": "0.71.0",
+    "after": "0.72.0",
+    "source_identity": {
+      "files": 52,
+      "sha256": "bd2373f8d961f4961987b4bab4a4d98cd8d39921ae6c94105a412ad34b44effa"
+    },
+    "source_unchanged": true
+  }
+]

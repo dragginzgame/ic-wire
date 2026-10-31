@@ -19,10 +19,11 @@ and enable Wire's `platform-types` instead. Derive `serde::Serialize`,
 `serde::Deserialize` and (on native metadata hosts) `ic_wire::Wire` on the same
 DTOs, using `ic_platform::Principal` and `ic_platform::Account` directly. There
 are no wrappers, Cargo patches or second schema trait. Use a matching Platform
-0.12 release in direct dependencies. Platform 0.11 removed its old schema feature;
-Wire 0.10 supplied this integration for Platform 0.11; the pending Wire 0.11
-aligns its schemas and endpoints with Platform 0.12. Align native typed clients
-that expose Wire limits/errors with the same Wire minor release.
+0.12 release in direct dependencies for the pending Wire 0.11 release. Wire 0.10
+introduced this integration with Platform 0.11, which removed its `wire-schema`
+feature. The 0.12 adoption preserves representation but changes the supplying
+Rust type identity; consumers must align direct Platform dependencies. Align
+native typed clients that expose Wire limits/errors with the supplying Wire minor.
 
 Principal's schema stays bounded bytes with maximum length 29. Account stays an
 ordered record of `owner: Principal`, then `subaccount: Option<[u8; 32]>`.

@@ -1,9 +1,14 @@
 //! Host-only generator timing probe; copy into ic-wire/examples to build.
 use ic_wire::typescript::generate_registry;
 use serde_json::json;
-use std::{collections::BTreeMap, hint::black_box, time::Instant};
+use std::{collections::BTreeMap, hint::black_box, path::PathBuf, time::Instant};
 
 fn main() {
+    let arguments = clap::Command::new("generator-bench")
+        .about("Measure TypeScript generation, optionally retaining generated files in a directory")
+        .arg(clap::Arg::new("directory").value_parser(clap::value_parser!(PathBuf)))
+        .get_matches();
+    let directory = arguments.get_one::<PathBuf>("directory");
     for kind in ["record", "enum", "methods"] {
         for count in [8, 128, 1024] {
             let mut types = BTreeMap::new();
@@ -26,18 +31,49 @@ fn main() {
                 };
                 types.insert("Payload".into(), node);
             }
-            let expected = generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap();
-            if let Some(directory) = std::env::args().nth(1) {
-                std::fs::write(format!("{directory}/{kind}-{count}.ts"), &expected).unwrap();
+            let expected = generate_registry(
+                &types,
+                &methods,
+                "./wire-runtime.js",
+                &Default::default(),
+                |report| {
+                    black_box(report);
+                },
+            )
+            .unwrap();
+            if let Some(directory) = directory {
+                std::fs::write(directory.join(format!("{kind}-{count}.ts")), &expected).unwrap();
             }
             for _ in 0..100 {
-                black_box(generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap());
+                black_box(
+                    generate_registry(
+                        &types,
+                        &methods,
+                        "./wire-runtime.js",
+                        &Default::default(),
+                        |report| {
+                            black_box(report);
+                        },
+                    )
+                    .unwrap(),
+                );
             }
             let mut repetitions = 1;
             loop {
                 let start = Instant::now();
                 for _ in 0..repetitions {
-                    black_box(generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap());
+                    black_box(
+                        generate_registry(
+                            &types,
+                            &methods,
+                            "./wire-runtime.js",
+                            &Default::default(),
+                            |report| {
+                                black_box(report);
+                            },
+                        )
+                        .unwrap(),
+                    );
                 }
                 if start.elapsed().as_millis() >= 20 || repetitions >= 4096 {
                     break;
@@ -47,7 +83,18 @@ fn main() {
             for batch in 0..11 {
                 let start = Instant::now();
                 for _ in 0..repetitions {
-                    black_box(generate_registry(&types, &methods, "./wire-runtime.js", &Default::default(), |report| { black_box(report); }).unwrap());
+                    black_box(
+                        generate_registry(
+                            &types,
+                            &methods,
+                            "./wire-runtime.js",
+                            &Default::default(),
+                            |report| {
+                                black_box(report);
+                            },
+                        )
+                        .unwrap(),
+                    );
                 }
                 println!(
                     "{kind},{count},{batch},{repetitions},{},{:.3}",

@@ -1,0 +1,85 @@
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -419,45 +419,46 @@
+         }
+     }
+ }
++
++struct InlineOutput { reply: InlineReply, limit: usize }
++impl postcard::ser_flavors::Flavor for InlineOutput {
++    type Output = InlineReply;
++    #[inline(never)]
++    fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
++        self.try_extend(&[byte])
++    }
++    #[inline(never)]
++    fn try_extend(&mut self, input: &[u8]) -> postcard::Result<()> {
++        let len = self.reply.as_ref().len();
++        if input.len() > self.limit - len { return Err(postcard::Error::SerializeBufferFull); }
++        match &mut self.reply {
++            InlineReply::Inline { bytes, len } => {
++                bytes[*len..*len+input.len()].copy_from_slice(input);
++                *len += input.len();
++            }
++            InlineReply::Heap(bytes) => bytes.extend_from_slice(input),
++        }
++        Ok(())
++    }
++    fn finalize(self) -> postcard::Result<Self::Output> { Ok(self.reply) }
++}
+ pub(crate) fn encode_inline_response<T: Serialize + ?Sized>(
+-    id: u64,
+-    value: &T,
+-    limits: Limits,
++    id: u64, value: &T, limits: Limits,
+ ) -> Result<InlineReply, Error> {
++    use postcard::ser_flavors::Flavor;
+     let prefix = contract::header(id, 1);
+     let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
+     let total = size + prefix.len();
+-    let budget = Budget::new(limits);
+-    let bounded = encode::Bounded {
+-        value,
+-        budget: &budget,
+-        depth: 1,
++    let reply = if total <= 128 {
++        InlineReply::Inline { bytes: [0;128], len: 0 }
++    } else {
++        let mut bytes=Vec::new();
++        bytes.try_reserve_exact(total).map_err(|_|Error::Allocation)?;
++        InlineReply::Heap(bytes)
+     };
+-    if total <= 128 {
+-        let mut bytes = [0; 128];
+-        bytes[..prefix.len()].copy_from_slice(&prefix);
+-        let written = postcard::to_slice(&bounded, &mut bytes[prefix.len()..total])
+-            .map_err(|_| budget.error())?
+-            .len()
+-            + prefix.len();
+-        Ok(InlineReply::Inline {
+-            bytes,
+-            len: written,
+-        })
+-    } else {
+-        let mut bytes = Vec::new();
+-        bytes
+-            .try_reserve_exact(total)
+-            .map_err(|_| Error::Allocation)?;
+-        bytes.extend_from_slice(&prefix);
+-        let bytes = postcard::serialize_with_flavor(
+-            &bounded,
+-            contract::Output {
+-                bytes,
+-                limit: total,
+-            },
+-        )
+-        .map_err(|_| budget.error())?;
+-        Ok(InlineReply::Heap(bytes))
+-    }
+-}
++    let mut output=InlineOutput { reply, limit: total };
++    output.try_extend(&prefix).map_err(|_|Error::Limit)?;
++    let budget=Budget::new(limits);
++    postcard::serialize_with_flavor(&encode::Bounded {value,budget:&budget,depth:1},output)
++        .map_err(|_|budget.error())
++}

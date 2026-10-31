@@ -25,9 +25,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.71.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.72.1 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.71.0 without default features; the CLI feature is only enabled for installation.
+0.72.1 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -291,7 +291,17 @@ compilation distinct from runtime performance or consumer deployment acceptance.
 
 ## Candid comparison benchmarks
 
-Run `make check-benchmarks` for corpus correctness, lint and Rust 1.91 checks.
+For CLI-only changes, run `make check-benchmark-cli` and
+`cargo test --locked -p ic-wire-benchmarks --example codec-report`.
+The smoke check uses disposable files, exercises actual Cargo/CLI callers and
+builds the copy-only generator probe; it starts no measurements or servers.
+The initial locked workspace build supplies dependencies for the subsequent
+offline probe. Argument errors exit 2, help exits 0, and suite/report outputs
+remain create-only. Paths use native OS values; parsing happens before
+measurement and server setup.
+
+Run the aggregate `make check-benchmarks` for CLI/corpus correctness, lint and
+Rust 1.91 checks.
 This is not a performance regression gate. A full measured comparison is a
 separate run; the [current report](evidence/candid-comparison-0725/README.md)
 records the latest full matrix. The [0.7.10 report](full-comparison-0710.md)

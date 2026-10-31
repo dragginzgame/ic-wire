@@ -87,3 +87,35 @@ It does not fetch, install, publish or release anything. The completed run is
 `/tmp/wire-platform011-published/`; its standalone consumer is
 `candidate/target/platform-types.CMjavi`. Pin/boundary and corpus logs are
 `/tmp/wire-platform011-boundaries.log` and `/tmp/wire-platform011-roundtrip.log`.
+
+## Published Wire consumer follow-up
+
+On 2026-10-31, issue [#32](https://github.com/dragginzgame/ic-wire/issues/32) was
+qualified against **both published packages**, Wire 0.10.0 and Platform 0.11.1,
+without path dependencies or Cargo patches. This is an additional consumer
+composition check, not a rerun of the historical performance comparison above.
+The [standalone manifest](composition-Cargo.toml.snapshot) replaces Platform's
+retired `wire-schema` with Wire's `platform-types`; its `endpoint` feature enables
+the same published runtime supplier. Five fixture tests and Rust 1.91 Wasm
+compilation pass. The schema-only graph selects no runtime owner; the combined
+Wasm graph has one Platform/runtime guard, no Candid and no host serde_json.
+[Logs and dependency graphs](composition-checks.txt) retain the fixture hash.
+
+Reproduce from the repository root with cached registry packages and Rust 1.91:
+
+```sh
+consumer="$(mktemp -d)"
+mkdir "$consumer/src"
+cp docs/evidence/platform-types-transfer/published/composition-Cargo.toml.snapshot "$consumer/Cargo.toml"
+cp crates/ic-wire-qualification/fixtures/platform_types/mod.rs "$consumer/src/lib.rs"
+cargo metadata --manifest-path "$consumer/Cargo.toml" --offline --format-version 1 > "$consumer/metadata.json"
+cargo +1.91.0 test --manifest-path "$consumer/Cargo.toml" --locked --offline --features endpoint --lib
+cargo +1.91.0 check --manifest-path "$consumer/Cargo.toml" --locked --offline --features endpoint --target wasm32-unknown-unknown
+cargo tree --manifest-path "$consumer/Cargo.toml" --locked --offline --edges normal,build
+cargo tree --manifest-path "$consumer/Cargo.toml" --locked --offline --features endpoint --target wasm32-unknown-unknown --edges normal,build
+```
+
+Transitive packages resolve from the available registry index; the two integration
+suppliers are exact. This check establishes composition, not a performance result
+or a downstream Canic/Blob deployment qualification. Platform 0.12 consumers still
+need the pending compatible Wire release tracked by #34.

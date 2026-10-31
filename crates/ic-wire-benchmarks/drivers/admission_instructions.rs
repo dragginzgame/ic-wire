@@ -7,10 +7,22 @@ use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::PathBuf, time::Duration};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut args = std::env::args().skip(1);
-    let wasm_path = PathBuf::from(args.next().expect("Wasm artifact"));
-    let output = PathBuf::from(args.next().expect("new output directory"));
-    fs::create_dir(&output)?;
+    let arguments = clap::Command::new("admission-instructions")
+        .about("Measure admission costs using a Wasm artifact and a new output directory")
+        .arg(
+            clap::Arg::new("wasm")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .arg(
+            clap::Arg::new("output")
+                .required(true)
+                .value_parser(clap::value_parser!(PathBuf)),
+        )
+        .get_matches();
+    let wasm_path = arguments.get_one::<PathBuf>("wasm").unwrap();
+    let output = arguments.get_one::<PathBuf>("output").unwrap();
+    fs::create_dir(output)?;
     assert!(std::env::var_os("IC_TESTKIT_POCKET_IC_URL").is_none());
     let server =
         PathBuf::from(std::env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server"));

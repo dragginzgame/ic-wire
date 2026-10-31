@@ -1,0 +1,116 @@
+[
+  {
+    "profile": "evaluation",
+    "endpoints": 1,
+    "baseline": {
+      "total": 28994,
+      "code": 25072,
+      "sha256": "3bcf532b03420b5cdc608c6a3f00d3d28dc741aa161b00afe233eee2cda05298"
+    },
+    "candidate": {
+      "total": 29756,
+      "code": 25667,
+      "sha256": "4cacc039538fe2bef8351961006e964e728c44b2579120d8248ab171429fa7a0"
+    },
+    "shared": {
+      "total": 29580,
+      "code": 25489,
+      "sha256": "aa5dfccc4ed90663e0249b7e4503dfa4c7082569624cff4e1de01ab158f1b92a"
+    }
+  },
+  {
+    "profile": "evaluation",
+    "endpoints": 10,
+    "baseline": {
+      "total": 49535,
+      "code": 44745,
+      "sha256": "a7c056d6f0cec17f76a9174e3b40f678870d2969c1e28767e8527451d3ccca94"
+    },
+    "candidate": {
+      "total": 54421,
+      "code": 49460,
+      "sha256": "3619a09e77cd84fbf14a7b5775f45dffa03fadc38e162dbfd418d60029c56d7b"
+    },
+    "shared": {
+      "total": 51105,
+      "code": 46146,
+      "sha256": "99d80e74c6d8d9ddf7704407c2ed4219556e52bcab4f0f41e7dbe1d34f271b1d"
+    }
+  },
+  {
+    "profile": "evaluation",
+    "endpoints": 100,
+    "baseline": {
+      "total": 232906,
+      "code": 218985,
+      "sha256": "a08eafaaf15b261ed9a16583aecf0a3c14238336a2817c57e655c55cd5938073"
+    },
+    "candidate": {
+      "total": 271993,
+      "code": 257900,
+      "sha256": "8ba1ab65f155042cc661950c4042450edf3d47fa3902ae5cd6643cb14eac6210"
+    },
+    "shared": {
+      "total": 244107,
+      "code": 230016,
+      "sha256": "d49e957cacb35955c90ae4f4ff26122d6dc17baeb540eea0d43d78b237f91cfc"
+    }
+  },
+  {
+    "profile": "benchmark-speed",
+    "endpoints": 1,
+    "baseline": {
+      "total": 30827,
+      "code": 27173,
+      "sha256": "beecda4861147e830b11f428dcfa4a7674744655df77c64dfdd2430f98f548a3"
+    },
+    "candidate": {
+      "total": 31211,
+      "code": 27450,
+      "sha256": "a240d5a86d791c815aa2ac3bc274c1774dcb649f7facafe1b5cd39b662291902"
+    },
+    "shared": {
+      "total": 31866,
+      "code": 28087,
+      "sha256": "e6c96a5348cc092a0bb3d77362aa0bd5fd1ede82e391e6cc6753e50389f0d88c"
+    }
+  },
+  {
+    "profile": "benchmark-speed",
+    "endpoints": 10,
+    "baseline": {
+      "total": 59782,
+      "code": 55858,
+      "sha256": "177c86211eda724e318372d70fb77dd6b6ea2753157bb9a3d41563b48cdc9423"
+    },
+    "candidate": {
+      "total": 68665,
+      "code": 64633,
+      "sha256": "801d4ac44e23ceedca98ea31cdd5597cda21c9294e7d0551aff3c8b00d275d52"
+    },
+    "shared": {
+      "total": 63040,
+      "code": 58992,
+      "sha256": "296f1a47decd0faa923294ea6b1fd517c573c3f713bd39c4f170cdbd53f0d564"
+    }
+  },
+  {
+    "profile": "benchmark-speed",
+    "endpoints": 100,
+    "baseline": {
+      "total": 331797,
+      "code": 325229,
+      "sha256": "108e31aa803b2e583f63f18400f812b3305382b92b2174fc6bffd35b405fa658"
+    },
+    "candidate": {
+      "total": 410704,
+      "code": 404024,
+      "sha256": "4595decb9aa4209c6f4d03fb94cb85c52f550a9d23f48c747e216ad46e24f146"
+    },
+    "shared": {
+      "total": 359358,
+      "code": 352663,
+      "sha256": "b27d9f2d4f1f721815ee897495f4f2ead7e853e1be2d09c818f48f8b792e15be"
+    }
+  }
+]

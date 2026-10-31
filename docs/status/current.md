@@ -1,99 +1,101 @@
 # Current handoff
 
-## Released 0.10.0; pending Platform 0.12 integration
+## Released 0.10.0; pending 0.11.0
 
-Released baseline: `c9d4e7b`, Wire 0.10.0. The isolated contribution selects
-published Platform/macros/runtime guard 0.12.0 for both optional integrations.
-Own versions stay 0.10.0; the exposed schema/runtime identity change requires
-the pending 0.11.0 minor. Core-only consumers need no migration. Align direct
-Platform selections to 0.12 and native typed clients to the supplying Wire minor.
-[#34 — Supply platform-types schemas compatible with published Platform 0.12](https://github.com/dragginzgame/ic-wire/issues/34)
-owns the producer fix; [Tooling #274 — Align Testkit typed Wire calls](https://github.com/dragginzgame/ic-tooling/issues/274)
-tracks Testkit's exposed Limits/Error pairing. Auth retains its published pair
-until compatible suppliers are published. No publication or merge is authorized.
+Released baseline is `c9d4e7b`. PR [#35](https://github.com/dragginzgame/ic-wire/pull/35)
+merged as `2a6d186` and is fast-forwarded locally. Both optional integrations now
+select published Platform 0.12.0, including its macros/runtime guard. Pending
+Tooling 0.72.1 adoption and Tripwire research were preserved. Own package versions
+remain 0.10.0; leave staging, commits, versioning, releases and publication to the
+maintainer. Shared Tooling remains the reviewed 0.27.11 snapshot at
+`62edfbd43087a718bf0283e9040676a49211976d`.
 
-Focused standalone schema and endpoint checks pass on the new supplier:
-Rust 1.91 native/Wasm, strict Clippy, exact Rust/TypeScript bytes and malformed
-inputs, 11 compiler diagnostics plus passing control, endpoint schema tests and
-dependency isolation. [Evidence and reproduction](../evidence/platform012-adoption/README.md)
-distinguish these results from the retained 0.10 studies below. Platform library,
-macro and runtime-guard Rust sources match 0.11.0 exactly; Wire Rust source is
-unchanged. No cost benchmark or performance claim is applicable to this batch.
-Normal sibling pending 0.10.1 work was preserved; this topic starts at the
-committed release and carries no unrelated Tooling adoption.
+The supplying Principal/Account Rust identities change, so notes target Wire's
+next minor, 0.11.0. Consumers using `platform-types` align their direct Platform
+dependency to 0.12; endpoint consumers align all runtime suppliers. Native typed
+clients exposing Wire Limits/Error also need the supplying Wire minor.
+[#34](https://github.com/dragginzgame/ic-wire/issues/34) remains open for publication;
+[Tooling #274](https://github.com/dragginzgame/ic-tooling/issues/274) tracks the native
+client pairing. Core-only users need no migration. No codec bytes, budgets,
+accepted-input rules, handler syntax, identities or retry/hash inputs change.
 
-## Principal/Account schema transfer
+## Issue follow-up
 
-`platform-types` implements the existing host `typescript::Wire` trait for
-Platform's owned Principal and Account. It enables `principal` with defaults
-disabled and host TypeScript support. Only `endpoint` selects CDK; both features
-share one optional Platform dependency. Core-only Wire remains Platform-free.
-No wrappers, extra crates, serializer alternatives or second schema trait.
+[#31](https://github.com/dragginzgame/ic-wire/issues/31) is fixed locally: the five
+benchmark/report/generator CLIs use the existing workspace Clap dependency.
+Typed native paths, profile/primary choices, ranges/defaults, exclusive report
+modes and Cargo's `--bench` are declared before effects. Measurement code and
+create-only evidence remain unchanged. Clap is host-only in the unpublished
+benchmark package. No codec/protocol change or performance saving is claimed.
 
-Consumers remove Platform `wire-schema` and select Wire `platform-types`.
-Principal stays bounded bytes (max 29); Account stays owner then optional
-32-byte subaccount. Absent and explicit zero remain distinct bytes despite
-Account equality. Serialization, budgets, identities, accepted inputs and
-retry bytes are unchanged. See the [migration](../../crates/ic-wire/README.md#optional-platform-identity-schemas).
+`make check-benchmark-cli` passes 49 focused checks, including a real Cargo bench
+caller stopped at existing output, report reuse refusal and the disposable
+generator probe. Five report tests, focused strict Clippy and Rust 1.91 checks
+pass. The Wasm benchmark graph excludes Clap. No full performance matrix was run
+for CLI mechanics. Logs: `/tmp/wire-issues-31-34/`. Leave #31 open until delivery.
 
-The 0.10 release's single root dependency and lock selected Platform 0.11.0, macros
-and runtime guard together. All 126 supplier source files match the isolated
-preparation; registry archive checksums match the lock. Endpoint consumers must
-align runtime-consuming dependencies on Platform 0.11. The coordinated runtime
-identity change required Wire 0.10.0. No sibling checkout was
-modified and no publication, release or commit was performed.
+[#32](https://github.com/dragginzgame/ic-wire/issues/32) is closed after qualifying
+registry-only Wire 0.10.0 / Platform 0.11.1 together: five combined endpoint/schema
+tests, Rust 1.91 Wasm compilation and feature isolation pass without patches.
+See [published consumer evidence](../evidence/platform-types-transfer/published/README.md#published-wire-consumer-follow-up).
+#34's source fix is merged; it remains open until compatible Wire publication
+and Blob consumer qualification. Nothing was committed, released or published.
 
 ## Qualification
 
-[Prepared-source evidence](../evidence/platform-types-transfer/README.md) binds
-Platform 421edbc plus its prepared removal, the Wire transfer, exact compiler,
-locks, server and artifact hashes. Schema output and Rust frame vectors match
-between registry 0.10 and prepared 0.11. Rust 1.91 standalone derives, host/Wasm
-feature isolation, combined endpoint schemas, strict Clippy and Rust/TS
-byte/malformed tests pass. `make check-platform-types` runs this focused consumer
-proof and is included in the TypeScript CI group.
+[Platform 0.12 evidence and reproduction](../evidence/platform012-adoption/README.md)
+compare the pending Platform 0.11.1 / Tooling 0.72.1 baseline with Platform 0.12.0
+on the same Tooling. Registry Platform/macros/guard source trees are identical.
+Standalone Principal/Account derives pass Rust 1.91 host/Wasm, strict Clippy,
+schema-only and combined endpoint graphs, exact Rust/TypeScript frames and
+malformed-input tests. Endpoint schema/method identity tests, 11 expected compiler
+diagnostics plus passing control, lint and optimized/MSRV Wasm checks pass.
+Installed limits/rollback and the three Candid corpus correctness tests pass.
 
-[Published-supplier qualification](../evidence/platform-types-transfer/published/README.md)
-uses registry 0.11 for standalone schema/Serde consumers, Rust 1.91 host/Wasm,
-combined endpoint graphs and strict Clippy. Exact Rust/TS bytes and malformed
-cases pass. Endpoint native/schema tests, 11 compiler diagnostics and passing
-control, strict lint, Wasm/MSRV and installed limits/rollback pass. The Candid
-comparison corpus's three roundtrip/rejection tests pass on the new supplier.
+The matched 12-case, seven-export probe passes: 384 measured logical calls / 608
+physical executions, eight samples after warmup in each profile. Every instruction
+and cycle sample matches, as do frames and outcomes. Code sections remain 86,068 B
+(opt-z) and 80,630 B (opt-3). Total uncompressed Wasm is 99,951 → 99,947 B and
+93,518 → 93,518 B. The four-byte non-code change is not a codec optimization claim.
+A profiler rebuild was detected during the first pass; the final receipt uses
+one frozen binary and rerun affected samples. Raw work: `/tmp/wire-platform012-adoption/`.
 
-Dependency checks match package names, avoiding a false Candid hit in local
-candidate paths. The canister graph has one runtime; Testkit's native-only
-Platform 0.9.1 stays outside it. Schema-only users select no Candid/executor;
-Wasm has no serde_json and core-only Wire remains Platform-free.
+Testkit 0.72.1 retains native-only Platform 0.11.1 in the development graph.
+Both Wire integrations use the single root Platform 0.12 requirement. Core stays
+Platform-free; schema-only selects no CDK/executor/Candid; Wasm selects no host
+serde_json; production endpoints have one runtime owner. No package patch is
+needed. Pin/boundary and documentation checks pass. No full CI, macOS or new
+full Candid performance matrix was run. The managed 0.72.1 release editor and
+disposable release adapter retain their [prior qualification](../evidence/tripwire-followup-0101/README.md).
 
-The published-supplier comparison covers 12 cases/seven exports, two profiles
-and eight repetitions after warmup: 384 measured logical calls / 608 physical
-executions. Every instruction/cycle sample matches, as do frames and outcomes.
-Code sections remain 86,068 B (opt-z) and 80,630 B (opt-3); total Wasm is
-99,947 → 99,950 B (+3 B, +0.003%) and 93,518 → 93,518 B. Raw outputs are
-`/tmp/wire-platform011-published/`. The prepared study stays separately scoped.
+## PR disposition
 
-Focused pin/boundary checks, format, script syntax and documentation links pass. No full CI, macOS or
-sibling suite was run. Original prepared outputs remain
-`/tmp/wire-platform-types-transfer/`. Exact inputs and reproduction are in
-the evidence; the prepared study's source-path size difference is not a saving.
+PR [#33](https://github.com/dragginzgame/ic-wire/pull/33) was closed as superseded,
+with explicit maintainer approval. Its goal of removing `#[path]` imports shipped
+in 0.8.0 (`59dd019`) through colocated drivers and ordinary modules. Preserve that
+layout and Candid's dev-dependency role; the stale library refactor was not merged.
+PR #35 supplies the Platform adoption; its original focused evidence is retained
+alongside the expanded local qualification. No release/publication tracker was closed. The optional hosted PR matrix was
+still running at the final status check; no hosted/full-CI pass is claimed.
 
-## Maintained tooling and earlier studies
+## Maintained boundaries and earlier research
 
-Build/Testkit/managed release-editor remain 0.71.0. Shared Tooling remains reviewed
-0.27.11 at `62edfbd43087a718bf0283e9040676a49211976d`; no snapshot changes.
-The [previous supplier study](../evidence/platform010-tooling071/README.md) retains
-its own inputs and measurements. Evidence manifests use `.snapshot`, not active
-`Cargo.toml` names. [Publication](../cargo-publication.md) remains explicit.
+Principal stays bounded bytes (max 29); Account stays owner then optional 32-byte
+subaccount. Absent `01 04 00` and explicit zero `01 04 01` plus 32 zero bytes
+remain distinct despite Account equality. Platform owns exports/execution;
+consumers own authentication, dispatch, persistence, retries and deployment.
+Preserve original retry/hash bytes. Synchronous reply failure rolls back; after
+await only the current callback rolls back. See [endpoints](../endpoints.md).
 
-The [Candid matrix](../evidence/candid-comparison-0725/README.md) retains its
-22-cohort controls; ordinary vectors remain weak cases and explicit Packed wins
-its 436 primary comparisons. The [Tripwire comparison](../evidence/tripwire-comparison-0725/README.md)
-is a focused ingress probe, not general CDK-RSX or consumer qualification.
-The [admission study](../evidence/tripwire-adoption-0725/README.md) keeps selective
-input as research: its copied-input, fixed-shape prototype is not a generic
-Serde reader. No pre-copy API or consumer integration is added here.
+The [Tripwire follow-up](../evidence/tripwire-followup-0101/README.md) remains research
+on its recorded Platform 0.11.1 / Tooling 0.72.1 suppliers. Both reply writers were
+rejected: even the shared writer adds 11–28 KB across 100 endpoint types. Selective
+input passed 1,536 updates; a 256 B prefix of 1 MiB saved about 95.7% instructions
+but only 0.186% cycles. It remains fixed-shape research needing a pre-copy contract.
+LZ4 roundtripped 353 inputs with 1,216 measured queries; only 138 inputs shrank,
+with 19–20 KB additional Wasm. Keep compression consumer-owned.
 
-Platform owns exports/execution; consumers own authentication, dispatch, retries,
-persistence and deployment. Retain original retry/hash bytes. Synchronous reply
-failure rolls back; after await only the current callback rolls back. See
-[endpoints](../endpoints.md) and the [SDK recipe](../sdk-integration.md).
+The [Candid matrix](../evidence/candid-comparison-0725/README.md) retains ordinary
+vector controls and explicit Packed comparisons. Historical studies are not
+relabeled to new suppliers. Evidence manifests use `.snapshot`, not active Cargo
+workspace filenames. No experimental codec or dependency entered production.

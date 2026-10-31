@@ -1,0 +1,42 @@
+[
+  {
+    "package": "ic-build",
+    "before": "0.72.0",
+    "after": "0.72.1",
+    "src_files": 71,
+    "source_unchanged": true,
+    "tree_sha256": "2677af8b34db0ffc2e66f16dcd4d47f852bed80621dfda09e9eb1ccf1a812cd0"
+  },
+  {
+    "package": "ic-testkit",
+    "before": "0.72.0",
+    "after": "0.72.1",
+    "src_files": 28,
+    "source_unchanged": true,
+    "tree_sha256": "ee53be3e68be40e7c8d664c8c5e1687fa8442f253f07dd56cd7ff29c54e8c915"
+  },
+  {
+    "package": "ic-host-artifacts",
+    "before": "0.72.0",
+    "after": "0.72.1",
+    "src_files": 32,
+    "source_unchanged": true,
+    "tree_sha256": "93c6ce075c68129c2e2231b58dc3fc5f8adc4b4e3adb401c8edcd0607a1fb680"
+  },
+  {
+    "package": "ic-host-fs",
+    "before": "0.72.0",
+    "after": "0.72.1",
+    "src_files": 63,
+    "source_unchanged": true,
+    "tree_sha256": "0b0a39231f5b96ef0f20ab5f41dcf37ddae1764f2b4958880325348152489c3c"
+  },
+  {
+    "package": "ic-host-process",
+    "before": "0.72.0",
+    "after": "0.72.1",
+    "src_files": 52,
+    "source_unchanged": true,
+    "tree_sha256": "c806303bfaae40bfbc3f9544278299f908d863b74f04f4bd774a24d0c0cef304"
+  }
+]

@@ -1,0 +1,191 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -55,3 +55,6 @@
+ [profile.benchmark-speed]
+ inherits = "evaluation"
+ opt-level = 3
++
++[patch.crates-io]
++ic-platform-macros = { path = "../platform-macros" }
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -940,8 +940,6 @@
+ [[package]]
+ name = "ic-platform-macros"
+ version = "0.11.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "bcd6a82fee85bcf155fd5f38565713581849c4acba2153625f53442f38f579fa"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -402,3 +402,62 @@
+         ..limits
+     })
+ }
++
++// Research only: replace output ownership, not encoding or admission. Both
++// branches size once, cap writes at that result and emit identical framed bytes.
++// The Platform experiment allows any owned AsRef<[u8]> encoder output.
++#[doc(hidden)]
++pub enum InlineReply {
++    Inline { bytes: [u8; 128], len: usize },
++    Heap(Vec<u8>),
++}
++impl AsRef<[u8]> for InlineReply {
++    fn as_ref(&self) -> &[u8] {
++        match self {
++            Self::Inline { bytes, len } => &bytes[..*len],
++            Self::Heap(bytes) => bytes,
++        }
++    }
++}
++pub(crate) fn encode_inline_response<T: Serialize + ?Sized>(
++    id: u64,
++    value: &T,
++    limits: Limits,
++) -> Result<InlineReply, Error> {
++    let prefix = contract::header(id, 1);
++    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
++    let total = size + prefix.len();
++    let budget = Budget::new(limits);
++    let bounded = encode::Bounded {
++        value,
++        budget: &budget,
++        depth: 1,
++    };
++    if total <= 128 {
++        let mut bytes = [0; 128];
++        bytes[..prefix.len()].copy_from_slice(&prefix);
++        let written = postcard::to_slice(&bounded, &mut bytes[prefix.len()..total])
++            .map_err(|_| budget.error())?
++            .len()
++            + prefix.len();
++        Ok(InlineReply::Inline {
++            bytes,
++            len: written,
++        })
++    } else {
++        let mut bytes = Vec::new();
++        bytes
++            .try_reserve_exact(total)
++            .map_err(|_| Error::Allocation)?;
++        bytes.extend_from_slice(&prefix);
++        let bytes = postcard::serialize_with_flavor(
++            &bounded,
++            contract::Output {
++                bytes,
++                limit: total,
++            },
++        )
++        .map_err(|_| budget.error())?;
++        Ok(InlineReply::Heap(bytes))
++    }
++}
+--- a/crates/ic-wire/src/native/tests/mod.rs
++++ b/crates/ic-wire/src/native/tests/mod.rs
+@@ -80,3 +80,40 @@
+         }
+     }
+ }
++
++#[test]
++fn inline_reply_parity_and_boundary() {
++    let limits = crate::Limits {
++        bytes: 4096,
++        allocation: 65536,
++        nodes: 1024,
++        depth: 16,
++    };
++    for length in 0..300 {
++        let value = crate::ByteBuf::from(alloc::vec![0xa5; length]);
++        let expected = super::encode_response(7, &value, limits).unwrap();
++        let actual = super::encode_inline_response(7, &value, limits).unwrap();
++        assert_eq!(actual.as_ref(), expected);
++        assert_eq!(
++            matches!(actual, super::InlineReply::Inline { .. }),
++            expected.len() <= 128
++        );
++        for bounded in [
++            crate::Limits {
++                bytes: expected.len() - 1,
++                ..limits
++            },
++            crate::Limits { nodes: 0, ..limits },
++            crate::Limits { depth: 0, ..limits },
++            crate::Limits {
++                allocation: 0,
++                ..limits
++            },
++        ] {
++            assert_eq!(
++                super::encode_inline_response(7, &value, bounded).err(),
++                super::encode_response(7, &value, bounded).err()
++            );
++        }
++    }
++}
+--- a/crates/ic-wire/src/endpoint/mod.rs
++++ b/crates/ic-wire/src/endpoint/mod.rs
+@@ -28,7 +28,7 @@
+ //! final artifact checks remain framework-owned; do not stack two export macros.
+ 
+ use crate::{Limits, native};
+-use alloc::{string::ToString, vec::Vec};
++use alloc::string::ToString;
+ use serde::{Deserialize, Serialize};
+ 
+ pub use ic_wire_derive::{query, update};
+@@ -161,8 +161,12 @@
+ ///
+ /// A trap (rather than a rejection or error reply) preserves synchronous mutation
+ /// rollback. Earlier async transactions remain committed; see the module docs.
+-pub fn encode_response<T: Serialize + ?Sized>(value: &T, id: u64, limits: Limits) -> Vec<u8> {
+-    native::encode_response(id, value, limits).unwrap_or_else(|error| trap_error(error))
++pub fn encode_response<T: Serialize + ?Sized>(
++    value: &T,
++    id: u64,
++    limits: Limits,
++) -> native::InlineReply {
++    native::encode_inline_response(id, value, limits).unwrap_or_else(|error| trap_error(error))
+ }
+ 
+ // Keep failure formatting shared across request/reply types and admission.
+--- a/crates/ic-wire-derive/src/endpoint/mod.rs
++++ b/crates/ic-wire-derive/src/endpoint/mod.rs
+@@ -176,11 +176,12 @@
+                     Ok(())
+                 }
+                 fn #decode(bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> { bytes }
++                fn #encode(bytes: #wire::native::InlineReply) -> #wire::native::InlineReply { bytes }
+                 #[#wire::endpoint::__private::cdk::#attribute(
+                     name = #export, #composite crate = #cdk_path,
+-                    guard = #admit_path, decode_with = #decode_path, encode_with = #decode_path
++                    guard = #admit_path, decode_with = #decode_path, encode_with = #encode_path
+                 )]
+-                fn #entry(#bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> {
++                fn #entry(#bytes: ::std::vec::Vec<u8>) -> #wire::native::InlineReply {
+                     let #value: #request_type = #wire::endpoint::decode_request(
+                         &#bytes, #settings.id, #settings.request);
+                     let #reply = #function_name(#value);
+@@ -203,7 +204,7 @@
+             fn #decode(bytes: ::std::vec::Vec<u8>) -> #request_type {
+                 #wire::endpoint::decode_request(&bytes, #settings.id, #settings.request)
+             }
+-            fn #encode(value: #response_type) -> ::std::vec::Vec<u8> {
++            fn #encode(value: #response_type) -> #wire::native::InlineReply {
+                 #wire::endpoint::encode_response(&value, #settings.id, #settings.response)
+             }
+             #[#wire::endpoint::__private::cdk::#attribute(
+--- a/examples/endpoint/src/lib.rs
++++ b/examples/endpoint/src/lib.rs
+@@ -163,7 +163,7 @@
+         );
+         let reply = borrowed_echo(view);
+         assert_eq!(
+-            ic_wire::endpoint::encode_response(&reply, 17, LIMITS),
++            ic_wire::endpoint::encode_response(&reply, 17, LIMITS).as_ref(),
+             ic_wire::native::encode_response(17, &value, LIMITS).unwrap()
+         );
+         #[cfg(feature = "schema")]

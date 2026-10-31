@@ -1,0 +1,40 @@
+--- a/crates/ic-wire-benchmarks/Cargo.toml
++++ b/crates/ic-wire-benchmarks/Cargo.toml
+@@ -11,6 +11,7 @@
+ ic-testkit.workspace = true
+ 
+ [features]
++stack-input = []
+ selective-input = []
+ direct-owned-input = []
+ wire = []
+--- a/crates/ic-wire-benchmarks/examples/selective_input/mod.rs
++++ b/crates/ic-wire-benchmarks/examples/selective_input/mod.rs
+@@ -157,15 +157,19 @@
+     } else if cfg!(feature = "direct-owned-input") {
+         direct_owned(&locate(length, copy).unwrap(), copy)
+     } else {
+-        let input = ic_platform::cdk::api::msg_arg_data();
+-        if cfg!(feature = "borrowed-input") {
+-            let value: Borrowed<'_> = native::decode_request(ID, &input, LIMITS).unwrap();
+-            consume(value.mode, value.nonce, value.body.as_slice())
++        // Research: same complete contiguous input and strict decoder. Only the
++        // small input owner changes; no skipped bytes or new admission rules.
++        let mut scratch = [0;128];
++        let heap;
++        let input = if cfg!(feature = "stack-input") && length <= scratch.len() {
++            copy(0, &mut scratch[..length]);
++            &scratch[..length]
+         } else {
+-            let value: Owned = native::decode_request(ID, &input, LIMITS).unwrap();
+-            drop(input);
+-            consume(value.mode, value.nonce, value.body.as_slice())
+-        }
++            heap = ic_platform::cdk::api::msg_arg_data();
++            &heap
++        };
++        let value: Borrowed<'_> = native::decode_request(ID, input, LIMITS).unwrap();
++        consume(value.mode, value.nonce, value.body.as_slice())
+     };
+     let mut output = [0; 24];
+     for (i, value) in result.iter().enumerate() {

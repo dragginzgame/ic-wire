@@ -75,7 +75,6 @@ fn comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse() {
     fs::write(&file, finite).unwrap();
     assert!(comparison(&root, "wire-native").is_err());
     assert!(comparison(&root, "wire-bounded").is_ok());
-    assert!(comparison(&root, "unknown").is_err());
     fs::write(&file, &candid).unwrap();
     assert!(comparison(&root, "wire-bounded").is_err());
     // A native control must not mask a missing packed measurement.
@@ -124,4 +123,33 @@ fn comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse() {
             .contains("input identity mismatch")
     );
     fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn report_cli_preserves_modes_and_defaults() {
+    command().debug_assert();
+    let args = command()
+        .try_get_matches_from(["report", "evidence"])
+        .unwrap();
+    assert_eq!(args.get_one::<String>("primary").unwrap(), "wire-native");
+    for mode in ["--artifact", "--code-size"] {
+        let args = command()
+            .try_get_matches_from(["report", mode, "file"])
+            .unwrap();
+        assert!(args.get_one::<String>("primary").is_none());
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn report_cli_preserves_native_path_bytes() {
+    use std::{ffi::OsString, os::unix::ffi::OsStringExt};
+    let path = OsString::from_vec(b"non-utf8-\xff".to_vec());
+    let args = command()
+        .try_get_matches_from([OsString::from("report"), path.clone()])
+        .unwrap();
+    assert_eq!(
+        args.get_one::<PathBuf>("directory").unwrap().as_os_str(),
+        path
+    );
 }

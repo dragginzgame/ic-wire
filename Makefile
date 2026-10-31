@@ -6,7 +6,7 @@ export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-RELEASE_EDITOR_VERSION := 0.71.0
+RELEASE_EDITOR_VERSION := 0.72.1
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -46,6 +46,7 @@ evaluate-codec-instructions:
 	+@env cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features wire,candid,ic -- "$(CURDIR)/target/codec-comparison"
 
 check-benchmarks:
+	+@$(MAKE) check-benchmark-cli
 	+@env cargo test --locked -p ic-wire-benchmarks --example codec-report
 	+@env cargo test --locked -p ic-wire-benchmarks --features wire,candid --test roundtrip
 	+@env cargo clippy --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic -- -D warnings
@@ -54,6 +55,10 @@ check-benchmarks:
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features wire,candid
 	+@$(MAKE) check-consumer-benchmarks
+
+.PHONY: check-benchmark-cli
+check-benchmark-cli:
+	+@node scripts/ci/check-benchmark-cli.mjs
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
