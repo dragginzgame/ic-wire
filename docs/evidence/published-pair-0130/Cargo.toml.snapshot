@@ -1,0 +1,16 @@
+[workspace]
+[package]
+name = "published-wire-013-consumer"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.91"
+[features]
+endpoint = ["dep:ic-wire-endpoint"]
+[dependencies]
+ic-wire = { version = "=0.13.0", default-features = false, features = ["platform-types"] }
+ic-wire-endpoint = { version = "=0.2.0", optional = true, features = ["typescript"] }
+ic-platform = { version = "=0.15.0", default-features = false, features = ["principal"] }
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+[dev-dependencies]
+serde_bytes = "0.11"
+serde_json = "1"

@@ -12,8 +12,7 @@ ic-wire = "0.13.0"
 ic-wire-endpoint = "0.2.0"
 ```
 
-This guide describes pending Wire 0.13.0 and Endpoint 0.2.0; they become available only
-after publication. The [standalone fixture](../examples/endpoint/Cargo.toml) uses the local workspace
+Wire 0.13.0 and Endpoint 0.2.0 are published on crates.io. The [standalone fixture](../examples/endpoint/Cargo.toml) uses the local workspace
 package for qualification. Git releases and registry publication remain separate.
 
 Platform embeds its IC0 wrappers and executor. Endpoint users must adopt

@@ -15,11 +15,10 @@ these exact identities; direct `ic_platform_types` imports work too.
 
 Consumers remove Platform's retired `wire-schema` selection and enable Wire's
 `platform-types`. Keep ordinary Serde derives alongside native `ic_wire::Wire`.
-For the pending Wire 0.13 migration, align facade users on Platform 0.15 and
+For the Wire 0.13 migration, align facade users on Platform 0.15 and
 native typed clients/metadata producers on the supplying Wire minor. Afterwards,
 runtime integration upgrades can retain the codec when the Types supplier stays
-fixed. Upstream now versions Types with Platform; incompatible Types version
-changes still require schema supplier alignment.
+fixed. Incompatible Types versions still require schema supplier alignment.
 Published Wire 0.11 still pairs with Platform 0.12. There are no wrappers, Cargo
 patches or second schema trait.
 

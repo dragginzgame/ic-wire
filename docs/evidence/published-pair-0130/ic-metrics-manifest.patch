@@ -1,0 +1,5 @@
+--- ic-metrics/registry/Cargo.toml
++++ ic-metrics/aligned/Cargo.toml
+@@ -56 +56 @@
+-version = "0.11.0"
++version = "=0.13.0"

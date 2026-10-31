@@ -2,9 +2,8 @@
 
 The maintainer approved this boundary for [#36](https://github.com/dragginzgame/ic-wire/issues/36)
 on 2026-10-31 and requested implementation after Platform publication. It is now
-implemented locally, pending delivery/publication. The original prerequisite is
-supplied by registry Platform 0.15 / Types 0.15 and IC Build 0.73. No sibling
-checkout, own existing version, real index or release ref is changed.
+delivered and published as core 0.13.0 / Endpoint 0.2.0. The original prerequisite is
+supplied by registry Platform 0.15 / Types 0.15 and IC Build 0.73. No sibling checkout was modified.
 
 ## Owners and release groups
 
@@ -23,8 +22,7 @@ The sole schema trait owner implements its trait directly for canonical owned
 types. Platform reexports the same definitions; there is no wrapper or orphan-rule
 workaround, Platform-to-Wire dependency, duplicate codec or compatibility lane.
 The core/derive group keeps its identity across endpoint changes that retain the
-Types supplier. Upstream now versions Types together with its workspace; an
-incompatible Types package version still requires core schema alignment. The
+Types supplier. An incompatible Types package version still requires core schema alignment. The
 prospective fixture holds Types fixed to prove Wire isolation, not to promise
 that upstream will retain that selection across its real releases.
 Endpoint's attributes still use the existing derive package and default to the
@@ -49,8 +47,7 @@ malformed acceptance, sync/async rollback and original retry/hash inputs are unc
 - Metrics and typed Testkit callers align once on the supplying core minor;
   runtime-only Endpoint releases can subsequently retain those public identities.
 
-Pending selections are Wire 0.13 and Endpoint 0.2. Existing package versions stay
-0.12.1 / 0.1.0 until maintainer release. The 0.15 supplier alignment changes
+Published selections are Wire/Derive 0.13.0 and Endpoint 0.2.0. The 0.15 supplier alignment changes
 Principal/Account Rust identity without changing their Serde implementation.
 Endpoint initially inherits its core dependency from the root workspace, so core
 release preparation updates that requirement before packaging the dependent endpoint.
@@ -81,10 +78,8 @@ make publish RELEASE_GROUP=core PACKAGE="ic-wire-derive ic-wire"
 make publish RELEASE_GROUP=endpoint PACKAGE=ic-wire-endpoint
 ```
 
-These are maintainer commands, not actions performed by this implementation.
-Endpoint 0.1.0 is published. The current migration selects core 0.13 / Endpoint
-0.2 notes; increment commands refuse mismatched headings. Publish the new core
-before the dependent endpoint. Release, resume and publication reject missing,
+The delegated delivery executed both minor releases and published core 0.13.0
+before Endpoint 0.2.0. Future increments require their own matching notes. Release, resume and publication reject missing,
 empty or unknown groups before setup/effects. Publication selects only the chosen
 group (derive before core); PACKAGE subsets must belong to that group. Exact
 versions and the lint gate remain enforced. There is no implicit group or whole-
@@ -101,6 +96,6 @@ identity package IDs remain fixed. It does not claim a future runtime is release
 
 The combined Platform 0.13 → 0.14 and package move adds 714/555 total Wasm bytes
 at opt-z/opt-3; instruction changes are at most +0.026%. It changes no message
-contract. #36 remains open until the implementation is delivered and its required
-release/consumer acceptance is established. Publication and full hosted/native
-qualification are not implied by local checks.
+contract. [Published-pair evidence](evidence/published-pair-0130/README.md) records
+the delivered releases and registry-only Rust/MSRV/Wasm/TypeScript consumer.
+Hosted CI status and producer-owned adoption are tracked in the current handoff.

@@ -1,0 +1,240 @@
+Consumer identity evidence: /tmp/wire-ship-02719/aligned-consumers
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+     Locking 296 packages to highest Rust 1.91.0 compatible versions
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding ic-metrics v0.22.0 (available: v0.23.2)
+      Adding ic-platform v0.13.0 (available: v0.15.1)
+      Adding ic-platform v0.15.0 (available: v0.15.1)
+      Adding ic-platform-runtime-guard v0.15.0 (available: v0.15.1)
+      Adding thiserror v2.0.18 (available: v2.0.21)
+      Adding thiserror-impl v2.0.18 (available: v2.0.21)
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling proc-macro2 v1.0.107
+   Compiling libc v0.2.191
+   Compiling serde v1.0.229
+   Compiling find-msvc-tools v0.1.15
+   Compiling shlex v2.0.1
+   Compiling smallvec v1.16.4
+   Compiling once_cell v1.21.4
+   Compiling stable_deref_trait v1.2.1
+   Compiling typenum v1.20.1
+   Compiling thiserror v2.0.18
+   Compiling bytes v1.12.1
+   Compiling parking_lot_core v0.9.12
+   Compiling memchr v2.8.3
+   Compiling pkg-config v0.3.34
+   Compiling dunce v1.0.5
+   Compiling fs_extra v1.3.0
+   Compiling scopeguard v1.2.0
+   Compiling futures-core v0.3.34
+   Compiling object v0.39.1
+   Compiling futures-sink v0.3.34
+   Compiling cpufeatures v0.2.17
+   Compiling aws-lc-rs v1.19.0
+   Compiling utf_types v1.0.0
+   Compiling writeable v0.6.4
+   Compiling autocfg v1.5.1
+   Compiling zeroize v1.9.1
+   Compiling litemap v0.8.3
+   Compiling icu_normalizer_data v2.4.0
+   Compiling icu_properties_data v2.4.0
+   Compiling bitflags v2.13.2
+   Compiling slab v0.4.12
+   Compiling lazy_static v1.5.1
+   Compiling binrw_derive v0.15.2
+   Compiling thiserror v1.0.69
+   Compiling rustversion v1.0.23
+   Compiling futures-io v0.3.34
+   Compiling httparse v1.10.1
+   Compiling futures-task v0.3.34
+   Compiling equivalent v1.0.3
+   Compiling either v1.19.0
+   Compiling binrw v0.15.2
+   Compiling anyhow v1.0.104
+   Compiling rustls v0.23.46
+   Compiling percent-encoding v2.3.2
+   Compiling hashbrown v0.17.1
+   Compiling untrusted v0.9.0
+   Compiling paste v1.0.15
+   Compiling fnv v1.0.7
+   Compiling subtle v2.6.1
+   Compiling tower-service v0.3.3
+   Compiling generic-array v0.14.7
+   Compiling lock_api v0.4.14
+   Compiling unicode-width v0.2.3
+   Compiling typed-arena v2.0.2
+   Compiling arrayvec v0.5.2
+   Compiling rustix v1.1.6
+   Compiling log v0.4.35
+   Compiling try-lock v0.2.5
+   Compiling array-init v2.1.0
+   Compiling adler2 v2.0.1
+   Compiling atomic-waker v1.1.2
+   Compiling simd-adler32 v0.3.10
+   Compiling leb128 v0.2.7
+   Compiling byteorder v1.5.0
+   Compiling tracing-core v0.1.36
+   Compiling futures-channel v0.3.34
+   Compiling regex-syntax v0.8.11
+   Compiling unicase v2.10.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling crossbeam-utils v0.8.23
+   Compiling rustls-pki-types v1.15.1
+   Compiling sync_wrapper v1.0.2
+   Compiling openssl-probe v0.2.2
+   Compiling base64 v0.23.1
+   Compiling powerfmt v0.2.1
+   Compiling form_urlencoded v1.2.2
+   Compiling tower-layer v0.3.3
+   Compiling num-conv v0.2.2
+   Compiling cfg_aliases v0.2.2
+   Compiling utf8_iter v1.1.0
+   Compiling ipnet v2.12.2
+   Compiling getrandom v0.4.3
+   Compiling deranged v0.5.9
+   Compiling time-core v0.1.9
+   Compiling sharded-slab v0.1.7
+   Compiling thread_local v1.1.10
+   Compiling schemars v0.8.22
+   Compiling half v1.8.3
+   Compiling nu-ansi-term v0.50.3
+   Compiling heck v0.5.0
+   Compiling mime v0.3.17
+   Compiling want v0.3.2
+   Compiling mime_guess v2.0.5
+   Compiling fastrand v2.5.0
+   Compiling symlink v0.1.0
+   Compiling dyn-clone v1.0.20
+   Compiling num-traits v0.2.19
+   Compiling serde_json v1.0.154
+   Compiling http v1.5.0
+   Compiling futures-util v0.3.34
+   Compiling miniz_oxide v0.9.1
+   Compiling semver v1.0.28
+   Compiling base64 v0.22.1
+   Compiling nix v0.31.3
+   Compiling pretty v0.12.5
+   Compiling tracing-log v0.2.0
+   Compiling indexmap v2.14.2
+   Compiling rustls-native-certs v0.8.5
+   Compiling backon v1.6.0
+   Compiling quote v1.0.47
+   Compiling slog v2.8.2
+   Compiling flate2 v1.1.10
+   Compiling crossbeam-channel v0.5.17
+   Compiling http-body v1.1.0
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling http-body-util v0.1.5
+   Compiling digest v0.10.7
+   Compiling regex-automata v0.4.18
+   Compiling sha2 v0.10.9
+   Compiling num-integer v0.1.47
+   Compiling time v0.3.55
+   Compiling ic-host-artifacts v0.73.0
+   Compiling jobserver v0.1.35
+   Compiling cc v1.10.0
+   Compiling errno v0.3.14
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.4
+   Compiling signal-hook-registry v1.4.8
+   Compiling parking_lot v0.12.5
+   Compiling cmake v0.1.58
+   Compiling matchers v0.2.0
+   Compiling stacker v0.1.25
+   Compiling aws-lc-sys v0.47.0
+   Compiling tempfile v3.27.0
+   Compiling ar_archive_writer v0.5.3
+   Compiling psm v0.1.32
+   Compiling synstructure v0.14.0
+   Compiling serde_derive_internals v0.29.1
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.7
+   Compiling displaydoc v0.2.7
+   Compiling tokio-macros v2.7.2
+   Compiling ic-wire-derive v0.13.0
+   Compiling serde_repr v0.1.21
+   Compiling thiserror-impl v2.0.18
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v1.0.69
+   Compiling candid_derive v0.10.39
+   Compiling strum_macros v0.26.4
+   Compiling ic-platform-macros v0.15.1
+   Compiling schemars_derive v0.8.22
+   Compiling tokio v1.54.1
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.4
+   Compiling tracing v0.1.44
+   Compiling zerovec v0.11.9
+   Compiling zerotrie v0.2.5
+   Compiling cobs v0.3.0
+   Compiling command-fds v0.3.3
+   Compiling ic-host-fs v0.73.0
+   Compiling strum v0.26.3
+   Compiling tinystr v0.8.5
+   Compiling potential_utf v0.1.6
+   Compiling ic-host-process v0.73.0
+   Compiling icu_collections v2.4.0
+   Compiling icu_locale_core v2.4.0
+   Compiling icu_provider v2.4.0
+   Compiling hex v0.4.3
+   Compiling num-bigint v0.4.8
+   Compiling ic_principal v0.1.5
+   Compiling tracing-serde v0.2.0
+   Compiling ic-platform-types v0.15.1
+   Compiling erased-serde v0.3.31
+   Compiling postcard v1.1.3
+   Compiling serde_cbor v0.11.2
+   Compiling ic-metrics v0.22.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling icu_normalizer v2.4.0
+   Compiling icu_properties v2.4.0
+   Compiling ic-platform v0.15.0
+   Compiling ic-certification v3.2.0
+   Compiling ic-wire v0.13.0
+   Compiling ic-metrics v0.22.0 (/tmp/wire-ship-02719/aligned-consumers/ic-metrics)
+   Compiling ic-wire-endpoint v0.2.0
+   Compiling candid v0.10.39
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling tracing-appender v0.2.5
+   Compiling url v2.5.8
+   Compiling tokio-util v0.7.20
+   Compiling tower v0.5.3
+   Compiling tower-http v0.6.11
+   Compiling ic-management-canister-types v0.8.0
+   Compiling ic-transport-types v0.49.3
+   Compiling ic-management-canister-types v0.11.0
+   Compiling h2 v0.4.20
+   Compiling rustls-webpki v0.103.16
+   Compiling hyper v1.12.0
+   Compiling hyper-util v0.1.21
+   Compiling tokio-rustls v0.26.6
+   Compiling rustls-platform-verifier v0.7.1
+   Compiling hyper-rustls v0.27.10
+   Compiling reqwest v0.13.5
+   Compiling pocket-ic v16.1.0
+   Compiling ic-platform v0.13.0
+   Compiling ic-testkit v0.73.0 (/tmp/wire-ship-02719/aligned-consumers/ic-testkit)
+   Compiling wire-aligned-identity-consumer v0.0.0 (/tmp/wire-ship-02719/aligned-consumers)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.42s
+     Running unittests src/lib.rs (/tmp/wire-ship-02719/published-consumer/target/debug/deps/wire_aligned_identity_consumer-d9dcfe776dcb04e0)
+
+running 1 test
+test shared_schema_limits_and_errors ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+ic-wire registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.13.0
+ic-wire-derive registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.13.0
+ic-platform-types registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.15.1
