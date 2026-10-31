@@ -935,9 +935,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.11.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f25c04deaaa7906e751e2b963c1a54c84c0b1e6acdae77f16adf6fb62c5d1903"
+checksum = "2aa0f99f96ecb4eb64146f09353633c6abefc822a3d962447a79a71f8e9e37af"
 dependencies = [
  "candid",
  "crc32fast",
@@ -954,9 +954,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.11.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b51d66f2fd41c6abc756e85f2e97fe081a3cadce167b5bc651cb8ead3e2445a7"
+checksum = "40135ac50d7e7356bafc9604d93469f464bbbfe9226a2610b1c33487d9a71cb8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -965,9 +965,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.11.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3de235b7eaaad3d515256550538a7044654ed210297f5af49a121e329aef767"
+checksum = "31ee28e271ce87e1ff161419a254f12eda2ec454fc0602914fa9e4ffa2da1de3"
 
 [[package]]
 name = "ic-testkit"
@@ -1008,7 +1008,7 @@ version = "0.10.0"
 dependencies = [
  "bytemuck",
  "clap",
- "ic-platform 0.11.0",
+ "ic-platform 0.12.0",
  "ic-wire-derive",
  "libfuzzer-sys",
  "postcard",
@@ -1022,7 +1022,7 @@ name = "ic-wire-benchmarks"
 version = "0.10.0"
 dependencies = [
  "dhat",
- "ic-platform 0.11.0",
+ "ic-platform 0.12.0",
  "ic-testkit",
  "ic-wire",
  "num-bigint",
@@ -1046,7 +1046,7 @@ dependencies = [
 name = "ic-wire-endpoint-fixture"
 version = "0.10.0"
 dependencies = [
- "ic-platform 0.11.0",
+ "ic-platform 0.12.0",
  "ic-testkit",
  "ic-wire",
  "serde",
