@@ -15,7 +15,10 @@
       "changelog": "releases/core/CHANGELOG.md",
       "dependencies": [
         "ic-wire",
-        "ic-wire-derive"
+        "ic-wire-benchmarks",
+        "ic-wire-derive",
+        "ic-wire-endpoint-fixture",
+        "ic-wire-qualification"
       ]
     },
     {

@@ -1,0 +1,139 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling version_check v0.9.5
+   Compiling thiserror v2.0.18
+   Compiling typenum v1.20.1
+   Compiling libc v0.2.191
+   Compiling cfg-if v1.0.5
+   Compiling serde v1.0.229
+   Compiling bitflags v2.13.2
+   Compiling cfg_aliases v0.2.2
+   Compiling shlex v2.0.1
+   Compiling zmij v1.0.23
+   Compiling cpufeatures v0.2.17
+   Compiling rustix v1.1.6
+   Compiling find-msvc-tools v0.1.15
+   Compiling serde_json v1.0.154
+   Compiling winnow v1.0.4
+   Compiling linux-raw-sys v0.12.1
+   Compiling camino v1.2.6
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.3
+   Compiling memchr v2.8.3
+   Compiling toml_writer v1.1.3+spec-1.1.0
+   Compiling itoa v1.0.18
+   Compiling clap_lex v1.1.1
+   Compiling anstyle v1.0.14
+   Compiling bytemuck v1.25.2
+   Compiling arbitrary v1.5.0
+   Compiling nix v0.31.3
+   Compiling clap_builder v4.6.7
+   Compiling generic-array v0.14.7
+   Compiling indexmap v2.14.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling digest v0.10.7
+   Compiling sha2 v0.10.9
+   Compiling jobserver v0.1.35
+   Compiling cc v1.10.0
+   Compiling ic-host-artifacts v0.73.1
+   Compiling clap v4.6.7
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling cargo-platform v0.3.3
+   Compiling semver v1.0.28
+   Compiling serde_bytes v0.11.19
+   Compiling serde_spanned v1.1.2
+   Compiling thiserror-impl v2.0.18
+   Compiling toml v1.1.8+spec-1.1.0
+   Compiling toml_edit v0.25.17+spec-1.1.0
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling libfuzzer-sys v0.4.13
+   Compiling cobs v0.3.0
+   Compiling command-fds v0.3.3
+   Compiling ic-host-fs v0.73.1
+   Compiling ic-host-process v0.73.1
+   Compiling postcard v1.1.3
+   Compiling cargo_metadata v0.23.1
+   Compiling ic-wire v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-build v0.73.1
+   Compiling ic-wire-qualification v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Finished `release` profile [optimized] target(s) in 9.53s
+     Running `target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime /home/adam/projects/ic-wire/target/fuzz-runtime/corpus -artifact_prefix=/home/adam/projects/ic-wire/target/fuzz-runtime/artifacts/ -runs=1000 -seed=42 -max_len=2048 -timeout=5 -rss_limit_mb=2048`
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 42
+INFO: Loaded 1 modules   (4995 inline 8-bit counters): 4995 [0x58b153586190, 0x58b153587513), 
+INFO: Loaded 1 PC tables (4995 PCs): 4995 [0x58b153587518,0x58b15359ad48), 
+INFO:      112 files found in /home/adam/projects/ic-wire/target/fuzz-runtime/corpus
+INFO: seed corpus: files: 112 min: 14b max: 527b total: 18112b rss: 50Mb
+#113	INITED cov: 781 ft: 1018 corp: 63/8304b exec/s: 0 rss: 50Mb
+#114	NEW    cov: 782 ft: 1037 corp: 64/8316b lim: 527 exec/s: 0 rss: 50Mb L: 12/527 MS: 1 EraseBytes-
+#115	NEW    cov: 783 ft: 1039 corp: 65/8330b lim: 527 exec/s: 0 rss: 50Mb L: 14/527 MS: 1 ChangeByte-
+#125	NEW    cov: 785 ft: 1041 corp: 66/8602b lim: 527 exec/s: 0 rss: 50Mb L: 272/527 MS: 5 CopyPart-ChangeBinInt-CrossOver-ChangeBit-InsertByte-
+#141	NEW    cov: 787 ft: 1045 corp: 67/8611b lim: 527 exec/s: 0 rss: 50Mb L: 9/527 MS: 1 EraseBytes-
+#150	NEW    cov: 789 ft: 1047 corp: 68/8893b lim: 527 exec/s: 0 rss: 50Mb L: 282/527 MS: 4 ChangeASCIIInt-CopyPart-ChangeBinInt-CrossOver-
+#152	NEW    cov: 791 ft: 1049 corp: 69/9086b lim: 527 exec/s: 0 rss: 50Mb L: 193/527 MS: 2 ChangeBit-InsertRepeatedBytes-
+#159	NEW    cov: 793 ft: 1051 corp: 70/9164b lim: 527 exec/s: 0 rss: 50Mb L: 78/527 MS: 2 ChangeByte-EraseBytes-
+	NEW_FUNC[1/4]: 0x58b1533ecf90  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x17df90) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+	NEW_FUNC[2/4]: 0x58b1533f8ff0  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x189ff0) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+#197	NEW    cov: 811 ft: 1106 corp: 71/9204b lim: 527 exec/s: 0 rss: 50Mb L: 40/527 MS: 3 ChangeBit-ChangeBinInt-InsertRepeatedBytes-
+#198	NEW    cov: 827 ft: 1125 corp: 72/9310b lim: 527 exec/s: 0 rss: 50Mb L: 106/527 MS: 1 InsertRepeatedBytes-
+#205	NEW    cov: 828 ft: 1126 corp: 73/9429b lim: 527 exec/s: 0 rss: 50Mb L: 119/527 MS: 2 CopyPart-CrossOver-
+#212	REDUCE cov: 828 ft: 1126 corp: 73/9393b lim: 527 exec/s: 0 rss: 50Mb L: 42/527 MS: 2 ChangeBit-EraseBytes-
+#231	NEW    cov: 833 ft: 1134 corp: 74/9425b lim: 527 exec/s: 0 rss: 50Mb L: 32/527 MS: 4 CopyPart-InsertRepeatedBytes-ChangeASCIIInt-CopyPart-
+#232	NEW    cov: 833 ft: 1135 corp: 75/9536b lim: 527 exec/s: 0 rss: 50Mb L: 111/527 MS: 1 InsertRepeatedBytes-
+#235	REDUCE cov: 833 ft: 1135 corp: 75/9532b lim: 527 exec/s: 0 rss: 50Mb L: 5/527 MS: 3 ChangeBit-InsertByte-EraseBytes-
+#281	NEW    cov: 833 ft: 1136 corp: 76/9546b lim: 527 exec/s: 0 rss: 50Mb L: 14/527 MS: 1 ChangeByte-
+#285	NEW    cov: 835 ft: 1138 corp: 77/9836b lim: 527 exec/s: 0 rss: 50Mb L: 290/527 MS: 4 ChangeBinInt-ChangeByte-ChangeASCIIInt-EraseBytes-
+#286	NEW    cov: 835 ft: 1144 corp: 78/9850b lim: 527 exec/s: 0 rss: 50Mb L: 14/527 MS: 1 ChangeByte-
+#313	REDUCE cov: 835 ft: 1144 corp: 78/9782b lim: 527 exec/s: 0 rss: 50Mb L: 214/527 MS: 2 CopyPart-EraseBytes-
+#331	NEW    cov: 837 ft: 1146 corp: 79/10015b lim: 527 exec/s: 0 rss: 50Mb L: 233/527 MS: 3 ChangeByte-ChangeBit-CrossOver-
+#332	NEW    cov: 839 ft: 1148 corp: 80/10364b lim: 527 exec/s: 0 rss: 50Mb L: 349/527 MS: 1 EraseBytes-
+#334	REDUCE cov: 841 ft: 1150 corp: 81/10406b lim: 527 exec/s: 0 rss: 50Mb L: 42/527 MS: 2 ChangeBinInt-CrossOver-
+#376	NEW    cov: 841 ft: 1156 corp: 82/10507b lim: 527 exec/s: 0 rss: 50Mb L: 101/527 MS: 2 InsertRepeatedBytes-EraseBytes-
+#397	NEW    cov: 841 ft: 1157 corp: 83/10551b lim: 527 exec/s: 0 rss: 50Mb L: 44/527 MS: 1 CrossOver-
+	NEW_FUNC[1/2]: 0x58b1533fd950  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x18e950) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+	NEW_FUNC[2/2]: 0x58b153403cd0  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x194cd0) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+#415	NEW    cov: 853 ft: 1203 corp: 84/10581b lim: 527 exec/s: 0 rss: 50Mb L: 30/527 MS: 3 CopyPart-EraseBytes-CrossOver-
+#443	NEW    cov: 855 ft: 1205 corp: 85/10600b lim: 527 exec/s: 0 rss: 50Mb L: 19/527 MS: 3 EraseBytes-ChangeBit-InsertByte-
+#449	NEW    cov: 857 ft: 1209 corp: 86/10632b lim: 527 exec/s: 0 rss: 50Mb L: 32/527 MS: 1 CMP- DE: "\377\377"-
+#471	NEW    cov: 858 ft: 1210 corp: 87/10650b lim: 527 exec/s: 0 rss: 50Mb L: 18/527 MS: 2 ShuffleBytes-PersAutoDict- DE: "\377\377"-
+	NEW_FUNC[1/4]: 0x58b1533e9700  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x17a700) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+	NEW_FUNC[2/4]: 0x58b1533f4ed0  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x185ed0) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+#490	NEW    cov: 881 ft: 1233 corp: 88/10660b lim: 527 exec/s: 0 rss: 50Mb L: 10/527 MS: 4 EraseBytes-ChangeByte-ChangeBit-CopyPart-
+#491	NEW    cov: 883 ft: 1235 corp: 89/10780b lim: 527 exec/s: 0 rss: 50Mb L: 120/527 MS: 1 EraseBytes-
+#494	REDUCE cov: 883 ft: 1235 corp: 89/10633b lim: 527 exec/s: 0 rss: 50Mb L: 202/527 MS: 3 ShuffleBytes-ChangeASCIIInt-EraseBytes-
+#520	REDUCE cov: 883 ft: 1235 corp: 89/10579b lim: 527 exec/s: 0 rss: 50Mb L: 57/527 MS: 1 EraseBytes-
+#551	REDUCE cov: 883 ft: 1309 corp: 90/10620b lim: 527 exec/s: 0 rss: 50Mb L: 41/527 MS: 1 InsertRepeatedBytes-
+#572	NEW    cov: 885 ft: 1311 corp: 91/10786b lim: 527 exec/s: 0 rss: 50Mb L: 166/527 MS: 1 EraseBytes-
+#597	NEW    cov: 885 ft: 1320 corp: 92/10935b lim: 527 exec/s: 0 rss: 50Mb L: 149/527 MS: 5 ChangeASCIIInt-ChangeBit-CrossOver-ChangeByte-CMP- DE: "\003\000\000\000\000\000\000\000"-
+#608	REDUCE cov: 885 ft: 1320 corp: 92/10934b lim: 527 exec/s: 0 rss: 50Mb L: 18/527 MS: 1 EraseBytes-
+#620	REDUCE cov: 885 ft: 1320 corp: 92/10881b lim: 527 exec/s: 0 rss: 50Mb L: 237/527 MS: 2 ChangeBinInt-EraseBytes-
+#631	NEW    cov: 885 ft: 1352 corp: 93/10922b lim: 527 exec/s: 0 rss: 50Mb L: 41/527 MS: 1 CrossOver-
+	NEW_FUNC[1/3]: 0x58b1533ecfa0  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x17dfa0) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+	NEW_FUNC[2/3]: 0x58b1533fd000  (/home/adam/projects/ic-wire/target/fuzz-runtime/x86_64-unknown-linux-gnu/release/examples/fuzz-runtime+0x18e000) (BuildId: 626a6d8e31f002516624c772215dc7b1ca48aab3)
+#658	NEW    cov: 901 ft: 1368 corp: 94/10944b lim: 527 exec/s: 0 rss: 50Mb L: 22/527 MS: 2 CrossOver-PersAutoDict- DE: "\003\000\000\000\000\000\000\000"-
+#673	NEW    cov: 902 ft: 1369 corp: 95/11142b lim: 527 exec/s: 0 rss: 50Mb L: 198/527 MS: 5 CopyPart-EraseBytes-InsertRepeatedBytes-CopyPart-CMP- DE: "\000\000"-
+#708	REDUCE cov: 902 ft: 1369 corp: 95/11116b lim: 527 exec/s: 0 rss: 50Mb L: 123/527 MS: 5 InsertRepeatedBytes-PersAutoDict-InsertRepeatedBytes-EraseBytes-EraseBytes- DE: "\377\377"-
+#759	REDUCE cov: 902 ft: 1369 corp: 95/11104b lim: 527 exec/s: 0 rss: 50Mb L: 20/527 MS: 1 EraseBytes-
+#780	NEW    cov: 903 ft: 1370 corp: 96/11115b lim: 527 exec/s: 0 rss: 50Mb L: 11/527 MS: 1 InsertByte-
+#781	REDUCE cov: 905 ft: 1372 corp: 97/11172b lim: 527 exec/s: 0 rss: 50Mb L: 57/527 MS: 1 CopyPart-
+#818	REDUCE cov: 905 ft: 1372 corp: 97/11139b lim: 527 exec/s: 0 rss: 50Mb L: 86/527 MS: 2 CrossOver-CrossOver-
+#887	NEW    cov: 907 ft: 1374 corp: 98/11324b lim: 527 exec/s: 0 rss: 50Mb L: 185/527 MS: 4 CopyPart-ChangeBinInt-ChangeBit-PersAutoDict- DE: "\000\000"-
+#923	NEW    cov: 907 ft: 1379 corp: 99/11364b lim: 527 exec/s: 0 rss: 50Mb L: 40/527 MS: 1 CMP- DE: "\001\020\000\000\000\000\000\000"-
+#937	NEW    cov: 907 ft: 1415 corp: 100/11412b lim: 527 exec/s: 0 rss: 50Mb L: 48/527 MS: 4 ChangeASCIIInt-ChangeBit-EraseBytes-CrossOver-
+#941	NEW    cov: 908 ft: 1416 corp: 101/11417b lim: 527 exec/s: 0 rss: 50Mb L: 5/527 MS: 4 InsertByte-EraseBytes-ChangeBinInt-EraseBytes-
+#990	NEW    cov: 910 ft: 1418 corp: 102/11473b lim: 527 exec/s: 0 rss: 50Mb L: 56/527 MS: 4 CrossOver-ChangeByte-ChangeByte-PersAutoDict- DE: "\377\377"-
+#1000	DONE   cov: 910 ft: 1418 corp: 102/11473b lim: 527 exec/s: 0 rss: 50Mb
+###### Recommended dictionary. ######
+"\377\377" # Uses: 29
+"\003\000\000\000\000\000\000\000" # Uses: 11
+"\000\000" # Uses: 4
+"\001\020\000\000\000\000\000\000" # Uses: 0
+###### End of recommended dictionary. ######
+Done 1000 runs in 0 second(s)

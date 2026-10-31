@@ -1,0 +1,21 @@
+{
+  "ic-wire": "path+file:///home/adam/projects/ic-wire/crates/ic-wire#0.13.0",
+  "ic-wire-derive": "path+file:///home/adam/projects/ic-wire/crates/ic-wire-derive#0.13.0",
+  "ic-platform-types": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.15.1",
+  "ic-platform": {
+    "current": [
+      "registry+https://github.com/rust-lang/crates.io-index#ic-platform@0.15.2"
+    ],
+    "simulated-next": [
+      "path+file:///home/adam/projects/ic-wire/target/stable-identities.Ma68fx/next-platform#ic-platform@0.16.0"
+    ]
+  },
+  "ic-wire-endpoint": {
+    "current": [
+      "path+file:///home/adam/projects/ic-wire/crates/ic-wire-endpoint#0.2.0"
+    ],
+    "simulated-next": [
+      "path+file:///home/adam/projects/ic-wire/target/stable-identities.Ma68fx/next-endpoint#ic-wire-endpoint@0.3.0"
+    ]
+  }
+}

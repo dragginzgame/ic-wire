@@ -1,0 +1,10 @@
+shared-tooling snapshot verified: 119 file(s), version 0.27.20 (267ba25810546bd9cb622d0fb43ccc0588622b67)
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+npm root declarations passed: examples/browser (Node 24.21.0; npm 12.2.0; resolution and runtime qualification remain consumer-owned)
+dependency pins passed (declarations and tracked lockfiles; runtime qualification remains consumer-owned)
+Cargo dependency boundaries passed.
+Checking formatting inputs... changed (0.24s)
+Manifest sorting [.]... ok (0.01s)
+Rust formatting [.]... ok (0.16s)
+Recording formatting result... stable inputs (0.25s)

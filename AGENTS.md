@@ -7,7 +7,7 @@ qualification work. These guides are task-specific, not a startup reading list.
 The Postcard runtime is qualified for bounded Rust integration.
 
 Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
-rules, vendored at `54fc49e12f439dbe18d232f622a6d78e61773353` (recorded version 0.27.19).
+rules, vendored at `143a9abb9ae81feae9400ff3844b03b1ddfdd75a` (recorded version 0.27.21).
 [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
 hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
 moving sibling checkout or patch snapshot-owned files in place. The main snapshot
@@ -36,7 +36,8 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - The maintainer approved and requested implementation of the
   [stable identity boundary](docs/stable-identities.md): coordinated ic-wire/
   ic-wire-derive and one independently versioned ic-wire-endpoint package.
-  Platform 0.15 / Types 0.15 and IC Build 0.73 supply the current suppliers. Use the
+  Platform 0.15.2 / Types 0.15.1 and IC Build 0.73.1 supply the current suppliers;
+  native qualification uses Testkit 0.75.0. Use the
   explicit core/endpoint release groups with literal member versions and ledgers
   under releases/<group>/. Release/resume/publication require explicit group
   selection; no publication is authorized.

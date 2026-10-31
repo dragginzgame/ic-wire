@@ -1,0 +1,46 @@
+{
+  "before": {
+    "codec": [
+      [
+        "libfuzzer-sys",
+        "0.4.13"
+      ]
+    ],
+    "benchmark": [
+      [
+        "dhat",
+        "0.3.3"
+      ],
+      [
+        "stats_alloc",
+        "0.1.10"
+      ]
+    ]
+  },
+  "after": {
+    "allocations-wasm": [],
+    "allocations": [
+      [
+        "stats_alloc",
+        "0.1.10"
+      ]
+    ],
+    "benchmark": [],
+    "codec": [],
+    "fuzz-wasm": [],
+    "fuzz": [
+      [
+        "libfuzzer-sys",
+        "0.4.13"
+      ]
+    ],
+    "heap-wasm": [],
+    "heap": [
+      [
+        "dhat",
+        "0.3.3"
+      ]
+    ],
+    "qualification": []
+  }
+}

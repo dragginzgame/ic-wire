@@ -27,7 +27,6 @@ serde_bytes.workspace = true
 
 [dev-dependencies]
 clap.workspace = true
-libfuzzer-sys.workspace = true
 serde_json.workspace = true
 
 [[test]]
@@ -45,11 +44,6 @@ path = "tests/native/mod.rs"
 [[test]]
 name = "borrowed"
 path = "tests/borrowed/mod.rs"
-
-[[example]]
-name = "fuzz-runtime"
-path = "examples/fuzz_runtime/mod.rs"
-test = false
 
 [[example]]
 name = "typescript-conformance"

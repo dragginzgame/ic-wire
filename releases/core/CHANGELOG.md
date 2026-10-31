@@ -5,6 +5,39 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.13.1]
+
+### ⬆️ Dependencies
+
+- Require canonical Platform Types 0.15.1 and adopt Build/host tools 0.73.1,
+  including the explicitly installed release metadata editor. Native controls use
+  Testkit 0.75.0 / Metrics 0.23.2, removing the old Platform 0.13 dependency.
+  Canonical Rust type identity, schema bytes, limits and codec acceptance remain
+  unchanged; no consumer migration or production codec change is required.
+
+### 🔧 Changed
+
+- Adopt Shared Tooling revision `143a9ab` through the canonical exporter
+  (upstream's committed VERSION records 0.27.21). Present all six workspace members
+  once in root dependency catalog blocks, with group changelog links and complete
+  release-policy alias rosters. Remove the duplicate header map; admission checks
+  coverage, paths and full member versions across all groups. Preserve package
+  versions, dependency resolution, Cargo cleanup and independent release flows.
+- Qualify the published Testkit 0.75 typed APIs and Metrics 0.24 metadata against
+  registry Wire 0.13 on Rust 1.91, without source-aligned manifests or patches.
+  The workspace's arithmetic-only Metrics selection remains 0.23.2.
+
+### 🧹 Cleanup
+
+- Move the unchanged coverage-guided fuzz target into private qualification under
+  its explicit native fuzz-runtime feature. Make native heap/allocation profilers
+  optional through the benchmark's existing heap/allocations features. Ordinary
+  codec tests and default benchmark graphs no longer select these tools; graph
+  checks enforce that boundary. Keep explicit profiler/fuzz coverage, mutual
+  exclusion and Rust 1.91 qualification. No codec API, bytes, budgets or malformed
+  acceptance changes; no build-time or Wasm-size saving is claimed.
+  [#39 — Opt-in qualification tools](https://github.com/dragginzgame/ic-wire/issues/39).
+
 ## [0.13.0] - 2026-10-31
 
 ### ⚠️ Breaking

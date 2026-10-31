@@ -1,0 +1,29 @@
+   Compiling ic-wire-benchmarks v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+error: Use separate allocation and heap runs
+   --> crates/ic-wire-benchmarks/examples/caller_storage/mod.rs:159:5
+    |
+159 |     compile_error!("Use separate allocation and heap runs");
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: cannot define multiple global allocators
+   --> crates/ic-wire-benchmarks/examples/caller_storage/mod.rs:157:5
+    |
+153 | /     static ALLOCATOR: &stats_alloc::StatsAlloc<std::alloc::System> =
+154 | |         &stats_alloc::INSTRUMENTED_SYSTEM;
+    | |__________________________________________- previous global allocator defined here
+155 |       #[cfg(feature = "heap")]
+156 |       #[global_allocator]
+    |       ------------------- in this attribute macro expansion
+157 |       static HEAP: dhat::Alloc = dhat::Alloc;
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot define a new global allocator
+
+warning: unused variable: `sample`
+   --> crates/ic-wire-benchmarks/examples/caller_storage/mod.rs:185:25
+    |
+185 |                     let sample = {
+    |                         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_sample`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ic-wire-benchmarks` (example "caller-storage" test) generated 1 warning
+error: could not compile `ic-wire-benchmarks` (example "caller-storage" test) due to 2 previous errors; 1 warning emitted

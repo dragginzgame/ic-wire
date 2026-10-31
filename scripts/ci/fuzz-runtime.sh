@@ -16,6 +16,6 @@ perl scripts/ci/seed-packed-fuzz.pl "$CARGO_TARGET_DIR/corpus"
 # An explicit target keeps these flags off proc-macro/build-script host binaries.
 export RUSTFLAGS='-Cpasses=sancov-module -Cllvm-args=-sanitizer-coverage-level=4 -Cllvm-args=-sanitizer-coverage-inline-8bit-counters -Cllvm-args=-sanitizer-coverage-pc-table -Cllvm-args=-sanitizer-coverage-trace-compares -Zsanitizer=address'
 rustup run "$toolchain" cargo run --offline --locked --release --target "$host" \
-    -p ic-wire --example fuzz-runtime -- \
+    -p ic-wire-qualification --example fuzz-runtime --features fuzz-runtime -- \
     "$CARGO_TARGET_DIR/corpus" "-artifact_prefix=$CARGO_TARGET_DIR/artifacts/" \
     "-runs=$runs" -seed=42 -max_len=2048 -timeout=5 -rss_limit_mb=2048

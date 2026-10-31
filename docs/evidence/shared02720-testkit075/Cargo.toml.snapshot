@@ -1,0 +1,13 @@
+[workspace]
+[package]
+name = "wire-tooling-075-consumer"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.91"
+[dependencies]
+ic-wire = { version = "=0.13.0", default-features = false, features = ["platform-types"] }
+ic-wire-endpoint = { version = "=0.2.0", features = ["typescript"] }
+ic-platform = { version = "=0.15.2", default-features = false, features = ["principal"] }
+ic-metrics = { version = "=0.24.0", default-features = false, features = ["native-wire"] }
+ic-testkit = { version = "=0.75.0", default-features = false, features = ["wire"] }
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }

@@ -1,0 +1,22 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling gimli v0.34.0
+   Compiling object v0.40.0
+   Compiling rustc-demangle v0.1.28
+   Compiling thousands v0.2.0
+   Compiling mintex v0.1.4
+   Compiling rustc-hash v1.1.0
+   Compiling addr2line v0.27.1
+   Compiling backtrace v0.3.77
+   Compiling dhat v0.3.3
+   Compiling ic-wire-benchmarks v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.42s
+     Running unittests examples/caller_storage/mod.rs (target/issues-39/build/debug/examples/caller_storage-2f1d63888adb209e)
+
+running 1 test
+test tests::native_measurement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

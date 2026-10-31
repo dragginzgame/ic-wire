@@ -1,0 +1,12 @@
+{
+  "baseline_inputs": {
+    "Cargo.toml": "6950b61a2eff5ec38f8586101e16512baffc8302e291f60d01f3e6ee3fd44f8f",
+    "Cargo.lock": "8d3dfc14866c0ae5335fe4ea365083f0bc5bc85824df81c075e464eb53845fa0"
+  },
+  "candidate_inputs": {
+    "Cargo.toml": "6f021b465365ee075b7e3ba7ce7d35bd4ee071e97b000cc173cde666b0ae1721",
+    "Cargo.lock": "1cb82feb5fa885a127e359a330a4e542e46afba4787cf56572e3aef6b00d894f"
+  },
+  "normalized_graph_sha256": "a450a8971d8bc049c35d8bd814e79a1131c966209d0e1c08213e751c14686b54",
+  "graph_equal": true
+}

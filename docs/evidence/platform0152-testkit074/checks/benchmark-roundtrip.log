@@ -1,0 +1,25 @@
+   Compiling gimli v0.34.0
+   Compiling object v0.40.0
+   Compiling rustc-demangle v0.1.28
+   Compiling thousands v0.2.0
+   Compiling rustc-hash v1.1.0
+   Compiling mintex v0.1.4
+   Compiling stats_alloc v0.1.10
+   Compiling ic-wire-benchmarks v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling ic-wire-derive v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-platform v0.15.2
+   Compiling ic-testkit v0.74.0
+   Compiling ic-wire v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling addr2line v0.27.1
+   Compiling backtrace v0.3.77
+   Compiling dhat v0.3.3
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.41s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-736ccd8b17a1f034)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.90s
+

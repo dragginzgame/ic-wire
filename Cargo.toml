@@ -1,11 +1,3 @@
-# Release groups: ci/cargo-release-groups.json
-# core: ic-wire, ic-wire-derive; ic-wire-benchmarks, ic-wire-qualification,
-#       ic-wire-endpoint-fixture (private qualification)
-#   version: crates/ic-wire/Cargo.toml package.version
-#   changelog: releases/core/CHANGELOG.md
-# endpoint: ic-wire-endpoint
-#   version: crates/ic-wire-endpoint/Cargo.toml package.version
-#   changelog: releases/endpoint/CHANGELOG.md
 [workspace]
 members = [
     "crates/ic-wire",
@@ -25,28 +17,39 @@ license = "MIT"
 repository = "https://github.com/dragginzgame/ic-wire"
 
 [workspace.dependencies]
+# Core
+# Changelog : releases/core/CHANGELOG.md
+ic-wire = { path = "crates/ic-wire", version = "0.13.0" }
+ic-wire-benchmarks = { path = "crates/ic-wire-benchmarks", version = "0.13.0" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.13.0" }
+ic-wire-endpoint-fixture = { path = "examples/endpoint", version = "0.13.0" }
+ic-wire-qualification = { path = "crates/ic-wire-qualification", version = "0.13.0" }
+
+# Endpoint
+# Changelog : releases/endpoint/CHANGELOG.md
+ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.2.0" }
+
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
-# Identity/runtime packages stay separate; upstream aligns their versions at 0.15.
-# The Types supplier identity changes; codec bytes, budgets and acceptance do not.
-ic-platform = { version = "0.15.0", default-features = false }
-ic-platform-types = { version = "0.15.0", default-features = false }
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.13.0" }
-ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.2.0" }
+ic-platform = { version = "0.15.2", default-features = false }
+ic-platform-types = { version = "0.15.1", default-features = false }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
-proc-macro2 = "1.0.107"
-quote = "1.0.47"
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde_bytes = { version = "0.11.19", default-features = false, features = ["alloc"] }
+
+# Native schema support and qualification
 serde_json = "1.0"
+
+# Host proc-macro implementation
+proc-macro2 = "1.0.107"
+quote = "1.0.47"
 syn = { version = "3.0.9", features = ["visit"] }
 
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 dhat = "0.3.3"
-ic-build = { version = "0.73.0", default-features = false }
-ic-testkit = { version = "0.73.0", default-features = false }
-ic-wire = { path = "crates/ic-wire", version = "0.13.0" }
+ic-build = { version = "0.73.1", default-features = false }
+ic-testkit = { version = "0.75.0", default-features = false }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"

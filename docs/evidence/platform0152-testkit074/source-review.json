@@ -1,0 +1,114 @@
+{
+  "ic-platform": {
+    "before": "0.15.1",
+    "after": "0.15.2",
+    "before_files": 112,
+    "after_files": 112,
+    "changed": [],
+    "vcs": {
+      "git": {
+        "sha1": "3587cd2633b5c94fd7ebf9dea3eefdb0433ea59d"
+      },
+      "path_in_vcs": "crates/ic-platform"
+    }
+  },
+  "ic-platform-macros": {
+    "before": "0.15.1",
+    "after": "0.15.2",
+    "before_files": 5,
+    "after_files": 5,
+    "changed": [],
+    "vcs": {
+      "git": {
+        "sha1": "3587cd2633b5c94fd7ebf9dea3eefdb0433ea59d"
+      },
+      "path_in_vcs": "crates/ic-platform-macros"
+    }
+  },
+  "ic-platform-runtime-guard": {
+    "before": "0.15.1",
+    "after": "0.15.2",
+    "before_files": 1,
+    "after_files": 1,
+    "changed": [],
+    "vcs": {
+      "git": {
+        "sha1": "3587cd2633b5c94fd7ebf9dea3eefdb0433ea59d"
+      },
+      "path_in_vcs": "crates/ic-platform-runtime-guard"
+    }
+  },
+  "ic-platform-types": {
+    "before": "0.15.0",
+    "after": "0.15.1",
+    "before_files": 10,
+    "after_files": 10,
+    "changed": [
+      "src/lib.rs"
+    ],
+    "vcs": {
+      "git": {
+        "sha1": "668e44f70455b3118859f81ec1b7aa23de7db63a"
+      },
+      "path_in_vcs": "crates/ic-platform-types"
+    }
+  },
+  "ic-testkit": {
+    "before": "0.73.0",
+    "after": "0.74.0",
+    "before_files": 28,
+    "after_files": 28,
+    "changed": [],
+    "vcs": {
+      "git": {
+        "sha1": "1a78892fe04edd43e07cb3d1709b36088a1a7e49"
+      },
+      "path_in_vcs": "crates/ic-testkit"
+    }
+  },
+  "ic-build": {
+    "before": "0.73.0",
+    "after": "0.73.1",
+    "before_files": 71,
+    "after_files": 71,
+    "changed": [],
+    "vcs": {
+      "git": {
+        "sha1": "3b095515ed2b2020d700b5bf0e90c0c4459f5454"
+      },
+      "path_in_vcs": "crates/ic-build"
+    }
+  },
+  "ic-host-artifacts": {
+    "before": "0.73.0",
+    "after": "0.73.1",
+    "before_files": 32,
+    "after_files": 32,
+    "changed": []
+  },
+  "ic-host-fs": {
+    "before": "0.73.0",
+    "after": "0.73.1",
+    "before_files": 63,
+    "after_files": 63,
+    "changed": [
+      "src/durable/symlink/tests.rs"
+    ]
+  },
+  "ic-host-process": {
+    "before": "0.73.0",
+    "after": "0.73.1",
+    "before_files": 52,
+    "after_files": 52,
+    "changed": []
+  },
+  "ic-metrics": {
+    "before": "0.22.0",
+    "after": "0.23.2",
+    "before_files": 30,
+    "after_files": 30,
+    "changed": [
+      "src/application.md"
+    ]
+  }
+}

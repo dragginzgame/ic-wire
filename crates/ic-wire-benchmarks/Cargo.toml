@@ -8,14 +8,13 @@ publish = false
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 clap.workspace = true
-dhat.workspace = true
 ic-testkit.workspace = true
 
 [features]
 wire = []
 candid = []
-allocations = []
-heap = []
+allocations = ["dep:stats_alloc"]
+heap = ["dep:dhat"]
 ic = ["ic-platform/pocket-ic"]
 toko = []
 # Focused ordinary-list/output-writer qualification, not a production mode.
@@ -44,6 +43,10 @@ derive-scale-10 = ["derive-scale"]
 # Only the explicit endpoint ownership probe selects runtime glue.
 ic-wire-endpoint = { workspace = true, optional = true }
 
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+dhat = { workspace = true, optional = true }
+stats_alloc = { workspace = true, optional = true }
+
 [dev-dependencies]
 ic-platform = { workspace = true, features = ["candid", "ic0"] }
 ic-wire.workspace = true
@@ -52,7 +55,6 @@ serde.workspace = true
 serde_bytes.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-stats_alloc.workspace = true
 
 [[bench]]
 name = "suite"

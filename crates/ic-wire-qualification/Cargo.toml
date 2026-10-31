@@ -8,6 +8,10 @@ publish = false
 
 [features]
 allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
+fuzz-runtime = ["dep:ic-wire", "dep:libfuzzer-sys"]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+libfuzzer-sys = { workspace = true, optional = true }
 
 [dependencies]
 ic-wire = { workspace = true, optional = true }
@@ -23,6 +27,12 @@ sha2.workspace = true
 [[example]]
 name = "check-diagnostics"
 path = "examples/check_diagnostics/mod.rs"
+
+[[example]]
+name = "fuzz-runtime"
+path = "examples/fuzz_runtime/mod.rs"
+required-features = ["fuzz-runtime"]
+test = false
 
 [[example]]
 name = "allocation"

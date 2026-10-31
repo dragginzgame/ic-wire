@@ -1,7 +1,7 @@
 # Typed Wire endpoints
 
 Add the independent `ic-wire-endpoint` package in a standalone canister. It
-connects ordinary Serde handlers to published IC Platform 0.15.0's maintained
+connects ordinary Serde handlers to published IC Platform 0.15.2's maintained
 query/update generator. The default Wire codec stays `no_std + alloc` and has no
 Platform dependency. The integration uses Platform's `std` runtime without Candid,
 Canic, an extra executor or a second encoding.

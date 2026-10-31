@@ -1,0 +1,101 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling clap_lex v1.1.1
+   Compiling anstyle v1.0.14
+   Compiling serde_json v1.0.154
+   Compiling itoa v1.0.18
+   Compiling bytemuck v1.25.2
+   Compiling memchr v2.8.3
+   Compiling clap_builder v4.6.7
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+   Compiling clap v4.6.7
+   Compiling serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling cobs v0.3.0
+   Compiling postcard v1.1.3
+   Compiling ic-wire v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.77s
+     Running unittests src/lib.rs (target/issues-39/build/debug/deps/ic_wire-586ae6e055c505a9)
+
+running 4 tests
+test native::header_admission_tests::pre_copy_header_agrees_with_complete_frame_admission ... ok
+test native::tests::automatic_method_identity_vectors_and_frame ... ok
+test packed::tests::endian_append_matches_wire_bytes ... ok
+test native::tests::allocation_units_match_byte_accounting_at_remainders_and_overflow ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/borrowed/mod.rs (target/issues-39/build/debug/deps/borrowed-09d2af3966678ef4)
+
+running 6 tests
+test borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input ... ok
+test encoding_and_sizing_do_not_require_a_decoder ... ok
+test newtype_variants_borrow_with_derived_metadata ... ok
+test lifetime_derives_cover_enums_nested_containers_bounds_and_name_collisions ... ok
+test owned_and_borrowed_leaves_agree_on_mutated_frames ... ok
+test blob_requests_borrow_owned_storage_and_decode_without_payload_copies ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/native/mod.rs (target/issues-39/build/debug/deps/native-b00907f77d8dc987)
+
+running 34 tests
+test adversarial::frame_rejection_precedes_consumer_deserialization_and_calls_are_independent ... ok
+test adversarial::zero_byte_collection_work_is_linear_and_forged_lengths_stop_at_budget ... ok
+test allocation::tiny_response_can_exceed_its_frame_size_in_allocation_charges ... ok
+test allocation::response_allocation_reserves_the_configured_byte_limit_and_weights_visits ... ok
+test adversarial::nested_collections_share_one_budget_and_truncated_prefix_work_is_bounded ... ok
+test borrowed_decode_points_into_the_frame_and_preserves_rejections ... ok
+test decode_only_types_and_independent_decode_allowances ... ok
+test frame_budgets_agree_at_header_boundary_and_preserve_error_precedence ... ok
+test every_allowance_is_enforced_and_empty_values_remain_valid ... ok
+test borrowed_frames_match_owned_postcard_and_frozen_envelope ... ok
+test hidden_list_lengths_preserve_bounds_and_zero_sized_values ... ok
+test packed::runtime_byte_and_allocation_limits_still_reject ... ok
+test packed::packed_words_match_little_endian_bytes_and_unaligned_decode ... ok
+test packed::invalid_widths_and_noncanonical_lengths_are_rejected ... ok
+test packed::signed_bytes_keep_vec_bytes_but_use_bulk_admission ... ok
+test reusable_output_keeps_capacity_and_clears_all_failure_paths ... ok
+test scalar_admission_preserves_exact_resource_boundaries ... ok
+test scoped::scoped_output_drops_owned_input_before_callback_and_serializes_twice ... ok
+test scoped::scoped_output_keeps_exact_admission_and_never_consumes_refused_values ... ok
+test scoped::scoped_output_never_consumes_failed_second_pass_on_either_destination ... ok
+test slice::caller_slice_never_returns_partial_output_after_a_second_pass_failure ... ok
+test slice::caller_slice_refuses_limits_before_writing ... ok
+test strict_parsing_allows_consumer_normalization ... ok
+test recursive_and_zero_byte_values_cannot_bypass_budgets ... ok
+test u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries ... ok
+test packed::blob_manifest_boundary_preserves_order_and_header_bytes ... ok
+test packed::generic_i16_matches_existing_packed_type_for_every_word ... ok
+test scoped::scoped_output_matches_owned_bytes_and_selects_storage_once ... ok
+test slice::caller_slice_matches_owned_payload_and_both_frame_directions ... ok
+test strict_integer_reads_reject_every_redundant_u16_encoding ... ok
+test u16_three_group_decoder_matches_canonical_postcard_control ... ok
+test packed::packed_length_prefixes_offsets_and_budget_boundaries ... ok
+test packed_i16_bytes_bounds_and_canonicality ... ok
+test integer_shortcuts_preserve_postcard_bytes_and_original_budgets ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/runtime/mod.rs (target/issues-39/build/debug/deps/runtime-44743d9c40409f2e)
+
+running 5 tests
+test decoding::custom_field_boundaries_can_have_a_different_roundtrip ... ok
+test finite_float_bits_and_nonfinite_rejection ... ok
+test list_count_rejects_before_element_decoder ... ok
+test decoding::custom_normalization_is_consumer_owned ... ok
+test decoding::copied_record_checks_prefixes_truncation_and_preserves_owned_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

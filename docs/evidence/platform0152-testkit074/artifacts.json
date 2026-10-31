@@ -1,0 +1,46 @@
+{
+  "evaluation": {
+    "before": {
+      "wasm_bytes": 100665,
+      "code_bytes": 86766,
+      "sha256": "a263a83b5ef396aa72b76628714dcf92fa267f455daff65891a96d09578ee602"
+    },
+    "after": {
+      "wasm_bytes": 100665,
+      "code_bytes": 86766,
+      "sha256": "cda46da21172ed48ed67a9e4a64b9617b41b08c773ac9780ae2a85a2a1b5a7b3"
+    },
+    "delta": {
+      "wasm_bytes": {
+        "bytes": 0,
+        "percent": 0
+      },
+      "code_bytes": {
+        "bytes": 0,
+        "percent": 0
+      }
+    }
+  },
+  "benchmark-speed": {
+    "before": {
+      "wasm_bytes": 94073,
+      "code_bytes": 81127,
+      "sha256": "a128172d7ca5d0345f80b277494cc4d794ac7a58d02d143176f10d8ab6d1f706"
+    },
+    "after": {
+      "wasm_bytes": 94073,
+      "code_bytes": 81127,
+      "sha256": "404a57c108e46e4b5a005b2a36be55a17a6cdf026301641a396c17e9fad12349"
+    },
+    "delta": {
+      "wasm_bytes": {
+        "bytes": 0,
+        "percent": 0
+      },
+      "code_bytes": {
+        "bytes": 0,
+        "percent": 0
+      }
+    }
+  }
+}

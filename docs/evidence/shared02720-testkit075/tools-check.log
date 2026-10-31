@@ -1,0 +1,7 @@
+make --no-print-directory host-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory rust-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+/home/adam/projects/ic-wire/.tools/rust/selected-e52738538bb560fc54aa1f9b56917d886db8022937d0469e6e45595a714f1b2d/bin/ic-build-release-metadata

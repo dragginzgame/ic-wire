@@ -1,0 +1,11 @@
+    Checking gimli v0.34.0
+    Checking object v0.40.0
+    Checking rustc-demangle v0.1.28
+    Checking mintex v0.1.4
+    Checking thousands v0.2.0
+    Checking rustc-hash v1.1.0
+    Checking addr2line v0.27.1
+    Checking backtrace v0.3.77
+    Checking dhat v0.3.3
+    Checking ic-wire-benchmarks v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.25s

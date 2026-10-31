@@ -3,7 +3,9 @@
 The maintainer approved this boundary for [#36](https://github.com/dragginzgame/ic-wire/issues/36)
 on 2026-10-31 and requested implementation after Platform publication. It is now
 delivered and published as core 0.13.0 / Endpoint 0.2.0. The original prerequisite is
-supplied by registry Platform 0.15 / Types 0.15 and IC Build 0.73. No sibling checkout was modified.
+supplied by registry Platform/Types 0.15 and IC Build 0.73.
+Current compatible selections are Platform 0.15.2, Types 0.15.1, Build 0.73.1
+and native Testkit 0.75.0. No sibling checkout was modified.
 
 ## Owners and release groups
 
@@ -58,13 +60,16 @@ release preparation updates that requirement before packaging the dependent endp
 Each member declares its existing literal version; root Cargo metadata has no
 workspace version. `core` takes its authority from ic-wire and covers core/derive
 plus private qualification; `endpoint` takes its authority from ic-wire-endpoint.
-The comment map beside root `[workspace]` lists all members and canonical paths.
+Root `[workspace.dependencies]` is the complete member catalog, including private
+qualification packages. Each release group has one contiguous block with its
+changelog link; the policy lists every alias so preparation also updates unused
+catalog entries. No extra dependency edges or duplicate header map are added.
 Both ledgers live at `releases/<group>/CHANGELOG.md`; root CHANGELOG is an index,
 with coordinated releases through 0.11.0 preserved once in `releases/history.md`.
 No package paths, numeric versions, tags or historical scope were changed. The real
 adapter uses the shared group plan's exact files for metadata/source admission,
 receipts and post-commit checks. Group-specific tags/plans prevent collisions.
-The metadata editor is published IC Build 0.73 with `group-manifest`.
+The metadata editor is published IC Build 0.73.1 with `group-manifest`.
 
 ```sh
 make release-version RELEASE_GROUP=core

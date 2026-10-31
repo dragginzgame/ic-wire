@@ -25,12 +25,14 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.73.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.73.1 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.73.0 without default features; the CLI feature is only enabled for installation.
+0.73.1 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
+Native endpoint/codec controls select Testkit 0.75.0; Build/Host retain the
+independently versioned 0.73.1 foundation.
 
 Installation is explicit; checks install nothing. IC Wire selects only the
 reviewed common host and Cargo toolsets. Platform executables are not part of its
@@ -142,12 +144,16 @@ serialization and allocation/error paths still require a real target or emulator
 
 ### Runtime fuzz seeds
 
-`make fuzz-runtime` restores 112 deterministic packed frames before every run,
+The fuzz engine belongs to the unpublished qualification package and is selected
+only through its native `fuzz-runtime` feature. Ordinary codec and qualification
+tests do not select it. `make fuzz-runtime` retains the prepared nightly/C++
+runner and restores 112 deterministic packed frames before every run,
 using `scripts/ci/seed-packed-fuzz.pl`. No archived corpus is needed on a clean
 checkout. Seeds cover every supported word type, both directions, empty fields,
 length-prefix boundaries and partial-word rejection. Existing discovered corpus
 entries are preserved. Cell variant indices in the seed oracle must track the
-qualification enum in `examples/fuzz_runtime/mod.rs`.
+qualification enum in
+`crates/ic-wire-qualification/examples/fuzz_runtime/mod.rs`.
 
 The runner requires the prepared `nightly-2026-07-29` toolchain and a C++ compiler;
 it installs nothing. To inspect only the seed corpus, create an empty directory
@@ -156,6 +162,13 @@ unchanged; on hosts where ptrace prevents LeakSanitizer shutdown, an explicit
 `ASAN_OPTIONS=detect_leaks=0` run retains address checking but does not check leaks.
 
 ### Allocation timing modes
+
+The private benchmark's native `allocations` and `heap` features select
+`stats_alloc` and `dhat` respectively. Ordinary timing/correctness builds select
+neither; enable only one profiler per build. Both remain outside Wasm dependencies.
+`check-qualification` enforces these graphs through
+`scripts/ci/check-qualification-tools.sh` and selects allocation-fixture explicitly,
+so routine qualification does not enable fuzzing via `--all-features`.
 
 For the focused caller-slice versus owned/reused output study, see
 [caller-storage qualification](evidence/caller-storage-0719/README.md) and run

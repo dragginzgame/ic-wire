@@ -1,0 +1,35 @@
+    Checking ic-wire-benchmarks v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Checking ic-wire v0.13.0 (/home/adam/projects/ic-wire/crates/ic-wire)
+error: Run allocations and heap in separate builds
+  --> crates/ic-wire-benchmarks/drivers/suite.rs:22:1
+   |
+22 | compile_error!("Run allocations and heap in separate builds");
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: cannot define multiple global allocators
+  --> crates/ic-wire-benchmarks/drivers/suite.rs:28:1
+   |
+25 | static HEAP: dhat::Alloc = dhat::Alloc;
+   | --------------------------------------- previous global allocator defined here
+26 | #[cfg(feature = "allocations")]
+27 | #[global_allocator]
+   | ------------------- in this attribute macro expansion
+28 | static ALLOCATOR: &stats_alloc::StatsAlloc<std::alloc::System> = &stats_alloc::INSTRUMENTED_SYSTEM;
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot define a new global allocator
+
+error[E0308]: mismatched types
+  --> crates/ic-wire-benchmarks/drivers/suite.rs:58:9
+   |
+58 | /         json!({"peak_live_bytes":stats.max_bytes,"peak_live_blocks":stats.max_blocks,
+59 | |             "total_bytes":stats.total_bytes,"total_blocks":stats.total_blocks,"retained_bytes":stats.curr_bytes})
+   | |_________________________________________________________________________________________________________________^ expected `()`, found `Value`
+   |
+   = note: this error originates in the macro `$crate::json_internal` which comes from the expansion of the macro `json` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: you might have meant to return this value
+   |
+58 ~         return json!({"peak_live_bytes":stats.max_bytes,"peak_live_blocks":stats.max_blocks,
+59 ~             "total_bytes":stats.total_bytes,"total_blocks":stats.total_blocks,"retained_bytes":stats.curr_bytes});
+   |
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `ic-wire-benchmarks` (bench "suite") due to 3 previous errors

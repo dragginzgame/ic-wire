@@ -16,7 +16,7 @@ ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
 endif
-RELEASE_EDITOR_VERSION := 0.73.0
+RELEASE_EDITOR_VERSION := 0.73.1
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -70,8 +70,10 @@ check-benchmarks:
 	+@env cargo test --locked -p ic-wire-benchmarks --example codec-report
 	+@env cargo test --locked -p ic-wire-benchmarks --features wire,candid --test roundtrip
 	+@env cargo clippy --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic -- -D warnings
-	+@env cargo clippy --locked -p ic-wire-benchmarks --bench suite --features wire,candid,allocations -- -D warnings
-	+@env cargo clippy --locked -p ic-wire-benchmarks --bench suite --features wire,candid,heap -- -D warnings
+	+@for mode in allocations heap; do \
+	    cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,$$mode" -- -D warnings && \
+	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,$$mode" || exit $$?; \
+	done
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic
 	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features wire,candid
 	+@$(MAKE) check-consumer-benchmarks
@@ -115,9 +117,10 @@ check-platform-types:
 	+@bash scripts/ci/check-stable-identities.sh
 
 check-qualification:
+	+@bash scripts/ci/check-qualification-tools.sh
 	+@env cargo test --locked -p ic-wire-qualification --lib --tests --features allocation-fixture
-	+@env cargo clippy --locked -p ic-wire-qualification --all-targets --all-features -- -D warnings
-	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-qualification --all-targets --all-features
+	+@env cargo clippy --locked -p ic-wire-qualification --all-targets --features allocation-fixture -- -D warnings
+	+@env RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-qualification --all-targets --features allocation-fixture
 
 check-typed-diagnostics:
 	+@bash scripts/ci/check-diagnostics.sh

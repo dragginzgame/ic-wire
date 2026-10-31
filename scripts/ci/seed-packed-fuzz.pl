@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-# Independent frame oracle for Cell variants 8..14 in fuzz_runtime/mod.rs.
+# Independent frame oracle for Cell variants 8..14 in the qualification fuzz_runtime/mod.rs.
 # Keep seeds deterministic and restore them before each run; discovered corpus
 # entries are never removed. Partial words deliberately seed malformed admission.
 my ($directory) = @ARGV;
