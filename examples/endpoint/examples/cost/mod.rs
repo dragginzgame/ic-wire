@@ -20,7 +20,7 @@ impl<T: Serialize> Serialize for Measured<T> {
         // second pass observes entry/copy/decode/handler and encoding up to here;
         // final counter serialization, msg_reply and cleanup are excluded.
         #[cfg(target_family = "wasm")]
-        let count = ic_platform::ic0::performance_counter(0);
+        let count = ic_platform_runtime::ic0::performance_counter(0);
         #[cfg(not(target_family = "wasm"))]
         let count = 0u64;
         tuple.serialize_element(&ic_wire::BytesRef::<8>::new(&count.to_le_bytes()).unwrap())?;
@@ -31,7 +31,7 @@ impl<T: Serialize> Serialize for Measured<T> {
 #[cfg_attr(not(feature = "inline-baseline"), ic_wire_endpoint::query(id = 21, request = LIMITS, response = LIMITS))]
 #[cfg_attr(
     feature = "inline-baseline",
-    ic_platform::cdk::query(
+    ic_platform_runtime::cdk::query(
         guard = "admit",
         decode_with = "decode_blob",
         encode_with = "encode_blob"
@@ -44,7 +44,7 @@ fn echo(value: ByteBuf) -> Measured<ByteBuf> {
 #[cfg_attr(not(feature = "inline-baseline"), ic_wire_endpoint::query(id = 22, request = LIMITS, response = LIMITS))]
 #[cfg_attr(
     feature = "inline-baseline",
-    ic_platform::cdk::query(
+    ic_platform_runtime::cdk::query(
         guard = "admit",
         decode_with = "decode_unit",
         encode_with = "encode_unit"
@@ -59,8 +59,8 @@ fn unit(value: ()) -> Measured<()> {
 // This isolates extraction overhead, not a complete Canic migration speedup.
 #[cfg(feature = "inline-baseline")]
 fn admit() -> Result<(), String> {
-    if ic_platform::ic0::msg_arg_data_size() > LIMITS.bytes {
-        ic_platform::cdk::api::trap("Wire request exceeds byte allowance");
+    if ic_platform_runtime::ic0::msg_arg_data_size() > LIMITS.bytes {
+        ic_platform_runtime::cdk::api::trap("Wire request exceeds byte allowance");
     }
     Ok(())
 }
@@ -84,12 +84,12 @@ fn encode_unit(value: Measured<()>) -> Vec<u8> {
 #[cfg(any(feature = "inline-baseline", test))]
 fn before_decode<T: serde::de::DeserializeOwned>(bytes: &[u8], id: u64) -> T {
     native::decode_request(id, bytes, LIMITS)
-        .unwrap_or_else(|error| ic_platform::cdk::api::trap(error.to_string()))
+        .unwrap_or_else(|error| ic_platform_runtime::cdk::api::trap(error.to_string()))
 }
 #[cfg(any(feature = "inline-baseline", test))]
 fn before_encode<T: Serialize>(value: &T, id: u64) -> Vec<u8> {
     native::encode_response(id, value, LIMITS)
-        .unwrap_or_else(|error| ic_platform::cdk::api::trap(error.to_string()))
+        .unwrap_or_else(|error| ic_platform_runtime::cdk::api::trap(error.to_string()))
 }
 
 #[cfg(test)]

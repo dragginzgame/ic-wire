@@ -118,7 +118,7 @@ impl<Request: crate::typescript::Wire, Response: crate::typescript::Wire>
 /// Platform paths used by generated entrypoints, including renamed Wire imports.
 #[doc(hidden)]
 pub mod __private {
-    pub use ic_platform::cdk;
+    pub use ic_platform_runtime::cdk;
 }
 
 /// Trap on an oversized ingress before Platform allocates/copies argument bytes.
@@ -130,9 +130,9 @@ fn admit_request_len(limits: Limits) -> usize {
     // This moves Canic's pre-copy check to Wire without changing its acceptance
     // rule: the full native frame counts toward bytes, including its 11-byte header.
     // Consumers retain their existing method IDs and limits; no wire migration.
-    let length = ic_platform::ic0::msg_arg_data_size();
+    let length = ic_platform_runtime::ic0::msg_arg_data_size();
     if length > limits.bytes {
-        ic_platform::cdk::api::trap("Wire request exceeds byte allowance");
+        ic_platform_runtime::cdk::api::trap("Wire request exceeds byte allowance");
     }
     length
 }
@@ -144,7 +144,7 @@ fn admit_frame(id: u64, limits: Limits) {
         trap_error(crate::Error::Malformed);
     }
     let mut header = [0; native::REQUEST_HEADER_BYTES];
-    ic_platform::ic0::msg_arg_data_copy(&mut header, 0);
+    ic_platform_runtime::ic0::msg_arg_data_copy(&mut header, 0);
     // Previously identity/direction were checked after copying the complete
     // ingress. Check the same eleven bytes first, using the same validator.
     // Bytes and accepted frames are unchanged; no consumer migration. Payload
@@ -173,5 +173,5 @@ pub fn encode_response<T: Serialize + ?Sized>(value: &T, id: u64, limits: Limits
 #[cold]
 #[inline(never)]
 fn trap_error(error: crate::Error) -> ! {
-    ic_platform::cdk::api::trap(error.to_string())
+    ic_platform_runtime::cdk::api::trap(error.to_string())
 }

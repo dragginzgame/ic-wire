@@ -58,11 +58,13 @@ pub async fn composite() -> u64 {
 
 async fn remote_count() -> u64 {
     let frame = ic_wire::native::encode_request(8, &(), LIMITS).unwrap();
-    let reply =
-        ic_platform::cdk::call::Call::bounded_wait(ic_platform::cdk::api::canister_self(), "count")
-            .with_raw_args(&frame)
-            .await
-            .unwrap();
+    let reply = ic_platform_runtime::cdk::call::Call::bounded_wait(
+        ic_platform_runtime::cdk::api::canister_self(),
+        "count",
+    )
+    .with_raw_args(&frame)
+    .await
+    .unwrap();
     ic_wire::native::decode_response(8, reply.as_ref(), LIMITS).unwrap()
 }
 
@@ -131,17 +133,17 @@ fn guarded_handler(allowed: bool) -> Result<u64, &'static str> {
     COUNT.set(COUNT.get() + 1);
     Ok(COUNT.get())
 }
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "composed_admit",
     decode_with = "composed_decode",
     manual_reply
 )]
 fn composed(allowed: bool) {
     match guarded_handler(allowed) {
-        Ok(value) => {
-            ic_platform::cdk::api::msg_reply(ic_wire_endpoint::encode_response(&value, 16, LIMITS))
-        }
-        Err(error) => ic_platform::cdk::api::msg_reject(error),
+        Ok(value) => ic_platform_runtime::cdk::api::msg_reply(ic_wire_endpoint::encode_response(
+            &value, 16, LIMITS,
+        )),
+        Err(error) => ic_platform_runtime::cdk::api::msg_reject(error),
     }
 }
 

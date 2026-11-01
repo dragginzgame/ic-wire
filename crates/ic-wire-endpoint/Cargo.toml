@@ -17,7 +17,7 @@ typescript = ["ic-wire/typescript", "dep:serde_json"]
 serde_json = { workspace = true, optional = true }
 
 [dependencies]
-ic-platform = { workspace = true, features = ["cdk"] }
+ic-platform-runtime = { workspace = true, features = ["cdk"] }
 ic-wire.workspace = true
 ic-wire-derive = { workspace = true, features = ["endpoint"] }
 serde.workspace = true

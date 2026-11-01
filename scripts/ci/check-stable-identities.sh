@@ -12,8 +12,10 @@ from pathlib import Path
 import json,sys,shutil
 root,out=map(Path,sys.argv[1:]);m=json.loads((out/'workspace.json').read_text())
 endpoint=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire-endpoint/Cargo.toml'))
-dep=next(d for n in m['resolve']['nodes'] if n['id']==endpoint['id'] for d in n['deps'] if d['name']=='ic_platform')
-p=next(p for p in m['packages'] if p['id']==dep['pkg'])
+p=next(p for p in m['packages'] if p['name']=='ic-platform')
+runtime_edge=next(d for n in m['resolve']['nodes'] if n['id']==endpoint['id'] for d in n['deps'] if d['name']=='ic_platform_runtime')
+runtime=next(p for p in m['packages'] if p['id']==runtime_edge['pkg'])
+runtime_selection=f'version = "={runtime["version"]}"' if runtime['source'] else f'path = "{Path(runtime["manifest_path"]).parent}"'
 major,minor,_=map(int,p['version'].split('.')); future=f'{major}.{minor+1}.0'
 ep_major,ep_minor,_=map(int,endpoint['version'].split('.')); future_endpoint=f'{ep_major}.{ep_minor+1}.0'
 source=Path(p['manifest_path']).parent
@@ -32,7 +34,7 @@ typescript = ["ic-wire/typescript", "dep:serde_json"]
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 serde_json = {{ version = "1", optional = true }}
 [dependencies]
-ic-platform = {{ path = "{out}/next-platform", default-features = false, features = ["cdk"] }}
+ic-platform-runtime = {{ {runtime_selection}, default-features = false, features = ["cdk"] }}
 ic-wire = {{ path = "{root}/crates/ic-wire" }}
 ic-wire-derive = {{ path = "{root}/crates/ic-wire-derive", features = ["endpoint"] }}
 serde = {{ version = "1", default-features = false, features = ["derive", "alloc"] }}
@@ -77,7 +79,7 @@ import json,sys
 from pathlib import Path
 out=Path(sys.argv[1]);meta=[json.loads((out/l/'metadata.json').read_text()) for l in ['current','next']]
 ids={}
-for name in ['ic-wire','ic-wire-derive','ic-platform-types']:
+for name in ['ic-wire','ic-wire-derive','ic-platform-types','ic-platform-runtime','ic-platform-macros','ic-platform-runtime-guard']:
  selections=[[p['id'] for p in m['packages'] if p['name']==name] for m in meta]
  assert len(selections[0])==1 and selections[0]==selections[1],(name,selections)
  ids[name]=selections[0][0]

@@ -122,3 +122,12 @@ introduce automatic migration or compatibility shims.
 
 Update the open changelog and compact handoff for meaningful batches. Keep
 proposed syntax explicitly labeled until it compiles and passes its owning tests.
+
+## Independent Runtime adoption (#131)
+
+The pending Endpoint 0.4 selects `ic-platform-runtime` 0.17 directly. Core, derive
+and canonical Types remain independent. The facade stays available only for
+separately selected qualification clients and external Candid/crypto capabilities.
+Runtime/macros/exact guard publication precedes Endpoint and matching Timers
+adoption. Source/archive qualification uses harness-root supplier patches; refresh
+the registry lock after publication before merging/releasing this draft.

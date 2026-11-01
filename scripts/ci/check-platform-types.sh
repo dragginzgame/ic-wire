@@ -21,8 +21,7 @@ const fs=require('node:fs'),path=require('node:path');
 const [root,fixture]=process.argv.slice(2),m=JSON.parse(fs.readFileSync(`${fixture}/workspace.json`));
 const wire=m.packages.find(p=>p.name==='ic-wire'&&p.manifest_path===`${root}/crates/ic-wire/Cargo.toml`);
 const endpoint=m.packages.find(p=>p.name==='ic-wire-endpoint'&&p.manifest_path===`${root}/crates/ic-wire-endpoint/Cargo.toml`);
-const dep=m.resolve.nodes.find(n=>n.id===endpoint.id).deps.find(d=>d.name==='ic_platform');
-const platform=m.packages.find(p=>p.id===dep.pkg);
+const platform=m.packages.find(p=>p.name==='ic-platform');
 const source=platform.source===null?`, path = ${JSON.stringify(path.dirname(platform.manifest_path))}`:'';
 fs.writeFileSync(`${fixture}/Cargo.toml`, `[workspace]
 [package]
@@ -54,7 +53,7 @@ for selection in types combined; do
             echo 'External codec/runtime dependency leaked into platform types' >&2; exit 1
         fi
         if [[ "$selection" == types ]]; then
-            if grep -Eq '^ic-platform-(macros|runtime-guard) v|^ic-platform v.*features=.*(cdk|executor|runtime|candid|wire-schema)' "$graph"; then
+            if grep -Eq '^ic-platform-(macros|runtime|runtime-guard) v|^ic-platform v.*features=.*(cdk|executor|runtime|candid|wire-schema)' "$graph"; then
                 echo 'Schema-only consumer selected endpoint/runtime machinery' >&2; exit 1
             fi
         else

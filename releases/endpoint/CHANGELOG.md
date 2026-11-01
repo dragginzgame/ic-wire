@@ -4,6 +4,16 @@ Covers ic-wire-endpoint. Its independent series begins at 0.1.0; pre-extraction
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.4.0]
+
+### ⚠️ Breaking
+
+- Select `ic-platform-runtime` 0.17 directly for typed entrypoints and execution.
+  Endpoint and canister runtime identity no longer follow crypto facade releases.
+  Keep Core/derive identity, handler syntax, Wire bytes and budgets unchanged.
+  Migrate Timers and other executor suppliers together; the exact singleton guard
+  intentionally rejects the legacy embedded Platform 0.16 executor.
+
 ## [0.3.0] - 2026-11-01
 
 ### ⚠️ Breaking
