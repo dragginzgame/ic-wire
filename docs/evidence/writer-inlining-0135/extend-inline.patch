@@ -1,0 +1,10 @@
+--- a/crates/ic-wire/src/contract/mod.rs
++++ b/crates/ic-wire/src/contract/mod.rs
+@@ -19,6 +19,7 @@
+         self.bytes.push(byte);
+         Ok(())
+     }
++    #[cfg_attr(target_arch = "wasm32", inline(always))]
+     fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+         if bytes.len() > self.limit - self.bytes.len() {
+             return Err(postcard::Error::SerializeBufferFull);

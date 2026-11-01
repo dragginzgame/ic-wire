@@ -1,0 +1,7 @@
+Candid control artifact changed: evaluation
++ actual - expected
+
++ '8d440cca084f1aab5c09d6653e25f92b719716fed306cc8f6414a427f6349bfc'
+- 'd82b93f26946c22bcf32d3d3f981660353da2826e71c27bdef07f8d16b18b583'
+
+make: *** [Makefile:93: check-codec-costs] Error 1

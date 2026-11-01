@@ -1,0 +1,122 @@
+[
+  {
+    "key": [
+      "benchmark-speed",
+      "scalar-u64-0",
+      "wire-native",
+      "encode-fresh"
+    ],
+    "before": 676.25,
+    "after": 674.25,
+    "delta": -2.0,
+    "change_pct": -0.2957486136783734
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "scalar-u64-0",
+      "wire-native",
+      "encode-reuse"
+    ],
+    "before": 352.25,
+    "after": 350.25,
+    "delta": -2.0,
+    "change_pct": -0.5677785663591199
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "scalar-u64-127",
+      "wire-native",
+      "encode-fresh"
+    ],
+    "before": 676.25,
+    "after": 674.25,
+    "delta": -2.0,
+    "change_pct": -0.2957486136783734
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "scalar-u64-127",
+      "wire-native",
+      "encode-reuse"
+    ],
+    "before": 352.25,
+    "after": 350.25,
+    "delta": -2.0,
+    "change_pct": -0.5677785663591199
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "scalar-u64-18446744073709551615",
+      "wire-native",
+      "encode-fresh"
+    ],
+    "before": 972.25,
+    "after": 976.25,
+    "delta": 4.0,
+    "change_pct": 0.41141681666238106
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "scalar-u64-18446744073709551615",
+      "wire-native",
+      "encode-reuse"
+    ],
+    "before": 648.25,
+    "after": 652.25,
+    "delta": 4.0,
+    "change_pct": 0.6170458927882762
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "optional-unit-list-4096",
+      "wire-native",
+      "encode-fresh"
+    ],
+    "before": 447273.25,
+    "after": 455465.25,
+    "delta": 8192.0,
+    "change_pct": 1.8315425749248362
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "optional-unit-list-4096",
+      "wire-native",
+      "encode-reuse"
+    ],
+    "before": 446956.25,
+    "after": 455148.25,
+    "delta": 8192.0,
+    "change_pct": 1.8328415812509613
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "message-128",
+      "wire-native",
+      "encode-fresh"
+    ],
+    "before": 1701.25,
+    "after": 1705.25,
+    "delta": 4.0,
+    "change_pct": 0.23512123438648053
+  },
+  {
+    "key": [
+      "benchmark-speed",
+      "message-128",
+      "wire-native",
+      "encode-reuse"
+    ],
+    "before": 1377.25,
+    "after": 1381.25,
+    "delta": 4.0,
+    "change_pct": 0.2904338355418406
+  }
+]

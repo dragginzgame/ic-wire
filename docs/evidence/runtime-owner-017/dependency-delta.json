@@ -1,0 +1,17 @@
+{
+  "removed": [
+    "ic-platform@0.16.0@registry+https://github.com/rust-lang/crates.io-index",
+    "ic-platform-macros@0.16.0@registry+https://github.com/rust-lang/crates.io-index",
+    "ic-platform-runtime-guard@0.16.0@registry+https://github.com/rust-lang/crates.io-index",
+    "ic-platform-types@0.15.1@registry+https://github.com/rust-lang/crates.io-index",
+    "pocket-ic@16.1.0@registry+https://github.com/rust-lang/crates.io-index"
+  ],
+  "added": [
+    "ic-platform@0.16.0@qualification path",
+    "ic-platform-macros@0.17.0@qualification path",
+    "ic-platform-pocket-ic@0.16.0@qualification path",
+    "ic-platform-runtime@0.17.0@qualification path",
+    "ic-platform-runtime-guard@0.17.0@qualification path",
+    "ic-platform-types@0.15.1@qualification path"
+  ]
+}

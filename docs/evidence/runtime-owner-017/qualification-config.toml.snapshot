@@ -1,0 +1,7 @@
+[patch.crates-io]
+ic-platform = { path = "/tmp/wire-runtime-owner-suppliers-20261101/ic-platform-0.16.0" }
+ic-platform-runtime = { path = "/tmp/wire-runtime-owner-suppliers-20261101/ic-platform-runtime-0.17.0" }
+ic-platform-macros = { path = "/tmp/wire-runtime-owner-suppliers-20261101/ic-platform-macros-0.17.0" }
+ic-platform-runtime-guard = { path = "/tmp/wire-runtime-owner-suppliers-20261101/ic-platform-runtime-guard-0.17.0" }
+ic-platform-types = { path = "/tmp/wire-runtime-owner-suppliers-20261101/ic-platform-types-0.15.1" }
+ic-platform-pocket-ic = { path = "/tmp/wire-runtime-owner-suppliers-20261101/ic-platform-pocket-ic-0.16.0" }

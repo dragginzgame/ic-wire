@@ -1,0 +1,34 @@
+{
+  "checked_at": "2026-11-01T13:50:22.800Z",
+  "publication_ready": false,
+  "packages": [
+    {
+      "name": "ic-platform-runtime",
+      "url": "https://index.crates.io/ic/-p/ic-platform-runtime",
+      "http_status": 404,
+      "latest": null,
+      "published_runtime_017": false
+    },
+    {
+      "name": "ic-platform-macros",
+      "url": "https://index.crates.io/ic/-p/ic-platform-macros",
+      "http_status": 200,
+      "latest": "0.16.0",
+      "published_runtime_017": false
+    },
+    {
+      "name": "ic-platform-runtime-guard",
+      "url": "https://index.crates.io/ic/-p/ic-platform-runtime-guard",
+      "http_status": 200,
+      "latest": "0.16.0",
+      "published_runtime_017": false
+    },
+    {
+      "name": "ic-platform-types",
+      "url": "https://index.crates.io/ic/-p/ic-platform-types",
+      "http_status": 200,
+      "latest": "0.15.1",
+      "published_runtime_017": false
+    }
+  ]
+}

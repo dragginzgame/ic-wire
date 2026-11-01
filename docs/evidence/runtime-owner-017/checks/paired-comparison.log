@@ -1,0 +1,109 @@
+{
+  "artifacts": [
+    {
+      "profile": "evaluation",
+      "exports": 17,
+      "cases": 178,
+      "measured_calls_per_lane": 1424,
+      "baseline": {
+        "total": 100373,
+        "code": 86476
+      },
+      "candidate": {
+        "total": 100285,
+        "code": 86476
+      }
+    },
+    {
+      "profile": "benchmark-speed",
+      "exports": 17,
+      "cases": 178,
+      "measured_calls_per_lane": 1424,
+      "baseline": {
+        "total": 93957,
+        "code": 81012
+      },
+      "candidate": {
+        "total": 93869,
+        "code": 81012
+      }
+    }
+  ],
+  "pairs": 356,
+  "measured_calls": 5696,
+  "identical_instructions": 356,
+  "identical_cycles": 356,
+  "worst": {
+    "profile": "evaluation",
+    "method": "echo",
+    "mode": "query",
+    "case": "blob-0",
+    "outcome": "reply",
+    "request_bytes": 14,
+    "baseline_instructions": 253815,
+    "candidate_instructions": 253815,
+    "instruction_delta": 0,
+    "instruction_percent": 0,
+    "baseline_cycles": 0,
+    "candidate_cycles": 0,
+    "baseline_page_instructions": 240000,
+    "candidate_page_instructions": 240000,
+    "baseline_samples": [
+      253815,
+      253815,
+      253815,
+      253815,
+      253815,
+      253815,
+      253815,
+      253815
+    ],
+    "candidate_samples": [
+      253815,
+      253815,
+      253815,
+      253815,
+      253815,
+      253815,
+      253815,
+      253815
+    ]
+  },
+  "best": {
+    "profile": "benchmark-speed",
+    "method": "composed",
+    "mode": "update",
+    "case": "truncated",
+    "outcome": "trap",
+    "request_bytes": 11,
+    "baseline_instructions": 484327,
+    "candidate_instructions": 484327,
+    "instruction_delta": 0,
+    "instruction_percent": 0,
+    "baseline_cycles": 6978327,
+    "candidate_cycles": 6978327,
+    "baseline_page_instructions": 480000,
+    "candidate_page_instructions": 480000,
+    "baseline_samples": [
+      484327,
+      484327,
+      484327,
+      484327,
+      484327,
+      484327,
+      484327,
+      484327
+    ],
+    "candidate_samples": [
+      484327,
+      484327,
+      484327,
+      484327,
+      484327,
+      484327,
+      484327,
+      484327
+    ]
+  },
+  "over_five_percent": 0
+}

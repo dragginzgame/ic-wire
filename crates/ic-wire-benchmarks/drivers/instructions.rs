@@ -153,6 +153,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "build_environment":std::env::vars().filter(|(key,_)| key.starts_with("CARGO_PROFILE_") || matches!(key.as_str(),"RUSTFLAGS"|"CARGO_ENCODED_RUSTFLAGS"|"RUSTC_WRAPPER"|"RUSTC_WORKSPACE_WRAPPER")).collect::<std::collections::BTreeMap<_,_>>(),
         "byte_keys_fixture_sha256":hash(include_bytes!("fixtures/byte_keys/mod.rs")),"cost_smoke_fixture_sha256":hash(include_bytes!("fixtures/cost_smoke/mod.rs")),
         "native_encoder_sha256":hash(include_bytes!("../../ic-wire/src/native/encode/mod.rs")),"native_decoder_sha256":hash(include_bytes!("../../ic-wire/src/native/decode/mod.rs")),"native_admission_sha256":hash(include_bytes!("../../ic-wire/src/native/mod.rs")),
+        "contract_sha256":hash(include_bytes!("../../ic-wire/src/contract/mod.rs")),
         "native_parser_sha256":hash(include_bytes!("../../ic-wire/src/native/parser/mod.rs")),
         "lock_sha256":hash(include_bytes!("../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         )?,

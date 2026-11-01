@@ -1,0 +1,3 @@
+evaluation: total 94193 → 94193 bytes (+0); code 81742 → 81742 bytes (+0)
+benchmark-speed: total 121096 → 121085 bytes (-11); code 109653 → 109642 bytes (-11)
+192 Wire operation pairs; policy: instructions ≤ baseline × 1.05 + 64; no total/code Wasm growth.

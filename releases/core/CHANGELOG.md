@@ -5,6 +5,31 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.13.5]
+
+### 🔧 Changed
+
+- Inline the single-byte output wrapper on Wasm. In the matched 100-type
+  opt-3 fixture, total module bytes fall 398,548 → 396,039 (−2,509), and code
+  bytes fall 364,120 → 361,615 (−2,505); opt-z is unchanged. Retain the existing
+  byte-slice writer after broader hints regressed map encoding. All 192 paired
+  IC operations pass the cost screen, with a maximum 1.83% increase; native
+  timing variability and regressions remain visible. Bytes, budgets, primitive
+  acceptance, error behavior and retained retry/hash inputs are unchanged.
+  [Measurements and rejected candidates](../../docs/evidence/writer-inlining-0135/README.md).
+
+### 🧪 Testing
+
+- Record contract/output source identity in the private instruction sampler.
+  Retain matched repeated native/IC samples, small controls, allocation/heap
+  probes and physical raw/code Wasm for the output-writer investigation.
+
+- Retain the proposed independent Runtime adoption and its isolated Endpoint
+  qualification as research evidence. Published dependencies remain selected
+  until the supplying Runtime/macros/guard and final Types graph are qualified.
+  Protocol and production dependencies are unchanged by this preparation.
+  [Prepared patch and qualification](../../docs/evidence/runtime-owner-017/README.md).
+
 ## [0.13.4] - 2026-11-01
 
 ### 🔧 Changed

@@ -1,0 +1,6 @@
+{
+  "release_commit": "f83755b30f76704105164e163b9334310e106e44",
+  "git_context": "e6c05564241e3a07775c72ac03a825007293f97b",
+  "baseline": "Core/derive 0.13.4 plus common private contract_sha256 sampler identity",
+  "production_difference": "Applied hint has only an explanatory end-of-line comment beyond measured candidate source; runtime tokens and line numbers match."
+}
