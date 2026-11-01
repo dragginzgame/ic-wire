@@ -1,0 +1,11 @@
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -77,7 +77,7 @@
+             self.refused.set(true);
+             return false;
+         };
+-        if depth > self.depth || !self.bytes(size) {
++        if depth > self.depth || (size != 0 && !self.bytes(size)) {
+             self.refused.set(true);
+             return false;
+         }

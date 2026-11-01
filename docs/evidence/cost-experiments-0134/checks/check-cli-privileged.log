@@ -1,0 +1,25 @@
+✔ paired unchanged evidence passes with both raw Wasm metrics (6.959503ms)
+✔ instruction regression fails while the small absolute margin is explicit (2.611986ms)
+✔ dependency drift (3.117323ms)
+✔ missing compiler (2.762742ms)
+✔ changed input (2.804264ms)
+✔ missing operation (2.181701ms)
+✔ unstable counters (2.072067ms)
+✔ cached runtime change (2.628271ms)
+✔ bad code-section metric (1.986308ms)
+✔ artifact mutation (1.932578ms)
+✔ total growth is caught even with unchanged code section (2.175982ms)
+✔ code growth is an independently enforced limit (2.326788ms)
+✔ changed runtime accepts an explicitly rebuilt candidate (1.715782ms)
+✔ compressed artifacts cannot masquerade as raw Wasm (3.462771ms)
+✔ effective compiler profile overrides are rejected (1.766318ms)
+✔ guest feature changes require a matched baseline (2.606078ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.983774
+Benchmark CLI: 49 focused checks passed; no measurements or servers started.

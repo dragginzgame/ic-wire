@@ -1,0 +1,5 @@
+    Blocking waiting for file lock on package cache
+    Updating crates.io index
+    Removing ic-platform v0.15.3
+    Updating ic-testkit v0.75.2 -> v0.76.0
+note: pass `--verbose` to see 5 unchanged dependencies behind latest

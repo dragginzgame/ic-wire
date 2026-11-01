@@ -1,0 +1,5 @@
+   Compiling ic-wire-derive v0.13.3 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-wire v0.13.3 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.98s

@@ -1,8 +1,22 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
 #[cfg(any(feature = "bulk", feature = "bulk-scale"))]
 mod bulk;
-#[cfg(feature = "byte-keys")]
+#[cfg(any(feature = "byte-keys", feature = "cost-smoke"))]
 mod byte_keys;
+#[cfg(feature = "cost-smoke")]
+mod cost_smoke;
+#[cfg(all(
+    feature = "cost-smoke",
+    any(
+        feature = "byte-keys",
+        feature = "hotspots",
+        feature = "bulk",
+        feature = "derive-scale",
+        feature = "toko",
+        feature = "packed-i16"
+    )
+))]
+compile_error!("select one benchmark corpus");
 #[cfg(feature = "hotspots")]
 mod hotspots;
 #[cfg(all(
@@ -303,6 +317,10 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     {
         byte_keys::cases_selected(selected)
     }
+    #[cfg(feature = "cost-smoke")]
+    {
+        cost_smoke::cases_selected(selected)
+    }
     #[cfg(feature = "bulk")]
     {
         bulk::cases_selected(selected)
@@ -325,7 +343,8 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         feature = "packed-i16",
         feature = "bulk",
         feature = "hotspots",
-        feature = "byte-keys"
+        feature = "byte-keys",
+        feature = "cost-smoke"
     )))]
     {
         standard_cases_selected(selected)

@@ -105,9 +105,10 @@ effects remain outside that scope. Keep the finalized release at the
 top of the changelog until subsequent work needs a new numbered, undated pending
 entry under the [automatic next-version rules](../rules/changelogs.md).
 
-Agents maintain that proposed changelog version and canonical standalone `VERSION`
-file during ordinary development. The proposal does not bump package metadata or
-execute a release. Select the
+Agents maintain that proposed changelog version during ordinary development.
+Shared Tooling alone also maintains its standalone `VERSION` file automatically;
+this is not a sibling adoption requirement. The proposal does not bump package
+metadata or execute a release. Select the
 matching release kind when invoking the explicitly authorized command; its computed
 candidate must agree with the pending heading and the complete batch's
 compatibility impact before finalization.

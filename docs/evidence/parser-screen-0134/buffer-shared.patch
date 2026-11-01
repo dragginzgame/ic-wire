@@ -1,0 +1,68 @@
+--- a/crates/ic-wire/src/native/parser/mod.rs
++++ b/crates/ic-wire/src/native/parser/mod.rs
+@@ -39,6 +39,17 @@
+ }
+ 
+ impl<'de> Deserializer<'de> {
++    #[cfg_attr(target_arch = "wasm32", inline(never))]
++    fn take_bytes(&mut self) -> Result<&'de [u8]> {
++        let len = self.try_take_varint_usize()?;
++        self.flavor.try_take_n(len)
++    }
++
++    #[cfg_attr(target_arch = "wasm32", inline(never))]
++    fn take_str(&mut self) -> Result<&'de str> {
++        core::str::from_utf8(self.take_bytes()?).map_err(|_| Error::DeserializeBadUtf8)
++    }
++
+     #[cfg(target_pointer_width = "16")]
+     #[inline(always)]
+     fn try_take_varint_usize(&mut self) -> Result<usize> {
+@@ -407,11 +418,7 @@
+     where
+         V: Visitor<'de>,
+     {
+-        let sz = self.try_take_varint_usize()?;
+-        let bytes: &'de [u8] = self.flavor.try_take_n(sz)?;
+-        let str_sl = core::str::from_utf8(bytes).map_err(|_| Error::DeserializeBadUtf8)?;
+-
+-        visitor.visit_borrowed_str(str_sl)
++        visitor.visit_borrowed_str(self.take_str()?)
+     }
+ 
+     #[inline]
+@@ -419,11 +426,7 @@
+     where
+         V: Visitor<'de>,
+     {
+-        let sz = self.try_take_varint_usize()?;
+-        let bytes: &[u8] = self.flavor.try_take_n_temp(sz)?;
+-        let str_sl = core::str::from_utf8(bytes).map_err(|_| Error::DeserializeBadUtf8)?;
+-
+-        visitor.visit_str(str_sl)
++        visitor.visit_str(self.take_str()?)
+     }
+ 
+     #[inline]
+@@ -431,9 +434,7 @@
+     where
+         V: Visitor<'de>,
+     {
+-        let sz = self.try_take_varint_usize()?;
+-        let bytes: &'de [u8] = self.flavor.try_take_n(sz)?;
+-        visitor.visit_borrowed_bytes(bytes)
++        visitor.visit_borrowed_bytes(self.take_bytes()?)
+     }
+ 
+     #[inline]
+@@ -441,9 +442,7 @@
+     where
+         V: Visitor<'de>,
+     {
+-        let sz = self.try_take_varint_usize()?;
+-        let bytes: &[u8] = self.flavor.try_take_n_temp(sz)?;
+-        visitor.visit_bytes(bytes)
++        visitor.visit_bytes(self.take_bytes()?)
+     }
+ 
+     #[inline]

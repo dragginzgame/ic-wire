@@ -35,6 +35,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let version = Command::new(&server).arg("--version").output()?;
     assert!(version.status.success());
+    let compiler = Command::new("rustc").arg("-vV").output()?;
+    assert!(compiler.status.success());
+    let compiler = String::from_utf8(compiler.stdout)?;
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
         .build_instance(PocketIcBuilder::new().with_application_subnet())?;
     let pic = owned.instance();
@@ -146,6 +149,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "sample_caller":"unique 8-byte little-endian principal per query; caller not read by guest",
         "server_version":String::from_utf8(version.stdout)?,"server_sha256":hash(&fs::read(server)?),"artifacts":artifacts,
         "fixture_sha256":hash(include_bytes!("fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("fixtures/scale/mod.rs")),"driver_sha256":hash(include_bytes!("instructions.rs")),"wasm_driver_sha256":hash(include_bytes!("wasm.rs")),
+        "compiler":compiler,"workspace_manifest_sha256":hash(include_bytes!("../../../Cargo.toml")),
+        "build_environment":std::env::vars().filter(|(key,_)| key.starts_with("CARGO_PROFILE_") || matches!(key.as_str(),"RUSTFLAGS"|"CARGO_ENCODED_RUSTFLAGS"|"RUSTC_WRAPPER"|"RUSTC_WORKSPACE_WRAPPER")).collect::<std::collections::BTreeMap<_,_>>(),
+        "byte_keys_fixture_sha256":hash(include_bytes!("fixtures/byte_keys/mod.rs")),"cost_smoke_fixture_sha256":hash(include_bytes!("fixtures/cost_smoke/mod.rs")),
+        "native_encoder_sha256":hash(include_bytes!("../../ic-wire/src/native/encode/mod.rs")),"native_decoder_sha256":hash(include_bytes!("../../ic-wire/src/native/decode/mod.rs")),"native_admission_sha256":hash(include_bytes!("../../ic-wire/src/native/mod.rs")),
+        "native_parser_sha256":hash(include_bytes!("../../ic-wire/src/native/parser/mod.rs")),
         "lock_sha256":hash(include_bytes!("../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         )?,
     )?;

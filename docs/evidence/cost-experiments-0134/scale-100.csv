@@ -1,0 +1,5 @@
+variant,profile,total_bytes,code_section_bytes
+baseline,evaluation,310706,291971
+baseline,benchmark-speed,398675,364245
+admission-linear,evaluation,310637,291902
+admission-linear,benchmark-speed,398548,364120

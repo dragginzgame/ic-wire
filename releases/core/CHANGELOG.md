@@ -5,6 +5,49 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.13.4]
+
+### 🔧 Changed
+
+- Adopt committed Shared Tooling 0.27.24 through its canonical exporter. Report
+  total uncompressed Wasm and code-section bytes separately; omit gzip sizes
+  from Wasm comparisons unless transport/compression is explicitly requested.
+  Keep consumer profiles, optimizer settings, runtime bytes and budgets unchanged.
+
+- Simplify native admission's allowance checks and debit flow while preserving
+  sticky refusal, limits, Postcard bytes and retry/hash inputs. In the matched
+  100-type fixture this removes 69 total/code bytes at opt-z and 127 total / 125
+  code bytes at opt-3. The maximum measured IC increase is 0.42%; native unit-list
+  decoding is about 0.2 µs slower, while encoding is faster. Protocol unchanged.
+  [Measurements and rejected candidates](../../docs/evidence/cost-experiments-0134/README.md).
+
+### 🧪 Testing
+
+- Add a small paired cost corpus with scalar, blob, zero-sized collection,
+  ordinary integer-list, record and binary-key-map controls. Retain empty and
+  singleton inputs and existing full corpora; no production encoding mode changes.
+
+- Add a data-only paired cost gate with strict build/input identities, stable IC
+  samples, unchanged Candid controls and independent raw Wasm/code-section limits.
+  Keep measurements explicit; ordinary CI runs only cheap corruption fixtures.
+  Record parser source identity alongside encoder, decoder and admission inputs.
+  Retain a [follow-up size screen](../../docs/evidence/parser-screen-0134/README.md)
+  rejecting additional helper rewrites that gave identical or larger raw Wasm.
+
+### ⬆️ Dependencies
+
+- Align the private Build diagnostic caller and managed release editor on
+  published Build 0.73.5. Qualify the already-selected Host Artifacts/FS/Process
+  0.73.5 family without unrelated dependency upgrades. Retain default-disabled
+  library features, explicit CLI setup and unchanged codec/runtime dependencies.
+  [Tooling qualification](../../docs/evidence/build-host-0735-adoption/README.md).
+
+- Adopt published Testkit 0.76.0 for private codec/endpoint qualification with
+  defaults disabled. Align its native Platform supplier to the existing 0.16.0,
+  removing the older 0.15.3 copy from the lockfile. Preserve production graphs,
+  codec bytes, budgets and retry/hash inputs.
+  [Focused qualification](../../docs/evidence/testkit-076-adoption/README.md).
+
 ## [0.13.3] - 2026-11-01
 
 ### ➕ Added

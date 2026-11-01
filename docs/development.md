@@ -25,14 +25,14 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.73.3 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.73.5 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.73.3 without default features; the CLI feature is only enabled for installation.
+0.73.5 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
-Native endpoint/codec controls select Testkit 0.75.2; Build/Host retain the
-independently versioned 0.73.3 foundation.
+Native endpoint/codec controls select Testkit 0.76.0; Build/Host select the
+independently versioned 0.73.5 foundation.
 
 Installation is explicit; checks install nothing. IC Wire selects only the
 reviewed common host and Cargo toolsets. Platform executables are not part of its
@@ -333,10 +333,10 @@ the new `tree-depth-7` row have different inputs and must not be paired. The
 upstream guard also adds Candid admission work; old codec reports keep their
 recorded Platform version and do not quantify this new comparison cost.
 For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
-prepared server and run `make evaluate-codec-matrix`. The 21 cohorts cover the
-standard/Toko corpora, 1/10/100 ordinary derived records, bounded packed-i16 and
+prepared server and run `make evaluate-codec-matrix`. The maintained cohort roster
+covers standard/Toko corpora, 1/10/100 ordinary derived records, bounded packed-i16 and
 ordinary controls, shared/varied bound records, and generic packed integer/hash
-fields plus matching ordinary controls and 1/10/100-record scaling. These are
+fields plus matching ordinary controls, byte-key maps and focused cost controls. These are
 benchmark cohorts within the one codec, not selectable production strategies.
 
 The runner freezes source/lock before measurement, requires a fresh output
@@ -367,6 +367,8 @@ CORPUS_FEATURE=toko POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/toko-comparison
 CORPUS_FEATURE=derive-scale POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/derive-100-comparison
+CORPUS_FEATURE=cost-smoke POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh target/cost-smoke-comparison
 ```
 
 `make check-consumer-benchmarks` qualifies these fixtures without timings;
@@ -377,6 +379,42 @@ every selected type is exercised. Identical generated code may still be shared
 by the compiler. `build-times.csv` records single build-command durations rounded
 to whole seconds: dependencies may be cached, and these are neither isolated
 macro-expansion timings nor statistically established compiler speedups.
+
+### Paired cost regression check
+
+After preparing two matched `cost-smoke` runs with the same fixture/driver,
+dependencies, compiler, environment and explicitly supplied PocketIC binary:
+
+```sh
+make check-codec-costs \
+  CODEC_BASELINE_DIR=/absolute/completed/baseline \
+  CODEC_CANDIDATE_DIR=/absolute/completed/candidate
+```
+
+This only reads completed evidence. It requires both profiles, Candid controls,
+exact input/frame hashes, complete operation coverage, three identical IC counts
+with distinct query callers, and the four physical uncompressed Wasm artifacts.
+It checks total bytes and section-10 payload bytes independently against their
+reported hashes and sizes. Candidate build JSON must show the Wire library and
+guest actually rebuilt; copied source with older mtimes can otherwise reuse
+stale Cargo artifacts. Use one fixed worktree and refresh changed input mtimes
+before building both sides; do not share its target directory with another job.
+The compiler/profile and guest features must match. Keep global Cargo config and
+any other build inputs fixed too: recorded identities are not a hermetic build.
+Old reports lacking the current producer metadata require a fresh matched pair.
+
+The policy permits no growth in total or code-section bytes; each Wire operation
+must cost at most baseline × 1.05 + 64 IC instructions. Candid artifacts/counters
+must remain unchanged. Native timing, allocation and heap findings still need
+separate review; the gate does not infer cycles or application code-limit headroom.
+It accepts no compressed artifact as a raw Wasm measurement. It never rebuilds,
+starts a server, downloads tools or rewrites the baseline. The 18 cheap synthetic
+corruption tests run with `make check-codec-costs-tests` and as part of
+`check-benchmark-cli`; ordinary CI does not run the performance experiment.
+
+The [matched 0.13.4 study](evidence/cost-experiments-0134/README.md) retains
+exact source, artifacts, samples and reproduction commands, including a discarded
+cache-contaminated attempt and the corrected fresh-build checks.
 
 ### Uncompressed Wasm footprint
 

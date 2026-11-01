@@ -1,0 +1,26 @@
+[
+  {
+    "path": "src/bin/ic-build-release-metadata.rs",
+    "old_sha256": "4aaec6ceb6616323e71a0936545b1c189221e6561c1da40ef9f72a3826d9a319",
+    "new_sha256": "4aaec6ceb6616323e71a0936545b1c189221e6561c1da40ef9f72a3826d9a319",
+    "identical": true
+  },
+  {
+    "path": "src/bin/release_metadata_cli/mod.rs",
+    "old_sha256": "46a1f7c48f2844b6a39b030600102b8ef47a3fcea6d7f05ba25b8d98c91e478a",
+    "new_sha256": "46a1f7c48f2844b6a39b030600102b8ef47a3fcea6d7f05ba25b8d98c91e478a",
+    "identical": true
+  },
+  {
+    "path": "src/cargo/release_metadata/tests.rs",
+    "old_sha256": "dea85304503cb0e5a5e1d8f656e891c5579d4b4b944da77d5dc6889a634a2b78",
+    "new_sha256": "dea85304503cb0e5a5e1d8f656e891c5579d4b4b944da77d5dc6889a634a2b78",
+    "identical": true
+  },
+  {
+    "path": "src/cargo/release_metadata/mod.rs",
+    "old_sha256": "a2a9c83ec895b4e42ab69d1b8fcbca96ab06c0081653fd0a28a450cb6434b7c2",
+    "new_sha256": "a2a9c83ec895b4e42ab69d1b8fcbca96ab06c0081653fd0a28a450cb6434b7c2",
+    "identical": true
+  }
+]

@@ -24,6 +24,7 @@ it is no longer maintained alongside the production Serde suite.
 | `check-benchmarks` | Matched Candid/Wire corpus, malformed-frame checks, lint and MSRV |
 | `check-consumer-benchmarks` | Toko-shaped and 1/10/100-type derive corpus, lint and MSRV checks |
 | `evaluate-codecs` | Repeated native timing, allocator counts, peak live heap and Wasm footprint |
+| `check-codec-costs` | Data-only matched cost regression check; completed baseline/candidate runs required |
 | `check-qualification` | Allocation/borrowing fixture tests, strict linting and compiler-floor checks |
 | `check-endpoint` | Typed endpoint/native schema checks, compiler diagnostics, lint, Wasm/MSRV and graph isolation |
 | `check-endpoint-ic` | Explicit installed endpoint/rollback and async qualification using a prepared PocketIC server |
@@ -55,6 +56,28 @@ network addresses and ranges, including invalid values, every truncated frame
 prefix and trailing-byte refusal. Raw floating-point checks compare IEEE bits,
 including signed zero and NaN payloads, rather than float equality. These codec
 checks do not imply generated TypeScript schema support for every Rust type.
+
+The private `cost-smoke` cohort retains 20 scalar, blob, zero-sized collection,
+ordinary wide-integer, record and byte-key-map controls. It uses the existing
+codec runner, not another production strategy. The
+[0.13.4 investigation](evidence/cost-experiments-0134/README.md) records five
+independent candidates, rejected tradeoffs and the selected admission cleanup.
+It includes repeated native samples, IC counters, unchanged allocation/heap
+observations and total uncompressed Wasm/code-section measurements. The large
+unit-list encode gap at opt-z remains; native and IC changes are different.
+
+The [follow-up parser screen](evidence/parser-screen-0134/README.md) rejects
+three independent rewrites using rebuilt 100-type raw/code modules. None improves
+size in either profile, so they do not proceed to instruction/timing qualification.
+
+`check-codec-costs` compares completed, matched runs with unchanged Candid
+controls. It rejects growth in either raw Wasm metric and instruction increases
+above baseline × 1.05 + 64 per operation. The absolute margin is explicit for
+tiny inputs; this is a screening policy, not a universal performance promise.
+It starts no server, never updates a baseline and does not replace native-time
+review or the complete comparison matrix. Ordinary CI runs its cheap corruption
+fixtures through `check-benchmark-cli`; measurements remain explicitly invoked.
+See [commands and evidence requirements](development.md#paired-cost-regression-check).
 
 Earlier alternative-codec suites were retired in 0.5.19; their reports and raw
 evidence remain historical. The new [Candid suite](candid-comparison.md) is owned

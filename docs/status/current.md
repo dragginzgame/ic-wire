@@ -1,5 +1,92 @@
 # Current handoff
 
+## Core 0.13.4 deployment in progress
+
+The maintainer authorized Git delivery to origin/main and crates.io publication
+of the pending Core patch, followed by further isolated optimization research.
+Release only Core 0.13.4 (ic-wire/derive); Endpoint remains 0.3.0. The standard
+runner must complete its full gate before version preparation. Source and
+registry readback agree on Core 0.13.3 as the released base; 0.13.4 is absent.
+Keep new optimization changes outside this admitted release source.
+
+Align Build's minimum and the managed release-editor pin on published 0.73.5.
+The incoming lock already selects Build and Host Artifacts/FS/Process 0.73.5
+and is preserved. Host Rust sources match 0.73.4; Build changes only package
+archive qualification, and the editor's four release source files match 0.73.3.
+Explicit editor preparation, offline admission, nine diagnostics/passing control,
+qualification-caller Clippy/Rust 1.91 and production graph isolation pass.
+The disposable Make fixture and both real release-group adapter fixtures pass
+with the selected editor, including refusal, interrupted resume and receipt checks.
+Production codec/generator source, bytes and budgets are unchanged; no runtime
+performance claim or real release is made. [Adoption evidence](../evidence/build-host-0735-adoption/README.md).
+
+Adopt published Testkit 0.76.0 with defaults disabled for the two private
+qualification packages. Its native Platform supplier now shares the existing
+0.16.0 identity; the lock removes 0.15.3, with all other package versions
+preserved. The 28 Testkit Rust source files are byte-identical to 0.75.2.
+Focused caller Clippy, Rust 1.91 host compilation, Core/endpoint Wasm graph
+isolation and the prepared installed endpoint admission/rollback test pass.
+Own versions remain Core 0.13.3 / Endpoint 0.3.0. Production codec/generator
+source, bytes, budgets and retries are unchanged by this dependency adoption;
+no performance saving is claimed. [Adoption evidence](../evidence/testkit-076-adoption/README.md).
+Earlier cost studies below freeze their recorded 0.75.2 graph; this is not a
+full performance matrix rerun or a cross-lock regression comparison.
+
+Shared 0.27.24 at 1211262f32ea193cc4edcd60d2750baf1f1d6425 is canonically
+exported (119 payloads). Raw total module bytes and code-section bytes are
+separate required Wasm metrics; gzip/transport bytes are not an optimization
+objective. Consumer profiles/optimizer settings remain unchanged.
+
+New private cost-smoke corpus has 20 controls: small scalars/blobs, 1 MiB blob,
+empty/singleton/4096-unit lists, empty records/inner lists, optional units, an
+ordinary i16 control, a record and four binary-key maps. Roundtrip/refusal tests
+and strict corpus Clippy pass. The data-only cost gate checks paired identities,
+exact frame/input coverage, three stable unique-caller samples, unchanged Candid
+controls and physical raw/code Wasm. It permits no Wasm growth and IC costs at
+most baseline × 1.05 + 64. Eighteen corruption/regression fixture checks and all
+192 real Wire pairs pass. No automatic baseline update or server startup.
+
+Keep the simpler `Budget::enter_many` direct allowance checks, preserving sticky
+refusal and debit order. The 20-case fixture saves 26 total/code bytes at opt-z
+and 14 total/code at opt-3. The 100-type fixture saves 69 total/code at opt-z and
+127 total / 125 code at opt-3. Maximum IC regression: +0.4121% (map128 encode);
+optional-unit decode improves 6.38%. Native unit encoding improves about 85%,
+but unit decoding grows about 0.2 µs (29–31%); allocation/heap rows are unchanged.
+These are complete fixture measurements, not application headroom claims.
+
+Byte serialization outlining worsened opt-3 size and doubled map encode cost;
+unit inlining had no effect; a more aggressive budget rewrite regressed opt-z
+unit decoding 12.38%. Reject those and the zero-charge no-size-win candidate.
+The opt-z large unit-list encode gap remains about 9.48× Candid. The original
+copied-workspace attempt was cache-contaminated and is INVALID. Corrected runs
+use one worktree with observed library/guest rebuilds. Exact source, independent
+patches, all artifacts/samples and replay commands are in the
+[cost investigation](../evidence/cost-experiments-0134/README.md).
+
+Follow-up [parser size screen](../evidence/parser-screen-0134/README.md) rejects
+three additional candidates against that accepted cleanup: byte-budget direct
+subtraction is bit-identical, shared buffer/string readers add 121 total / 119
+code bytes at opt-z (94/92 at opt-3), and outlined varint tails add 230/227 at
+opt-z (1,062/1,058 at opt-3). All eight 100-type modules were rebuilt and retained.
+No instruction/timing work was run for candidates that failed the size objective.
+The private sampler now records parser source identity too; strict sampler lint
+passes. These rejected patches add no production runtime changes.
+
+Focused qualification passes: 82 runtime/native/borrowed tests, runtime/corpus
+Clippy, Rust 1.91 host/Wasm, installed endpoint rollback/admission, 49 CLI checks
+and 18 cheap gate fixtures. Source/fixture/compiler/build identities are stronger.
+No new full matrix/CI run is claimed. Protocol bytes, acceptance, budgets, saved
+retry/hash inputs and the one production Serde/Postcard codec are unchanged.
+
+The batch below is admitted for this deployment. Own package versions remain
+Core 0.13.3 / Endpoint 0.3.0 until the standard runner prepares Core 0.13.4 after
+validation. The delivery below records the previous completed release.
+
+Read-only GitHub inspection on 2026-11-01 finds one open issue: #40,
+documentation-only CI selection. It is a consumer workflow optimization requiring
+a reviewed prose allowlist, stable required checks and full native fallback;
+it has not been implemented or closed by this codec investigation.
+
 ## Delivered Core 0.13.3 / Endpoint 0.3.0
 
 Published and verified on 2026-11-01. Core commit
@@ -11,13 +98,6 @@ Rust 1.91 consumer passes six tests and Wasm compilation with one Core/derive/
 Endpoint/Types identity; no Candid/external executor leaks into its Wasm graph.
 [Delivery evidence and reproduction](../evidence/published-core-0133-endpoint-030/README.md).
 No build/evidence cleanup or sibling edit occurred.
-
-The maintainer next requested investigation of ByteArray Wasm overhead,
-zero-sized collections and a small performance regression gate, plus Shared
-Tooling 0.27.24 adoption. Those are subsequent work, not this release's contents.
-Shared's reviewed target is 1211262f32ea193cc4edcd60d2750baf1f1d6425; export it
-canonically after delivery recording. New implementation remains ordinary work,
-without automatic staging, commits or another release.
 
 Core adds the standard `ic_wire::ByteArray<N>` re-export and exact-width host
 metadata, including standard fixed-array byte adapters and options. Existing

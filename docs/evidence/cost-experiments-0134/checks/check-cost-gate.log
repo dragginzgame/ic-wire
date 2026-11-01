@@ -1,0 +1,29 @@
+✔ paired unchanged evidence passes with both raw Wasm metrics (14.276607ms)
+✔ instruction regression fails while the small absolute margin is explicit (5.673542ms)
+✔ dependency drift (8.701093ms)
+✔ nested fixture drift (8.835986ms)
+✔ Candid counter drift (11.827874ms)
+✔ missing compiler (6.572911ms)
+✔ changed input (5.460602ms)
+✔ missing operation (9.268084ms)
+✔ unstable counters (10.386912ms)
+✔ cached runtime change (5.673852ms)
+✔ bad code-section metric (4.848684ms)
+✔ artifact mutation (4.608213ms)
+✔ total growth is caught even with unchanged code section (5.17256ms)
+✔ code growth is an independently enforced limit (4.461253ms)
+✔ changed runtime accepts an explicitly rebuilt candidate (12.379993ms)
+✔ compressed artifacts cannot masquerade as raw Wasm (8.797157ms)
+✔ effective compiler profile overrides are rejected (3.815835ms)
+✔ guest feature changes require a matched baseline (4.734462ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 146.976657
+evaluation: total 94219 → 94193 bytes (-26); code 81768 → 81742 bytes (-26)
+benchmark-speed: total 121110 → 121096 bytes (-14); code 109667 → 109653 bytes (-14)
+192 Wire operation pairs; policy: instructions ≤ baseline × 1.05 + 64; no total/code Wasm growth.

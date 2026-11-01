@@ -1,0 +1,26 @@
+[
+  {
+    "variant": "baseline",
+    "profile": "evaluation",
+    "sha256": "3cb8c0999a181e1f8529671f8c0fdefb280611d1c5b7f4e3e1d58bb68ee5678b",
+    "total_bytes": 310706
+  },
+  {
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "sha256": "a6fc4058f02aa4a9ca912cbc10511bd4f8e352707ac3e37f90e949b07de22bca",
+    "total_bytes": 398675
+  },
+  {
+    "variant": "admission-linear",
+    "profile": "evaluation",
+    "sha256": "37eca6a4e8c12dd50c170cd56cc9454fe53d5db076391fc578d7a4103ed84d91",
+    "total_bytes": 310637
+  },
+  {
+    "variant": "admission-linear",
+    "profile": "benchmark-speed",
+    "sha256": "4c2ffd579db95e418c3e76ecd37496eb0178ec047a2b894e54eef003fadf1c25",
+    "total_bytes": 398548
+  }
+]

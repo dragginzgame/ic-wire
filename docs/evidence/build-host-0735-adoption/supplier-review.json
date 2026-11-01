@@ -1,0 +1,624 @@
+{
+  "ic-build": {
+    "before": "0.73.4",
+    "after": "0.73.5",
+    "rust_files": 71,
+    "changed_rust_files": [
+      "cargo/packages/archive.rs",
+      "cargo/packages/mod.rs"
+    ],
+    "archive_sha256": "b824b726840636f4104b7b8baf0cb493fddee0799f9b42188b60f7231f008568",
+    "vcs": {
+      "git": {
+        "sha1": "bc1f4f392757d43639505d99fdca90711c6bf5dd"
+      },
+      "path_in_vcs": "crates/ic-build"
+    },
+    "registry": {
+      "name": "ic-build",
+      "vers": "0.73.5",
+      "deps": [
+        {
+          "name": "cargo_metadata",
+          "req": "^0.23.1",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "clap",
+          "req": "^4.6.7",
+          "features": [
+            "std",
+            "help",
+            "usage",
+            "error-context"
+          ],
+          "optional": true,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "clap",
+          "req": "^4.6.7",
+          "features": [
+            "std",
+            "help",
+            "usage",
+            "error-context"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "ic-host-artifacts",
+          "req": "^0.73.5",
+          "features": [],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-fs",
+          "req": "^0.73.5",
+          "features": [],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-fs",
+          "req": "^0.73.5",
+          "features": [
+            "test-support"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "ic-host-process",
+          "req": "^0.73.5",
+          "features": [],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-process",
+          "req": "^0.73.5",
+          "features": [
+            "test-support"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": "cfg(unix)",
+          "kind": "dev"
+        },
+        {
+          "name": "rustix",
+          "req": "^1.1.4",
+          "features": [
+            "std",
+            "fs",
+            "process"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "serde",
+          "req": "^1.0.228",
+          "features": [
+            "std"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "serde_json",
+          "req": "^1.0.150",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "sha2",
+          "req": "^0.10.9",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "thiserror",
+          "req": "^2.0.18",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "toml",
+          "req": "^1",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "toml_edit",
+          "req": "^0.25.17",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        }
+      ],
+      "cksum": "b824b726840636f4104b7b8baf0cb493fddee0799f9b42188b60f7231f008568",
+      "features": {
+        "default": [],
+        "test-support": [
+          "ic-host-fs/test-support"
+        ]
+      },
+      "features2": {
+        "cli": [
+          "dep:clap",
+          "clap/derive",
+          "serde/derive"
+        ]
+      },
+      "yanked": false,
+      "rust_version": "1.91.0",
+      "pubtime": "2026-11-01T11:58:34Z",
+      "v": 2
+    }
+  },
+  "ic-host-artifacts": {
+    "before": "0.73.4",
+    "after": "0.73.5",
+    "rust_files": 32,
+    "changed_rust_files": [],
+    "archive_sha256": "0103be287db558bf9944666984c054db38a36b5a15c73e1515ed8900cfedfd61",
+    "vcs": {
+      "git": {
+        "sha1": "bc1f4f392757d43639505d99fdca90711c6bf5dd"
+      },
+      "path_in_vcs": "crates/ic-host-artifacts"
+    },
+    "registry": {
+      "name": "ic-host-artifacts",
+      "vers": "0.73.5",
+      "deps": [
+        {
+          "name": "clap",
+          "req": "^4.6.7",
+          "features": [
+            "std",
+            "help",
+            "usage",
+            "error-context",
+            "derive"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "flate2",
+          "req": "^1.1.10",
+          "features": [
+            "rust_backend"
+          ],
+          "optional": true,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "leb128",
+          "req": "^0.2.5",
+          "features": [],
+          "optional": true,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "serde",
+          "req": "^1.0.228",
+          "features": [
+            "std"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "serde_json",
+          "req": "^1.0.150",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "sha2",
+          "req": "^0.10.9",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "wasm-encoder",
+          "req": "^0.263",
+          "features": [],
+          "optional": true,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "wasmparser",
+          "req": "^0.263",
+          "features": [
+            "std",
+            "features"
+          ],
+          "optional": true,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "wasmparser",
+          "req": "^0.263",
+          "features": [
+            "std",
+            "features"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "wat",
+          "req": "~1.263.0",
+          "features": [],
+          "optional": true,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        }
+      ],
+      "cksum": "0103be287db558bf9944666984c054db38a36b5a15c73e1515ed8900cfedfd61",
+      "features": {
+        "default": []
+      },
+      "features2": {
+        "gzip": [
+          "dep:flate2"
+        ],
+        "wasm": [
+          "dep:leb128",
+          "dep:wasmparser"
+        ],
+        "wasm-encoding": [
+          "dep:wasm-encoder"
+        ],
+        "wasm-text": [
+          "dep:wat"
+        ],
+        "wasm-validation": [
+          "wasm",
+          "wasmparser/validate"
+        ]
+      },
+      "yanked": false,
+      "rust_version": "1.91.0",
+      "pubtime": "2026-11-01T11:58:24Z",
+      "v": 2
+    }
+  },
+  "ic-host-fs": {
+    "before": "0.73.4",
+    "after": "0.73.5",
+    "rust_files": 63,
+    "changed_rust_files": [],
+    "archive_sha256": "e87346704b19eaed83fff066b58af63e1ffd3060f48b24f5a0059e3f5e39fe4f",
+    "vcs": {
+      "git": {
+        "sha1": "bc1f4f392757d43639505d99fdca90711c6bf5dd"
+      },
+      "path_in_vcs": "crates/ic-host-fs"
+    },
+    "registry": {
+      "name": "ic-host-fs",
+      "vers": "0.73.5",
+      "deps": [
+        {
+          "name": "cap-fs-ext",
+          "req": "^4.0.2",
+          "features": [],
+          "optional": true,
+          "default_features": true,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "cap-std",
+          "req": "^4.0.2",
+          "features": [],
+          "optional": true,
+          "default_features": true,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "clap",
+          "req": "^4.6.7",
+          "features": [
+            "std",
+            "help",
+            "usage",
+            "error-context",
+            "derive"
+          ],
+          "optional": true,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "clap",
+          "req": "^4.6.7",
+          "features": [
+            "std",
+            "help",
+            "usage",
+            "error-context",
+            "derive"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "ic-host-artifacts",
+          "req": "^0.73.5",
+          "features": [],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-artifacts",
+          "req": "^0.73.5",
+          "features": [
+            "gzip"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "rustix",
+          "req": "^1.1.4",
+          "features": [
+            "std",
+            "fs"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "serde",
+          "req": "^1.0.228",
+          "features": [
+            "std"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "serde_json",
+          "req": "^1.0.150",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "tempfile",
+          "req": "^3.27.0",
+          "features": [],
+          "optional": true,
+          "default_features": true,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "thiserror",
+          "req": "^2.0.18",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": null,
+          "kind": "normal"
+        }
+      ],
+      "cksum": "e87346704b19eaed83fff066b58af63e1ffd3060f48b24f5a0059e3f5e39fe4f",
+      "features": {
+        "default": [],
+        "test-support": []
+      },
+      "features2": {
+        "capability": [
+          "dep:cap-fs-ext",
+          "dep:cap-std"
+        ],
+        "cli": [
+          "dep:clap"
+        ],
+        "temporary-file": [
+          "dep:tempfile"
+        ]
+      },
+      "yanked": false,
+      "rust_version": "1.91.0",
+      "pubtime": "2026-11-01T11:58:28Z",
+      "v": 2
+    }
+  },
+  "ic-host-process": {
+    "before": "0.73.4",
+    "after": "0.73.5",
+    "rust_files": 52,
+    "changed_rust_files": [],
+    "archive_sha256": "8f9d16fcd1e488eabda8b99b4a8945688d36e857fd0bc753242856547902c0be",
+    "vcs": {
+      "git": {
+        "sha1": "bc1f4f392757d43639505d99fdca90711c6bf5dd"
+      },
+      "path_in_vcs": "crates/ic-host-process"
+    },
+    "registry": {
+      "name": "ic-host-process",
+      "vers": "0.73.5",
+      "deps": [
+        {
+          "name": "clap",
+          "req": "^4.6.7",
+          "features": [
+            "std",
+            "help",
+            "usage",
+            "error-context",
+            "derive"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "command-fds",
+          "req": "^0.3.3",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-artifacts",
+          "req": "^0.73.5",
+          "features": [],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-fs",
+          "req": "^0.73.5",
+          "features": [],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "normal"
+        },
+        {
+          "name": "ic-host-fs",
+          "req": "^0.73.5",
+          "features": [
+            "test-support"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": null,
+          "kind": "dev"
+        },
+        {
+          "name": "libc",
+          "req": "^0.2.190",
+          "features": [],
+          "optional": false,
+          "default_features": true,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        },
+        {
+          "name": "rustix",
+          "req": "^1.1.4",
+          "features": [
+            "std",
+            "fs",
+            "thread"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": "cfg(target_os = \"linux\")",
+          "kind": "normal"
+        },
+        {
+          "name": "rustix",
+          "req": "^1.1.4",
+          "features": [
+            "std",
+            "fs",
+            "param",
+            "pipe",
+            "process",
+            "time"
+          ],
+          "optional": false,
+          "default_features": false,
+          "target": "cfg(unix)",
+          "kind": "normal"
+        }
+      ],
+      "cksum": "8f9d16fcd1e488eabda8b99b4a8945688d36e857fd0bc753242856547902c0be",
+      "features": {
+        "test-support": []
+      },
+      "yanked": false,
+      "rust_version": "1.91.0",
+      "pubtime": "2026-11-01T11:58:31Z"
+    }
+  }
+}

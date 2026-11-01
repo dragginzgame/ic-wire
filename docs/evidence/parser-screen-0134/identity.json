@@ -1,0 +1,19 @@
+{
+  "source_head": "c2d3dfe5266e696a9a98983bdac53fb38024e522",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "host": "x86_64-unknown-linux-gnu",
+  "target": "wasm32-unknown-unknown",
+  "features": [
+    "wire",
+    "derive-scale"
+  ],
+  "post_link": [],
+  "lock_sha256": "6885f32811faba40a81720c2fd86d8eb15534c5a33c8c1612af4d1bf3caf9a12",
+  "workspace_manifest_sha256": "86f0c148c2260b7c785070fec5d9dd41617f2c9d470a567f4c8b246905018505",
+  "source_sha256": {
+    "mod.rs": "97c18ee8a5d5a75fb67f5ab197a9b8117055dd7d6a55d44f4dcf3529fb0cab7b",
+    "encode/mod.rs": "57d078adce76cdc1ad446bb60a5fb676582847f5862e6754fd6564c27ebdd462",
+    "decode/mod.rs": "0e23c8bba33c2fbe6d51bf1c1be514b95b3952a5b575c6ccbfcd4c64964b00df",
+    "parser/mod.rs": "90effd865fbc06ca6c4cb2681dbd11a0810ec8143e700e56704171c886fdd35a"
+  }
+}

@@ -1,0 +1,8 @@
+evaluation: total 94219 → 94193 bytes (-26); code 81768 → 81742 bytes (-26)
+benchmark-speed: total 121110 → 121096 bytes (-14); code 109667 → 109653 bytes (-14)
+192 Wire operation pairs; policy: instructions ≤ baseline × 1.05 + 64; no total/code Wasm growth.
+Verified corrected screen: 24 physical raw modules, hashes, total and code-section bytes
+Verified formal pair and scale follow-up: 12 physical raw modules
+Verified all retained native sample counts and stable three-sample IC rows
+Retained archive gate replay passed independently of target/ outputs
+Retained gate archive matches current checker and fixtures

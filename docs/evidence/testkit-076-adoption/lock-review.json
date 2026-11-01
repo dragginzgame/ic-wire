@@ -1,0 +1,19 @@
+{
+  "removed": [
+    [
+      "ic-platform",
+      "0.15.3"
+    ],
+    [
+      "ic-testkit",
+      "0.75.2"
+    ]
+  ],
+  "added": [
+    [
+      "ic-testkit",
+      "0.76.0"
+    ]
+  ],
+  "other_package_versions_preserved": true
+}
