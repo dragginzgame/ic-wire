@@ -1,105 +1,78 @@
 # Current handoff
 
-## Core 0.13.5 deployment authorized
+## Core 0.13.5 delivered; Endpoint remains 0.3.0
 
-The user requested push/deploy on 2026-11-01. Deliver the compatible Core 0.13.5
-writer optimization and retained qualification through the standard complete
-release gate, direct origin/main Git release and crates.io publication. Endpoint
-remains 0.3.0; Runtime/macros/guard are still unpublished. Preserve all evidence,
-verify registry archives and installed consumers, and leave the Runtime proposal
-isolated until its real supplier graph is qualified.
+The maintainer requested push/deploy on 2026-11-01. Source `422b3f5` passed the
+standard complete local CI gate in **567 s**. The runner prepared only Core,
+created release commit `a8195d42683f90810a9afd615e4f27e3e5a3c744` and annotated
+`core-v0.13.5` (object `6e6aff91a74f8436a1541eebac112b4aa9a13247`), then atomically
+pushed origin/main and that tag. Core/derive 0.13.5 are published and independently
+verified against registry checksums, prepared/uploaded archives and clean source.
+[Delivery evidence, receipts and reproduction](../evidence/published-core-0135/README.md).
 
-Core 0.13.4 is published and independently verified on 2026-11-01. Standard full
-local release CI passed in 607 s from source `25a4cb9`; release commit
-`f83755b30f76704105164e163b9334310e106e44` and annotated tag `core-v0.13.4` were
-atomically pushed to origin/main. Both registry archives match admitted upload
-bytes, checksums and clean release provenance. A registry-only Rust 1.91 consumer
-passes six tests and Wasm compilation with one Core/derive/Endpoint/Types identity
-and clean production dependency isolation. Endpoint remains **0.3.0**.
-[Delivery evidence and reproduction](../evidence/published-core-0134/README.md).
+A registry-only Rust 1.91 consumer passes six tests and Wasm compilation with one
+Core/derive 0.13.5, Endpoint 0.3.0 and canonical Types identity. Production Wasm
+excludes Candid, simulators, serde_json and host tooling. No source patch is needed.
+The provenance helper fetched the exact release source from the canonical repo.
+All build outputs, failed preparations and delivery/publication evidence remain.
 
-Current suppliers: Platform/macros/guard 0.16.0, canonical Types 0.15.1,
-locked Testkit 0.76.1 (declared minimum 0.76.0), Build/Host 0.73.5 and Metrics 0.24.4. Build's minimum and managed
-release editor are 0.73.5; library defaults remain disabled, CLI setup explicit.
-Shared 0.27.24 is canonically exported at
-1211262f32ea193cc4edcd60d2750baf1f1d6425 (119 payloads). No standalone VERSION,
-new codec, compatibility lane or sibling checkout edit was introduced.
-Wasm objectives are total **uncompressed** module bytes and separate code-section
-bytes. Consumer profiles remain consumer-owned; omit gzip comparisons.
+Suppliers: Platform/macros/guard 0.16.0, Types 0.15.1, locked Testkit 0.76.1
+(declared minimum 0.76.0), Build/Host 0.73.5 and Metrics 0.24.4. Shared 0.27.24 is
+exported at `1211262f32ea193cc4edcd60d2750baf1f1d6425` (119 payloads).
+Library defaults remain disabled; managed CLI setup is explicit. No sibling
+checkout was edited. Future ordinary continuation does not authorize another release.
 
-The delivered admission cleanup saves 69 total/code bytes at opt-z and 127 total /
-125 code at opt-3 in the 100-type fixture. Maximum smoke IC regression is 0.4121%;
-native unit decoding costs about 0.2 µs more while encoding improves. All paired
-allocation/heap observations match. The [cost study](../evidence/cost-experiments-0134/README.md)
-retains full samples, small controls, rejected candidates and the invalid original
-cache-contaminated attempt. The [parser follow-up](../evidence/parser-screen-0134/README.md)
-rejects three further rewrites. Those reports keep their exact earlier lockfiles;
-the adoption/release checks do not reinterpret them as a new performance matrix.
+## Delivered writer optimization
 
-The 20-case cost-smoke corpus and data-only gate are maintained. The gate checks
-matching build/input identities, stable fresh-caller IC samples and unchanged
-Candid controls; no raw/code Wasm growth and instructions ≤ baseline × 1.05 + 64.
-Eighteen cheap corruption fixtures run in ordinary CI; measurements require an
-explicit prepared server. Further tradeoffs require native/IC results separately.
+Core 0.13.5 keeps one Wasm-only `Output::try_push` inlining hint. In the matched
+100-type opt-3 fixture, total/code bytes fall 398,548/364,120 → 396,039/361,615
+(−2,509/−2,505); both opt-z metrics are identical. The 20-case opt-3 fixture saves
+11 total/code bytes. All 192 IC pairs pass with unchanged Candid artifacts/counters;
+maximum increase is 1.83284% on optional-unit encoding. Every decode/refusal
+counter and map encoding are unchanged. Native observations include a ~12 ns
+scalar increase and variable directions; no native speed win is claimed.
+Allocation/heap observations match. Bytes, budgets, errors and retry/hash inputs
+are unchanged; no consumer migration. The sampler records contract/output identity.
 
-Select one Wasm-only `Output::try_push` inlining hint for compatible Core 0.13.5. The matched 100-type opt-3 fixture shrinks from
-398,548 total / 364,120 code bytes to 396,039 / 361,615 (−2,509/−2,505); both opt-z
-metrics are identical. The 20-case opt-3 fixture saves 11 total/code bytes.
-All 192 IC pairs pass with unchanged Candid artifacts/counters; the maximum
-increase is 1.83284% on optional-unit encoding. Map encoding and every decode/
-refusal counter are unchanged. Native observations include a ~12 ns scalar
-increase and variable directions elsewhere; no native speed win is claimed.
-Allocation/heap observations are identical. Library/sampler Clippy and Rust 1.91
-Wasm checks pass. No new full CI is claimed for this follow-up.
+[Writer evidence](../evidence/writer-inlining-0135/README.md) retains all 24 raw
+modules, repeated native/IC samples, controls and rejected candidates. Broad hints
+regressed map encode by 9.45%; owned slices grew opt-z; finalization had no effect.
+Raw work remains `target/research-0135-writers`. Objectives are total uncompressed
+Wasm and separate code-section bytes; consumer profiles remain consumer-owned.
+The complete release gate checks corpora but is not a fresh full performance matrix.
 
-The [writer investigation](../evidence/writer-inlining-0135/README.md) retains
-exact source, all 24 raw modules, native/IC samples, paired controls and rejected
-alternatives. Broad inlining regressed map encode by 9.45%; owned slice output
-grew opt-z; finalization hints had no effect. The private sampler now records
-contract/output source identity. Bytes, budgets, errors and exact retry/hash
-inputs remain unchanged; consumers need no migration. This is separate from delivered 0.13.4; the user has now authorized Core 0.13.5
-release/publication. Full working outputs remain target/research-0135-writers.
+## Prepared independent Runtime adoption (#41)
 
-One open issue observed on 2026-11-01: #40, conservative documentation-only CI
-selection. It needs an exact prose allowlist, stable checks and full native
-fallback. This codec investigation has not implemented or closed it.
+[Wire PR #41](https://github.com/dragginzgame/ic-wire/pull/41) supplies the Wire side
+of [Platform #131](https://github.com/dragginzgame/ic-platform/issues/131).
+The [prepared patch and evidence](../evidence/runtime-owner-017/README.md) select
+Runtime directly, keep the facade in qualification clients, and prove Core/derive/
+Types and execution identities survive a fake facade break. Endpoint/schema/
+diagnostics/Clippy, Rust 1.91 host/Wasm, Rust–TypeScript and installed transaction
+checks pass. A legacy embedded executor is rejected by its conflicting links owner.
+The 17-export / 178-case comparison passes 5,696 measured calls: all 3,204 paired
+samples, warmups included, have identical IC instruction and cycle counts. Total
+Wasm falls 88 bytes at opt-z and opt-3; code sections are unchanged.
 
-## Prepared Endpoint Runtime adoption (#41)
+This proposal remains **isolated and undeployed**. Prepared suppliers are frozen
+at Platform `3a72f6f`: Runtime 0.17.0 / Types 0.15.1. Final registry observation
+at 14:13 UTC still finds Runtime absent, macros/guard 0.16.0 and Types 0.15.1.
+Publication and actual registry qualification block integration/merge/release.
+The announced supplier release includes Types 0.16: recheck its actual graph,
+align Core schemas and native Testkit/facade clients if required, and coordinate
+Timers before application adoption. Never ship the source-only qualification lock
+or a downstream patch. No wrappers, second schema trait or compatibility lane.
 
-The user requested the cross-crate implementation in [Wire PR #41](https://github.com/dragginzgame/ic-wire/pull/41),
-for [Platform #131](https://github.com/dragginzgame/ic-platform/issues/131).
-The 15-file integration patch and source qualification are [retained here](../evidence/runtime-owner-017/README.md).
-They select independent Runtime directly, keep the facade in qualification clients,
-and prove Core/derive/Types and execution identities survive a fake facade break.
-Endpoint/schema/diagnostic/strict Clippy, Rust 1.91 host/Wasm, Rust–TypeScript and
-installed transaction checks pass. Legacy embedded execution is rejected by links.
-The full 17-export / 178-case comparison passes 5,696 measured calls: all 3,204
-paired samples (warmups included) have identical IC instruction and cycle counts.
-Total Wasm falls 88 bytes at opt-z and opt-3; code sections are unchanged.
+## Other open work and earlier evidence
 
-Main keeps its published dependencies; no proposed code, supplier patch or source-only
-lock is installed here. Prepared providers are frozen at Platform 3a72f6f, Runtime
-0.17.0 / Types 0.15.1. Runtime/macros/guard publication and registry qualification
-block integration, merge and release. The announced supplier release also includes
-Types 0.16: recheck its actual graph, align Core schemas if required, and coordinate
-Timers before application adoption. Preserve the pending 0.13.5 writer work.
-No merge, staging, commit, release, publication or sibling edit was performed.
-
-## Earlier delivered context
-
-Core 0.13.3 / Endpoint 0.3.0 have [separate delivery evidence](../evidence/published-core-0133-endpoint-030/README.md).
-Core's ByteArray re-export is an explicit representation choice: `[0_u8,255]`
-changes `00 ff` to `02 00 ff`; coordinate contracts and regenerate clients when
-adopting it. Existing arrays retain bytes/admission. Endpoint 0.3 requires aligned
-Platform 0.16 execution suppliers and canonical Types 0.15.1.
-
+#40 remains open: conservative documentation-only CI selection, with an exact
+prose allowlist, stable checks and full native fallback. It is not implemented.
 The [full Candid matrix](../evidence/candid-comparison-0133/README.md) retains
-22 cohorts / 1,243 entries / 4,972 primary comparisons, including ordinary-vector
-losses and explicit Packed controls. It is not a universal win or a measurement
-on today's supplier graph. Protocol bytes, budgets, acceptance and exact retained
-retry/hash inputs remain unchanged in Core 0.13.4.
-
-Core 0.13.2 / Endpoint 0.2.1 retain [prior evidence](../evidence/published-core-0132/README.md).
-#36/#39 are closed and published; #37 is superseded. The
-[stable boundary](../stable-identities.md) keeps codec/schema/Types in Core,
-execution in Platform and endpoint admission/trapping replies in Endpoint.
+22 cohorts / 1,243 entries / 4,972 comparisons including ordinary-vector losses;
+it describes its frozen supplier graph, not every current consumer workload.
+Core 0.13.4 has [separate delivery evidence](../evidence/published-core-0134/README.md).
+Core 0.13.3 / Endpoint 0.3 have [earlier evidence](../evidence/published-core-0133-endpoint-030/README.md).
+ByteArray remains an explicit choice: `[0_u8,255]` changes `00 ff` → `02 00 ff`;
+coordinate contracts when adopting it. Existing arrays retain bytes/admission.
+#36/#39 are published/closed and #37 superseded. The [stable boundary](../stable-identities.md)
+keeps codec/schema/Types in Core and endpoint admission/trapping replies in Endpoint.
