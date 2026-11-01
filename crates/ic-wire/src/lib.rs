@@ -32,6 +32,16 @@ pub use ic_wire_derive::Wire;
 /// unchanged by this re-export; no migration is needed from serde_bytes::ByteBuf.
 pub use serde_bytes::ByteBuf;
 
+/// Fixed-width binary data using Serde's bulk byte representation.
+///
+/// This re-exports `serde_bytes::ByteArray<N>`; no consumer dependency is needed.
+/// TypeScript projects it to `Uint8Array` with length exactly `N`.
+/// Unlike `[u8; N]`, its Postcard bytes include a length prefix: `[0, 255]`
+/// is `00 ff` as an array and `02 00 ff` as `ByteArray<2>`. Adopting this type
+/// changes the contract and bulk admission; coordinate consumers, regenerate
+/// clients and qualify limits. Existing array layouts remain unchanged.
+pub use serde_bytes::ByteArray;
+
 /// Implementation dependencies used by generated contracts.
 #[doc(hidden)]
 pub mod __private {

@@ -3,6 +3,7 @@ mod adversarial;
 mod allocation;
 #[cfg(feature = "typescript")]
 mod bulk_lint;
+mod byte_array;
 mod packed;
 #[cfg(feature = "typescript")]
 mod payload;
@@ -10,6 +11,7 @@ mod payload;
 mod registry;
 mod scoped;
 mod slice;
+mod std_types;
 use ic_wire::{Error, Limits, native};
 use serde::{Deserialize, Serialize};
 

@@ -1,0 +1,17 @@
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-host-artifacts v0.73.3
+   Compiling ic-host-fs v0.73.3
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-host-process v0.73.3
+   Compiling ic-testkit v0.75.2
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.09s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-d8e1dbe02e7d8002)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.00s
+

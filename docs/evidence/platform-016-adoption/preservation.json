@@ -1,0 +1,9 @@
+{
+  "non_platform_package_selections_preserved": true,
+  "incoming_build_host": "0.73.4",
+  "incoming_metrics": "0.24.4",
+  "canonical_types": "0.15.1",
+  "selected_runtime": "0.16.0",
+  "native_only_testkit_platform": "0.15.3",
+  "own_versions_unchanged": true
+}

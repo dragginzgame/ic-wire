@@ -20,3 +20,5 @@ bulk-control-1|bulk-scale,bulk-baseline,derive-scale-1|wire-bounded
 bulk-control-10|bulk-scale,bulk-baseline,derive-scale-10|wire-bounded
 bulk-control-100|bulk-scale,bulk-baseline|wire-bounded
 hotspots|hotspots|wire-native
+byte-keys|byte-keys|wire-native
+byte-keys-control|byte-keys-control|wire-native

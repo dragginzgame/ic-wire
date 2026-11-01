@@ -1,0 +1,44 @@
+{
+  "ic-build": {
+    "old": "0.73.2",
+    "new": "0.73.3",
+    "old_src_count": 71,
+    "new_src_count": 71,
+    "changed": [
+      "src/artifacts/wasm_cache.rs",
+      "src/cargo/packages/archive.rs",
+      "src/cargo/packages/archive/tests.rs",
+      "src/cargo/packages/mod.rs"
+    ]
+  },
+  "ic-host-artifacts": {
+    "old": "0.73.2",
+    "new": "0.73.3",
+    "old_src_count": 32,
+    "new_src_count": 32,
+    "changed": []
+  },
+  "ic-host-fs": {
+    "old": "0.73.2",
+    "new": "0.73.3",
+    "old_src_count": 63,
+    "new_src_count": 63,
+    "changed": []
+  },
+  "ic-host-process": {
+    "old": "0.73.2",
+    "new": "0.73.3",
+    "old_src_count": 52,
+    "new_src_count": 52,
+    "changed": []
+  },
+  "ic-testkit": {
+    "old": "0.75.1",
+    "new": "0.75.2",
+    "old_src_count": 28,
+    "new_src_count": 28,
+    "changed": [
+      "src/pic/startup.rs"
+    ]
+  }
+}

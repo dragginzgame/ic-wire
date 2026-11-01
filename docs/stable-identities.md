@@ -4,8 +4,11 @@ The maintainer approved this boundary for [#36](https://github.com/dragginzgame/
 on 2026-10-31 and requested implementation after Platform publication. It is now
 delivered and published as core 0.13.0 / Endpoint 0.2.0. The original prerequisite is
 supplied by registry Platform/Types 0.15 and IC Build 0.73.
-Current compatible selections are Platform 0.15.2, Types 0.15.1, Build 0.73.2
-and native Testkit 0.75.1. No sibling checkout was modified.
+Endpoint 0.3.0 selects Platform 0.16.0 while retaining Types 0.15.1.
+Current tooling requirements are Build 0.73.3 and native Testkit 0.75.2. Its native-only Platform 0.15 dependency may coexist;
+production Wasm selects only the 0.16 runtime/guard. Align application runtime
+suppliers before adopting Endpoint 0.3; Core/derive identities stay fixed.
+No sibling checkout was modified.
 
 ## Owners and release groups
 
@@ -16,7 +19,7 @@ and native Testkit 0.75.1. No sibling checkout was modified.
 | Principal/Account/Subaccount and Serde representation | ic-platform-types 0.15 | Platform-owned independent supplier |
 | Principal/Account Wire schema implementations | ic-wire platform-types | core |
 | Contract, attributes, admission, trapping replies and CDK reexport | ic-wire-endpoint | endpoint |
-| Exports, executor and runtime singleton | ic-platform 0.15 | Platform runtime |
+| Exports, executor and runtime singleton | ic-platform 0.16 (Endpoint 0.3) | Platform runtime |
 | Typed client transport | IC Testkit | Tooling |
 | Measurement metadata | IC Metrics | Metrics |
 
@@ -43,9 +46,11 @@ malformed acceptance, sync/async rollback and original retry/hash inputs are unc
   `ic_wire::endpoint::query`/helpers with `ic_wire_endpoint::query`/helpers.
   Renamed endpoint imports use the existing `crate = "renamed"` option.
 - Select Endpoint's `typescript` feature for native Contract schema methods.
-- Keep `ic-wire/platform-types`; align once on Platform 0.15 reexports or direct
+- Keep `ic-wire/platform-types`; Platform 0.15/0.16 reexports or direct
   `ic-platform-types` 0.15 imports. Schema identity is retained only while the
   supplying Types version remains compatible.
+- Endpoint 0.3 requires Platform 0.16 for runtime owners, including timers;
+  do not mix 0.15 and 0.16 executors. Published Endpoint 0.2.1 remains on 0.15.
 - Metrics and typed Testkit callers align once on the supplying core minor;
   runtime-only Endpoint releases can subsequently retain those public identities.
 
@@ -69,7 +74,7 @@ with coordinated releases through 0.11.0 preserved once in `releases/history.md`
 No package paths, numeric versions, tags or historical scope were changed. The real
 adapter uses the shared group plan's exact files for metadata/source admission,
 receipts and post-commit checks. Group-specific tags/plans prevent collisions.
-The metadata editor is published IC Build 0.73.2 with `group-manifest`.
+The metadata editor is published IC Build 0.73.3 with `group-manifest`.
 
 ```sh
 make release-version RELEASE_GROUP=core

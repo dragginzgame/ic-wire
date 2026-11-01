@@ -1,0 +1,93 @@
+{
+  "cdk": {
+    "before_files": 15,
+    "after_files": 15,
+    "unchanged": true,
+    "changes": [],
+    "files": {
+      "src/cdk/mod.rs": "c48c8feccbfc9245198d7874e5ec8aa541f54153f1fb15762a53d3c6e2c952aa",
+      "src/cdk/reject_code/LICENSE": "512af14666ccf40333b11dc59b1db31fbd8cc9335da4255c3e15b6a6dd21385e",
+      "src/cdk/reject_code/NOTICE.md": "9d7479267fff7bef8ad82bba8c48650ff317e4fb04ea086ceb446d3d317ac55a",
+      "src/cdk/reject_code/mod.rs": "8aca0c4f0c25b25b9f576a3e3a4dd33442ad7b49a518698821f6ca634c387f33",
+      "src/cdk/reject_code/tests/mod.rs": "14c32d2fdf34798d22f4939f623f97feb352e5756a5a090738bc9feb22089fda",
+      "src/cdk/upstream/LICENSE-APACHE": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "src/cdk/upstream/NOTICE.md": "1342a89013b8aa7373c464648d073ce4ffb2f8cda81c752eb41fbad326cd8c63",
+      "src/cdk/upstream/api/mod.rs": "72015a0e019cd4746f94e22b50c5404a290efc15aaa2cd58ffb0a0d0664d4a3f",
+      "src/cdk/upstream/api/text_tests/mod.rs": "f7c1ece00b0e0ff1c5fb747656d570edcb9ad7c53b3f61c35312a8bc22c6e1fd",
+      "src/cdk/upstream/call/mod.rs": "49ca6ccf75bf593505e9757d22e2ad13ea72cbd40f8e66b7521eef9afa0dfe25",
+      "src/cdk/upstream/futures/internals/mod.rs": "788919ea11253a13af4b8dcc91408df47c9b3c04ef6d3bc6710133a927e6e284",
+      "src/cdk/upstream/futures/mod.rs": "ef9388e6c2f894f23ac82b473ed7d4c9600cc4d03e1ba5ff20c42d1d8c827066",
+      "src/cdk/upstream/mod.rs": "9e2aef9a4da59367d379159db9c45146691b6564c443db90a0a1d02b87a46b86",
+      "src/cdk/upstream/provenance.json": "029aca8656242a0c78e76e51b651999c2b59423d9d919a852de7055f0e2986fb",
+      "src/cdk/upstream/stable/mod.rs": "516df7c95eebd4a89671b3c45bcaf02d0f7c7d78606159d1a7c2a7edd51ca356"
+    }
+  },
+  "executor": {
+    "before_files": 5,
+    "after_files": 5,
+    "unchanged": true,
+    "changes": [],
+    "files": {
+      "src/executor/mod.rs": "eee0665c4753059a93b1b7c6251bf4d249c25974bc1842f1b3b8be824e8e6781",
+      "src/executor/runtime/LICENSE-APACHE": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "src/executor/runtime/mod.rs": "9ba71a6341a7200826517b8e408fdd6195a9710fce0847226d9faba1a5a7d3db",
+      "src/executor/runtime/provenance.json": "531c182fab9e9058c6244721e870edc00a7dd14994cf63c9320e623fa667aad0",
+      "src/executor/runtime/tests/mod.rs": "75ee3064bc53c0112e0fa4eed0a14c2c551bfef58a73f933e217fb6d75bbcd2f"
+    }
+  },
+  "ic0": {
+    "before_files": 5,
+    "after_files": 5,
+    "unchanged": true,
+    "changes": [],
+    "files": {
+      "src/ic0/mod.rs": "fe54eb764541307f1951068aaf49e28f3af293e8e5eae71f9707d5391e505340",
+      "src/ic0/upstream/LICENSE-APACHE": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "src/ic0/upstream/mod.rs": "83540065702d4d68681a217eb29c7c3c8312f8570217040dc3a9f022645353ff",
+      "src/ic0/upstream/provenance.json": "b2599b1f2ffc728159df10f0d08ce43fa2b53fc6d0bf34bd82d4eca34199bcdb",
+      "src/ic0/upstream/sys/mod.rs": "3484f826f43fc15fb5df8c03645a74289ade8842807b05151d5632ba187cb54e"
+    }
+  },
+  "candid": {
+    "before_files": 16,
+    "after_files": 16,
+    "unchanged": true,
+    "changes": [],
+    "files": {
+      "src/candid/arguments/mod.rs": "23fe8bd36200af5a4983d1d628f6a150cac8d1b373404e117c67bf4427ebcb05",
+      "src/candid/contract/pretty/candid/mod.rs": "3c9056ab0b0bbbbcb84569dab7c7311fb5adb9063aa579791cdfc885c64cdfde",
+      "src/candid/contract/pretty/mod.rs": "874845acc1697b730c8f3058c78a0e1c7b60aae984e2dd42f62c968a90616899",
+      "src/candid/contract/types/internal/mod.rs": "3971d7ce9f4febb545e8227af8cda5fd3646fc18af27ab78017fad4f7df7452b",
+      "src/candid/contract/types/subtype/mod.rs": "c11818517267acbb5d350981b69025da242b316445d1ab825e05a6a23f8634ac",
+      "src/candid/decoder/mod.rs": "652065a2a309d6996b68b0a5c7836fd2242a4bb9c11b73a8e23be89ee4196fcc",
+      "src/candid/endpoint/mod.rs": "2cf0e54377ea3855664fb675e2671948f4f907429b293f41a603b2763551a8b9",
+      "src/candid/mod.rs": "06997b9e9a158946ed5c1054430c1dee440f7cf3e1b095184dc3aaa780f29a08",
+      "src/candid/nesting/mod.rs": "db488e9e0cb6d0155ae5d45e3f33f357780ea3a074ad0b3996d93652751c0f86",
+      "src/candid/nesting/tests/mod.rs": "6f951c67a04c880b58416d9814c01cda7585f0d05245ea7201cbe83bd6149097",
+      "src/candid/protocols/mod.rs": "b7c026f88a2380b960674266360e663eef6559e0c9f52b56d66a6e1c6a5c17fc",
+      "src/candid/reserved/mod.rs": "75271b850361e45be08abbff2fdf6b4550f4fcd30aec6741a0dad75c9d5db110",
+      "src/candid/reserved/tests/mod.rs": "97f23e5348245e5bbbc34f08317a60fb5497575a6a83b85159c45a2874ccb745",
+      "src/candid/sequence/mod.rs": "31a21b4d3bd5e702f1d5e5bf00c0adea739399da8a15961bd1238a17bce76d00",
+      "src/candid/sequence/tests/mod.rs": "e537ab5da343e212035c7f1a17032747a0322856750d1b3e759c757e3b6617e7",
+      "src/candid/tests.rs": "d69ba1128ee5ccc1d09c9ebbe6697089ff990f1cee18f65100c24f9a30d34b6c"
+    }
+  },
+  "principal": {
+    "before_files": 1,
+    "after_files": 1,
+    "unchanged": true,
+    "changes": [],
+    "files": {
+      "src/principal/mod.rs": "21fc6205a1e20f34a9f86f7f09cc097629e450a5a590879e9b5a087474d51f56"
+    }
+  },
+  "account": {
+    "before_files": 1,
+    "after_files": 1,
+    "unchanged": true,
+    "changes": [],
+    "files": {
+      "src/account/mod.rs": "9927946fcaf20fcd5db8b6671cc9d5434c87fcb0907b7df156a097cea42f0d64"
+    }
+  }
+}

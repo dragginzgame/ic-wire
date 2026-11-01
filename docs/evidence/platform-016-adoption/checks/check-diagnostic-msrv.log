@@ -1,0 +1,10 @@
+   Compiling syn v3.0.9
+    Checking ic-host-artifacts v0.73.4
+    Checking ic-host-fs v0.73.4
+    Checking ic-host-process v0.73.4
+   Compiling serde_derive v1.0.229
+    Checking serde v1.0.229
+    Checking cargo_metadata v0.23.1
+    Checking ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Checking ic-build v0.73.4
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.65s

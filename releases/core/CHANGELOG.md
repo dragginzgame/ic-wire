@@ -5,6 +5,60 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.13.3]
+
+### ➕ Added
+
+- Expose standard `serde_bytes::ByteArray<N>` as `ic_wire::ByteArray<N>` with
+  exact-width TypeScript metadata, including standard fixed-array byte adapters
+  and optional fields. Existing arrays are unchanged; explicitly adopting the
+  bulk representation changes `[0_u8,255]` from `00 ff` to `02 00 ff`, requiring
+  coordinated contracts, regenerated clients and qualified limits.
+
+### 🧪 Testing
+
+- Qualify standard byte arrays across Rust/TypeScript, malformed inputs, budgets,
+  standalone derives and Rust 1.91 host/Wasm forwarding. The
+  [matched key-map study](../../docs/evidence/byte-array-0133/README.md) retains
+  small controls and Candid: at 128 keys opt-3 instructions fall 78.50% encode /
+  68.32% decode, with 128 more frame bytes and 1,526 more raw Wasm bytes.
+
+- Refresh the complete Wire/Candid comparison: 22 cohorts, 1,243 case entries,
+  both optimization profiles, repeated native samples, allocation/heap probes,
+  IC instructions, wire bytes and raw Wasm/code-section sizes. Retain the frozen
+  source and all 88 modules; strict pairing, coverage and provenance checks pass.
+  Include ordinary-control losses and the 35 new cases. This is measured codec
+  qualification, not a production optimization or protocol change.
+  [Full results](../../docs/evidence/candid-comparison-0133/README.md).
+
+- Add 35 matched Wire/Candid workloads for zero-sized collections, binary-key
+  maps, nested blob results, optional arrays, ownership wrappers and enum shapes.
+  Append cases to preserve existing IC indices and retain empty/singleton controls.
+  Add native Serde checks for all nonzero integer types, network addresses,
+  ranges and exact IEEE float bits, with malformed-value/truncation/trailing-byte
+  coverage. These are codec tests, not new TypeScript schema support or fresh
+  performance measurements. Production bytes, budgets and acceptance are unchanged.
+
+### ⬆️ Dependencies
+
+- Select Platform 0.16.0 for private codec/endpoint qualification while preserving
+  canonical Types 0.15.1 and the independent Core codec/schema identity. Keep
+  Testkit's native-only Platform 0.15 selection isolated from production runtime;
+  the endpoint integration's coordinated adoption belongs to Endpoint 0.3.0.
+
+- Adopt Build/Host 0.73.3, including the managed release metadata editor, and
+  Testkit 0.75.2. Preserve canonical Types 0.15.1; the retained benchmark and
+  adoption reports identify their own frozen Platform/Host/Metrics selections.
+  These tooling-only changes require no Core consumer migration; they preserve
+  production codec/schema bytes, budgets and malformed-input acceptance.
+
+### 🔧 Changed
+
+- Refresh Shared Tooling to committed revision `619d194` (recorded 0.27.23)
+  through the canonical exporter. Keep Cargo's independent release groups and
+  package-version preparation unchanged; standalone pending-VERSION automation
+  does not apply to this workspace.
+
 ## [0.13.2] - 2026-10-31
 
 ### ⬆️ Dependencies

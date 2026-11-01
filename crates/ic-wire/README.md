@@ -10,7 +10,7 @@ derive designs are research, not selectable runtime modes.
 
 Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on the canonical
 `ic-platform-types` 0.15 owned Principal and Account. This selects host TypeScript
-support with no CDK, executor, Candid or runtime facade. Platform 0.15 reexports
+support with no CDK, executor, Candid or runtime facade. Platform 0.15 and 0.16 reexport
 these exact identities; direct `ic_platform_types` imports work too.
 
 Consumers remove Platform's retired `wire-schema` selection and enable Wire's
@@ -144,6 +144,7 @@ Use these defaults when declaring a new contract:
 | Data | Default field | TypeScript shape |
 | --- | --- | --- |
 | Binary data with a field limit | `Bytes<N>` | `Uint8Array` |
+| Fixed-width binary data | `ic_wire::ByteArray<N>` | `Uint8Array` (exactly `N` bytes) |
 | Binary data with operation-level limits | `ic_wire::ByteBuf` or `Vec<u8>` with `#[serde(with = "serde_bytes")]` | `Uint8Array` |
 | Large homogeneous integer arrays | `Packed<T>` with `i16`, `u16`, `i32`, `u32`, `i64` or `u64` | Corresponding integer typed array |
 | Lists of 32-byte hashes | `Packed<[u8; 32]>` | Flat `Uint8Array` |
@@ -270,6 +271,17 @@ assert_eq!(ic_wire::native::decode_request::<Upload>(7, &frame, limits)?, upload
 # Ok::<(), ic_wire::Error>(())
 ```
 
+For fixed-width hashes or binary keys, `ic_wire::ByteArray<N>` re-exports the
+standard `serde_bytes::ByteArray<N>` with stack-backed storage and exact-width
+validation. It supports ordinary Serde derives and host `Wire` metadata; generated
+clients use `Uint8Array` and reject lengths other than `N`, including when encoding.
+For example, `ic_wire::ByteArray::new([0, 255])` has Postcard payload `02 00 ff`;
+plain `[0_u8, 255]` remains `00 ff`. Each byte array adds a length prefix, but uses
+the bulk byte path instead of visiting each array element. Adopting it changes
+contract bytes and admission accounting: coordinate consumers, regenerate clients
+and qualify operation limits. Neither ordinary arrays nor existing contracts are
+rewritten. Exact-width validation is not a collection-size or application bound.
+
 Enable IC Wire's `typescript` feature in the host metadata generator.
 `ByteBuf` owns its bytes; `BytesRef<'_, N>` supports bounded borrowing.
 The direct `serde_bytes` adapter and unbounded `&serde_bytes::Bytes` remain
@@ -278,13 +290,15 @@ available with a consumer dependency on `serde_bytes`. These byte fields project
 and qualify traversal budgets when changing that field. `Wire` does not rewrite
 Serde derives. Existing `#[serde(with = "serde_bytes")]` fields also derive
 byte metadata, without changing the field type or serializer. Supported inputs
-are `Vec<u8>`, `[u8]`, `serde_bytes::ByteBuf`/`Bytes` and references to those types;
+are `Vec<u8>`, `[u8]`, `[u8; N]`, `serde_bytes::ByteArray<N>`,
+`serde_bytes::ByteBuf`/`Bytes` and references to those types;
 `Option<T>` of these inputs projects to `null | { some: Uint8Array }` (and
 nested options retain each tag). Aliases and generic fields with the required
 Serde adapter bounds work through their types, not their spelling. `None`,
 `Some(empty)` and `Some([0,128,255])` retain payloads `00`, `01 00` and
-`01 03 00 80 ff`. Fixed arrays and arbitrary custom adapters
-still require explicit verified metadata. Use the standard dependency under its
+`01 03 00 80 ff`. Fixed-array adapters retain their length prefix and project to
+exact-width byte metadata. Arbitrary custom adapters still require explicit
+verified metadata. Use the standard dependency under its
 `serde_bytes` name (the absolute `::serde_bytes` path is also recognized).
 This uses the already-measured byte path, not a new runtime optimization: at
 1 MiB, retained opt-3 measurements show 1,049,715 encode instructions versus

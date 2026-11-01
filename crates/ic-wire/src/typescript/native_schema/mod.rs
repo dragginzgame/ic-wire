@@ -27,6 +27,12 @@ mod byte_field {
     impl Sealed for [u8] {
         type Layout = serde_bytes::ByteBuf;
     }
+    impl<const N: usize> Sealed for [u8; N] {
+        type Layout = serde_bytes::ByteArray<N>;
+    }
+    impl<const N: usize> Sealed for serde_bytes::ByteArray<N> {
+        type Layout = Self;
+    }
     impl Sealed for serde_bytes::ByteBuf {
         type Layout = Self;
     }
@@ -136,6 +142,16 @@ scalar! {
 impl Wire for Cow<'_, str> {
     fn native_schema(c: &mut SchemaContext) -> Result<Value, GenerationError> {
         <str as Wire>::native_schema(c)
+    }
+}
+
+impl<const N: usize> Wire for serde_bytes::ByteArray<N> {
+    fn native_schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
+        // New metadata matches the existing standard Serde byte serializer:
+        // length + N bytes, not the prefix-free [u8; N] layout. Both Rust and TS
+        // reject other lengths. Ordinary arrays are unchanged; adoption requires
+        // coordinated contracts/clients and bulk-budget qualification.
+        Ok(json!({"k":"bytes","min":N,"max":N}))
     }
 }
 

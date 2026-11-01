@@ -1,0 +1,47 @@
+Diagnostic logs: /home/adam/projects/ic-wire/target/ui-diagnostics/wire.OEA0nR
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+9 expected diagnostics and passing control verified
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+Qualification tools are opt-in and native-only; ordinary codec/benchmark graphs are clean.
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-build v0.73.3
+   Compiling ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.92s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire_qualification-6ddf0972c3e6a3ca)
+
+running 3 tests
+test allocation::tests::packed_hash_shape_refuses_partial_and_oversized_elements ... ok
+test allocation::tests::same_layout_lanes_match_and_layout_changes_have_distinct_identities ... ok
+test allocation::tests::codec_only_preserves_frames_and_capacity ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running tests/packed_projection/mod.rs (target/debug/deps/packed_projection-8d2806e61181f8a4)
+
+running 1 test
+test packed_hash_projection_borrows_arrays_without_a_staging_copy ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-host-artifacts v0.73.3
+    Checking ic-host-fs v0.73.3
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-host-process v0.73.3
+    Checking ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Checking ic-build v0.73.3
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.53s
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-host-artifacts v0.73.3
+    Checking ic-host-fs v0.73.3
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-host-process v0.73.3
+    Checking ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Checking ic-build v0.73.3
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.57s

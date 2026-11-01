@@ -1,0 +1,621 @@
+{
+  "artifact_profiles": {
+    "bulk-control/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-1/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-1/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-1/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-1/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-1/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-1/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-1/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-1/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-1/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-1/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-1/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-1/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-100/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-100/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-100/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-100/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-10/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-10/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-10/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-10/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "toko/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "toko/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "toko/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "toko/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-control/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-control/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-control/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-control/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-1/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-1/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-1/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-1/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-10/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-10/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-10/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-10/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-10/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-10/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-10/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-10/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-100/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-100/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-100/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-100/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-10/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-10/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-10/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-control-10/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-i16/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-i16/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-i16/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-i16/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-10/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-10/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-10/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-10/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-100/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-100/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-100/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "derive-100/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "hotspots/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "hotspots/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "hotspots/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "hotspots/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-100/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-100/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-100/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-varied-100/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-1/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-1/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-1/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "bulk-1/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-100/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-100/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-100/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "packed-shared-100/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "standard/benchmark-speed-wire-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "standard/benchmark-speed-candid-build.jsonl": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "standard/evaluation-wire-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "standard/evaluation-candid-build.jsonl": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  "profile_environment_overrides": {}
+}

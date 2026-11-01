@@ -1,0 +1,9 @@
+cohort,profile,operation,cases,wire_wins,ties,candid_wins,max_wire_over_candid
+"byte-keys","evaluation","encode-fresh",4,4,0,0,0.7949858937320283
+"byte-keys","evaluation","decode-owned-or-labelled-borrowed",4,4,0,0,0.15983822790547647
+"byte-keys","benchmark-speed","encode-fresh",4,4,0,0,0.7132728426140946
+"byte-keys","benchmark-speed","decode-owned-or-labelled-borrowed",4,4,0,0,0.16392203416783624
+"byte-keys-control","evaluation","encode-fresh",4,3,0,1,1.8892889492242118
+"byte-keys-control","evaluation","decode-owned-or-labelled-borrowed",4,4,0,0,0.5350946878173898
+"byte-keys-control","benchmark-speed","encode-fresh",4,3,0,1,3.3182393583888534
+"byte-keys-control","benchmark-speed","decode-owned-or-labelled-borrowed",4,4,0,0,0.5174650194803634

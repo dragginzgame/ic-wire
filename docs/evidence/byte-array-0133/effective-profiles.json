@@ -1,0 +1,98 @@
+[
+  {
+    "cohort": "byte-keys",
+    "profile": "evaluation",
+    "codec": "wire",
+    "effective": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys",
+    "profile": "evaluation",
+    "codec": "candid",
+    "effective": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "effective": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "effective": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys-control",
+    "profile": "evaluation",
+    "codec": "wire",
+    "effective": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys-control",
+    "profile": "evaluation",
+    "codec": "candid",
+    "effective": {
+      "opt_level": "z",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys-control",
+    "profile": "benchmark-speed",
+    "codec": "wire",
+    "effective": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  },
+  {
+    "cohort": "byte-keys-control",
+    "profile": "benchmark-speed",
+    "codec": "candid",
+    "effective": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    }
+  }
+]

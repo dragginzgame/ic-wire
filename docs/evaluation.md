@@ -32,6 +32,30 @@ it is no longer maintained alongside the production Serde suite.
 
 The unpublished `ic-wire-qualification` package owns the maintained allocation,
 borrowing and buffer-reuse fixtures plus the IC Build compiler-diagnostic runner.
+
+The standard Wire/Candid corpus includes empty and singleton controls, zero-sized
+unit/record collections, nested empty lists, binary-key maps, blob-valued results,
+fixed optional arrays, boxed values, Unicode `Cow<str>` and tuple/record enum
+variants. New workloads append to the corpus so existing IC case indices stay
+fixed. Binary-key maps use ordered pairs for their JSON input identity only;
+both measured codecs still serialize the map. These cases use the existing native,
+IC instruction and Wasm-footprint runners; adding coverage is not a new performance
+measurement. Historical reports retain their original corpus and source identity.
+
+The focused `byte-keys` and `byte-keys-control` cohorts compare standard
+`ByteArray<32>` keys against unchanged `[u8;32]` map keys at 0/1/16/128 entries.
+Both keep identical Candid maps and logical inputs. The
+[matched study](evidence/byte-array-0133/README.md) retains repeated native time,
+IC instructions, frame bytes, allocation/heap probes and raw Wasm/code sizes.
+This explicit representation improves nonempty-map instructions while increasing
+Wasm and wire size; ordinary controls and existing corpus indices remain intact.
+
+Rust-only native tests additionally qualify Serde's standard nonzero integers,
+network addresses and ranges, including invalid values, every truncated frame
+prefix and trailing-byte refusal. Raw floating-point checks compare IEEE bits,
+including signed zero and NaN payloads, rather than float equality. These codec
+checks do not imply generated TypeScript schema support for every Rust type.
+
 Earlier alternative-codec suites were retired in 0.5.19; their reports and raw
 evidence remain historical. The new [Candid suite](candid-comparison.md) is owned
 by the unpublished `ic-wire-benchmarks` package. See [retired comparisons](performance.md#retired-alternative-codec-comparisons)

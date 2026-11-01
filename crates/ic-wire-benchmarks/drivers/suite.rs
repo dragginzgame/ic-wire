@@ -5,7 +5,8 @@
         feature = "toko",
         feature = "derive-scale",
         feature = "packed-i16",
-        feature = "bulk"
+        feature = "bulk",
+        feature = "byte-keys"
     ),
     expect(
         dead_code,

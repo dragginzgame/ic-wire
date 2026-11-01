@@ -21,6 +21,12 @@ pub struct Upload {
     pub data: ic_wire::ByteBuf,
 }
 
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "wire-schema", derive(ic_wire::Wire))]
+pub struct Digest {
+    pub key: ic_wire::ByteArray<2>,
+}
+
 pub fn roundtrip() -> Result<(), ic_wire::Error> {
     let limits = ic_wire::Limits {
         bytes: 256,
@@ -50,6 +56,10 @@ pub fn roundtrip() -> Result<(), ic_wire::Error> {
         ic_wire::native::decode_request::<Upload>(1, &bytes, limits)?,
         upload
     );
+    let digest = Digest { key: ic_wire::ByteArray::new([0,255]) };
+    let bytes = ic_wire::native::encode_request(1, &digest, limits)?;
+    assert_eq!(&bytes[11..], &[2,0,255]);
+    assert_eq!(ic_wire::native::decode_request::<Digest>(1,&bytes,limits)?,digest);
     let id = TemplateId(alloc::borrow::Cow::Borrowed("id"));
     let bytes = ic_wire::native::encode_request(1, &id, limits)?;
     assert_eq!(&bytes[11..], &[2, b'i', b'd']);
@@ -74,6 +84,11 @@ fn metadata_and_runtime() {
         assert_eq!(schema["fields"][0]["name"], "entries");
         assert_eq!(schema["fields"][0]["value"]["k"], "list");
         assert_eq!(schema["fields"][1]["name"], "total");
+        let schema = ic_wire::typescript::native_schema::<Digest>().unwrap();
+        let key = &schema["fields"][0]["value"];
+        assert_eq!(key["k"], "bytes");
+        assert_eq!(key["min"], 2);
+        assert_eq!(key["max"], 2);
         let schema = ic_wire::typescript::native_schema::<Upload>().unwrap();
         assert_eq!(schema["fields"][0]["name"], "data");
         assert_eq!(schema["fields"][0]["value"]["k"], "bytes");

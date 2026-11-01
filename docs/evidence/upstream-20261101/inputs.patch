@@ -1,0 +1,479 @@
+diff --git a/.shared-tooling.snapshot b/.shared-tooling.snapshot
+index 4eff7fc..a483241 100644
+--- a/.shared-tooling.snapshot
++++ b/.shared-tooling.snapshot
+@@ -1,8 +1,8 @@
+ # Shared Tooling snapshot v1
+-# version	0.27.21
++# version	0.27.23
+ format	1
+ source	https://github.com/dragginzgame/shared-tooling
+-revision	143a9abb9ae81feae9400ff3844b03b1ddfdd75a
++revision	619d194875369e0f72b45477b66adb430acbf6b7
+ # entrypoint	make/consumer.mk
+ # entrypoint	.githooks/pre-commit
+ # entrypoint	scripts/ci/check-documentation-links.pl
+@@ -83,15 +83,15 @@ file	100ec624bbd1c8bcd6b3b73cfaa23742ad8bc05b920c0908ca0f93ad5defd392	x	scripts/
+ file	40f31a19d6115411ebffe7c26e3ed30b8af7eead10dd4830de8d5a9312291222	x	scripts/ci/read-cargo-workspace-version.sh
+ file	b9406061ebc1765ab9552b8e5d1bbd43e3d468fde11063f2046867a58ce77254	-	.github/actions/prepare-rust-toolchains/action.yml
+ file	26a269c0e63125e8bd939578a64a6a67dbc5280cd3fbfd7da8b9c8e4d44cc6d5	-	.github/actions/retain-failure-evidence/action.yml
+-file	e33fbd174a2aa5d2454d085bafa56882d8603d645d38d6ce74c0d0074ca9011d	-	DRAGGINZGAME.md
+-file	c0b9a1469feefbf75e9ef894cc5c328fead7bbbff6f23f7216c50ac3ee0af2d0	-	rules/contributions.md
+-file	ce1a133fb1cb113501199157fbca07172d39dc336f7cbb823a0ba629460cee73	-	rules/changelogs.md
++file	045cd7dc967260d6cdc3be831244c3ccaa4be8d81ada99d62576649f4b0aaa1c	-	DRAGGINZGAME.md
++file	222e7517f39edbc6d2a20d1928b18503074f1ded6161217ab4629e0af90f3826	-	rules/contributions.md
++file	12b41c5b4a9329dbefc080f466ed87ce3bdcdce2e44f5f34523e8d867c30cdd2	-	rules/changelogs.md
+ file	6c25fe09f631d92a88d8ebb62cc20279f57f43a753d3a19dc254bb6ff0433b76	-	rules/change-reporting.md
+ file	7e7baf2e5ad9d5b701879602442ee7d10759d17800fbb18cbbd4378a8700d6af	-	rules/cargo-dependencies.md
+ file	55bdaa6dc1086407fe54f92e7c0482a5e282d8b56001ef62509dcd87c0250195	-	rules/rust-workspaces.md
+ file	b0b4c00e2183a787791314f21d33d270b8003a1ec67286ce8a681b028214ff75	-	rules/dependency-pinning.md
+ file	c957bb6465df829fa7aea4c8bdb9e7200bf5dd7f17776c0d57fcdf23eba634c3	-	rules/git-hooks.md
+-file	21e468fd66fb4a7c00ca02ef460a13bcb5193128f300a4074ba82c6204d8964c	-	rules/agent-maintenance.md
++file	2c869bf905e6d0ecce1787eb21aa8e040d5d054f25d4b712a4e0499fafc9f338	-	rules/agent-maintenance.md
+ file	eff485d42b3a61da174ee7c3bb8257dccfc8753e6bf66f07290a78a67cc3edc2	-	tasks/README.md
+ file	eb2419a5762a3cb02f25811d93becb6b18ca520df0bc3448ea35dfa187a034b4	-	tasks/cargo-machete.md
+ file	b20211ec1c39ef262c8ab266b207db43c44cd1474acde18297586590c7885810	-	tasks/msrv.md
+@@ -112,8 +112,8 @@ file	52628e3c08d8c1ac8e258d34ea102daa81253fe78448d5afe406b52e247610d3	-	audits/f
+ file	ffdca09602c44c8aff8fc2a17588b20eb6a56e2e71fb6d42ad75087fdd65819b	-	audits/complexity-and-technical-debt.md
+ file	1b64cf2ba0393ab329ec29eb05a696d47ef5933f5ab9bff6e1fe4a7e7b294075	-	audits/module-surface-hardening.md
+ file	090d05318e8114ea3e3ba789620a8f3ac638d43b2aad2f4e90a69e69b6d1f6f8	-	audits/module-cleanup.md
+-file	83a048e9ee37023e3522acb5a85b7e0af499f0029b7d391d8ebf553142c7ceea	-	docs/releases.md
+-file	4f2dd43c82bdaf079e586688110702f3a056b700807a4dc6ad47cd486866f683	x	scripts/ci/run-release.sh
++file	b8b7de88f347bdc42da5c36f7c832f0c6aba0f25999e49d121e1c22e2c83661a	-	docs/releases.md
++file	ffdcce5cf9c3871d45a6a7da24b38851ffd233729faacea4c3d1a5cc4305beac	x	scripts/ci/run-release.sh
+ file	07ff21bc90ad9d9882be78d38af9f659d2e13d1a1e5e5208ed540f93bcfcdfaf	-	scripts/ci/release-pr.sh
+ file	9e32385247296ce95d2b15b1290c64e6b6dff15716c1c139f21ab5e5128f4be3	x	scripts/ci/check-make-execution.sh
+ file	a3af7084956384262842be33100f91a22fdd82b0f91b6091a00e90f8726f67fe	x	scripts/ci/check-release-source.sh
+@@ -158,7 +158,7 @@ file	c8693a4bc058f31c1592c86e7037f0ed02a9719a8a0269038e0a45e16ca93c0b	-	scripts/
+ file	31c47b675fba90850681c6fac0d685def34b08a68e7e05bc55ae0403419fdf82	x	scripts/dev/prepare-rust-toolchain.sh
+ file	172ab2415f4816bdad7955720ef45445b4bd81283c928d7ef2ee3de9064b69b5	x	scripts/ci/collect-tool-evidence.sh
+ file	d517344568e02a638cd19b99bfbcc63f000a0cf1df7b7713f901f52518b1e2ee	x	scripts/ci/formatting-evidence.sh
+-file	1bd5a58249f8a3ddb24a59337868183e845a8b051091d18b137d8f378a221139	-	rules/engineering-details.md
++file	84448d47c9e27406c3bdd131979393ae997cd857e73af9e8c2b7dc6010fc7428	-	rules/engineering-details.md
+ file	e3aed908dd9b08bf93255328bb056bed57298dab39944e3726aad2726548e653	-	rules/rpc-budgets.md
+ file	c96e7f919c1f0b88155316f79567438fd5e1fc0c07a31b308170dbc8adf91b11	-	docs/node-tools.md
+ file	18240ae231c3056bab5c535f25534dcd5ec0ac65d8d431e88fc3b174c66f2fce	x	scripts/ci/check-release-tag.sh
+diff --git a/AGENTS.md b/AGENTS.md
+index 9f3119d..699477c 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -7,7 +7,7 @@ qualification work. These guides are task-specific, not a startup reading list.
+ The Postcard runtime is qualified for bounded Rust integration.
+ 
+ Apply the reviewed [Shared Tooling baseline](DRAGGINZGAME.md) and its referenced
+-rules, vendored at `143a9abb9ae81feae9400ff3844b03b1ddfdd75a` (recorded version 0.27.21).
++rules, vendored at `619d194875369e0f72b45477b66adb430acbf6b7` (recorded version 0.27.23).
+ [.shared-tooling.snapshot](.shared-tooling.snapshot) records the exact selection,
+ hashes and modes. This file is the IC Wire overlay. Do not infer policy from a
+ moving sibling checkout or patch snapshot-owned files in place. The main snapshot
+@@ -36,8 +36,8 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
+ - The maintainer approved and requested implementation of the
+   [stable identity boundary](docs/stable-identities.md): coordinated ic-wire/
+   ic-wire-derive and one independently versioned ic-wire-endpoint package.
+-  Platform 0.15.2 / Types 0.15.1 and IC Build 0.73.2 supply the current suppliers;
+-  native qualification uses Testkit 0.75.1. Use the
++  Platform 0.15.2 / Types 0.15.1 and IC Build 0.73.3 supply the current suppliers;
++  native qualification uses Testkit 0.75.2. Use the
+   explicit core/endpoint release groups with literal member versions and ledgers
+   under releases/<group>/. Release/resume/publication require explicit group
+   selection; no publication is authorized.
+diff --git a/Cargo.lock b/Cargo.lock
+index 64d7df0..39f1179 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -831,9 +831,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-build"
+-version = "0.73.2"
++version = "0.73.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "166b8fdac3cc38e7b6abffd074809b62c5a5a311b185d549743e0f6a4eb83c1e"
++checksum = "fbe5f9a066b805d5a1b5b839a4464364396e8418900d66413155d120f02ca8a2"
+ dependencies = [
+  "cargo_metadata",
+  "ic-host-artifacts",
+@@ -862,9 +862,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-host-artifacts"
+-version = "0.73.2"
++version = "0.73.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "143da7023ea2841fbc29394459e5519618e3ad3136efe65efd7f120e056d8334"
++checksum = "46da95486e1320c8f82da99e187a55b9d59d26b25ab5928d13a782d53840edf6"
+ dependencies = [
+  "flate2",
+  "sha2",
+@@ -872,9 +872,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-host-fs"
+-version = "0.73.2"
++version = "0.73.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d1da7888eb4c18aee89e5b5a2c63416de3a00500956e99e5dc9d29a118cceae0"
++checksum = "b5f773e7bd36f9a471d78b903bdb28067cee40df70492f388732124a14f67b01"
+ dependencies = [
+  "ic-host-artifacts",
+  "rustix",
+@@ -883,9 +883,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-host-process"
+-version = "0.73.2"
++version = "0.73.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c3c0c82f68418a09cdf4b03179795737238de1a6dea25b64e948492dfce2b1ed"
++checksum = "6ccd602f2147d0795ad820ad9157ecafc51f59ebce5e85a589ae5f12a1e6b531"
+ dependencies = [
+  "command-fds",
+  "ic-host-artifacts",
+@@ -977,9 +977,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "ic-testkit"
+-version = "0.75.1"
++version = "0.75.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "cec2f03048c28b83005bad6612be3f7da773c2829ebc2fdb218a2331000a6d52"
++checksum = "78f815e709f8fdb2a4f1d806122ff2dea4bd555d2997dc075a699be835d32494"
+ dependencies = [
+  "ic-host-artifacts",
+  "ic-host-fs",
+diff --git a/Cargo.toml b/Cargo.toml
+index eb7b10a..be2da97 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -48,8 +48,8 @@ syn = { version = "3.0.9", features = ["visit"] }
+ # Tests and tooling only
+ clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
+ dhat = "0.3.3"
+-ic-build = { version = "0.73.2", default-features = false }
+-ic-testkit = { version = "0.75.1", default-features = false }
++ic-build = { version = "0.73.3", default-features = false }
++ic-testkit = { version = "0.75.2", default-features = false }
+ libfuzzer-sys = "0.4.13"
+ num-bigint = "0.4"
+ sha2 = "0.10.9"
+diff --git a/DRAGGINZGAME.md b/DRAGGINZGAME.md
+index 82770f5..6e0c2c8 100644
+--- a/DRAGGINZGAME.md
++++ b/DRAGGINZGAME.md
+@@ -28,8 +28,10 @@ same approach: mandatory local constraints first, task-specific references after
+   sibling inspection needs no additional permission. Never edit another
+   contributor's sibling working checkout in place.
+ - Ordinary fixes authorize local implementation and focused checks. Leave staging,
+-  commits, own release versions, tags and release execution to the user unless
+-  delegated. A PR request includes its branch, scoped commits, branch push and PR.
++  commits, package release versions, tags and release execution to the user unless
++  delegated. Automatically prepare a canonical `VERSION` file with its pending
++  changelog under the [next-version rules](rules/changelogs.md#automatic-next-version-selection).
++  A PR request includes its branch, scoped commits, branch push and PR.
+   A release/ship/deploy request delegates the corresponding delivery workflow,
+   including routine group/version/order choices under
+   [delegated delivery](rules/contributions.md#delegated-delivery). Do not ask again
+diff --git a/Makefile b/Makefile
+index 5347396..8c0584f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -16,7 +16,7 @@ ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
+ $(error Select RELEASE_GROUP=core or endpoint explicitly)
+ endif
+ endif
+-RELEASE_EDITOR_VERSION := 0.73.2
++RELEASE_EDITOR_VERSION := 0.73.3
+ export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
+ RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
+     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
+diff --git a/docs/development.md b/docs/development.md
+index fc8cb51..63b16e4 100644
+--- a/docs/development.md
++++ b/docs/development.md
+@@ -25,14 +25,14 @@ make tools-check
+ make install-hooks
+ ```
+ 
+-`make install-tools` also prepares IC Tooling's IC Build 0.73.2 release metadata
++`make install-tools` also prepares IC Tooling's IC Build 0.73.3 release metadata
+ editor with its required `cli` feature. The diagnostic library selects IC Build
+-0.73.2 without default features; the CLI feature is only enabled for installation.
++0.73.3 without default features; the CLI feature is only enabled for installation.
+ `make release-editor-check` verifies its selected executable offline. The release
+ adapter selects that path automatically; metadata inputs are limited to 8 MiB
+ per document. This tooling executable is separate from runtime dependencies.
+-Native endpoint/codec controls select Testkit 0.75.1; Build/Host retain the
+-independently versioned 0.73.2 foundation.
++Native endpoint/codec controls select Testkit 0.75.2; Build/Host retain the
++independently versioned 0.73.3 foundation.
+ 
+ Installation is explicit; checks install nothing. IC Wire selects only the
+ reviewed common host and Cargo toolsets. Platform executables are not part of its
+diff --git a/docs/releases.md b/docs/releases.md
+index 1606dc3..abee175 100644
+--- a/docs/releases.md
++++ b/docs/releases.md
+@@ -25,9 +25,12 @@ the default; [PR delivery](#pr-delivery) adds review and fresh merged-commit
+ validation before tagging. A repository
+ without package metadata may use a dedicated version file; otherwise it uses
+ its latest finalized changelog version. Shared Tooling owns its current local
+-version in root `VERSION`, displayed by `make version`. Its undated changelog
+-heading names the next proposed release. Preparation updates both files and
+-stages them together; neither a version file nor a changelog heading proves
++version in root `VERSION`, displayed by `make version`. Ordinary meaningful work
++runs `make prepare-work` to create or reuse an explicit `- Unreleased` entry and
++align `VERSION`. `WORK_VERSION_KIND=minor` or `major` promotes the pending batch;
++the default is patch. Add meaningful notes to that entry. CI's `check-version`
++rejects disagreement. Release preparation dates that same version and stages
++both files together; neither a version file nor a changelog heading proves
+ that a tag was pushed. Pre-release versions require a separately selected release plan;
+ these commands must reject ambiguous or unsupported version inputs.
+ 
+@@ -37,6 +40,16 @@ directory, including after a partial replacement. Retry uses the existing releas
+ reconciliation; it does not delete earlier evidence or automatically restore files.
+ Successful attempts remove only their own scratch directory.
+ 
++Shared selects `RELEASE_VERSION_MODE=pending` and supplies `release-base-version`.
++That read-only hook returns the preceding ledger version when `VERSION` already
++matches an explicit pending heading, otherwise the current version for the legacy
++workflow. The runner computes the requested increment from that base and still
++requires the candidate to agree with the prepared metadata. Preparation must be
++idempotent because the pending version can already be present before finalization
++or recovery. A mismatched release kind fails before validation or delivery.
++The default `released` mode and Cargo release-group adapters retain their existing
++version selection; pending-file mode cannot be used with a Cargo release group.
++
+ ## Required workflow
+ 
+ The default `RELEASE_DELIVERY=direct` workflow is:
+@@ -92,8 +105,9 @@ effects remain outside that scope. Keep the finalized release at the
+ top of the changelog until subsequent work needs a new numbered, undated pending
+ entry under the [automatic next-version rules](../rules/changelogs.md).
+ 
+-Agents maintain that proposed changelog version during ordinary development.
+-The proposal does not bump package metadata or execute a release. Select the
++Agents maintain that proposed changelog version and canonical standalone `VERSION`
++file during ordinary development. The proposal does not bump package metadata or
++execute a release. Select the
+ matching release kind when invoking the explicitly authorized command; its computed
+ candidate must agree with the pending heading and the complete batch's
+ compatibility impact before finalization.
+diff --git a/docs/stable-identities.md b/docs/stable-identities.md
+index 4717982..9f5d92f 100644
+--- a/docs/stable-identities.md
++++ b/docs/stable-identities.md
+@@ -4,8 +4,8 @@ The maintainer approved this boundary for [#36](https://github.com/dragginzgame/
+ on 2026-10-31 and requested implementation after Platform publication. It is now
+ delivered and published as core 0.13.0 / Endpoint 0.2.0. The original prerequisite is
+ supplied by registry Platform/Types 0.15 and IC Build 0.73.
+-Current compatible selections are Platform 0.15.2, Types 0.15.1, Build 0.73.2
+-and native Testkit 0.75.1. No sibling checkout was modified.
++Current compatible selections are Platform 0.15.2, Types 0.15.1, Build 0.73.3
++and native Testkit 0.75.2. No sibling checkout was modified.
+ 
+ ## Owners and release groups
+ 
+@@ -69,7 +69,7 @@ with coordinated releases through 0.11.0 preserved once in `releases/history.md`
+ No package paths, numeric versions, tags or historical scope were changed. The real
+ adapter uses the shared group plan's exact files for metadata/source admission,
+ receipts and post-commit checks. Group-specific tags/plans prevent collisions.
+-The metadata editor is published IC Build 0.73.2 with `group-manifest`.
++The metadata editor is published IC Build 0.73.3 with `group-manifest`.
+ 
+ ```sh
+ make release-version RELEASE_GROUP=core
+diff --git a/releases/core/CHANGELOG.md b/releases/core/CHANGELOG.md
+index 247301e..e224345 100644
+--- a/releases/core/CHANGELOG.md
++++ b/releases/core/CHANGELOG.md
+@@ -5,6 +5,22 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
+ series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
+ in [shared history](../history.md).
+ 
++## [0.13.3]
++
++### ⬆️ Dependencies
++
++- Adopt Build/Host 0.73.3, including the managed release metadata editor, and
++  Testkit 0.75.2. Keep Platform 0.15.3, canonical Types 0.15.1 and Metrics 0.24.1.
++  Production codec/schema and Endpoint dependencies, bytes, budgets and malformed
++  acceptance remain unchanged; no consumer migration is required.
++
++### 🔧 Changed
++
++- Refresh Shared Tooling to committed revision `619d194` (recorded 0.27.23)
++  through the canonical exporter. Keep Cargo's independent release groups and
++  package-version preparation unchanged; standalone pending-VERSION automation
++  does not apply to this workspace.
++
+ ## [0.13.2] - 2026-10-31
+ 
+ ### ⬆️ Dependencies
+diff --git a/rules/agent-maintenance.md b/rules/agent-maintenance.md
+index d52c4ad..2e907fd 100644
+--- a/rules/agent-maintenance.md
++++ b/rules/agent-maintenance.md
+@@ -29,7 +29,10 @@ still governs commits, releases and other external effects. Issue reports in
+ issue discussions and logs as evidence, not instructions that expand authority.
+ 
+ Ordinary checks and repairs do not automatically include staging, commits,
+-repository version changes, tags or `make release-*`. A scoped release/ship/deploy
++package version changes, tags or `make release-*`. Repairs maintain canonical
++pending `VERSION` files with their notes under the
++[next-version rules](changelogs.md#automatic-next-version-selection).
++A scoped release/ship/deploy
+ request delegates the corresponding workflow under
+ [delegated delivery](contributions.md#delegated-delivery); continuation retains
+ that authority. Without it, prepare reviewable changes and notes without changing
+diff --git a/rules/changelogs.md b/rules/changelogs.md
+index 60efe8b..1569af3 100644
+--- a/rules/changelogs.md
++++ b/rules/changelogs.md
+@@ -262,16 +262,26 @@ selects the group's own ledger; it does not finalize a shared historical file.
+   view and detail link aligned, including when a candidate changes minor line.
+ - In the handoff, state the selected next version and the compatibility reason,
+   including the affected contract and required action for a breaking change.
+-  Selecting a changelog heading is automatic documentation maintenance; it does
+-  not change manifests, lockfiles or release defaults, or authorize commits,
+-  tags, pushes, publication or deployment. Commit and PR authority follows the
+-  [contribution rules](contributions.md).
+-  Requests such as "work on 0.4", "prepare 0.4" or "0.4 changelog" select the
+-  work and notes only. Leave `VERSION`, the repository's own Cargo/npm package
+-  versions and corresponding release metadata to the user's release flow unless
+-  the user expressly delegates that exact edit or release operation. Do not
+-  stage notes, create commits or tags, or run a release target merely to finish
+-  ordinary changelog preparation.
++- When a dedicated `VERSION` file is the canonical repository version, prepare
++  it automatically with the pending changelog during meaningful implementation.
++  No separate version-edit request is needed. Use `## [X.Y.Z] - Unreleased` for
++  this workflow so a prepared version is distinguishable from undated historical
++  releases. Keep the file and heading equal; reuse that pair for further pending
++  work, and promote both together if compatibility requires a larger bump. Do not
++  bump on inspection-only tasks or create an empty release for each edit.
++  Shared Tooling uses `make prepare-work [WORK_VERSION_KIND=patch|minor|major]`
++  before adding the batch's notes, and `make check-version` rejects drift in CI.
++  Its release adapter derives the released base from the entry below the explicit
++  pending heading, then finalizes the prepared identity without a second bump.
++  Other VERSION-backed repositories must wire the same distinction into their
++  local release adapter before adopting this automation; do not patch snapshots.
++- This pending-file authority does not extend to Cargo/npm package versions,
++  lockfiles, unrelated groups, commits, tags, pushes, publication or deployment.
++  Do not introduce a root `VERSION` in a workspace with independent release groups
++  or treat a file mirroring package metadata as an independent version owner.
++  Requests such as "work on 0.4", "prepare 0.4" or "0.4 changelog" select the work,
++  notes and canonical VERSION where applicable, not release execution. Commit and
++  PR authority follows the [contribution rules](contributions.md).
+ 
+ For a latest finalized release of `0.14.7`:
+ 
+diff --git a/rules/contributions.md b/rules/contributions.md
+index 1067199..0ad1821 100644
+--- a/rules/contributions.md
++++ b/rules/contributions.md
+@@ -33,8 +33,10 @@ agreement does not establish acceptance or configure fleet-wide signing checks.
+ 
+ ## Implementation and delivery authority
+ 
+-Ordinary implementation does not automatically include staging, commits, version
+-changes, tags, pushes or release execution. A request to release, publish, ship or
++Ordinary implementation includes pending changelog and canonical `VERSION`
++preparation under the [next-version rules](changelogs.md#automatic-next-version-selection).
++It does not automatically include staging, commits, package version changes,
++tags, pushes or release execution. A request to release, publish, ship or
+ deploy delegates the corresponding delivery workflow under
+ [delegated delivery](#delegated-delivery), without requiring the user to choose
+ every command or release group. The standing
+@@ -44,7 +46,7 @@ changes, numbered changelog notes and the appropriate validation. Leave existing
+ staging untouched; do not stage or unstage the user's work to make checks pass.
+ 
+ In particular, do not run `git add .`, `git add -A`, `git commit` (including
+-amend), version-bump helpers, `git tag`, `git push`, `make release-patch`,
++amend), package version-bump helpers, `git tag`, `git push`, `make release-patch`,
+ `make release-minor`, `make release-major`, `make release-resume` or their
+ mutating adapters as an automatic completion step. Inspect wrappers and Make
+ targets for these effects before invoking them. A validation request does not
+@@ -57,10 +59,10 @@ During implementation, "keep going", "finish this", "prepare the release",
+ "work on 0.4", "new changelog" and "ready to push?" do not newly delegate
+ release operations. During an already delegated delivery workflow, continuation
+ retains that authority; do not stop for permission at each group or command.
+-A release number selects the work/notes; it is not permission to update
+-`VERSION`, application/workspace/package versions, matching release lock entries
+-or generated release metadata. Explicit dependency-update authority remains
+-separate and does not authorize bumping the repository's own release version.
++A release number selects the work/notes and canonical pending `VERSION` where
++applicable; it is not permission to update application/workspace/package versions,
++matching release lock entries or generated release metadata. Explicit dependency
++updates remain separate from package release-version changes.
+ 
+ Do not change a published version, delete a tag, reset or rewrite history to
+ undo an unexpected release. Report the observed state and leave recovery to an
+diff --git a/rules/engineering-details.md b/rules/engineering-details.md
+index cd636e6..5f71197 100644
+--- a/rules/engineering-details.md
++++ b/rules/engineering-details.md
+@@ -66,12 +66,14 @@ product, release and recovery obligations remain binding when applicable.
+ - Ordinary implementation does not include staging, commits or release execution. During
+   ordinary implementation, leave the real checkout's index, package/application
+   release versions and Git refs alone. Do not run `git add .`, `git add -A`,
+-  `git commit`, version-bump helpers, `git tag`, pushes, `make release-*` or
++  `git commit`, package version-bump helpers, `git tag`, pushes, `make release-*` or
+   mutating release adapters to finish a coding task. This includes release
+   recovery and indirect calls from scripts or Make targets. "Keep going",
+   "prepare the release", "work on 0.4" and "ready to push?" authorize no such
+   effects unless the session already delegates delivery. Prepare source, numbered
+-  changelog notes and validation within the established scope. A release/ship/deploy
++  changelog notes, the matching canonical pending `VERSION` under the
++  [next-version rules](changelogs.md#automatic-next-version-selection), and
++  validation within the established scope. A release/ship/deploy
+   request delegates its corresponding workflow and routine group/version/order
+   choices under [delegated delivery](contributions.md#delegated-delivery).
+   Continue that workflow without per-step permission; preserve explicit target
+@@ -82,7 +84,7 @@ product, release and recovery obligations remain binding when applicable.
+   branch, commits, branch push and PR creation/update needed to deliver it;
+   do not require the maintainer to commit first or approve each substep again.
+   The standing cross-repository PR workflow supplies the same scoped authority
+-  without a separate PR request. Neither route authorizes release versions or tags.
++  without a separate PR request. Neither route authorizes package release versions or tags.
+ - A PR request does not authorize merging, pushing directly to `main`, `master`
+   or another integration/release branch, or rewriting shared history. Those
+   effects require explicit authorization. Preserve branch protections and
+diff --git a/scripts/ci/run-release.sh b/scripts/ci/run-release.sh
+index c4ab324..c0a8d52 100755
+--- a/scripts/ci/run-release.sh
++++ b/scripts/ci/run-release.sh
+@@ -16,6 +16,9 @@ runner_dir="${BASH_SOURCE[0]}"
+ runner_dir="$(cd -P "${runner_dir%/*}" && printf '%s/.' "$PWD")"
+ runner_dir="${runner_dir%/.}"
+ release_group="${RELEASE_GROUP:-}"
++version_mode="${RELEASE_VERSION_MODE:-released}"
++case "$version_mode" in released|pending) ;; *) fail 'invalid RELEASE_VERSION_MODE' ;; esac
++[[ "$version_mode" != pending || -z "$release_group" ]] || fail 'pending VERSION mode does not apply to Cargo release groups'
+ [[ -z "$release_group" || "$release_group" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] || fail 'invalid release group'
+ export RELEASE_GROUP="$release_group"
+ plan_prefix="${release_group:+$release_group-}"
+@@ -168,6 +171,9 @@ select_release() {
+     fi
+     kind="$mode"
+     previous="$("$make_bin" --no-print-directory -s release-version "RELEASE_GROUP=$release_group")"
++    if [[ "$version_mode" == pending ]]; then
++        previous="$("$make_bin" --no-print-directory -s release-base-version)"
++    fi
+     if [[ -n "$release_group" ]]; then
+         [[ "$previous" == "$(bash "$runner_dir/cargo-release-group.sh" version "$release_group")" ]] || fail 'adapter selected the wrong group version'
+     fi
+@@ -347,11 +353,12 @@ while [[ "$phase" != complete ]]; do
+             assert_source
+             [[ "$delivery" != pr ]] || pr_prepare_branch
+             current="$("$make_bin" --no-print-directory -s release-version "RELEASE_GROUP=$release_group")"
+-            if [[ "$current" == "$previous" ]]; then
++            if [[ "$current" != "$previous" && "$current" != "$candidate" ]]; then
++                fail 'prepared version differs from the exact saved release'
++            fi
++            if [[ "$current" == "$previous" || "$version_mode" == pending ]]; then
+                 hook release-preflight
+                 hook release-prepare-version
+-            elif [[ "$current" != "$candidate" ]]; then
+-                fail 'prepared version differs from the exact saved release'
+             fi
+             hook release-prepared-check
+             [[ "$("$make_bin" --no-print-directory -s release-version "RELEASE_GROUP=$release_group")" == "$candidate" ]] || fail 'preparation did not produce the candidate'

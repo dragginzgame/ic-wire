@@ -1,0 +1,7 @@
+{
+  "incoming_lock_byte_identical": true,
+  "lock_sha256": "08e4943df8415aa520e5226bf2e3f631efb5d37b0a1e304f76925b16276da7a1",
+  "production_endpoint_wasm_graph_equal_to_delivered": true,
+  "runtime_and_generator_source_unchanged": true,
+  "own_package_versions_unchanged": true
+}

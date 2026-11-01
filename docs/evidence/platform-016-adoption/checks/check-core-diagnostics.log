@@ -1,0 +1,4 @@
+Diagnostic logs: /home/adam/projects/ic-wire/target/ui-diagnostics/wire.35FStP
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.41s
+9 expected diagnostics and passing control verified

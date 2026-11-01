@@ -1,5 +1,6 @@
 //! Generate independent Rust vectors and executable JavaScript conformance checks.
 mod admission;
+mod byte_array;
 mod large_bytes;
 mod native_schema;
 mod payload;
@@ -307,6 +308,7 @@ fn main() {
         count: 0,
         mutations: 0,
     };
+    byte_array::add(&mut f);
     f.add((), "null");
     f.add(false, "false");
     f.add(true, "true");

@@ -1,0 +1,34 @@
+ M .shared-tooling.snapshot
+ M AGENTS.md
+ M Cargo.lock
+ M Cargo.toml
+ M DRAGGINZGAME.md
+ M Makefile
+ M crates/ic-wire-benchmarks/Cargo.toml
+ M crates/ic-wire-benchmarks/drivers/fixtures/mod.rs
+ M crates/ic-wire-benchmarks/drivers/roundtrip.rs
+ M crates/ic-wire-benchmarks/drivers/suite.rs
+ M crates/ic-wire-qualification/fixtures/schema_targets/mod.rs
+ M crates/ic-wire/examples/typescript_conformance/mod.rs
+ M crates/ic-wire/src/lib.rs
+ M crates/ic-wire/src/typescript/native_schema/mod.rs
+ M crates/ic-wire/tests/native/mod.rs
+ M docs/candid-comparison.md
+ M docs/development.md
+ M docs/evaluation.md
+ M docs/releases.md
+ M docs/stable-identities.md
+ M docs/status/current.md
+ M releases/core/CHANGELOG.md
+ M rules/agent-maintenance.md
+ M rules/changelogs.md
+ M rules/contributions.md
+ M rules/engineering-details.md
+ M scripts/ci/codec-cohorts.psv
+ M scripts/ci/run-release.sh
+?? crates/ic-wire-benchmarks/drivers/fixtures/byte_keys/
+?? crates/ic-wire/examples/typescript_conformance/byte_array/
+?? crates/ic-wire/tests/native/byte_array/
+?? crates/ic-wire/tests/native/std_types/
+?? docs/evidence/candid-comparison-0133/
+?? docs/evidence/upstream-20261101/

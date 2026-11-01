@@ -1,0 +1,9 @@
+{
+  "wasm_modules": 88,
+  "sha256_and_total_bytes_match": true,
+  "code_section_lengths_independently_parsed": true,
+  "source_manifest_lock_match": true,
+  "untracked_rust_fixture_retained": true,
+  "browser_node_modules_excluded": true,
+  "analyzer_matches_previous_study": true
+}

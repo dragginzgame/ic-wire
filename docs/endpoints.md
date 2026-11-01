@@ -1,25 +1,29 @@
 # Typed Wire endpoints
 
 Add the independent `ic-wire-endpoint` package in a standalone canister. It
-connects ordinary Serde handlers to published IC Platform 0.15.2's maintained
+connects ordinary Serde handlers to published IC Platform 0.16.0's maintained
 query/update generator. The default Wire codec stays `no_std + alloc` and has no
 Platform dependency. The integration uses Platform's `std` runtime without Candid,
 Canic, an extra executor or a second encoding.
 
 ```toml
 [dependencies]
-ic-wire = "0.13.0"
-ic-wire-endpoint = "0.2.0"
+ic-wire = "0.13.3"
+ic-wire-endpoint = "0.3.0"
 ```
 
-Wire 0.13.0 and Endpoint 0.2.0 are published on crates.io. The [standalone fixture](../examples/endpoint/Cargo.toml) uses the local workspace
-package for qualification. Git releases and registry publication remain separate.
+The example selects Core 0.13.3 / Endpoint 0.3.0 with Platform 0.16. Endpoint
+0.2.1 retains Platform 0.15. The [standalone fixture](../examples/endpoint/Cargo.toml)
+uses local workspace packages. Git releases and registry publication remain separate.
 
-Platform embeds its IC0 wrappers and executor. Endpoint users must adopt
-Platform 0.15 throughout their application's runtime dependencies, including timer
+Platform embeds its IC0 wrappers and executor. Endpoint 0.3 users must adopt
+Platform 0.16 throughout their application's runtime dependencies, including timer
 integrations; do not combine it with an older external executor. Cargo's singleton
 guard rejects conflicting runtime owners. Core-only Wire consumers need no runtime
-migration. Handler declarations, frame bytes, method identities and Wire admission
+migration: canonical Principal/Account remain Types 0.15.1. The 0.16 native
+entrypoint names are crate-scoped; Cargo supplies that crate name automatically
+(direct rustc tools must match `CARGO_CRATE_NAME` to `--crate-name`). Wasm exports,
+handler declarations, frame bytes, method identities and Wire admission
 rules are unchanged; retained request/retry bytes remain valid. See
 [Platform's runtime migration](https://github.com/dragginzgame/ic-platform/blob/421edbc/docs/migration.md#embedded-ic0-and-executor).
 

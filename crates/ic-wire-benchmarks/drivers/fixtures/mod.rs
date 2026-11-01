@@ -1,8 +1,21 @@
 //! Matched values; setup and semantic roundtrip assertions are outside measurement.
 #[cfg(any(feature = "bulk", feature = "bulk-scale"))]
 mod bulk;
+#[cfg(feature = "byte-keys")]
+mod byte_keys;
 #[cfg(feature = "hotspots")]
 mod hotspots;
+#[cfg(all(
+    feature = "byte-keys",
+    any(
+        feature = "hotspots",
+        feature = "bulk",
+        feature = "derive-scale",
+        feature = "toko",
+        feature = "packed-i16"
+    )
+))]
+compile_error!("select one benchmark corpus");
 #[cfg(feature = "packed-i16")]
 mod packed_i16;
 #[cfg(feature = "derive-scale")]
@@ -123,6 +136,16 @@ fn case<T: Serialize + DeserializeOwned + Compared + PartialEq + Debug + 'static
     value: T,
 ) -> Case {
     let input_json = serde_json::to_vec(&value).unwrap();
+    case_with_input_json(name, value, input_json)
+}
+
+fn case_with_input_json<
+    T: Serialize + DeserializeOwned + Compared + PartialEq + Debug + 'static,
+>(
+    name: &str,
+    value: T,
+    input_json: Vec<u8>,
+) -> Case {
     let value = Rc::new(value);
     let mut lanes = Vec::new();
     #[cfg(feature = "wire")]
@@ -276,6 +299,10 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     {
         hotspots::cases_selected(selected)
     }
+    #[cfg(feature = "byte-keys")]
+    {
+        byte_keys::cases_selected(selected)
+    }
     #[cfg(feature = "bulk")]
     {
         bulk::cases_selected(selected)
@@ -297,7 +324,8 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         feature = "derive-scale",
         feature = "packed-i16",
         feature = "bulk",
-        feature = "hotspots"
+        feature = "hotspots",
+        feature = "byte-keys"
     )))]
     {
         standard_cases_selected(selected)
@@ -323,6 +351,20 @@ enum GenericEvent<T> {
     Value(T),
     Batch(Vec<T>),
     Failure { code: u32, detail: String },
+}
+
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+struct EmptyRecord {}
+
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
+enum Delivery {
+    Empty,
+    Chunk(u64, Blob, Option<String>),
+    Refused { code: u16, retry_after: Option<u64> },
 }
 
 fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
@@ -748,6 +790,78 @@ fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
         GenericEvent::<u64>::Failure {
             code: 403,
             detail: "denied".into()
+        }
+    ));
+
+    // Append only: prior IC workload indices and their type definitions stay fixed.
+    // Zero-byte elements test work admission independently of payload byte count.
+    for n in [0, 1, 128, 4096] {
+        push!(case(&format!("unit-list-{n}"), vec![(); n]));
+        push!(case(
+            &format!("empty-record-list-{n}"),
+            (0..n).map(|_| EmptyRecord {}).collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("optional-unit-list-{n}"),
+            (0..n)
+                .map(|i| (i % 2 == 0).then_some(()))
+                .collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("result-unit-list-{n}"),
+            (0..n)
+                .map(|i| if i % 2 == 0 { Ok(()) } else { Err(()) })
+                .collect::<Vec<_>>()
+        ));
+    }
+    for n in [0, 1, 16, 128] {
+        push!({
+            let value = (0..n)
+                .map(|i| {
+                    let mut key = [0x95_u8; 32];
+                    key[0] = i as u8;
+                    (key, (i % 2 == 0).then(|| Blob(data(32))))
+                })
+                .collect::<std::collections::BTreeMap<_, _>>();
+            // JSON cannot represent array keys. Use ordered pairs only for
+            // input identity; both measured codecs still serialize the map.
+            let input_json = serde_json::to_vec(&value.iter().collect::<Vec<_>>()).unwrap();
+            case_with_input_json(&format!("binary-key-map-{n}"), value, input_json)
+        });
+        push!(case(
+            &format!("result-blob-list-{n}"),
+            (0..n)
+                .map(|i| {
+                    let blob = Blob(data([0, 1, 127, 128, 4096][i % 5]));
+                    if i % 2 == 0 { Ok(blob) } else { Err(blob) }
+                })
+                .collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("empty-inner-lists-{n}"),
+            vec![Vec::<u64>::new(); n]
+        ));
+    }
+    push!(case(
+        "fixed-option-array",
+        [None, Some(0_u64), Some(128), Some(u64::MAX)]
+    ));
+    push!(case("boxed-message", Box::new(message(128))));
+    push!(case(
+        "cow-unicode-text",
+        std::borrow::Cow::<'static, str>::Borrowed("é水🌍")
+    ));
+    push!(case("boxed-optional-blob", Box::new(Some(Blob(data(128))))));
+    push!(case("delivery-empty", Delivery::Empty));
+    push!(case(
+        "delivery-tuple",
+        Delivery::Chunk(128, Blob(data(128)), Some("next".into()))
+    ));
+    push!(case(
+        "delivery-record",
+        Delivery::Refused {
+            code: 429,
+            retry_after: Some(16_384)
         }
     ));
     assert!(selected.is_none_or(|s| s < index), "unknown case");

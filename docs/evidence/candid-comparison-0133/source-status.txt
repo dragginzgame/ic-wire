@@ -1,0 +1,21 @@
+ M .shared-tooling.snapshot
+ M AGENTS.md
+ M Cargo.lock
+ M Cargo.toml
+ M DRAGGINZGAME.md
+ M Makefile
+ M crates/ic-wire-benchmarks/drivers/fixtures/mod.rs
+ M crates/ic-wire/tests/native/mod.rs
+ M docs/development.md
+ M docs/evaluation.md
+ M docs/releases.md
+ M docs/stable-identities.md
+ M docs/status/current.md
+ M releases/core/CHANGELOG.md
+ M rules/agent-maintenance.md
+ M rules/changelogs.md
+ M rules/contributions.md
+ M rules/engineering-details.md
+ M scripts/ci/run-release.sh
+?? crates/ic-wire/tests/native/std_types/
+?? docs/evidence/upstream-20261101/

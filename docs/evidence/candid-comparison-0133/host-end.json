@@ -1,0 +1,14 @@
+{
+  "load_end": [
+    12.1875,
+    15.23583984375,
+    20.255859375
+  ],
+  "libc": "ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39",
+  "allocator_environment": {
+    "MALLOC_ARENA_MAX": null,
+    "MALLOC_TRIM_THRESHOLD_": null,
+    "MALLOC_MMAP_THRESHOLD_": null,
+    "GLIBC_TUNABLES": null
+  }
+}

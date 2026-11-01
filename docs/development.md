@@ -25,14 +25,14 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.73.2 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.73.3 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.73.2 without default features; the CLI feature is only enabled for installation.
+0.73.3 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
-Native endpoint/codec controls select Testkit 0.75.1; Build/Host retain the
-independently versioned 0.73.2 foundation.
+Native endpoint/codec controls select Testkit 0.75.2; Build/Host retain the
+independently versioned 0.73.3 foundation.
 
 Installation is explicit; checks install nothing. IC Wire selects only the
 reviewed common host and Cargo toolsets. Platform executables are not part of its
@@ -321,7 +321,7 @@ measurement and server setup.
 Run the aggregate `make check-benchmarks` for CLI/corpus correctness, lint and
 Rust 1.91 checks.
 This is not a performance regression gate. A full measured comparison is a
-separate run; the [current report](evidence/candid-comparison-0725/README.md)
+separate run; the [current report](evidence/candid-comparison-0133/README.md)
 records the latest full matrix. The [0.7.10 report](full-comparison-0710.md)
 retains its matched previous-release qualification; the current refresh is not
 a matched regression comparison against that older dependency/server graph.

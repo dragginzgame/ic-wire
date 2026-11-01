@@ -67,6 +67,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let name = case.map_or("valid", |index| names[index].as_str());
         let mut command = Command::new("rustc");
         command
+            // Direct rustc bypasses Cargo's target environment. Match the
+            // --crate-name below so Platform can scope native export symbols.
+            .env("CARGO_CRATE_NAME", "ui_contract")
             .args([
                 "--edition=2024",
                 "--crate-type=lib",

@@ -5,7 +5,8 @@
         feature = "toko",
         feature = "derive-scale",
         feature = "packed-i16",
-        feature = "bulk"
+        feature = "bulk",
+        feature = "byte-keys"
     ),
     expect(
         dead_code,
@@ -58,7 +59,8 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "derive-scale",
         feature = "packed-i16",
         feature = "bulk",
-        feature = "hotspots"
+        feature = "hotspots",
+        feature = "byte-keys"
     )))]
     assert!(cases.len() >= 100);
     #[cfg(feature = "bulk")]
@@ -81,7 +83,8 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "derive-scale",
         feature = "packed-i16",
         feature = "bulk",
-        feature = "hotspots"
+        feature = "hotspots",
+        feature = "byte-keys"
     )))]
     for length in [4096, 1_048_576] {
         let vector = cases

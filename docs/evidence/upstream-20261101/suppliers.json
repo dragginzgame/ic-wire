@@ -1,0 +1,62 @@
+{
+  "ic-build": {
+    "version": "0.73.3",
+    "checksum": "fbe5f9a066b805d5a1b5b839a4464364396e8418900d66413155d120f02ca8a2",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-host-artifacts": {
+    "version": "0.73.3",
+    "checksum": "46da95486e1320c8f82da99e187a55b9d59d26b25ab5928d13a782d53840edf6",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-host-fs": {
+    "version": "0.73.3",
+    "checksum": "b5f773e7bd36f9a471d78b903bdb28067cee40df70492f388732124a14f67b01",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-host-process": {
+    "version": "0.73.3",
+    "checksum": "6ccd602f2147d0795ad820ad9157ecafc51f59ebce5e85a589ae5f12a1e6b531",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-testkit": {
+    "version": "0.75.2",
+    "checksum": "78f815e709f8fdb2a4f1d806122ff2dea4bd555d2997dc075a699be835d32494",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-platform": {
+    "version": "0.15.3",
+    "checksum": "4b6912ffa33536abf388c40e9b32e36b2c3498b2846ee88951365bd1d7ee200b",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-platform-types": {
+    "version": "0.15.1",
+    "checksum": "de0b5a4e7dff6d2c8ec7a58e5673f7348a49e90232add1eb31fec0bba5f4252e",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-platform-macros": {
+    "version": "0.15.3",
+    "checksum": "c45b557958f0f359b8c64f10e8476a21f3e8cb1c36f9bf4ef9ea32f4954d2366",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-platform-runtime-guard": {
+    "version": "0.15.3",
+    "checksum": "34d0c2cda9fee3984746f300ae720710d4eb077df801ab77ca170c70bad1ea25",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  },
+  "ic-metrics": {
+    "version": "0.24.1",
+    "checksum": "744346d56fe0994acc3b39aed3e2139c62f91d4924d0b466a19cbb375c3d66ad",
+    "rust_version": "1.91.0",
+    "registry": "https://index.crates.io"
+  }
+}

@@ -1,0 +1,29 @@
+   Compiling ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.81s
+     Running `target/debug/examples/check-diagnostics /home/adam/projects/ic-wire/target/endpoint-check.TmutW5 --endpoint`
+11 expected diagnostics and passing control verified
+   Compiling syn v2.0.119
+   Compiling ic-platform-runtime-guard v0.16.0
+   Compiling ic-platform-macros v0.16.0
+   Compiling thiserror-impl v2.0.18
+   Compiling thiserror v2.0.18
+   Compiling cobs v0.3.0
+   Compiling ic-platform-types v0.15.1
+   Compiling postcard v1.1.3
+   Compiling ic-platform v0.16.0
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling ic-wire-endpoint-fixture v0.13.2 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `evaluation` profile [optimized] target(s) in 2.63s
+   Compiling ic-platform-runtime-guard v0.16.0
+   Compiling ic-platform-macros v0.16.0
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking thiserror v2.0.18
+    Checking cobs v0.3.0
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking ic-wire-endpoint-fixture v0.13.2 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.10s

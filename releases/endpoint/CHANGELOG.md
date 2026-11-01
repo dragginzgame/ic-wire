@@ -4,6 +4,22 @@ Covers ic-wire-endpoint. Its independent series begins at 0.1.0; pre-extraction
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.3.0]
+
+### ⚠️ Breaking
+
+- Adopt Platform 0.16.0 for typed entrypoints; align other application runtime
+  suppliers, including timers, rather than mixing 0.15/0.16 executor owners.
+  Keep canonical Types 0.15.1 and Core/derive identity, handler syntax, Wire bytes,
+  budgets, malformed-input acceptance and transaction/rollback rules unchanged.
+
+### 🩹 Fixed
+
+- Use Platform's crate-scoped native entrypoint symbols, allowing overlapping
+  method names from different canister libraries in one host process while
+  retaining the exact Wasm export names. Qualify installed admission, async
+  calls, reply failures and rollback with the supplying runtime.
+
 ## [0.2.1] - 2026-10-31
 
 ### ⬆️ Dependencies
