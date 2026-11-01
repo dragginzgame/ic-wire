@@ -1,0 +1,38 @@
+[
+  {
+    "name": "ic-platform",
+    "version": "0.16.0",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform@0.16.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  {
+    "name": "ic-platform-macros",
+    "version": "0.17.1",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-macros@0.17.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  {
+    "name": "ic-platform-runtime",
+    "version": "0.17.1",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime@0.17.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  {
+    "name": "ic-platform-runtime-guard",
+    "version": "0.17.1",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.17.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  {
+    "name": "ic-platform-types",
+    "version": "0.15.1",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.15.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  {
+    "name": "ic-platform-types",
+    "version": "0.16.0",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.16.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  }
+]

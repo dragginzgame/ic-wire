@@ -1,5 +1,5 @@
 //! Standalone consumer proof transferred from Platform commit 421edbc.
-use ic_platform::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -11,7 +11,7 @@ pub struct Request {
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(not(target_family = "wasm"), derive(ic_wire::Wire))]
 pub struct AccountRequest {
-    pub account: ic_platform::Account,
+    pub account: ic_platform_types::Account,
 }
 
 #[cfg(feature = "endpoint")]
@@ -35,8 +35,8 @@ mod tests {
     #[test]
     fn owned_identities_implement_the_consumers_wire_trait() {
         fn accepts<T: ic_wire::typescript::Wire>() {}
-        accepts::<ic_platform::Principal>();
-        accepts::<ic_platform::Account>();
+        accepts::<ic_platform_types::Principal>();
+        accepts::<ic_platform_types::Account>();
     }
 
     #[test]
@@ -113,7 +113,7 @@ mod tests {
 
     #[test]
     fn account_schema_and_frames_preserve_representation() {
-        use ic_platform::Account;
+        use ic_platform_types::Account;
         assert_eq!(
             typescript::native_schema::<Account>().unwrap(),
             serde_json::json!({
@@ -207,7 +207,7 @@ mod tests {
         // Build malformed field layouts with the canonical encoder. The fixed-array
         // subaccount has no length prefix; missing/extra elements must still refuse.
         let owner = serde_bytes::Bytes::new(&[4]);
-        let valid = ic_platform::Account::from(Principal::anonymous());
+        let valid = ic_platform_types::Account::from(Principal::anonymous());
         let mut cases = vec![
             (
                 "short subaccount",

@@ -5,6 +5,22 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.14.0]
+
+### ⚠️ Breaking
+
+- Align the optional Principal/Account schemas with canonical Types 0.16.
+  Consumers align their Types dependency or use the matching Platform 0.17
+  re-exports. Preserve Serde bytes, schemas, budgets, malformed-input acceptance
+  and exact retry/hash inputs; this is a Rust identity cut without a legacy lane.
+
+### 🧪 Testing
+
+- Qualify schemas against their canonical Types owner directly, independently of
+  the native qualification client's facade. Reject mixed DTO identities in the
+  composed Endpoint graph and prove a crypto-facade version change retains the
+  codec, schema and execution owners.
+
 ## [0.13.5] - 2026-11-01
 
 ### 🔧 Changed

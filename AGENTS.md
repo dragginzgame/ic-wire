@@ -36,8 +36,9 @@ also owns the release-receipt helper; no separate contribution snapshot remains.
 - The maintainer approved and requested implementation of the
   [stable identity boundary](docs/stable-identities.md): coordinated ic-wire/
   ic-wire-derive and one independently versioned ic-wire-endpoint package.
-  Platform 0.16.0 / Types 0.15.1 and IC Build 0.73.5 supply the current suppliers;
-  native qualification uses Testkit 0.76.0. Use the
+  Runtime 0.17.1 / Types 0.16.0 and IC Build 0.73.5 supply the selected owners;
+  native qualification retains Platform 0.16.0 / Testkit 0.76.1 solely for its
+  existing external client boundary. Use the
   explicit core/endpoint release groups with literal member versions and ledgers
   under releases/<group>/. Release/resume/publication require explicit group
   selection; no publication is authorized.
@@ -125,9 +126,10 @@ proposed syntax explicitly labeled until it compiles and passes its owning tests
 
 ## Independent Runtime adoption (#131)
 
-The pending Endpoint 0.4 selects `ic-platform-runtime` 0.17 directly. Core, derive
-and canonical Types remain independent. The facade stays available only for
+The pending Endpoint 0.4 selects published `ic-platform-runtime` 0.17.1 directly.
+Core 0.14 aligns its optional schemas with canonical Types 0.16. The facade stays available only for
 separately selected qualification clients and external Candid/crypto capabilities.
-Runtime/macros/exact guard publication precedes Endpoint and matching Timers
-adoption. Source/archive qualification uses harness-root supplier patches; refresh
-the registry lock after publication before merging/releasing this draft.
+Only the native qualification client retains facade 0.16 / Types 0.15; production
+Endpoint and standalone schema graphs share Types 0.16 with one Runtime guard.
+Use the registry lock without supplier patches. Coordinate matching Timers and
+Endpoint publication before applications; ordinary continuation does not publish.

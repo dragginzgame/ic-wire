@@ -16,7 +16,9 @@ excludes Candid, simulators, serde_json and host tooling. No source patch is nee
 The provenance helper fetched the exact release source from the canonical repo.
 All build outputs, failed preparations and delivery/publication evidence remain.
 
-Suppliers: Platform/macros/guard 0.16.0, Types 0.15.1, locked Testkit 0.76.1
+Published 0.13.5 suppliers were Platform/macros/guard 0.16.0 and Types 0.15.1.
+This pending integration selects Runtime/macros/guard 0.17.1 and DTO Types 0.16,
+with native qualification on facade 0.16 / locked Testkit 0.76.1
 (declared minimum 0.76.0), Build/Host 0.73.5 and Metrics 0.24.4. Shared 0.27.24 is
 exported at `1211262f32ea193cc4edcd60d2750baf1f1d6425` (119 payloads).
 Library defaults remain disabled; managed CLI setup is explicit. No sibling
@@ -41,27 +43,25 @@ Raw work remains `target/research-0135-writers`. Objectives are total uncompress
 Wasm and separate code-section bytes; consumer profiles remain consumer-owned.
 The complete release gate checks corpora but is not a fresh full performance matrix.
 
-## Prepared independent Runtime adoption (#41)
+## Registry Runtime / Types adoption in PR #41
 
-[Wire PR #41](https://github.com/dragginzgame/ic-wire/pull/41) supplies the Wire side
-of [Platform #131](https://github.com/dragginzgame/ic-platform/issues/131).
-The [prepared patch and evidence](../evidence/runtime-owner-017/README.md) select
-Runtime directly, keep the facade in qualification clients, and prove Core/derive/
-Types and execution identities survive a fake facade break. Endpoint/schema/
-diagnostics/Clippy, Rust 1.91 host/Wasm, Rust–TypeScript and installed transaction
-checks pass. A legacy embedded executor is rejected by its conflicting links owner.
-The 17-export / 178-case comparison passes 5,696 measured calls: all 3,204 paired
-samples, warmups included, have identical IC instruction and cycle counts. Total
-Wasm falls 88 bytes at opt-z and opt-3; code sections are unchanged.
-
-This proposal remains **isolated and undeployed**. Prepared suppliers are frozen
-at Platform `3a72f6f`: Runtime 0.17.0 / Types 0.15.1. Final registry observation
-at 14:13 UTC still finds Runtime absent, macros/guard 0.16.0 and Types 0.15.1.
-Publication and actual registry qualification block integration/merge/release.
-The announced supplier release includes Types 0.16: recheck its actual graph,
-align Core schemas and native Testkit/facade clients if required, and coordinate
-Timers before application adoption. Never ship the source-only qualification lock
-or a downstream patch. No wrappers, second schema trait or compatibility lane.
+Suppliers are now published: Runtime/macros/guard 0.17.1, Types 0.16 and facade
+0.17. The PR selects Runtime directly and adopts canonical Types 0.16 schemas.
+Pending ledgers classify Core 0.14 and Endpoint 0.4; own package versions are still
+0.13.5/0.3 during implementation and no new publication is performed.
+The [registry qualification](../evidence/registry-runtime-0171/README.md) records
+standalone schemas, exact Rust/browser bytes/refusals, MSRV host/Wasm, strict
+Clippy, compiler diagnostics, one DTO/runtime owner and legacy-guard refusal.
+Installed transaction/admission/rollback/async/dispatch checks pass.
+Production Wasm excludes the facade and host/native client dependencies. Native
+qualification deliberately keeps the matching facade 0.16 / Testkit client; its
+old Types do not implement or supply new DTO schemas. The crypto-only future
+facade fixture preserves Core/derive/DTO and execution identities.
+The matched 17-export / 178-case comparison passes 5,696 measured calls: all
+3,204 paired samples have identical IC instructions and cycle debits. Each profile
+adds 40 total Wasm bytes with unchanged code sections. Source, raw samples and
+artifacts are retained in the registry report. Source-only historical evidence is
+not a registry acceptance claim. Required hosted checks/reviews remain independent.
 
 ## Other open work and earlier evidence
 

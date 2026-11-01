@@ -13,7 +13,7 @@ primitive validation, resource limits and typed errors.
 | IC Wire | Encoding, bounds, derives, typed codec errors and TypeScript codecs |
 | IC Wire Endpoint package | Typed handlers connected to Platform through native Wire frames |
 | IC Wire optional platform-types feature | Host schemas for Platform's owned Principal/Account; Platform Types retains Serde ownership |
-| IC Platform | IC exports, query/update contexts and executor |
+| IC Platform Runtime | IC exports, query/update contexts and executor |
 | Consumer contract | Request/reply types, method identities and semantic validation |
 | Application/framework owner | Authentication, dispatch policy and final artifact admission |
 | Delivery owner | Retry decisions, exact retained bytes and effect recovery |
@@ -23,7 +23,7 @@ primitive validation, resource limits and typed errors.
 
 The core codec remains Wasm-safe and independent of platform and host tooling.
 The independent `platform-types` feature selects only `ic-platform-types` and
-host schema support. The independent `ic-wire-endpoint` package selects Platform
+host schema support. The independent `ic-wire-endpoint` package selects independent Platform Runtime
 CDK and uses its generator and executor. Core/derive and endpoint release groups
 can evolve separately; one codec and one schema trait remain.
 See [typed endpoints](endpoints.md). Browser transports remain consumer-owned. The unpublished

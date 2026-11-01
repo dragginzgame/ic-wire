@@ -1,35 +1,26 @@
 # Typed Wire endpoints
 
-Add the independent `ic-wire-endpoint` package in a standalone canister. It
-connects ordinary Serde handlers to published IC Platform 0.16.0's maintained
-query/update generator. The default Wire codec stays `no_std + alloc` and has no
-Platform dependency. The integration uses Platform's `std` runtime without Candid,
-Canic, an extra executor or a second encoding.
+The pending Endpoint 0.4 connects ordinary Serde handlers directly to published
+IC Platform Runtime 0.17.1. Core's default codec stays `no_std + alloc`; the
+optional Core 0.14 schemas use canonical Types 0.16. Production Endpoint uses one
+executor/guard and excludes the crypto facade, Candid and native client tooling.
 
-```toml
-[dependencies]
-ic-wire = "0.13.3"
-ic-wire-endpoint = "0.3.0"
-```
+Align application runtime suppliers, including Timers, before adopting Endpoint
+0.4. The exact guard rejects the legacy embedded Platform 0.16 executor. Direct
+low-level APIs move from `ic_platform::{cdk, executor, ic0}` to
+`ic_platform_runtime::{cdk, executor, ic0}`, with Runtime's `cdk` feature.
+Endpoint macros use their existing re-export and require no extra application
+dependency solely for the attribute. Select Types 0.16 directly for DTOs or use
+Platform 0.17's matching re-exports. Older facade Principal types do not gain a
+second Wire schema implementation.
 
-The example selects Core 0.13.3 / Endpoint 0.3.0 with Platform 0.16. Endpoint
-0.2.1 retains Platform 0.15. The [standalone fixture](../examples/endpoint/Cargo.toml)
-uses local workspace packages. Git releases and registry publication remain separate.
-
-Platform embeds its IC0 wrappers and executor. Endpoint 0.3 users must adopt
-Platform 0.16 throughout their application's runtime dependencies, including timer
-integrations; do not combine it with an older external executor. Cargo's singleton
-guard rejects conflicting runtime owners. Core-only Wire consumers need no runtime
-migration: canonical Principal/Account remain Types 0.15.1. The 0.16 native
-entrypoint names are crate-scoped; Cargo supplies that crate name automatically
-(direct rustc tools must match `CARGO_CRATE_NAME` to `--crate-name`). Wasm exports,
-handler declarations, frame bytes, method identities and Wire admission
-rules are unchanged; retained request/retry bytes remain valid. See
-[Platform's runtime migration](https://github.com/dragginzgame/ic-platform/blob/421edbc/docs/migration.md#embedded-ic0-and-executor).
-
-Platform scopes that Cargo guard to executor/runtime features. Native-only
-Platform dependencies can coexist without claiming another runtime; endpoint
-builds still select the guard and cannot mix executor owners.
+These changes are pending coordinated Core 0.14 / Endpoint 0.4 releases; package
+versions remain at their last published values during implementation. Wire frame
+bytes, method identities, bounds, acceptance, rollback and retained retry/hash
+inputs stay unchanged. The native qualification fixture deliberately keeps its
+older matching facade 0.16 / Testkit client, outside production Wasm and DTO
+schema graphs. It does not select a legacy executor. Source qualification uses
+registry suppliers without Cargo patches. See the [standalone fixture](../examples/endpoint/Cargo.toml).
 
 ```rust,ignore
 use ic_wire_endpoint::query;
@@ -163,15 +154,15 @@ fn admit() -> Result<(), String> {
 fn decode(bytes: Vec<u8>) -> Request {
     ic_wire_endpoint::decode_request(&bytes, METHOD_ID, REQUEST)
 }
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit", decode_with = "decode", manual_reply
 )]
 async fn entry(request: Request) {
     match existing_guarded_handler(request).await {
-        Ok(response) => ic_platform::cdk::api::msg_reply(
+        Ok(response) => ic_platform_runtime::cdk::api::msg_reply(
             ic_wire_endpoint::encode_response(&response, METHOD_ID, RESPONSE)
         ),
-        Err(access_error) => ic_platform::cdk::api::msg_reject(access_error.to_string()),
+        Err(access_error) => ic_platform_runtime::cdk::api::msg_reject(access_error.to_string()),
     }
 }
 ```

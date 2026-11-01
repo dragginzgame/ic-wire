@@ -118,6 +118,8 @@ impl<Request: crate::typescript::Wire, Response: crate::typescript::Wire>
 /// Platform paths used by generated entrypoints, including renamed Wire imports.
 #[doc(hidden)]
 pub mod __private {
+    // Select the independent execution owner instead of the crypto facade.
+    // Frames, budgets and transaction rules stay fixed; align executor suppliers.
     pub use ic_platform_runtime::cdk;
 }
 

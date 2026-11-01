@@ -9,6 +9,9 @@
 // Types 0.1 -> 0.15 changes Rust identity only. Consumers align suppliers on
 // this core minor; schema shapes, Serde bytes, budgets and refusals stay unchanged.
 
+// Types 0.15 -> 0.16 changes Rust identity, not schema or Serde bytes. Principal
+// remains bytes(max 29), Account owner then optional subaccount. Align consumers
+// on Types 0.16 (or a matching facade); no old-type implementation or shim.
 use crate::typescript::{GenerationError, SchemaContext, Wire};
 
 impl Wire for ic_platform_types::Principal {

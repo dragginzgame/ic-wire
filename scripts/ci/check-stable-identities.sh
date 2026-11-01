@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# Future-generation simulation only; published suppliers qualify the current lane.
+# Future crypto-facade simulation; the execution owner is held fixed.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
 out="$(mktemp -d "$root/target/stable-identities.XXXXXX")"
 printf 'Stable identity evidence: %s\n' "$out"
-cargo metadata --locked --offline --format-version 1 > "$out/workspace.json"
+cargo metadata --locked --offline --features ic-wire/platform-types --format-version 1 > "$out/workspace.json"
 python3 - "$root" "$out" <<'PY'
 from pathlib import Path
 import json,sys,shutil
 root,out=map(Path,sys.argv[1:]);m=json.loads((out/'workspace.json').read_text())
+wire=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire/Cargo.toml'))
+types_edge=next(d for n in m['resolve']['nodes'] if n['id']==wire['id'] for d in n['deps'] if d['name']=='ic_platform_types')
+types=next(p for p in m['packages'] if p['id']==types_edge['pkg'])
+types_selection=f'version = "={types["version"]}"' if types['source'] else f'path = "{Path(types["manifest_path"]).parent}"'
 endpoint=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire-endpoint/Cargo.toml'))
 client=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire-benchmarks/Cargo.toml'))
 dep=next(d for n in m['resolve']['nodes'] if n['id']==client['id'] for d in n['deps'] if d['name']=='ic_platform')
@@ -23,8 +27,8 @@ ep_major,ep_minor,_=map(int,endpoint['version'].split('.')); future_endpoint=f'{
 source=Path(p['manifest_path']).parent
 shutil.copytree(source,out/'next-platform')
 f=out/'next-platform/Cargo.toml';f.write_text(f.read_text().replace(f'version = "{p["version"]}"',f'version = "{future}"',1))
-# This prospective runtime generation changes only package identity. No claim
-# about an unpublished runtime implementation or its performance is made.
+# Change only the crypto facade identity, keeping execution and DTO identities.
+# Its crypto-only selection must not pull its historical Principal supplier.
 next_endpoint=out/'next-endpoint';shutil.copytree(root/'crates/ic-wire-endpoint/src',next_endpoint/'src')
 (next_endpoint/'Cargo.toml').write_text(f'''[workspace]
 [package]
@@ -57,7 +61,8 @@ endpoint = []
 [dependencies]
 ic-wire = {{ path = "{root}/crates/ic-wire", features = ["platform-types"] }}
 ic-wire-endpoint = {{ path = "{endpoint}", features = ["typescript"] }}
-ic-platform = {{ {platform}, default-features = false, features = ["principal"] }}
+ic-platform = {{ {platform}, default-features = false, features = ["blake3"] }}
+ic-platform-types = {{ {types_selection}, default-features = false }}
 serde = {{ version = "1", default-features = false, features = ["derive", "alloc"] }}
 [dev-dependencies]
 serde_bytes = "0.11"
@@ -90,5 +95,5 @@ for name in ['ic-platform','ic-wire-endpoint']:
  assert len(selections[0])==len(selections[1])==1 and selections[0]!=selections[1]
  ids[name]=dict(zip(['current','simulated-next'],selections))
 (out/'identities.json').write_text(json.dumps(ids,indent=2)+'\n')
-print('Codec/schema/derive and Principal/Account supplier IDs unchanged across simulated endpoint/runtime generation.')
+print('Codec/schema/derive and Principal/Account supplier IDs unchanged across simulated endpoint/crypto-facade generation.')
 PY

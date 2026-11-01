@@ -4,11 +4,11 @@ The maintainer approved this boundary for [#36](https://github.com/dragginzgame/
 on 2026-10-31 and requested implementation after Platform publication. It is now
 delivered and published as core 0.13.0 / Endpoint 0.2.0. The original prerequisite is
 supplied by registry Platform/Types 0.15 and IC Build 0.73.
-Endpoint 0.3.0 selects Platform 0.16.0 while retaining Types 0.15.1.
-Current tooling requirements are Build 0.73.3 and native Testkit 0.75.2. Its native-only Platform 0.15 dependency may coexist;
-production Wasm selects only the 0.16 runtime/guard. Align application runtime
-suppliers before adopting Endpoint 0.3; Core/derive identities stay fixed.
-No sibling checkout was modified.
+Pending Core 0.14 / Endpoint 0.4 selects canonical Types 0.16 and independent
+Runtime/macros/exact guard 0.17.1. Published Core 0.13.5 / Endpoint 0.3 remains the
+older qualified stack. The native qualification client keeps facade 0.16 and
+Testkit 0.76.1 for its external transport; those old identity types do not enter
+production Endpoint or schema DTO graphs. Build 0.73.5 remains selected.
 
 ## Owners and release groups
 
@@ -16,10 +16,10 @@ No sibling checkout was modified.
 | --- | --- | --- |
 | Codec, Limits/Error, framing, bounds and TypeScript schema trait | ic-wire | core |
 | Metadata derive and endpoint attribute generation | ic-wire-derive | core |
-| Principal/Account/Subaccount and Serde representation | ic-platform-types 0.15 | Platform-owned independent supplier |
+| Principal/Account/Subaccount and Serde representation | ic-platform-types 0.16 (pending Core 0.14) | Platform-owned independent supplier |
 | Principal/Account Wire schema implementations | ic-wire platform-types | core |
 | Contract, attributes, admission, trapping replies and CDK reexport | ic-wire-endpoint | endpoint |
-| Exports, executor and runtime singleton | ic-platform 0.16 (Endpoint 0.3) | Platform runtime |
+| Exports, executor and runtime singleton | ic-platform-runtime 0.17.1 (pending Endpoint 0.4) | Platform Runtime |
 | Typed client transport | IC Testkit | Tooling |
 | Measurement metadata | IC Metrics | Metrics |
 
@@ -28,8 +28,8 @@ types. Platform reexports the same definitions; there is no wrapper or orphan-ru
 workaround, Platform-to-Wire dependency, duplicate codec or compatibility lane.
 The core/derive group keeps its identity across endpoint changes that retain the
 Types supplier. An incompatible Types package version still requires core schema alignment. The
-prospective fixture holds Types fixed to prove Wire isolation, not to promise
-that upstream will retain that selection across its real releases.
+crypto-facade simulation holds Types/Runtime fixed to prove execution isolation;
+an actual Types change still requires Core schema alignment.
 Endpoint's attributes still use the existing derive package and default to the
 new facade path; metadata derives continue to target `ic_wire`.
 
@@ -46,15 +46,15 @@ malformed acceptance, sync/async rollback and original retry/hash inputs are unc
   `ic_wire::endpoint::query`/helpers with `ic_wire_endpoint::query`/helpers.
   Renamed endpoint imports use the existing `crate = "renamed"` option.
 - Select Endpoint's `typescript` feature for native Contract schema methods.
-- Keep `ic-wire/platform-types`; Platform 0.15/0.16 reexports or direct
-  `ic-platform-types` 0.15 imports. Schema identity is retained only while the
-  supplying Types version remains compatible.
-- Endpoint 0.3 requires Platform 0.16 for runtime owners, including timers;
-  do not mix 0.15 and 0.16 executors. Published Endpoint 0.2.1 remains on 0.15.
+- Keep `ic-wire/platform-types`; pending Core 0.14 supports direct Types 0.16
+  imports and Platform 0.17 re-exports. Do not expect old Types 0.15 DTOs to
+  implement the new Core schema trait.
+- Pending Endpoint 0.4 selects Runtime 0.17.1. Adopt matching Timers and other
+  execution suppliers together; legacy embedded executors are refused.
 - Metrics and typed Testkit callers align once on the supplying core minor;
   runtime-only Endpoint releases can subsequently retain those public identities.
 
-Published selections are Wire/Derive 0.13.0 and Endpoint 0.2.0. The 0.15 supplier alignment changes
+Published selections are Core/Derive 0.13.5 and Endpoint 0.3.0. The 0.15 supplier alignment changes
 Principal/Account Rust identity without changing their Serde implementation.
 Endpoint initially inherits its core dependency from the root workspace, so core
 release preparation updates that requirement before packaging the dependent endpoint.
@@ -74,7 +74,7 @@ with coordinated releases through 0.11.0 preserved once in `releases/history.md`
 No package paths, numeric versions, tags or historical scope were changed. The real
 adapter uses the shared group plan's exact files for metadata/source admission,
 receipts and post-commit checks. Group-specific tags/plans prevent collisions.
-The metadata editor is published IC Build 0.73.3 with `group-manifest`.
+The metadata editor is published IC Build 0.73.5 with `group-manifest`.
 
 ```sh
 make release-version RELEASE_GROUP=core
