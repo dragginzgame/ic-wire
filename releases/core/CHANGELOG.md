@@ -5,7 +5,7 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
-## [0.13.5]
+## [0.13.5] - 2026-11-01
 
 ### 🔧 Changed
 
