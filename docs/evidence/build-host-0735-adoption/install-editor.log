@@ -1,0 +1,7 @@
+Cargo tool setup: package=ic-build version=0.73.5 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.5 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=ic-build version=0.73.5 phase=lock-wait outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.5 phase=lock-wait outcome=passed elapsed=0s status=0
+Cargo tool setup: package=ic-build version=0.73.5 phase=cache-reuse outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.5 phase=cache-reuse outcome=passed elapsed=0s status=0
+/home/adam/projects/ic-wire/.tools/rust/selected-71b23e85bbd4d4bd1baad3c98c42fc64c338cbef4cc1c503047e55722ecf3515/bin/ic-build-release-metadata

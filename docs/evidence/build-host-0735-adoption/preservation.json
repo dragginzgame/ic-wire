@@ -1,0 +1,13 @@
+{
+  "incoming_lock_sha256": "51724f986a0abcbe49fc463f172428bbe7d8e1552c72bdef23b9e542397d8dbf",
+  "current_lock_sha256": "51724f986a0abcbe49fc463f172428bbe7d8e1552c72bdef23b9e542397d8dbf",
+  "editor_path": "/home/adam/projects/ic-wire/.tools/rust/selected-71b23e85bbd4d4bd1baad3c98c42fc64c338cbef4cc1c503047e55722ecf3515/bin/ic-build-release-metadata",
+  "editor_sha256": "589eabc6fbc9c2896136753b71f51fb8b13519b819ee53b44c624bb875f67f82",
+  "own_versions": {
+    "core": "0.13.3",
+    "endpoint": "0.3.0"
+  },
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+  "own_versions_verified": true,
+  "lock_preserved": true
+}

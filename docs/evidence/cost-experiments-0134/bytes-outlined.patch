@@ -1,0 +1,10 @@
+--- a/crates/ic-wire/src/native/encode/mod.rs
++++ b/crates/ic-wire/src/native/encode/mod.rs
+@@ -138,6 +138,7 @@
+         }
+         self.inner.serialize_str(value)
+     }
++    #[cfg_attr(target_arch = "wasm32", inline(never))]
+     fn serialize_bytes(self, value: &[u8]) -> Result<Self::Ok, Self::Error> {
+         if !self.budget.bytes(value.len()) {
+             return Err(ser::Error::custom("payload allocation allowance exceeded"));

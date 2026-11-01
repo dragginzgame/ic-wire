@@ -19,11 +19,11 @@ repository = "https://github.com/dragginzgame/ic-wire"
 [workspace.dependencies]
 # Core
 # Changelog : releases/core/CHANGELOG.md
-ic-wire = { path = "crates/ic-wire", version = "0.13.3" }
-ic-wire-benchmarks = { path = "crates/ic-wire-benchmarks", version = "0.13.3" }
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.13.3" }
-ic-wire-endpoint-fixture = { path = "examples/endpoint", version = "0.13.3" }
-ic-wire-qualification = { path = "crates/ic-wire-qualification", version = "0.13.3" }
+ic-wire = { path = "crates/ic-wire", version = "0.13.5" }
+ic-wire-benchmarks = { path = "crates/ic-wire-benchmarks", version = "0.13.5" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.13.5" }
+ic-wire-endpoint-fixture = { path = "examples/endpoint", version = "0.13.5" }
+ic-wire-qualification = { path = "crates/ic-wire-qualification", version = "0.13.5" }
 
 # Endpoint
 # Changelog : releases/endpoint/CHANGELOG.md
@@ -49,8 +49,8 @@ syn = { version = "3.0.9", features = ["visit"] }
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 dhat = "0.3.3"
-ic-build = { version = "0.73.3", default-features = false }
-ic-testkit = { version = "0.75.2", default-features = false }
+ic-build = { version = "0.73.5", default-features = false }
+ic-testkit = { version = "0.76.0", default-features = false }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"

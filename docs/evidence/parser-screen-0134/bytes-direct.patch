@@ -1,0 +1,18 @@
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -89,11 +89,12 @@
+     }
+     #[cfg_attr(target_arch = "wasm32", inline(always))]
+     fn bytes(&self, bytes: usize) -> bool {
+-        let Some(heap) = self.heap_units.get().checked_sub(bytes) else {
++        let heap = self.heap_units.get();
++        if heap < bytes {
+             self.refused.set(true);
+             return false;
+-        };
+-        self.heap_units.set(heap);
++        }
++        self.heap_units.set(heap - bytes);
+         true
+     }
+     fn error(&self) -> Error {

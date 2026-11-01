@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire-benchmarks"
-version = "0.13.3"
+version = "0.13.5"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -19,6 +19,8 @@ ic = ["ic-platform/pocket-ic"]
 toko = []
 # Focused ordinary-list/output-writer qualification, not a production mode.
 hotspots = []
+# Small paired regression corpus, never a production codec selection.
+cost-smoke = []
 # Explicit standard byte-array map keys versus unchanged fixed-array controls.
 byte-keys = []
 byte-keys-control = ["byte-keys"]

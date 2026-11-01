@@ -1,0 +1,3 @@
+Verified physical sizes, code-section lengths and SHA-256 for all eight raw modules
+Both baseline modules match the previously accepted cleanup byte-for-byte
+All baseline/candidate library and guest builds observed rebuilt; effective profiles match

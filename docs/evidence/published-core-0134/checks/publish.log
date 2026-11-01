@@ -1,0 +1,42 @@
+Publication selection evidence: /home/adam/projects/ic-wire/target/publication/selection.FGWBpc
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+Publication evidence: /home/adam/projects/ic-wire/target/publication/publish.selection.FGWBpc
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Packaging ic-wire-derive v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Blocking waiting for file lock on package cache
+    Updating crates.io index
+    Packaged 9 files, 31.2KiB (9.7KiB compressed)
+   Packaging ic-wire v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire)
+warning: ignoring example `bulk-lint` as `examples/bulk_lint/mod.rs` is not included in the published package
+warning: ignoring example `typescript-conformance` as `examples/typescript_conformance/mod.rs` is not included in the published package
+warning: ignoring test `borrowed` as `tests/borrowed/mod.rs` is not included in the published package
+warning: ignoring test `native` as `tests/native/mod.rs` is not included in the published package
+warning: ignoring test `runtime` as `tests/runtime/mod.rs` is not included in the published package
+warning: ignoring test `ui` as `tests/ui/mod.rs` is not included in the published package
+    Updating crates.io index
+    Packaged 28 files, 209.0KiB (57.3KiB compressed)
+   Verifying ic-wire-derive v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-wire-derive v0.13.4 (/home/adam/projects/ic-wire/target/package/ic-wire-derive-0.13.4)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.51s
+   Verifying ic-wire v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling ic-wire v0.13.4 (/home/adam/projects/ic-wire/target/package/ic-wire-0.13.4)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+   Uploading ic-wire-derive v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Uploaded ic-wire-derive v0.13.4 to registry `crates-io`
+note: waiting for ic-wire-derive v0.13.4 to be available at registry `crates-io`.
+      1 remaining crate to be published
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Published ic-wire-derive v0.13.4 at registry `crates-io`
+   Uploading ic-wire v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Uploaded ic-wire v0.13.4 to registry `crates-io`
+note: waiting for ic-wire v0.13.4 to be available at registry `crates-io`
+help: you may press ctrl-c to skip waiting; the crate should be available shortly
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Published ic-wire v0.13.4 at registry `crates-io`

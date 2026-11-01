@@ -1,0 +1,9 @@
+cohort,profile,operation,cases,wire_wins,ties,candid_wins,max_wire_over_candid
+"baseline","evaluation","encode-fresh",20,17,0,3,49.89265314389884
+"baseline","evaluation","decode-owned-or-labelled-borrowed",20,19,0,1,1.689918372845171
+"baseline","benchmark-speed","encode-fresh",20,17,0,3,32.826937252157684
+"baseline","benchmark-speed","decode-owned-or-labelled-borrowed",20,19,0,1,1.3491119838793644
+"admission-linear","evaluation","encode-fresh",20,17,0,3,49.89265314389884
+"admission-linear","evaluation","decode-owned-or-labelled-borrowed",20,19,0,1,1.689918372845171
+"admission-linear","benchmark-speed","encode-fresh",20,17,0,3,32.826937252157684
+"admission-linear","benchmark-speed","decode-owned-or-labelled-borrowed",20,19,0,1,1.3491119838793644

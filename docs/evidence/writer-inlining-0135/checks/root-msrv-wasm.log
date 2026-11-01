@@ -1,0 +1,3 @@
+   Compiling ic-wire-derive v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-wire v0.13.4 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.85s

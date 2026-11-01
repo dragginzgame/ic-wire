@@ -1,0 +1,9 @@
+cohort,profile,codec,total_bytes,code_section_bytes,sha256
+"baseline","evaluation","wire",94193,81742,"f4772928de2e3d34fbd3f348b835dead8bf7eb0978bc4a6e4456613179ef8563"
+"baseline","evaluation","candid",402762,367085,"d82b93f26946c22bcf32d3d3f981660353da2826e71c27bdef07f8d16b18b583"
+"baseline","benchmark-speed","wire",121096,109653,"6141bc3864af1cc871f5bcaf8b2a45d0282c9c13a988f7360b4790e483bfc798"
+"baseline","benchmark-speed","candid",624858,590483,"726e245754543506d224e22bdab8d70b2a479a893305191be2d3ab3e9cb4cc60"
+"output-inline","evaluation","wire",93759,81310,"eebfc3ff646060f75f578aae897da0968a7b35a9a1f1f584806aec6809c55e4f"
+"output-inline","evaluation","candid",402634,366958,"8d440cca084f1aab5c09d6653e25f92b719716fed306cc8f6414a427f6349bfc"
+"output-inline","benchmark-speed","wire",120667,109226,"7623a4d27b6f5d715130bfa61fdda9fc9dbcd8cef0be480c24bd5acf57c4854c"
+"output-inline","benchmark-speed","candid",624858,590483,"726e245754543506d224e22bdab8d70b2a479a893305191be2d3ab3e9cb4cc60"

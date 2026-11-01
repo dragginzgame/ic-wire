@@ -16,7 +16,7 @@ ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
 endif
-RELEASE_EDITOR_VERSION := 0.73.3
+RELEASE_EDITOR_VERSION := 0.73.5
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -79,16 +79,26 @@ check-benchmarks:
 	+@$(MAKE) check-consumer-benchmarks
 
 .PHONY: check-benchmark-cli
-check-benchmark-cli:
+check-benchmark-cli: check-codec-costs-tests
 	+@node scripts/ci/check-benchmark-cli.mjs
+
+.PHONY: check-codec-costs check-codec-costs-tests
+export CODEC_BASELINE_DIR CODEC_CANDIDATE_DIR
+check-codec-costs-tests:
+	+@node scripts/ci/check-codec-costs.test.mjs
+
+# Data-only admission: measurement/server preparation remains explicit.
+check-codec-costs:
+	@test -n "$${CODEC_BASELINE_DIR:-}" && test -n "$${CODEC_CANDIDATE_DIR:-}" || { echo 'Set CODEC_BASELINE_DIR and CODEC_CANDIDATE_DIR to completed matched runs' >&2; exit 2; }
+	+@node scripts/ci/check-codec-costs.mjs "$$CODEC_BASELINE_DIR" "$$CODEC_CANDIDATE_DIR"
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
+	+@for corpus in cost-smoke byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
 	    cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --test roundtrip && \
 	    cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
+	+@for corpus in cost-smoke byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" && \
 	    RUSTUP_TOOLCHAIN=1.91.0 cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
@@ -146,6 +156,7 @@ help:
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
 		'Qualification: check-platform-types (standalone Principal/Account, MSRV and feature isolation)' \
 		'Evaluation: evaluate-codecs / evaluate-codec-matrix (timing, heap, Wasm, explicit PocketIC)' \
+		'Qualification: check-codec-costs CODEC_BASELINE_DIR=... CODEC_CANDIDATE_DIR=... (completed evidence only)' \
 		'Qualification: check-benchmarks (comparison corpus, lint and MSRV)' \
 		'Evaluation: evaluate-allocation (borrowing, buffers and bounded/packed layouts)' \
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \

@@ -1,0 +1,13 @@
+{
+  "old": "0.75.2",
+  "new": "0.76.0",
+  "registry_checksum": "5c9e84475c2c4a85466848d36694882cbeb3d1732819871acc3900d93862dde7",
+  "vcs": {
+    "git": {
+      "sha1": "2973946c6f7dc13552af78f887d5e2a8dbf37a61"
+    },
+    "path_in_vcs": "crates/ic-testkit"
+  },
+  "rust_files_compared": 28,
+  "changed_rust_source": []
+}

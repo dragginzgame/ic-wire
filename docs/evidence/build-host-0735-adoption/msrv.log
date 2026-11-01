@@ -1,0 +1,6 @@
+    Checking ic-wire-qualification v0.13.3 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Checking ic-host-artifacts v0.73.5
+    Checking ic-host-fs v0.73.5
+    Checking ic-host-process v0.73.5
+    Checking ic-build v0.73.5
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.87s

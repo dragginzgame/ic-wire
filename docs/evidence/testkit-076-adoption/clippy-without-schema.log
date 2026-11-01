@@ -1,0 +1,40 @@
+    Checking ic-wire-benchmarks v0.13.3 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling ic-wire-derive v0.13.3 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.3 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-testkit v0.76.0
+    Checking ic-wire-endpoint v0.3.0 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking ic-wire-endpoint-fixture v0.13.3 (/home/adam/projects/ic-wire/examples/endpoint)
+error[E0599]: no method named `request_schema` found for struct `ic_wire_endpoint::Contract<Request, Response>` in the current scope
+   --> examples/endpoint/src/lib.rs:211:26
+    |
+211 |             DEFAULT_BLOB.request_schema().unwrap(),
+    |                          ^^^^^^^^^^^^^^ method not found in `ic_wire_endpoint::Contract<ic_wire::ByteBuf, ic_wire::ByteBuf>`
+
+error[E0599]: no method named `response_schema` found for struct `ic_wire_endpoint::Contract<Request, Response>` in the current scope
+   --> examples/endpoint/src/lib.rs:215:26
+    |
+215 |             DEFAULT_BLOB.response_schema().unwrap(),
+    |                          ^^^^^^^^^^^^^^^ method not found in `ic_wire_endpoint::Contract<ic_wire::ByteBuf, ic_wire::ByteBuf>`
+
+error[E0599]: no method named `request_schema` found for struct `ic_wire_endpoint::Contract<Request, Response>` in the current scope
+   --> examples/endpoint/src/lib.rs:216:26
+    |
+216 |             DEFAULT_BLOB.request_schema().unwrap()
+    |                          ^^^^^^^^^^^^^^ method not found in `ic_wire_endpoint::Contract<ic_wire::ByteBuf, ic_wire::ByteBuf>`
+
+error[E0599]: no method named `request_schema` found for struct `ic_wire_endpoint::Contract<Request, Response>` in the current scope
+   --> examples/endpoint/src/lib.rs:252:28
+    |
+252 |             COUNT_CONTRACT.request_schema().unwrap(),
+    |                            ^^^^^^^^^^^^^^ method not found in `ic_wire_endpoint::Contract<(), u64>`
+
+error[E0599]: no method named `response_schema` found for struct `ic_wire_endpoint::Contract<Request, Response>` in the current scope
+   --> examples/endpoint/src/lib.rs:256:25
+    |
+256 |             ASYNC_QUERY.response_schema().unwrap(),
+    |                         ^^^^^^^^^^^^^^^ method not found in `ic_wire_endpoint::Contract<u64, (u64, bool)>`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `ic-wire-endpoint-fixture` (lib test) due to 5 previous errors
+warning: build failed, waiting for other jobs to finish...

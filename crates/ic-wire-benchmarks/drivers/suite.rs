@@ -6,7 +6,8 @@
         feature = "derive-scale",
         feature = "packed-i16",
         feature = "bulk",
-        feature = "byte-keys"
+        feature = "byte-keys",
+        feature = "cost-smoke"
     ),
     expect(
         dead_code,
@@ -213,7 +214,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "samples":samples,"minimum_batch_ms":millis,"case_count":cases.len(),"compiler":command("rustc", &["-vV"]),
         "host":command("uname", &["-a"]),"git_head":command("git", &["rev-parse","HEAD"]),
         "git_status":command("git", &["status","--short"]),"lock_sha256":hash(include_bytes!("../../../Cargo.lock")),
-        "fixture_sha256":hash(include_bytes!("fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("fixtures/scale/mod.rs")),"runner_sha256":hash(include_bytes!("suite.rs")),
+        "workspace_manifest_sha256":hash(include_bytes!("../../../Cargo.toml")),"byte_keys_fixture_sha256":hash(include_bytes!("fixtures/byte_keys/mod.rs")),"cost_smoke_fixture_sha256":hash(include_bytes!("fixtures/cost_smoke/mod.rs")),"fixture_sha256":hash(include_bytes!("fixtures/mod.rs")),"hotspots_fixture_sha256":hash(include_bytes!("fixtures/hotspots/mod.rs")),"bulk_fixture_sha256":hash(include_bytes!("fixtures/bulk/mod.rs")),"packed_i16_fixture_sha256":hash(include_bytes!("fixtures/packed_i16/mod.rs")),"toko_fixture_sha256":hash(include_bytes!("fixtures/toko/mod.rs")),"derive_fixture_sha256":hash(include_bytes!("fixtures/scale/mod.rs")),"runner_sha256":hash(include_bytes!("suite.rs")),
         "executable_sha256":hash(&fs::read(std::env::current_exe()?)?),
         "native_executable_bytes":fs::metadata(std::env::current_exe()?)?.len(),
         "cpu_info":fs::read_to_string("/proc/cpuinfo").ok(),

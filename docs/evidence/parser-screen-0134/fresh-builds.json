@@ -1,0 +1,234 @@
+[
+  {
+    "variant": "baseline",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "baseline",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "bytes-direct",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "bytes-direct",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "buffer-shared",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "buffer-shared",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "varint-tail",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "varint-tail",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  }
+]

@@ -1,0 +1,26 @@
+--- a/crates/ic-wire/src/native/parser/mod.rs
++++ b/crates/ic-wire/src/native/parser/mod.rs
+@@ -90,6 +90,11 @@
+         if first < 128 {
+             return Ok(first as u32);
+         }
++        self.try_take_varint_u32_tail(first)
++    }
++
++    #[cfg_attr(target_arch = "wasm32", inline(never))]
++    fn try_take_varint_u32_tail(&mut self, first: u8) -> Result<u32> {
+         let mut out = (first & 0x7f) as u32;
+         for i in 1..varint_max::<u32>() {
+             let val = self.flavor.pop()?;
+@@ -121,6 +126,11 @@
+         if first < 128 {
+             return Ok(first as u64);
+         }
++        self.try_take_varint_u64_tail(first)
++    }
++
++    #[cfg_attr(target_arch = "wasm32", inline(never))]
++    fn try_take_varint_u64_tail(&mut self, first: u8) -> Result<u64> {
+         let mut out = (first & 0x7f) as u64;
+         for i in 1..varint_max::<u64>() {
+             let val = self.flavor.pop()?;

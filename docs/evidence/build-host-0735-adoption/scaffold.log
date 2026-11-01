@@ -1,0 +1,6 @@
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+npm root declarations passed: examples/browser (Node 24.21.0; npm 12.2.0; resolution and runtime qualification remain consumer-owned)
+dependency pins passed (declarations and tracked lockfiles; runtime qualification remains consumer-owned)
+Cargo dependency boundaries passed.
+shared-tooling snapshot verified: 119 file(s), version 0.27.24 (1211262f32ea193cc4edcd60d2750baf1f1d6425)

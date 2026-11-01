@@ -22,3 +22,4 @@ bulk-control-100|bulk-scale,bulk-baseline|wire-bounded
 hotspots|hotspots|wire-native
 byte-keys|byte-keys|wire-native
 byte-keys-control|byte-keys-control|wire-native
+cost-smoke|cost-smoke|wire-native

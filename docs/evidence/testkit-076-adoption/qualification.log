@@ -1,0 +1,4 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+Testkit adoption: caller Clippy, Rust 1.91, host/Wasm isolation and installed endpoint qualification passed.

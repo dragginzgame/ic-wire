@@ -1,0 +1,24 @@
+[
+  {
+    "package": "ic-wire-derive",
+    "version": "0.13.4",
+    "sha256": "4149ece53397d91790da342bca0605061b0339818d5eb4fa25329dc715b6a467",
+    "vcs": {
+      "git": {
+        "sha1": "f83755b30f76704105164e163b9334310e106e44"
+      },
+      "path_in_vcs": "crates/ic-wire-derive"
+    }
+  },
+  {
+    "package": "ic-wire",
+    "version": "0.13.4",
+    "sha256": "0192cb6194c998c081fdc20cb12da9a9a3c73216fc09b14a9e0110f0a543f9b6",
+    "vcs": {
+      "git": {
+        "sha1": "f83755b30f76704105164e163b9334310e106e44"
+      },
+      "path_in_vcs": "crates/ic-wire"
+    }
+  }
+]

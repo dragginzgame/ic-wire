@@ -12,12 +12,13 @@ pub(crate) struct Output {
 }
 impl Flavor for Output {
     type Output = Vec<u8>;
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
         if self.bytes.len() == self.limit {
             return Err(postcard::Error::SerializeBufferFull);
         }
         self.bytes.push(byte);
-        Ok(())
+        Ok(()) // Inline instead of compiler-chosen calls on Wasm; bytes/limits/retries stay unchanged.
     }
     fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
         if bytes.len() > self.limit - self.bytes.len() {

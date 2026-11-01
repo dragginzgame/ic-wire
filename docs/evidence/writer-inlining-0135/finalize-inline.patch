@@ -1,0 +1,10 @@
+--- a/crates/ic-wire/src/contract/mod.rs
++++ b/crates/ic-wire/src/contract/mod.rs
+@@ -26,6 +26,7 @@
+         self.bytes.extend_from_slice(bytes);
+         Ok(())
+     }
++    #[cfg_attr(target_arch = "wasm32", inline(always))]
+     fn finalize(self) -> postcard::Result<Self::Output> {
+         Ok(self.bytes)
+     }

@@ -1,8 +1,8 @@
 # Shared Tooling snapshot v1
-# version	0.27.23
+# version	0.27.24
 format	1
 source	https://github.com/dragginzgame/shared-tooling
-revision	619d194875369e0f72b45477b66adb430acbf6b7
+revision	1211262f32ea193cc4edcd60d2750baf1f1d6425
 # entrypoint	make/consumer.mk
 # entrypoint	.githooks/pre-commit
 # entrypoint	scripts/ci/check-documentation-links.pl
@@ -83,15 +83,15 @@ file	100ec624bbd1c8bcd6b3b73cfaa23742ad8bc05b920c0908ca0f93ad5defd392	x	scripts/
 file	40f31a19d6115411ebffe7c26e3ed30b8af7eead10dd4830de8d5a9312291222	x	scripts/ci/read-cargo-workspace-version.sh
 file	b9406061ebc1765ab9552b8e5d1bbd43e3d468fde11063f2046867a58ce77254	-	.github/actions/prepare-rust-toolchains/action.yml
 file	26a269c0e63125e8bd939578a64a6a67dbc5280cd3fbfd7da8b9c8e4d44cc6d5	-	.github/actions/retain-failure-evidence/action.yml
-file	045cd7dc967260d6cdc3be831244c3ccaa4be8d81ada99d62576649f4b0aaa1c	-	DRAGGINZGAME.md
-file	222e7517f39edbc6d2a20d1928b18503074f1ded6161217ab4629e0af90f3826	-	rules/contributions.md
-file	12b41c5b4a9329dbefc080f466ed87ce3bdcdce2e44f5f34523e8d867c30cdd2	-	rules/changelogs.md
+file	f7a0333ad10b091d4000e21cf72f1ba2a29c20ba218e42047103b2e9e75a60d8	-	DRAGGINZGAME.md
+file	6cbec75d346a06e90e3fc20a774aba7e735988ba7ef48c629166c687ccef6023	-	rules/contributions.md
+file	81921b5057cf9e48bbc332d616371709df471db7ef4303339a13b81fc58c49e8	-	rules/changelogs.md
 file	6c25fe09f631d92a88d8ebb62cc20279f57f43a753d3a19dc254bb6ff0433b76	-	rules/change-reporting.md
 file	7e7baf2e5ad9d5b701879602442ee7d10759d17800fbb18cbbd4378a8700d6af	-	rules/cargo-dependencies.md
 file	55bdaa6dc1086407fe54f92e7c0482a5e282d8b56001ef62509dcd87c0250195	-	rules/rust-workspaces.md
 file	b0b4c00e2183a787791314f21d33d270b8003a1ec67286ce8a681b028214ff75	-	rules/dependency-pinning.md
 file	c957bb6465df829fa7aea4c8bdb9e7200bf5dd7f17776c0d57fcdf23eba634c3	-	rules/git-hooks.md
-file	2c869bf905e6d0ecce1787eb21aa8e040d5d054f25d4b712a4e0499fafc9f338	-	rules/agent-maintenance.md
+file	5c021f93dbc6ae08e8856ed594ee6f3e2a30d591f47ddb64381546b1246648dd	-	rules/agent-maintenance.md
 file	eff485d42b3a61da174ee7c3bb8257dccfc8753e6bf66f07290a78a67cc3edc2	-	tasks/README.md
 file	eb2419a5762a3cb02f25811d93becb6b18ca520df0bc3448ea35dfa187a034b4	-	tasks/cargo-machete.md
 file	b20211ec1c39ef262c8ab266b207db43c44cd1474acde18297586590c7885810	-	tasks/msrv.md
@@ -112,7 +112,7 @@ file	52628e3c08d8c1ac8e258d34ea102daa81253fe78448d5afe406b52e247610d3	-	audits/f
 file	ffdca09602c44c8aff8fc2a17588b20eb6a56e2e71fb6d42ad75087fdd65819b	-	audits/complexity-and-technical-debt.md
 file	1b64cf2ba0393ab329ec29eb05a696d47ef5933f5ab9bff6e1fe4a7e7b294075	-	audits/module-surface-hardening.md
 file	090d05318e8114ea3e3ba789620a8f3ac638d43b2aad2f4e90a69e69b6d1f6f8	-	audits/module-cleanup.md
-file	b8b7de88f347bdc42da5c36f7c832f0c6aba0f25999e49d121e1c22e2c83661a	-	docs/releases.md
+file	fe792c581acad48014bad736c96edc810e1f23448c48b912c04276cf775a6726	-	docs/releases.md
 file	ffdcce5cf9c3871d45a6a7da24b38851ffd233729faacea4c3d1a5cc4305beac	x	scripts/ci/run-release.sh
 file	07ff21bc90ad9d9882be78d38af9f659d2e13d1a1e5e5208ed540f93bcfcdfaf	-	scripts/ci/release-pr.sh
 file	9e32385247296ce95d2b15b1290c64e6b6dff15716c1c139f21ab5e5128f4be3	x	scripts/ci/check-make-execution.sh
@@ -158,7 +158,7 @@ file	c8693a4bc058f31c1592c86e7037f0ed02a9719a8a0269038e0a45e16ca93c0b	-	scripts/
 file	31c47b675fba90850681c6fac0d685def34b08a68e7e05bc55ae0403419fdf82	x	scripts/dev/prepare-rust-toolchain.sh
 file	172ab2415f4816bdad7955720ef45445b4bd81283c928d7ef2ee3de9064b69b5	x	scripts/ci/collect-tool-evidence.sh
 file	d517344568e02a638cd19b99bfbcc63f000a0cf1df7b7713f901f52518b1e2ee	x	scripts/ci/formatting-evidence.sh
-file	84448d47c9e27406c3bdd131979393ae997cd857e73af9e8c2b7dc6010fc7428	-	rules/engineering-details.md
+file	c8b9339749abb1a695e64644857f3ebcda49f3100f3862925e6f47c107921522	-	rules/engineering-details.md
 file	e3aed908dd9b08bf93255328bb056bed57298dab39944e3726aad2726548e653	-	rules/rpc-budgets.md
 file	c96e7f919c1f0b88155316f79567438fd5e1fc0c07a31b308170dbc8adf91b11	-	docs/node-tools.md
 file	18240ae231c3056bab5c535f25534dcd5ec0ac65d8d431e88fc3b174c66f2fce	x	scripts/ci/check-release-tag.sh

@@ -1,0 +1,542 @@
+[
+  {
+    "variant": "baseline",
+    "context": "100-types",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "baseline",
+    "context": "100-types",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "owned-slice",
+    "context": "100-types",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "owned-slice",
+    "context": "100-types",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "output-inline",
+    "context": "100-types",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "output-inline",
+    "context": "100-types",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "push-inline",
+    "context": "100-types",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "push-inline",
+    "context": "100-types",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "extend-inline",
+    "context": "100-types",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "extend-inline",
+    "context": "100-types",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "finalize-inline",
+    "context": "100-types",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "finalize-inline",
+    "context": "100-types",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive-scale",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "baseline",
+    "context": "smoke",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cost-smoke",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "baseline",
+    "context": "smoke",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cost-smoke",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "output-inline",
+    "context": "smoke",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cost-smoke",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "output-inline",
+    "context": "smoke",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cost-smoke",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "push-inline",
+    "context": "smoke",
+    "profile": "evaluation",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "z",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cost-smoke",
+        "wire"
+      ]
+    }
+  },
+  {
+    "variant": "push-inline",
+    "context": "smoke",
+    "profile": "benchmark-speed",
+    "ic_wire": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": []
+    },
+    "codec-wasm": {
+      "rebuilt": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cost-smoke",
+        "wire"
+      ]
+    }
+  }
+]

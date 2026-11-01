@@ -1,0 +1,23 @@
+--- a/crates/ic-wire/src/native/mod.rs
++++ b/crates/ic-wire/src/native/mod.rs
+@@ -73,15 +73,14 @@
+         if self.refused.get() {
+             return false;
+         }
+-        let Some(nodes) = self.nodes.get().checked_sub(count) else {
+-            self.refused.set(true);
+-            return false;
+-        };
+-        if depth > self.depth || !self.bytes(size) {
++        let nodes = self.nodes.get();
++        let heap = self.heap_units.get();
++        if nodes < count || depth > self.depth || heap < size {
+             self.refused.set(true);
+             return false;
+         }
+-        self.nodes.set(nodes);
++        self.heap_units.set(heap - size);
++        self.nodes.set(nodes - count);
+         true
+     }
+     #[cfg_attr(target_arch = "wasm32", inline(always))]

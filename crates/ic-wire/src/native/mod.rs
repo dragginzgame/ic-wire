@@ -69,19 +69,22 @@ impl Budget {
         self.enter_many(depth, size, 1)
     }
     #[cfg_attr(target_arch = "wasm32", inline(always))]
+    // Previously nested checked subtraction committed the heap through bytes().
+    // Check both original allowances, then commit the same heap/node debits.
+    // Sticky refusal, depth/overflow rejection, bytes and acceptance are unchanged;
+    // consumers need no migration and retained retry/hash inputs remain valid.
     fn enter_many(&self, depth: usize, size: usize, count: usize) -> bool {
         if self.refused.get() {
             return false;
         }
-        let Some(nodes) = self.nodes.get().checked_sub(count) else {
-            self.refused.set(true);
-            return false;
-        };
-        if depth > self.depth || !self.bytes(size) {
+        let nodes = self.nodes.get();
+        let heap = self.heap_units.get();
+        if nodes < count || depth > self.depth || heap < size {
             self.refused.set(true);
             return false;
         }
-        self.nodes.set(nodes);
+        self.heap_units.set(heap - size);
+        self.nodes.set(nodes - count);
         true
     }
     #[cfg_attr(target_arch = "wasm32", inline(always))]
