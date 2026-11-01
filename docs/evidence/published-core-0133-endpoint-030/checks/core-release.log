@@ -1,0 +1,1291 @@
+Release 0.13.2 -> 0.13.3 on main via origin: validate, prepare, stage, commit/tag, atomic push
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --preflight
+make --no-print-directory install-host-tools
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env"
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory install-rust-tools
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env"
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=source-preparation outcome=passed elapsed=7s status=0
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=selection-reuse outcome=passed elapsed=0s status=0
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=selection-reuse outcome=passed elapsed=0s status=0
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+Cargo tool setup: package=ic-build version=0.73.3 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.3 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=ic-build version=0.73.3 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.3 phase=selection-reuse outcome=passed elapsed=0s status=0
+/home/adam/projects/ic-wire/.tools/rust/selected-c6f8832ae673598499f07886f51090281433bc8f4f1bff446eea60b910e01b3e/bin/ic-build-release-metadata
+make --no-print-directory host-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory rust-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+/home/adam/projects/ic-wire/.tools/rust/selected-c6f8832ae673598499f07886f51090281433bc8f4f1bff446eea60b910e01b3e/bin/ic-build-release-metadata
+Validation logs and timings: /home/adam/projects/ic-wire/.git/release-state/ic-wire-0.13.3/validation/validation.TPqNC4
+
+==> ci
+Validation logs and timings: /home/adam/projects/ic-wire/.git/release-state/ic-wire-0.13.3/validation/validation.Ky6PBr
+
+==> tools-check
+make --no-print-directory host-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory rust-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+/home/adam/projects/ic-wire/.tools/rust/selected-c6f8832ae673598499f07886f51090281433bc8f4f1bff446eea60b910e01b3e/bin/ic-build-release-metadata
+
+==> lint
+    Checking ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
+
+==> shared-tooling-check
+shared-tooling snapshot verified: 119 file(s), version 0.27.23 (619d194875369e0f72b45477b66adb430acbf6b7)
+
+==> check-pins
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+npm root declarations passed: examples/browser (Node 24.21.0; npm 12.2.0; resolution and runtime qualification remain consumer-owned)
+dependency pins passed (declarations and tracked lockfiles; runtime qualification remains consumer-owned)
+
+==> check-boundary
+Cargo dependency boundaries passed.
+
+==> check-doc-links
+[OK] 22 local references across 4 documents.
+[OK] 339 local references across 34 documents.
+
+==> check-tooling
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+Local Make routing, release routing and native formatting hook passed (disposable Git fixture).
+
+==> check-release
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+    Blocking waiting for file lock on package cache
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+    Blocking waiting for file lock on package cache
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+fixture-gates.mk:3: warning: overriding recipe for target 'release-editor-check'
+Makefile:48: warning: ignoring old recipe for target 'release-editor-check'
+fixture-gates.mk:5: warning: overriding recipe for target 'install-tools'
+make/tools.mk:29: warning: ignoring old recipe for target 'install-tools'
+fixture-gates.mk:5: warning: overriding recipe for target 'tools-check'
+make/tools.mk:36: warning: ignoring old recipe for target 'tools-check'
+fixture-gates.mk:7: warning: overriding recipe for target 'ci'
+Makefile:203: warning: ignoring old recipe for target 'ci'
+fixture-gates.mk:10: warning: overriding recipe for target 'release-push-check'
+Makefile:239: warning: ignoring old recipe for target 'release-push-check'
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+Local release passed: dirty/conflicting source refusal, retained failed validation, exact metadata/tag/push, resume and receipt rejection; no publication.
+
+==> fmt-check
+Checking formatting inputs... changed (0.25s)
+Manifest sorting [.]... ok (0.01s)
+Rust formatting [.]... ok (0.16s)
+Recording formatting result... stable inputs (0.25s)
+
+==> check
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.52s
+
+==> test
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.42s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire-abf975165c2a7178)
+
+running 4 tests
+test native::header_admission_tests::pre_copy_header_agrees_with_complete_frame_admission ... ok
+test native::tests::automatic_method_identity_vectors_and_frame ... ok
+test packed::tests::endian_append_matches_wire_bytes ... ok
+test native::tests::allocation_units_match_byte_accounting_at_remainders_and_overflow ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/borrowed/mod.rs (target/debug/deps/borrowed-e212b0aeb92dbd45)
+
+running 6 tests
+test borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input ... ok
+test encoding_and_sizing_do_not_require_a_decoder ... ok
+test newtype_variants_borrow_with_derived_metadata ... ok
+test lifetime_derives_cover_enums_nested_containers_bounds_and_name_collisions ... ok
+test owned_and_borrowed_leaves_agree_on_mutated_frames ... ok
+test blob_requests_borrow_owned_storage_and_decode_without_payload_copies ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/native/mod.rs (target/debug/deps/native-1633b6ef2ef886f3)
+
+running 40 tests
+test adversarial::frame_rejection_precedes_consumer_deserialization_and_calls_are_independent ... ok
+test adversarial::zero_byte_collection_work_is_linear_and_forged_lengths_stop_at_budget ... ok
+test allocation::response_allocation_reserves_the_configured_byte_limit_and_weights_visits ... ok
+test borrowed_decode_points_into_the_frame_and_preserves_rejections ... ok
+test allocation::tiny_response_can_exceed_its_frame_size_in_allocation_charges ... ok
+test adversarial::nested_collections_share_one_budget_and_truncated_prefix_work_is_bounded ... ok
+test byte_array::byte_array_rejects_wrong_lengths_and_invalid_prefixes ... ok
+test decode_only_types_and_independent_decode_allowances ... ok
+test borrowed_frames_match_owned_postcard_and_frozen_envelope ... ok
+test frame_budgets_agree_at_header_boundary_and_preserve_error_precedence ... ok
+test byte_array::byte_array_preserves_standard_bytes_frames_and_admission ... ok
+test every_allowance_is_enforced_and_empty_values_remain_valid ... ok
+test packed::invalid_widths_and_noncanonical_lengths_are_rejected ... ok
+test packed::runtime_byte_and_allocation_limits_still_reject ... ok
+test hidden_list_lengths_preserve_bounds_and_zero_sized_values ... ok
+test packed::packed_words_match_little_endian_bytes_and_unaligned_decode ... ok
+test packed::signed_bytes_keep_vec_bytes_but_use_bulk_admission ... ok
+test reusable_output_keeps_capacity_and_clears_all_failure_paths ... ok
+test scalar_admission_preserves_exact_resource_boundaries ... ok
+test scoped::scoped_output_drops_owned_input_before_callback_and_serializes_twice ... ok
+test scoped::scoped_output_keeps_exact_admission_and_never_consumes_refused_values ... ok
+test scoped::scoped_output_never_consumes_failed_second_pass_on_either_destination ... ok
+test slice::caller_slice_never_returns_partial_output_after_a_second_pass_failure ... ok
+test slice::caller_slice_refuses_limits_before_writing ... ok
+test std_types::raw_ieee_float_bits_survive_without_partial_eq_assumptions ... ok
+test std_types::network_addresses_preserve_binary_serde_shapes ... ok
+test strict_parsing_allows_consumer_normalization ... ok
+test recursive_and_zero_byte_values_cannot_bypass_budgets ... ok
+test std_types::standard_ranges_and_nested_nonzero_results_follow_serde ... ok
+test u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries ... ok
+test std_types::nonzero_integers_preserve_primitive_bytes_and_reject_zero ... ok
+test packed::blob_manifest_boundary_preserves_order_and_header_bytes ... ok
+test packed::generic_i16_matches_existing_packed_type_for_every_word ... ok
+test scoped::scoped_output_matches_owned_bytes_and_selects_storage_once ... ok
+test slice::caller_slice_matches_owned_payload_and_both_frame_directions ... ok
+test strict_integer_reads_reject_every_redundant_u16_encoding ... ok
+test u16_three_group_decoder_matches_canonical_postcard_control ... ok
+test packed::packed_length_prefixes_offsets_and_budget_boundaries ... ok
+test packed_i16_bytes_bounds_and_canonicality ... ok
+test integer_shortcuts_preserve_postcard_bytes_and_original_budgets ... ok
+
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/runtime/mod.rs (target/debug/deps/runtime-93eb5e36813d8f1d)
+
+running 5 tests
+test decoding::custom_field_boundaries_can_have_a_different_roundtrip ... ok
+test finite_float_bits_and_nonfinite_rejection ... ok
+test list_count_rejects_before_element_decoder ... ok
+test decoding::custom_normalization_is_consumer_owned ... ok
+test decoding::copied_record_checks_prefixes_truncation_and_preserves_owned_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ui/mod.rs (target/debug/deps/ui-b6173c9645e890fd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests ic_wire
+
+running 11 tests
+test crates/ic-wire/src/lib.rs - (line 46) ... ignored
+test crates/ic-wire/src/lib.rs - (line 175) ... ok
+test crates/ic-wire/src/lib.rs - (line 313) ... ok
+test crates/ic-wire/src/lib.rs - (line 265) ... ok
+test crates/ic-wire/src/lib.rs - (line 223) ... ok
+test crates/ic-wire/src/lib.rs - (line 243) ... ok
+test crates/ic-wire/src/lib.rs - (line 592) ... ok
+test crates/ic-wire/src/native/mod.rs - native::with_encoded (line 172) ... ok
+test crates/ic-wire/src/lib.rs - (line 350) ... ok
+test crates/ic-wire/src/lib.rs - (line 427) ... ok
+test crates/ic-wire/src/lib.rs - (line 527) ... ok
+
+test result: ok. 10 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test crates/ic-wire/src/native/mod.rs - native::with_encoded (line 183) - compile fail ... ok
+test crates/ic-wire/src/lib.rs - (line 437) - compile fail ... ok
+test crates/ic-wire/src/native/mod.rs - native::with_encoded (line 188) - compile fail ... ok
+test crates/ic-wire/src/lib.rs - (line 362) - compile fail ... ok
+test crates/ic-wire/src/packed/mod.rs - packed::Packed (line 67) - compile fail ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.29s; merged doctests compilation took 0.26s
+
+==> check-typed-diagnostics
+Diagnostic logs: /home/adam/projects/ic-wire/target/ui-diagnostics/wire.8XsrfA
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+9 expected diagnostics and passing control verified
+
+==> check-qualification
+Qualification tools are opt-in and native-only; ordinary codec/benchmark graphs are clean.
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-build v0.73.4
+   Compiling ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.54s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire_qualification-902a8cf86fb07403)
+
+running 3 tests
+test allocation::tests::packed_hash_shape_refuses_partial_and_oversized_elements ... ok
+test allocation::tests::same_layout_lanes_match_and_layout_changes_have_distinct_identities ... ok
+test allocation::tests::codec_only_preserves_frames_and_capacity ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/packed_projection/mod.rs (target/debug/deps/packed_projection-b5502a4c1d8faf0e)
+
+running 1 test
+test packed_hash_projection_borrows_arrays_without_a_staging_copy ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Blocking waiting for file lock on package cache
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-build v0.73.4
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.55s
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-build v0.73.4
+    Checking ic-wire-qualification v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-qualification)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.99s
+
+==> check-endpoint
+Endpoint compile evidence: /home/adam/projects/ic-wire/target/endpoint-check.XLZNY7
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling ic-wire-endpoint-fixture v0.13.2 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.90s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire_endpoint_fixture-15d4208e2ce7bf3f)
+
+running 3 tests
+test tests::defaults_and_overrides_bind_the_actual_contract ... ok
+test tests::borrowed_fields_and_reply_retain_input_storage ... ok
+test tests::declaration_matches_types_constants_and_existing_projection ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/lib.rs (target/debug/deps/ic_wire-abf975165c2a7178)
+
+running 1 test
+test native::tests::automatic_method_identity_vectors_and_frame ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.34s
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking ic-wire-endpoint-fixture v0.13.2 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.78s
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running `target/debug/examples/check-diagnostics /home/adam/projects/ic-wire/target/endpoint-check.XLZNY7 --endpoint`
+11 expected diagnostics and passing control verified
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling ic-wire-endpoint-fixture v0.13.2 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `evaluation` profile [optimized] target(s) in 0.72s
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking ic-wire-endpoint-fixture v0.13.2 (/home/adam/projects/ic-wire/examples/endpoint)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+
+==> check-benchmarks
+Benchmark CLI: 49 focused checks passed; no measurements or servers started.
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running unittests examples/report/mod.rs (target/debug/examples/codec_report-18b68321cca1e239)
+
+running 5 tests
+test tests::code_size_counts_only_the_code_section_and_rejects_broken_framing ... ok
+test tests::artifact_uses_reported_paths_and_rejects_missing_or_ambiguous_outputs ... ok
+test tests::report_cli_preserves_native_path_bytes ... ok
+test tests::report_cli_preserves_modes_and_defaults ... ok
+test tests::comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-fa323d877fd3ff34)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.12s
+
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.38s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Checking ic-platform v0.16.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Checking ic-platform v0.16.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.79s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.64s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.74s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-platform v0.16.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.75s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.03s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-8b6a6020e3fd7251)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.92s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-916b9d08cc2bf70d)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.66s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.11s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-b200744cb6a71533)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.71s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.71s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.09s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-95c8f7b8c104b418)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.76s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-4a29a00f4c6bd144)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.67s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.43s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-154ea43a5509b391)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.04s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.48s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-33dd599fd5da3fe8)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.70s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.94s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-ac10f6c12b54b05c)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.70s
+    Blocking waiting for file lock on package cache
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.05s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-e6e9fc4ee5565dac)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.72s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-4dbcc923da6cef46)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.25s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.38s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-bca3810c82eff058)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.00s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.21s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-4d4a0039fe6af619)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.71s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.20s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-5c6ca07fb2e9c4e9)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.74s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.90s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-97707af1bb5c3fc5)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.63s
+   Compiling ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.97s
+     Running drivers/roundtrip.rs (target/debug/deps/roundtrip-fa17051c650e7720)
+
+running 3 tests
+test unsigned_magnitude::external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes ... ok
+test recursive_tree_keeps_wire_support_and_candid_nesting_refusal_explicit ... ok
+test corpus_roundtrips_and_rejects_damaged_frames ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.33s
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.23s
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.59s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.69s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.56s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.83s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.75s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.27s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.13s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.74s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.58s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.29s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.99s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.80s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.63s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.57s
+    Checking ic-wire-benchmarks v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-benchmarks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.89s
+
+==> check-typescript
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.03s
+     Running tests/borrowed/mod.rs (target/debug/deps/borrowed-8e984c5d3decf57c)
+
+running 6 tests
+test encoding_and_sizing_do_not_require_a_decoder ... ok
+test borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input ... ok
+test lifetime_derives_cover_enums_nested_containers_bounds_and_name_collisions ... ok
+test newtype_variants_borrow_with_derived_metadata ... ok
+test owned_and_borrowed_leaves_agree_on_mutated_frames ... ok
+test blob_requests_borrow_owned_storage_and_decode_without_payload_copies ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/native/mod.rs (target/debug/deps/native-88f0b2b325b7419f)
+
+running 60 tests
+test adversarial::zero_byte_collection_work_is_linear_and_forged_lengths_stop_at_budget ... ok
+test allocation::response_allocation_reserves_the_configured_byte_limit_and_weights_visits ... ok
+test adversarial::frame_rejection_precedes_consumer_deserialization_and_calls_are_independent ... ok
+test allocation::tiny_response_can_exceed_its_frame_size_in_allocation_charges ... ok
+test borrowed_decode_points_into_the_frame_and_preserves_rejections ... ok
+test adversarial::nested_collections_share_one_budget_and_truncated_prefix_work_is_bounded ... ok
+test borrowed_frames_match_owned_postcard_and_frozen_envelope ... ok
+test bulk_lint::all_supported_list_words_and_enum_result_paths ... ok
+test bulk_lint::generation_reports_exported_types_and_never_emits_partial_diagnostics ... ok
+test bulk_lint::generation_always_reports_use_sites_and_preserves_source_when_acknowledged ... ok
+test byte_array::byte_array_rejects_wrong_lengths_and_invalid_prefixes ... ok
+test bulk_lint::resolved_aliases_nested_fields_and_acknowledgements ... ok
+test decode_only_types_and_independent_decode_allowances ... ok
+test byte_array::byte_array_schema_and_adapter_keep_exact_width ... ok
+test byte_array::byte_array_preserves_standard_bytes_frames_and_admission ... ok
+test bulk_lint::rooted_review_distinguishes_shared_fields_and_ignores_intern_names ... ok
+test frame_budgets_agree_at_header_boundary_and_preserve_error_precedence ... ok
+test every_allowance_is_enforced_and_empty_values_remain_valid ... ok
+test hidden_list_lengths_preserve_bounds_and_zero_sized_values ... ok
+test packed::invalid_widths_and_noncanonical_lengths_are_rejected ... ok
+test packed::packed_words_match_little_endian_bytes_and_unaligned_decode ... ok
+test packed::runtime_byte_and_allocation_limits_still_reject ... ok
+test packed::signed_bytes_keep_vec_bytes_but_use_bulk_admission ... ok
+test payload::standalone_schema_accepts_constructor_tuples_and_guarded_recursion ... ok
+test payload::payload_generation_validates_policy_references_names_and_diagnostics ... ok
+test payload::standalone_schema_reuses_generator_rejections_including_unused_definitions ... ok
+test registry::directional_limit_projection_checks_exact_numbers_without_heap_claims ... ok
+test registry::duplicate_names_and_rebinding_poison_the_collector ... ok
+test registry::optional_byte_adapters_follow_types_and_preserve_option_tags ... ok
+test scalar_admission_preserves_exact_resource_boundaries ... ok
+test registry::unresolved_custom_metadata_is_rejected_at_finish ... ok
+test reusable_output_keeps_capacity_and_clears_all_failure_paths ... ok
+test scoped::scoped_output_drops_owned_input_before_callback_and_serializes_twice ... ok
+test registry::renamed_recursive_variants_keep_declaration_ordinals ... ok
+test registry::registry_rejects_numeric_method_id_collisions_before_emitting_diagnostics ... ok
+test scoped::scoped_output_keeps_exact_admission_and_never_consumes_refused_values ... ok
+test scoped::scoped_output_never_consumes_failed_second_pass_on_either_destination ... ok
+test slice::caller_slice_never_returns_partial_output_after_a_second_pass_failure ... ok
+test slice::caller_slice_refuses_limits_before_writing ... ok
+test recursive_and_zero_byte_values_cannot_bypass_budgets ... ok
+test std_types::raw_ieee_float_bits_survive_without_partial_eq_assumptions ... ok
+test bulk_lint::references_cycles_and_escaped_names_are_bounded ... ok
+test std_types::network_addresses_preserve_binary_serde_shapes ... ok
+test strict_parsing_allows_consumer_normalization ... ok
+test registry::finite_recursive_registries_preserve_inline_behavior_and_generic_shapes ... ok
+test std_types::standard_ranges_and_nested_nonzero_results_follow_serde ... ok
+test u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries ... ok
+test std_types::nonzero_integers_preserve_primitive_bytes_and_reject_zero ... ok
+test packed::blob_manifest_boundary_preserves_order_and_header_bytes ... ok
+test registry::conflicting_projections_and_excessive_shapes_fail_closed ... ok
+test packed::generic_i16_matches_existing_packed_type_for_every_word ... ok
+test scoped::scoped_output_matches_owned_bytes_and_selects_storage_once ... ok
+test slice::caller_slice_matches_owned_payload_and_both_frame_directions ... ok
+test strict_integer_reads_reject_every_redundant_u16_encoding ... ok
+test u16_three_group_decoder_matches_canonical_postcard_control ... ok
+test packed::packed_length_prefixes_offsets_and_budget_boundaries ... ok
+test packed_i16_bytes_bounds_and_canonicality ... ok
+test bulk_lint::rooted_aliases_recursion_inline_errors_and_work_limits ... ok
+test integer_shortcuts_preserve_postcard_bytes_and_original_budgets ... ok
+test payload::standalone_schema_shares_depth_and_total_work_allowances_with_registry ... ok
+
+test result: ok. 60 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/runtime/mod.rs (target/debug/deps/runtime-6a09115c2abc3d8c)
+
+running 16 tests
+test decoding::custom_field_boundaries_can_have_a_different_roundtrip ... ok
+test finite_float_bits_and_nonfinite_rejection ... ok
+test list_count_rejects_before_element_decoder ... ok
+test native_schema::cow_text_preserves_schema_frames_and_admission ... ok
+test native_schema::generics_borrows_and_struct_forms_follow_serde ... ok
+test native_schema::serde_crate_paths_preserve_record_and_enum_contracts ... ok
+test native_schema::byte_buffers_keep_frames_and_admit_in_bulk ... ok
+test native_schema::metadata_bounds_follow_fields_and_preserve_recursive_refusal ... ok
+test typescript_registry_rejects_transparent_cycles_and_invalid_method_budgets ... ok
+test typescript_registry_rejects_invalid_optional_collection_bounds ... ok
+test typescript_registry_requires_an_exact_array_length ... ok
+test typescript_registry_validates_float_bounds ... ok
+test typescript_registry_validates_integer_bounds_without_precision_loss ... ok
+test decoding::custom_normalization_is_consumer_owned ... ok
+test decoding::copied_record_checks_prefixes_truncation_and_preserves_owned_bytes ... ok
+test typescript_registry_rejects_invalid_names_shapes_and_excessive_metadata ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.52s
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running `target/debug/examples/typescript-conformance /home/adam/projects/ic-wire/target/typescript-conformance`
+warning: /methods/codec/request/item/list/u32: consider Packed<u32>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/item/list/u32: consider Packed<u32>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/list/u64: consider Packed<u64>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/list/u64: consider Packed<u64>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/list/u64: consider Packed<u64>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/list/u64: consider Packed<u64>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/pages/fields/entries/item/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/choice/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/choice/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/pages/fields/entries/item/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/choice/variants/One/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/choice/variants/Named/fields/page/fields/entries/item/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/optional/item/ok/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/request/fields/entries/item/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+warning: /methods/codec/response/fields/entries/item/list/u16: consider Packed<u16>; ordinary lists can have high per-element encoding and truncated-input rejection costs; preserve constraints and measure small-value size tradeoffs
+Hostile-input and outgoing-value rejection checks passed
+Finite-float canonical bits and rejection checks passed
+Recursive native metadata, tuples, aliases, scalar validation and explicit traversal refusal passed
+Rust/TypeScript conformance: 176 vectors, both directions, truncation and identity rejection passed
+Differential mutations: 38556 Rust/TypeScript acceptance and canonical re-encode checks passed
+1 MiB Rust/TypeScript byte buffers: exact frames and boundary refusals passed
+Wire: 29 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed
+Payload conformance: unit, scalar, tuple, records, recursive enums, limits and malformed inputs passed
+Cross-runtime admission: 16 shapes checked in both directions
+Incremental writer: bounded allocations, exact bytes, ownership, callbacks and directional limits passed
+Simulated big-endian packed codec: 54 cases passed (not a native big-endian engine).
+Schema forwarding fixture: /home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling wire-schema-targets v0.0.0 (/home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.42s
+     Running unittests lib.rs (target/schema-targets/build/debug/deps/wire_schema_targets-306e79de95725340)
+
+running 1 test
+test metadata_and_runtime ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests wire_schema_targets
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling wire-schema-targets v0.0.0 (/home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running unittests lib.rs (target/schema-targets/build/debug/deps/wire_schema_targets-fc3c707532a18302)
+
+running 1 test
+test metadata_and_runtime ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests wire_schema_targets
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking wire-schema-targets v0.0.0 (/home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.22s
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking wire-schema-targets v0.0.0 (/home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking wire-schema-targets v0.0.0 (/home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
+Native metadata and Wasm schema forwarding passed; evidence: /home/adam/projects/ic-wire/target/schema-targets/consumer.zuOiur
+Cargo bulk advice visibility/suppression passed; evidence: /home/adam/projects/ic-wire/target/bulk-advice/consumer.CshyD2
+Version 7.0.2
+Platform type qualification: /home/adam/projects/ic-wire/target/platform-types.CnZE2H
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+    Checking cfg-if v1.0.5
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.154
+    Checking data-encoding v2.11.1
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking bytemuck v1.25.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+    Checking serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking cobs v0.3.0
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.42s
+   Compiling serde_core v1.0.229
+    Checking cfg-if v1.0.5
+    Checking data-encoding v2.11.1
+    Checking bytemuck v1.25.2
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+    Checking cobs v0.3.0
+    Checking serde_bytes v0.11.19
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.61s
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+   Compiling zmij v1.0.23
+   Compiling cfg-if v1.0.5
+   Compiling data-encoding v2.11.1
+   Compiling serde_json v1.0.154
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling bytemuck v1.25.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+   Compiling serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling cobs v0.3.0
+   Compiling ic-platform-types v0.15.1
+   Compiling postcard v1.1.3
+   Compiling ic-platform v0.16.0
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.61s
+     Running unittests src/lib.rs (target/platform-types.CnZE2H/target/debug/deps/wire_platform_types_consumer-398b5f00f97ace3a)
+
+running 4 tests
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+test tests::principal_schema_and_frames ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+   Compiling zmij v1.0.23
+    Checking cfg-if v1.0.5
+    Checking data-encoding v2.11.1
+   Compiling serde_json v1.0.154
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking bytemuck v1.25.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+    Checking serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.18
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking cobs v0.3.0
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.80s
+   Compiling version_check v0.9.5
+   Compiling ic-platform-runtime-guard v0.16.0
+    Checking pin-project-lite v0.2.17
+   Compiling syn v3.0.9
+   Compiling slotmap v1.1.1
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-platform-macros v0.16.0
+    Checking serde v1.0.229
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.50s
+    Checking pin-project-lite v0.2.17
+   Compiling ic-platform-runtime-guard v0.16.0
+   Compiling slotmap v1.1.1
+    Checking serde v1.0.229
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.60s
+   Compiling version_check v0.9.5
+   Compiling ic-platform-runtime-guard v0.16.0
+   Compiling pin-project-lite v0.2.17
+   Compiling syn v3.0.9
+   Compiling slotmap v1.1.1
+   Compiling serde_derive v1.0.229
+   Compiling ic-platform-macros v0.16.0
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling serde v1.0.229
+   Compiling ic-platform-types v0.15.1
+   Compiling postcard v1.1.3
+   Compiling ic-platform v0.16.0
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.58s
+     Running unittests src/lib.rs (target/platform-types.CnZE2H/target/debug/deps/wire_platform_types_consumer-86c8b89aa7907ed9)
+
+running 5 tests
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::combined_endpoint_uses_the_same_schema_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+test tests::principal_schema_and_frames ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling version_check v0.9.5
+   Compiling ic-platform-runtime-guard v0.16.0
+    Checking pin-project-lite v0.2.17
+   Compiling syn v3.0.9
+   Compiling slotmap v1.1.1
+   Compiling serde_derive v1.0.229
+   Compiling ic-platform-macros v0.16.0
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking serde v1.0.229
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking wire-platform-types-consumer v0.0.0 (/home/adam/projects/ic-wire/target/platform-types.CnZE2H)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.11s
+Principal Rust/TypeScript frames and length refusals passed
+Account Rust/TypeScript frames preserve absent, zero and nonzero subaccounts
+Account malformed request/response refusals agree with Rust
+Stable identity evidence: /home/adam/projects/ic-wire/target/stable-identities.QEeoXC
+     Locking 32 packages to highest Rust 1.99.1 compatible versions
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+   Compiling version_check v0.9.5
+   Compiling cfg-if v1.0.5
+   Compiling zmij v1.0.23
+   Compiling ic-platform-runtime-guard v0.16.0
+   Compiling serde_json v1.0.154
+   Compiling data-encoding v2.11.1
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling bytemuck v1.25.2
+   Compiling pin-project-lite v0.2.17
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+   Compiling serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling ic-platform-macros v0.16.0
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling cobs v0.3.0
+   Compiling ic-platform-types v0.15.1
+   Compiling postcard v1.1.3
+   Compiling ic-platform v0.16.0
+   Compiling ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+   Compiling ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+   Compiling wire-stable-identity-consumer v0.0.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/current)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.05s
+     Running unittests src/lib.rs (target/stable-identities.QEeoXC/target/debug/deps/wire_stable_identity_consumer-5f55c7584cfe0397)
+
+running 5 tests
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::combined_endpoint_uses_the_same_schema_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::principal_schema_and_frames ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+   Compiling zmij v1.0.23
+    Checking cfg-if v1.0.5
+   Compiling version_check v0.9.5
+   Compiling serde_json v1.0.154
+   Compiling ic-platform-runtime-guard v0.16.0
+    Checking data-encoding v2.11.1
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking pin-project-lite v0.2.17
+    Checking bytemuck v1.25.2
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+    Checking serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+   Compiling ic-platform-macros v0.16.0
+    Checking cobs v0.3.0
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking wire-stable-identity-consumer v0.0.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/current)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.64s
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+    Checking cfg-if v1.0.5
+   Compiling version_check v0.9.5
+    Checking data-encoding v2.11.1
+   Compiling ic-platform-runtime-guard v0.16.0
+    Checking pin-project-lite v0.2.17
+    Checking bytemuck v1.25.2
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+    Checking serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling ic-platform-macros v0.16.0
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking cobs v0.3.0
+    Checking ic-platform-types v0.15.1
+    Checking postcard v1.1.3
+    Checking ic-platform v0.16.0
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Checking ic-wire-endpoint v0.2.1 (/home/adam/projects/ic-wire/crates/ic-wire-endpoint)
+    Checking wire-stable-identity-consumer v0.0.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/current)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.87s
+     Locking 32 packages to highest Rust 1.99.1 compatible versions
+   Compiling ic-platform v0.17.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next-platform)
+   Compiling ic-wire-endpoint v0.3.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next-endpoint)
+   Compiling wire-stable-identity-consumer v0.0.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.54s
+     Running unittests src/lib.rs (target/stable-identities.QEeoXC/target/debug/deps/wire_stable_identity_consumer-bf6805d6db5cee5a)
+
+running 5 tests
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::combined_endpoint_uses_the_same_schema_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+test tests::principal_schema_and_frames ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking ic-platform v0.17.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next-platform)
+    Checking ic-wire-endpoint v0.3.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next-endpoint)
+    Checking wire-stable-identity-consumer v0.0.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+    Checking ic-platform v0.17.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next-platform)
+    Checking ic-wire-endpoint v0.3.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next-endpoint)
+    Checking wire-stable-identity-consumer v0.0.0 (/home/adam/projects/ic-wire/target/stable-identities.QEeoXC/next)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+Codec/schema/derive and Principal/Account supplier IDs unchanged across simulated endpoint/runtime generation.
+
+==> check-wasm
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+
+==> check-msrv
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.25s
+   Compiling ic-wire-derive v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire-derive)
+    Checking ic-wire v0.13.2 (/home/adam/projects/ic-wire/crates/ic-wire)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.59s
+
+Validation summary:
+  PASS    10s  tools-check
+  PASS     1s  lint
+  PASS     1s  shared-tooling-check
+  PASS     2s  check-pins
+  PASS     0s  check-boundary
+  PASS     0s  check-doc-links
+  PASS    17s  check-tooling
+  PASS   347s  check-release
+  PASS     1s  fmt-check
+  PASS     1s  check
+  PASS     2s  test
+  PASS     0s  check-typed-diagnostics
+  PASS     6s  check-qualification
+  PASS     5s  check-endpoint
+  PASS   137s  check-benchmarks
+  PASS    48s  check-typescript
+  PASS     0s  check-wasm
+  PASS     1s  check-msrv
+VALIDATION PASSED: all requested targets succeeded.
+Validation logs retained at: /home/adam/projects/ic-wire/.git/release-state/ic-wire-0.13.3/validation/validation.Ky6PBr
+
+Validation summary:
+  PASS   579s  ci
+VALIDATION PASSED: all requested targets succeeded.
+Validation logs retained at: /home/adam/projects/ic-wire/.git/release-state/ic-wire-0.13.3/validation/validation.TPqNC4
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --preflight
+make --no-print-directory install-host-tools
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env"
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory install-rust-tools
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env"
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort version=2.1.4 phase=selection-reuse outcome=passed elapsed=0s status=0
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=source-preparation outcome=passed elapsed=2s status=0
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=cargo-sort-derives version=0.14.1 phase=selection-reuse outcome=passed elapsed=1s status=0
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+Cargo tool setup: package=ic-build version=0.73.3 phase=source-preparation outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.3 phase=source-preparation outcome=passed elapsed=3s status=0
+Cargo tool setup: package=ic-build version=0.73.3 phase=selection-reuse outcome=started elapsed=0s
+Cargo tool setup: package=ic-build version=0.73.3 phase=selection-reuse outcome=passed elapsed=0s status=0
+/home/adam/projects/ic-wire/.tools/rust/selected-c6f8832ae673598499f07886f51090281433bc8f4f1bff446eea60b910e01b3e/bin/ic-build-release-metadata
+make --no-print-directory host-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-host-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/host/bin
+make --no-print-directory rust-tools-check
+bash "/home/adam/projects/ic-wire/scripts/dev/install-rust-tools.sh" --consumer "/home/adam/projects/ic-wire" --versions "/home/adam/projects/ic-wire/ci/tool-versions.env" --check
+/home/adam/projects/ic-wire/.tools/rust/common/bin
+/home/adam/projects/ic-wire/.tools/rust/selected-c6f8832ae673598499f07886f51090281433bc8f4f1bff446eea60b910e01b3e/bin/ic-build-release-metadata
+Release preparation originals retained: /tmp/cargo-group-backup.snvcUR
+Checking ic-wire...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Checking ic-wire...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Checking ic-wire...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Manifest sorting [.]... ok (0.02s)
+Rust formatting [.]... ok (0.16s)
+Pre-commit formatting passed; refreshed only the selected files.
+[main 3330639] Release core 0.13.3
+ 8 files changed, 16 insertions(+), 16 deletions(-)
+Checking source...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Checking source...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+Checking source...
+Checking ic-wire...
+Checking ic-wire-benchmarks...
+Checking ic-wire-derive...
+Checking ic-wire-endpoint...
+Checking ic-wire-qualification...
+Checking endpoint...
+To https://github.com/dragginzgame/ic-wire.git
+   0ea66e1..3330639  HEAD -> main
+ * [new tag]         core-v0.13.3 -> core-v0.13.3
+Release 0.13.3 completed; plan: .git/release-state/core-0.13.3.plan

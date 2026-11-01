@@ -1,12 +1,23 @@
 # Current handoff
 
-## Authorized delivery: Core 0.13.3 / Endpoint 0.3.0
+## Delivered Core 0.13.3 / Endpoint 0.3.0
 
-The maintainer requested deployment on 2026-11-01. Source preparation is in
-progress; Git releases and crates.io publication are authorized for both groups,
-Core first. Full release CI and independent registry verification must complete
-before recording delivery. Own manifests are still Core 0.13.2 / Endpoint 0.2.1
-until the release adapters prepare their respective versions.
+Published and verified on 2026-11-01. Core commit
+33306395a833fd29f8c8a91abf9b8d38123dd0f9 / core-v0.13.3 and Endpoint commit
+3ddaeb834e0f8e3290f3146a119435a185b9bda9 / endpoint-v0.3.0 were atomically pushed.
+Complete local release CI passed in 579 s / 617 s. All three registry archives
+match upload bytes, checksums and clean release provenance. A registry-only
+Rust 1.91 consumer passes six tests and Wasm compilation with one Core/derive/
+Endpoint/Types identity; no Candid/external executor leaks into its Wasm graph.
+[Delivery evidence and reproduction](../evidence/published-core-0133-endpoint-030/README.md).
+No build/evidence cleanup or sibling edit occurred.
+
+The maintainer next requested investigation of ByteArray Wasm overhead,
+zero-sized collections and a small performance regression gate, plus Shared
+Tooling 0.27.24 adoption. Those are subsequent work, not this release's contents.
+Shared's reviewed target is 1211262f32ea193cc4edcd60d2750baf1f1d6425; export it
+canonically after delivery recording. New implementation remains ordinary work,
+without automatic staging, commits or another release.
 
 Core adds the standard `ic_wire::ByteArray<N>` re-export and exact-width host
 metadata, including standard fixed-array byte adapters and options. Existing
@@ -55,7 +66,7 @@ editor remains explicitly 0.73.3. Shared snapshot 0.27.23 at
 its original graph and disposable release/receipt fixtures. Cargo groups remain
 independent; no standalone VERSION, compatibility lane or alternate codec added.
 
-## Previously delivered
+## Earlier delivered
 
 Core 0.13.2: eff8c18d053506be5e0d3a8676f1e48ae9ce99d0, core-v0.13.2.
 Endpoint 0.2.1: a6cfed5b367fff84997985a357ceeb6731ec5400, endpoint-v0.2.1.

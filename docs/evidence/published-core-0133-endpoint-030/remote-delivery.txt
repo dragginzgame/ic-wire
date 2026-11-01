@@ -1,0 +1,5 @@
+3ddaeb834e0f8e3290f3146a119435a185b9bda9	refs/heads/main
+41455812b31751a139d2daa0a43d8a04945c56d4	refs/tags/core-v0.13.3
+33306395a833fd29f8c8a91abf9b8d38123dd0f9	refs/tags/core-v0.13.3^{}
+ad29d28fe2ed23d71a14940feb43882a0ea8a40d	refs/tags/endpoint-v0.3.0
+3ddaeb834e0f8e3290f3146a119435a185b9bda9	refs/tags/endpoint-v0.3.0^{}
