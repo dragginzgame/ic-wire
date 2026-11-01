@@ -21,7 +21,9 @@ const fs=require('node:fs'),path=require('node:path');
 const [root,fixture]=process.argv.slice(2),m=JSON.parse(fs.readFileSync(`${fixture}/workspace.json`));
 const wire=m.packages.find(p=>p.name==='ic-wire'&&p.manifest_path===`${root}/crates/ic-wire/Cargo.toml`);
 const endpoint=m.packages.find(p=>p.name==='ic-wire-endpoint'&&p.manifest_path===`${root}/crates/ic-wire-endpoint/Cargo.toml`);
-const platform=m.packages.find(p=>p.name==='ic-platform');
+const client=m.packages.find(p=>p.manifest_path===`${root}/crates/ic-wire-benchmarks/Cargo.toml`);
+const dep=m.resolve.nodes.find(n=>n.id===client.id).deps.find(d=>d.name==='ic_platform');
+const platform=m.packages.find(p=>p.id===dep.pkg);
 const source=platform.source===null?`, path = ${JSON.stringify(path.dirname(platform.manifest_path))}`:'';
 fs.writeFileSync(`${fixture}/Cargo.toml`, `[workspace]
 [package]

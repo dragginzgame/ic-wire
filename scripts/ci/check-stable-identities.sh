@@ -12,7 +12,9 @@ from pathlib import Path
 import json,sys,shutil
 root,out=map(Path,sys.argv[1:]);m=json.loads((out/'workspace.json').read_text())
 endpoint=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire-endpoint/Cargo.toml'))
-p=next(p for p in m['packages'] if p['name']=='ic-platform')
+client=next(p for p in m['packages'] if p['manifest_path']==str(root/'crates/ic-wire-benchmarks/Cargo.toml'))
+dep=next(d for n in m['resolve']['nodes'] if n['id']==client['id'] for d in n['deps'] if d['name']=='ic_platform')
+p=next(p for p in m['packages'] if p['id']==dep['pkg'])
 runtime_edge=next(d for n in m['resolve']['nodes'] if n['id']==endpoint['id'] for d in n['deps'] if d['name']=='ic_platform_runtime')
 runtime=next(p for p in m['packages'] if p['id']==runtime_edge['pkg'])
 runtime_selection=f'version = "={runtime["version"]}"' if runtime['source'] else f'path = "{Path(runtime["manifest_path"]).parent}"'
