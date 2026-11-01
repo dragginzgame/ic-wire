@@ -1,0 +1,44 @@
+{
+  "name": "ic-wire-derive",
+  "vers": "0.13.4",
+  "deps": [
+    {
+      "name": "proc-macro2",
+      "req": "^1.0.107",
+      "features": [],
+      "optional": false,
+      "default_features": true,
+      "target": null,
+      "kind": "normal"
+    },
+    {
+      "name": "quote",
+      "req": "^1.0.47",
+      "features": [],
+      "optional": false,
+      "default_features": true,
+      "target": null,
+      "kind": "normal"
+    },
+    {
+      "name": "syn",
+      "req": "^3.0.9",
+      "features": [
+        "visit"
+      ],
+      "optional": false,
+      "default_features": true,
+      "target": null,
+      "kind": "normal"
+    }
+  ],
+  "cksum": "4149ece53397d91790da342bca0605061b0339818d5eb4fa25329dc715b6a467",
+  "features": {
+    "endpoint": [
+      "syn/full"
+    ]
+  },
+  "yanked": false,
+  "rust_version": "1.91",
+  "pubtime": "2026-11-01T13:03:47Z"
+}

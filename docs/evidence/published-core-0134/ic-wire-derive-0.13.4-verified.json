@@ -1,0 +1,9 @@
+{
+  "package": "ic-wire-derive",
+  "version": "0.13.4",
+  "commit": "f83755b30f76704105164e163b9334310e106e44",
+  "sha256": "4149ece53397d91790da342bca0605061b0339818d5eb4fa25329dc715b6a467",
+  "archive_matches_upload": true,
+  "yanked": false,
+  "clean_source_verified": true
+}

@@ -1,0 +1,44 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.3
+   Compiling cfg-if v1.0.5
+   Compiling zmij v1.0.23
+   Compiling version_check v0.9.5
+   Compiling ic-platform-runtime-guard v0.16.0
+   Compiling serde_json v1.0.154
+   Compiling data-encoding v2.11.1
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling bytemuck v1.25.2
+   Compiling pin-project-lite v0.2.17
+   Compiling slotmap v1.1.1
+   Compiling syn v3.0.9
+   Compiling serde_bytes v0.11.19
+   Compiling thiserror-impl v2.0.21
+   Compiling serde_derive v1.0.229
+   Compiling ic-wire-derive v0.13.4
+   Compiling ic-platform-macros v0.16.0
+   Compiling cobs v0.3.0
+   Compiling ic-platform-types v0.15.1
+   Compiling postcard v1.1.3
+   Compiling ic-platform v0.16.0
+   Compiling ic-wire v0.13.4
+   Compiling ic-wire-endpoint v0.3.0
+   Compiling wire-deployment-consumer v0.0.0 (/home/adam/projects/ic-wire/target/deploy-0134/registry-consumer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.39s
+     Running unittests src/lib.rs (/home/adam/projects/ic-wire/target/deploy-0134/registry-consumer-build/debug/deps/wire_deployment_consumer-5a7dcd81a18f9a9a)
+
+running 6 tests
+test registry_byte_array_and_endpoint_contract ... ok
+test tests::owned_identities_implement_the_consumers_wire_trait ... ok
+test tests::combined_endpoint_uses_the_same_schema_trait ... ok
+test tests::malformed_account_frames_are_refused ... ok
+test tests::principal_schema_and_frames ... ok
+test tests::account_schema_and_frames_preserve_representation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
