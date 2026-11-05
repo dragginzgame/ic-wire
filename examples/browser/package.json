@@ -1,0 +1,14 @@
+{
+  "name": "ic-wire-typescript-conformance",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@12.2.0",
+  "engines": {
+    "node": "24.21.0",
+    "npm": "12.2.0"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

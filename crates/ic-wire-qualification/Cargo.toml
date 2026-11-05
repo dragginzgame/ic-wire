@@ -1,0 +1,65 @@
+[package]
+name = "ic-wire-qualification"
+version = "0.17.2"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+autobenches = false
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
+
+[package.metadata.shared-tooling.loc.paths]
+benches = "benchmarks"
+tools = "build_tooling"
+
+[lib]
+path = "benches/mod.rs"
+
+[features]
+allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
+fuzz-runtime = ["dep:ic-wire", "dep:libfuzzer-sys"]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+libfuzzer-sys = { workspace = true, optional = true }
+
+[dependencies]
+ic-wire = { workspace = true, optional = true }
+serde.workspace = true
+serde_bytes = { workspace = true, optional = true }
+
+[dev-dependencies]
+clap.workspace = true
+ic-build.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[[example]]
+name = "check-diagnostics"
+path = "tools/check_diagnostics/mod.rs"
+test = true
+
+[[example]]
+name = "fuzz-runtime"
+path = "tools/fuzz_runtime/mod.rs"
+required-features = ["fuzz-runtime"]
+test = false
+
+[[example]]
+name = "allocation"
+path = "benches/allocation_driver/mod.rs"
+required-features = ["allocation-fixture"]
+
+[[test]]
+name = "packed-projection"
+path = "tests/packed_projection/mod.rs"
+required-features = ["allocation-fixture"]
+
+[[test]]
+name = "deferred-blob-ownership"
+path = "tests/deferred_blob_ownership/mod.rs"
+required-features = ["allocation-fixture"]
+
+[lints]
+workspace = true

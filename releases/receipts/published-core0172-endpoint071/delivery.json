@@ -1,0 +1,150 @@
+{
+  "groups": [
+    {
+      "group": "core",
+      "version": "0.17.2",
+      "owner": "ic-wire",
+      "run": "run.FHA5DN",
+      "tag": "core-v0.17.2",
+      "commit": "46d7d0892dba11b93b454326e3bf288e6371ed12",
+      "tag_object": "39029744dfe3fa3c3491806adca23e2ad0ffb5e2",
+      "source_commit": "269d266a077c36157a4cf3351ed5726134b42e70",
+      "stage_count": 20
+    },
+    {
+      "group": "endpoint",
+      "version": "0.7.1",
+      "owner": "ic-wire-endpoint",
+      "tag": "endpoint-v0.7.1",
+      "commit": "da5ed1edb1b2ce6a5ac96837092211bc7f65ef0c",
+      "tag_object": "61c1fa1e929cbd52fff969b5a6eb45c30bfeced4",
+      "run": "run.JnlsRd",
+      "source_commit": "9713d28662a4558e7139d02a53b2272272f1924d",
+      "stage_count": 20
+    }
+  ],
+  "packages": [
+    {
+      "package": "ic-wire",
+      "version": "0.17.2",
+      "commit": "46d7d0892dba11b93b454326e3bf288e6371ed12",
+      "sha256": "3aced7117acb04dcd7a03e1f34d6f7bb3a3dd26264f5c0d37f0fd1468c1a84ce",
+      "prepared_archive": "target/package/tmp-registry/ic-wire-0.17.2.crate",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/bounded/borrowed/mod.rs",
+        "src/bounded/mod.rs",
+        "src/bounded/packed_i16/mod.rs",
+        "src/contract/mod.rs",
+        "src/float/mod.rs",
+        "src/lib.rs",
+        "src/native/LICENSE-MIT",
+        "src/native/decode/mod.rs",
+        "src/native/encode/mod.rs",
+        "src/native/header_admission_tests.rs",
+        "src/native/mod.rs",
+        "src/native/parser/LICENSE-MIT",
+        "src/native/parser/mod.rs",
+        "src/native/tests/mod.rs",
+        "src/packed/mod.rs",
+        "src/packed/tests/mod.rs",
+        "src/platform_types/mod.rs",
+        "src/typescript/bulk_lint/mod.rs",
+        "src/typescript/limits/mod.rs",
+        "src/typescript/metadata/mod.rs",
+        "src/typescript/mod.rs",
+        "src/typescript/native_schema/mod.rs",
+        "src/typescript/native_schema/registry/mod.rs",
+        "src/typescript/runtime.ts"
+      ]
+    },
+    {
+      "package": "ic-wire-derive",
+      "version": "0.17.2",
+      "commit": "46d7d0892dba11b93b454326e3bf288e6371ed12",
+      "sha256": "6761134f57eb51747238833deee8fd737dace20e2b5df2650b1c556c171c093e",
+      "prepared_archive": "target/package/tmp-registry/ic-wire-derive-0.17.2.crate",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/lib.rs",
+        "src/native_schema/mod.rs",
+        "src/native_schema/tests/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-wire-endpoint",
+      "version": "0.7.1",
+      "commit": "da5ed1edb1b2ce6a5ac96837092211bc7f65ef0c",
+      "sha256": "ab0b58fb30e45d850b6f8d11c2bfd6fd60c56518f7287c9637c27523cc8897d1",
+      "prepared_archive": "target/package/tmp-registry/ic-wire-endpoint-0.7.1.crate",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/lib.rs"
+      ]
+    },
+    {
+      "package": "ic-wire-endpoint-macros",
+      "version": "0.7.1",
+      "commit": "da5ed1edb1b2ce6a5ac96837092211bc7f65ef0c",
+      "sha256": "e36e632dce30c86542e093e9f0b2ebd71eee6e08f15aaf996cf2395e2c0bde2a",
+      "prepared_archive": "target/package/tmp-registry/ic-wire-endpoint-macros-0.7.1.crate",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/endpoint/mod.rs",
+        "src/lib.rs"
+      ]
+    }
+  ],
+  "remote_refs": {
+    "refs/heads/main": "da5ed1edb1b2ce6a5ac96837092211bc7f65ef0c",
+    "refs/tags/core-v0.17.2": "39029744dfe3fa3c3491806adca23e2ad0ffb5e2",
+    "refs/tags/core-v0.17.2^{}": "46d7d0892dba11b93b454326e3bf288e6371ed12",
+    "refs/tags/endpoint-v0.7.1": "61c1fa1e929cbd52fff969b5a6eb45c30bfeced4",
+    "refs/tags/endpoint-v0.7.1^{}": "da5ed1edb1b2ce6a5ac96837092211bc7f65ef0c"
+  },
+  "registry_identities": {
+    "core-consumer": {
+      "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.17.2"
+    },
+    "platform-consumer": {
+      "ic-platform-runtime": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime@0.19.2",
+      "ic-platform-runtime-guard": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.19.2",
+      "ic-platform-types": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.18.1",
+      "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.17.2",
+      "ic-wire-derive": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.17.2",
+      "ic-wire-endpoint": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint@0.7.1",
+      "ic-wire-endpoint-macros": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint-macros@0.7.1"
+    },
+    "installed-consumer": {
+      "ic-platform-runtime": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime@0.19.2",
+      "ic-platform-runtime-guard": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.19.2",
+      "ic-platform-types": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.18.1",
+      "ic-testkit": "registry+https://github.com/rust-lang/crates.io-index#ic-testkit@0.86.0",
+      "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.17.2",
+      "ic-wire-derive": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.17.2",
+      "ic-wire-endpoint": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint@0.7.1",
+      "ic-wire-endpoint-macros": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint-macros@0.7.1"
+    }
+  },
+  "compiler": "Rust/Cargo 1.99.1",
+  "installed_guest_sha256": "549c364d5cd698aa390c4c33a8387827b95c11fe7f29d6e4c294836e02726dd6",
+  "pocketic_server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+  "protocol_changed": false,
+  "legacy_log_cleanup": {
+    "removedFiles": 255,
+    "reclaimedLogicalBytes": 707622600,
+    "remainingFiles": 2846,
+    "remainingLogicalBytes": 79493019,
+    "allPlansAndReceiptsPreserved": true,
+    "backup": "target/deploy-0172-0071/legacy-validation-0711-0720.tar.gz",
+    "backupSha256": "ec22825d57cc2e61019d6cd56152817eaaff0bb2142f4bd090c6cf30f1012a64"
+  }
+}

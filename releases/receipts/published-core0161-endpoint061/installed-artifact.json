@@ -1,0 +1,30 @@
+{
+  "sha256": "766824b9301feabac63b1f249599395b0355ab56430940952b78644c0a67985b",
+  "total_uncompressed_wasm_bytes": 100685,
+  "code_section_bytes": 86698,
+  "profile": "evaluation: opt-z, LTO, one codegen unit, abort, strip symbols",
+  "target": "wasm32-unknown-unknown",
+  "compiler": "Rust 1.99.1",
+  "exports": [
+    "canister_query borrowed_echo",
+    "canister_query count",
+    "canister_query default_blob",
+    "canister_query default_unit",
+    "canister_query echo",
+    "canister_query nodes",
+    "canister_query response_only",
+    "canister_query stable-name",
+    "canister_update borrowed_mutate",
+    "canister_update composed",
+    "canister_update default_mutate",
+    "canister_update mutate",
+    "canister_update unit-call",
+    "canister_composite_query composite",
+    "canister_query async_query",
+    "canister_update async_mutate",
+    "canister_update async_ready"
+  ],
+  "fresh_target_and_artifact": true,
+  "server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db",
+  "not_an_instruction_or_size_comparison": true
+}

@@ -1,0 +1,324 @@
+{
+  "date": "2026-11-03",
+  "repository": "https://github.com/dragginzgame/ic-wire.git",
+  "deliveryCheckout": "/tmp/ic-wire-deploy-0160-060-20261103",
+  "sourceCommit": "ec542ac223f6851e6efcee5cd0c3d873c830d320",
+  "core": {
+    "version": "0.16.0",
+    "commit": "be6d0ab9af777cd69a216ab7e19de2e504f99280",
+    "tag": "core-v0.16.0",
+    "fullGateSeconds": 650
+  },
+  "endpoint": {
+    "version": "0.6.0",
+    "commit": "4bb88c214c28ce6584625ccf848303c756337b69",
+    "tag": "endpoint-v0.6.0",
+    "fullGateSeconds": 655
+  },
+  "observedRemoteBeforeEvidenceCommit": {
+    "refs/heads/main": "4bb88c214c28ce6584625ccf848303c756337b69",
+    "refs/tags/core-v0.16.0": "1b3fbaa96f4af01f0d01f4323ea348d181859004",
+    "refs/tags/core-v0.16.0^{}": "be6d0ab9af777cd69a216ab7e19de2e504f99280",
+    "refs/tags/endpoint-v0.6.0": "fc72e682b07a7e6740d474ab0e46cd634dfada88",
+    "refs/tags/endpoint-v0.6.0^{}": "4bb88c214c28ce6584625ccf848303c756337b69"
+  },
+  "compiler": "1.99.1",
+  "suppliers": {
+    "types": "0.18.0",
+    "runtime": "0.19.0",
+    "facade": "0.19.0",
+    "pocketIC": "0.19.0",
+    "testkit": "0.81.0"
+  },
+  "publishedPackages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.16.0",
+      "commit": "be6d0ab9af777cd69a216ab7e19de2e504f99280",
+      "sha256": "022f7cfa0eb58ac31669b30e9d65f4476ad16d2c09e42585938f2c3f524c5e14",
+      "yanked": false,
+      "archiveMatchesUpload": true,
+      "allPackagedSourceMatchesCommit": true,
+      "rustVersion": "1.99.1",
+      "vcs": {
+        "git": {
+          "sha1": "be6d0ab9af777cd69a216ab7e19de2e504f99280"
+        },
+        "path_in_vcs": "crates/ic-wire-derive"
+      },
+      "registry": {
+        "name": "ic-wire-derive",
+        "vers": "0.16.0",
+        "deps": [
+          {
+            "name": "proc-macro2",
+            "req": "^1.0.107",
+            "features": [],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "quote",
+            "req": "^1.0.47",
+            "features": [],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "syn",
+            "req": "^3.0.9",
+            "features": [
+              "visit"
+            ],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "normal"
+          }
+        ],
+        "cksum": "022f7cfa0eb58ac31669b30e9d65f4476ad16d2c09e42585938f2c3f524c5e14",
+        "features": {
+          "endpoint": [
+            "syn/full"
+          ]
+        },
+        "yanked": false,
+        "rust_version": "1.99.1",
+        "pubtime": "2026-11-03T09:46:53Z"
+      }
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.16.0",
+      "commit": "be6d0ab9af777cd69a216ab7e19de2e504f99280",
+      "sha256": "7405eaf0d977aa1765f7f2ab06724154653ef2235da72a99b9c92a19fbd75230",
+      "yanked": false,
+      "archiveMatchesUpload": true,
+      "allPackagedSourceMatchesCommit": true,
+      "rustVersion": "1.99.1",
+      "vcs": {
+        "git": {
+          "sha1": "be6d0ab9af777cd69a216ab7e19de2e504f99280"
+        },
+        "path_in_vcs": "crates/ic-wire"
+      },
+      "registry": {
+        "name": "ic-wire",
+        "vers": "0.16.0",
+        "deps": [
+          {
+            "name": "bytemuck",
+            "req": "^1.25.2",
+            "features": [
+              "must_cast"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "clap",
+            "req": "^4.6.7",
+            "features": [
+              "std",
+              "help",
+              "usage",
+              "error-context"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "dev"
+          },
+          {
+            "name": "ic-platform-types",
+            "req": "^0.18.0",
+            "features": [],
+            "optional": true,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "ic-wire-derive",
+            "req": "^0.16.0",
+            "features": [],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "postcard",
+            "req": "^1.1.1",
+            "features": [
+              "alloc"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "serde",
+            "req": "^1.0",
+            "features": [
+              "derive",
+              "alloc"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "serde_bytes",
+            "req": "^0.11.19",
+            "features": [
+              "alloc"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "serde_json",
+            "req": "^1.0",
+            "features": [],
+            "optional": true,
+            "default_features": true,
+            "target": "cfg(not(target_family = \"wasm\"))",
+            "kind": "normal"
+          },
+          {
+            "name": "serde_json",
+            "req": "^1.0",
+            "features": [],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "dev"
+          }
+        ],
+        "cksum": "7405eaf0d977aa1765f7f2ab06724154653ef2235da72a99b9c92a19fbd75230",
+        "features": {},
+        "features2": {
+          "platform-types": [
+            "dep:ic-platform-types",
+            "typescript"
+          ],
+          "typescript": [
+            "dep:serde_json"
+          ]
+        },
+        "yanked": false,
+        "rust_version": "1.99.1",
+        "pubtime": "2026-11-03T09:47:28Z",
+        "v": 2
+      }
+    },
+    {
+      "name": "ic-wire-endpoint",
+      "version": "0.6.0",
+      "commit": "4bb88c214c28ce6584625ccf848303c756337b69",
+      "sha256": "69b59e101b8ae98b55a230975a26aefc78af05fafb263bc3589a214b2b49bbd3",
+      "yanked": false,
+      "archiveMatchesUpload": true,
+      "allPackagedSourceMatchesCommit": true,
+      "rustVersion": "1.99.1",
+      "vcs": {
+        "git": {
+          "sha1": "4bb88c214c28ce6584625ccf848303c756337b69"
+        },
+        "path_in_vcs": "crates/ic-wire-endpoint"
+      },
+      "registry": {
+        "name": "ic-wire-endpoint",
+        "vers": "0.6.0",
+        "deps": [
+          {
+            "name": "ic-platform-runtime",
+            "req": "^0.19.0",
+            "features": [
+              "cdk"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "ic-wire",
+            "req": "^0.16.0",
+            "features": [],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "ic-wire-derive",
+            "req": "^0.16.0",
+            "features": [
+              "endpoint"
+            ],
+            "optional": false,
+            "default_features": true,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "serde",
+            "req": "^1.0",
+            "features": [
+              "derive",
+              "alloc"
+            ],
+            "optional": false,
+            "default_features": false,
+            "target": null,
+            "kind": "normal"
+          },
+          {
+            "name": "serde_json",
+            "req": "^1.0",
+            "features": [],
+            "optional": true,
+            "default_features": true,
+            "target": "cfg(not(target_family = \"wasm\"))",
+            "kind": "normal"
+          }
+        ],
+        "cksum": "69b59e101b8ae98b55a230975a26aefc78af05fafb263bc3589a214b2b49bbd3",
+        "features": {},
+        "features2": {
+          "typescript": [
+            "ic-wire/typescript",
+            "dep:serde_json"
+          ]
+        },
+        "yanked": false,
+        "rust_version": "1.99.1",
+        "pubtime": "2026-11-03T10:01:27Z",
+        "v": 2
+      }
+    }
+  ],
+  "originalPreservation": {
+    "path": "/home/adam/projects/ic-wire",
+    "head": "aa308c9c859687f505cdde33a5d47c96c99ac601",
+    "status": " M Cargo.lock\n M docs/design.md\n M docs/evidence/hotspots-0150/README.md\n M docs/status/current.md\n M releases/core/CHANGELOG.md\n M releases/endpoint/CHANGELOG.md\n?? docs/evidence/account-batch-0151/\n?? docs/evidence/contract-artifact-0160/\n?? docs/evidence/contract-fingerprint-0160/\n?? docs/evidence/platform019-types018/\n?? docs/evidence/types-016-readiness/\n?? releases/core/0.16.md\n?? releases/endpoint/0.6.md\n",
+    "manifestHashes": {
+      "Cargo.toml": "43ac977205a70ff5e7f2f764d6b3b78bec2ac0efca0907bc7980046ac0db05c8",
+      "Cargo.lock": "5ccf7cf87cd017c30aca1ee0718f116f747a1f0007f16356502f0e4fa53f5af2"
+    },
+    "unrelatedTypesReadinessExcluded": true
+  },
+  "pairedCostStudy": "Historical before own-version metadata transactions; final registry installed proof is correctness, not another cost matrix"
+}

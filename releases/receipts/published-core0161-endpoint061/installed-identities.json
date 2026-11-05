@@ -1,0 +1,42 @@
+{
+  "ic-wire": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.16.1",
+    "version": "0.16.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-wire-derive": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.16.1",
+    "version": "0.16.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-wire-endpoint": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint@0.6.1",
+    "version": "0.6.1",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-platform-types": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.18.0",
+    "version": "0.18.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-platform-runtime": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime@0.19.0",
+    "version": "0.19.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-platform-runtime-guard": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.19.0",
+    "version": "0.19.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-platform-pocket-ic": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-pocket-ic@0.20.0",
+    "version": "0.20.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "ic-testkit": {
+    "id": "registry+https://github.com/rust-lang/crates.io-index#ic-testkit@0.83.0",
+    "version": "0.83.0",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  }
+}

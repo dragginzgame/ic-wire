@@ -1,0 +1,8 @@
+{
+  "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.13.3",
+  "ic-wire-derive": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.13.3",
+  "ic-wire-endpoint": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint@0.3.0",
+  "ic-platform": "registry+https://github.com/rust-lang/crates.io-index#ic-platform@0.16.0",
+  "ic-platform-types": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.15.1",
+  "ic-platform-runtime-guard": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.16.0"
+}

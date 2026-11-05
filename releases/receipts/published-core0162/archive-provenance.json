@@ -1,0 +1,64 @@
+{
+  "source": "85a164ceffecfeba507930adb539463b617dea93",
+  "archives": [
+    {
+      "package": "ic-wire-derive",
+      "version": "0.16.2",
+      "sha256": "60796e0da1200abcbe657870d590e9d796ed07f1eb72d1f713b37948998824e4",
+      "bytes": 10156,
+      "vcs": {
+        "git": {
+          "sha1": "85a164ceffecfeba507930adb539463b617dea93"
+        },
+        "path_in_vcs": "crates/ic-wire-derive"
+      },
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/endpoint/mod.rs",
+        "src/lib.rs",
+        "src/native_schema/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-wire",
+      "version": "0.16.2",
+      "sha256": "12a4538a2f347ba5b72d02e203544ec208f79df200243920d464c9578ce9b7ad",
+      "bytes": 59338,
+      "vcs": {
+        "git": {
+          "sha1": "85a164ceffecfeba507930adb539463b617dea93"
+        },
+        "path_in_vcs": "crates/ic-wire"
+      },
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/bounded/borrowed/mod.rs",
+        "src/bounded/mod.rs",
+        "src/bounded/packed_i16/mod.rs",
+        "src/contract/mod.rs",
+        "src/float/mod.rs",
+        "src/lib.rs",
+        "src/native/LICENSE-MIT",
+        "src/native/decode/mod.rs",
+        "src/native/encode/mod.rs",
+        "src/native/mod.rs",
+        "src/native/parser/LICENSE-MIT",
+        "src/native/parser/mod.rs",
+        "src/native/tests/mod.rs",
+        "src/packed/mod.rs",
+        "src/platform_types/mod.rs",
+        "src/typescript/bulk_lint/mod.rs",
+        "src/typescript/limits/mod.rs",
+        "src/typescript/metadata/mod.rs",
+        "src/typescript/mod.rs",
+        "src/typescript/native_schema/mod.rs",
+        "src/typescript/native_schema/registry/mod.rs",
+        "src/typescript/runtime.ts"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "sha256": "3d55d753902fe09bd5fe2c74628768b74cc198f3029bb8c66e0c72b9e262d981",
+  "uncompressed_bytes": 100413,
+  "code_section_bytes": 86476,
+  "profile": "evaluation",
+  "core_version": "0.16.2",
+  "endpoint_version": "0.6.1",
+  "runtime": "0.19.1",
+  "server": "16.1.0",
+  "installed_test": "passed"
+}

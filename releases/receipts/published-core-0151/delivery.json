@@ -1,0 +1,14 @@
+{
+  "source": "77ef6d67d1f7db3440d74906ad1aab1777094c12",
+  "release_commit": "e1e8bf8767616fc9c037e894a7985985a1c27dae",
+  "core_tag": "core-v0.15.1",
+  "tag_object": "9cb976448ee495d454d68e20fb2368c770e15c49",
+  "endpoint_version": "0.5.0",
+  "full_ci_seconds": 697,
+  "rust": "1.99.1",
+  "server_sha256": "69e324bdb68d32d878b7a9504b1379f08f8d1921272bacb065b0fabb3d0f3792",
+  "published": [
+    "ic-wire-derive@0.15.1",
+    "ic-wire@0.15.1"
+  ]
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "dependency": "clap",
+    "allowed_packages": [
+      "ic-wire",
+      "ic-wire-benchmarks",
+      "ic-wire-qualification"
+    ]
+  },
+  {
+    "dependency": "ic-build",
+    "allowed_packages": [
+      "ic-wire-qualification"
+    ]
+  }
+]

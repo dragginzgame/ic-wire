@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+
+jobs:
+  change-scope:
+    runs-on: ubuntu-24.04
+    outputs:
+      scope: ${{ steps.classify.outputs.scope }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check reviewed snapshot integrity
+        run: make shared-tooling-check
+      - name: Prepare pinned security scanner
+        id: security-tool
+        run: |
+          scanner="$(bash scripts/ci/install-ci-tool.sh gitleaks --install-dir "$RUNNER_TEMP/ci-security")"
+          echo "gitleaks=$scanner" >> "$GITHUB_OUTPUT"
+      - name: Scan repository history for secrets
+        env:
+          GITLEAKS_BIN: ${{ steps.security-tool.outputs.gitleaks }}
+        run: |
+          "$GITLEAKS_BIN" git --redact=100 --no-banner --no-color --log-level error "$GITHUB_WORKSPACE"
+      - name: Classify the exact tested change
+        id: classify
+        env:
+          CHANGE_EVENT: ${{ github.event_name }}
+          CHANGE_REF: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', github.base_ref) || github.ref }}
+          CHANGE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          CHANGE_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$CHANGE_HEAD"
+          scope="$(perl scripts/ci/classify-ci-change.pl --event "$CHANGE_EVENT" --ref "$CHANGE_REF" \
+            --base "$CHANGE_BASE" --head "$CHANGE_HEAD" --policy ci/docs-only-paths.txt)"
+          case "$scope" in docs|full) ;; *) scope=full ;; esac
+          if [[ "$scope" == docs ]]; then
+            git diff --check "$CHANGE_BASE...$CHANGE_HEAD" --
+          fi
+          echo "scope=$scope" >> "$GITHUB_OUTPUT"
+
+  docs:
+    needs: change-scope
+    if: ${{ needs.change-scope.result == 'success' && needs.change-scope.outputs.scope == 'docs' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Check prose documentation
+        run: make check-doc-links
+
+  validate:
+    needs: change-scope
+    if: ${{ needs.change-scope.result == 'success' && needs.change-scope.outputs.scope != 'docs' }}
+    name: ${{ matrix.suite }} (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+        suite: [core, typescript, benchmarks]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare reviewed bootstrap tools
+        run: make install-host-tools
+      - name: Prepare the compiler from local policy
+        run: |
+          export PATH="$PWD/.tools/host/bin:$PATH"
+          bash scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
+          bash scripts/ci/rust-policy.sh
+          echo "RUSTUP_TOOLCHAIN=$(bash scripts/ci/read-cargo-workspace-rust-version.sh Cargo.toml)" >> "$GITHUB_ENV"
+      - name: Install reviewed common tools
+        run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
+      - name: Prepare Node for TypeScript qualification
+        if: matrix.suite == 'typescript'
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: examples/browser/.nvmrc
+          package-manager-cache: false
+      - name: Prepare pinned npm and TypeScript compiler
+        if: matrix.suite == 'typescript'
+        run: |
+          npm install --global "$(node -p 'require("./examples/browser/package.json").packageManager')"
+          npm --prefix examples/browser ci
+      - name: Prepare locked workspace dependencies
+        run: cargo fetch --locked
+      - name: Validate selected CI group
+        env:
+          VALIDATION_LOG_DIR: ${{ runner.temp }}/ic-wire-validation
+          CI_GROUP: ${{ matrix.suite }}
+        run: make "ci-$CI_GROUP"
+      - name: Retain failure evidence
+        if: ${{ failure() }}
+        uses: ./.github/actions/retain-failure-evidence
+        with:
+          name: validation-${{ matrix.suite }}-${{ matrix.os }}-${{ github.run_attempt }}
+          temp-root: ${{ runner.temp }}
+          repository-root: ${{ github.workspace }}
+          compact-successful-tools: 'true'
+
+  # Preserve the existing required check names. These light gates qualify the
+  # selected qualification. A docs pass does not claim native execution.
+  scaffold:
+    if: ${{ always() }}
+    needs: [change-scope, docs, validate]
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require selected qualification
+        env:
+          CLASSIFICATION_RESULT: ${{ needs.change-scope.result }}
+          CHANGE_SCOPE: ${{ needs.change-scope.outputs.scope }}
+          DOCS_RESULT: ${{ needs.docs.result }}
+          VALIDATION_RESULT: ${{ needs.validate.result }}
+        run: |
+          test "$CLASSIFICATION_RESULT" = success
+          case "$CHANGE_SCOPE" in
+            docs) test "$DOCS_RESULT" = success && test "$VALIDATION_RESULT" = skipped ;;
+            full) test "$VALIDATION_RESULT" = success && test "$DOCS_RESULT" = skipped ;;
+            *) exit 1 ;;
+          esac

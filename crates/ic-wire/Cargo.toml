@@ -1,0 +1,59 @@
+[package]
+name = "ic-wire"
+description = "Bounded Serde/Postcard contracts for controlled Internet Computer endpoints"
+version = "0.17.2"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = ["crates-io"]
+readme = "README.md"
+include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+
+[features]
+platform-types = ["dep:ic-platform-types", "typescript"]
+typescript = ["dep:ic-wire-derive", "dep:serde_json"]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+serde_json = { workspace = true, optional = true }
+
+[dependencies]
+bytemuck.workspace = true
+ic-platform-types = { workspace = true, optional = true }
+ic-wire-derive = { workspace = true, optional = true }
+postcard.workspace = true
+serde.workspace = true
+serde_bytes.workspace = true
+
+[dev-dependencies]
+clap.workspace = true
+serde_json.workspace = true
+
+[[test]]
+name = "runtime"
+path = "tests/runtime/mod.rs"
+
+[[test]]
+name = "ui"
+path = "tests/ui/mod.rs"
+
+[[test]]
+name = "native"
+path = "tests/native/mod.rs"
+
+[[test]]
+name = "borrowed"
+path = "tests/borrowed/mod.rs"
+
+[[example]]
+name = "typescript-conformance"
+path = "examples/typescript_conformance/mod.rs"
+required-features = ["typescript"]
+
+[[example]]
+name = "bulk-lint"
+path = "examples/bulk_lint/mod.rs"
+required-features = ["typescript"]
+
+[lints]
+workspace = true

@@ -1,0 +1,6 @@
+{
+  "git": {
+    "sha1": "a8195d42683f90810a9afd615e4f27e3e5a3c744"
+  },
+  "path_in_vcs": "crates/ic-wire-derive"
+}

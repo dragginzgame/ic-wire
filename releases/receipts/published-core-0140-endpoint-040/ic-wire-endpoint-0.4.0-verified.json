@@ -1,0 +1,85 @@
+{
+  "name": "ic-wire-endpoint",
+  "version": "0.4.0",
+  "commit": "f9486c36eac4a52dea5c0c659413f7f598dfb65f",
+  "sha256": "c922f2c0a7a5e3f23551000c792606b67fe06c8ceae27d7dd8f434b275f903bb",
+  "yanked": false,
+  "archiveMatchesUpload": true,
+  "allPackagedSourceMatchesCommit": true,
+  "vcs": {
+    "git": {
+      "sha1": "f9486c36eac4a52dea5c0c659413f7f598dfb65f"
+    },
+    "path_in_vcs": "crates/ic-wire-endpoint"
+  },
+  "registry": {
+    "name": "ic-wire-endpoint",
+    "vers": "0.4.0",
+    "deps": [
+      {
+        "name": "ic-platform-runtime",
+        "req": "^0.17.1",
+        "features": [
+          "cdk"
+        ],
+        "optional": false,
+        "default_features": false,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "ic-wire",
+        "req": "^0.14.0",
+        "features": [],
+        "optional": false,
+        "default_features": true,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "ic-wire-derive",
+        "req": "^0.14.0",
+        "features": [
+          "endpoint"
+        ],
+        "optional": false,
+        "default_features": true,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "serde",
+        "req": "^1.0",
+        "features": [
+          "derive",
+          "alloc"
+        ],
+        "optional": false,
+        "default_features": false,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "serde_json",
+        "req": "^1.0",
+        "features": [],
+        "optional": true,
+        "default_features": true,
+        "target": "cfg(not(target_family = \"wasm\"))",
+        "kind": "normal"
+      }
+    ],
+    "cksum": "c922f2c0a7a5e3f23551000c792606b67fe06c8ceae27d7dd8f434b275f903bb",
+    "features": {},
+    "features2": {
+      "typescript": [
+        "ic-wire/typescript",
+        "dep:serde_json"
+      ]
+    },
+    "yanked": false,
+    "rust_version": "1.91",
+    "pubtime": "2026-11-01T17:05:25Z",
+    "v": 2
+  }
+}

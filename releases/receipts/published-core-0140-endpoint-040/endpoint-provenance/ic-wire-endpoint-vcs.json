@@ -1,0 +1,6 @@
+{
+  "git": {
+    "sha1": "f9486c36eac4a52dea5c0c659413f7f598dfb65f"
+  },
+  "path_in_vcs": "crates/ic-wire-endpoint"
+}

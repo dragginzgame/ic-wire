@@ -1,0 +1,687 @@
+# Core group changelog
+
+Covers ic-wire, ic-wire-derive and the private ic-wire-benchmarks,
+ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
+series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
+in [shared history](../history.md).
+
+## [0.17.3]
+
+### ⬆️ Dependencies
+
+- Adopt Platform 0.23 for unpublished Candid/IC0 qualification controls. Keep
+  production Types 0.18.1 and Runtime 0.19.2 selections; Wire does not call the
+  changed optional subnet-metrics decoder. Codec bytes and budgets are unchanged.
+- Adopt committed Shared Tooling 0.30.4: repair macOS-compatible LOC table
+  options, keep formatting/LOC scratch under the owning target directory and
+  tighten release-heading validation. Release-stage reuse and final-candidate
+  execution remain disabled; protocol bytes are unchanged.
+
+### 🧹 Cleanup
+
+- Replace per-run evidence archives and routine adoption reports with compact
+  topic summaries. Preserve small release records, repair references and state
+  explicitly where raw measurements were retired. Benchmark output defaults
+  now live under `target/evidence/`.
+
+### 🩹 Fixed
+
+- Enforce Shared's Candid source boundary in the existing dependency gate, with
+  exact named allowances for unpublished codec-comparison DTOs and helpers.
+  Production types stay Wire-only; private fixture fields and bytes are unchanged.
+
+## [0.17.2] - 2026-11-05
+
+### ⬆️ Dependencies
+
+- Adopt Testkit 0.86 for native codec/endpoint qualification. Its optional typed
+  Wire support follows the 0.17 line and remains disabled here. Locked graph,
+  affected-package lint, native caller compilation and installed endpoint
+  admission/reply/borrowing/rollback checks pass on Rust 1.99.1. Production
+  dependencies, codec bytes, schemas and budgets are unchanged; no new codec
+  performance or Wasm-size claim. [Qualification](../../docs/evidence/README.md).
+- Retain the separately approved Platform facade 0.22.1 update for qualification;
+  production Types and Runtime selections remain unchanged.
+
+### 🧹 Cleanup
+
+- Adopt committed Shared Tooling 0.30.0, including source-aware LOC categories
+  and bounded Git-side release-state admission. Separate Rust tests, benchmarks
+  and development tools under their conventional owners and declare private
+  package roles. No public API, codec byte, schema, identity or budget changes.
+- Give public-package schema lint one owner. Group-scoped lint and archive checks
+  select the same packages; full release plans explicitly lint both groups.
+  Archive review now requires `RELEASE_GROUP=core` or `endpoint`.
+
+### 🩹 Fixed
+
+- Repair all five broken links in exported Shared documentation by adopting
+  Shared's committed LOC-reference fix and selecting the missing audit guide
+  through its exporter. The documentation gate now checks every exported
+  Markdown file and rejects broken Shared links in its normal CI fixture.
+- Fail diagnostic discovery on missing/unreadable expectations and benchmark
+  report discovery on invalid or redirected run directories instead of silently
+  omitting required inputs. Keep regression checks in their owning normal gates.
+- Replace the diagnostic fixture's broad lint allowance with justified
+  expectations and remove its obsolete import suppression.
+
+### 🧪 Testing
+
+- Qualify a separately pinned nightly for opt-in sanitizer fuzzing, replacing the
+  runner's compiler that predates the package floor. Normal development and
+  release builds remain on Rust 1.99.1. Keep private corpus checks beside their
+  benchmark modules, using `--example codec-wasm` in place of `--test roundtrip`.
+  Scope test-only imports to remain lint-clean when the same modules are loaded
+  by harness-free benchmark targets.
+
+[Audit, checks and retained-state finding](../../docs/evidence/README.md).
+
+## [0.17.1] - 2026-11-04
+
+### 🧹 Cleanup
+
+- Share bounded-byte allocation/copy decoding across field bounds, and centralize
+  packed-reader mechanics and strict u32/u64 varint source without changing
+  specialized fast paths. Public APIs, bytes, field bounds, budgets and typed
+  errors are unchanged. Empty-byte decode at opt-z rises 583.5 → 642.5
+  instructions (+10.1%); 64 KiB overhead stays below 0.09%. Packed/scalar counts
+  remain identical. Many-bound stress measurements are qualification controls,
+  not projected application savings; generated fixture types stay outside the
+  published dependency graph.
+  [Tradeoffs and reproduction](../../docs/evidence/codec-cleanup.md).
+- Share browser decoder error translation and correct the native module's stale
+  Endpoint description. Keep frame/payload completion explicit; broader helper
+  experiments added indirection without a stable performance benefit.
+- Share bounded-list growth code across bounds, preserving constant-bound
+  specialization for tiny bounds and zero-sized elements. One source algorithm
+  retains bytes, limits, budgets and custom-decoder ordering. Large-list decode
+  improves; one-element u64 decode at opt-3 rises 628 → 724 instructions
+  (+15.3%), tiny rejection up to 17%; unit-list and
+  encoding counters stay unchanged. Reject borrowed-visitor sharing and fully
+  generic unit loops. [Measurements and tradeoffs](../../docs/evidence/bound-sharing.md).
+
+## [0.17.0] - 2026-11-04
+
+[Migration and release contract](0.17.md).
+
+### ⚠️ Breaking
+
+- Make the metadata derive optional through the existing `typescript` feature.
+  Consumers using `ic_wire::Wire` select that feature, or `platform-types`, in
+  schema-generating builds. Codec-only builds no longer compile `ic-wire-derive`;
+  ordinary Serde implementations, wire bytes and budgets are unchanged.
+  Fresh codec-only builds contain zero Wire derive artifacts. In the matched
+  Endpoint fixture, opt-z adds 413 uncompressed Wasm bytes; opt-3 size and measured
+  partial endpoint instruction counts stay unchanged. Opt-z instruction counts
+  decrease by less than 0.06%; no build-time speedup is claimed.
+  [Qualification](../../docs/evidence/optional-metadata-derive.md).
+
+- Remove the `ic-wire-derive/endpoint` feature and its direct query/update
+  attributes. Use `ic_wire_endpoint::{query, update}`; their generator now belongs
+  to Endpoint's own proc-macro package and release group. The `Wire` metadata
+  derive, generated endpoint tokens, frame bytes, identities and budgets stay
+  unchanged. Align Endpoint 0.7 for the coordinated package-identity cut.
+
+### ⬆️ Dependencies
+
+- Require Platform Types 0.18.1 for optional Principal/Account schemas. Its
+  `principal-external` feature restores upstream Serde support without Candid or
+  hashing; owned identity serialization, schemas and budgets are unchanged.
+  Standalone host/Wasm byte/refusal tests and installed Endpoint qualification
+  pass. Endpoint Wasm sizes and measured partial instruction counts are unchanged.
+  [Qualification](../../docs/evidence/README.md).
+
+- Adopt Platform facade 0.22 and Testkit 0.85 for qualification. Runtime 0.19.1
+  and canonical Types 0.18 stay unchanged; Testkit retains facade 0.21 only in
+  its native management adapter. Standalone schema/identity graphs, installed
+  Endpoint calls/rollback and Candid corpus checks pass. Both Endpoint Wasms
+  remain byte-identical at opt-z/opt-3; production encoding and budgets are unchanged.
+  [Evidence](../../docs/evidence/README.md).
+
+## [0.16.2] - 2026-11-04
+
+### ⬆️ Dependencies
+
+- Adopt Platform facade 0.21 and matching Testkit 0.84.1, using its owned
+  `ic_testkit::pocket_ic` client throughout native qualification. Remove the
+  separate Platform PocketIC dependency and keep Testkit out of Core/schema/
+  endpoint production graphs. Qualify compatible Runtime/macros/guard 0.19.1 and
+  native Host artifacts/fs/process 0.74.3 patch selections. Types 0.18, codec
+  bytes, identities and budgets are unchanged; frozen benchmark reports retain
+  their original supplier locks.
+
+### 🔧 Changed
+
+- Recognize ordinary 32-byte hash lists in bulk-field advice, including aliases
+  and newtypes, with exact `/list/hash32` acknowledgements. Bound default report
+  formatting to eight entries plus a summary while retaining every diagnostic
+  for review and CI. Generated TypeScript and production protocol stay unchanged.
+  Host generation of 1,024 newly detected hash fields adds 0.17–0.20 ms; default
+  formatting of 1,024 integer warnings is about 98.6–98.7% faster in two rounds.
+  [Qualification](../../docs/evidence/schema-generation.md).
+
+### 🧪 Testing
+
+- Add 94-case missing-type coverage and its paired private float/bool bulk-field
+  research cohort, retaining ordinary-vector and plain-array Candid controls.
+  Include owned Principal lengths, byte-adapted Candid Accounts/hash keys, nested
+  packed containers, deterministic hash collections, bounded Nat conversion,
+  standard-library types, borrowed records and non-finite IEEE bits. Candid stays
+  qualification-only; no new public Packed words, schemas or codecs are selected.
+  Both measured cohorts retain 752 primary comparisons and eight fresh Wasm
+  modules. Private 1 MiB opt-3 encode falls to about 1.05M instructions versus
+  Candid's 2.11M, saving 1,564 total uncompressed Wasm bytes in the paired fixture;
+  tiny-input regressions and both native/IC profiles remain visible.
+  [Evidence](../../docs/evidence/primitive-bulk.md).
+  Private float byte-count prefixes differ from ordinary element counts
+  (`01 00 00 80 3f` → `04 00 00 80 3f` for `[1_f32]`); bool bytes match but buffer
+  admission differs. Any future promotion requires coordinated clients/bounds.
+
+- Refresh the full Candid comparison with all 26 cohorts, 1,387 overlapping
+  case entries and 104 fresh Wasm modules. Retain both optimization profiles,
+  native timing, allocator probes, IC counters and frame bytes. Record remaining
+  float/bool/vector hotspots and missing owned-type/Candid-adapter controls;
+  no production type, encoding, budget or acceptance rule changes.
+  [Evidence](../../docs/candid-comparison.md).
+
+### 🩹 Fixed
+
+- Run the declared hotspot cohort in the full Candid matrix instead of silently
+  skipping it. The frozen cohort roster now matches all measured output folders.
+
+- Adopt committed Shared Tooling 0.28.3 (`1a2a8b3`), including explicit
+  Bash 3.2 manifest-order refusal and UTF-8 validation-evidence handling. Preserve
+  existing release groups, compiler/tool pins and product gate coverage.
+
+- Restore CI/bootstrap commands on macOS system Make. Admit the shared roster
+  without requiring GNU Make 4.2's `.SHELLSTATUS`, and continue refusing failed
+  readers even when they emit partial stage lists. Codec bytes and budgets are
+  unchanged; published Core 0.16.1 packages are unaffected.
+- Make the release fixture's intentional failure explicit on Bash 3.2. Preserve
+  inner failure logs in CI artifacts and bound the displayed diagnostic tail.
+
+## [0.16.1] - 2026-11-03
+
+### 🔧 Changed
+
+- Consolidate release validation on Shared's roster, baseline and evidence
+  helpers. Full CI and selected release plans share one stage declaration;
+  preserve source custody, copied-proof recovery and required native coverage.
+  Eligible Endpoint-only Linux changes select their qualified gate, while Core,
+  shared or uncertain changes retain full scope.
+  [#45](https://github.com/dragginzgame/ic-wire/issues/45).
+- Refresh Shared Tooling to 0.28.2, including its shared plan parser, packaging
+  admission and maintenance safeguards. Preserve the compiler and tool pins.
+
+### ⬆️ Dependencies
+
+- Update qualification to canonical PocketIC client/facade 0.20 and Testkit 0.83.
+  Keep Runtime/macros/exact guard 0.19, Types 0.18 and Rust 1.99.1; use one client
+  identity without supplier patches or another executor.
+
+### 🩹 Fixed
+
+- Repair the ignored endpoint cost probe's canonical imports and fallible setup
+  calls. Explicitly compile its test harness during endpoint admission so ordinary
+  example lint cannot leave this caller unchecked.
+
+### 🧭 Migration Notes
+
+- Internal release-validation receipts now bind Shared-verified evidence. Older
+  receipts need a fresh applicable gate. Wire frames, payloads, retry/hash bytes,
+  admission budgets and the published 0.16 Account contract remain unchanged.
+
+## [0.16.0] - 2026-11-03
+
+### ⚠️ Breaking
+
+- Select canonical Platform Types 0.18 for optional Principal/Account schemas.
+  Account's present subaccount changes from `01 + 32 bytes` to `01 20 + 32 bytes`;
+  None remains `00`. Describe exact 32-byte buffers and generate Uint8Array
+  browser fields. Preserve owner/subaccount order, raw absent versus explicit
+  zero, logical account identity and external ledger Candid bytes.
+- Coordinate fresh endpoint keys and regenerated clients. Current default IDs
+  hash only the exported method name; a package/schema bump does not fence old
+  bytes, which can decode into different valid values. Resolve retained/in-flight
+  operations, preserve original retry/signature/hash bytes, and inventory unframed
+  stored Account data. No legacy reader or automatic migration is provided.
+
+### ⬆️ Dependencies
+
+- Qualify Platform/PocketIC 0.19 and Testkit 0.81 with the canonical Types family;
+  Endpoint independently selects Runtime/macros/exact guard 0.19. Keep Core
+  SDK-independent by default and optional host schemas separate from execution.
+  The Rust minimum and pinned compiler remain 1.99.1. Retain the already selected
+  Build 0.74.1 / Host 0.74.2 lock updates.
+
+### 🧪 Testing
+
+- Qualify standalone schema/combined consumers, exact Rust–TypeScript vectors,
+  malformed fields, all four admission limits and same-key misdecode/fresh-key
+  refusal. Require typed canister errors in installed rejection tests so transport
+  failures cannot count as successful refusal; add no retry policy.
+- [Published-supplier comparisons](../../docs/evidence/account-platform-cut.md)
+  retain 1,230 codec operation pairs and 356 endpoint case/profile pairs, with
+  uncompressed total/code Wasm measurements. For 128 zero-subaccount Accounts,
+  encode/decode instructions fall 74.59%/81.61%, adding 128 frame bytes. Retain
+  absent Account encode +12 and empty sparse-record encode +9 instruction
+  regressions, Candid control drift and its opt-3 module growth. This is a
+  58-case linked workload, not a whole-application or native-time claim.
+
+### 🔬 Research
+
+- Retain the [fingerprint study](../../docs/evidence/contract-fingerprint.md)
+  and [macro artifact trial](../../docs/evidence/contract-artifact.md)
+  as isolated research. Production macros retain their current `id` option and
+  name-derived default; no automatic fingerprint API or runtime hashing is enabled.
+  The trials preserve runtime costs but add host generation/verification cost;
+  recursive layouts and reusable consumer build ownership remain unqualified.
+
+## [0.15.1] - 2026-11-02
+
+### 🧹 Cleanup
+
+- Replace schema-derive attribute switches with explicit sites, reuse fixture
+  policy projection, simplify corpus exclusions and name existing budget units.
+  Share benchmark operation constants/fingerprints and the sealed packed encoder;
+  retain independent verification and bounded decoding. Reject collector, shared
+  decoder and browser-finalizer trials after measuring their tradeoffs.
+  [Seven selected cleanups and ten reviewed candidates](../../docs/evidence/complexity-cleanup.md)
+  preserve protocol bytes and budgets: all 1,762 measured Wire instruction pairs
+  and all six total/code Wasm size pairs are unchanged. No native speedup is claimed.
+
+- Defer owned-only helper construction until after the borrowed endpoint expansion.
+  Keep direct quotation after shared-scaffold experiments increased host cost.
+  Replace the expansion benchmark's old one-sided default lane with paired
+  default/explicit, borrowed, async and hygiene controls plus token equality.
+  [Measured host costs and identical Wasm](../../docs/evidence/endpoint-cleanup.md)
+  retain regressions; generated tokens, protocol and ownership are unchanged.
+
+- Share host schema work/depth ceilings and the named-definition validation/render
+  loop. Preserve each traversal's counter, boundary rules and error order;
+  accepted schemas, diagnostics, generated clients and protocol bytes are unchanged.
+  Correct stale guidance referring to Core's removed endpoint feature.
+  [Paired host-generation and uncompressed Wasm checks](../../docs/evidence/schema-cleanup.md)
+  retain small/100-definition controls, repeated samples and regressions.
+
+### 🧪 Testing
+
+- Reject Candid-only reports and unknown codec/operation labels in the paired
+  cost gate, which could previously pass without measuring Wire. Share row-key
+  and matched-identity bookkeeping; retain all four Wire lanes and optional
+  buffer-reuse measurements. Codec, protocol and cost thresholds are unchanged.
+
+- Adopt Testkit 0.80 for unpublished native codec/endpoint qualification. Its
+  optional Wire client now selects Core 0.15; qualify a registry-only consumer's
+  typed limits/errors and installed query/update calls. Keep default features
+  disabled and production suppliers, protocol bytes and budgets unchanged.
+  Both matched guest profiles remain byte-identical; retain
+  [qualification and raw Wasm sizes](../../docs/evidence/README.md).
+
+## [0.15.0] - 2026-11-02
+
+### ⚠️ Breaking
+
+- Require Rust 1.99.1 for Core/derive and qualification consumers, matching the
+  pinned development/release compiler. Upgrade older toolchains; protocol bytes,
+  schemas and budgets are unchanged. Preserve distinct host/Wasm and standalone
+  consumer proofs while removing duplicate old-compiler checks.
+- Align optional Principal/Account schemas with canonical Platform Types 0.17.
+  Consumers use matching Types 0.17 or Platform 0.18 re-exports. Serde declaration
+  order, schemas, bytes and budgets remain unchanged; the prepared subaccount
+  byte-adapter cut is not activated by this supplier update.
+
+### ⬆️ Dependencies
+
+- Adopt Shared Tooling 0.27.27 at `651f5f7acb2e3055abd51ba5f835a2112801666a`
+  through the canonical exporter. Keep the complete release gate; optional group
+  validation/reuse is not activated. Preserve codec bytes, budgets and selected
+  suppliers while updating tool-cache, dependency-owner and compiler guidance.
+
+- Adopt IC Build 0.74.0 and its Host 0.74.1 dependencies for diagnostics; select
+  the matching 0.74.0 release editor through the existing installer. Library
+  defaults remain disabled and CLI support stays confined to the executable.
+  Adopt the matching Testkit 0.79 / Platform-PocketIC 0.18 native client pairing
+  and required Metrics 0.26.1, keeping simulator/SDK clients out of production.
+
+### 🧪 Testing
+
+- Use documentation-only CI for an exact four-file prose allowlist, retaining
+  snapshot integrity, a pinned secret scan, links, whitespace and stable required
+  check names. Code, tooling, policy and uncertain changes keep all nine native
+  combinations; classification or qualification failures cannot produce success.
+- Qualify actual workflow shell steps and required-gate outcomes in disposable
+  Git histories. Complete release gates and the Wire protocol remain unchanged.
+- Extend the Wire/Candid corpus with real Platform identities, wide and sparse
+  records, large enums and fragmented blob batches. Preserve earlier workload
+  indices and record the additional fixture identity in paired cost checks;
+  production encoding, schemas and resource budgets are unchanged.
+- Select owned identity fixtures directly from the canonical Types supplier,
+  independently of Testkit's external client facade; preserve the existing
+  comparison shapes, byte values and standard workload indices.
+- Qualify the approved Account byte-adapter cut against isolated real Platform
+  Types source, including matching schema, Rust–TypeScript bytes/refusals and
+  changed admission boundaries. Retain reviewable supplier/Wire patches and
+  [paired measurements](../../docs/evidence/hotspots.md). The normal
+  published supplier and schema are unchanged until coordinated registry adoption.
+- Maintain a bounded borrowed-blob validation example that copies payloads only
+  after full-frame acceptance. Test exact bytes, borrowing, truncation, trailing
+  input and field bounds. Ownership conversion is consumer-budgeted; no additional
+  codec, public API or implicit replacement of owned decoding is introduced.
+- Screen shared error/header/limit/budget helpers in the 20-control and 100-type
+  Wasm fixtures. Reject all four candidates because they grow at least one
+  profile/fixture; retain absolute uncompressed/code sizes and reproducible inputs
+  with the hotspot evidence. No production codec or performance claim changes.
+- Investigate Canic's native marked-buffer observation with exact-source reruns,
+  same-source raw copies, limits/tuple controls and offset sweeps. Attribute the
+  large gap to native copy-placement sensitivity; retain reproducible evidence
+  and qualification guidance. Production bytes, budgets and codec stay unchanged.
+
+## [0.14.2] - 2026-11-01
+
+### 🧪 Testing
+
+- Adopt Testkit 0.78 and its Metrics 0.25 supplier for native endpoint and codec
+  qualification. Testkit's optional Wire support now aligns with Core 0.14;
+  production dependencies, protocol bytes, budgets and acceptance are unchanged.
+
+## [0.14.1] - 2026-11-01
+
+### 🧪 Testing
+
+- Adopt Platform/PocketIC 0.17 and Testkit 0.77 for native codec and endpoint
+  qualification, sharing canonical Types 0.16 with production DTOs. Retire the
+  older native client/type generation; preserve the production Runtime 0.17.1
+  supplier, wire bytes, schemas, budgets and acceptance rules.
+
+## [0.14.0] - 2026-11-01
+
+### ⚠️ Breaking
+
+- Align the optional Principal/Account schemas with canonical Types 0.16.
+  Consumers align their Types dependency or use the matching Platform 0.17
+  re-exports. Preserve Serde bytes, schemas, budgets, malformed-input acceptance
+  and exact retry/hash inputs; this is a Rust identity cut without a legacy lane.
+
+### 🧪 Testing
+
+- Qualify schemas against their canonical Types owner directly, independently of
+  the native qualification client's facade. Reject mixed DTO identities in the
+  composed Endpoint graph and prove a crypto-facade version change retains the
+  codec, schema and execution owners.
+- Prepare the crypto-only identity fixture through the workspace lock so clean
+  CI hosts can run it offline without relying on a developer's cached dependencies.
+
+## [0.13.5] - 2026-11-01
+
+### 🔧 Changed
+
+- Inline the single-byte output wrapper on Wasm. In the matched 100-type
+  opt-3 fixture, total module bytes fall 398,548 → 396,039 (−2,509), and code
+  bytes fall 364,120 → 361,615 (−2,505); opt-z is unchanged. Retain the existing
+  byte-slice writer after broader hints regressed map encoding. All 192 paired
+  IC operations pass the cost screen, with a maximum 1.83% increase; native
+  timing variability and regressions remain visible. Bytes, budgets, primitive
+  acceptance, error behavior and retained retry/hash inputs are unchanged.
+  [Measurements and rejected candidates](../../docs/evidence/writer-inlining.md).
+
+### 🧪 Testing
+
+- Record contract/output source identity in the private instruction sampler.
+  Retain matched repeated native/IC samples, small controls, allocation/heap
+  probes and physical raw/code Wasm for the output-writer investigation.
+
+- Retain the proposed independent Runtime adoption and its isolated Endpoint
+  qualification as research evidence. Published dependencies remain selected
+  until the supplying Runtime/macros/guard and final Types graph are qualified.
+  Protocol and production dependencies are unchanged by this preparation.
+  [Prepared patch and qualification](../../docs/evidence/runtime-owner.md).
+
+## [0.13.4] - 2026-11-01
+
+### 🔧 Changed
+
+- Adopt committed Shared Tooling 0.27.24 through its canonical exporter. Report
+  total uncompressed Wasm and code-section bytes separately; omit gzip sizes
+  from Wasm comparisons unless transport/compression is explicitly requested.
+  Keep consumer profiles, optimizer settings, runtime bytes and budgets unchanged.
+
+- Simplify native admission's allowance checks and debit flow while preserving
+  sticky refusal, limits, Postcard bytes and retry/hash inputs. In the matched
+  100-type fixture this removes 69 total/code bytes at opt-z and 127 total / 125
+  code bytes at opt-3. The maximum measured IC increase is 0.42%; native unit-list
+  decoding is about 0.2 µs slower, while encoding is faster. Protocol unchanged.
+  [Measurements and rejected candidates](../../docs/evidence/cost-experiments.md).
+
+### 🧪 Testing
+
+- Add a small paired cost corpus with scalar, blob, zero-sized collection,
+  ordinary integer-list, record and binary-key-map controls. Retain empty and
+  singleton inputs and existing full corpora; no production encoding mode changes.
+
+- Add a data-only paired cost gate with strict build/input identities, stable IC
+  samples, unchanged Candid controls and independent raw Wasm/code-section limits.
+  Keep measurements explicit; ordinary CI runs only cheap corruption fixtures.
+  Record parser source identity alongside encoder, decoder and admission inputs.
+  Retain a [follow-up size screen](../../docs/evidence/parser-screen.md)
+  rejecting additional helper rewrites that gave identical or larger raw Wasm.
+
+### ⬆️ Dependencies
+
+- Align the private Build diagnostic caller and managed release editor on
+  published Build 0.73.5. Qualify the already-selected Host Artifacts/FS/Process
+  0.73.5 family without unrelated dependency upgrades. Retain default-disabled
+  library features, explicit CLI setup and unchanged codec/runtime dependencies.
+  [Tooling qualification](../../docs/evidence/README.md).
+
+- Adopt published Testkit 0.76.0 for private codec/endpoint qualification with
+  defaults disabled. Align its native Platform supplier to the existing 0.16.0,
+  removing the older 0.15.3 copy from the lockfile. Preserve production graphs,
+  codec bytes, budgets and retry/hash inputs.
+  [Focused qualification](../../docs/evidence/README.md).
+
+## [0.13.3] - 2026-11-01
+
+### ➕ Added
+
+- Expose standard `serde_bytes::ByteArray<N>` as `ic_wire::ByteArray<N>` with
+  exact-width TypeScript metadata, including standard fixed-array byte adapters
+  and optional fields. Existing arrays are unchanged; explicitly adopting the
+  bulk representation changes `[0_u8,255]` from `00 ff` to `02 00 ff`, requiring
+  coordinated contracts, regenerated clients and qualified limits.
+
+### 🧪 Testing
+
+- Qualify standard byte arrays across Rust/TypeScript, malformed inputs, budgets,
+  standalone derives and Rust 1.91 host/Wasm forwarding. The
+  [matched key-map study](../../docs/evidence/byte-array.md) retains
+  small controls and Candid: at 128 keys opt-3 instructions fall 78.50% encode /
+  68.32% decode, with 128 more frame bytes and 1,526 more raw Wasm bytes.
+
+- Refresh the complete Wire/Candid comparison: 22 cohorts, 1,243 case entries,
+  both optimization profiles, repeated native samples, allocation/heap probes,
+  IC instructions, wire bytes and raw Wasm/code-section sizes. Retain the frozen
+  source and all 88 modules; strict pairing, coverage and provenance checks pass.
+  Include ordinary-control losses and the 35 new cases. This is measured codec
+  qualification, not a production optimization or protocol change.
+  [Full results](../../docs/candid-comparison.md).
+
+- Add 35 matched Wire/Candid workloads for zero-sized collections, binary-key
+  maps, nested blob results, optional arrays, ownership wrappers and enum shapes.
+  Append cases to preserve existing IC indices and retain empty/singleton controls.
+  Add native Serde checks for all nonzero integer types, network addresses,
+  ranges and exact IEEE float bits, with malformed-value/truncation/trailing-byte
+  coverage. These are codec tests, not new TypeScript schema support or fresh
+  performance measurements. Production bytes, budgets and acceptance are unchanged.
+
+### ⬆️ Dependencies
+
+- Select Platform 0.16.0 for private codec/endpoint qualification while preserving
+  canonical Types 0.15.1 and the independent Core codec/schema identity. Keep
+  Testkit's native-only Platform 0.15 selection isolated from production runtime;
+  the endpoint integration's coordinated adoption belongs to Endpoint 0.3.0.
+
+- Adopt Build/Host 0.73.3, including the managed release metadata editor, and
+  Testkit 0.75.2. Preserve canonical Types 0.15.1; the retained benchmark and
+  adoption reports identify their own frozen Platform/Host/Metrics selections.
+  These tooling-only changes require no Core consumer migration; they preserve
+  production codec/schema bytes, budgets and malformed-input acceptance.
+
+### 🔧 Changed
+
+- Refresh Shared Tooling to committed revision `619d194` (recorded 0.27.23)
+  through the canonical exporter. Keep Cargo's independent release groups and
+  package-version preparation unchanged; standalone pending-VERSION automation
+  does not apply to this workspace.
+
+## [0.13.2] - 2026-10-31
+
+### ⬆️ Dependencies
+
+- Adopt Build/Host 0.73.2, including the managed release metadata editor, and
+  Testkit 0.75.1 with arithmetic-only Metrics 0.24.1. Preserve the production
+  codec/Endpoint dependency graph, protocol bytes, resource budgets and Rust 1.91
+  support. No consumer migration or runtime performance saving is implied.
+
+## [0.13.1] - 2026-10-31
+
+### ⬆️ Dependencies
+
+- Require canonical Platform Types 0.15.1 and adopt Build/host tools 0.73.1,
+  including the explicitly installed release metadata editor. Native controls use
+  Testkit 0.75.0 / Metrics 0.23.2, removing the old Platform 0.13 dependency.
+  Canonical Rust type identity, schema bytes, limits and codec acceptance remain
+  unchanged; no consumer migration or production codec change is required.
+
+### 🔧 Changed
+
+- Adopt Shared Tooling revision `143a9ab` through the canonical exporter
+  (upstream's committed VERSION records 0.27.21). Present all six workspace members
+  once in root dependency catalog blocks, with group changelog links and complete
+  release-policy alias rosters. Remove the duplicate header map; admission checks
+  coverage, paths and full member versions across all groups. Preserve package
+  versions, dependency resolution, Cargo cleanup and independent release flows.
+- Qualify the published Testkit 0.75 typed APIs and Metrics 0.24 metadata against
+  registry Wire 0.13 on Rust 1.91, without source-aligned manifests or patches.
+  The workspace's arithmetic-only Metrics selection remains 0.23.2.
+
+### 🧹 Cleanup
+
+- Move the unchanged coverage-guided fuzz target into private qualification under
+  its explicit native fuzz-runtime feature. Make native heap/allocation profilers
+  optional through the benchmark's existing heap/allocations features. Ordinary
+  codec tests and default benchmark graphs no longer select these tools; graph
+  checks enforce that boundary. Keep explicit profiler/fuzz coverage, mutual
+  exclusion and Rust 1.91 qualification. No codec API, bytes, budgets or malformed
+  acceptance changes; no build-time or Wasm-size saving is claimed.
+  [#39 — Opt-in qualification tools](https://github.com/dragginzgame/ic-wire/issues/39).
+
+## [0.13.0] - 2026-10-31
+
+### ⚠️ Breaking
+
+- Align published Platform, macros, runtime guard and Types on 0.15.0.
+  Types moves from 0.1 to 0.15, changing Principal/Account Rust identity even
+  though its implementation is unchanged. Schema consumers align direct
+  suppliers and typed/metadata clients on this Wire minor; endpoint consumers
+  select the supplying Endpoint minor. No wrappers or compatibility lanes.
+  Codec bytes, bounds, budgets, malformed acceptance and retry/hash inputs stay
+  unchanged. Absent Account `01 04 00` and explicit zero `01 04 01` plus 32 zero
+  bytes remain distinct.
+
+### 🥾 Governance
+
+- Adopt the reviewed Shared Tooling 0.27.19 snapshot at `54fc49e`. Use literal versions for every member, symmetric group ledgers
+  under `releases/`, a root changelog index and one preserved coordinated history.
+  Require explicit core/endpoint selection for release, resume and publication;
+  keep crate paths, numeric versions, lock selections and the full gate intact.
+  Protocol/runtime behavior and codec performance are unchanged by this tooling
+  and metadata migration. Delegated release/ship/deploy requests now use the
+  existing delivery workflow without repeated per-command confirmation.
+
+### 🧪 Testing
+
+- Qualify current/MSRV host/Wasm schemas, exact Rust/TypeScript frames/refusals,
+  renamed endpoint diagnostics and feature isolation. Make the prospective
+  identity fixture resolve its current supplier and next simulated version from
+  workspace metadata rather than fixed historical versions. Matched
+  [installed qualification](../../docs/evidence/README.md) retains
+  identical instruction/cycle samples over 384 logical calls / 608 executions.
+  Total Wasm stays 100,441 B opt-z / 94,073 B opt-3; code stays 86,544 / 81,127 B.
+
+### 📚 Documentation
+
+- Consolidate obsolete Platform 0.13 issue #37 into #36 without claiming the old
+  pair was published. Record delivered core 0.12.1's successful hosted matrix,
+  pending current supplier delivery and Platform's prepared independent-group
+  restoration; retain published/source-aligned consumer distinctions.
+
+## [0.12.1] - 2026-10-31
+
+### 🩹 Fixed
+
+- Reconcile the earlier release-group adapter contribution with the stable
+  identity/endpoint split. Preserve current groups and receipt paths, retain
+  literal metadata exclusions and the validated fixture-editor override, and
+  exercise both real groups instead of recreating an obsolete synthetic policy.
+  Protocol bytes, budgets and runtime behavior are unchanged.
+
+## [0.12.0] - 2026-10-31
+
+### ⚠️ Breaking
+
+- Implement the approved [stable identity boundary](../../docs/stable-identities.md)
+  for [#36](https://github.com/dragginzgame/ic-wire/issues/36): move endpoint
+  helpers and attributes into independently versioned `ic-wire-endpoint` 0.1.0.
+  Remove `ic-wire/endpoint`; migrate `ic_wire::endpoint` imports to
+  `ic_wire_endpoint`. Keep codec/schema/limits ownership with ic-wire/derive.
+- Select published Platform Types 0.1 for `platform-types` schemas and Platform
+  0.14 for Endpoint. Principal/Account trait implementations stay with Wire;
+  Platform reexports the canonical stable definitions. Consumers align facade
+  and native typed/metadata suppliers once on this Wire minor. This supersedes
+  the pending 0.13-only pairing in [#37](https://github.com/dragginzgame/ic-wire/issues/37).
+  Bytes, budgets, declaration order, malformed acceptance, retry/hash inputs and
+  rollback behavior stay unchanged. Absent Account `01 04 00` remains distinct
+  from explicit-zero `01 04 01` followed by 32 zero bytes.
+
+### ⬆️ Dependencies
+
+- Adopt Shared Tooling 0.27.14 at `b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57`
+  through the canonical exporter. Include explicit publication options,
+  core/integration boundary guidance, opt-in Cargo release-group support and the
+  narrow `ic-platform-types -> ic_principal` owner exception. Wire's direct
+  dependency restrictions remain intact.
+  Keep Wire's current coordinated release setup; group activation still needs
+  the supplying IC Build editor and local integration qualification. Runtime
+  dependencies, codec bytes, budgets and acceptance rules are unchanged by this
+  tooling adoption.
+
+- Adopt IC Build/Testkit 0.73.0 and the matching managed `cli` editor. Use its
+  `group-manifest` renderer with explicit core/endpoint release groups and separate
+  ledgers/receipts. No package publication or existing version changes are performed.
+
+### 🧪 Testing
+
+- Qualify the [stable identity/endpoint migration](../../docs/evidence/stable-identities.md)
+  with current/MSRV host/Wasm, exact Rust/TypeScript schemas/bytes/refusals,
+  diagnostics, installed guards/rollback and prospective identity isolation.
+  Align released Metrics/Testkit source copies through manifest-only changes for
+  one trait/Limits/Error identity; no downstream working checkout edits or Cargo
+  patches. Qualify both release groups and exact publication selections in
+  disposable repositories. Matched 384 logical calls / 608 executions retain
+  identical frames/outcomes; total Wasm grows 714 B (opt-z) / 555 B (opt-3), and
+  the largest instruction regression is 0.026%. Retain raw traces and inputs.
+- Qualify the published Wire 0.11 / Platform 0.12 / Metrics 0.22 pairing with
+  Blob's actual schema example in an isolated released-source copy, standalone
+  Rust 1.91 host/Wasm consumers and Rust–TypeScript exact-byte/malformed checks.
+  Retain [reproduction and evidence](../receipts/README.md)
+  for [#34](https://github.com/dragginzgame/ic-wire/issues/34); sibling working
+  checkouts are untouched. No codec bytes, budgets or acceptance rules change.
+
+### 📚 Documentation
+
+- Document the one-time schema/endpoint migration, group commands and initial
+  Endpoint publication ordering. Published consumer qualification remains pending
+  the maintainer delivery; #36/#37 are not closed on local evidence alone.
+- Refresh the handoff for released 0.11.0 and close completed #31/#34 outcomes.
+

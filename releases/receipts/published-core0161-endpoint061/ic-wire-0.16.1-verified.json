@@ -1,0 +1,43 @@
+{
+  "name": "ic-wire",
+  "version": "0.16.1",
+  "commit": "cbbce2ad62b3ef2b5c5bf440aedf8b003a7693ba",
+  "checksum": "ef5c9c1d5a07ba652379ed698a1eec7e92b6c10bc2b305eee311cca113eae942",
+  "index_url": "https://index.crates.io/ic/-w/ic-wire",
+  "archive_url": "https://static.crates.io/crates/ic-wire/ic-wire-0.16.1.crate",
+  "yanked": false,
+  "vcs": {
+    "git": {
+      "sha1": "cbbce2ad62b3ef2b5c5bf440aedf8b003a7693ba"
+    },
+    "path_in_vcs": "crates/ic-wire"
+  },
+  "matched_source_files": [
+    "Cargo.toml.orig",
+    "LICENSE",
+    "README.md",
+    "src/bounded/borrowed/mod.rs",
+    "src/bounded/mod.rs",
+    "src/bounded/packed_i16/mod.rs",
+    "src/contract/mod.rs",
+    "src/float/mod.rs",
+    "src/lib.rs",
+    "src/native/LICENSE-MIT",
+    "src/native/decode/mod.rs",
+    "src/native/encode/mod.rs",
+    "src/native/mod.rs",
+    "src/native/parser/LICENSE-MIT",
+    "src/native/parser/mod.rs",
+    "src/native/tests/mod.rs",
+    "src/packed/mod.rs",
+    "src/platform_types/mod.rs",
+    "src/typescript/bulk_lint/mod.rs",
+    "src/typescript/limits/mod.rs",
+    "src/typescript/metadata/mod.rs",
+    "src/typescript/mod.rs",
+    "src/typescript/native_schema/mod.rs",
+    "src/typescript/native_schema/registry/mod.rs",
+    "src/typescript/runtime.ts"
+  ],
+  "prepared_archive_matches": true
+}

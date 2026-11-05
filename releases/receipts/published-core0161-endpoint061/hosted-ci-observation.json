@@ -1,0 +1,95 @@
+{
+  "shared": {
+    "run": 41668002042,
+    "head": "5eb5b7499bf9d366bd7096f21da02026507d3ba0",
+    "jobs": [
+      {
+        "name": "lint-and-security",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "change-scope",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "portable-regression (macos-15)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "portable-regression (macos-15-intel)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "portable-regression (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "wire": {
+    "run": 41672610192,
+    "head": "77a5c2d79e318c4a853db37649b94c2752b0755e",
+    "jobs": [
+      {
+        "name": "change-scope",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "typescript (ubuntu-24.04)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "benchmarks (ubuntu-24.04)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "typescript (macos-15)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "benchmarks (macos-15)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "core (macos-15)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "core (macos-15-intel)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "core (ubuntu-24.04)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "typescript (macos-15-intel)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "benchmarks (macos-15-intel)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "name": "docs",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ]
+  },
+  "note": "Observation during post-publication verification; pending jobs are not passes."
+}

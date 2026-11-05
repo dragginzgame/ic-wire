@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "groups": [
+    {
+      "name": "core",
+      "primary": "ic-wire",
+      "version": "package",
+      "members": [
+        "ic-wire",
+        "ic-wire-derive",
+        "ic-wire-benchmarks",
+        "ic-wire-qualification",
+        "ic-wire-endpoint-fixture"
+      ],
+      "changelog": "releases/core/CHANGELOG.md",
+      "dependencies": [
+        "ic-wire",
+        "ic-wire-benchmarks",
+        "ic-wire-derive",
+        "ic-wire-endpoint-fixture",
+        "ic-wire-qualification"
+      ]
+    },
+    {
+      "name": "endpoint",
+      "primary": "ic-wire-endpoint",
+      "version": "package",
+      "members": [
+        "ic-wire-endpoint",
+        "ic-wire-endpoint-macros"
+      ],
+      "changelog": "releases/endpoint/CHANGELOG.md",
+      "dependencies": [
+        "ic-wire-endpoint",
+        "ic-wire-endpoint-macros"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "ic-wire": {
+    "version": "0.13.0",
+    "checksum": "0345419cb266f26bdaa0dd94558dc7db889fb9b560d1856fd8f5e8d407b0b9e9",
+    "yanked": false,
+    "matching_archives": [
+      "target/package/tmp-crate/ic-wire-0.13.0.crate",
+      "target/package/tmp-registry/ic-wire-0.13.0.crate"
+    ]
+  },
+  "ic-wire-derive": {
+    "version": "0.13.0",
+    "checksum": "03dda8c8072cd1c09207b3244133bc3d795161b76124dd2d45040945bfb4b4aa",
+    "yanked": false,
+    "matching_archives": [
+      "target/package/tmp-crate/ic-wire-derive-0.13.0.crate",
+      "target/package/tmp-registry/ic-wire-derive-0.13.0.crate"
+    ]
+  },
+  "ic-wire-endpoint": {
+    "version": "0.2.0",
+    "checksum": "3c1910a8b4c8340726a1dea729a5915e56cf62cc771a37c54ab7e05176eed1a7",
+    "yanked": false,
+    "matching_archives": [
+      "target/package/tmp-crate/ic-wire-endpoint-0.2.0.crate",
+      "target/package/tmp-registry/ic-wire-endpoint-0.2.0.crate"
+    ]
+  }
+}

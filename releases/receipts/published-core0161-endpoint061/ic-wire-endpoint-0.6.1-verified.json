@@ -1,0 +1,22 @@
+{
+  "name": "ic-wire-endpoint",
+  "version": "0.6.1",
+  "commit": "77a5c2d79e318c4a853db37649b94c2752b0755e",
+  "checksum": "9850a616da62dc225db1c354105e15be87e5763e7c7b8fdf2adfb20d9c40c9b5",
+  "index_url": "https://index.crates.io/ic/-w/ic-wire-endpoint",
+  "archive_url": "https://static.crates.io/crates/ic-wire-endpoint/ic-wire-endpoint-0.6.1.crate",
+  "yanked": false,
+  "vcs": {
+    "git": {
+      "sha1": "77a5c2d79e318c4a853db37649b94c2752b0755e"
+    },
+    "path_in_vcs": "crates/ic-wire-endpoint"
+  },
+  "matched_source_files": [
+    "Cargo.toml.orig",
+    "LICENSE",
+    "README.md",
+    "src/lib.rs"
+  ],
+  "prepared_archive_matches": true
+}

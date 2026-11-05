@@ -1,0 +1,13 @@
+[extend]
+useDefault = true
+
+# SHA-256 of crates/ic-wire-benchmarks/drivers/fixtures/byte_keys/mod.rs,
+# retained in historical producer identities. This is a source digest, not a key.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Exact byte-key benchmark source digest in retained producer identities"
+condition = "AND"
+paths = ['''^docs/evidence/account-batch-0151/results/producer-identities\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"byte_keys_fixture_sha256": "4b84760ff10b3d3a9fc3a60c0724bb59141d05fefa69abb236c33271a236ec57",?\s*$''']

@@ -1,0 +1,9 @@
+{
+  "package": "ic-wire",
+  "version": "0.13.5",
+  "commit": "a8195d42683f90810a9afd615e4f27e3e5a3c744",
+  "sha256": "a84839b136cdb92833e274cbe4083b38f3f94e2e04ae1da091d1e2c9ba219a1c",
+  "archive_matches_upload": true,
+  "yanked": false,
+  "clean_source_verified": true
+}

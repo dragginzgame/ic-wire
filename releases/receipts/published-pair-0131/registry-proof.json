@@ -1,0 +1,56 @@
+{
+  "ic-wire": {
+    "version": "0.13.1",
+    "checksum": "7937116504bc8a341bd008a68a1992b36066c2624cff3c743c1ff164c3979f97",
+    "yanked": false,
+    "download_url": "https://static.crates.io/crates/ic-wire/ic-wire-0.13.1.crate",
+    "tag": "core-v0.13.1",
+    "source_commit": "974510a88590f2bd54e8ea45de90e0830e928063",
+    "vcs": {
+      "git": {
+        "sha1": "974510a88590f2bd54e8ea45de90e0830e928063"
+      },
+      "path_in_vcs": "crates/ic-wire"
+    },
+    "matching_local_archives": [
+      "target/package/tmp-crate/ic-wire-0.13.1.crate",
+      "target/package/tmp-registry/ic-wire-0.13.1.crate"
+    ]
+  },
+  "ic-wire-derive": {
+    "version": "0.13.1",
+    "checksum": "43910d50878c0561b36720f3eedaa84da2269741910b1d45b8109ed5e9f33170",
+    "yanked": false,
+    "download_url": "https://static.crates.io/crates/ic-wire-derive/ic-wire-derive-0.13.1.crate",
+    "tag": "core-v0.13.1",
+    "source_commit": "974510a88590f2bd54e8ea45de90e0830e928063",
+    "vcs": {
+      "git": {
+        "sha1": "974510a88590f2bd54e8ea45de90e0830e928063"
+      },
+      "path_in_vcs": "crates/ic-wire-derive"
+    },
+    "matching_local_archives": [
+      "target/package/tmp-crate/ic-wire-derive-0.13.1.crate",
+      "target/package/tmp-registry/ic-wire-derive-0.13.1.crate"
+    ]
+  },
+  "ic-wire-endpoint": {
+    "version": "0.2.1",
+    "checksum": "c2d845f1a548581445d1ca41d457d3f2f29368fbda289d933819e93e240d5824",
+    "yanked": false,
+    "download_url": "https://static.crates.io/crates/ic-wire-endpoint/ic-wire-endpoint-0.2.1.crate",
+    "tag": "endpoint-v0.2.1",
+    "source_commit": "a6cfed5b367fff84997985a357ceeb6731ec5400",
+    "vcs": {
+      "git": {
+        "sha1": "a6cfed5b367fff84997985a357ceeb6731ec5400"
+      },
+      "path_in_vcs": "crates/ic-wire-endpoint"
+    },
+    "matching_local_archives": [
+      "target/package/tmp-crate/ic-wire-endpoint-0.2.1.crate",
+      "target/package/tmp-registry/ic-wire-endpoint-0.2.1.crate"
+    ]
+  }
+}

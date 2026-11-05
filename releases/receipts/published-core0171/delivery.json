@@ -1,0 +1,73 @@
+{
+  "packages": [
+    {
+      "mode": "verify",
+      "package": "ic-wire",
+      "version": "0.17.1",
+      "commit": "41cc60884696a05edbad71ddbd6b4ebf5c3dcf2a",
+      "sha256": "5dabcace6920776c0c35464b1eaad1448be0e1930afea1b923322e10a2363309",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/bounded/borrowed/mod.rs",
+        "src/bounded/mod.rs",
+        "src/bounded/packed_i16/mod.rs",
+        "src/contract/mod.rs",
+        "src/float/mod.rs",
+        "src/lib.rs",
+        "src/native/LICENSE-MIT",
+        "src/native/decode/mod.rs",
+        "src/native/encode/mod.rs",
+        "src/native/mod.rs",
+        "src/native/parser/LICENSE-MIT",
+        "src/native/parser/mod.rs",
+        "src/native/tests/mod.rs",
+        "src/packed/mod.rs",
+        "src/platform_types/mod.rs",
+        "src/typescript/bulk_lint/mod.rs",
+        "src/typescript/limits/mod.rs",
+        "src/typescript/metadata/mod.rs",
+        "src/typescript/mod.rs",
+        "src/typescript/native_schema/mod.rs",
+        "src/typescript/native_schema/registry/mod.rs",
+        "src/typescript/runtime.ts"
+      ]
+    },
+    {
+      "mode": "verify",
+      "package": "ic-wire-derive",
+      "version": "0.17.1",
+      "commit": "41cc60884696a05edbad71ddbd6b4ebf5c3dcf2a",
+      "sha256": "439dd29e3e2f8cbdf9cfc5849412e37d11467a74d700b2d2ca0d2b4730fbf968",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/lib.rs",
+        "src/native_schema/mod.rs"
+      ]
+    }
+  ],
+  "registry_identities": {
+    "core-consumer": {
+      "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.17.1",
+      "ic-wire-derive": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.17.1"
+    },
+    "installed-consumer": {
+      "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.17.1",
+      "ic-wire-derive": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.17.1",
+      "ic-wire-endpoint": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint@0.7.0",
+      "ic-wire-endpoint-macros": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint-macros@0.7.0",
+      "ic-platform-types": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.18.1",
+      "ic-platform-runtime": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime@0.19.1",
+      "ic-platform-runtime-guard": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.19.1"
+    }
+  },
+  "core_gate": "run.ZpI4aa",
+  "source_commit": "24d5db3e301fabd89d463ac5ae16d46ea05c0060",
+  "release_commit": "41cc60884696a05edbad71ddbd6b4ebf5c3dcf2a",
+  "tag_object": "108e64435c0f6cdf5d2d5ae5ab919e52555c7a9b",
+  "installed_guest_sha256": "66f2c187bbbbdba54c479a055b6c79c1e60f16e4f67fdefd67681be0f266fecf",
+  "pocketic_server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db"
+}

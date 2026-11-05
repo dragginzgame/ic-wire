@@ -1,0 +1,6 @@
+# Exact consumer-owned prose paths; additions require review of all readers.
+# Exclude packaged/embedded/doctest/generated inputs, policy and Shared companions.
+docs/design.md
+docs/evaluation.md
+docs/performance.md
+docs/status/current.md

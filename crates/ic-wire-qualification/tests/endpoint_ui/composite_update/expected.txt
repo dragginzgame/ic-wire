@@ -1,0 +1,1 @@
+unsupported Wire endpoint option

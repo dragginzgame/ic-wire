@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-02",
+  "shared_tooling": {
+    "version": "0.27.27",
+    "revision": "651f5f7acb2e3055abd51ba5f835a2112801666a"
+  },
+  "core": {
+    "version": "0.15.0",
+    "source": "69d6e5da650babdf377e038e1c9a6ae51ff3c7a2",
+    "commit": "a06db47b8c9e213bdd8277a05d3c64d4ba325443",
+    "tag": "core-v0.15.0",
+    "tag_object": "6479b0e014a50e87c732bdd33917cc339d4872f6",
+    "complete_ci_seconds": 669
+  },
+  "endpoint": {
+    "version": "0.5.0",
+    "source": "5dcb043f36546432e085d701114ec912a7558e3e",
+    "commit": "d33de2eb45004c870cf523a5d82175948b6bd679",
+    "tag": "endpoint-v0.5.0",
+    "tag_object": "0355e012832498b25b5a598453717aab17ae60d5",
+    "complete_ci_seconds": 612
+  },
+  "compiler": "1.99.1",
+  "protocol": "unchanged",
+  "observed_at": "2026-11-02T17:25:14.720822+00:00"
+}

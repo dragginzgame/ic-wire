@@ -1,0 +1,92 @@
+{
+  "packages": [
+    {
+      "mode": "verify",
+      "package": "ic-wire",
+      "version": "0.17.0",
+      "commit": "2e5a074b1800aad0500c41c4605f29c5923fd955",
+      "sha256": "685df1a8586f5daec236a0aee92a858163f464cf64a9306969ea53f45c1f57b2",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/bounded/borrowed/mod.rs",
+        "src/bounded/mod.rs",
+        "src/bounded/packed_i16/mod.rs",
+        "src/contract/mod.rs",
+        "src/float/mod.rs",
+        "src/lib.rs",
+        "src/native/LICENSE-MIT",
+        "src/native/decode/mod.rs",
+        "src/native/encode/mod.rs",
+        "src/native/mod.rs",
+        "src/native/parser/LICENSE-MIT",
+        "src/native/parser/mod.rs",
+        "src/native/tests/mod.rs",
+        "src/packed/mod.rs",
+        "src/platform_types/mod.rs",
+        "src/typescript/bulk_lint/mod.rs",
+        "src/typescript/limits/mod.rs",
+        "src/typescript/metadata/mod.rs",
+        "src/typescript/mod.rs",
+        "src/typescript/native_schema/mod.rs",
+        "src/typescript/native_schema/registry/mod.rs",
+        "src/typescript/runtime.ts"
+      ]
+    },
+    {
+      "mode": "verify",
+      "package": "ic-wire-derive",
+      "version": "0.17.0",
+      "commit": "2e5a074b1800aad0500c41c4605f29c5923fd955",
+      "sha256": "4cd954c96a5a51480bc7bb9ead322bbe6272b984f80ed07dee5015a153a1fa6b",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/lib.rs",
+        "src/native_schema/mod.rs"
+      ]
+    },
+    {
+      "mode": "verify",
+      "package": "ic-wire-endpoint",
+      "version": "0.7.0",
+      "commit": "9d06fbd4709a68cc39ab71cd37867a88569aa3ea",
+      "sha256": "c63d257ab3444fca089c3fb920cac6bfe36579629c686717963704ea5aed55ea",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/lib.rs"
+      ]
+    },
+    {
+      "mode": "verify",
+      "package": "ic-wire-endpoint-macros",
+      "version": "0.7.0",
+      "commit": "9d06fbd4709a68cc39ab71cd37867a88569aa3ea",
+      "sha256": "8983c86159560274430898e0cbb7aa6721b89a6585a26079b91a7f1cf482953f",
+      "verified_source_files": [
+        "Cargo.toml.orig",
+        "LICENSE",
+        "README.md",
+        "src/endpoint/mod.rs",
+        "src/lib.rs"
+      ]
+    }
+  ],
+  "installed_registry_identities": {
+    "ic-wire": "registry+https://github.com/rust-lang/crates.io-index#ic-wire@0.17.0",
+    "ic-wire-derive": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-derive@0.17.0",
+    "ic-wire-endpoint": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint@0.7.0",
+    "ic-wire-endpoint-macros": "registry+https://github.com/rust-lang/crates.io-index#ic-wire-endpoint-macros@0.7.0",
+    "ic-platform-types": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-types@0.18.1",
+    "ic-platform-runtime": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime@0.19.1",
+    "ic-platform-runtime-guard": "registry+https://github.com/rust-lang/crates.io-index#ic-platform-runtime-guard@0.19.1"
+  },
+  "installed_guest_sha256": "1cc474774c94aeaa30a16610d6baf3734e0abf974c297a6861ad24748dca344f",
+  "core_gate": "run.Jf7ntt",
+  "endpoint_gate": "run.I4zJNV",
+  "pocketic_server_sha256": "b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db"
+}

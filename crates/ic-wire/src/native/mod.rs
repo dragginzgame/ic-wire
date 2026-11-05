@@ -1,0 +1,426 @@
+//! Explicit resource admission for native Serde payloads in the same Postcard format.
+//!
+//! Types, IDs, deterministic serialization and domain rules are consumer-owned.
+//! Resource admission follows Serde visits; no static schema is inferred.
+//! Custom Serde implementations are trusted: allocations/work outside visited
+//! values cannot be constrained here. See the runtime guide for budget semantics.
+#[cfg(test)]
+mod tests;
+
+mod decode;
+mod encode;
+mod parser;
+
+use crate::{Error, Limits, contract};
+use alloc::vec::Vec;
+use core::cell::Cell;
+use serde::{Deserialize, Serialize};
+
+/// Stable automatic endpoint identity from the exact exported IC method name.
+///
+/// FNV-1a-64 over UTF-8 `ic-wire:method:` followed by the name, using offset basis
+/// 14695981039346656037, prime 1099511628211 and wrapping u64 arithmetic. This is
+/// a routing identity, not authentication or a cryptographic schema fingerprint.
+/// Consumers retain duplicate-ID admission; 64-bit hashes can collide.
+///
+/// The endpoint macro evaluates this at compile time. Rust module paths, type
+/// spelling and execution mode do not participate. Renaming the exported method
+/// changes its ID; `name = "stable-name"` decouples it from a Rust function rename.
+/// Explicit IDs remain valid. Replacing one with this default requires coordinated
+/// clients unless the values match. The frame format itself remains unchanged.
+pub const fn method_id(name: &str) -> u64 {
+    let mut hash = 14_695_981_039_346_656_037u64;
+    let domain = b"ic-wire:method:";
+    let mut index = 0;
+    while index < domain.len() {
+        hash = (hash ^ domain[index] as u64).wrapping_mul(1_099_511_628_211);
+        index += 1;
+    }
+    let bytes = name.as_bytes();
+    index = 0;
+    while index < bytes.len() {
+        hash = (hash ^ bytes[index] as u64).wrapping_mul(1_099_511_628_211);
+        index += 1;
+    }
+    hash
+}
+
+struct Budget {
+    nodes: Cell<usize>,
+    heap_units: Cell<usize>,
+    depth: usize,
+    refused: Cell<bool>,
+}
+impl Budget {
+    fn new(limits: Limits) -> Self {
+        Self {
+            nodes: Cell::new(limits.nodes),
+            // All value charges are multiples of eight bytes. Store whole charge
+            // units instead of bytes: the unused remainder cannot fund a charge.
+            // This removes per-visit multiplication without changing admission,
+            // overflow rejection, wire bytes or consumer limits.
+            heap_units: Cell::new(limits.allocation.saturating_sub(limits.bytes) / 8),
+            depth: limits.depth,
+            refused: Cell::new(limits.allocation < limits.bytes),
+        }
+    }
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
+    fn enter(&self, depth: usize, units: usize) -> bool {
+        self.enter_many(depth, units, 1)
+    }
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
+    // Previously nested checked subtraction committed the heap through bytes().
+    // Check both original allowances, then commit the same heap/node debits.
+    // Sticky refusal, depth/overflow rejection, bytes and acceptance are unchanged;
+    // consumers need no migration and retained retry/hash inputs remain valid.
+    fn enter_many(&self, depth: usize, units: usize, count: usize) -> bool {
+        if self.refused.get() {
+            return false;
+        }
+        let nodes = self.nodes.get();
+        let heap = self.heap_units.get();
+        if nodes < count || depth > self.depth || heap < units {
+            self.refused.set(true);
+            return false;
+        }
+        self.heap_units.set(heap - units);
+        self.nodes.set(nodes - count);
+        true
+    }
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
+    // One unit is eight allowance bytes. Buffer length supplies the conservative
+    // charge in units, not an exact heap-byte measurement. Preserve that policy.
+    fn charge_buffer(&self, units: usize) -> bool {
+        let Some(heap) = self.heap_units.get().checked_sub(units) else {
+            self.refused.set(true);
+            return false;
+        };
+        self.heap_units.set(heap);
+        true
+    }
+    fn error(&self) -> Error {
+        if self.refused.get() {
+            Error::Limit
+        } else {
+            Error::Malformed
+        }
+    }
+}
+
+/// Measure one native payload with no output allocation; `bytes` excludes a frame.
+pub fn encoded_len<T: Serialize + ?Sized>(value: &T, limits: Limits) -> Result<usize, Error> {
+    let budget = Budget::new(limits);
+    let size = postcard::experimental::serialized_size(&encode::Bounded {
+        value,
+        budget: &budget,
+        depth: 1,
+    })
+    .map_err(|_| budget.error())?;
+    if size > limits.bytes {
+        return Err(Error::Limit);
+    }
+    Ok(size)
+}
+
+/// Encode an owned or borrowed native payload under explicit traversal allowances.
+pub fn encode<T: Serialize + ?Sized>(value: &T, limits: Limits) -> Result<Vec<u8>, Error> {
+    encode_prefixed(value, limits, &[])
+}
+fn encode_prefixed<T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    prefix: &[u8],
+) -> Result<Vec<u8>, Error> {
+    let mut bytes = Vec::new();
+    encode_prefixed_into(value, limits, prefix, &mut bytes)?;
+    Ok(bytes)
+}
+
+/// Encode into reusable caller storage. Previous contents are cleared, including on error.
+/// Capacity may be lost on serialization failure; successful calls retain it.
+/// Retain a separate immutable frame when bytes must survive subsequent calls for retries.
+pub fn encode_into<T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_prefixed_into(value, limits, &[], bytes)
+}
+
+/// Encode a payload into caller-owned storage without allocating codec output.
+///
+/// Returns only the completed encoding. A short buffer returns [`Error::Limit`]
+/// before writing; on any other error storage contents are unspecified and must
+/// not be published. The returned slice borrows storage, not the value. Admission,
+/// two-pass sizing and trusted custom Serde rules match [`encode_into`]; storage
+/// capacity does not replace or reduce the configured allocation allowance.
+pub fn encode_to_slice<'a, T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    encode_prefixed_to_slice(value, limits, &[], storage)
+}
+
+/// Encode a payload using scratch storage or owned fallback, then consume its bytes.
+///
+/// Preflight selects a destination once: scratch when the admitted payload fits,
+/// otherwise an owned buffer. Both paths retain [`encode`]'s two-pass admission
+/// and allocation allowance; custom serializers may still allocate independently.
+/// The owned `value` is dropped before the synchronous callback. Passing a
+/// reference instead keeps ownership with the caller.
+///
+/// Encoding failure never calls `consume`; scratch contents on error are
+/// unspecified. Only successful bytes may be published. Copy bytes that must
+/// survive the callback, including saved retries. No framing is added.
+///
+/// ```
+/// let limits = ic_wire::Limits { bytes: 128, allocation: 2048, nodes: 64, depth: 8 };
+/// let mut scratch = [0; 128];
+/// let length = ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| {
+///     assert_eq!(bytes, [7]);
+///     bytes.len()
+/// })?;
+/// assert_eq!(length, 1);
+/// # Ok::<(), ic_wire::Error>(())
+/// ```
+/// Callback bytes cannot escape as a borrow or inside a future:
+/// ```compile_fail
+/// let limits = ic_wire::Limits { bytes: 128, allocation: 2048, nodes: 64, depth: 8 };
+/// let mut scratch = [0; 128];
+/// ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| bytes);
+/// ```
+/// ```compile_fail
+/// let limits = ic_wire::Limits { bytes: 128, allocation: 2048, nodes: 64, depth: 8 };
+/// let mut scratch = [0; 128];
+/// ic_wire::native::with_encoded(7_u64, limits, &mut scratch, |bytes| async move {
+///     bytes.len()
+/// });
+/// ```
+pub fn with_encoded<T: Serialize, R>(
+    value: T,
+    limits: Limits,
+    scratch: &mut [u8],
+    consume: impl FnOnce(&[u8]) -> R,
+) -> Result<R, Error> {
+    let size = encoded_len(&value, limits)?;
+    let budget = Budget::new(limits);
+    let bounded = encode::Bounded {
+        value: &value,
+        budget: &budget,
+        depth: 1,
+    };
+    // New destination selection only: both writers are capped at the preflight
+    // size. Postcard bytes and admission match encode; e.g. u64 7 remains 07.
+    // Existing endpoints/retries need no migration or alternate codec.
+    if let Some(storage) = scratch.get_mut(..size) {
+        let bytes = postcard::to_slice(&bounded, storage).map_err(|_| budget.error())?;
+        drop(value);
+        Ok(consume(bytes))
+    } else {
+        let mut bytes = Vec::new();
+        bytes
+            .try_reserve_exact(size)
+            .map_err(|_| Error::Allocation)?;
+        let bytes =
+            postcard::serialize_with_flavor(&bounded, contract::Output { bytes, limit: size })
+                .map_err(|_| budget.error())?;
+        drop(value);
+        Ok(consume(&bytes))
+    }
+}
+
+/// Encode a complete request into caller storage; follows [`encode_to_slice`].
+pub fn encode_request_to_slice<'a, T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    encode_prefixed_to_slice(value, limits, &contract::header(id, 0), storage)
+}
+
+/// Encode a complete response into caller storage; follows [`encode_to_slice`].
+pub fn encode_response_to_slice<'a, T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    encode_prefixed_to_slice(value, limits, &contract::header(id, 1), storage)
+}
+
+fn encode_prefixed_to_slice<'a, T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    prefix: &[u8],
+    storage: &'a mut [u8],
+) -> Result<&'a mut [u8], Error> {
+    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
+    let output = storage.get_mut(..size + prefix.len()).ok_or(Error::Limit)?;
+    output[..prefix.len()].copy_from_slice(prefix);
+    let budget = Budget::new(limits);
+    // New storage API, same Postcard bytes and admission as Vec output. The
+    // slice flavor bounds every write, including inconsistent custom Serialize
+    // passes. Only Ok publishes a completed prefix; no inline/spill policy or
+    // framing change is introduced, and existing consumers need no migration.
+    let payload = postcard::to_slice(
+        &encode::Bounded {
+            value,
+            budget: &budget,
+            depth: 1,
+        },
+        &mut output[prefix.len()..],
+    )
+    .map_err(|_| budget.error())?;
+    let written = prefix.len() + payload.len();
+    Ok(&mut output[..written])
+}
+
+fn encode_prefixed_into<T: Serialize + ?Sized>(
+    value: &T,
+    limits: Limits,
+    prefix: &[u8],
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    bytes.clear();
+    let size = encoded_len(value, payload_limits(limits, prefix.len())?)?;
+    bytes
+        .try_reserve_exact(size + prefix.len())
+        .map_err(|_| Error::Allocation)?;
+    bytes.extend_from_slice(prefix);
+    let budget = Budget::new(limits);
+    *bytes = postcard::serialize_with_flavor(
+        &encode::Bounded {
+            value,
+            budget: &budget,
+            depth: 1,
+        },
+        contract::Output {
+            bytes: core::mem::take(bytes),
+            limit: size + prefix.len(),
+        },
+    )
+    .map_err(|_| budget.error())?;
+    Ok(())
+}
+
+/// Encode a request into reusable storage; follows [`encode_into`] failure semantics.
+pub fn encode_request_into<T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_prefixed_into(value, limits, &contract::header(id, 0), bytes)
+}
+
+/// Encode a response into reusable storage; follows [`encode_into`] failure semantics.
+pub fn encode_response_into<T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+    bytes: &mut Vec<u8>,
+) -> Result<(), Error> {
+    encode_prefixed_into(value, limits, &contract::header(id, 1), bytes)
+}
+
+/// Decode a complete Postcard payload; allocation admission precedes visitor calls.
+/// Borrowed bytes and strings may refer directly to the input for its lifetime.
+/// Primitive representations are checked while reading; Serde normalization is consumer-owned.
+pub fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8], limits: Limits) -> Result<T, Error> {
+    if bytes.len() > limits.bytes {
+        return Err(Error::Limit);
+    }
+    let budget = Budget::new(limits);
+    let mut input = parser::Deserializer::from_bytes(bytes);
+    let value = T::deserialize(decode::Bounded {
+        inner: &mut input,
+        budget: &budget,
+        depth: 1,
+    })
+    .map_err(|_| budget.error())?;
+    if !input.finalize().map_err(|_| Error::Malformed)?.is_empty() {
+        return Err(Error::Trailing);
+    }
+    // Hard cut: decoding no longer reserializes or charges a serialization pass.
+    // Primitive parsing stays strict, but maps/sets and custom Serde may normalize:
+    // e.g. map bytes 02 02 14 01 0a now decode and re-encode as 02 01 0a 02 14.
+    // Consumers own normalization and must retain original bytes for exact retries.
+    Ok(value)
+}
+
+/// Encode a complete request; `limits.bytes` includes the canonical frame header.
+pub fn encode_request<T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+) -> Result<Vec<u8>, Error> {
+    encode_prefixed(value, limits, &contract::header(id, 0))
+}
+/// Encode a complete response, including borrowed response projections.
+pub fn encode_response<T: Serialize + ?Sized>(
+    id: u64,
+    value: &T,
+    limits: Limits,
+) -> Result<Vec<u8>, Error> {
+    encode_prefixed(value, limits, &contract::header(id, 1))
+}
+/// Measure a request or response frame; both directions have equal header length.
+pub fn encoded_frame_len<T: Serialize + ?Sized>(value: &T, limits: Limits) -> Result<usize, Error> {
+    encoded_len(value, payload_limits(limits, contract::HEADER)?)
+        .map(|size| size + contract::HEADER)
+}
+/// Check request identity and direction before decoding its bounded native value.
+pub fn decode_request<'de, T: Deserialize<'de>>(
+    id: u64,
+    bytes: &'de [u8],
+    limits: Limits,
+) -> Result<T, Error> {
+    decode_frame(id, 0, bytes, limits)
+}
+/// Check response identity and direction before decoding its bounded native value.
+pub fn decode_response<'de, T: Deserialize<'de>>(
+    id: u64,
+    bytes: &'de [u8],
+    limits: Limits,
+) -> Result<T, Error> {
+    decode_frame(id, 1, bytes, limits)
+}
+fn decode_frame<'de, T: Deserialize<'de>>(
+    id: u64,
+    direction: u8,
+    bytes: &'de [u8],
+    limits: Limits,
+) -> Result<T, Error> {
+    if bytes.len() > limits.bytes {
+        return Err(Error::Limit);
+    }
+    let payload = contract::payload(id, direction, bytes)?;
+    decode(payload, payload_limits(limits, contract::HEADER)?)
+}
+
+fn payload_limits(limits: Limits, prefix: usize) -> Result<Limits, Error> {
+    Ok(Limits {
+        bytes: limits.bytes.checked_sub(prefix).ok_or(Error::Limit)?,
+        allocation: limits.allocation.checked_sub(prefix).ok_or(Error::Limit)?,
+        ..limits
+    })
+}
+
+/// Native request frame header size, including magic, identity and direction.
+pub const REQUEST_HEADER_BYTES: usize = crate::contract::HEADER;
+
+/// Validate only the fixed request header before a transport copies the payload.
+/// The complete request still requires normal decoding and resource admission.
+/// This delegates to the same validator previously used inside Wire's endpoint
+/// module: accepted bytes and error ordering are unchanged after its package move.
+pub fn validate_request_header(
+    id: u64,
+    header: &[u8; REQUEST_HEADER_BYTES],
+) -> Result<(), crate::Error> {
+    crate::contract::payload(id, 0, header).map(|_| ())
+}
+
+#[cfg(test)]
+mod header_admission_tests;

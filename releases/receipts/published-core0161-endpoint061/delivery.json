@@ -1,0 +1,34 @@
+{
+  "groups": {
+    "core": {
+      "version": "0.16.1",
+      "tag": "core-v0.16.1",
+      "tag_object": "5635f9e84b938c9c08be23f7518b471a2faf9642",
+      "release_commit": "cbbce2ad62b3ef2b5c5bf440aedf8b003a7693ba",
+      "validation_source": "ea853a6a845f71c64cd7722bdc57198099aa7242",
+      "required_stages": 20,
+      "stage_seconds": 1171,
+      "scope": "workspace",
+      "plan": "/home/adam/projects/ic-wire/target/release-validation/run.i6GgDs/plan.json"
+    },
+    "endpoint": {
+      "version": "0.6.1",
+      "tag": "endpoint-v0.6.1",
+      "tag_object": "7c3deda13fe5a734107193098144f8fdb277f131",
+      "release_commit": "77a5c2d79e318c4a853db37649b94c2752b0755e",
+      "validation_source": "73ab030e1d29dcd91abcc9a96f3de67730ed7887",
+      "required_stages": 20,
+      "stage_seconds": 1126,
+      "scope": "workspace",
+      "plan": "/home/adam/projects/ic-wire/target/release-validation/run.t5HmJr/plan.json"
+    }
+  },
+  "shared_pr": "https://github.com/dragginzgame/shared-tooling/pull/352",
+  "shared_merge": "1a2a8b310e5d78faf8a3035b43fb25779c1811d0",
+  "shared_snapshot_version": "0.28.3",
+  "shared_release_or_publication": false,
+  "core_registry_tests": 6,
+  "combined_registry_tests": 7,
+  "installed_exports": 17,
+  "protocol_changed": false
+}

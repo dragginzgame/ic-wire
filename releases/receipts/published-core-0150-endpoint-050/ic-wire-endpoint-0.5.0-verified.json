@@ -1,0 +1,86 @@
+{
+  "name": "ic-wire-endpoint",
+  "version": "0.5.0",
+  "commit": "d33de2eb45004c870cf523a5d82175948b6bd679",
+  "sha256": "b6bdd79280251b2a5b177d7bf9829aec17b2b82ccf8b91245e9c0d3b73f5decf",
+  "yanked": false,
+  "archiveMatchesUpload": true,
+  "allPackagedSourceMatchesCommit": true,
+  "rustVersion": "1.99.1",
+  "vcs": {
+    "git": {
+      "sha1": "d33de2eb45004c870cf523a5d82175948b6bd679"
+    },
+    "path_in_vcs": "crates/ic-wire-endpoint"
+  },
+  "registry": {
+    "name": "ic-wire-endpoint",
+    "vers": "0.5.0",
+    "deps": [
+      {
+        "name": "ic-platform-runtime",
+        "req": "^0.18.0",
+        "features": [
+          "cdk"
+        ],
+        "optional": false,
+        "default_features": false,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "ic-wire",
+        "req": "^0.15.0",
+        "features": [],
+        "optional": false,
+        "default_features": true,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "ic-wire-derive",
+        "req": "^0.15.0",
+        "features": [
+          "endpoint"
+        ],
+        "optional": false,
+        "default_features": true,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "serde",
+        "req": "^1.0",
+        "features": [
+          "derive",
+          "alloc"
+        ],
+        "optional": false,
+        "default_features": false,
+        "target": null,
+        "kind": "normal"
+      },
+      {
+        "name": "serde_json",
+        "req": "^1.0",
+        "features": [],
+        "optional": true,
+        "default_features": true,
+        "target": "cfg(not(target_family = \"wasm\"))",
+        "kind": "normal"
+      }
+    ],
+    "cksum": "b6bdd79280251b2a5b177d7bf9829aec17b2b82ccf8b91245e9c0d3b73f5decf",
+    "features": {},
+    "features2": {
+      "typescript": [
+        "ic-wire/typescript",
+        "dep:serde_json"
+      ]
+    },
+    "yanked": false,
+    "rust_version": "1.99.1",
+    "pubtime": "2026-11-02T17:20:15Z",
+    "v": 2
+  }
+}

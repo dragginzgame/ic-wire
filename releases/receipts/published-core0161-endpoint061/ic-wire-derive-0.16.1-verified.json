@@ -1,0 +1,24 @@
+{
+  "name": "ic-wire-derive",
+  "version": "0.16.1",
+  "commit": "cbbce2ad62b3ef2b5c5bf440aedf8b003a7693ba",
+  "checksum": "806f1fc46fb963176e2af03b8c53acdb55a6b2a8d6a7a190d0d55d007ef3167f",
+  "index_url": "https://index.crates.io/ic/-w/ic-wire-derive",
+  "archive_url": "https://static.crates.io/crates/ic-wire-derive/ic-wire-derive-0.16.1.crate",
+  "yanked": false,
+  "vcs": {
+    "git": {
+      "sha1": "cbbce2ad62b3ef2b5c5bf440aedf8b003a7693ba"
+    },
+    "path_in_vcs": "crates/ic-wire-derive"
+  },
+  "matched_source_files": [
+    "Cargo.toml.orig",
+    "LICENSE",
+    "README.md",
+    "src/endpoint/mod.rs",
+    "src/lib.rs",
+    "src/native_schema/mod.rs"
+  ],
+  "prepared_archive_matches": true
+}
