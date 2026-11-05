@@ -10,9 +10,11 @@ pub use metadata::{generate_payload_registry, generate_registry, validate_payloa
 pub use native_schema::SerdeBytesField;
 pub use native_schema::{SchemaContext, SchemaRegistry, Wire, native_schema};
 
-// Shared host-metadata ceilings, independent of runtime Limits. Keep each
-// traversal's counter and boundary comparison: this changes no accepted schema,
-// generated source, diagnostics or wire bytes.
+// Inline projection, named collection (including collision rechecks), finish
+// validation, bulk pre-validation, and metadata validation/rendering each keep
+// their existing 65,536-work allowance. References remain leaves in validation;
+// rooted advice instead expands them at every use site (see bulk_lint).
+// All host ceilings are independent of runtime Limits and wire acceptance.
 const SCHEMA_WORK: usize = 65_536;
 const SCHEMA_DEPTH: usize = 64;
 

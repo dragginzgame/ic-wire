@@ -52,11 +52,12 @@ clap = { version = "4.6.7", default-features = false, features = ["std", "help",
 dhat = "0.3.3"
 ic-build = { version = "0.74.0", default-features = false }
 ic-platform = { version = "0.23.0", default-features = false }
-ic-testkit = { version = "0.86.0", default-features = false }
+ic-testkit = { version = "0.87.0", default-features = false }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"
 stats_alloc = "0.1.10"
+tokio = { version = "1.54.1", default-features = false, features = ["macros", "net", "rt", "time"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

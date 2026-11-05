@@ -1,59 +1,93 @@
-# Hash advice and bounded host diagnostics
+# Bounded host schema traversal and error diagnostics
 
-> Historical findings only. Raw measurements, snapshots, logs and build artifacts
-> were retired from this tree. A summary/hash cannot verify missing payloads.
-> Use the maintained development commands for fresh measurements.
+Measured 2026-11-05 for [#46 — Support large composed registries within bounded host schema traversal](https://github.com/dragginzgame/ic-wire/issues/46)
+and [#47 — Keep Error Display diagnostics independent of Debug formatting](https://github.com/dragginzgame/ic-wire/issues/47).
+Baseline: `c8e632163f2c8d0f78499c1ac3a3e165edff396a`; candidate: its working tree
+with the two fixes, before Testkit 0.87 adoption. Neither source is a new package
+release; these timings do not qualify the subsequent dependency update.
 
-Rust/Cargo 1.99.1, x86_64-unknown-linux-gnu, workspace `evaluation` profile
-(opt-z, LTO, one codegen unit, panic abort, stripped), identical Cargo.lock and
-manifests. Baseline is the pending Platform 0.21 source before this lint change;
-candidate changes only `bulk_lint/mod.rs`. Each frozen copy has its own Cargo
-target. The copied example is [the maintained probe](../../scripts/benchmarks/bulk-advice/mod.rs).
-No native codec time, IC instructions or Wasm saving is claimed here.
+## Matched native measurements
 
-The deterministic generator produces direct-hash, aliased-hash and integer
-control records with 1/8/128/1,024 fields. Two serial baseline/candidate rounds,
-eight warmups, calibrated batches (20 ms target, maximum 4,096 repetitions),
-eleven samples per operation. Output byte lengths are prepared outside timing;
-`Display` includes string allocation but excludes terminal I/O. Source and all
-generated TypeScript files are retained in `generator-sources.tar.xz`.
+Rust 1.99.1 (`58cf8f9c3`), Cargo 1.99.1 (`5f94df478`), Linux
+`x86_64-unknown-linux-gnu`, AMD Threadripper 7970X. Cargo `--release` defaults:
+opt-3, no LTO, default codegen units, test unwinding; no Rust flags. Identical
+manifests/dependencies and Cargo.lock SHA-256
+`8e7ab6ae7acd382fb461561cf03676ff129d6b108c7fe5e9ff169c9331ac875a`.
+Each source had its own fresh Cargo target, with no competing build/measurement.
 
-| Host operation | Round | Before ns | After ns | Change |
-| --- | ---: | ---: | ---: | ---: |
-| Generate one hash field | 1 | 2,183.415 | 2,247.281 | +2.93% |
-| Generate one hash field | 2 | 2,155.052 | 2,267.893 | +5.24% |
-| Generate 1,024 hash fields | 1 | 1,292,422.688 | 1,497,367.750 | +15.86% |
-| Generate 1,024 hash fields | 2 | 1,245,501.562 | 1,411,347.812 | +13.32% |
-| Generate 1,024 integer fields | 1 | 1,065,198.562 | 1,062,837.531 | -0.22% |
-| Generate 1,024 integer fields | 2 | 1,058,826.500 | 1,062,268.250 | +0.33% |
-| Format 1,024 integer warnings | 1 | 40,793.410 | 555.105 | -98.64% |
-| Format 1,024 integer warnings | 2 | 42,663.018 | 554.953 | -98.70% |
+Eleven samples per case; medians below. Generation includes rendering, complete
+advice and disposal, excluding fixture construction and terminal output. One,
+32 and 297 methods use 1,000, 20 and three repetitions/sample respectively.
+Error formatting averages all five variants over 500,000 writes/sample into one
+reused String with capacity 32; no terminal I/O or repeated buffer allocation.
 
-The hash generation increase is real additional work: baseline collected zero
-hash warnings and candidate retains all 1,024. It adds about 0.17–0.20 ms for
-that large synthetic registry. Existing integer controls are approximately
-unchanged. Formatting emits eight entries plus a summary, rather than 1,024
-lines. Tiny formatting has small regressions; [Retired artifact: summary and retention status](primitive-bulk.md)
-and original eleven-sample CSVs retain them. This does not measure minutes of
-terminal output or claim a terminal-I/O speedup.
+| Operation | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| Generate one method | 11.317 µs | 11.468 µs | +1.33% |
+| Generate 32 methods | 1.128235 ms | 1.095145 ms | −2.93% |
+| Generate 297 methods | 6.713176 ms, **Complexity** | 11.249410 ms, **success** | +67.57%; different completed work |
+| Format one error, averaged over five variants | 13.776694 ns | 6.420804 ns | −53.39% |
 
-All **24 matched generated outputs** (12 workloads per round) are byte-identical.
-[Retired artifact: summary and retention status](primitive-bulk.md) record bytes and SHA-256. The diagnostic
-report still holds every exact suppression path; only its default formatting is
-bounded. Tests cover stale acknowledgements, aliases, newtypes, nested lists,
-recursion and excluded fixed/byte/packed fields.
+The large fixture has 594 roots, 112,751 expanded visits (largest root 7,790),
+shared definitions and active-path recursion. The candidate retains all 15,925
+warning paths and emits 214,150 bytes of TypeScript source. Controls emit the
+same 3,530/25,473 source bytes on both sides. These are host source sizes, **not
+Wasm sizes**. The failed large baseline produces no accepted source/report;
+its shorter time is not an equivalent successful generation. Small-control
+variation is not a material speed improvement claim. No codec time, IC
+instructions, whole-module or code-section saving is claimed.
 
-To reproduce, extract `generator-sources.tar.xz` into a new directory. For each
-`before` / `after-lint` tree, use a distinct absolute `CARGO_TARGET_DIR` and run:
+## Reproduction and source identity
+
+Maintained probes are ignored tests in
+[the composed fixture](../../crates/ic-wire/tests/native/bulk_lint/composition_tests.rs)
+and [the native test owner](../../crates/ic-wire/tests/native/mod.rs).
+Prepare disposable source copies under `target/evidence/`: baseline via
+`git archive c8e632163f2c8d0f78499c1ac3a3e165edff396a`, candidate from the current
+reviewed source. Overlay those two test files and `tests/native/bulk_lint/mod.rs`
+from the candidate onto the baseline, preserving identical runners. Use distinct
+absolute Cargo target directories and the same locked dependencies. In each copy:
 
 ```sh
-cargo build --locked --profile evaluation -p ic-wire --features typescript --example bulk_advice_probe
-# Run the built evaluation/examples/bulk_advice_probe twice with fresh output
-# directories, redirecting stdout to before-1.csv / after-1.csv etc.
+WIRE_STUDY_SOURCE_HASH=REVIEWED_INPUT_HASH CARGO_TARGET_DIR=ABSOLUTE_LANE_TARGET \
+  bash /home/adam/projects/ic-wire/scripts/ci/rust-policy.sh \
+  cargo test --offline --locked --release --target x86_64-unknown-linux-gnu \
+  -p ic-wire --features typescript --test native measure_ -- \
+  --ignored --nocapture --test-threads=1
 ```
 
-Use the recorded compiler, prepare locked dependencies and repeat serially with
-no competing measurement/build. The archive already contains the exact copied
-probe under `crates/ic-wire/examples/bulk_advice_probe/main.rs`. The raw CSV
-columns include kind, count, operation, batch, repetitions, output bytes, warning
-count and ns/op. Aggregate each eleven-sample group by median; retain both rounds.
+The input hash is SHA-256 of a compact, sorted JSON map from relative paths to
+file SHA-256 values: root Cargo.toml/Cargo.lock and every file under
+crates/ic-wire and crates/ic-wire-derive. The probe bakes this environment value
+into its executable; compare printed values with the independently hashed inputs.
+Recorded baseline/candidate hashes:
+
+- `c399e2471b160587a0677f1d0237e29a29b864a064c56036485b4d20dd6bdb2d`
+- `817f7529d4dad3fec92b1837ca3fbfae8d5c88a960dcf02c01543416feeade7e`
+
+Raw manifests, logs, copied sources and samples are disposable under
+`target/evidence/issues46-47/`. Only this compact result is maintained in Git.
+The synthetic fixture is not the original Toko application registry.
+
+## Diagnostic and capacity qualification
+
+Normal formatting tests cover every Error variant. A focused Rust 1.99.1
+experiment with `RUSTC_BOOTSTRAP=1 RUSTFLAGS=-Zfmt-debug=none`, separate targets
+and the same regression test reproduced the baseline's bare `wire ` and passed
+with explicit candidate literals. This one-off unstable-flag experiment neither
+selects nightly nor changes compiler policy or recommended production flags.
+Display changes `wire Malformed` to `wire malformed`; typed errors retain their
+meanings. Current Wire/Canic/Toko Rust/TS source searches found no exact old-text
+consumers; that is not a fleet-wide guarantee.
+
+[The design table](../design.md#host-schema-traversal) reviews all six allowance
+owners. Only rooted advice changes: 65,536 visits per root, 1,000,000 per report.
+Tests preserve exact use-site acknowledgements and deterministic source, and
+reject excessive per-root DAG expansion, aggregate work and reference depth.
+Existing malformed schemas, recursive references and no-partial-report cases
+pass. Runtime limits, protocol acceptance, bytes and method IDs are unchanged.
+
+Earlier hash-advice work recorded bounded Display output (eight entries plus an
+omission count), roughly 98.6% less formatting time for 1,024 diagnostics, and
+13–16% more generation work when newly retaining hash warnings. Those historical
+raw archives were retired; they are not current regression or reproduction proof.

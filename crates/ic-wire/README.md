@@ -423,6 +423,11 @@ invalid primitive representations (including overlong integers) are
 `Error::Malformed`; trailing bytes and envelope identity retain their own errors. Caller input custody is excluded. Native depth allowances must fit the
 consumer's stack budget. No schema-independent performance claim is made.
 
+Match the typed `Error` variants for programmatic decisions. Their Display
+messages use explicit lowercase text, such as `wire malformed`, and remain useful
+when compiler settings strip derived Debug output. Compared with earlier releases,
+text comparisons must account for the former capitalization (`wire Malformed`).
+
 The traversal adapters are adapted from IcyDB's native admission implementation;
 its MIT notice is retained in `src/native/LICENSE-MIT`. IcyDB's numeric policies,
 SQL semantics, endpoint roster and storage encodings are not imported.
@@ -522,6 +527,13 @@ their headers and identity/direction checks. See the
 consumer scalar conversions, typed client facades and compiling JavaScript.
 Generation checks names, references, supported type shapes and bounded metadata
 traversal; it preserves supplied wire metadata and never infers native limits.
+Inline metadata, collection and validation retain 65,536-node/work allowances.
+Rooted bulk advice separately allows 65,536 expanded visits per root and
+1,000,000 per report; exhausted work/depth returns `GenerationError::Complexity`
+without partial diagnostics. Every use-site path is retained, including repeated
+references; recursive references stop when already active on the current path.
+These host limits bound expansion/report cardinality, not exact heap or string
+bytes; metadata names and manual projection callbacks remain trusted inputs.
 For constructors and other standalone payloads, call
 `typescript::validate_payload_schema(&types, &schema)` to apply those schema
 checks without emitting a module. It checks unused registry definitions too,

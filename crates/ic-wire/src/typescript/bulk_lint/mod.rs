@@ -8,6 +8,13 @@ use alloc::{
 };
 use serde_json::Value;
 
+// Previously one 65,536-visit counter covered all expanded roots, refusing
+// ordinary large composed services. Keep that ceiling per root and allow at
+// most 1,000,000 expanded visits for the entire report. This broadens host
+// generation capacity only: schemas, wire bytes and runtime admission stay
+// unchanged. Consumers can regenerate without changing deployed contracts.
+const ROOTED_WORK: usize = 1_000_000;
+
 /// A length-prefixed primitive list that may benefit from bulk admission.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BulkWarning {
@@ -102,6 +109,9 @@ pub fn lint_bulk_fields(
 /// Bounds/custom checks still require consumer review; they are not inferred.
 /// Empty reasons and invalid schemas return Schema; depth/work exhaustion returns
 /// Complexity without a partial report. Byte/packed fields are not candidates.
+/// Expanded advice allows 65,536 visits per root and 1,000,000 per report,
+/// with depth strictly below 64. Definitions and roots are pre-validated under
+/// a separate shared 65,536-node allowance. No use-site warning is truncated.
 /// Runtime bytes, budgets and generator output are unchanged.
 pub fn lint_bulk_roots(
     roots: &BTreeMap<String, Value>,
@@ -189,9 +199,11 @@ pub(super) fn lint_validated<'a>(
     let mut traversal = Traversal {
         rooted,
         active: BTreeSet::new(),
-        remaining: SCHEMA_WORK,
+        remaining: ROOTED_WORK,
+        root_remaining: SCHEMA_WORK,
     };
     for (path, node) in roots {
+        traversal.root_remaining = SCHEMA_WORK;
         walk(node, &path, types, &mut warnings, &mut traversal, 0)?;
     }
     let paths: BTreeSet<_> = warnings.iter().map(|warning| &warning.path).collect();
@@ -252,6 +264,7 @@ struct Traversal {
     rooted: bool,
     active: BTreeSet<String>,
     remaining: usize,
+    root_remaining: usize,
 }
 
 fn walk(
@@ -263,10 +276,11 @@ fn walk(
     depth: usize,
 ) -> Result<(), GenerationError> {
     if traversal.rooted {
-        if depth >= SCHEMA_DEPTH || traversal.remaining == 0 {
+        if depth >= SCHEMA_DEPTH || traversal.remaining == 0 || traversal.root_remaining == 0 {
             return Err(GenerationError::Complexity);
         }
         traversal.remaining -= 1;
+        traversal.root_remaining -= 1;
     }
     match node["k"].as_str().unwrap() {
         "ref" if traversal.rooted => {

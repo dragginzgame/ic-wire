@@ -2,6 +2,7 @@ use ic_wire::typescript::native_schema;
 use ic_wire::typescript::{GenerationError, lint_bulk_fields};
 use serde_json::json;
 use std::collections::BTreeMap;
+mod composition_tests;
 
 #[test]
 fn resolved_aliases_nested_fields_and_acknowledgements() {

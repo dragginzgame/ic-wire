@@ -7,7 +7,8 @@ use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::PathBuf, time::Duration};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let arguments = clap::Command::new("admission-instructions")
         .about("Measure admission costs using a Wasm artifact and a new output directory")
         .arg(
@@ -28,7 +29,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server =
         PathBuf::from(std::env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server"));
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
-        .build_instance(PocketIcBuilder::new().with_application_subnet())?;
+        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .await?;
     let pic = owned.instance();
     let wasm = fs::read(wasm_path)?;
     fs::write(
@@ -42,9 +44,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "notes":"Warm decode, including destruction; setup/transport excluded. Budgets are illustrative, not equivalent to Candid quotas."
         }))?,
     )?;
-    let canister = pic.create_canister()?;
-    pic.add_cycles(canister, 100_000_000_000_000)?;
-    pic.install_canister(canister, wasm, vec![], None)?;
+    let canister = pic.create_canister().await?;
+    pic.add_cycles(canister, 100_000_000_000_000).await?;
+    pic.install_canister(canister, wasm, vec![], None).await?;
     let mut file = fs::File::create(output.join("samples.jsonl"))?;
     for (kind, name) in admission::KINDS.iter().enumerate() {
         for (index, length) in admission::LENGTHS.into_iter().enumerate() {
@@ -68,6 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 "benchmark",
                                 vec![kind as u8, index as u8, policy as u8, u8::from(truncated)],
                             )
+                            .await
                             .unwrap();
                         assert_eq!(reply.len(), 9);
                         assert_eq!(reply[8], expected);
@@ -86,7 +89,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    pic.stop_canister(canister, None).unwrap();
-    pic.delete_canister(canister, None).unwrap();
+    pic.stop_canister(canister, None).await.unwrap();
+    pic.delete_canister(canister, None).await.unwrap();
+    owned.close().await?;
     Ok(())
 }

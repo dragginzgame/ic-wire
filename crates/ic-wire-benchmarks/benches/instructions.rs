@@ -19,7 +19,8 @@ use serde_json::json;
 mod evidence;
 use evidence::hash;
 use std::{fs, io::Write, path::PathBuf, process::Command, time::Duration};
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let arguments = clap::Command::new("codec-instructions")
         .about("Measure completed native/Wasm evidence using a prepared PocketIC server")
         .arg(
@@ -46,7 +47,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert!(compiler.status.success());
     let compiler = String::from_utf8(compiler.stdout)?;
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
-        .build_instance(PocketIcBuilder::new().with_application_subnet())?;
+        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .await?;
     let pic = owned.instance();
     let cases = fixtures::cases();
     let samples = 3;
@@ -62,9 +64,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         for codec in ["wire", "candid"] {
             let wasm = fs::read(root.join(format!("{profile}-{codec}.wasm")))?;
             artifacts.push(json!({"profile":profile,"codec":codec,"sha256":hash(&wasm)}));
-            let canister = pic.create_canister()?;
-            pic.add_cycles(canister, 100_000_000_000_000)?;
-            pic.install_canister(canister, wasm, vec![], None)?;
+            let canister = pic.create_canister().await?;
+            pic.add_cycles(canister, 100_000_000_000_000).await?;
+            pic.install_canister(canister, wasm, vec![], None).await?;
             for (case_id, case) in cases.iter().enumerate() {
                 let lanes = case.lanes.iter().filter(|lane| {
                     if codec == "wire" {
@@ -92,7 +94,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .into_iter()
                             .flat_map(u32::to_le_bytes)
                             .collect();
-                        let reply = pic.query_call(canister, caller, "benchmark", args).unwrap();
+                        let reply = pic
+                            .query_call(canister, caller, "benchmark", args)
+                            .await
+                            .unwrap();
                         assert!(reply.len() >= FRAME_OFFSET);
                         let length = u64::from_le_bytes(
                             reply[COUNTS_BYTES..FRAME_OFFSET].try_into().unwrap(),
@@ -144,8 +149,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     case.name
                 );
             }
-            pic.stop_canister(canister, None).unwrap();
-            pic.delete_canister(canister, None).unwrap();
+            pic.stop_canister(canister, None).await.unwrap();
+            pic.delete_canister(canister, None).await.unwrap();
         }
     }
     fs::write(
@@ -164,5 +169,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "lock_sha256":hash(include_bytes!("../../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         ))?,
     )?;
+    owned.close().await?;
     Ok(())
 }

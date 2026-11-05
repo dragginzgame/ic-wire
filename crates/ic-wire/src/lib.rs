@@ -67,7 +67,16 @@ pub enum Error {
 }
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "wire {self:?}")
+        // Display must survive builds that strip derived Debug implementations.
+        // Text changes from e.g. "wire Malformed" to "wire malformed"; enum
+        // meanings, protocol bytes and admission rules remain unchanged.
+        f.write_str(match self {
+            Self::Limit => "wire limit",
+            Self::Allocation => "wire allocation",
+            Self::Malformed => "wire malformed",
+            Self::Trailing => "wire trailing",
+            Self::Identity => "wire identity",
+        })
     }
 }
 impl core::error::Error for Error {}

@@ -293,9 +293,9 @@ fn integer(value: &Value) -> u64 {
     value.as_str().unwrap().parse().unwrap()
 }
 
-#[test]
+#[tokio::test(flavor = "current_thread")]
 #[ignore = "explicit instrumented PocketIC, frozen Wasm and ENDPOINT_MATRIX_DIR"]
-fn all_endpoint_costs() {
+async fn all_endpoint_costs() {
     let out = PathBuf::from(std::env::var_os("ENDPOINT_MATRIX_DIR").unwrap());
     assert!(std::env::var_os("IC_TESTKIT_POCKET_IC_URL").is_none());
     let expected_exports: BTreeSet<String> =
@@ -312,15 +312,18 @@ fn all_endpoint_costs() {
     let session = PocketIcStartupConfig::from_env(Duration::from_secs(90))
         .unwrap()
         .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .await
         .unwrap();
     let pic = session.instance();
-    let canister = pic.create_canister().unwrap();
-    pic.add_cycles(canister, 100_000_000_000_000).unwrap();
+    let canister = pic.create_canister().await.unwrap();
+    pic.add_cycles(canister, 100_000_000_000_000).await.unwrap();
     let wasm = fs::read(out.join("endpoint.wasm")).unwrap();
     let module_hash = digest(&wasm);
-    pic.install_canister(canister, wasm, vec![], None).unwrap();
+    pic.install_canister(canister, wasm, vec![], None)
+        .await
+        .unwrap();
     let caller = Principal::anonymous().into();
-    let count = || {
+    let count = || async {
         native::decode_response::<u64>(
             8,
             &pic.query_call(
@@ -329,6 +332,7 @@ fn all_endpoint_costs() {
                 "count",
                 native::encode_request(8, &(), LIMITS).unwrap(),
             )
+            .await
             .unwrap(),
             LIMITS,
         )
@@ -342,31 +346,33 @@ fn all_endpoint_costs() {
         "http://{}:{}/api/instances/{}/canisters/{}",
         viewer["ip_addr"].as_str().unwrap(),
         viewer["port"].as_u64().unwrap(),
-        pic.instance_id(),
+        pic.instance_id,
         canister.to_text()
     );
     let mut samples = fs::File::create(out.join("samples.jsonl")).unwrap();
     let mut server = None;
     for (case_index, case) in cases.into_iter().enumerate() {
         for repetition in 0..9 {
-            let state = count();
+            let state = count().await;
             // Clear only this owned private recorder after earlier receipts have
             // been persisted. Observation queries run outside the traced interval.
             http(&format!("{path}/clear"), true);
             http(&format!("{path}/start"), true);
             // Publish a round before sampling. Each call uses a distinct caller
             // so query-result caching cannot replace actual Wasm execution.
-            pic.tick().unwrap();
-            let balance = pic.cycle_balance(canister).unwrap();
+            pic.tick().await.unwrap();
+            let balance = pic.cycle_balance(canister).await.unwrap();
             let measured_caller =
                 Principal::from_slice(&((case_index * 9 + repetition) as u64).to_le_bytes()).into();
             let result = if case.mode == "update" {
                 pic.update_call(canister, measured_caller, case.method, case.frame.clone())
+                    .await
             } else {
                 pic.query_call(canister, measured_caller, case.method, case.frame.clone())
+                    .await
             };
             let cycles = balance
-                .checked_sub(pic.cycle_balance(canister).unwrap())
+                .checked_sub(pic.cycle_balance(canister).await.unwrap())
                 .unwrap();
             http(&format!("{path}/stop"), true);
             let trace = http(&format!("{path}/executions?limit=1000"), false);
@@ -443,7 +449,7 @@ fn all_endpoint_costs() {
                 (_, unexpected) => panic!("{} / {}: {unexpected:?}", case.method, case.label),
             };
             assert_eq!(
-                count(),
+                count().await,
                 state + case.mutation,
                 "{} / {} transaction state",
                 case.method,
@@ -452,6 +458,7 @@ fn all_endpoint_costs() {
             writeln!(samples,"{}",json!({"method":case.method,"mode":case.mode,"case":case.label,"repetition":repetition,"warmup":repetition==0,"caller":measured_caller.to_text(),"request_bytes":case.frame.len(),"request_sha256":digest(&case.frame),"reply_bytes":reply_bytes,"reply_sha256":reply_hash,"outcome":outcome,"cycles_debited":cycles.to_string(),"ic_instructions":instructions,"heap_page_instructions":page_instructions,"physical_executions":executions})).unwrap();
         }
     }
-    pic.stop_canister(canister, None).unwrap();
-    pic.delete_canister(canister, None).unwrap();
+    pic.stop_canister(canister, None).await.unwrap();
+    pic.delete_canister(canister, None).await.unwrap();
+    session.close().await.unwrap();
 }

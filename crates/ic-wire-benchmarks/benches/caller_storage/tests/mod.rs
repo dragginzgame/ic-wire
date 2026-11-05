@@ -84,9 +84,9 @@ fn native_measurement() {
 }
 
 #[cfg(feature = "ic")]
-#[test]
+#[tokio::test(flavor = "current_thread")]
 #[ignore = "requires an explicitly prepared PocketIC server and Wasm artifacts"]
-fn ic_measurement() {
+async fn ic_measurement() {
     use ic_platform::candid::contract::Principal;
     use ic_testkit::pic::PocketIcStartupConfig;
     use ic_testkit::pocket_ic::PocketIcBuilder;
@@ -94,19 +94,21 @@ fn ic_measurement() {
     let owned = PocketIcStartupConfig::from_env(std::time::Duration::from_secs(60))
         .unwrap()
         .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .await
         .unwrap();
     let pic = owned.instance();
     let mut rows = Vec::new();
     for profile in ["evaluation", "benchmark-speed"] {
         for lane in ["before-vec", "after-vec", "after-slice", "after-scoped"] {
-            let canister = pic.create_canister().unwrap();
-            pic.add_cycles(canister, 100_000_000_000_000).unwrap();
+            let canister = pic.create_canister().await.unwrap();
+            pic.add_cycles(canister, 100_000_000_000_000).await.unwrap();
             pic.install_canister(
                 canister,
                 fs::read(output.join(format!("{profile}-{lane}.wasm"))).unwrap(),
                 vec![],
                 None,
             )
+            .await
             .unwrap();
             for (case, label) in CASES.iter().enumerate() {
                 let mut samples = Vec::new();
@@ -119,6 +121,7 @@ fn ic_measurement() {
                             "benchmark",
                             vec![case as u8],
                         )
+                        .await
                         .unwrap();
                     assert_eq!(reply.len(), 16);
                     samples.push(u64::from_le_bytes(reply[..8].try_into().unwrap()));
@@ -126,8 +129,8 @@ fn ic_measurement() {
                 }
                 rows.push(json!({"profile":profile,"lane":lane,"case":label,"bytes":length,"ic_instructions":samples}));
             }
-            pic.stop_canister(canister, None).unwrap();
-            pic.delete_canister(canister, None).unwrap();
+            pic.stop_canister(canister, None).await.unwrap();
+            pic.delete_canister(canister, None).await.unwrap();
         }
     }
     fs::write(
@@ -135,4 +138,5 @@ fn ic_measurement() {
         serde_json::to_vec_pretty(&rows).unwrap(),
     )
     .unwrap();
+    owned.close().await.unwrap();
 }

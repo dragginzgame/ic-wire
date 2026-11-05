@@ -52,41 +52,44 @@ fn operation<T: serde::de::DeserializeOwned + Serialize>(
 }
 
 #[cfg(feature = "ic")]
-#[test]
+#[tokio::test(flavor = "current_thread")]
 #[ignore = "explicit installed instruction study"]
-fn ic_cost() {
-    measure_ic_cost(&["inline", "extracted"]);
+async fn ic_cost() {
+    measure_ic_cost(&["inline", "extracted"]).await;
 }
 
 #[cfg(feature = "ic")]
-#[test]
+#[tokio::test(flavor = "current_thread")]
 #[ignore = "explicit metadata-dependency instruction study"]
-fn metadata_dependency_cost() {
-    measure_ic_cost(&["before", "after"]);
+async fn metadata_dependency_cost() {
+    measure_ic_cost(&["before", "after"]).await;
 }
 
 #[cfg(feature = "ic")]
-fn measure_ic_cost(lanes: &[&str]) {
+async fn measure_ic_cost(lanes: &[&str]) {
     use ic_platform_types::principal::Principal;
     use ic_testkit::pic::PocketIcStartupConfig;
     use ic_testkit::pocket_ic::PocketIcBuilder;
     let owned = PocketIcStartupConfig::from_env(std::time::Duration::from_secs(60))
         .unwrap()
         .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .await
         .unwrap();
     let pic = owned.instance();
     let mut rows = Vec::new();
     let mut sample_caller = 0_u64;
     for lane in lanes {
-        let canister = pic.create_canister().unwrap();
-        pic.add_cycles(canister, 100_000_000_000_000).unwrap();
+        let canister = pic.create_canister().await.unwrap();
+        pic.add_cycles(canister, 100_000_000_000_000).await.unwrap();
         let wasm = std::fs::read(format!(
             "{}/{}.wasm",
             std::env::var("ENDPOINT_COST_DIR").unwrap(),
             lane
         ))
         .unwrap();
-        pic.install_canister(canister, wasm, vec![], None).unwrap();
+        pic.install_canister(canister, wasm, vec![], None)
+            .await
+            .unwrap();
         for length in [None, Some(0), Some(32), Some(65536)] {
             let bytes = ByteBuf::from(vec![0xa5; length.unwrap_or(0)]);
             let (method, id, frame) = if length.is_none() {
@@ -112,6 +115,7 @@ fn measure_ic_cost(lanes: &[&str]) {
                         method,
                         frame.clone(),
                     )
+                    .await
                     .unwrap();
                 let count = if length.is_none() {
                     native::decode_response::<((), ByteBuf)>(id, &reply, LIMITS)
@@ -133,4 +137,5 @@ fn measure_ic_cost(lanes: &[&str]) {
         serde_json::to_vec_pretty(&rows).unwrap(),
     )
     .unwrap();
+    owned.close().await.unwrap();
 }

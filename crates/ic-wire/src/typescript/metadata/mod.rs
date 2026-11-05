@@ -320,7 +320,9 @@ pub(super) fn validate_aliases(types: &BTreeMap<String, Value>) -> Result<(), Ge
 /// Paths start with /methods/NAME/request or /methods/NAME/response; without
 /// methods, all exported types are reviewed under /types/NAME. With methods,
 /// only their reachable shapes are advised. Stale acknowledgements are warnings.
-/// Traversal uses the rooted lint's depth/work bounds and can return Complexity.
+/// Shape validation/rendering share 65,536 nodes; rooted advice separately allows
+/// 65,536 expanded visits per root and 1,000,000 per report. Exhaustion returns
+/// Complexity without invoking diagnostics. See [`super::lint_bulk_roots`].
 /// This host API replaces the former three-argument, silent generator; generated
 /// TypeScript, wire bytes, identities and runtime admission are unchanged.
 pub fn generate_registry(

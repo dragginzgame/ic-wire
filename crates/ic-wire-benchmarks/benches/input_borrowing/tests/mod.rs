@@ -39,9 +39,9 @@ fn identical_bytes_borrowed_custody_and_rejection() {
     }
 }
 #[cfg(feature = "ic")]
-#[test]
+#[tokio::test(flavor = "current_thread")]
 #[ignore = "explicit prepared instrumented PocketIC and frozen guest artifacts"]
-fn physical_updates() {
+async fn physical_updates() {
     use ic_platform::candid::contract::Principal;
     use ic_testkit::pic::PocketIcStartupConfig;
     use ic_testkit::pocket_ic::PocketIcBuilder;
@@ -53,6 +53,7 @@ fn physical_updates() {
     let session = PocketIcStartupConfig::from_env(Duration::from_secs(90))
         .unwrap()
         .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .await
         .unwrap();
     let pic = session.instance();
     let http = |path: &str, post: bool| {
@@ -82,20 +83,22 @@ fn physical_updates() {
     let mut rows = fs::File::create(out.join("calls.jsonl")).unwrap();
     let mut canisters = Vec::new();
     for lane in ["owned", "borrowed"] {
-        let id = pic.create_canister().unwrap();
-        pic.add_cycles(id, 100_000_000_000_000).unwrap();
+        let id = pic.create_canister().await.unwrap();
+        pic.add_cycles(id, 100_000_000_000_000).await.unwrap();
         pic.install_canister(
             id,
             fs::read(out.join(format!("{lane}.wasm"))).unwrap(),
             vec![],
             None,
         )
+        .await
         .unwrap();
         pic.update_call(id, Principal::anonymous(), "consume", packet(0, 0, 0))
+            .await
             .unwrap();
         let path = format!(
             "{viewer}/api/instances/{}/canisters/{}",
-            pic.instance_id(),
+            pic.instance_id,
             id.to_text()
         );
         fs::write(
@@ -123,11 +126,12 @@ fn physical_updates() {
                 });
                 for offset in 0..2 {
                     let (lane, id, _) = &canisters[((repetition as usize) + offset) % 2];
-                    let before = pic.cycle_balance(*id).unwrap();
+                    let before = pic.cycle_balance(*id).await.unwrap();
                     let reply = pic
                         .update_call(*id, Principal::anonymous(), "consume", bytes.clone())
+                        .await
                         .unwrap();
-                    let after = pic.cycle_balance(*id).unwrap();
+                    let after = pic.cycle_balance(*id).await.unwrap();
                     let value: [u64; 3] = native::decode_response(ID, &reply, LIMITS).unwrap();
                     assert_eq!(value, [nonce, n as u64, sum]);
                     writeln!(rows,"{}",json!({"lane":lane,"size":size,"mode":mode,"repetition":repetition,"nonce":nonce,"request_bytes":bytes.len(),"request_sha256":format!("{:x}",Sha256::digest(&bytes)),"reply_sha256":format!("{:x}",Sha256::digest(&reply)),"cycles":(before-after).to_string()})).unwrap();
@@ -151,7 +155,8 @@ fn physical_updates() {
             http(&format!("{path}/summary"), false),
         )
         .unwrap();
-        pic.stop_canister(id, None).unwrap();
-        pic.delete_canister(id, None).unwrap();
+        pic.stop_canister(id, None).await.unwrap();
+        pic.delete_canister(id, None).await.unwrap();
     }
+    session.close().await.unwrap();
 }

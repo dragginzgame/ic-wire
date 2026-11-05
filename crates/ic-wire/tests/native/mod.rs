@@ -23,6 +23,52 @@ const LIMITS: Limits = Limits {
 };
 
 #[test]
+fn error_display_preserves_diagnostics_without_debug() {
+    for (error, expected) in [
+        (Error::Limit, "wire limit"),
+        (Error::Allocation, "wire allocation"),
+        (Error::Malformed, "wire malformed"),
+        (Error::Trailing, "wire trailing"),
+        (Error::Identity, "wire identity"),
+    ] {
+        assert_eq!(error.to_string(), expected);
+    }
+}
+
+#[test]
+#[ignore = "explicit matched error-formatting measurement"]
+fn measure_error_display() {
+    use std::{fmt::Write, hint::black_box, time::Instant};
+    println!(
+        "source-sha256={}",
+        option_env!("WIRE_STUDY_SOURCE_HASH").unwrap_or("unrecorded")
+    );
+    println!("case,sample,repetitions,native_ns_per_display");
+    let mut output = String::with_capacity(32);
+    let errors = [
+        Error::Limit,
+        Error::Allocation,
+        Error::Malformed,
+        Error::Trailing,
+        Error::Identity,
+    ];
+    for sample in 0..11 {
+        let start = Instant::now();
+        for _ in 0..100_000 {
+            for error in errors {
+                output.clear();
+                write!(output, "{}", black_box(error)).unwrap();
+                black_box(&output);
+            }
+        }
+        println!(
+            "all-errors,{sample},500000,{}",
+            start.elapsed().as_nanos() as f64 / 500_000.0
+        );
+    }
+}
+
+#[test]
 fn u64_shortcut_preserves_postcard_bytes_and_admission_at_boundaries() {
     let mut values: Vec<u64> = (0..=255).collect();
     for shift in (7..64).step_by(7) {

@@ -10,6 +10,7 @@ autobenches = false
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 clap.workspace = true
 ic-testkit.workspace = true
+tokio.workspace = true
 
 [package.metadata.shared-tooling.loc]
 category = "benchmarks"

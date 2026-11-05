@@ -42,8 +42,11 @@ consumers explicitly select `typescript` (or its `platform-types` forwarding).
 `check-schema-targets.sh` checks standalone default/schema host/Wasm builds and
 proves the metadata crate is absent from codec-only artifacts.
 Production Endpoint selects Runtime; optional schemas select canonical Types.
-Native endpoint/codec controls import the PocketIC client and DTOs from
+Native endpoint/codec controls import the async PocketIC client and DTOs from
 `ic_testkit::pocket_ic`, with Testkit also owning server admission/lifecycle.
+Drivers/tests own one Tokio runtime, await client operations and explicitly
+await `instance.close()` before dropping an owned server. Tokio stays in native
+qualification dev dependencies; no per-operation blocking wrappers are added.
 The Platform facade supplies external Candid/crypto controls. See the
 [current handoff](status/current.md#compiler-suppliers-and-release-boundary) for the
 qualified supplier cohort; root manifests and Cargo.lock own selections. The
@@ -270,8 +273,9 @@ The default codec graph has no Platform or simulator dependencies. The independe
 `ic-wire-endpoint` package selects Runtime's Candid-free `cdk` surface. The optional
 `platform-types` integration independently selects `principal` and host TypeScript
 support; its standalone consumer check also qualifies the combined endpoint graph.
-The unpublished benchmark and endpoint fixture packages use PocketIC through Platform and Testkit
-for qualification. Endpoint cost comparisons use
+The unpublished benchmark and endpoint fixture packages use Testkit's async
+PocketIC client and lifecycle for qualification; Platform supplies external
+Candid/protocol controls. Endpoint cost comparisons use
 `bash scripts/ci/evaluate-endpoint.sh NEW_OUTPUT_DIRECTORY` with an explicitly
 prepared `POCKET_IC_BIN`; see [scope and results](evidence/endpoints.md).
 

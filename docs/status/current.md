@@ -9,11 +9,26 @@ fresh-clone rather than merge the discarded history. Registry versions/archives
 are unchanged; old commit IDs in release receipts record original publication,
 not refs to recreate. No package publication or version bump is part of this reset.
 
-## Pending Core 0.17.3
+## Core 0.17.3 release selection
+
+This batch fixes [large composed host registries (#46)](https://github.com/dragginzgame/ic-wire/issues/46)
+and [Debug-independent error diagnostics (#47)](https://github.com/dragginzgame/ic-wire/issues/47).
+Rooted advice retains 65,536 visits per root and now allows 1,000,000 per report;
+other host budgets stay unchanged. The 297-method regression retains all 15,925
+paths; depth/work/DAG failures, existing bulk advice and malformed metadata pass.
+Every error formats correctly normally and with the reported Debug-stripping
+flag in an isolated Rust 1.99.1 experiment. Strict affected-test Clippy, default
+codec Wasm and formatting pass. [Matched timings](../evidence/schema-generation.md)
+show +1.3%/−2.9% small/medium generation controls and −53.4% native error-format
+time; the formerly failing large registry completes in 11.25 ms. No Wasm-size or
+IC-instruction claim. The maintainer selected Core 0.17.3 for direct Git delivery
+and registry publication; release/publication receipts own completion evidence.
+Protocol bytes, runtime limits and typed errors are unchanged;
+Display text changes capitalization (`wire Malformed` → `wire malformed`).
 
 Shared **0.30.4 / 2aa41c7** is exported canonically: **139** payloads, independently
 verified against the committed source. The new Candid source check is part of
-`check-boundary`: all **113** crate/example Rust files, with **34** exact named
+`check-boundary`: all **114** crate/example Rust files, with **34** exact named
 comparison declarations in ci/candid-boundary.json. It is lexical, not macro
 expansion/type resolution. Owned application and unreviewed benchmark DTO probes
 refuse; no whole-file allowances. Private sparse/wide reference structs have
@@ -35,15 +50,25 @@ Clippy and Wasm compile checks. Snapshot, source/dependency boundaries, formatti
 175-document link checks, actual CI/Make routing and broken-link refusal pass.
 No full CI, native macOS, installed-server or new performance matrix was run.
 Protocol bytes, fields, schemas, identities, limits, budgets and rollback are
-unchanged. No performance or Wasm-saving claim. Package versions remain Core
-**0.17.2**, Endpoint **0.7.1**; notes are pending **0.17.3**. The source is included
-in the history replacement; no new registry release was performed.
+unchanged. No performance or Wasm-saving claim. Core **0.17.3** is the selected
+patch release; Endpoint remains **0.7.1**. The Shared/retention work was included
+in the history replacement; the issue fixes and Testkit update follow that root.
 
 ## Platform and compiler selections
 
-The pending benchmark selection is published Platform facade **0.23.0**;
-Testkit **0.86.0** retains native facade **0.22.3**. Types **0.18.1** and
-Runtime/macros/exact guard **0.19.2** are unchanged. Prior focused facade
+Published Testkit **0.87.0** is adopted for native qualification, using one
+Platform facade **0.23.0** instead of retaining the former **0.22.3** duplicate.
+All seven client-owning drivers now await async operations and explicit close;
+their entrypoints/tests own Tokio current-thread runtimes. Its Wire feature is
+still off. Native instruction/cost and borrowing/storage callers compile;
+affected package Clippy and installed endpoint admission, replies, synchronous/
+async rollback and teardown pass against the prepared PocketIC **16.1.0** server
+on Linux/Rust 1.99.1. Core, Endpoint and benchmark Wasm graph checks exclude the
+native client/HTTP/Tokio stack. No full CI, macOS execution, fresh Candid matrix
+or instruction/Wasm saving is claimed. Existing issue-fix timings above predate
+this Testkit lock selection; their measured inputs remain identified separately.
+
+Types **0.18.1** and Runtime/macros/exact guard **0.19.2** are unchanged. Prior focused facade
 qualification passed six corpus tests, strict all-target lint, guest Wasm,
 production graphs, pins and formatting; its routine raw report was retired.
 Existing Build/Host **0.74.4**, Candid/derive **0.10.40**, mime **0.3.18** and
@@ -62,7 +87,7 @@ integration is off. The roster retains **20** full stages and **11** eligible
 Endpoint-only Linux stages; shared/dependency/uncertain inputs broaden to full.
 Stage reuse and final-candidate execution remain disabled.
 
-## Delivered and recovery state
+## Prior delivery and recovery state
 
 Core/derive **0.17.2**, Endpoint/macros **0.7.1** are already published:
 **46d7d08 / core-v0.17.2**, **da5ed1e / endpoint-v0.7.1**. Their

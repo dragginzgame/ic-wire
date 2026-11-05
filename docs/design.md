@@ -77,6 +77,30 @@ are retired; Wire now names the metadata-only derive.
 Bounded owned/borrowed field wrappers share Serde representations; borrowing
 changes custody, not framing. Alternative serializers remain research only.
 
+## Host schema traversal
+
+Host work allowances have separate owners because references cost differently:
+
+| Traversal | Allowance and scope |
+| --- | --- |
+| Inline `native_schema` | 65,536 `describe` visits, depth below 64 |
+| `SchemaRegistry` collection | 65,536 visits/registrations/collision rechecks across the collector, depth below 64 |
+| Registry finish validation | Fresh 65,536 metadata nodes; named references are leaves |
+| Bulk pre-validation | Fresh 65,536 metadata nodes across definitions and explicit roots; references are leaves |
+| Rooted bulk lint | 65,536 expanded visits per root, 1,000,000 across the report; depth below 64 |
+| Metadata generation/validation | Fresh 65,536 nodes across definitions and method/payload roots; references are leaves |
+
+Metadata validation retains its existing inline depth boundary of 64. Only rooted
+lint expands named references at each use site, stopping an active recursive
+reference without suppressing sibling paths. Its former aggregate 65,536 limit
+refused large ordinary compositions; the larger report allowance admits those
+while the per-root ceiling rejects explosive DAGs. Exhaustion returns typed
+`Complexity`, with no partial diagnostic callback or silently omitted paths.
+The complete report remains available; Display prints at most eight diagnostics
+plus an omission count. Visit ceilings bound expansion/cardinality, not exact
+host heap use or arbitrary trusted metadata/callback allocations. There is no
+change to runtime limits, wire acceptance, bytes, field order or method IDs.
+
 ## Field selection
 
 New contracts should use byte-oriented fields for binary data and `Packed<T>`

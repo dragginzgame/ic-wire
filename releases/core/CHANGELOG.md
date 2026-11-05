@@ -9,6 +9,10 @@ in [shared history](../history.md).
 
 ### ⬆️ Dependencies
 
+- Adopt Testkit 0.87's async PocketIC client in native qualification drivers,
+  with caller-owned runtimes and explicit awaited instance cleanup. Keep Tokio
+  native-only and consolidate the qualification facade on Platform 0.23.
+  Production codec/endpoint dependencies, wire bytes and budgets are unchanged.
 - Adopt Platform 0.23 for unpublished Candid/IC0 qualification controls. Keep
   production Types 0.18.1 and Runtime 0.19.2 selections; Wire does not call the
   changed optional subnet-metrics decoder. Codec bytes and budgets are unchanged.
@@ -26,6 +30,15 @@ in [shared history](../history.md).
 
 ### 🩹 Fixed
 
+- Admit large composed host registries while retaining bounded per-root/report
+  expansion, recursion handling and exact bulk-warning acknowledgement paths.
+  Runtime admission and generated codec bytes are unchanged.
+  [#46 — Support large composed registries within bounded host schema traversal](https://github.com/dragginzgame/ic-wire/issues/46).
+- Preserve useful error diagnostics when derived Debug output is stripped.
+  Display now uses lowercase literals (`wire Malformed` → `wire malformed`);
+  consumers comparing text should update capitalization or match typed errors.
+  Enum meanings, bytes and budgets are unchanged.
+  [#47 — Keep Error Display diagnostics independent of Debug formatting](https://github.com/dragginzgame/ic-wire/issues/47).
 - Enforce Shared's Candid source boundary in the existing dependency gate, with
   exact named allowances for unpublished codec-comparison DTOs and helpers.
   Production types stay Wire-only; private fixture fields and bytes are unchanged.
