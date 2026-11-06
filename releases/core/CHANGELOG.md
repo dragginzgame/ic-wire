@@ -29,6 +29,12 @@ in [shared history](../history.md).
   Delegate candidate setup and saved-batch recovery, reconciliation and retirement
   to Shared. Existing codec bytes, identities and admission are unchanged.
 
+### 🩹 Fixed
+
+- Prepare the locked browser compiler inside each fresh release checkout and
+  check it offline during recovery. A normal checkout's `node_modules` no longer
+  hides missing setup until the TypeScript stage of captured release validation.
+
 ### 🧪 Testing
 
 - Qualify the public adapters with exact bytes, actual admission boundaries,

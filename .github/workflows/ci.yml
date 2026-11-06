@@ -100,7 +100,7 @@ jobs:
         if: matrix.suite == 'typescript'
         run: |
           npm install --global "$(node -p 'require("./examples/browser/package.json").packageManager')"
-          npm --prefix examples/browser ci
+          bash scripts/ci/prepare-browser-tools.sh prepare
       - name: Prepare locked workspace dependencies
         run: cargo fetch --locked
       - name: Validate selected CI group

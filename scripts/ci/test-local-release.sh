@@ -65,11 +65,13 @@ cat >> Makefile <<'MAKE'
 include fixture-gates.mk
 MAKE
 cat > fixture-gates.mk <<'MAKE'
-.PHONY: install-tools tools-check release-editor-check
+.PHONY: install-tools tools-check release-editor-check release-browser-tools
 release-editor-check:
 	@printf '%s\n' "$$FIXTURE_RELEASE_EDITOR"
 install-tools tools-check:
 	@printf '%s\n' '$@' >> "$$(git rev-parse --git-path fixture-gates)"
+release-browser-tools:
+	@printf '%s\n' '$@:$(RELEASE_SETUP_MODE)' >> "$$(git rev-parse --git-path fixture-gates)"
 release-push-check:
 	@bash scripts/ci/ic-wire-release.sh push
 	@test ! -f .git/hold-push
@@ -172,6 +174,9 @@ if [[ "$batch_mode" == true ]]; then
     rm "$FIXTURE_HOLD_PUBLICATION"
     make release-batch-resume "BATCH=$batch" PUBLICATION_RESULT=not-published > "$fixture/recovered.log" 2>&1
     jq -e '.schema == 2 and .phase == "complete" and .index == 2' "$intent" >/dev/null
+    candidate_gitdir="$(git -C "$work" rev-parse --absolute-git-dir)"
+    grep -Fx 'release-browser-tools:prepare' "$candidate_gitdir/fixture-gates" >/dev/null
+    grep -Fx 'release-browser-tools:check' "$candidate_gitdir/fixture-gates" >/dev/null
     [[ "$(git -C "$work" rev-parse HEAD)" == "$commit" ]]
     printf 'core|%s|publish --locked --registry crates-io --package ic-wire-derive@%s --package ic-wire@%s\n' "$work" "$candidate" "$candidate" > "$fixture/expected-publication"
     for attempt in failed recovered; do

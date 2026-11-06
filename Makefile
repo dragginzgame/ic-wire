@@ -73,12 +73,16 @@ endif
 # Local compiler policy is admitted before Cargo; no compiler version lives here.
 RUST_POLICY = bash "$(CURDIR)/scripts/ci/rust-policy.sh"
 
-.PHONY: install-release-editor release-editor-check release-candidate-setup
+.PHONY: install-release-editor release-editor-check release-candidate-setup release-browser-tools
 release-candidate-setup:
 	@case "$(RELEASE_SETUP_MODE)" in prepare|check) ;; *) echo 'Shared must select RELEASE_SETUP_MODE=prepare or check' >&2; exit 2 ;; esac
 	+@$(RUST_POLICY) bash scripts/ci/cargo-release-preflight.sh "$(CURDIR)" "$(if $(filter prepare,$(RELEASE_SETUP_MODE)),1,0)" \
 	    --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
-	    --prepare install-tools --prepare tools-check --check tools-check
+	    --pin examples/browser/.nvmrc --pin examples/browser/package.json --pin examples/browser/package-lock.json \
+	    --prepare install-tools --prepare tools-check --prepare release-browser-tools \
+	    --check tools-check --check release-browser-tools
+release-browser-tools:
+	@bash scripts/ci/prepare-browser-tools.sh "$(RELEASE_SETUP_MODE)"
 install-release-editor:
 	+@$(RELEASE_EDITOR_COMMAND)
 release-editor-check:

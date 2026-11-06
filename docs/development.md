@@ -243,7 +243,8 @@ This includes registry publication. A multi-group delivery requires explicit
 The old `RELEASE_FROZEN_*` variables and runner have been removed upstream;
 there are no compatibility aliases. Wire supplies `release-candidate-setup`:
 Shared invokes it before version lookup, prepares the selected tools/cache for a
-new group, and checks them offline during recovery. Preflight does not repeat setup
+new group, including the locked browser compiler needed by both release plans,
+and checks them offline during recovery. Preflight does not repeat setup
 inside a batch. Publication remains explicit rather than a default side effect.
 
 Use Shared's `release-batch-status`, `release-batch-resume`,
@@ -270,7 +271,7 @@ Prepare Node 24.21.0 and npm 12.2.0, matching `examples/browser/.nvmrc` and
 the private package metadata, then:
 
 ```sh
-npm --prefix examples/browser ci
+bash scripts/ci/prepare-browser-tools.sh prepare
 make check-typescript
 ```
 
@@ -278,9 +279,11 @@ make check-typescript
 retains stderr in `target/typescript-conformance/generation.log` and
 replays normal diagnostics. A synthetic benchmark-warning flood fails before
 replay. Benchmark timings still compute bulk advice but exclude its output.
-Local release operators must prepare the pinned Node/npm environment and locked
-package above before starting the offline validation phase. Hosted CI prepares them on every
-supported host. The target also runs feature-enabled Rust runtime/borrowed/native tests;
+Local release operators select the pinned Node/npm environment; captured release
+setup installs the locked package inside its own checkout. Recovery uses
+`bash scripts/ci/prepare-browser-tools.sh check` without installation or network
+access. Hosted TypeScript CI uses the same preparation script. The target also
+runs feature-enabled Rust runtime/borrowed/native tests;
 the single public `lint` stage owns strict schema Clippy. It also runs a disposable
 consumer that forwards a local schema feature: native metadata and exact runtime
 frames must work, while Wasm builds with and without forwarding exclude Wire's

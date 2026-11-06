@@ -2,6 +2,14 @@
 
 ## Release preparation: Core 0.17.6 / Shared 0.31
 
+The first delivery attempt, **batch-1afAufRB** from **2d9a983**, stopped before
+version preparation because the captured checkout lacked the browser compiler.
+No release commit, push or publication occurred. Its failure state/logs remain
+under `.git/release-state/frozen/batch-1afAufRB/` and `target/core0176-delivery/`.
+The setup hook now installs locked browser dependencies and checks them offline
+on recovery; hosted TypeScript CI uses the same owner. Capture corrected committed
+source in a new batch rather than modifying or resuming the failed source.
+
 Shared **0.31.0**, revision **74313941af2fce4399bec0e6909ca6229673c3f8**,
 is adopted through the exporter, including its checksum fixes. Grouped releases
 now capture committed source automatically. Wire uses Shared's setup and saved
@@ -20,8 +28,8 @@ substitutes, not registry or archive qualification. Raw logs remain under ignore
 `target/shared031-adoption/`.
 
 Pending Core **0.17.6** notes include the adapters and coverage below. Endpoint
-remains **0.7.2**. Package versions are unchanged; nothing has been staged,
-committed, pushed or published for this batch. These are readiness results, not a
+remains **0.7.2**. Package versions are unchanged. Source is committed, but no
+release commit, push or publication has occurred. These are readiness results, not a
 source-bound release receipt: authorized delivery still captures the committed
 source and runs its own gate and exact-version archive/publication checks.
 
