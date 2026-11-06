@@ -9,7 +9,8 @@ type Field = { name: string; value: Schema };
 export type Schema = ( { k: 'unit' | 'bool' }
   | { k: 'bytes'; min?: number; max?: number }
   | { k: 'packed-i16'; max: number }
-  | { k: 'packed'; word: keyof typeof packedArrays }
+  | { k: 'packed'; word: 'i64'; nonzero?: true }
+  | { k: 'packed'; word: Exclude<keyof typeof packedArrays, 'i64'>; nonzero?: never }
   | { k: 'text'; max?: number }
   | { k: 'u' | 'i' | 'float'; bits: number; min?: number; max?: number }
   | { k: 'list'; max?: number; item: Schema }
@@ -207,6 +208,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (s.k === 'packed-i16' && value.byteLength / width > s.max) fail('limit');
       out.varint(BigInt(value.byteLength));
       if (value.byteLength > out.limit - out.offset) fail('limit');
+      if (s.k === 'packed' && s.nonzero && (value as BigInt64Array).includes(0n)) fail('value');
       const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
       if (littleEndian || kind === 'hash32') out.raw(bytes);
       else { const copy = new Uint8Array(bytes); swapWords(copy, width); out.raw(copy); }
@@ -304,7 +306,9 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       // and ensures decoded values never retain or mutate the caller's buffer.
       const bytes = new Uint8Array(input.raw(length));
       if (!littleEndian && kind !== 'hash32') swapWords(bytes, width);
-      return new ctor(bytes.buffer);
+      const value = new ctor(bytes.buffer);
+      if (s.k === 'packed' && s.nonzero && (value as BigInt64Array).includes(0n)) fail('malformed');
+      return value;
     }
     case 'text': {
       const text = utf8.decode(input.raw(input.length(Math.min(s.max ?? input.bytes.length, input.bytes.length - input.offset))));

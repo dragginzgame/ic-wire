@@ -24,8 +24,15 @@ impl<'ast> Visit<'ast> for RecursiveType<'_> {
 
 struct Projection {
     transparent: bool,
-    bytes: bool,
+    adapter: Option<Adapter>,
     rename: Option<String>,
+}
+
+#[derive(Clone, Copy)]
+enum Adapter {
+    Bytes,
+    NonzeroI64,
+    HeapU64,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -39,7 +46,7 @@ enum AttributeSite {
 fn attributes(attrs: &[syn::Attribute], site: AttributeSite) -> syn::Result<Projection> {
     let mut transparent = false;
     let mut borrow = false;
-    let mut bytes = false;
+    let mut adapter = None;
     let mut deny_unknown = false;
     let mut serde_crate = false;
     let mut rename = None;
@@ -68,12 +75,14 @@ fn attributes(attrs: &[syn::Attribute], site: AttributeSite) -> syn::Result<Proj
                     meta.value()?.parse::<syn::LitStr>()?;
                     serde_crate = true;
                     Ok(())
-                } else if site == AttributeSite::Field && meta.path.is_ident("with") && !bytes {
-                    let adapter = meta.value()?.parse::<syn::LitStr>()?;
-                    if !matches!(adapter.value().as_str(), "serde_bytes" | "::serde_bytes") {
-                        return Err(meta.error("unsupported Serde byte adapter; custom layouts require explicit verified metadata"));
-                    }
-                    bytes = true;
+                } else if site == AttributeSite::Field && meta.path.is_ident("with") && adapter.is_none() {
+                    let path = meta.value()?.parse::<syn::LitStr>()?;
+                    adapter = Some(match path.value().strip_prefix("::").unwrap_or(path.value().as_str()) {
+                        "serde_bytes" => Adapter::Bytes,
+                        "ic_wire::serde_packed::nonzero_i64" => Adapter::NonzeroI64,
+                        "ic_wire::serde_packed::heap_u64" => Adapter::HeapU64,
+                        _ => return Err(meta.error("unsupported Serde byte adapter; custom layouts require explicit verified metadata")),
+                    });
                     Ok(())
                 } else if site != AttributeSite::Container && meta.path.is_ident("rename") && rename.is_none() {
                     rename = Some(meta.value()?.parse::<syn::LitStr>()?.value());
@@ -96,7 +105,7 @@ fn attributes(attrs: &[syn::Attribute], site: AttributeSite) -> syn::Result<Proj
     }
     Ok(Projection {
         transparent,
-        bytes,
+        adapter,
         rename,
     })
 }
@@ -118,14 +127,23 @@ fn fields<'a>(
         .iter()
         .map(|(f, projection)| {
             let ty = &f.ty;
-            if projection.bytes {
-                // serde_bytes encodes a byte buffer rather than visiting a list.
-                // Existing annotated fields keep their bytes and budgets; only
-                // previously unavailable metadata becomes Uint8Array. Regenerate
-                // bindings. The sealed bound rejects unqualified adapter inputs.
-                quote!(#context.describe_bytes::<#ty>()?)
-            } else {
-                quote!(#context.describe::<#ty>()?)
+            match projection.adapter {
+                Some(Adapter::Bytes) => quote!(#context.describe_bytes::<#ty>()?),
+                Some(Adapter::NonzeroI64) => quote!(({
+                    // Type equality accepts aliases without trusting a syntactic
+                    // type name or introducing a second public schema trait.
+                    let _: ::core::marker::PhantomData<#ty> =
+                        ::core::marker::PhantomData::<::ic_wire::__private::Vec<::core::num::NonZeroI64>>;
+                    let mut schema = #context.describe::<::ic_wire::Packed<::core::primitive::i64>>()?;
+                    schema["nonzero"] = ::ic_wire::__private::serde_json::Value::Bool(true);
+                    schema
+                })),
+                Some(Adapter::HeapU64) => quote!(({
+                    let _: ::core::marker::PhantomData<#ty> =
+                        ::core::marker::PhantomData::<::ic_wire::__private::BinaryHeap<::core::primitive::u64>>;
+                    #context.describe::<::ic_wire::Packed<::core::primitive::u64>>()?
+                })),
+                None => quote!(#context.describe::<#ty>()?),
             }
         })
         .collect();
@@ -244,10 +262,10 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         // would instead make trait selection cycle before projection can start.
         if !visitor.found && input.generics.type_params().next().is_some() {
             let ty = &field.ty;
-            let bound = if projection.bytes {
-                quote!(::ic_wire::typescript::SerdeBytesField)
-            } else {
-                quote!(::ic_wire::typescript::Wire)
+            let bound = match projection.adapter {
+                Some(Adapter::Bytes) => quote!(::ic_wire::typescript::SerdeBytesField),
+                Some(Adapter::NonzeroI64 | Adapter::HeapU64) => continue,
+                None => quote!(::ic_wire::typescript::Wire),
             };
             generics
                 .make_where_clause()

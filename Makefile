@@ -9,7 +9,7 @@ LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
 export RELEASE_GROUP
 # Refuse ambiguous group effects before any setup, gate or release runner.
-ifneq ($(filter-out release-editor-check,$(filter release-% publish publish-check version,$(MAKECMDGOALS))),)
+ifneq ($(filter-out release-editor-check release-batch-status release-batch-resume release-batch-reconcile release-batch-retire,$(filter release-% publish publish-check version,$(MAKECMDGOALS))),)
 ifneq ($(words $(RELEASE_GROUP)),1)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
@@ -17,28 +17,17 @@ ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
 endif
-# A frozen launcher owns no Cargo build; each candidate Make selects its own
-# target. Do not hide caller overrides or allow a partially dispatched roster.
-ifneq ($(filter release-patch release-minor release-major,$(MAKECMDGOALS)),)
-ifneq ($(strip $(RELEASE_FROZEN_GROUPS)),)
-ifneq ($(FROZEN_RELEASE_ACTIVE),1)
-_wire_frozen_rosters := core endpoint core,endpoint
-ifeq ($(filter $(_wire_frozen_rosters),$(RELEASE_FROZEN_GROUPS)),)
-$(error Select frozen groups core, endpoint or core,endpoint in supplier order)
-endif
-ifneq ($(words $(RELEASE_FROZEN_GROUPS)),1)
-$(error Select one comma-separated frozen group roster)
-endif
-ifneq ($(RELEASE_GROUP),$(if $(filter endpoint,$(RELEASE_FROZEN_GROUPS)),endpoint,core))
-$(error RELEASE_GROUP must select the first frozen group)
-endif
+# Batch launch/recovery owns no Cargo build; candidate hooks choose their own
+# target. Never hide an inherited override from Shared's context admission.
+ifneq ($(filter release-patch release-minor release-major release-batch-status release-batch-resume release-batch-reconcile release-batch-retire,$(MAKECMDGOALS)),)
+ifneq ($(RELEASE_BATCH_ACTIVE),1)
 ifneq ($(_wire_cargo_target_origin),undefined)
-$(error Unset CARGO_TARGET_DIR before starting a frozen release)
+$(error Unset CARGO_TARGET_DIR before starting a release batch)
 endif
 unexport CARGO_TARGET_DIR
 endif
 endif
-endif
+RELEASE_SETUP_TARGET := release-candidate-setup
 RELEASE_EDITOR_VERSION := 0.75.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
@@ -65,10 +54,31 @@ endif
 endif
 include make/consumer.mk
 
+# Shared owns default capture. Wire admits only its complete supplier-first roster.
+ifneq ($(filter release-patch release-minor release-major,$(MAKECMDGOALS)),)
+ifneq ($(RELEASE_BATCH_ACTIVE),1)
+_wire_release_rosters := core endpoint core,endpoint
+ifeq ($(filter $(_wire_release_rosters),$(RELEASE_GROUPS)),)
+$(error Select groups core, endpoint or core,endpoint in supplier order)
+endif
+ifneq ($(words $(RELEASE_GROUPS)),1)
+$(error Select one comma-separated group roster)
+endif
+ifneq ($(RELEASE_GROUP),$(if $(filter endpoint,$(RELEASE_GROUPS)),endpoint,core))
+$(error RELEASE_GROUP must select the first group)
+endif
+endif
+endif
+
 # Local compiler policy is admitted before Cargo; no compiler version lives here.
 RUST_POLICY = bash "$(CURDIR)/scripts/ci/rust-policy.sh"
 
-.PHONY: install-release-editor release-editor-check
+.PHONY: install-release-editor release-editor-check release-candidate-setup
+release-candidate-setup:
+	@case "$(RELEASE_SETUP_MODE)" in prepare|check) ;; *) echo 'Shared must select RELEASE_SETUP_MODE=prepare or check' >&2; exit 2 ;; esac
+	+@$(RUST_POLICY) bash scripts/ci/cargo-release-preflight.sh "$(CURDIR)" "$(if $(filter prepare,$(RELEASE_SETUP_MODE)),1,0)" \
+	    --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
+	    --prepare install-tools --prepare tools-check --check tools-check
 install-release-editor:
 	+@$(RELEASE_EDITOR_COMMAND)
 release-editor-check:
@@ -123,11 +133,11 @@ check-codec-costs:
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in coverage-shapes research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
+	+@for corpus in coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
 	    $(RUST_POLICY) cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --example codec-wasm && \
 	    $(RUST_POLICY) cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in coverage-shapes research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
+	+@for corpus in coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
 	    $(RUST_POLICY) cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
 
@@ -198,7 +208,8 @@ help:
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
 		'Hosted CI groups: ci-core, ci-typescript, ci-benchmarks (separate runners)' \
-		'Releases: release-patch, release-minor, release-major, release-resume (Git delivery only)'
+		'Releases: release-patch/minor/major capture the selected group; RELEASE_PUBLISH_TARGET=publish includes uploads' \
+		'Recovery: release-batch-status/resume/reconcile/retire BATCH=batch-XXXXXXXX'
 
 build:
 	+@$(RUST_POLICY) cargo build --locked -p ic-wire
@@ -252,6 +263,7 @@ check-release-validation:
 check-release:
 	+@bash scripts/ci/test-local-release.sh core
 	+@bash scripts/ci/test-local-release.sh endpoint
+	+@bash scripts/ci/test-local-release.sh core --batch
 
 check-tooling:
 	+@bash scripts/ci/test-local-make.sh

@@ -10,6 +10,7 @@ mod payload;
 #[cfg(feature = "typescript")]
 mod registry;
 mod scoped;
+mod serde_packed;
 mod slice;
 mod std_types;
 use ic_wire::{Error, Limits, native};

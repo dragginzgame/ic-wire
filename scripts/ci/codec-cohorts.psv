@@ -25,4 +25,12 @@ byte-keys-control|byte-keys-control|wire-native
 cost-smoke|cost-smoke|wire-native
 contract-shapes|contract-shapes|wire-native
 coverage-shapes|coverage-shapes|wire-native
+packed-containers|packed-containers|wire-native
+borrowed-containers|borrowed-containers|wire-native
 research-bulk|research-bulk|wire-native
+adapter-borrowed-1|adapter-scale,derive-scale-1|wire-bounded
+adapter-borrowed-10|adapter-scale,derive-scale-10|wire-bounded
+adapter-borrowed-100|adapter-scale|wire-bounded
+adapter-dto-1|adapter-scale,adapter-scale-dto,derive-scale-1|wire-bounded
+adapter-dto-10|adapter-scale,adapter-scale-dto,derive-scale-10|wire-bounded
+adapter-dto-100|adapter-scale,adapter-scale-dto|wire-bounded

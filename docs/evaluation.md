@@ -61,6 +61,42 @@ The standard corpus test freezes both its 391-case count and ordered-name digest
 review an intentional inventory update when adding cases, never silently bless
 a smaller corpus or a reordered case index.
 
+The `coverage-shapes` follow-up now contains 124 cases. Its 30 appended cases
+cover nested optional byte buffers (outer absent, inner absent and empty),
+success/error results containing packed integers or blobs, byte-array versus
+Packed hash lists, nonzero signed-integer lists and binary heaps. Collections
+have empty, singleton, 128- and 4,096-element controls. The original 94 names and
+indices are frozen separately. Tests check malformed option tags, every prefix
+of small option payloads and rejection of a late zero in a nonzero list.
+Candid hash-list controls use identical external byte-vector DTOs. Nonzero
+admission and heap reconstruction are additional Wire-side semantics, not
+identical invalid-value or reconstruction policies. These native Serde cases
+do not add schema support or change production bytes, limits or acceptance.
+
+The `borrowed-containers` selection uses the same 124 logical inputs with public
+`serde_packed` field adapters for the nonzero-list and heap cases. The private
+`packed-containers` control copies into Packed inside serialization; the original
+one-copy DTO is also preserved in paired study snapshots. Candid's external
+integer-vector DTOs remain unchanged. Do not attribute gains over the twice-visited
+copying adapter to the more efficient original DTO control.
+
+Core tests cover exact packed bytes, real admission transitions, zero/partial-word/
+trailing rejection and unordered/duplicate heap reconstruction. Generated browser
+vectors enforce nonzero constraints without callbacks. Standalone consumer tests
+cover aliases, generic containing records, no_std host/Wasm and codec-only feature
+isolation. Exact record-field encoding allowance may differ from an owned Packed
+field; transparent-root equivalence alone is insufficient. Consumer adoption from
+ordinary lists is a coordinated layout cut; existing consumers stay unchanged.
+
+The `adapter-scale` corpus reuses the existing nominally distinct 1/10/100-record
+roster with both public domain adapters. `adapter-scale-dto` selects matching
+Packed fields as a footprint control; these DTOs are constructed outside timing,
+so it does not represent domain-to-DTO conversion latency. Records retain their
+varying fixed arrays and visible runtime dispatch. Both use one production codec;
+this is a monomorphization stress fixture, not an application savings claim.
+Select the documented rows in `scripts/ci/codec-cohorts.psv` through
+`CORPUS_FEATURE=... scripts/ci/evaluate-codecs.sh /absolute/fresh/output`.
+
 The focused `byte-keys` and `byte-keys-control` cohorts compare standard
 `ByteArray<32>` keys against unchanged `[u8;32]` map keys at 0/1/16/128 entries.
 Both keep identical Candid maps and logical inputs. The

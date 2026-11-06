@@ -11,6 +11,7 @@ mod float;
 mod packed;
 #[cfg(all(feature = "platform-types", not(target_family = "wasm")))]
 mod platform_types;
+pub mod serde_packed;
 pub use packed::{Packed, PackedElement};
 /// Bounded Serde/Postcard encoding, decoding and request/response framing.
 pub mod native;
@@ -46,6 +47,7 @@ pub use serde_bytes::ByteArray;
 /// Implementation dependencies used by generated contracts.
 #[doc(hidden)]
 pub mod __private {
+    pub use alloc::{collections::BinaryHeap, vec::Vec};
     pub use serde;
     #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
     pub use serde_json;

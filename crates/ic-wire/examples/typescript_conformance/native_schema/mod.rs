@@ -120,6 +120,39 @@ enum Recursive {
     Next(Box<Self>),
 }
 
+#[derive(Debug, Deserialize, Wire, PartialEq, Serialize)]
+#[serde(transparent)]
+struct NonzeroWords(
+    #[serde(with = "ic_wire::serde_packed::nonzero_i64")] Vec<std::num::NonZeroI64>,
+);
+
+#[derive(Debug, Deserialize, Wire, Serialize)]
+#[serde(transparent)]
+struct HeapWords(
+    #[serde(with = "ic_wire::serde_packed::heap_u64")] std::collections::BinaryHeap<u64>,
+);
+impl PartialEq for HeapWords {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.clone().into_sorted_vec() == other.0.clone().into_sorted_vec()
+    }
+}
+
+#[derive(Debug, Deserialize, Wire, Serialize)]
+struct DomainRecord {
+    tag: u8,
+    #[serde(with = "ic_wire::serde_packed::nonzero_i64")]
+    ids: Vec<std::num::NonZeroI64>,
+    #[serde(with = "ic_wire::serde_packed::heap_u64")]
+    queue: std::collections::BinaryHeap<u64>,
+}
+impl PartialEq for DomainRecord {
+    fn eq(&self, other: &Self) -> bool {
+        self.tag == other.tag
+            && self.ids == other.ids
+            && self.queue.clone().into_sorted_vec() == other.queue.clone().into_sorted_vec()
+    }
+}
+
 const LIMITS: Limits = Limits {
     bytes: 4096,
     allocation: 32768,
@@ -420,6 +453,77 @@ export function createCodec(method: unknown, types: unknown) {
         },
         "{tag:'Record',value:{items:[null,{some:7}]}}",
     );
+    for (offset, values) in [vec![], vec![-1_i64], vec![i64::MIN, 1, i64::MAX]]
+        .into_iter()
+        .enumerate()
+    {
+        let js = format!(
+            "new BigInt64Array([{}])",
+            values
+                .iter()
+                .map(|v| format!("{v}n"))
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        add(
+            directory,
+            &mut checks,
+            29 + offset,
+            NonzeroWords(
+                values
+                    .into_iter()
+                    .map(|v| std::num::NonZeroI64::new(v).unwrap())
+                    .collect(),
+            ),
+            &js,
+        );
+    }
+    for (offset, values) in [vec![], vec![1_u64], vec![0, 7, 7, u64::MAX]]
+        .into_iter()
+        .enumerate()
+    {
+        let heap = std::collections::BinaryHeap::from(values);
+        let js = format!(
+            "new BigUint64Array([{}])",
+            heap.as_slice()
+                .iter()
+                .map(|v| format!("{v}n"))
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        add(directory, &mut checks, 32 + offset, HeapWords(heap), &js);
+    }
+    add(
+        directory,
+        &mut checks,
+        35,
+        DomainRecord {
+            tag: 7,
+            ids: vec![std::num::NonZeroI64::new(-1).unwrap()],
+            queue: std::collections::BinaryHeap::from(vec![7, 0]),
+        },
+        "{tag:7,ids:new BigInt64Array([-1n]),queue:new BigUint64Array([7n,0n])}",
+    );
+    checks.push_str(
+        r#"
+for (const direction of ['Request', 'Response']) {
+  const nonzero = projection30, heap = projection33;
+  const encode = 'encode'+direction, decode = 'decode'+direction;
+  rejects(() => nonzero[encode](new BigInt64Array([0n])), 'value');
+  rejects(() => nonzero[encode](new BigInt64Array([1n, 0n])), 'value');
+  const header = [73,87,17,0,0,0,0,0,0,0,direction === 'Request' ? 0 : 1];
+  rejects(() => nonzero[decode](Uint8Array.from([...header,8,0,0,0,0,0,0,0,0])), 'malformed');
+  for (const codec of [nonzero, heap]) {
+    rejects(() => codec[decode](Uint8Array.from([...header,1,0])), 'malformed');
+    rejects(() => codec[decode](Uint8Array.from([...header,8,1])), 'limit');
+    rejects(() => codec[decode](Uint8Array.from([...header,0,0])), 'malformed');
+  }
+  // Browser values preserve received order/duplicates. Rust reconstructs a heap.
+  const bytes = Uint8Array.from([...header,24,1,0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]);
+  assert.deepEqual(heap[decode](bytes), new BigUint64Array([1n,7n,1n]));
+}
+"#,
+    );
     checks.push_str(r#"
 rejects(() => projection26.encodeRequest({cursor:{some:[0,128,255]}}), 'value');
 rejects(() => projection27.encodeRequest({tag:'Int64',value:-7n}), 'value');
@@ -432,7 +536,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 29 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 36 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

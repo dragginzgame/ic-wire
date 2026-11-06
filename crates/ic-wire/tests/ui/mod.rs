@@ -19,6 +19,8 @@ mod borrow_mutation;
 mod encode_only_decode;
 #[cfg(ui_case = "native_schema_attributes")]
 mod native_schema_attributes;
+#[cfg(ui_case = "packed_adapter_type")]
+mod packed_adapter_type;
 mod support;
 mod valid;
 #[cfg(ui_case = "wrong_reply")]

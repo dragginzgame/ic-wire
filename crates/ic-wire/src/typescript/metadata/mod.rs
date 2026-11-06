@@ -98,6 +98,13 @@ pub(super) fn ty(
     }
     *remaining -= 1;
     let kind = text(value, "k")?;
+    // Only the qualified NonZeroI64 adapter emits this constraint. Ordinary
+    // packed values still accept zero; regeneration is required on adoption.
+    if value.get("nonzero").is_some_and(|nonzero| {
+        kind != "packed" || value["word"] != "i64" || nonzero != &Value::Bool(true)
+    }) {
+        return Err(GenerationError::Schema);
+    }
     if value.get("check").is_some_and(|check| !check.is_string()) {
         return Err(GenerationError::Schema);
     }

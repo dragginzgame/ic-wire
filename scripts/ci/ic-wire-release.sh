@@ -62,9 +62,13 @@ case "$operation" in
         [[ "$(bash scripts/ci/cargo-release-group.sh version "$RELEASE_GROUP")" == "$RELEASE_PREVIOUS" ]] || fail 'previous version changed'
         awk -v version="$RELEASE_VERSION" -v previous="$RELEASE_PREVIOUS" -v date="$RELEASE_DATE" \
             -f scripts/ci/finalize-release-changelog.awk "$changelog" >/dev/null
-        bash scripts/ci/cargo-release-preflight.sh "$PWD" "${RELEASE_CACHE_PREPARE:-1}" \
-            --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
-            --prepare install-tools --prepare tools-check --check tools-check
+        # Captured groups were prepared by Shared before version lookup; exact
+        # standard-runner recovery retains its existing preparation contract.
+        if [[ "${RELEASE_BATCH_ACTIVE:-}" != 1 ]]; then
+            bash scripts/ci/cargo-release-preflight.sh "$PWD" "${RELEASE_CACHE_PREPARE:-1}" \
+                --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
+                --prepare install-tools --prepare tools-check --check tools-check
+        fi
         metadata check-graph
         ;;
     verify)

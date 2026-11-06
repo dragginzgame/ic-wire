@@ -5,6 +5,51 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.6]
+
+### ✨ Added
+
+- Add explicit `serde_packed::nonzero_i64` and `serde_packed::heap_u64` field
+  adapters, reusing the existing Packed codec without an intermediate encode
+  vector on little-endian targets. Wire derives project the qualified field types
+  to browser typed arrays; nonzero validation is automatic in both directions.
+  Existing consumers retain bytes, identities, limits and acceptance. Opting in
+  from an ordinary list changes `[-1]` from `01 01` to
+  `08 ff ff ff ff ff ff ff ff` (heap `[1]`: `01 01` to
+  `08 01 00 00 00 00 00 00 00`): coordinate consumer contracts, regenerate clients
+  and requalify budgets. Valid Packed DTO bytes match, but record-field encoding
+  allowance can differ. Heap normalization remains consumer-owned; preserve exact
+  retry/hash bytes. No new codec, automatic migration or second schema trait.
+
+### 🔧 Changed
+
+- Adopt Shared Tooling 0.31.0 at `7431394`, including the checksum-verification
+  fixes. Grouped releases now capture source automatically; use `RELEASE_GROUPS`
+  and `RELEASE_PUBLISH_TARGET` instead of the retired `RELEASE_FROZEN_*` settings.
+  Delegate candidate setup and saved-batch recovery, reconciliation and retirement
+  to Shared. Existing codec bytes, identities and admission are unchanged.
+
+### 🧪 Testing
+
+- Qualify the public adapters with exact bytes, actual admission boundaries,
+  malformed/zero rejection, standalone host/Wasm derives and generated browser
+  conformance. Keep ordinary lists and private copying controls visible; add
+  1/10/100-type adapter cohorts to monitor monomorphization footprint. Compared
+  with the original DTO conversion, large-case encode instructions roughly halve
+  and fixture Wasm falls 198/579 uncompressed bytes at opt-z/3. Compared with
+  already-packed records, adapters add 8,217/16,149 bytes in the 100-type stress
+  fixture; use selectively. [Matched results](../../docs/candid-comparison.md#borrowed-adapter-investigation).
+- Append 30 container workloads to the Candid comparison: nested optional bytes,
+  packed/blob results, byte-array versus Packed hash batches, nonzero integers
+  and binary heaps, retaining empty/singleton controls and all existing indices.
+  Check exact optional-state bytes, malformed inputs and nonzero admission.
+  Record both profiles' native timing, allocations, heap, IC instructions,
+  payload bytes and uncompressed Wasm in the
+  [expanded comparison](../../docs/candid-comparison.md#expanded-container-coverage),
+  including the remaining ordinary-list gaps and external DTO boundaries.
+  Existing consumer bytes, schemas, identities, limits and acceptance are unchanged;
+  no consumer migration is required.
+
 ## [0.17.5] - 2026-11-06
 
 ### 🩹 Fixed

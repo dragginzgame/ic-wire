@@ -2,15 +2,15 @@
 set -euo pipefail
 # Real local adapters/runner and Git delivery; expensive gate/setup substituted.
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
-frozen=false
-if [[ $# == 2 && "$1" == core && "$2" == --frozen ]]; then
-    frozen=true
+batch_mode=false
+if [[ $# == 2 && "$1" == core && "$2" == --batch ]]; then
+    batch_mode=true
 elif [[ $# != 1 ]]; then
-    echo 'usage: test-local-release.sh core|endpoint [--frozen (core batch only)]' >&2
+    echo 'usage: test-local-release.sh core|endpoint [--batch (core batch only)]' >&2
     exit 2
 fi
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
-unset CARGO_TARGET_DIR RELEASE_FROZEN_GROUPS RELEASE_FROZEN_PUBLISH_TARGET FROZEN_RELEASE_ACTIVE
+unset CARGO_TARGET_DIR RELEASE_GROUPS RELEASE_PUBLISH_TARGET RELEASE_BATCH_ACTIVE RELEASE_SETUP_TARGET RELEASE_SETUP_MODE
 unset FIXTURE_NORMAL_SOURCE FIXTURE_PUBLISH_CALLS FIXTURE_HOLD_PUBLICATION
 unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND CARGO_RELEASE_METADATA_EDITOR
 export RELEASE_GROUP="${1:?select the real fixture group}"
@@ -23,6 +23,9 @@ FIXTURE_RELEASE_EDITOR="${FIXTURE_RELEASE_EDITOR:-$(make --no-print-directory -s
 export FIXTURE_RELEASE_EDITOR
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 export RELEASE_CACHE_PREPARE=0
+# Default cases qualify hooks inside a captured checkout; --batch owns outer
+# capture, setup, multi-group publication and saved-state recovery.
+if [[ "$batch_mode" != true ]]; then export RELEASE_BATCH_ACTIVE=1; fi
 unset VALIDATION_REPOSITORY_ROOT VALIDATION_RUNNER_SNAPSHOT_PATH VALIDATION_LOG_DIR
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/local-release.XXXXXX")"
@@ -105,7 +108,7 @@ export PATH="$PWD/fixture-bin:$PATH"
 previous="$(make --no-print-directory -s release-version)"
 candidate="$(bash scripts/ci/next-release-version.sh "$previous" patch)"
 printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$candidate" "$previous" > "$changelog_path"
-if [[ "$frozen" == true ]]; then
+if [[ "$batch_mode" == true ]]; then
     endpoint_previous="$(make --no-print-directory -s release-version RELEASE_GROUP=endpoint)"
     endpoint_candidate="$(bash scripts/ci/next-release-version.sh "$endpoint_previous" patch)"
     printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$endpoint_candidate" "$endpoint_previous" > releases/endpoint/CHANGELOG.md
@@ -117,6 +120,7 @@ if [[ "$frozen" == true ]]; then
 set -euo pipefail
 if [[ "${1:-}" == publish ]]; then
     if grep -q frozen-deferred Cargo.lock; then exit 1; fi
+    [[ "$RELEASE_COMMIT" == "$(git rev-parse HEAD)" ]]
     printf '%s|%s|%s\n' "$RELEASE_GROUP" "$PWD" "$*" >> "$FIXTURE_PUBLISH_CALLS"
     if [[ "$RELEASE_GROUP" == endpoint && -f "$FIXTURE_HOLD_PUBLICATION" ]]; then exit 23; fi
     exit 0
@@ -136,11 +140,11 @@ git init -q --bare "$fixture/remote.git"
 git remote add origin "$fixture/remote.git"
 git push -q -u origin main
 source="$(git rev-parse HEAD)"
-if [[ "$frozen" == true ]]; then
+if [[ "$batch_mode" == true ]]; then
     export FIXTURE_NORMAL_SOURCE="$PWD" FIXTURE_PUBLISH_CALLS="$fixture/publication-calls"
     export FIXTURE_HOLD_PUBLICATION="$fixture/hold-publication"
     touch "$FIXTURE_HOLD_PUBLICATION"
-    if make release-patch RELEASE_FROZEN_GROUPS=core,endpoint RELEASE_FROZEN_PUBLISH_TARGET=publish > "$fixture/frozen.log" 2>&1; then exit 1; fi
+    if make release-patch RELEASE_GROUPS=core,endpoint RELEASE_PUBLISH_TARGET=publish > "$fixture/frozen.log" 2>&1; then exit 1; fi
     intents=(.git/release-state/frozen/batch-*/intent.json)
     [[ ${#intents[@]} == 1 && -f "${intents[0]}" ]]
     intent="${intents[0]}"
@@ -161,25 +165,35 @@ if [[ "$frozen" == true ]]; then
         [[ "$(git -C "$work" rev-parse "$group-v$version^{}")" == "$(git --git-dir="$fixture/remote.git" rev-parse "$group-v$version^{}")" ]]
     done
     cp "$FIXTURE_PUBLISH_CALLS" "$fixture/before-resume"
-    if perl scripts/ci/run-frozen-release.pl --root "$PWD" --resume "$batch" > "$fixture/uncertain.log" 2>&1; then exit 1; fi
+    if make release-batch-resume "BATCH=$batch" > "$fixture/uncertain.log" 2>&1; then exit 1; fi
     grep -q 'publication outcome uncertain' "$fixture/uncertain.log"
     cmp "$FIXTURE_PUBLISH_CALLS" "$fixture/before-resume"
     # The fixture transport did no uploads, so not-published is known here.
     rm "$FIXTURE_HOLD_PUBLICATION"
-    perl scripts/ci/run-frozen-release.pl --root "$PWD" --resume "$batch" --publication-result not-published > "$fixture/recovered.log" 2>&1
-    jq -e '.phase == "complete" and .index == 2' "$intent" >/dev/null
+    make release-batch-resume "BATCH=$batch" PUBLICATION_RESULT=not-published > "$fixture/recovered.log" 2>&1
+    jq -e '.schema == 2 and .phase == "complete" and .index == 2' "$intent" >/dev/null
     [[ "$(git -C "$work" rev-parse HEAD)" == "$commit" ]]
     printf 'core|%s|publish --locked --registry crates-io --package ic-wire-derive@%s --package ic-wire@%s\n' "$work" "$candidate" "$candidate" > "$fixture/expected-publication"
     for attempt in failed recovered; do
         printf 'endpoint|%s|publish --locked --registry crates-io --package ic-wire-endpoint-macros@%s --package ic-wire-endpoint@%s\n' "$work" "$endpoint_candidate" "$endpoint_candidate" >> "$fixture/expected-publication"
     done
     cmp "$FIXTURE_PUBLISH_CALLS" "$fixture/expected-publication"
-    perl scripts/ci/run-frozen-release.pl --root "$PWD" --resume "$batch" > "$fixture/complete-resume.log" 2>&1
+    make release-batch-resume "BATCH=$batch" > "$fixture/complete-resume.log" 2>&1
     cmp "$FIXTURE_PUBLISH_CALLS" "$fixture/expected-publication"
     [[ "$(git rev-parse HEAD)" == "$source" && "$(git status --porcelain)" == ' M Cargo.lock' ]]
     [[ -z "$(git -C "$work" status --porcelain)" ]]
+    make release-batch-status "BATCH=$batch" > "$fixture/status.log"
+    # Reconcile refuses the preserved edit. Preserve it, then qualify Shared's
+    # fast-forward and explicit retirement on this disposable fixture only.
+    if make release-batch-reconcile "BATCH=$batch" > "$fixture/dirty-reconcile.log" 2>&1; then exit 1; fi
+    cp Cargo.lock "$fixture/deferred.lock"
+    git restore Cargo.lock
+    make release-batch-reconcile "BATCH=$batch" > "$fixture/reconcile.log" 2>&1
+    [[ "$(git rev-parse HEAD)" == "$commit" ]]
+    make release-batch-retire "BATCH=$batch" > "$fixture/retire.log" 2>&1
+    [[ ! -e "$intent" && ! -e "$work" ]]
     complete=true
-    echo 'Frozen Wire hooks passed: both groups, deferred lock isolation, durable local Git delivery, uncertain publication refusal and idempotent recovery. Gates and upload substituted; no registry publication.'
+    echo 'Captured Wire hooks passed: both groups, deferred lock isolation, durable local Git delivery, uncertain publication refusal and idempotent recovery. Gates and upload substituted; no registry publication.'
     exit 0
 fi
 # Normal releases must ignore malformed historical plans and retain their evidence.

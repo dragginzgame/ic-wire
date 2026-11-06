@@ -220,29 +220,45 @@ For Shared release-entrypoint changes, use
 `bash scripts/ci/test-local-make.sh --case release-routing`. This exercises both
 groups' real Make includes, explicit-group refusal and runner arguments/status
 with release effects substituted in a disposable repository. It does not run
-formatting, publication or application gates. It also checks frozen roster order,
+formatting, publication or application gates. It also checks automatic single-group capture, explicit roster order,
 group consistency and Cargo target isolation. Only the outer launcher drops
 Wire's default target export; candidate Make invocations select their own target,
 and caller overrides are refused.
 
-`bash scripts/ci/test-local-release.sh core --frozen` selects the two-group frozen
+`bash scripts/ci/test-local-release.sh core --batch` selects the two-group frozen
 hook fixture. It uses real metadata, source admission, journals, tags, local Git
 pushes and publication receipts in disposable repositories. Application gates
 and registry uploads are substituted. It edits the normal fixture lock during
 Core validation, interrupts Endpoint publication, checks uncertain-outcome
 refusal, then checks explicit recovery and completed-resume idempotence.
 This is hook qualification, not installed/archive or full product qualification.
-The ordinary single-group fixtures remain available without `--frozen`.
+Without `--batch`, the single-group fixtures exercise the standard hooks inside
+a simulated captured checkout. They do not select live-checkout delivery.
 
-Frozen batches require an explicit affected roster. Core 0.17.5 qualified real
-all-feature archives, the full gate and installed Endpoint checks in the managed
-checkout, followed by registry readback. For an authorized Core patch deployment use
-`make release-patch RELEASE_GROUP=core RELEASE_FROZEN_GROUPS=core RELEASE_FROZEN_PUBLISH_TARGET=publish`.
-This command includes registry publication. Endpoint's earlier offline archive
-probe could not resolve the unpublished Core candidate; a future two-group
-deployment still needs complete supplier-first archive qualification. See the supplied
-[frozen batch contract](frozen-releases.md) for custody and recovery; deferred
-normal-checkout edits require explicit reconciliation after delivery.
+Shared 0.31 captures single-group releases automatically. For an authorized Core
+patch deployment use
+`make release-patch RELEASE_GROUP=core RELEASE_PUBLISH_TARGET=publish`.
+This includes registry publication. A multi-group delivery requires explicit
+`RELEASE_GROUPS=core,endpoint` in supplier order, with `RELEASE_GROUP=core`.
+The old `RELEASE_FROZEN_*` variables and runner have been removed upstream;
+there are no compatibility aliases. Wire supplies `release-candidate-setup`:
+Shared invokes it before version lookup, prepares the selected tools/cache for a
+new group, and checks them offline during recovery. Preflight does not repeat setup
+inside a batch. Publication remains explicit rather than a default side effect.
+
+Use Shared's `release-batch-status`, `release-batch-resume`,
+`release-batch-reconcile` and `release-batch-retire` with `BATCH=...` for the saved
+roster. Reconciliation requires a clean normal checkout; retirement explicitly
+deletes that completed batch's retained state. The old completed schema-1 Core
+0.17.5 receipt remains historical and must not be relabeled as schema 2 or resumed
+with the new runner. Its delivery was already reconciled into main.
+
+Core 0.17.5 qualified real archives, the full gate and installed Endpoint checks
+inside its managed checkout. The 0.31 hook fixture proves both groups, concurrent
+normal-lock isolation, uncertain publication refusal, saved commit identity,
+recovery, reconciliation and retirement with substituted gates/uploads. A future
+two-group deployment still needs complete supplier-first archive qualification.
+See the supplied [batch contract](release-batches.md) for custody and recovery.
 Core remains full-gate-only; Endpoint retains its qualified implementation paths.
 The default-feature Core `check` and schema-enabled host `lint` prove different
 feature graphs, and `check-wasm` proves a different target; none is removed as a

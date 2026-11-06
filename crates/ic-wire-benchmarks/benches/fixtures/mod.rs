@@ -39,6 +39,11 @@ compile_error!("select one derive cohort size");
 ))]
 compile_error!("select one scaling field representation");
 #[cfg(all(
+    feature = "adapter-scale",
+    any(feature = "bulk-scale", feature = "packed-scale")
+))]
+compile_error!("select one scaling field representation");
+#[cfg(all(
     feature = "bulk-baseline",
     not(any(feature = "bulk", feature = "bulk-scale"))
 ))]

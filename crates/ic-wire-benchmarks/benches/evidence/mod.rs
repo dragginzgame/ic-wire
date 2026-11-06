@@ -47,6 +47,24 @@ pub fn with_fixtures(mut identity: Value) -> Value {
         hash(include_bytes!("../fixtures/followup/mod.rs")).into(),
     );
     fields.insert(
+        "container_fixture_sha256".into(),
+        hash(include_bytes!("../fixtures/followup/containers/mod.rs")).into(),
+    );
+    fields.insert(
+        "container_transport_sha256".into(),
+        hash(include_bytes!(
+            "../fixtures/followup/containers/transport/mod.rs"
+        ))
+        .into(),
+    );
+    fields.insert(
+        "container_adapter_sha256".into(),
+        hash(include_bytes!(
+            "../fixtures/followup/containers/transport/adapters/mod.rs"
+        ))
+        .into(),
+    );
+    fields.insert(
         "followup_words_sha256".into(),
         hash(include_bytes!("../fixtures/followup/words/mod.rs")).into(),
     );
@@ -54,6 +72,18 @@ pub fn with_fixtures(mut identity: Value) -> Value {
         "evidence_helper_sha256".into(),
         hash(include_bytes!("mod.rs")).into(),
     );
+    for (key, source) in [
+        (
+            "public_nonzero_adapter_sha256",
+            include_bytes!("../../../ic-wire/src/serde_packed/nonzero_i64/mod.rs").as_slice(),
+        ),
+        (
+            "public_heap_adapter_sha256",
+            include_bytes!("../../../ic-wire/src/serde_packed/heap_u64/mod.rs").as_slice(),
+        ),
+    ] {
+        fields.insert(key.into(), hash(source).into());
+    }
     fields.insert(
         "operations_sha256".into(),
         hash(include_bytes!("../operations/mod.rs")).into(),

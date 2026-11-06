@@ -255,6 +255,49 @@ The TypeScript feature maps integers to the corresponding typed arrays (includin
 `BigInt64Array`/`BigUint64Array`) and hashes to flat `Uint8Array` bytes, with a length
 that must be divisible by 32. Ordinary vectors retain their current encoding.
 
+For large domain collections, explicit Serde field adapters preserve your Rust
+`Vec<NonZeroI64>` / `BinaryHeap<u64>` while serializing their existing storage as
+packed words. On little-endian hosts encoding does not copy into a temporary DTO;
+decoding remains owned and rejects zero or rebuilds heap order as appropriate.
+
+```rust
+use std::{collections::BinaryHeap, num::NonZeroI64};
+#[derive(serde::Serialize, serde::Deserialize)]
+# #[cfg_attr(all(feature = "typescript", not(target_family = "wasm")), derive(ic_wire::Wire))]
+struct Queue {
+    #[serde(with = "ic_wire::serde_packed::nonzero_i64")]
+    ids: Vec<NonZeroI64>,
+    #[serde(with = "ic_wire::serde_packed::heap_u64")]
+    pending: BinaryHeap<u64>,
+}
+```
+
+Add `ic_wire::Wire` to the derives when generating schemas. It recognizes these
+fully qualified adapter paths (also with a leading `::`) and type aliases for the
+same containers. Browser fields are `BigInt64Array` / `BigUint64Array`; nonzero
+validation is built in on both encode and decode. The Serde attribute applies to other serializers too; use a transport DTO when
+the domain type must retain another serialization format. Other custom adapters
+still need explicit verified metadata. `Packed<NonZeroI64>` remains unsupported.
+
+This is an explicit **consumer layout change**, not an automatic Serde rewrite:
+a nonzero list `[-1]` changes `01 01` to `08 ff ff ff ff ff ff ff ff`; a heap `[1]`
+changes `01 01` to `08 01 00 00 00 00 00 00 00`. Empty values remain `00`, which
+does not establish compatibility. Coordinate contract identities and consumers,
+regenerate clients and requalify limits. Existing ordinary/Packed bytes, identities,
+limits and acceptance are unchanged unless a consumer selects the adapters.
+
+Compared with an existing `Packed` DTO, valid bytes match, but field-adapter
+encoding can require less traversal allowance because Serde passes a smaller
+reference wrapper. Keep count bounds/domain checks and measure the actual record
+on its target. Heap decoding accepts arbitrary order and duplicates; Rust rebuilds
+heap order while the browser preserves the received array. Retain original bytes
+for retries/signatures instead of assuming re-encoding is canonical. Big-endian
+encoding uses the existing Packed copying fallback.
+
+Callers who can consume their heap can still transfer ownership directly with
+`Packed::new(heap.into_vec())`. Explicit DTOs and domain conversion remain useful
+when transport and domain contracts differ; no extra production codec is added.
+
 For bulk signed 16-bit values, `PackedI16<N>` owns a bounded `Vec<i16>` and
 serializes it as bytes: a byte count followed by fixed-width little-endian words.
 `new` admits an existing vector without copying; `as_slice` borrows its words and

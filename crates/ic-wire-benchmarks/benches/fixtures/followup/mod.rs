@@ -78,6 +78,7 @@ macro_rules! paired {
         )
     };
 }
+mod containers;
 #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "candid", derive(CandidType))]
 #[cfg_attr(feature = "candid", candid_path("ic_platform::candid::contract"))]
@@ -523,7 +524,10 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
                 .collect()
         ));
     }
-    assert!(selected.is_none_or(|s| s < index), "unknown follow-up case");
+    // Append only: preserve the original follow-up IC indices 0..94.
+    if selected.is_none_or(|s| s >= index) {
+        out.extend(containers::cases_selected(selected.map(|s| s - index)));
+    }
     out
 }
 #[cfg(all(test, feature = "wire", feature = "candid"))]

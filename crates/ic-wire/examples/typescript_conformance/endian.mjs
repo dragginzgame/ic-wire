@@ -47,7 +47,7 @@ for (const [word, name, , setter, values] of [...specs, ['hash32', 'Uint8Array',
     const expected = new Uint8Array(value.byteLength);
     if (word === 'hash32') expected.set(selected);
     else selected.forEach((v,i) => new DataView(expected.buffer)[setter](i * Ctor.BYTES_PER_ELEMENT, v, true));
-    for (const schema of [{k:'packed',word}, ...(word === 'i16' ? [{k:'packed-i16',max:3}] : [])]) {
+    for (const schema of [{k:'packed',word}, ...(word === 'i16' ? [{k:'packed-i16',max:3}] : []), ...(word === 'i64' ? [{k:'packed',word,nonzero:true}] : [])]) {
       const codec = createCodec({id:'1',request:schema,response:schema,requestBytes:256,responseBytes:256,requestNodes:16,responseNodes:16,requestDepth:8,responseDepth:8});
       for (const direction of ['Request','Response']) {
         const frame = Uint8Array.from([...header, expected.length, ...expected]);

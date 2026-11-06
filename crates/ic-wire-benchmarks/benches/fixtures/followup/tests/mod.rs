@@ -1,4 +1,85 @@
 #[test]
+fn container_cases_append_without_reordering_historical_indices() {
+    use super::*;
+    use sha2::{Digest, Sha256};
+    let cases = cases_selected(None);
+    assert_eq!(cases.len(), 124);
+    let historical = cases[..94]
+        .iter()
+        .map(|case| case.name.as_str())
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert_eq!(
+        format!("{:x}", Sha256::digest(historical.as_bytes())),
+        "c62153b64bd91c86603104afcf4d1e8bab90830f2086e8e3a0f093bfc7920dfe"
+    );
+    for n in [0, 1, 128, 4096] {
+        let arrays = cases
+            .iter()
+            .find(|c| c.name == format!("byte-array-hashes-{n}"))
+            .unwrap();
+        let packed = cases
+            .iter()
+            .find(|c| c.name == format!("packed-hashes-{n}"))
+            .unwrap();
+        assert_eq!(arrays.input_json, packed.input_json);
+        let candid = |case: &Case| {
+            case.lanes
+                .iter()
+                .find(|l| l.name == "candid")
+                .unwrap()
+                .bytes
+                .clone()
+        };
+        assert_eq!(candid(arrays), candid(packed));
+    }
+}
+
+#[test]
+fn nested_byte_options_preserve_absent_inner_absent_and_empty() {
+    use super::*;
+    type Value = Option<Option<ic_wire::ByteBuf>>;
+    for (value, bytes) in [
+        (None, vec![0]),
+        (Some(None), vec![1, 0]),
+        (Some(Some(ic_wire::ByteBuf::new())), vec![1, 1, 0]),
+        (
+            Some(Some(ic_wire::ByteBuf::from(vec![7]))),
+            vec![1, 1, 1, 7],
+        ),
+    ] {
+        assert_eq!(ic_wire::native::encode(&value, LIMITS).unwrap(), bytes);
+        assert_eq!(
+            ic_wire::native::decode::<Value>(&bytes, LIMITS).unwrap(),
+            value
+        );
+        for end in 0..bytes.len() {
+            assert!(ic_wire::native::decode::<Value>(&bytes[..end], LIMITS).is_err());
+        }
+    }
+    for invalid in [&[2][..], &[1, 2], &[1, 1, 2, 7]] {
+        assert!(ic_wire::native::decode::<Value>(invalid, LIMITS).is_err());
+    }
+}
+
+#[test]
+fn nonzero_list_rejects_a_late_zero_without_affecting_the_next_decode() {
+    use super::*;
+    use std::num::NonZeroI64;
+    let valid = vec![i64::MIN, -1, i64::MAX];
+    let mut invalid = valid.clone();
+    invalid.push(0);
+    let bytes = ic_wire::native::encode(&invalid, LIMITS).unwrap();
+    assert!(ic_wire::native::decode::<Vec<NonZeroI64>>(&bytes, LIMITS).is_err());
+    let bytes = ic_wire::native::encode(&valid, LIMITS).unwrap();
+    let decoded: Vec<NonZeroI64> = ic_wire::native::decode(&bytes, LIMITS).unwrap();
+    assert_eq!(
+        decoded.into_iter().map(NonZeroI64::get).collect::<Vec<_>>(),
+        valid
+    );
+}
+
+#[test]
 fn candid_byte_adapters_preserve_frames_and_owned_principal_boundary() {
     use super::*;
     let cases = cases_selected(None);

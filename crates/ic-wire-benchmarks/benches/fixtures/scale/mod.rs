@@ -1,6 +1,31 @@
 //! Nominally distinct records with byte-array, packed-i16 or mixed bulk-field cohorts.
 //! Each enabled type has a runtime-selectable codec path. All Wire records use the production Serde codec.
 use super::*;
+// These aliases also exercise exact-type metadata checking without name guessing.
+#[cfg(all(
+    feature = "wire",
+    feature = "adapter-scale",
+    feature = "adapter-scale-dto"
+))]
+type Ids = ic_wire::Packed<i64>;
+#[cfg(all(
+    feature = "wire",
+    feature = "adapter-scale",
+    not(feature = "adapter-scale-dto")
+))]
+type Ids = Vec<std::num::NonZeroI64>;
+#[cfg(all(
+    feature = "wire",
+    feature = "adapter-scale",
+    feature = "adapter-scale-dto"
+))]
+type Queue = ic_wire::Packed<u64>;
+#[cfg(all(
+    feature = "wire",
+    feature = "adapter-scale",
+    not(feature = "adapter-scale-dto")
+))]
+type Queue = std::collections::BinaryHeap<u64>;
 macro_rules! record {
     ($module:ident, $field:ident, $width:literal) => {
         mod $module {
@@ -8,7 +33,9 @@ macro_rules! record {
             #[cfg(feature = "packed-scale")]
             const PACKED_BOUND: usize = if cfg!(feature = "packed-scale-shared") { 16_384 } else { $width * 1024 };
             #[cfg(feature = "wire")]
-            #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+            #[derive(Debug, Serialize, serde::Deserialize)]
+            #[cfg_attr(any(not(feature = "adapter-scale"), feature = "adapter-scale-dto"), derive(PartialEq))]
+            #[cfg_attr(feature = "adapter-scale", derive(ic_wire::Wire))]
             struct WireRecord {
                 $field: u64,
                 active: bool,
@@ -32,7 +59,22 @@ macro_rules! record {
                 unsigned64: bulk::Field<u64>,
                 #[cfg(feature = "bulk-scale")]
                 hashes: bulk::Field<[u8; 32]>,
+                #[cfg(feature = "adapter-scale")]
+                #[cfg_attr(not(feature = "adapter-scale-dto"), serde(with = "ic_wire::serde_packed::nonzero_i64"))]
+                ids: Ids,
+                #[cfg(feature = "adapter-scale")]
+                #[cfg_attr(not(feature = "adapter-scale-dto"), serde(with = "ic_wire::serde_packed::heap_u64"))]
+                queue: Queue,
                 label: ic_wire::Text<64>,
+            }
+            #[cfg(all(feature = "wire", feature = "adapter-scale", not(feature = "adapter-scale-dto")))]
+            impl PartialEq for WireRecord {
+                fn eq(&self, other: &Self) -> bool {
+                    self.$field == other.$field && self.active == other.active
+                        && self.delta == other.delta && self.optional == other.optional
+                        && self.bytes == other.bytes && self.label == other.label
+                        && self.ids == other.ids && self.queue.as_slice() == other.queue.as_slice()
+                }
             }
             #[cfg(feature = "candid")]
             #[derive(Debug, PartialEq, serde::Deserialize, Serialize, CandidType)]
@@ -60,6 +102,10 @@ macro_rules! record {
                 unsigned64: Vec<u64>,
                 #[cfg(feature = "bulk-scale")]
                 hashes: Vec<[u8; 32]>,
+                #[cfg(feature = "adapter-scale")]
+                ids: Vec<i64>,
+                #[cfg(feature = "adapter-scale")]
+                queue: Vec<u64>,
                 label: String,
             }
             pub(super) fn build() -> Case {
@@ -83,6 +129,11 @@ macro_rules! record {
                     input["unsigned64"] = serde_json::json!(vec![u64::MAX; 8]);
                     input["hashes"] = serde_json::json!(vec![[42_u8; 32]; 8]);
                 }
+                #[cfg(feature = "adapter-scale")]
+                {
+                    input["ids"] = serde_json::json!(vec![i64::MAX; 8]);
+                    input["queue"] = serde_json::json!(vec![u64::MAX; 8]);
+                }
                 let input_json = serde_json::to_vec(&input).unwrap();
                 #[cfg(feature = "wire")]
                 lanes.push(lane("wire-bounded", Rc::new(WireRecord {
@@ -105,6 +156,20 @@ macro_rules! record {
                     unsigned64: bulk::field(vec![u64::MAX; 8]),
                     #[cfg(feature = "bulk-scale")]
                     hashes: bulk::field(vec![[42_u8; 32]; 8]),
+                    #[cfg(feature = "adapter-scale")]
+                    ids: {
+                        #[cfg(feature = "adapter-scale-dto")]
+                        { ic_wire::Packed::new(vec![i64::MAX; 8]) }
+                        #[cfg(not(feature = "adapter-scale-dto"))]
+                        { vec![std::num::NonZeroI64::new(i64::MAX).unwrap(); 8] }
+                    },
+                    #[cfg(feature = "adapter-scale")]
+                    queue: {
+                        #[cfg(feature = "adapter-scale-dto")]
+                        { ic_wire::Packed::new(vec![u64::MAX; 8]) }
+                        #[cfg(not(feature = "adapter-scale-dto"))]
+                        { std::collections::BinaryHeap::from(vec![u64::MAX; 8]) }
+                    },
                     label: ic_wire::Text::new("Representative record".into()).unwrap(),
                 }), |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
                     |b| ic_wire::native::decode_request::<WireRecord>(METHOD, b, LIMITS).ok()));
@@ -129,9 +194,25 @@ macro_rules! record {
                     unsigned64: vec![u64::MAX; 8],
                     #[cfg(feature = "bulk-scale")]
                     hashes: vec![[42_u8; 32]; 8],
+                    #[cfg(feature = "adapter-scale")]
+                    ids: vec![i64::MAX; 8],
+                    #[cfg(feature = "adapter-scale")]
+                    queue: vec![u64::MAX; 8],
                     label: "Representative record".into(),
                 }), |v| ic_platform::candid::contract::encode_one(v).unwrap(),
                     |b| ic_platform::candid::decode_exactly_one(b, CANDID_LIMITS).ok()));
+                #[cfg(all(test, feature = "wire", feature = "adapter-scale"))]
+                {
+                    // Both domain-adapter and plain DTO records must retain this
+                    // positional frame, including the varying fixed array width.
+                    let mut expected = ic_wire::native::encode_request(METHOD,
+                        &(1_000_000_u64, true, -65_i64, Some(128_u64)), LIMITS).unwrap();
+                    expected.extend_from_slice(&[42_u8; $width]);
+                    expected.extend(ic_wire::native::encode(&ic_wire::Packed::new(vec![i64::MAX; 8]), LIMITS).unwrap());
+                    expected.extend(ic_wire::native::encode(&ic_wire::Packed::new(vec![u64::MAX; 8]), LIMITS).unwrap());
+                    expected.extend(ic_wire::native::encode(&"Representative record", LIMITS).unwrap());
+                    assert_eq!(lanes[0].bytes, expected);
+                }
                 Case { name: stringify!($module).into(), input_json, lanes }
             }
         }

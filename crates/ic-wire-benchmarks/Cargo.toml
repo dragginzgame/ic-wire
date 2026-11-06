@@ -36,6 +36,10 @@ cost-smoke = []
 contract-shapes = []
 # New boundary/stdlib controls; bulk is private research, never production.
 coverage-shapes = []
+# Existing Packed DTOs plus domain conversion; not another production codec.
+packed-containers = ["coverage-shapes"]
+# Public adapter qualification; never a production codec selection.
+borrowed-containers = ["packed-containers"]
 research-bulk = ["coverage-shapes"]
 # Explicit standard byte-array map keys versus unchanged fixed-array controls.
 byte-keys = []
@@ -56,6 +60,9 @@ packed-scale-shared = ["packed-scale"]
 bulk = []
 bulk-baseline = []
 bulk-scale = ["derive-scale"]
+# Distinct records exercise public field adapters; DTO is the existing codec control.
+adapter-scale = ["derive-scale", "ic-wire/typescript"]
+adapter-scale-dto = ["adapter-scale"]
 derive-scale = []
 derive-scale-1 = ["derive-scale"]
 derive-scale-10 = ["derive-scale"]

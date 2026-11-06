@@ -9,7 +9,7 @@ if [[ $# != 0 ]]; then
     esac
 fi
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES RELEASE_GROUP WIRE_LINT_GROUP
-unset CARGO_TARGET_DIR RELEASE_FROZEN_GROUPS RELEASE_FROZEN_PUBLISH_TARGET FROZEN_RELEASE_ACTIVE
+unset CARGO_TARGET_DIR RELEASE_GROUPS RELEASE_PUBLISH_TARGET RELEASE_BATCH_ACTIVE RELEASE_SETUP_TARGET RELEASE_SETUP_MODE
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 
 # Consumer qualification only. Git/index effects stay in this disposable export.
@@ -133,17 +133,7 @@ for group_selection in missing empty unknown; do
         grep -F 'Select RELEASE_GROUP=core or endpoint explicitly' "$fixture/refuse-$group_selection-$target.log" >/dev/null
     done
 done
-for group in core endpoint; do
-    for target in release-patch release-minor release-major release-resume; do
-        status=0
-        make --no-print-directory -C "$fixture/repo" "$target" "RELEASE_GROUP=$group" VERSION=0.1.0 > "$fixture/$group-$target.log" 2>&1 || status=$?
-        [[ "$status" == 2 && -e "$RELEASE_SENTINEL" ]]
-        if [[ "$target" == release-resume ]]; then expected="resume 0.1.0 origin main"; else expected="${target#release-} origin main"; fi
-        [[ "$(cat "$RELEASE_SENTINEL")" == "$expected" ]]
-        rm "$RELEASE_SENTINEL"
-    done
-done
-cat > "$fixture/repo/scripts/ci/run-frozen-release.pl" <<'STUB'
+cat > "$fixture/repo/scripts/ci/run-release-batch.pl" <<'STUB'
 use strict;
 use warnings;
 die "normal Cargo target leaked into launcher\n" if exists $ENV{CARGO_TARGET_DIR};
@@ -152,27 +142,45 @@ print {$out} join(' ', @ARGV), "\n";
 close $out or die $!;
 exit 99;
 STUB
+# Default single-group selection must capture without an opt-in roster.
+for group in core endpoint; do
+    for target in release-patch release-minor release-major release-resume; do
+        status=0
+        make --no-print-directory -C "$fixture/repo" "$target" "RELEASE_GROUP=$group" VERSION=0.1.0 > "$fixture/$group-$target.log" 2>&1 || status=$?
+        [[ "$status" == 2 && -e "$RELEASE_SENTINEL" ]]
+        if [[ "$target" == release-resume ]]; then expected="resume 0.1.0 origin main";
+        else expected="--root $fixture/repo --groups $group --kind ${target#release-} --remote origin --branch main --delivery direct --setup-target release-candidate-setup"; fi
+        [[ "$(cat "$RELEASE_SENTINEL")" == "$expected" ]]
+        rm "$RELEASE_SENTINEL"
+    done
+done
+# Old public selectors must refuse, never silently narrow or publish a batch.
+for retired in RELEASE_FROZEN_GROUPS=core RELEASE_FROZEN_PUBLISH_TARGET=publish FROZEN_RELEASE_ACTIVE=1; do
+    if make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=core "$retired" > "$fixture/retired.log" 2>&1; then exit 1; fi
+    grep -F 'Retired release settings' "$fixture/retired.log" >/dev/null
+    [[ ! -e "$RELEASE_SENTINEL" ]]
+done
 for roster in core endpoint core,endpoint; do
     group="${roster%%,*}"
     status=0
     make --no-print-directory -C "$fixture/repo" release-patch "RELEASE_GROUP=$group" \
-        "RELEASE_FROZEN_GROUPS=$roster" > "$fixture/frozen-$group.log" 2>&1 || status=$?
-    [[ "$status" == 2 && "$(cat "$RELEASE_SENTINEL")" == "--root $fixture/repo --groups $roster --kind patch --remote origin --branch main --delivery direct" ]]
+        "RELEASE_GROUPS=$roster" > "$fixture/frozen-$group.log" 2>&1 || status=$?
+    [[ "$status" == 2 && "$(cat "$RELEASE_SENTINEL")" == "--root $fixture/repo --groups $roster --kind patch --remote origin --branch main --delivery direct --setup-target release-candidate-setup" ]]
     rm "$RELEASE_SENTINEL"
 done
 for roster in unknown endpoint,core core,core 'core endpoint' core,unknown; do
     if make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=core \
-        "RELEASE_FROZEN_GROUPS=$roster" > "$fixture/frozen-invalid.log" 2>&1; then exit 1; fi
+        "RELEASE_GROUPS=$roster" > "$fixture/frozen-invalid.log" 2>&1; then exit 1; fi
     [[ ! -e "$RELEASE_SENTINEL" ]]
 done
 if make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=endpoint \
-    RELEASE_FROZEN_GROUPS=core,endpoint > "$fixture/frozen-mismatch.log" 2>&1; then exit 1; fi
+    RELEASE_GROUPS=core,endpoint > "$fixture/frozen-mismatch.log" 2>&1; then exit 1; fi
 [[ ! -e "$RELEASE_SENTINEL" ]]
 for source in environment command; do
     args=()
     if [[ "$source" == command ]]; then args=(CARGO_TARGET_DIR=caller-target); fi
     if CARGO_TARGET_DIR=caller-target make --no-print-directory -C "$fixture/repo" \
-        release-patch RELEASE_GROUP=core RELEASE_FROZEN_GROUPS=core \
+        release-patch RELEASE_GROUP=core RELEASE_GROUPS=core \
         ${args[@]+"${args[@]}"} > "$fixture/frozen-target-$source.log" 2>&1; then exit 1; fi
     [[ ! -e "$RELEASE_SENTINEL" ]]
     grep -F 'Unset CARGO_TARGET_DIR' "$fixture/frozen-target-$source.log" >/dev/null
@@ -180,11 +188,11 @@ done
 # The candidate uses its ordinary runner and its own Cargo target, not a nested batch.
 status=0
 make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=endpoint \
-    RELEASE_FROZEN_GROUPS=core,endpoint FROZEN_RELEASE_ACTIVE=1 \
+    RELEASE_GROUPS=core,endpoint RELEASE_BATCH_ACTIVE=1 \
     > "$fixture/frozen-active.log" 2>&1 || status=$?
 [[ "$status" == 2 && "$(cat "$RELEASE_SENTINEL")" == 'patch origin main' ]]
 rm "$RELEASE_SENTINEL"
-cp -p "$root/scripts/ci/run-frozen-release.pl" "$fixture/repo/scripts/ci/run-frozen-release.pl"
+cp -p "$root/scripts/ci/run-release-batch.pl" "$fixture/repo/scripts/ci/run-release-batch.pl"
 if [[ "$case_selection" == release-routing ]]; then
     complete=true
     echo "Local Make release routing passed (both groups; disposable fixture; release effects substituted)."
