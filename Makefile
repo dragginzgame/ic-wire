@@ -2,6 +2,7 @@
 
 override SHARED_TOOLING_ROOT := $(CURDIR)
 SHARED_TOOLING_RUST := 1
+_wire_cargo_target_origin := $(origin CARGO_TARGET_DIR)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -14,6 +15,28 @@ $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
 ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
+endif
+endif
+# A frozen launcher owns no Cargo build; each candidate Make selects its own
+# target. Do not hide caller overrides or allow a partially dispatched roster.
+ifneq ($(filter release-patch release-minor release-major,$(MAKECMDGOALS)),)
+ifneq ($(strip $(RELEASE_FROZEN_GROUPS)),)
+ifneq ($(FROZEN_RELEASE_ACTIVE),1)
+_wire_frozen_rosters := core endpoint core,endpoint
+ifeq ($(filter $(_wire_frozen_rosters),$(RELEASE_FROZEN_GROUPS)),)
+$(error Select frozen groups core, endpoint or core,endpoint in supplier order)
+endif
+ifneq ($(words $(RELEASE_FROZEN_GROUPS)),1)
+$(error Select one comma-separated frozen group roster)
+endif
+ifneq ($(RELEASE_GROUP),$(if $(filter endpoint,$(RELEASE_FROZEN_GROUPS)),endpoint,core))
+$(error RELEASE_GROUP must select the first frozen group)
+endif
+ifneq ($(_wire_cargo_target_origin),undefined)
+$(error Unset CARGO_TARGET_DIR before starting a frozen release)
+endif
+unexport CARGO_TARGET_DIR
+endif
 endif
 endif
 RELEASE_EDITOR_VERSION := 0.75.0

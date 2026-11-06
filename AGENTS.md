@@ -1,6 +1,6 @@
 # IC Wire contributor instructions
 
-Apply the reviewed [Shared 0.30.6 policy](https://github.com/dragginzgame/shared-tooling/blob/45c0295e23d3d23225e31f47c018c30ff0c75581/DRAGGINZGAME.md)
+Apply the reviewed [Shared 0.30.8 policy](https://github.com/dragginzgame/shared-tooling/blob/dc9df707b3b1e616973494eab961c1c214d12260/DRAGGINZGAME.md)
 and its revision-bound references. The installed [baseline](DRAGGINZGAME.md) and
 [manifest](.shared-tooling.snapshot) own executable snapshot provenance; refresh
 through Shared's exporter, never by editing payloads or following a moving sibling.

@@ -216,6 +216,38 @@ consume Shared's admitted projection. For roster/receipt caller changes, use
 real Make dispatch/failure routing with substituted gates, leaving its unrelated
 formatting/publication fixture cases unrun.
 
+For Shared release-entrypoint changes, use
+`bash scripts/ci/test-local-make.sh --case release-routing`. This exercises both
+groups' real Make includes, explicit-group refusal and runner arguments/status
+with release effects substituted in a disposable repository. It does not run
+formatting, publication or application gates. It also checks frozen roster order,
+group consistency and Cargo target isolation. Only the outer launcher drops
+Wire's default target export; candidate Make invocations select their own target,
+and caller overrides are refused.
+
+`bash scripts/ci/test-local-release.sh core --frozen` selects the two-group frozen
+hook fixture. It uses real metadata, source admission, journals, tags, local Git
+pushes and publication receipts in disposable repositories. Application gates
+and registry uploads are substituted. It edits the normal fixture lock during
+Core validation, interrupts Endpoint publication, checks uncertain-outcome
+refusal, then checks explicit recovery and completed-resume idempotence.
+This is hook qualification, not installed/archive or full product qualification.
+The ordinary single-group fixtures remain available without `--frozen`.
+
+Frozen batches require an explicit affected roster. Core's all-feature archives
+have passed real Cargo verification; the first Core delivery also requires its
+full gate in the managed checkout. For an authorized Core patch deployment use
+`make release-patch RELEASE_GROUP=core RELEASE_FROZEN_GROUPS=core RELEASE_FROZEN_PUBLISH_TARGET=publish`.
+This command includes registry publication. Endpoint's earlier offline archive
+probe could not resolve the unpublished Core candidate; a future two-group
+deployment still needs complete supplier-first archive qualification. See the supplied
+[frozen batch contract](frozen-releases.md) for custody and recovery; deferred
+normal-checkout edits require explicit reconciliation after delivery.
+Core remains full-gate-only; Endpoint retains its qualified implementation paths.
+The default-feature Core `check` and schema-enabled host `lint` prove different
+feature graphs, and `check-wasm` proves a different target; none is removed as a
+duplicate compilation. No elapsed-time saving is claimed from this adoption.
+
 ### Standalone TypeScript qualification
 
 Prepare Node 24.21.0 and npm 12.2.0, matching `examples/browser/.nvmrc` and
@@ -476,9 +508,9 @@ benchmark cohorts within the one codec, not selectable production strategies.
 lengths, nested packed containers, deterministic hash collections, bounded Nat,
 standard-library types and float/bool size sweeps. `research-bulk` pairs that
 same corpus with private float/bool byte-buffer fields; it adds no public codec,
-Packed word, schema or generated client. The 26-cohort full report predates these
-two additions; their separate qualification is retained in the
-[follow-up study](evidence/primitive-bulk.md).
+Packed word, schema or generated client. The latest full report includes both
+cohorts while separating research from production results; their original
+qualification remains in the [follow-up study](evidence/primitive-bulk.md).
 
 The runner freezes source/lock before measurement, requires a fresh output
 folder, runs cohorts serially and retains both optimization profiles, two native

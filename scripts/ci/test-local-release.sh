@@ -2,7 +2,16 @@
 set -euo pipefail
 # Real local adapters/runner and Git delivery; expensive gate/setup substituted.
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+frozen=false
+if [[ $# == 2 && "$1" == core && "$2" == --frozen ]]; then
+    frozen=true
+elif [[ $# != 1 ]]; then
+    echo 'usage: test-local-release.sh core|endpoint [--frozen (core batch only)]' >&2
+    exit 2
+fi
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
+unset CARGO_TARGET_DIR RELEASE_FROZEN_GROUPS RELEASE_FROZEN_PUBLISH_TARGET FROZEN_RELEASE_ACTIVE
+unset FIXTURE_NORMAL_SOURCE FIXTURE_PUBLISH_CALLS FIXTURE_HOLD_PUBLICATION
 unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND CARGO_RELEASE_METADATA_EDITOR
 export RELEASE_GROUP="${1:?select the real fixture group}"
 plan="$(bash "$root/scripts/ci/cargo-release-group.sh" plan "$RELEASE_GROUP")"
@@ -57,7 +66,7 @@ cat > fixture-gates.mk <<'MAKE'
 release-editor-check:
 	@printf '%s\n' "$$FIXTURE_RELEASE_EDITOR"
 install-tools tools-check:
-	@printf '%s\n' '$@' >> .git/fixture-gates
+	@printf '%s\n' '$@' >> "$$(git rev-parse --git-path fixture-gates)"
 release-push-check:
 	@bash scripts/ci/ic-wire-release.sh push
 	@test ! -f .git/hold-push
@@ -74,8 +83,15 @@ if [[ $# == 5 && "$1" == --no-print-directory && "$2" == -C && "$4" == -- ]]; th
     goal="$5"
     if perl -MJSON::PP -e 'local $/; open my $f,"<",$ARGV[1] or die $!; my $p=decode_json(<$f>); exit((grep {$_ eq $ARGV[0]} @{$p->{stages}})?0:1)' "$goal" "$3/ci/release-validation.json"; then
         # Bash 3.2 does not apply errexit to this [[ ... ]] failure; exit explicitly.
-        if [[ "$goal" == lint && -f "$3/.git/fail-validation" ]]; then exit 1; fi
-        printf '%s\n' "$goal" >> "$3/.git/fixture-gates"
+        gitdir="$(git -C "$3" rev-parse --absolute-git-dir)"
+        if [[ "$goal" == lint && -f "$gitdir/fail-validation" ]]; then exit 1; fi
+        printf '%s\n' "$goal" >> "$gitdir/fixture-gates"
+        if [[ -n "${FIXTURE_NORMAL_SOURCE:-}" ]]; then
+            if grep -q frozen-deferred "$3/Cargo.lock"; then exit 1; fi
+            if [[ "$goal" == lint && "$RELEASE_GROUP" == core ]]; then
+                printf '\n# frozen-deferred\n' >> "$FIXTURE_NORMAL_SOURCE/Cargo.lock"
+            fi
+        fi
         exit 0
     fi
 fi
@@ -89,6 +105,27 @@ export PATH="$PWD/fixture-bin:$PATH"
 previous="$(make --no-print-directory -s release-version)"
 candidate="$(bash scripts/ci/next-release-version.sh "$previous" patch)"
 printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$candidate" "$previous" > "$changelog_path"
+if [[ "$frozen" == true ]]; then
+    endpoint_previous="$(make --no-print-directory -s release-version RELEASE_GROUP=endpoint)"
+    endpoint_candidate="$(bash scripts/ci/next-release-version.sh "$endpoint_previous" patch)"
+    printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$endpoint_candidate" "$endpoint_previous" > releases/endpoint/CHANGELOG.md
+    # Keep real publication admission, selection and receipts; substitute only
+    # the registry-effect command. This is not archive/build qualification.
+    export FIXTURE_REAL_CARGO="$(command -v cargo)"
+    cat > fixture-bin/cargo <<'STUB'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == publish ]]; then
+    if grep -q frozen-deferred Cargo.lock; then exit 1; fi
+    printf '%s|%s|%s\n' "$RELEASE_GROUP" "$PWD" "$*" >> "$FIXTURE_PUBLISH_CALLS"
+    if [[ "$RELEASE_GROUP" == endpoint && -f "$FIXTURE_HOLD_PUBLICATION" ]]; then exit 23; fi
+    exit 0
+fi
+exec "$FIXTURE_REAL_CARGO" "$@"
+STUB
+    chmod +x fixture-bin/cargo
+    printf '\nlint:\n\t@:\n' >> fixture-gates.mk
+fi
 git init -q -b main
 git config user.name Fixture
 git config user.email fixture@example.invalid
@@ -99,6 +136,52 @@ git init -q --bare "$fixture/remote.git"
 git remote add origin "$fixture/remote.git"
 git push -q -u origin main
 source="$(git rev-parse HEAD)"
+if [[ "$frozen" == true ]]; then
+    export FIXTURE_NORMAL_SOURCE="$PWD" FIXTURE_PUBLISH_CALLS="$fixture/publication-calls"
+    export FIXTURE_HOLD_PUBLICATION="$fixture/hold-publication"
+    touch "$FIXTURE_HOLD_PUBLICATION"
+    if make release-patch RELEASE_FROZEN_GROUPS=core,endpoint RELEASE_FROZEN_PUBLISH_TARGET=publish > "$fixture/frozen.log" 2>&1; then exit 1; fi
+    intents=(.git/release-state/frozen/batch-*/intent.json)
+    [[ ${#intents[@]} == 1 && -f "${intents[0]}" ]]
+    intent="${intents[0]}"
+    batch="$(basename "$(dirname "$intent")")"
+    work="$PWD/target/release-frozen/$batch"
+    gitdir="$(git -C "$work" rev-parse --absolute-git-dir)"
+    jq -e '.phase == "publishing" and .index == 1' "$intent" >/dev/null
+    [[ "$(git rev-parse HEAD)" == "$source" && "$(make -s release-version)" == "$previous" ]]
+    [[ "$(git status --porcelain)" == ' M Cargo.lock' ]]
+    grep -q frozen-deferred Cargo.lock
+    if grep -q frozen-deferred "$work/Cargo.lock"; then exit 1; fi
+    commit="$(git -C "$work" rev-parse HEAD)"
+    [[ "$(git --git-dir="$fixture/remote.git" rev-parse refs/heads/main)" == "$commit" ]]
+    for group in core endpoint; do
+        version="$candidate"
+        [[ "$group" == core ]] || version="$endpoint_candidate"
+        [[ -f "$gitdir/release-state/$group-$version.plan" ]]
+        [[ "$(git -C "$work" rev-parse "$group-v$version^{}")" == "$(git --git-dir="$fixture/remote.git" rev-parse "$group-v$version^{}")" ]]
+    done
+    cp "$FIXTURE_PUBLISH_CALLS" "$fixture/before-resume"
+    if perl scripts/ci/run-frozen-release.pl --root "$PWD" --resume "$batch" > "$fixture/uncertain.log" 2>&1; then exit 1; fi
+    grep -q 'publication outcome uncertain' "$fixture/uncertain.log"
+    cmp "$FIXTURE_PUBLISH_CALLS" "$fixture/before-resume"
+    # The fixture transport did no uploads, so not-published is known here.
+    rm "$FIXTURE_HOLD_PUBLICATION"
+    perl scripts/ci/run-frozen-release.pl --root "$PWD" --resume "$batch" --publication-result not-published > "$fixture/recovered.log" 2>&1
+    jq -e '.phase == "complete" and .index == 2' "$intent" >/dev/null
+    [[ "$(git -C "$work" rev-parse HEAD)" == "$commit" ]]
+    printf 'core|%s|publish --locked --registry crates-io --package ic-wire-derive@%s --package ic-wire@%s\n' "$work" "$candidate" "$candidate" > "$fixture/expected-publication"
+    for attempt in failed recovered; do
+        printf 'endpoint|%s|publish --locked --registry crates-io --package ic-wire-endpoint-macros@%s --package ic-wire-endpoint@%s\n' "$work" "$endpoint_candidate" "$endpoint_candidate" >> "$fixture/expected-publication"
+    done
+    cmp "$FIXTURE_PUBLISH_CALLS" "$fixture/expected-publication"
+    perl scripts/ci/run-frozen-release.pl --root "$PWD" --resume "$batch" > "$fixture/complete-resume.log" 2>&1
+    cmp "$FIXTURE_PUBLISH_CALLS" "$fixture/expected-publication"
+    [[ "$(git rev-parse HEAD)" == "$source" && "$(git status --porcelain)" == ' M Cargo.lock' ]]
+    [[ -z "$(git -C "$work" status --porcelain)" ]]
+    complete=true
+    echo 'Frozen Wire hooks passed: both groups, deferred lock isolation, durable local Git delivery, uncertain publication refusal and idempotent recovery. Gates and upload substituted; no registry publication.'
+    exit 0
+fi
 # Normal releases must ignore malformed historical plans and retain their evidence.
 mkdir -p .git/release-state/broken.plan
 printf 'retained historical plan\n' > .git/release-state/0.0.1.plan

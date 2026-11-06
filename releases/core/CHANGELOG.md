@@ -5,6 +5,38 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.5]
+
+### 🩹 Fixed
+
+- Let codec comparison reports read the runner's normal output layout without
+  treating native-run log files as measurement directories. Missing or invalid
+  numbered run directories still fail instead of silently dropping evidence.
+- Keep Wire's normal Cargo target export out of the opt-in frozen release
+  launcher; reject inconsistent or out-of-order group selections before effects.
+  Candidate Make invocations retain their own Cargo target directories.
+
+### 🧪 Testing
+
+- Cover default hotspot advice through real derived fields, including quiet
+  byte/Packed alternatives and exact acknowledgements, and extend Postcard byte
+  and budget checks across signed 32-bit encoding boundaries.
+- Refresh the complete 28-cohort Candid comparison, separating private research
+  from production results and documenting remaining hotspots and measured
+  uncompressed Wasm. Reject a signed-integer writer experiment that increased
+  size; production codec bytes, identities, limits and acceptance stay unchanged.
+
+### ⬆️ Dependencies
+
+- Adopt committed Shared Tooling 0.30.8, including the fix for resuming frozen
+  batches whose generated IDs contain underscores, and its release-efficiency guidance.
+  Cover Core/Endpoint routing and frozen lock isolation/recovery in focused
+  disposable fixtures. Frozen delivery selects an explicit affected group roster
+  and retains the full release gate; no registry uploads occur in fixtures.
+- Adopt Testkit 0.89 for native qualification. Client logging setup now belongs
+  to the application; Wire's fixtures need no logging migration. Remove unused
+  logging dependencies; this adoption changes no codec bytes or budgets.
+
 ## [0.17.4] - 2026-11-06
 
 ### ⬆️ Dependencies

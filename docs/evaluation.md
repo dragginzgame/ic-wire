@@ -1,9 +1,5 @@
 # Evaluation scope
 
-> Historical findings only. Raw measurements, snapshots, logs and build artifacts
-> were retired from this tree. A summary/hash cannot verify missing payloads.
-> Use the maintained development commands for fresh measurements.
-
 The maintained qualification exercises the selected Postcard codec, its
 generated TypeScript implementation and an isolated Candid comparison suite.
 The optional typed endpoint integration has a standalone Platform/Testkit fixture;
@@ -18,16 +14,17 @@ owns shipped-codec IC, frame and Wasm measurements. The retired protocol-study
 runner is available only in the archived finite revision linked by those studies;
 it is no longer maintained alongside the production Serde suite.
 
-The [4 November full matrix](candid-comparison.md) now
-measures its complete frozen 26-cohort roster, including the formerly skipped hotspot cohort:
-1,387 overlapping case entries, 5,548 primary comparisons and 104 fresh modules.
+The [6 November full matrix](candid-comparison.md) measures its complete frozen
+28-cohort roster: 1,575 overlapping case entries, 6,300 primary comparisons and
+112 fresh modules. Its report separates 27 production-representation cohorts
+from the private float/bool research cohort.
 It includes the complete 391-case standard corpus and the Platform/Testkit
 selection recorded in that report, not the current lockfile. [Coverage gaps](candid-comparison.md) and
 [ranked hotspots](candid-comparison.md) distinguish
 supported field choices from proposed research and missing comparison controls.
-The maintained roster now adds `coverage-shapes` and paired `research-bulk`:
-[separate follow-up evidence](evidence/primitive-bulk.md) keeps these new
-controls distinct from that frozen full run. Candid DTOs remain test-only; Wire
+The full run includes `coverage-shapes` and paired `research-bulk`; the
+[original follow-up](evidence/primitive-bulk.md) retains their design and
+earlier measurements. Candid DTOs remain test-only; Wire
 serializes owned application representations. Private float/bool fields do not
 extend the production Packed element set or generated client contract.
 

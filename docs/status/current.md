@@ -1,127 +1,118 @@
 # Current handoff
 
-## Selected delivery: Core 0.17.4 / Endpoint 0.7.2
+## Current work: frozen Core 0.17.5 delivery
 
-The maintainer authorized Git delivery and crates.io publication of this batch
-from /home/adam/projects/ic-wire, main, to origin/main at dragginzgame/ic-wire.
-Release Core first, then Endpoint, through the maintained group gates and
-publication adapter. Expected tags: core-v0.17.4 and endpoint-v0.7.2. Receipts and
-remote/registry verification own completion; this selection is not a release claim.
+The accepted comparison, advice audit and shared-code investigation are complete.
+Core **0.17.5** is the pending compatible patch: Shared/native qualification
+adoption, a benchmark reporter fix and meaningful regression coverage. Package
+versions remain at delivered Core **0.17.4** / Endpoint **0.7.2** while preparing
+the authorized Core release. The maintainer selected a frozen `core` batch from
+this checkout's `main` to `origin/main`, tag `core-v0.17.5`, and crates.io.
+Endpoint has no package changes requiring a separate release. Archive checks
+and the full 20-stage gate must pass against the selected inputs before delivery.
 
-The maintainer accepted the audit actions, prioritizing lint advice over more
-codec variants. Default generation now warns about ordinary bool, float,
-128-bit integer and zero-sized lists as well as byte/integer/hash candidates.
-Unsupported Packed types are never recommended. Exact-path acknowledgements,
-stale-acknowledgement detection and the eight-entry display cap remain intact.
-Codec-only consumers need a host schema-generation step to receive this advice.
-No consumer Serde representation is rewritten.
+Shared **0.30.8 / dc9df70** is adopted through the canonical exporter at the
+verified pushed revision, with 143 payloads. It fixes resume admission for generated
+batch IDs containing underscores without changing recovery paths. Frozen release batches remain
+off by default. Make now removes only its own target export at the outer frozen
+launcher and rejects invalid roster/order, group mismatch and caller target
+overrides. `test-local-make.sh --case release-routing` passes both ordinary and
+frozen dispatch checks. `test-local-release.sh core --frozen` exercises actual
+two-group metadata/Git/publication hooks with gates/uploads substituted; it tests
+deferred lock isolation and uncertain/completed publication recovery, and passes.
+Both fixture dispatchers also reject deliberately contaminated candidate locks.
+Core's real all-feature archive verification now passes. The earlier two-group
+probe could not resolve unpublished Core from Endpoint offline; it is not
+Endpoint archive qualification. This delivery selects only Core and must complete
+its full gate in the managed checkout. Default-feature Core, schema-host
+Clippy and Wasm compilation retain their distinct obligations; no validation
+reuse or elapsed-time saving is claimed.
+Snapshot/source verification, both-group release routing, existing CI-routing,
+script syntax and local documentation references pass. No full CI or real
+checkout/registry release effects ran; earlier work is preserved.
 
-Endpoint guards now qualify `Result::Ok`, preventing application `Ok` variants
-from capturing generated code. Real owned/borrowed macro controls and receiver/
-generic diagnostics replace the Core fixture's three mock adapter checks.
-Mixed published/current Core, derive and Endpoint consumers run inside the
-existing Endpoint stage, on host and Wasm, without downstream Cargo patches.
-The qualification-only patches select candidates in disposable test manifests.
-Compatible patches do not require republishing every dependent library; public
-minor/type-identity changes and payload-layout changes still need consumer review.
+The [6 November full comparison](../candid-comparison.md) covers 28 cohorts,
+1,575 overlapping case entries, 6,300 primary comparisons and 112 fresh Wasm
+modules. Production representations win 5,360/5,924 comparisons; the private
+research cohort wins 369/376. Wire is smaller in both total uncompressed Wasm
+and code-section bytes in all 56 cohort/profile pairs. These are codec fixtures,
+not a full Toko build or a traffic-weighted result.
 
-Shared frozen fixtures protect representative payload/frame bytes, malformed
-primitive refusal and actual host/Wasm allocation thresholds. Account tests
-compare raw subaccounts so absent and explicit zero cannot be conflated.
-The installed test-only endpoint runs these assertions on Wasm32; default
-performance fixtures retain their existing export roster. Serde sequence
-encoding visits references, so its charges can differ from owned decoding and
-between 32-bit Wasm and 64-bit hosts. Tests freeze those existing rules explicitly.
+Ordinary-list hotspots remain: encode reaches 121.39× / 49.67× Candid at
+opt-z / opt-3. Generic Packed wins all 436 primary comparisons. The advice audit
+finds existing categories cover the ≥10× families when supported metadata is
+generated. A real-derived 15-family test checks default paths, quiet byte/Packed
+alternatives, acknowledgements and bounded display. Codec-only users and custom
+layouts remain outside automatic schema advice; no Serde representation changes.
+Both changed native tests and formatting passed in the preceding codec batch.
 
-The private `check-contract` CLI validates and conservatively compares named
-schemas, method/payload declarations and optional frozen vectors. It never
-updates baselines or adds a runtime fingerprint. The standard benchmark corpus
-freezes 391 cases and their ordered-name digest. Fuzzing now covers maps/sets,
-recursion, borrowed fields, zero-sized collections, variable limits and output
-buffer APIs; normalized collections compare values rather than original bytes.
-See [focused commands and selection](../development.md) for usage and limits.
+The reporter now distinguishes numbered native-run directories from companion
+`.log` files. The original matrix stopped at that reporting defect; it resumed
+with retained samples and a recorded reporter-only repair. All runtime, fixture,
+manifest and lock inputs stayed frozen. Six reporter tests and strict affected
+Clippy pass; invalid required run directories still fail.
 
-[Matched host timings](../evidence/schema-generation.md#6-november-cost-advice-extension)
-record existing controls at +0.2% to +5.9%. The 512-type fixture now retains
-2,048 new warnings and takes 1.013 ms versus 0.848 ms. This is added host work,
-not a codec or Wasm saving. Standalone schema validation keeps its existing
-shared rendering traversal; no second validator or unmeasured sink refactor.
+The isolated signed-i32 writer-reuse candidate passes focused codec and exact
+byte/budget tests but grows ordinary-bulk Wasm by 3 bytes opt-z / 88 bytes opt-3
+in both total/code metrics. Four Toko/small-control modules are bit-identical.
+It is rejected before IC/native performance qualification; production source is
+unchanged. The i32 boundary test is retained. Parser-tail sharing remains
+rejected on prior size/instruction evidence; no new performance claim is made.
 
-Protocol bytes, schemas, identities, budgets, primitive acceptance and rollback
-are unchanged. Example: `[128_u16]` remains `01 80 01`; acknowledging a new
-`/response/list/bool` warning changes diagnostics only. No migration or legacy
-reader is introduced. Core and Endpoint changelogs have independent patch drafts
-for the authorized delivery above.
+## Evidence and supplier identity
 
-## Qualification
+The full run uses Rust/Cargo **1.99.1**, LLVM **23.1.1**, PocketIC **16.1.0**,
+Candid **0.10.40**, Postcard **1.1.3**, Platform facade **0.23.2**, Types
+**0.18.2**, Runtime/macros/guard **0.19.2**, Testkit **0.89.0** and Build **0.75.0**.
+The report records the complete lock hash and profile recipes. All 33,480 IC
+operation rows have three equal fresh-caller samples; native/IC input and frame
+identities, guest freshness and physical Wasm/code sizes verify. Native time,
+allocation and heap probes remain separate; the host was not CPU-isolated.
 
-Focused Core tests/doctests, the six-test 391-case Wire/Candid corpus, real
-Core/Endpoint diagnostic fixtures, strict affected Clippy and default Cargo
-warning/acknowledgement checks pass. Rust/TypeScript vectors, malformed-input
-conformance, Principal/Account host/Wasm and simulated future supplier identity
-checks pass. All three mixed-version lanes pass on host and Wasm. Installed
-PocketIC admission, replies, synchronous/async rollback and the new Wasm
-threshold checks pass. The expanded sanitizer smoke run completes 10,000 inputs
-on the separately approved nightly, with leak checking disabled.
+Raw output and frozen sources are under ignored
+`target/evidence/codec-matrix-20261106-current/` and
+`target/evidence/signed32-20261106/`. The latter's `size-screen-qualified/`
+contains the completed six-module screen.
+No raw experiment archive is added to Git. Historical retired artifacts cannot
+be verified from retained summaries alone.
 
-Formatting, dependency/Candid boundaries, documentation links, qualification
-graphs and disposable Make routing pass. The roster remains 20 full stages and
-11 eligible Endpoint-only Linux stages; installed execution and matched costs
-remain explicit change-specific checks. No full CI, macOS execution, new full
-Candid cost matrix, Toko build, IC-instruction or Wasm-size saving is claimed.
-Raw qualification/paired sources live under ignored target/, not Git.
+Concurrent lock updates are preserved: the checkout now selects Platform facade
+**0.23.4**, Runtime/macros/guard **0.19.3** and Testkit **0.89.1**. These are not
+the matrix's measured graph. Do not describe this refresh as qualification of
+those updates or as a matched regression test against earlier released matrices.
+The authorized release gate must qualify these supplier boundaries. Later
+normal-checkout updates belong to the next batch once this source is frozen.
 
-The subsequent Build 0.75/Testkit 0.88 adoption passes locked metadata and
-production/Wasm isolation, strict affected native-driver Clippy, both actual
-compiler-diagnostic suites, the 391-case corpus and installed Endpoint admission/
-rollback checks on PocketIC 16.1.0. No caller migration was needed. Ten unused
-transitive packages leave the lock; this is not a production Wasm-size claim.
-The Build 0.75 release editor passes offline admission and the disposable Core
-metadata/recovery fixture, including interrupted delivery and receipt refusal.
-Earlier host timing results retain their original dependency identities.
+Testkit 0.89.0 removes implicit logging setup; Wire has no removed-API callers and
+adds no logging dependency. Its 0.89.0 adoption passed strict affected-driver
+Clippy, installed Endpoint admission/replies/rollback, native-dev/Wasm isolation,
+boundaries, pins and links; logs remain in `target/testkit089/`. This does not
+qualify the later concurrent patches. The existing flate2 1.1.11 update is also
+preserved. Removing native logging dependencies is not a production Wasm saving.
 
-## Compiler, suppliers and release boundary
+## Delivered boundary and retained contracts
 
-Core/derive **0.17.3** is the last delivered Core release at **131f69d**;
-Endpoint/macros remain **0.7.1**. Existing delivery receipts own publication
-provenance. This audit preserves the pre-existing Platform facade **0.23.2**
-lock update and the concurrent **cc 1.11.1** update. The paired host experiment
-used the explicitly recorded earlier cc 1.11.0 lock; do not relabel its inputs.
-Testkit **0.88.0** and Build **0.75.0** are adopted for native qualification.
-The release metadata executable is separately prepared at Build **0.75.0**.
-Types **0.18.1**, Runtime/macros/exact guard **0.19.2**, Host **0.74.4** and
-Candid/derive **0.10.40** remain selected. Testkit's optional Wire feature stays off.
-Rust **1.99.1** is the minimum and pinned compiler. Only the optional sanitizer
-fuzzer uses `nightly-2026-11-05`; its script owns that exception.
+Core 0.17.4 and Endpoint 0.7.2 were delivered to origin/main and crates.io;
+annotated tags resolve to **fd31693** and **b6a462c**. Both full 20-stage gates
+passed and registry readback confirmed all four packages. Small
+[delivery receipts](../../releases/receipts/README.md) own publication provenance.
+No full repository CI, macOS or consumer application build was run for this batch.
 
-Shared **0.30.6 / 45c0295** owns 141 exported payloads, independently verified
-against the committed source. CBOR source/dependency/browser checks now run
-through Wire's existing boundary and materialized-fixture workflows; there are
-no CBOR exceptions or owned-format migrations. Candid comparison allowances
-remain exact. Shared owns the package inventory, including aliases; lexical
-checks do not prove dynamic imports, custom parsers or protocol provenance.
-Snapshot integrity, actual boundary targets, generated-browser and materialized
-Cargo checks, future-identity qualification, 54 generator/benchmark CLI checks,
-and Make routing with forbidden-import refusal pass. Formatting, pins and
-documentation links pass; no full CI or codec/performance rerun for this adoption.
-Production Core stays SDK-free; optional schemas use Types, Endpoint alone selects Runtime execution,
-and Candid/Testkit remain qualification-only. Stage reuse/final-candidate
-execution are still disabled. The maintained full Candid matrix uses an older
-supplier cohort; it is not a current-lock regression measurement.
+Rust **1.99.1** remains both minimum and pinned compiler; only the opt-in sanitizer fuzzer uses
+the approved dated nightly. CI/release routing remains one roster: 20 full
+stages, 11 for qualified Endpoint-only Linux changes; stage reuse/final-candidate
+execution stay disabled. Production Core is SDK-free; optional schemas select
+Types, Endpoint alone selects Runtime execution, Candid/Testkit remain test-only.
 
-## Retained contract and history cautions
+Bytes, schemas, identities, limits, primitive acceptance and rollback are
+unchanged: `[128_u16]` remains `01 80 01`; `64_i32` remains `80 01`. No migration,
+legacy reader, new codec mode or per-type codec variant is introduced. Account's
+[0.16 cut](../../releases/core/0.16.md) remains `01 20 + 32 bytes` for present
+subaccounts and `00` for absent ones. Consumers own normalization and retain
+original retry/hash bytes. Method IDs/name defaults remain production behavior;
+fingerprints and no-manual-ID macros remain research.
 
-The maintainer replaced repository history with one clean root. Consumers
-should fresh-clone, not merge discarded refs. Registry archives are unchanged;
-old receipt commit IDs are historical provenance, not refs to reconstruct.
-Bulk research archives and obsolete Git-side state were retired; compact
-[research summaries](../evidence/README.md) cannot verify removed raw artifacts.
-Small [release receipts](../../releases/receipts/README.md) retain their own role.
-
-Production retains explicit method IDs and name defaults. Fingerprints and
-no-manual-ID macros remain research. The [0.16 Account cut](../../releases/core/0.16.md)
-changed present subaccounts `01 + 32 bytes` to `01 20 + 32 bytes`; None stays `00`.
-Consumers own retained-data adoption and collection/custom-Serde normalization.
-Retain original retry bytes and encoder hash inputs; keep one codec and no
-automatic migration. Ordinary-list hotspots remain; use measured field choices
-and limits rather than per-type codec variants or projected stress-fixture gains.
+The maintainer replaced repository history with one clean root. Fresh-clone
+rather than merging discarded refs; registry archives and historical receipt
+provenance remain unchanged. See [focused development commands](../development.md)
+and the current report for reproduction and measurement limits.

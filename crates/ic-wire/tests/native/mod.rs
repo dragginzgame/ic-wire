@@ -167,6 +167,13 @@ fn integer_shortcuts_preserve_postcard_bytes_and_original_budgets() {
         ]);
     }
     signed_values.extend([i64::MIN, i64::MAX]);
+    check_values!(
+        i32,
+        signed_values
+            .iter()
+            .filter_map(|&value| i32::try_from(value).ok())
+            .chain([i32::MIN, i32::MAX])
+    );
     check_values!(i64, signed_values);
     // i8 is not zigzag encoded by Postcard and must not take this route.
     assert_eq!(native::encode(&-1_i8, LIMITS).unwrap(), [0xff]);

@@ -4,6 +4,83 @@ use serde_json::json;
 use std::collections::BTreeMap;
 
 #[test]
+fn derived_hotspot_fields_reach_default_advice_and_bulk_fields_stay_quiet() {
+    #[derive(serde::Serialize, ic_wire::Wire)]
+    struct Hotspots {
+        bytes: Vec<u8>,
+        signed_bytes: Vec<i8>,
+        signed_words: Vec<i16>,
+        words: Vec<u16>,
+        signed_ids: Vec<i32>,
+        ids: Vec<u32>,
+        signed_counters: Vec<i64>,
+        counters: Vec<u64>,
+        hashes: Vec<[u8; 32]>,
+        flags: Vec<bool>,
+        floats: Vec<ic_wire::FiniteF32>,
+        doubles: Vec<ic_wire::FiniteF64>,
+        wide_signed: Vec<i128>,
+        wide_unsigned: Vec<u128>,
+        units: Vec<()>,
+        blob: ic_wire::ByteBuf,
+        packed_words: ic_wire::Packed<i16>,
+        packed_hashes: ic_wire::Packed<[u8; 32]>,
+        #[serde(with = "serde_bytes")]
+        adapted: Vec<u8>,
+        records: Vec<String>,
+    }
+    let types = BTreeMap::from([(
+        "Hotspots".into(),
+        ic_wire::typescript::native_schema::<Hotspots>().unwrap(),
+    )]);
+    let mut report = None;
+    let source = generate_registry(&types, &[], "./runtime.js", &BTreeMap::new(), |r| {
+        report = Some(r)
+    })
+    .unwrap();
+    let report = report.unwrap();
+    let expected = [
+        ("bytes", "u8"),
+        ("signed_bytes", "i8"),
+        ("signed_words", "i16"),
+        ("words", "u16"),
+        ("signed_ids", "i32"),
+        ("ids", "u32"),
+        ("signed_counters", "i64"),
+        ("counters", "u64"),
+        ("hashes", "hash32"),
+        ("flags", "bool"),
+        ("floats", "f32"),
+        ("doubles", "f64"),
+        ("wide_signed", "i128"),
+        ("wide_unsigned", "u128"),
+        ("units", "unit"),
+    ]
+    .map(|(field, kind)| format!("/types/Hotspots/fields/{field}/list/{kind}"));
+    assert_eq!(
+        report.warnings.iter().map(|w| &w.path).collect::<Vec<_>>(),
+        expected.iter().collect::<Vec<_>>()
+    );
+    let acknowledgements = expected
+        .into_iter()
+        .map(|path| {
+            (
+                path,
+                "Measured consumer maximum; retain representation".into(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        source,
+        generate_registry(&types, &[], "./runtime.js", &acknowledgements, |r| assert!(
+            r.is_clean()
+        ))
+        .unwrap()
+    );
+    assert_eq!(report.to_string().lines().count(), 9);
+}
+
+#[test]
 fn expensive_lists_without_packed_support_have_acknowledgeable_paths() {
     let kinds = [
         ("bool", json!({"k":"bool"})),

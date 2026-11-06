@@ -64,6 +64,10 @@ fn comparison_requires_pairs_and_rejects_duplicates_but_allows_wire_reuse() {
     }
     let complete = format!("{wire}\n{candid}\n{reuse}\n");
     fs::write(&file, &complete).unwrap();
+    // Match evaluate-codecs.sh's real layout: compiler/progress logs are files,
+    // not native measurement directories, even though their names share a prefix.
+    fs::write(root.join("evaluation-native-1.log"), "compiler output").unwrap();
+    fs::write(root.join("benchmark-speed-native-2.log"), "progress output").unwrap();
     assert_eq!(
         String::from_utf8(comparison(&root, "wire-native").unwrap())
             .unwrap()

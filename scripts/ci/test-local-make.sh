@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-validation_only=false
+case_selection=all
 if [[ $# != 0 ]]; then
-    [[ $# == 2 && "$1" == --case && "$2" == validation ]] || { echo 'usage: test-local-make.sh [--case validation]' >&2; exit 2; }
-    validation_only=true
+    [[ $# == 2 && "$1" == --case ]] || { echo 'usage: test-local-make.sh [--case validation|release-routing]' >&2; exit 2; }
+    case "$2" in
+        validation|release-routing) case_selection="$2" ;;
+        *) echo 'usage: test-local-make.sh [--case validation|release-routing]' >&2; exit 2 ;;
+    esac
 fi
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES RELEASE_GROUP WIRE_LINT_GROUP
+unset CARGO_TARGET_DIR RELEASE_FROZEN_GROUPS RELEASE_FROZEN_PUBLISH_TARGET FROZEN_RELEASE_ACTIVE
 export RELEASE_DELIVERY=direct RELEASE_REMOTE=origin RELEASE_BRANCH=main
 
 # Consumer qualification only. Git/index effects stay in this disposable export.
@@ -98,7 +102,7 @@ STUB
 
 }
 
-if [[ "$validation_only" == true ]]; then
+if [[ "$case_selection" == validation ]]; then
     check_ci_routing
     complete=true
     echo "Local Make validation routing passed (disposable fixture; no application gates or releases)."
@@ -120,23 +124,72 @@ printf '%s\n' "$*" > "$RELEASE_SENTINEL"
 exit 99
 STUB
 export RELEASE_SENTINEL="$fixture/release-ran"
-for selection in missing empty unknown; do
+for group_selection in missing empty unknown; do
     args=()
-    case "$selection" in empty) args=(RELEASE_GROUP=) ;; unknown) args=(RELEASE_GROUP=unknown) ;; esac
+    case "$group_selection" in empty) args=(RELEASE_GROUP=) ;; unknown) args=(RELEASE_GROUP=unknown) ;; esac
     for target in release-patch release-minor release-major release-resume release-version publish publish-check; do
-        if make --no-print-directory -C "$fixture/repo" "$target" ${args[@]+"${args[@]}"} > "$fixture/refuse-$selection-$target.log" 2>&1; then exit 1; fi
+        if make --no-print-directory -C "$fixture/repo" "$target" ${args[@]+"${args[@]}"} > "$fixture/refuse-$group_selection-$target.log" 2>&1; then exit 1; fi
         [[ ! -e "$RELEASE_SENTINEL" && ! -e "$fixture/repo/.tools" ]]
-        grep -F 'Select RELEASE_GROUP=core or endpoint explicitly' "$fixture/refuse-$selection-$target.log" >/dev/null
+        grep -F 'Select RELEASE_GROUP=core or endpoint explicitly' "$fixture/refuse-$group_selection-$target.log" >/dev/null
     done
 done
-for target in release-patch release-minor release-major release-resume; do
+for group in core endpoint; do
+    for target in release-patch release-minor release-major release-resume; do
+        status=0
+        make --no-print-directory -C "$fixture/repo" "$target" "RELEASE_GROUP=$group" VERSION=0.1.0 > "$fixture/$group-$target.log" 2>&1 || status=$?
+        [[ "$status" == 2 && -e "$RELEASE_SENTINEL" ]]
+        if [[ "$target" == release-resume ]]; then expected="resume 0.1.0 origin main"; else expected="${target#release-} origin main"; fi
+        [[ "$(cat "$RELEASE_SENTINEL")" == "$expected" ]]
+        rm "$RELEASE_SENTINEL"
+    done
+done
+cat > "$fixture/repo/scripts/ci/run-frozen-release.pl" <<'STUB'
+use strict;
+use warnings;
+die "normal Cargo target leaked into launcher\n" if exists $ENV{CARGO_TARGET_DIR};
+open my $out, '>', $ENV{RELEASE_SENTINEL} or die $!;
+print {$out} join(' ', @ARGV), "\n";
+close $out or die $!;
+exit 99;
+STUB
+for roster in core endpoint core,endpoint; do
+    group="${roster%%,*}"
     status=0
-    make --no-print-directory -C "$fixture/repo" "$target" RELEASE_GROUP=core VERSION=0.1.0 > "$fixture/$target.log" 2>&1 || status=$?
-    [[ "$status" == 2 && -e "$RELEASE_SENTINEL" ]]
-    if [[ "$target" == release-resume ]]; then expected="resume 0.1.0 origin main"; else expected="${target#release-} origin main"; fi
-    [[ "$(cat "$RELEASE_SENTINEL")" == "$expected" ]]
+    make --no-print-directory -C "$fixture/repo" release-patch "RELEASE_GROUP=$group" \
+        "RELEASE_FROZEN_GROUPS=$roster" > "$fixture/frozen-$group.log" 2>&1 || status=$?
+    [[ "$status" == 2 && "$(cat "$RELEASE_SENTINEL")" == "--root $fixture/repo --groups $roster --kind patch --remote origin --branch main --delivery direct" ]]
     rm "$RELEASE_SENTINEL"
 done
+for roster in unknown endpoint,core core,core 'core endpoint' core,unknown; do
+    if make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=core \
+        "RELEASE_FROZEN_GROUPS=$roster" > "$fixture/frozen-invalid.log" 2>&1; then exit 1; fi
+    [[ ! -e "$RELEASE_SENTINEL" ]]
+done
+if make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=endpoint \
+    RELEASE_FROZEN_GROUPS=core,endpoint > "$fixture/frozen-mismatch.log" 2>&1; then exit 1; fi
+[[ ! -e "$RELEASE_SENTINEL" ]]
+for source in environment command; do
+    args=()
+    if [[ "$source" == command ]]; then args=(CARGO_TARGET_DIR=caller-target); fi
+    if CARGO_TARGET_DIR=caller-target make --no-print-directory -C "$fixture/repo" \
+        release-patch RELEASE_GROUP=core RELEASE_FROZEN_GROUPS=core \
+        ${args[@]+"${args[@]}"} > "$fixture/frozen-target-$source.log" 2>&1; then exit 1; fi
+    [[ ! -e "$RELEASE_SENTINEL" ]]
+    grep -F 'Unset CARGO_TARGET_DIR' "$fixture/frozen-target-$source.log" >/dev/null
+done
+# The candidate uses its ordinary runner and its own Cargo target, not a nested batch.
+status=0
+make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=endpoint \
+    RELEASE_FROZEN_GROUPS=core,endpoint FROZEN_RELEASE_ACTIVE=1 \
+    > "$fixture/frozen-active.log" 2>&1 || status=$?
+[[ "$status" == 2 && "$(cat "$RELEASE_SENTINEL")" == 'patch origin main' ]]
+rm "$RELEASE_SENTINEL"
+cp -p "$root/scripts/ci/run-frozen-release.pl" "$fixture/repo/scripts/ci/run-frozen-release.pl"
+if [[ "$case_selection" == release-routing ]]; then
+    complete=true
+    echo "Local Make release routing passed (both groups; disposable fixture; release effects substituted)."
+    exit 0
+fi
 
 # Admit the actual local Cargo recipes without compiling or running tests.
 cat > "$fixture/bin/cargo" <<'STUB'

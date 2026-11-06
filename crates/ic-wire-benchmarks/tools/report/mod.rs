@@ -125,7 +125,11 @@ fn comparison(root: &Path, primary: &str) -> Result<Vec<u8>, Box<dyn std::error:
         let kind = entry.file_type()?;
         let name = entry.file_name();
         let name = name.to_str().ok_or("benchmark run name is not UTF-8")?;
-        if name.contains("-native-") {
+        // The runner stores <profile>-native-<number>.log beside each run.
+        // Only the numeric run name denotes required measurement evidence.
+        if name.rsplit_once("-native-").is_some_and(|(_, run)| {
+            !run.is_empty() && run.bytes().all(|byte| byte.is_ascii_digit())
+        }) {
             // A named run is required evidence, never an optional directory
             // probe: metadata errors, redirects and missing samples must fail.
             if !kind.is_dir() {
