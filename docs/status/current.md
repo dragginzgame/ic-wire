@@ -1,39 +1,42 @@
 # Current handoff
 
-## Release preparation: Core 0.17.6 / Shared 0.31
+## Delivered: Core 0.17.6 / Shared 0.31
 
-The first delivery attempt, **batch-1afAufRB** from **2d9a983**, stopped before
-version preparation because the captured checkout lacked the browser compiler.
-No release commit, push or publication occurred. Its failure state/logs remain
-under `.git/release-state/frozen/batch-1afAufRB/` and `target/core0176-delivery/`.
-The setup hook now installs locked browser dependencies and checks them offline
-on recovery; hosted TypeScript CI uses the same owner. Capture corrected committed
-source in a new batch rather than modifying or resuming the failed source.
+Core **0.17.6** is pushed to origin/main and published to crates.io:
+**ic-wire-derive** and **ic-wire**, tag **core-v0.17.6**, release commit
+**163d6aa**. Shared **0.31.0 / 7431394** captured source **245ed7a** in schema-2
+**batch-1i9z2IIG**. Endpoint/macros remain **0.7.2**. The normal main branch is
+reconciled to delivery. The [receipt](../../releases/receipts/published-core0176/delivery.json)
+records the source, archive hashes, graph and qualification boundaries.
 
-Shared **0.31.0**, revision **74313941af2fce4399bec0e6909ca6229673c3f8**,
-is adopted through the exporter, including its checksum fixes. Grouped releases
-now capture committed source automatically. Wire uses Shared's setup and saved
-batch commands; retired `RELEASE_FROZEN_*` selectors fail explicitly. See the
-[delivery commands](../development.md). The completed schema-1 Core 0.17.5 batch
-below remains historical; do not resume it with the new schema-2 runner.
+The complete **20-stage Linux gate passed** in the captured checkout. Exact
+0.17.6 archives passed all-feature verification; installed Endpoint admission and
+transaction checks passed on PocketIC **16.1.0**. Fresh Cargo registry downloads
+match the upload and all-feature archive hashes and identify **163d6aa**.
+Completed-batch resume made no new publication attempt. Delivery retained Platform
+**0.23.4**, Types **0.18.2**, Runtime/macros/guard **0.19.4**, Testkit **0.89.3**,
+Build **0.75.0**, Host **0.74.4** and Rust **1.99.1**.
 
-The full **20-stage Linux gate passed**, including the expanded benchmark,
-Rust/TypeScript, feature-isolation and Wasm checks. Installed Endpoint admission
-and transaction checks also passed on PocketIC **16.1.0** with Runtime **0.19.4**
-and Testkit **0.89.3**. The actual candidate setup hook passed its offline check.
-Disposable release fixtures qualified both groups, automatic capture, deferred
-lock isolation, interrupted publication, saved commit identity, idempotent
-recovery, reconciliation and retirement. Their application gates/uploads are
-substitutes, not registry or archive qualification. Raw logs remain under ignored
-`target/shared031-adoption/`.
+The first attempt, **batch-1afAufRB** from **2d9a983**, stopped before version
+preparation because its checkout lacked the browser compiler. It had no external
+delivery effects and is superseded; do not resume it. Corrected source installs
+the locked browser dependencies during capture and checks them offline on recovery;
+hosted TypeScript CI uses the same owner. Later host package updates changed the
+native tool fingerprint after the full gate. Shared admitted the same pinned tool
+versions for the new host inputs, then resumed the saved preparation phase.
 
-Pending Core **0.17.6** notes include the adapters and coverage below. Endpoint
-remains **0.7.2**. Package versions are unchanged. Source is committed, but no
-release commit, push or publication has occurred. These are readiness results, not a
-source-bound release receipt: authorized delivery still captures the committed
-source and runs its own gate and exact-version archive/publication checks.
+Both attempts' recovery state is retained under `.git/release-state/frozen/`.
+Raw delivery/readback logs remain under ignored `target/core0176-delivery/`;
+the successful checkout is `target/release-frozen/batch-1i9z2IIG/`. Earlier workflow
+qualification remains under `target/shared031-adoption/`. The completed schema-1
+0.17.5 batch below is historical and cannot use the new runner.
 
-## Pending: public packed domain adapters
+A concurrent **Platform 0.23.5** lock edit was excluded from the capture. It is
+preserved on local branch **deferred/core0176-lock** at **7fd813f**, then reapplied
+uncommitted after reconciliation. This is the sole deferred working-tree change;
+it is not qualified by the 0.17.6 delivery and was not published with it.
+
+## Shipped in 0.17.6: public packed domain adapters
 
 `serde_packed::nonzero_i64` and `serde_packed::heap_u64` now reuse the existing
 Packed codec directly from `Vec<NonZeroI64>` / `BinaryHeap<u64>`. Metadata derives
@@ -56,7 +59,7 @@ DTOs where footprint takes priority. Two non-inlining experiments were rejected
 because they regressed the single-type fixture without consistent profile gains.
 The 32 measured modules and raw results remain under ignored
 `target/evidence/public-adapters-20261106/`. Real big-endian execution remains
-unqualified; release-readiness checks are recorded above.
+unqualified; release checks are recorded above.
 Both fresh sides preserve the concurrent Testkit **0.89.3** lock selection;
 lock SHA-256 `04623e37662c068b19fba770c5be5170b3a906a8c7548fd21004b74f4f648192`.
 
@@ -69,7 +72,7 @@ encoding allowance (64-bit `{tag:1, words:[-1]}`: 842 versus 1,098 allowance byt
 decode: 842 for both). Heap reconstruction is not canonical: retain original
 retry/hash bytes. Real big-endian execution is not qualified.
 
-## Pending: expanded container qualification
+## Shipped in 0.17.6: expanded container qualification
 
 The follow-up request to address the two large-container gaps is qualified as an
 **explicit consumer Packed DTO pattern**, using the existing production codec.
@@ -103,9 +106,8 @@ the first 30-case expansion's measurements.
 The requested type-coverage follow-up appends **30 cases** to `coverage-shapes`
 (**124 total**), preserving all 94 historical case indices and input/frame hashes.
 It covers nested byte options, packed/blob results, byte-array and Packed hash
-batches, nonzero integer lists and binary heaps. Pending Core **0.17.6**
-notes are prepared; package versions are unchanged and nothing has been staged,
-committed or delivered for this follow-up.
+batches, nonzero integer lists and binary heaps. This coverage is included in the
+Core **0.17.6** release above.
 
 The [expanded comparison](../candid-comparison.md#expanded-container-coverage)
 records both profiles, two native timing runs, allocation/heap probes, four fresh
@@ -154,7 +156,7 @@ the managed checkout and raw logs remain under `target/release-frozen/` and
 `intent.json`. Do not replay publication or replace retained state. Normal-checkout
 reconciliation preserved the concurrent dependency edit described below.
 
-## Deferred inputs and qualified graph
+## Previous 0.17.5 graph
 
 Delivery used Platform facade **0.23.4**, Types **0.18.2**, Runtime/macros/guard
 **0.19.3**, Testkit **0.89.1**, Build **0.75.0**, Host **0.74.4** and Rust/Cargo
@@ -166,10 +168,9 @@ A concurrent process advanced the normal checkout to Runtime/macros/guard
 edit was preserved through a temporary Git stash, reapplied after fast-forward,
 and checked byte-for-byte apart from the five expected Core version bumps.
 That deferred Cargo.lock edit was the sole uncommitted input after delivery.
-The later public-adapter follow-up above preserves Testkit 0.89.3. Neither supplier
-update was part of that delivery. The current readiness checks above qualify the
-accepted graph; the next batch still owns its release-source proof. A dependency
-patch alone does not require another package release.
+Neither supplier update was part of the 0.17.5 delivery. Core 0.17.6 qualified
+Runtime 0.19.4 and Testkit 0.89.3 as recorded above. A dependency patch alone does
+not require another package release.
 
 ## Current findings and retained contracts
 

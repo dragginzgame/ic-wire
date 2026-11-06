@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-06T19:11:58.186Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "group": "core",
+  "version": "0.17.6",
+  "source_commit": "245ed7a250df11c2570c4f4b7feac9e23d3dc0a0",
+  "release_commit": "163d6aa21ba9f6387f6538f35a22397a3b826c58",
+  "tag": "core-v0.17.6",
+  "frozen_batch": "batch-1i9z2IIG",
+  "batch_schema": 2,
+  "shared_tooling": {
+    "version": "0.31.0",
+    "revision": "74313941af2fce4399bec0e6909ca6229673c3f8"
+  },
+  "source_lock_sha256": "04623e37662c068b19fba770c5be5170b3a906a8c7548fd21004b74f4f648192",
+  "release_lock_sha256": "f50414f5fce1b0a2defc8e541258e5ce90b49f9db564ba7197ab5bfd59a1ed8e",
+  "compiler": "1.99.1",
+  "qualification": {
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "installed_endpoint_admission_and_rollback": true,
+    "pocket_ic": "16.1.0",
+    "registry_archive_readback": true,
+    "completed_resume_no_republication": true
+  },
+  "suppliers": {
+    "platform": "0.23.4",
+    "platform_types": "0.18.2",
+    "runtime": "0.19.4",
+    "runtime_macros": "0.19.4",
+    "runtime_guard": "0.19.4",
+    "testkit": "0.89.3",
+    "build": "0.75.0",
+    "host": "0.74.4"
+  },
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.6",
+      "sha256": "6791db1a6bcdc458aaecd6bd69394db5b3b3aff00424c41272960577f50a4b2d",
+      "registry": "crates.io",
+      "source_commit": "163d6aa21ba9f6387f6538f35a22397a3b826c58"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.6",
+      "sha256": "c2703592b213ea4d1c2f89aa25f92b8f532a4d698915ae5ad6fb61a51052db40",
+      "registry": "crates.io",
+      "source_commit": "163d6aa21ba9f6387f6538f35a22397a3b826c58"
+    }
+  ],
+  "unchanged_endpoint": "0.7.2",
+  "protocol": "Existing consumers retain bytes, identities, limits and acceptance. Explicit nonzero_i64/heap_u64 adapter adoption changes ordinary-list bytes and may change admission; coordinate consumers and requalify limits. Nonzero [-1]: 01 01 -> 08 ff ff ff ff ff ff ff ff; heap [1]: 01 01 -> 08 01 00 00 00 00 00 00 00.",
+  "recovery": {
+    "superseded_batch": "batch-1afAufRB",
+    "superseded_reason": "Missing browser compiler stopped validation before metadata mutation or external delivery; corrected setup was captured in this batch.",
+    "native_tool_readmission": "Host package updates changed the native fingerprint after validation; the same pinned tools were admitted through Shared before saved-phase resume.",
+    "native_environment_sha256": "10c04f37cd31e5d5d48b27d1f397a1a4c5abd5001b9fe2cb42c966234d43723e"
+  },
+  "limitations": [
+    "No new performance run; the public-adapter study retains its recorded compiler, lock and artifact identities.",
+    "No native macOS or real big-endian qualification in this Linux delivery.",
+    "Concurrent Platform 0.23.5 lock update is deferred, not part of this release; preserved on local branch deferred/core0176-lock and reapplied uncommitted after reconciliation."
+  ]
+}
