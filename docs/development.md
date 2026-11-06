@@ -234,9 +234,9 @@ refusal, then checks explicit recovery and completed-resume idempotence.
 This is hook qualification, not installed/archive or full product qualification.
 The ordinary single-group fixtures remain available without `--frozen`.
 
-Frozen batches require an explicit affected roster. Core's all-feature archives
-have passed real Cargo verification; the first Core delivery also requires its
-full gate in the managed checkout. For an authorized Core patch deployment use
+Frozen batches require an explicit affected roster. Core 0.17.5 qualified real
+all-feature archives, the full gate and installed Endpoint checks in the managed
+checkout, followed by registry readback. For an authorized Core patch deployment use
 `make release-patch RELEASE_GROUP=core RELEASE_FROZEN_GROUPS=core RELEASE_FROZEN_PUBLISH_TARGET=publish`.
 This command includes registry publication. Endpoint's earlier offline archive
 probe could not resolve the unpublished Core candidate; a future two-group

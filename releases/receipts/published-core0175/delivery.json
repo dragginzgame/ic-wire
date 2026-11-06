@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-06T14:33:07.518Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "group": "core",
+  "version": "0.17.5",
+  "source_commit": "4b064a66959b099e254df0e74d77b9c71a8306ce",
+  "release_commit": "c789f965bbc091e877092b580fb07ccf4ccc64dc",
+  "tag": "core-v0.17.5",
+  "frozen_batch": "batch-YDNNU8bS",
+  "source_lock_sha256": "657e4fd16e3404b6c7a740987e51afa76f13affae3661859b9c78b453dcf6c35",
+  "release_lock_sha256": "27f6e7b3c562f33ef634ce7cfe72eff14c71df39cbde96ee8cc40646319d54d2",
+  "compiler": "1.99.1",
+  "qualification": {
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "installed_endpoint_admission_and_rollback": true,
+    "pocket_ic": "16.1.0",
+    "registry_archive_readback": true,
+    "completed_resume_no_republication": true
+  },
+  "suppliers": {
+    "platform": "0.23.4",
+    "platform_types": "0.18.2",
+    "runtime": "0.19.3",
+    "runtime_macros": "0.19.3",
+    "runtime_guard": "0.19.3",
+    "testkit": "0.89.1",
+    "build": "0.75.0",
+    "host": "0.74.4"
+  },
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.5",
+      "sha256": "30a2f0a529a5d0287993a7c09a40dcc19f5bbd6314075a1c620e3fd9c57a8237",
+      "registry": "crates.io",
+      "source_commit": "c789f965bbc091e877092b580fb07ccf4ccc64dc"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.5",
+      "sha256": "b65a20ea8ba6b677e6a85e16e0d60cc24c069c2e9f8965ca954034f81eda0c3e",
+      "registry": "crates.io",
+      "source_commit": "c789f965bbc091e877092b580fb07ccf4ccc64dc"
+    }
+  ],
+  "unchanged_endpoint": "0.7.2",
+  "protocol": "Bytes, schemas, identities, limits and acceptance unchanged.",
+  "limitations": [
+    "No new performance measurement; the 6 November matrix has its own recorded supplier graph.",
+    "No macOS qualification in this Linux delivery.",
+    "Runtime/macros/guard 0.19.4 written to the normal checkout during delivery was preserved as deferred work and is not qualified by this receipt."
+  ]
+}
