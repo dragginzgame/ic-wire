@@ -2,6 +2,14 @@
 use ic_wire::{ByteBuf, Limits};
 use std::cell::Cell;
 
+/// Execute frozen byte/admission assertions inside actual Wasm, outside cost fixtures.
+#[cfg(feature = "admission-contract")]
+#[ic_wire_endpoint::query]
+pub fn admission_contract() {
+    ic_wire_qualification::contract_tests::frozen_contracts();
+    ic_wire_qualification::contract_tests::admission_boundaries();
+}
+
 /// Illustrative full-frame allowance, not a product default.
 pub const LIMITS: Limits = Limits {
     bytes: 128,

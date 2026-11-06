@@ -21,8 +21,8 @@ it is no longer maintained alongside the production Serde suite.
 The [4 November full matrix](candid-comparison.md) now
 measures its complete frozen 26-cohort roster, including the formerly skipped hotspot cohort:
 1,387 overlapping case entries, 5,548 primary comparisons and 104 fresh modules.
-It includes the complete 391-case standard corpus and current Platform/Testkit
-selection. [Coverage gaps](candid-comparison.md) and
+It includes the complete 391-case standard corpus and the Platform/Testkit
+selection recorded in that report, not the current lockfile. [Coverage gaps](candid-comparison.md) and
 [ranked hotspots](candid-comparison.md) distinguish
 supported field choices from proposed research and missing comparison controls.
 The maintained roster now adds `coverage-shapes` and paired `research-bulk`:
@@ -42,8 +42,8 @@ extend the production Packed element set or generated client contract.
 | `check-consumer-benchmarks` | Toko-shaped and 1/10/100-type derive corpus, lint and MSRV checks |
 | `evaluate-codecs` | Repeated native timing, allocator counts, peak live heap and Wasm footprint |
 | `check-codec-costs` | Data-only matched cost regression check; completed baseline/candidate runs required |
-| `check-qualification` | Allocation/borrowing fixture tests, strict linting and compiler-floor checks |
-| `check-endpoint` | Typed endpoint/native schema checks, compiler diagnostics, lint, Wasm/MSRV and graph isolation |
+| `check-qualification` | Allocation/borrowing fixtures, frozen contracts and conservative snapshot comparison |
+| `check-endpoint` | Typed endpoint/native schema checks, compiler diagnostics, mixed-version consumers, lint, Wasm/MSRV and graph isolation |
 | `check-endpoint-ic` | Explicit installed endpoint/rollback and async qualification using a prepared PocketIC server |
 | `evaluate-endpoints` | Every exported fixture endpoint: repeated complete IC instructions, observed cycle debits, frame sizes and Wasm; explicitly prepared instrumented server |
 | `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.99.1 floor |
@@ -59,6 +59,10 @@ fixed. Binary-key maps use ordered pairs for their JSON input identity only;
 both measured codecs still serialize the map. These cases use the existing native,
 IC instruction and Wasm-footprint runners; adding coverage is not a new performance
 measurement. Historical reports retain their original corpus and source identity.
+
+The standard corpus test freezes both its 391-case count and ordered-name digest;
+review an intentional inventory update when adding cases, never silently bless
+a smaller corpus or a reordered case index.
 
 The focused `byte-keys` and `byte-keys-control` cohorts compare standard
 `ByteArray<32>` keys against unchanged `[u8;32]` map keys at 0/1/16/128 entries.

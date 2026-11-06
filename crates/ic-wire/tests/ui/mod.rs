@@ -21,12 +21,6 @@ mod encode_only_decode;
 mod native_schema_attributes;
 mod support;
 mod valid;
-#[cfg(ui_case = "wrong_async_handler")]
-mod wrong_async_handler;
-#[cfg(ui_case = "wrong_handler")]
-mod wrong_handler;
-#[cfg(ui_case = "wrong_handler_argument")]
-mod wrong_handler_argument;
 #[cfg(ui_case = "wrong_reply")]
 mod wrong_reply;
 #[cfg(ui_case = "wrong_request")]

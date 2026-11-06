@@ -24,6 +24,7 @@ serde_json = "1.0"
 EOF_MANIFEST
 export CARGO_TARGET_DIR="$root/target/bulk-advice/build"
 cargo metadata --offline --format-version 1 --manifest-path "$fixture/Cargo.toml" > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 for mode in default partial all stale; do
     WIRE_ADVICE_CASE="$mode" cargo check --locked --offline --manifest-path "$fixture/Cargo.toml" > "$fixture/$mode.log" 2>&1
 done
@@ -31,6 +32,7 @@ byte='warning: wire-bulk-advice@0.0.0: /types/Payload/fields/data/list/u8: consi
 word='warning: wire-bulk-advice@0.0.0: /types/Payload/fields/words/list/u16: consider'
 rg -Fq "$byte" "$fixture/default.log"
 rg -Fq "$word" "$fixture/default.log"
+rg -Fq '/types/Payload/fields/flags/list/bool: consider' "$fixture/default.log"
 rg -Fq "$word" "$fixture/partial.log"
 if rg -F "$byte" "$fixture/partial.log" || rg 'warning:' "$fixture/all.log"; then
     echo 'Acknowledged field still emitted a warning' >&2

@@ -16,7 +16,7 @@ ifeq ($(filter core endpoint,$(RELEASE_GROUP)),)
 $(error Select RELEASE_GROUP=core or endpoint explicitly)
 endif
 endif
-RELEASE_EDITOR_VERSION := 0.74.0
+RELEASE_EDITOR_VERSION := 0.75.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -118,7 +118,7 @@ fuzz-runtime:
 	+@bash scripts/ci/fuzz-runtime.sh
 
 .PHONY: check-typed-diagnostics
-.PHONY: check-release check-qualification
+.PHONY: check-release check-qualification check-compatible-consumers
 .PHONY: check-typescript check-platform-types check-stable-identities
 
 check-typescript:
@@ -133,8 +133,11 @@ check-platform-types:
 
 check-qualification:
 	+@bash scripts/ci/check-qualification-tools.sh
-	+@$(RUST_POLICY) cargo test --locked -p ic-wire-qualification --lib --tests --example check-diagnostics --features allocation-fixture
-	+@$(RUST_POLICY) cargo clippy --locked -p ic-wire-qualification --all-targets --features allocation-fixture -- -D warnings
+	+@$(RUST_POLICY) cargo test --locked -p ic-wire-qualification --lib --tests --example check-diagnostics --example check-contract --features allocation-fixture,schema-fixture
+	+@$(RUST_POLICY) cargo clippy --locked -p ic-wire-qualification --all-targets --features allocation-fixture,schema-fixture -- -D warnings
+
+check-compatible-consumers:
+	+@bash scripts/ci/check-compatible-consumers.sh
 
 check-typed-diagnostics:
 	+@bash scripts/ci/check-diagnostics.sh
@@ -199,11 +202,14 @@ check-msrv: check check-wasm
 check-doc-links:
 	@bash scripts/ci/check-repository-documentation.sh
 
-.PHONY: check-boundary check-candid-boundary
+.PHONY: check-boundary check-candid-boundary check-browser-boundary
 check-candid-boundary:
-	@perl scripts/ci/check-candid-boundary.pl "$(CURDIR)" ci/candid-boundary.json crates examples
+	@perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates examples scripts/benchmarks
 
-check-boundary: check-candid-boundary
+check-browser-boundary:
+	@node scripts/ci/check-ic-sdk-boundary.mjs examples/browser crates scripts/dev/inspect-wire.mjs
+
+check-boundary: check-candid-boundary check-browser-boundary
 	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 
 .PHONY: check-ci-selection

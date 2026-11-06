@@ -10,7 +10,7 @@ Core 0.17 schemas use canonical Types 0.18.1. Production Endpoint uses one
 executor/guard and excludes the crypto facade, Candid and native client tooling.
 The `query`/`update` attributes are re-exported from the Endpoint-owned
 `ic-wire-endpoint-macros` package; it shares Endpoint's version/release group.
-The qualified lock selects Runtime/macros/exact guard 0.19.1; the compatible
+The qualified lock selects Runtime/macros/exact guard 0.19.2; the compatible
 published Endpoint dependency range remains `^0.19.0`.
 
 Align application runtime suppliers, including Timers, before adopting Endpoint
@@ -27,7 +27,7 @@ Consumers upgrading from Core 0.15 must separately adopt the
 [0.16 Account contract cut](../releases/core/0.16.md), including fresh contract
 keys and coordinated clients. Native qualification selects facade 0.22 and Testkit
 0.85; Testkit's internal management adapter retains facade 0.21. All are outside
-production Wasm, sharing Runtime 0.19.1 and Types 0.18.1. Rust 1.99.1 is minimum and pinned. Source
+production Wasm, sharing Runtime 0.19.2 and Types 0.18.1. Rust 1.99.1 is minimum and pinned. Source
 qualification uses registry suppliers without Cargo patches; see the
 [standalone fixture](../examples/endpoint/Cargo.toml).
 

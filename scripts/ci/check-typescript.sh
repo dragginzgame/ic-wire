@@ -19,6 +19,7 @@ if grep -Eq '^warning: /types/Page[0-9]+/' "$generation_log"; then
 fi
 cat "$generation_log" >&2
 [[ "$generation_status" == 0 ]] || exit "$generation_status"
+node "$root/scripts/ci/check-ic-sdk-boundary.mjs" "$out"
 "$root/examples/browser/node_modules/.bin/tsc" --ignoreConfig --strict --noUncheckedIndexedAccess --exactOptionalPropertyTypes --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck --outDir "$out/compiled" "$out"/*.ts
 node "$out/checks.mjs"
 node crates/ic-wire/examples/typescript_conformance/endian.mjs "$out/compiled/wire-runtime.js"

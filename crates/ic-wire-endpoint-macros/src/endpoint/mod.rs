@@ -172,7 +172,7 @@ pub(super) fn expand(
                 const #settings: #wire::Contract<#request_type, #response_type> = #settings_value;
                 fn #admit() -> ::std::result::Result<(), ::std::string::String> {
                     #settings.admit_request();
-                    Ok(())
+                    ::std::result::Result::Ok(())
                 }
                 fn #decode(bytes: ::std::vec::Vec<u8>) -> ::std::vec::Vec<u8> { bytes }
                 #[#wire::__private::cdk::#attribute(
@@ -203,7 +203,7 @@ pub(super) fn expand(
             const #settings: #wire::Contract<#request_type, #response_type> = #settings_value;
             fn #admit() -> ::std::result::Result<(), ::std::string::String> {
                 #settings.admit_request();
-                Ok(())
+                ::std::result::Result::Ok(())
             }
             fn #decode(bytes: ::std::vec::Vec<u8>) -> #request_type {
                 #wire::decode_request(&bytes, #settings.id, #settings.request)

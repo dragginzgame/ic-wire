@@ -50,7 +50,22 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "cost-smoke",
         feature = "coverage-shapes"
     )))]
-    assert!(cases.len() >= 100);
+    {
+        use sha2::{Digest, Sha256};
+        // Freeze names in IC index order: roundtrips alone cannot detect deleted,
+        // renamed or reordered cases. Review this digest when deliberately adding
+        // coverage; do not regenerate it inside a test or measurement run.
+        assert_eq!(cases.len(), 391);
+        let inventory = cases
+            .iter()
+            .map(|case| case.name.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert_eq!(
+            format!("{:x}", Sha256::digest(inventory.as_bytes())),
+            "727cb175a2460a051490b723693e2f1d4c74713a866d6f89681028043e3f053e"
+        );
+    }
     #[cfg(feature = "bulk")]
     assert_eq!(cases.len(), 109); // Includes ten i8 small/wide length controls.
     #[cfg(feature = "toko")]

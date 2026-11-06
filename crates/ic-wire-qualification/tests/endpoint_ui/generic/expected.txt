@@ -1,0 +1,1 @@
+Wire endpoints require a safe, nongeneric function

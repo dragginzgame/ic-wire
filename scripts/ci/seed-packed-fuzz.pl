@@ -2,12 +2,12 @@
 use strict;
 use warnings;
 
-# Independent frame oracle for Cell variants 8..14 in the qualification fuzz_runtime/mod.rs.
+# Independent frame oracle for Cell variants 8..15 in the qualification fuzz_runtime/mod.rs.
 # Keep seeds deterministic and restore them before each run; discovered corpus
 # entries are never removed. Partial words deliberately seed malformed admission.
 my ($directory) = @ARGV;
 defined($directory) && -d $directory or die "usage: $0 EXISTING_CORPUS_DIRECTORY\n";
-my @widths = (2, 2, 4, 4, 8, 8, 32);
+my @widths = (2, 2, 4, 4, 8, 8, 32, 1);
 for my $index (0..$#widths) {
     my $tag = 8 + $index;
     my $width = $widths[$index];
@@ -27,5 +27,22 @@ for my $index (0..$#widths) {
             print {$file} $bytes or die "$!\n";
             close($file) or die "$!\n";
         }
+    }
+}
+
+# Payload-only shapes: borrowed text/bytes, reordered and duplicate map/set
+# entries, recursive enum nodes and zero-sized elements. Also exercise their
+# truncated prefixes with the fuzzer's input-dependent resource limits.
+my @payloads = (
+    [2, 104, 105, 3, 1, 2, 3],
+    [2, 2, 0, 1, 1], [2, 1, 0, 1, 1],
+    [3, 2, 1, 2], [1, 2, 0, 2, 0], [2, 2, 2, 0], [128, 1], [255, 3],
+);
+for my $index (0..$#payloads) {
+    my $bytes = pack('C*', @{$payloads[$index]});
+    for my $length (0..length($bytes)) {
+        open(my $file, '>:raw', "$directory/payload-$index-$length") or die "$!\n";
+        print {$file} substr($bytes, 0, $length) or die "$!\n";
+        close($file) or die "$!\n";
     }
 }

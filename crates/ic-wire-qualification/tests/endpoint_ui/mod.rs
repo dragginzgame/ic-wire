@@ -1,4 +1,7 @@
-#![expect(dead_code, reason = "The selected driver uses only part of the shared fixture surface.")]
+#![expect(
+    dead_code,
+    reason = "The selected driver uses only part of the shared fixture surface."
+)]
 use ic_wire::Limits;
 use ic_wire_endpoint::query;
 const LIMITS: Limits = Limits {
@@ -42,6 +45,27 @@ mod valid {
     #[query(borrow)]
     fn bounded(value: ic_wire::BytesRef<'_, 32>) -> ic_wire::BytesRef<'_, 32> {
         value
+    }
+
+    // Application variants must not capture generated Result constructors.
+    mod shadowed {
+        enum ApplicationResult {
+            Ok(()),
+        }
+        use ApplicationResult::Ok;
+        #[ic_wire_endpoint::query]
+        fn owned() {
+            let _ = Ok(());
+        }
+        #[ic_wire_endpoint::update(borrow)]
+        fn borrowed(value: &str) -> &str {
+            value
+        }
+        #[ic_wire_endpoint::query]
+        #[cfg_attr(all(), cfg(any()))]
+        fn disabled(_: MissingType) -> MissingType {
+            unreachable!()
+        }
     }
 }
 
@@ -97,3 +121,15 @@ fn composite_update() {}
 #[cfg(ui_case = "name")]
 #[query(name = "", id = 1, request = LIMITS, response = LIMITS)]
 fn name() {}
+
+#[cfg(ui_case = "generic")]
+#[query]
+fn generic<T>(_: T) {}
+
+#[cfg(ui_case = "receiver")]
+struct Receiver;
+#[cfg(ui_case = "receiver")]
+impl Receiver {
+    #[query]
+    fn method(&self) {}
+}

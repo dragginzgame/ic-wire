@@ -170,6 +170,17 @@ a universal endpoint recommendation or an IC instruction quota.
 
 ## Host-side bulk advice and CI
 
+Advice also covers bool, float, 128-bit integer and zero-sized lists. These
+have no supported production `Packed<T>` substitute: retain their representation,
+set explicit element/node limits and measure valid maxima plus malformed inputs.
+For example, `/response/list/bool` can be acknowledged with the reason
+`At most 16 admin flags; measured at the endpoint limit`. An acknowledgement
+silences that exact use site and becomes stale when the shape changes. Neither
+advice nor acknowledgement changes bytes, budgets or acceptance. Schema-free
+codec calls cannot emit schema advice; include exported request/reply roots in
+the host generation step. Diagnostics display at most eight entries plus an
+omission count; the report retains every path for CI review.
+
 `generate_registry` now always runs bulk advice. Its host API takes an
 acknowledgement map and a required diagnostic handler; the former silent
 three-argument call is removed. This is a host API cut only: generated TypeScript,

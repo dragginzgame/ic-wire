@@ -744,7 +744,8 @@ fields. Root labels are chosen by the consumer, not synthetic type names;
 independent decisions even when both fields share one interned container.
 Aliases add no path segments. Recursion stops at a reference already active on
 the current path; sibling references are still inspected. Traversal is bounded
-to 64 levels and 65,536 visits and returns `Complexity`, never a partial report.
+to 64 levels, 65,536 visits per root and 1,000,000 visits per report, returning
+`Complexity`, never a partial report.
 Renaming/removing a field or changing its primitive word makes its former
 acknowledgement stale. Bounds and custom scalar constraints still need consumer
 review; these paths are not full contract fingerprints. Pass inline request/error
@@ -755,7 +756,11 @@ lists that may benefit from byte buffers or `Packed<T>`. Pass a map of named
 schemas and a map of exact diagnostic paths to acknowledgement reasons. Inspect
 `report.warnings` and `report.stale_acknowledgements`; optionally require
 `report.is_clean()` in consumer CI. Include inline method request/response roots.
-This opt-in lint does not rewrite Serde or affect Wasm. Small lists may be better
+Both generators always compute advice; the standalone lint is also available.
+Bool, float, 128-bit integer and zero-sized lists receive bound/node-limit advice
+even though no production Packed representation exists for them. Warnings do
+not predict a slowdown ratio: measure legitimate maximum and malformed inputs.
+Advice does not rewrite Serde or affect Wasm. Small lists may be better
 left compact; preserve field bounds and custom validation when adopting advice.
 `Packed<i8>` uses `Int8Array` metadata and preserves ordinary signed-byte payloads
 while changing traversal to bulk admission (`[-128,127]` stays `02 80 7f`).

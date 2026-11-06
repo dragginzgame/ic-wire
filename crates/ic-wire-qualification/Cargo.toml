@@ -12,6 +12,7 @@ category = "tests"
 
 [package.metadata.shared-tooling.loc.paths]
 benches = "benchmarks"
+"benches/contract_tests.rs" = "tests"
 tools = "build_tooling"
 
 [lib]
@@ -19,12 +20,15 @@ path = "benches/mod.rs"
 
 [features]
 allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
+contract-fixture = ["dep:ic-wire", "dep:ic-platform-types"]
+schema-fixture = ["contract-fixture", "ic-wire/typescript"]
 fuzz-runtime = ["dep:ic-wire", "dep:libfuzzer-sys"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 libfuzzer-sys = { workspace = true, optional = true }
 
 [dependencies]
+ic-platform-types = { workspace = true, optional = true }
 ic-wire = { workspace = true, optional = true }
 serde.workspace = true
 serde_bytes = { workspace = true, optional = true }
@@ -34,6 +38,12 @@ clap.workspace = true
 ic-build.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
+
+[[example]]
+name = "check-contract"
+path = "tools/check_contract/mod.rs"
+required-features = ["schema-fixture"]
+test = true
 
 [[example]]
 name = "check-diagnostics"

@@ -8,7 +8,8 @@ fn main() {
         serde_json::json!({
             "k":"record","fields":[
                 {"name":"data","value":{"k":"list","item":{"k":"u","bits":8}}},
-                {"name":"words","value":{"k":"list","item":{"k":"u","bits":16}}}
+                {"name":"words","value":{"k":"list","item":{"k":"u","bits":16}}},
+                {"name":"flags","value":{"k":"list","item":{"k":"bool"}}}
             ]
         }),
     )]);
@@ -20,6 +21,7 @@ fn main() {
         );
     }
     if case == "all" || case == "stale" {
+        acknowledgements.insert("/types/Payload/fields/flags/list/bool".into(), "Bounded admin flags".into());
         acknowledgements.insert(
             "/types/Payload/fields/words/list/u16".into(),
             "Small varints".into(),

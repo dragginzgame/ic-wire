@@ -23,11 +23,13 @@ mkdir "$fixture/repo" "$fixture/bin"
 paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
 paths+=(ci/release-validation.json scripts/ci/wire-validation-roster.pl scripts/ci/wire-release-validation.mjs scripts/ci/check-release-validation.mjs scripts/ci/rust-policy.sh scripts/ci/ic-wire-release.sh scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 paths+=(scripts/ci/check-lint.sh)
+paths+=(scripts/ci/check-compatible-consumers.sh)
+paths+=(scripts/benchmarks/generator/mod.rs scripts/dev/inspect-wire.mjs)
 paths+=(scripts/ci/check-repository-documentation.sh)
 paths+=(ci/candid-boundary.json)
 # Include authored crate inputs automatically, including new untracked modules.
 # Git exclusions keep ignored build/cache output out of the disposable export.
-git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/endpoint/ releases/ > "$fixture/crate-paths"
+git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/ releases/ > "$fixture/crate-paths"
 while IFS= read -r -d '' path; do
     [[ ! -f "$root/$path" ]] || paths+=("$path")
 done < "$fixture/crate-paths"
@@ -44,6 +46,13 @@ check_ci_routing() {
     # Roster admission must work before bootstrap tools exist, including system Make.
     make --no-print-directory -C "$fixture/repo" help > "$fixture/bootstrap.log"
     [[ ! -e "$fixture/repo/.tools" ]]
+    # Prove the actual consumer boundary target includes browser CBOR imports.
+    # This is parser input in a disposable tree, never compiled or executed.
+    make --no-print-directory -C "$fixture/repo" check-boundary > "$fixture/boundary.log" 2>&1
+    printf '%s\n' "import { decode } from 'cbor-x';" > "$fixture/repo/examples/browser/boundary-probe.ts"
+    if make --no-print-directory -C "$fixture/repo" check-boundary > "$fixture/boundary-refused.log" 2>&1; then exit 1; fi
+    grep -F 'direct SDK/CBOR import' "$fixture/boundary-refused.log" >/dev/null
+    rm "$fixture/repo/examples/browser/boundary-probe.ts"
     # Verify the actual CI recipes partition the complete roster. Substitute only
     # dispatch: no broad gate or release effect runs in this disposable checkout.
     cat > "$fixture/repo/scripts/ci/run-validation-targets.sh" <<'STUB'

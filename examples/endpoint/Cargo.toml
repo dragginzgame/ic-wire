@@ -22,11 +22,13 @@ ic = []
 schema = ["ic-wire/typescript", "ic-wire-endpoint/typescript"]
 # Qualification-only inline hook comparator, never a production encoding mode.
 inline-baseline = []
+admission-contract = ["dep:ic-wire-qualification"]
 
 [dependencies]
 ic-platform-runtime = { workspace = true, features = ["cdk"] }
 ic-wire.workspace = true
 ic-wire-endpoint.workspace = true
+ic-wire-qualification = { workspace = true, optional = true, features = ["contract-fixture"] }
 serde.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]

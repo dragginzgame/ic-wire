@@ -5,3 +5,7 @@
 /// Admission, borrowing, storage reuse and packed-hash experiment.
 #[cfg(feature = "allocation-fixture")]
 pub mod allocation;
+
+/// Frozen bytes and admission assertions for native and installed Wasm consumers.
+#[cfg(feature = "contract-fixture")]
+pub mod contract_tests;

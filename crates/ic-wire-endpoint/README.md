@@ -28,7 +28,7 @@ runtime re-exported through Endpoint; applications need no new dependency solely
 to use an Endpoint macro. Core and derive keep their independent release identity.
 
 Select matching Timers and other runtime suppliers before upgrading applications.
-The qualified Runtime/macros/exact guard 0.19.1 share canonical Types 0.18.1;
+The qualified Runtime/macros/exact guard 0.19.2 share canonical Types 0.18.1;
 the compatible Runtime dependency range remains ^0.19.0.
 Do not mix older execution generations with this singleton. Crypto/Candid facade
 features may be selected separately with a facade that delegates to this owner.

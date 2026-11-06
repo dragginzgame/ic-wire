@@ -26,6 +26,17 @@ async fn typed_calls_limits_and_transactions() {
     .await
     .unwrap();
     let caller = Principal::anonymous().into();
+    #[cfg(feature = "admission-contract")]
+    {
+        let id = native::method_id("admission_contract");
+        let limits = ic_wire_endpoint::DEFAULT_REQUEST_LIMITS;
+        let frame = native::encode_request(id, &(), limits).unwrap();
+        let reply = pic
+            .query_call(canister, caller, "admission_contract", frame)
+            .await
+            .unwrap();
+        native::decode_response::<()>(id, &reply, limits).unwrap();
+    }
     let unit = native::encode_request(8, &(), LIMITS).unwrap();
     let count = || async {
         native::decode_response::<u64>(

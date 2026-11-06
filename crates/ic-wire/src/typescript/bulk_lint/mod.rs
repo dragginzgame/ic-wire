@@ -80,8 +80,10 @@ impl core::fmt::Display for BulkLintReport {
 /// the registry). Named references are inspected at their definition, once;
 /// Rust aliases already resolve through `native_schema`. Nested lists, records,
 /// variants, tuples and options are traversed. Lists of 32-byte hashes also
-/// suggest Packed; standalone arrays, packed/byte fields, unsupported words
-/// and lists of general records are not candidates.
+/// suggest Packed; standalone arrays, packed/byte fields
+/// and lists of nonempty records are not candidates. Bool, finite float, 128-bit
+/// integer and zero-sized lists also receive cost advice, without suggesting an
+/// unsupported Packed element or silently changing their representation.
 ///
 /// Acknowledgements map exact diagnostic paths to nonempty reasons. Unmatched
 /// entries are reported as stale, preventing broad suppression after a schema
@@ -252,6 +254,44 @@ fn representation<'a>(
                     ("u", Some(32)) => Some(("u32", "Packed<u32>")),
                     ("i", Some(64)) => Some(("i64", "Packed<i64>")),
                     ("u", Some(64)) => Some(("u64", "Packed<u64>")),
+                    ("i", Some(128)) => Some((
+                        "i128",
+                        "bounded i128 lists and workload-specific node limits; Packed<i128> is unsupported",
+                    )),
+                    ("u", Some(128)) => Some((
+                        "u128",
+                        "bounded u128 lists and workload-specific node limits; Packed<u128> is unsupported",
+                    )),
+                    ("float", Some(32)) => Some((
+                        "f32",
+                        "bounded float lists and workload-specific node limits; Packed<f32> is unsupported",
+                    )),
+                    ("float", Some(64)) => Some((
+                        "f64",
+                        "bounded float lists and workload-specific node limits; Packed<f64> is unsupported",
+                    )),
+                    ("bool", _) => Some((
+                        "bool",
+                        "bounded bool lists and workload-specific node limits; Packed<bool> is unsupported",
+                    )),
+                    ("unit", _) => Some((
+                        "unit",
+                        "an explicit element bound and node limit; zero-byte elements still require traversal",
+                    )),
+                    ("record", _) if node["fields"].as_array().is_some_and(Vec::is_empty) => {
+                        Some((
+                            "empty-record",
+                            "an explicit element bound and node limit; zero-byte elements still require traversal",
+                        ))
+                    }
+                    ("tuple", _) if node["items"].as_array().is_some_and(Vec::is_empty) => Some((
+                        "empty-tuple",
+                        "an explicit element bound and node limit; zero-byte elements still require traversal",
+                    )),
+                    ("array", _) if node["max"].as_u64() == Some(0) => Some((
+                        "empty-array",
+                        "an explicit element bound and node limit; zero-byte elements still require traversal",
+                    )),
                     _ => None,
                 });
             }

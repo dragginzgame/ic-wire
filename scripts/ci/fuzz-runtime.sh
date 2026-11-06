@@ -19,4 +19,4 @@ export RUSTFLAGS='-Cpasses=sancov-module -Cllvm-args=-sanitizer-coverage-level=4
 rustup run "$toolchain" cargo run --offline --locked --release --target "$host" \
     -p ic-wire-qualification --example fuzz-runtime --features fuzz-runtime -- \
     "$CARGO_TARGET_DIR/corpus" "-artifact_prefix=$CARGO_TARGET_DIR/artifacts/" \
-    "-runs=$runs" -seed=42 -max_len=2048 -timeout=5 -rss_limit_mb=2048
+    "-runs=$runs" -seed=42 -max_len=4096 -timeout=5 -rss_limit_mb=2048

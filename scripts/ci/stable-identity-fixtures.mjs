@@ -21,7 +21,8 @@ if (mode === 'prepare') {
   const manifest = path.join(nextPlatform, 'Cargo.toml');
   const original = fs.readFileSync(manifest, 'utf8'), version = `version = "${platform.version}"`;
   assert.ok(original.includes(version));
-  write(manifest, original.replace(version, `version = "${next(platform.version)}"`));
+  // Admit this copied supplier as its own fixture workspace before compilation.
+  write(manifest, original.replace(version, `version = "${next(platform.version)}"`) + '\n[workspace]\n');
   const macros = path.join(out, 'next-endpoint-macros');
   fs.cpSync(path.join(root, 'crates/ic-wire-endpoint-macros/src'), path.join(macros, 'src'), { recursive: true });
   write(path.join(macros, 'Cargo.toml'), `[workspace]

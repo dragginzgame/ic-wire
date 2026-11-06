@@ -31,9 +31,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.74.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.75.0 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.74.0 without default features; the CLI feature is only enabled for installation.
+0.75.0 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -81,7 +81,8 @@ checks as an explicit convenience; CI does not repeat them under another compile
 | `lint` | Public-package strict Clippy with schema features; `RELEASE_GROUP=core` or `endpoint` narrows packages, full release plans explicitly lint both groups |
 | `check-wasm`, `check-msrv` | Runtime Wasm and minimum-toolchain checks |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
-| `check-qualification` | Allocation/borrowing fixtures and qualification lint/floor checks |
+| `check-qualification` | Allocation/borrowing, frozen bytes/admission and contract-diff tests |
+| `check-compatible-consumers` | Published/current Core, derive and Endpoint combinations; standalone Rust 1.99.1 host/Wasm checks; included in `check-endpoint` |
 | `check-endpoint` | Standalone typed endpoint/native metadata, compiler diagnostics, lint, Wasm/MSRV and dependency isolation |
 | `check-endpoint-ic` | Installed endpoint/rollback cases; explicitly prepared `POCKET_IC_BIN` required |
 | `evaluate-endpoints` | All exported endpoint costs and rejection paths; fresh absolute `EVIDENCE_DIR` and instrumented `POCKET_IC_BIN` required |
@@ -92,8 +93,9 @@ checks as an explicit convenience; CI does not repeat them under another compile
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
 | `fmt-check` | Grouped manifests, derive order and Rust formatting |
-| `check-pins`, `check-boundary` | Dependency inheritance/pins, external IC guard and exact Candid comparison declarations |
-| `check-candid-boundary` | Read-only lexical Candid trait check over all crate/example Rust sources; no Cargo or macro expansion |
+| `check-pins`, `check-boundary` | Dependency inheritance/pins, external IC/CBOR guard, Rust source and browser import boundaries |
+| `check-candid-boundary` | Read-only Candid/CBOR source checks over crates, examples and the generator probe; no Cargo or macro expansion |
+| `check-browser-boundary` | Shared SDK/CBOR checks for the browser example, crate runtime/fixture JS/TS and inspection helper |
 | `shared-tooling-check` | Recorded snapshot bytes and modes |
 | `tools-report` | Aggregate offline host/Cargo/local-tool diagnostics; runs every checker |
 | `check-doc-links` | Maintained local references and every snapshot-declared Shared Markdown file |
@@ -102,9 +104,18 @@ checks as an explicit convenience; CI does not repeat them under another compile
 | `check-tooling`, `check-release` | Disposable Make/hook and release-adapter fixtures |
 | `ci-core`, `ci-typescript`, `ci-benchmarks` | Aggregate hosted CI groups; each admits prepared tools first |
 
-The [Candid source check](candid-boundary.md) uses ci/candid-boundary.json to
-admit only named unpublished comparison DTOs/helpers. Macro expansion and
-cross-module aliases still require review; the checker is not type resolution.
+The [Candid/CBOR source check](candid-boundary.md) uses ci/candid-boundary.json to
+admit only named unpublished Candid comparison DTOs/helpers, with no CBOR
+exceptions. Shared owns the codec inventory; Wire does not duplicate it.
+The root Cargo check covers all seven workspace members. Materialized schema,
+bulk-advice, platform-type, compatibility, future-identity and generator CLI
+workspaces invoke the same dependency check before compilation. Generated
+Rust fixture bodies come from the checked source roots; copied Platform source
+remains the external producer. TypeScript conformance, platform-type and identity
+fixtures additionally check their actual generated browser roots. These checks
+do not cover arbitrary old target/ scratch or prove dynamic imports, macro
+expansion, cross-module alias provenance or byte compatibility. Snapshot-only
+adoption is not a claim that every independent workspace has been validated.
 New raw benchmark output defaults to `target/evidence/`; keep only compact topic
 results under the [research retention policy](evidence/README.md).
 
@@ -117,6 +128,49 @@ Use the smallest meaningful checks under the
 [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
 The complete `make ci` gate requires an explicit local request or the selected
 maintainer release operation. Configured hosted CI remains independent.
+
+### Selecting change-specific qualification
+
+The ordinary gates prove correctness and compilation; `check-benchmarks` does
+not run a performance comparison. Select these additional proofs by the changed
+boundary, keeping baseline/candidate compiler, lock, inputs and profiles matched:
+
+| Changed boundary | Additional proof |
+| --- | --- |
+| Codec traversal, buffering, parsing or bulk representation | `evaluate-codec-matrix` on isolated sources, then `check-codec-costs` on completed runs; include small and malformed controls, IC instructions and total uncompressed Wasm/code sections |
+| Endpoint expansion, admission, replies, traps or execution supplier | `check-endpoint-ic` with a prepared server; `evaluate-endpoints` for cost-affecting changes |
+| Host schemas or advice | Rust/TypeScript conformance, exact acknowledgement tests and paired host-generation timings; do not claim codec/Wasm savings |
+| Public codec/schema/macro interfaces | `check-compatible-consumers` (also in `check-endpoint`) plus consumer contract snapshots and frozen vectors |
+
+The installed fixture's `admission-contract` feature runs the same frozen byte
+and allocation-threshold assertions on actual Wasm32 as on the native host.
+It is absent from default cost fixtures, keeping their measured endpoint roster
+unchanged. Visitor charges depend on the target's value/reference sizes; host
+thresholds are not a substitute for the Wasm execution proof.
+
+### Checking a consumer contract snapshot
+
+The private qualification CLI compares two JSON snapshots containing `types`
+(the registry object), `methods` and/or `payloads` (generator declaration arrays),
+and optional `vectors` (named arrays of exact retained bytes). Omitted sections
+default to empty. Both snapshots pass Wire's existing schema validation first.
+
+```sh
+cargo run --locked -p ic-wire-qualification --example check-contract \
+  --features schema-fixture -- BEFORE.json AFTER.json
+```
+
+Equal declarations/vectors succeed; changes or invalid inputs fail. Declaration
+ordering is ignored by name, but field/variant ordering, limits, identities and
+literal bytes are compared. The CLI displays at most eight changed paths and
+never updates the baseline. Keep snapshots in the consumer's contract tests,
+review changes and qualify adoption before replacing them. This conservative
+tool compares supplied vectors; consumer tests must generate and verify those
+vectors against the actual Rust/TypeScript implementations. The
+diff can flag harmless metadata changes; it cannot prove arbitrary custom Serde
+behavior, deployment compatibility or retry safety. It adds no runtime fingerprint,
+wire field, fallback reader or published API. Retain original retry/signature
+bytes independently of any normalized decode/re-encode result.
 
 For code changes, hosted CI runs those three groups independently on Linux x86_64,
 macOS ARM64 and macOS Intel. Each matrix job owns its checkout, `target/`, tool
@@ -214,13 +268,18 @@ serialization and allocation/error paths still require a real target or emulator
 The fuzz engine belongs to the unpublished qualification package and is selected
 only through its native `fuzz-runtime` feature. Ordinary codec and qualification
 tests do not select it. `make fuzz-runtime` retains the prepared nightly/C++
-runner and restores 112 deterministic packed frames before every run,
+runner and restores deterministic packed frames and payload-only seeds before every run,
 using `scripts/ci/seed-packed-fuzz.pl`. No archived corpus is needed on a clean
 checkout. Seeds cover every supported word type, both directions, empty fields,
 length-prefix boundaries and partial-word rejection. Existing discovered corpus
 entries are preserved. Cell variant indices in the seed oracle must track the
 qualification enum in
 `crates/ic-wire-qualification/tools/fuzz_runtime/mod.rs`.
+Payload-only checks include maps/sets with reordered or duplicate entries,
+recursive values, zero-sized collections and borrowed text/bytes. They exercise
+fixed and input-dependent limits and compare output-buffer APIs. Maps/sets use
+semantic round trips: collection normalization is consumer-owned, so the fuzzer
+does not require byte-identical re-encoding. Inputs are capped at 4,096 bytes.
 
 The runner selects a separately pinned nightly in
 [`fuzz-runtime.sh`](../scripts/ci/fuzz-runtime.sh), solely for sanitizer/coverage

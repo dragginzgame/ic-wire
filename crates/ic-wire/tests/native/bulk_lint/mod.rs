@@ -31,6 +31,10 @@ fn resolved_aliases_nested_fields_and_acknowledgements() {
             ("/Request/fields/samples/item", "Packed<i64>"),
             ("/Request/fields/bytes", "ByteBuf / Bytes<N> / serde_bytes"),
             ("/Request/fields/records/item/items/1", "Packed<u16>"),
+            (
+                "/Request/fields/unsupported",
+                "bounded u128 lists and workload-specific node limits; Packed<u128> is unsupported"
+            ),
         ]
     );
     let mut acknowledged: BTreeMap<_, _> = report
@@ -480,3 +484,4 @@ fn display_bounds_warning_and_stale_output_without_losing_paths() {
     assert_eq!(stale.to_string().lines().count(), 9);
     assert!(stale.to_string().contains("2 more bulk diagnostics"));
 }
+mod cost_tests;

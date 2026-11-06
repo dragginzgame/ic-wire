@@ -106,6 +106,7 @@ try {
   fs.copyFileSync(path.join(root, 'Cargo.lock'), path.join(generator, 'Cargo.lock'));
   fs.writeFileSync(path.join(generator, 'Cargo.toml'), `[workspace]\n[package]\nname = "generator-cli-check"\nversion = "0.0.0"\nedition = "2024"\nrust-version = "${wire.rust_version}"\npublish = false\n[dependencies]\nic-wire = { path = ${JSON.stringify(path.join(root, 'crates/ic-wire'))}, features = ["typescript"] }\n${dependency('clap')}\n${dependency('serde_json')}\n`);
   const generatorEnv = { ...process.env, CARGO_TARGET_DIR: metadata.target_directory };
+  run('bash', [path.join(root, 'scripts/ci/check-cargo-dependency-boundaries.sh'), '--consumer', generator, '--external-ic']);
   const generatorBinary = artifacts(run('cargo', ['build', '--offline', '--message-format=json'], 0, generator, generatorEnv).stdout).get('generator-cli-check');
   assert.match(run(generatorBinary, ['--help']).stdout, /Usage:/);
   run(generatorBinary, [output, 'extra'], 2);

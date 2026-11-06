@@ -4,6 +4,20 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.7.2]
+
+### 🩹 Fixed
+
+- Fully qualify successful generated guard results so a consumer's imported
+  `Ok` cannot capture query/update expansion. Cover owned and borrowed handlers,
+  disabled items, generics and receiver diagnostics with the real macro.
+  Public APIs, bytes, identities, admission and rollback rules are unchanged.
+
+### 🧪 Testing
+
+- Include mixed published/current consumers in Endpoint qualification and run
+  frozen byte/admission assertions on the installed Wasm test fixture.
+
 ## [0.7.1] - 2026-11-05
 
 ### 🔧 Changed

@@ -31,10 +31,15 @@ through `platform-types` or Endpoint schema forwarding. Runtime Serde codecs
 do not require Wire metadata or the metadata proc macro.
 The independent `platform-types` feature selects only `ic-platform-types` and
 host schema support. The independent `ic-wire-endpoint` package selects independent Platform Runtime
-CDK and uses its generator and executor. Its exactly versioned
+CDK and uses its generator and executor. Its compatibly versioned
 `ic-wire-endpoint-macros` package owns query/update expansion. Core
 `ic-wire-derive` owns only schema metadata. Core/derive and endpoint release groups
 can evolve separately; one codec and one schema trait remain.
+`check-compatible-consumers` qualifies published/current Core, derive and
+Endpoint combinations, including frozen bytes. A compatible patch can be
+selected by an application's lockfile without republishing every dependent
+library. A new minor that changes public type identities or a payload layout
+still needs explicit consumer qualification; these are separate decisions.
 See [typed endpoints](endpoints.md). Browser transports remain consumer-owned. The unpublished
 benchmark crate may use Candid and PocketIC as dev dependencies for codec
 comparisons and IC instruction measurements. The standalone endpoint fixture also

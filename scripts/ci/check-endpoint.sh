@@ -7,6 +7,7 @@ export RUSTUP_AUTO_INSTALL=0
 mkdir -p target
 output="$(mktemp -d "$PWD/target/endpoint-check.XXXXXX")"
 printf 'Endpoint compile evidence: %s\n' "$output"
+bash scripts/ci/check-compatible-consumers.sh
 cargo test --locked -p ic-wire-endpoint-fixture --lib
 cargo test --locked -p ic-wire-endpoint-fixture --lib --features schema
 cargo test --locked -p ic-wire --lib automatic_method_identity_vectors_and_frame

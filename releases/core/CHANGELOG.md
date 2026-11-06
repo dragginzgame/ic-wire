@@ -5,6 +5,37 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.4]
+
+### ⬆️ Dependencies
+
+- Adopt committed Shared Tooling 0.30.6 and activate its CBOR checks for Rust,
+  browser/generated imports and standalone qualification manifests. Retain the
+  reviewed Candid comparison declarations; no codec or retained-byte migration.
+- Adopt IC Build 0.75 for compiler diagnostics and the separately prepared
+  release metadata editor, and Testkit 0.88 for native PocketIC qualification.
+  Remove retired Testkit schema/logging/enum-iteration dependencies from the
+  selected graph. Production codec/runtime suppliers, bytes and budgets are unchanged.
+
+### 🔧 Changed
+
+- Extend default schema advice to bool, float, 128-bit integer and zero-sized
+  lists. Recommend explicit bounds and measured node limits where Packed has
+  no supported element type. Preserve exact-path acknowledgement and bounded
+  diagnostic output; generated source, bytes, identities and admission are unchanged.
+
+### 🧪 Testing
+
+- Freeze representative payload/frame bytes and host/Wasm allocation thresholds,
+  including Account's absent versus explicit-zero subaccount. Qualify published
+  and current Core/derive/Endpoint combinations without downstream patches.
+- Add a private conservative contract-snapshot diff, protect the standard
+  benchmark inventory, and fuzz maps/sets, recursive and zero-sized collections,
+  borrowed fields, variable limits and output buffers. Collection normalization
+  remains consumer-owned; no new canonicality guarantee or wire reader.
+- Replace mock handler-adapter diagnostics with real Endpoint compiler cases.
+  Document when installed execution and matched cost checks are required.
+
 ## [0.17.3] - 2026-11-05
 
 ### ⬆️ Dependencies

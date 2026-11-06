@@ -91,3 +91,50 @@ Earlier hash-advice work recorded bounded Display output (eight entries plus an
 omission count), roughly 98.6% less formatting time for 1,024 diagnostics, and
 13–16% more generation work when newly retaining hash warnings. Those historical
 raw archives were retired; they are not current regression or reproduction proof.
+
+## 6 November cost-advice extension
+
+The audit adds warnings for ordinary bool, float, 128-bit integer and zero-sized
+lists, without adopting new Packed types. Isolated sources differ only in the
+production advice implementation; both use identical current test probes and
+the lock SHA-256 `ba25b3060a68d00e1de64502fb1ac0b72fd462214d2e1bea6b475d320ad09552`.
+That lock includes Platform 0.23.2 and cc 1.11.0; a concurrent later cc 1.11.1
+update is not part of this paired measurement. Compiler/host/release settings
+match the Rust 1.99.1 opt-3 setup above. Sources had separate fresh Cargo targets;
+no concurrent compilation or measurement ran during sampling. Baked source hashes
+were checked against all hashed files after both runs:
+
+- Before: `d119f7cfbdf7e2f75c388540be8205275f7083e73141576b4bceca38e2a4ca89`
+- After: `d79032edec7776d8e52d3226c21b5cd5e43d424a508ab1ba6554ec235fbe8b46`
+
+Each row contains 11 samples. Existing composed controls use the repetitions
+above; the new 1/64/512-type controls use 1,000/40/5 repetitions per sample.
+Each new type is a tuple of bool, f64, u128 and unit lists. Generation includes
+complete diagnostics and disposal, excluding fixture setup and terminal output.
+
+| Host generation | Before median | After median | Change |
+| --- | ---: | ---: | ---: |
+| Existing one-method control | 10.963 µs | 11.612 µs | +5.9% |
+| Existing 32-method control | 1.099587 ms | 1.102099 ms | +0.2% |
+| Existing 297-method control | 10.982834 ms | 11.220575 ms | +2.2% |
+| One newly warned type | 1.923 µs | 2.317 µs | +20.5% |
+| 64 newly warned types | 105.687 µs | 117.967 µs | +11.6% |
+| 512 newly warned types | 847.817 µs | 1,013.178 µs | +19.5% |
+
+The last row now retains 2,048 diagnostics instead of zero; this added host
+work is intentional. Source lengths match for every before/after control.
+Runtime bytes, limits and schemas are unchanged. IC instructions, total
+uncompressed Wasm and code-section deltas are not measured; no saving is claimed.
+
+Reproduce with the unchanged `measure_composed_generation` and
+`measure_new_cost_advice` ignored tests, filtering `bulk_lint::` with
+`--ignored --nocapture --test-threads=1`. Use identical candidate test files in
+both sources and the pre-extension `bulk_lint/mod.rs` for the baseline. Hash and
+bake inputs as above, compile both before sampling, and verify fresh binaries.
+Disposable sources, input maps and all 132 timing samples are under
+`target/audit-hardening/`; they are not retained in Git.
+
+The audit also reviewed standalone schema validation's discarded rendered
+strings. It retains the existing shared traversal: a separate validator would
+duplicate acceptance logic, while a rendering-sink refactor needs its own
+measured study. No unmeasured refactor or complexity increase was retained.
