@@ -1,8 +1,25 @@
 # Current handoff
 
-## Pending: Platform 0.24.0 qualification facade
+## Delivered: Core 0.17.8
 
-The working root requirement and lock now select published **Platform 0.24.0**
+Core **0.17.8** (`ic-wire-derive`, `ic-wire`) is on origin/main and crates.io.
+Tag **core-v0.17.8** selects **7f4e319**; source **e2bd6d6** was captured by
+Shared **0.31.5** in **batch-77451tll**. Endpoint remains **0.7.3**. The full
+20-stage Linux gate and final-version all-feature archives passed. Downloaded
+registry archives match the uploaded checksums and release source. The
+[delivery receipt](../../releases/receipts/published-core0178/delivery.json)
+owns exact identities. The normal checkout is reconciled; retained logs are in
+`target/core0178-delivery/` and the managed batch remains under
+`target/release-frozen/batch-77451tll/`. No cleanup was performed.
+
+The release's hosted CI started asynchronously. All six macOS jobs passed the
+bootstrap step that failed in the previous run; their full suites were still
+running at observation. Local Linux results do not establish complete native
+macOS qualification. Codec bytes, identities, limits and acceptance are unchanged.
+
+## Included: Platform 0.24.0 qualification facade
+
+The released root requirement and lock select published **Platform 0.24.0**
 (`fc6d419474a94a606e3c49729747e61978b4c9c7`) for benchmark Candid/crypto controls.
 Its removed unconfigured Candid decoders and native public-key derivation API
 have no Wire callers; bounded Candid controls retain their explicit limits.
@@ -22,11 +39,10 @@ codec/schema/Principal/Account identities. Logs are under
 Endpoint rerun is claimed: runtime and Testkit selections are unchanged. The
 completed matrix below retains its original supplier identities.
 
-This adoption and the Shared update below are uncommitted. No package version
-or delivered receipt changes; codec bytes, contract identities, limits and
-acceptance remain unchanged. Consumers need no protocol migration.
+These adoptions shipped in Core 0.17.8. Earlier delivery receipts retain their
+original inputs. Consumers need no protocol migration.
 
-## Pending: Shared 0.31.5 and macOS bootstrap fix
+## Included: Shared 0.31.5 and macOS bootstrap fix
 
 Adopted committed **Shared 0.31.5 / b2026a118e38de4af1555c527af327cb604eacdf**
 through the canonical exporter. The existing Core 0.17.7 / Endpoint 0.7.3 delivery
@@ -43,9 +59,9 @@ SHA-256/SHA-512 verification, print mode, mismatch/NUL refusal, backend failure
 propagation and the `shasum` fallback. Wire's actual host-tool install/check,
 143-file snapshot verification, documentation links and LOC reporting with a
 previously absent scratch parent pass. Evidence is under
-`target/shared0315-adoption/`; native macOS rerun remains required after delivery.
-Rerunning the old commit alone would retain the broken helper. This adoption is
-uncommitted; package versions and the delivered receipts remain unchanged.
+`target/shared0315-adoption/`. The new hosted run passed bootstrap on all six
+macOS jobs; full native suites remain asynchronous. Rerunning the old commit
+alone would retain the broken helper.
 
 ## Completed: full comparison refresh
 
@@ -70,7 +86,7 @@ session. Both protected matrix paths remain intact; no further cleanup is author
 
 ## Compiler, suppliers and release boundary
 
-Released Core **0.17.7** and Endpoint **0.7.3** select published **Build 0.77.0**
+The previous Core **0.17.7** / Endpoint **0.7.3** release selected published **Build 0.77.0**
 (`9d87394`), **Platform 0.23.6** (`51f5fbb`), **Runtime/macros/guard 0.19.5**
 (`c07b714`) and **Testkit 0.90.0** (`c03161b`). Types remains **0.18.2**, Host
 **0.74.4** and smallvec **1.16.5**. Rust/Cargo **1.99.1** remains floor and pin.
@@ -105,8 +121,8 @@ does not establish native macOS execution.
 
 ## Delivered state and recovery
 
-Core **0.17.7** (`ic-wire-derive`, `ic-wire`) and Endpoint **0.7.3**
-(`ic-wire-endpoint-macros`, `ic-wire-endpoint`) are on origin/main and crates.io.
+Previous Core **0.17.7** (`ic-wire-derive`, `ic-wire`) and current Endpoint
+**0.7.3** (`ic-wire-endpoint-macros`, `ic-wire-endpoint`) remain published.
 Tags **core-v0.17.7** and **endpoint-v0.7.3** select **2aa02ef** and **7c17eff**.
 The [Core receipt](../../releases/receipts/published-core0177/delivery.json) and
 [Endpoint receipt](../../releases/receipts/published-endpoint073/delivery.json)

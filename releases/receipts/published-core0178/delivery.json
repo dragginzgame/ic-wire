@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-07T11:34:11.944915+00:00",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "group": "core",
+  "version": "0.17.8",
+  "source_commit": "e2bd6d674fbc8624db4f1852503f3ae8053d58c1",
+  "release_commit": "7f4e319ec3adcff83401077f3004ad636d683675",
+  "tag": "core-v0.17.8",
+  "frozen_batch": "batch-77451tll",
+  "batch_schema": 2,
+  "batch_source_commit": "e2bd6d674fbc8624db4f1852503f3ae8053d58c1",
+  "shared_tooling": {
+    "version": "0.31.5",
+    "revision": "b2026a118e38de4af1555c527af327cb604eacdf"
+  },
+  "source_lock_sha256": "591e1dce55dc4c9d7ac696864c43b56480f45c5cb0c8029468a71cc7be01aa8c",
+  "release_lock_sha256": "5691a07bf30553f05af24a785c4035eb1d3bbb204cdc10289ad09efe88cfe6e4",
+  "compiler": "1.99.1",
+  "qualification": {
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "registry_archive_readback": true
+  },
+  "suppliers": {
+    "platform": "0.24.0",
+    "testkit_platform": "0.23.6",
+    "platform_types": "0.18.2",
+    "runtime": "0.19.5",
+    "runtime_macros": "0.19.5",
+    "runtime_guard": "0.19.5",
+    "testkit": "0.90.0",
+    "build": "0.77.0",
+    "host": "0.74.4"
+  },
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.8",
+      "sha256": "0bdc9977b079bef75db8babe5761b777445b7a4ad5f66617199bdb0cbae439c1",
+      "registry": "crates.io",
+      "source_commit": "7f4e319ec3adcff83401077f3004ad636d683675"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.8",
+      "sha256": "a9991e41a13c852e7c5a426f9c06b7b4f515d16d238e445d85d37c11986caed0",
+      "registry": "crates.io",
+      "source_commit": "7f4e319ec3adcff83401077f3004ad636d683675"
+    }
+  ],
+  "protocol": "Codec bytes, schemas, identities, limits and acceptance are unchanged. No consumer migration.",
+  "evidence_root": "target/core0178-delivery/",
+  "limitations": [
+    "The complete performance matrix retains its original supplier graph; no new performance measurement is claimed.",
+    "Installed Endpoint runtime tests were not repeated: Runtime and Testkit selections are unchanged.",
+    "Hosted Linux/macOS CI is asynchronous; local release qualification ran on Linux."
+  ]
+}
