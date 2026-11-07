@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire-benchmarks"
-version = "0.17.11"
+version = "0.17.12"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
