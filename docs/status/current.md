@@ -1,6 +1,6 @@
 # Current handoff
 
-## Working: public bool adapter for Core 0.17.11
+## Delivered: public bool adapter in Core 0.17.11
 
 Added explicit `serde_packed::bools` for `Vec<bool>` with generated `boolean[]`
 clients and default advice. Packed word invariants and existing fields stay
@@ -13,9 +13,18 @@ preserves every Wire IC counter and all allocations. Wire fixture Wasm adds
 Candid at opt-3. Other native results and controls remain in the report.
 Focused Rust/browser, malformed-input, budget, compile-fail and standalone
 host/Wasm checks pass. Evidence: `target/evidence/public-bools-20261107/` and
-`target/public-bools-checks/`. Changes are uncommitted and unreleased.
+`target/public-bools-checks/`. Core/derive **0.17.11** is on origin/main and
+crates.io: tag **core-v0.17.11**, release **104558b**, source **d4b117b**, batch
+**batch-_gyXV86f**. All 20 Linux stages and final all-feature archives pass;
+registry readback matches the uploaded bytes and release source. The normal
+checkout is reconciled. The initial validation was terminated; its empty stale
+lock was cleared after owner inspection, and the same batch passed a fresh gate.
+The [receipt](../../releases/receipts/published-core01711/delivery.json) owns exact
+identities. Logs: `target/core01711-delivery/`; retained checkout:
+`target/release-frozen/batch-_gyXV86f/`. Endpoint stays **0.7.3**; hosted CI is
+asynchronous. Platform Runtime 0.20 adoption is the next requested work.
 
-## Delivered: Core 0.17.10
+## Previous delivery: Core 0.17.10
 
 Core (`ic-wire-derive`, `ic-wire`) **0.17.10** is on `origin/main` and crates.io.
 Tag **core-v0.17.10** selects **f08c249**, from source **555664a**, in Shared

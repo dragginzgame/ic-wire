@@ -6,9 +6,9 @@ documentation directories. All 131 moved records retain their original bytes.
 They are provenance observations for the named release, not input to the release
 runner and not a second version catalog; manifests and group ledgers own versions.
 
-The latest recorded delivery is Core/derive **0.17.10**, with Endpoint/macros
-unchanged at **0.7.3**: [frozen delivery record](published-core01710/delivery.json).
-Core's tag `core-v0.17.10` resolves to `f08c249`. Checksums can be compared with
+The latest recorded delivery is Core/derive **0.17.11**, with Endpoint/macros
+unchanged at **0.7.3**: [frozen delivery record](published-core01711/delivery.json).
+Core's tag `core-v0.17.11` resolves to `104558b`. Checksums can be compared with
 registry downloads and tagged source. The receipt distinguishes current delivery
 qualification from earlier benchmark graphs.
 

@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-07T14:23:32.325Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "group": "core",
+  "version": "0.17.11",
+  "source_commit": "d4b117b81be16c9d1ec0f82f224062bbaf29d49d",
+  "release_commit": "104558b80b8120c8404220265acf012ecdbb24f7",
+  "tag": "core-v0.17.11",
+  "frozen_batch": "batch-_gyXV86f",
+  "batch_schema": 2,
+  "batch_source_commit": "d4b117b81be16c9d1ec0f82f224062bbaf29d49d",
+  "shared_tooling": {
+    "version": "0.31.5",
+    "revision": "b2026a118e38de4af1555c527af327cb604eacdf"
+  },
+  "source_lock_sha256": "5e91f850a9af1fc8af6aac59af2dda9b5b36f0d4da47e158a21cd37147ae490e",
+  "release_lock_sha256": "aff5e37fc41c387942ccb5a1a346dda2f18325a20410ee9f92cccdda77fe39fa",
+  "compiler": "1.99.1",
+  "qualification": {
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "registry_archive_readback": true
+  },
+  "suppliers": {
+    "platform": "0.24.0",
+    "testkit_platform": "0.24.0",
+    "platform_types": "0.18.2",
+    "runtime": "0.19.5",
+    "runtime_macros": "0.19.5",
+    "runtime_guard": "0.19.5",
+    "testkit": "0.92.0",
+    "build": "0.78.0",
+    "host": "0.75.0"
+  },
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.11",
+      "sha256": "f27cc842255da36c09436ab02dbd6770eb4facd79296a4945138a188e9c3f900",
+      "registry": "crates.io",
+      "source_commit": "104558b80b8120c8404220265acf012ecdbb24f7"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.11",
+      "sha256": "5c4f409b57ca119afa1b1cc7580d0b8fe6ebbdb97b2b1ae50c0cd4f6c430db15",
+      "registry": "crates.io",
+      "source_commit": "104558b80b8120c8404220265acf012ecdbb24f7"
+    }
+  ],
+  "protocol": "New explicit serde_packed::bools adapter preserves valid Vec<bool> bytes (02 00 01 for [false,true]); adopted fields use buffer traversal admission and need client regeneration and bounds/budget review. Existing fields, method identities, limits and acceptance remain unchanged.",
+  "evidence_root": "target/core01711-delivery/",
+  "limitations": [
+    "The initial validation process was terminated; the same captured batch completed a fresh full 20-stage gate on resume. No interrupted stage was counted as passing.",
+    "Native opt-3 large bool decode is 1.75–2.02x slower than the private prototype, despite identical IC counters. See the matched public-bools study.",
+    "Hosted CI runs asynchronously; the complete local gate ran on Linux."
+  ]
+}
