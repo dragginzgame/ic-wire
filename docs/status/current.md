@@ -1,8 +1,20 @@
 # Current handoff
 
-## Prepared: Build 0.78 / Testkit 0.91 adoption
+## Delivered: Core 0.17.9
 
-The working graph selects published **Build 0.78.0** (`5bdfc9f`) and
+Core **0.17.9** (`ic-wire-derive`, `ic-wire`) is on origin/main and crates.io.
+Tag **core-v0.17.9** selects **2568005**, from source **ad51c6b** captured in
+Shared 0.31.5 batch **batch-C3zNXsh0**. All 20 Linux release stages and the final
+all-feature archives passed. Registry readback matches both uploaded checksums
+and the release commit. The [receipt](../../releases/receipts/published-core0179/delivery.json)
+owns exact identities. The normal checkout is reconciled; raw logs remain under
+`target/core0179-delivery/` and the captured checkout under
+`target/release-frozen/batch-C3zNXsh0/`. No cleanup was performed. Hosted CI runs
+asynchronously; this delivery does not establish full native macOS qualification.
+
+## Included: Build 0.78 / Testkit 0.91 adoption
+
+The released graph selects published **Build 0.78.0** (`5bdfc9f`) and
 **Testkit 0.91.0** (`5a2fe41`), with their required **Host 0.75.0** family.
 The diagnostic library and installed release editor both select Build 0.78.0.
 Wire does not use the retired compiler wrapper, cross-call input leases or
@@ -15,12 +27,13 @@ logs are in `target/build078-testkit091-adoption/`.
 Shared's remote main still selects **0.31.5 / b2026a1**, already installed;
 no snapshot refresh is needed. Platform remains **0.24.0** directly and
 **0.23.6** through native Testkit; Runtime remains **0.19.5**, Types **0.18.2**.
-These tooling-only changes prepare Core **0.17.9**; Endpoint remains **0.7.3**.
+These tooling-only changes shipped in Core **0.17.9**; Endpoint remains **0.7.3**.
 Published dependency selections, codec bytes, identities, limits and acceptance
 are unchanged. The full comparison retains its original supplier cohort; this
-adoption makes no new performance claim. Delivery qualification is pending.
+adoption makes no new performance claim. The installed Endpoint proof preceded
+the metadata-only version preparation; the release gate qualifies the captured source.
 
-## Delivered: Core 0.17.8
+## Previous delivery: Core 0.17.8
 
 Core **0.17.8** (`ic-wire-derive`, `ic-wire`) is on origin/main and crates.io.
 Tag **core-v0.17.8** selects **7f4e319**; source **e2bd6d6** was captured by
