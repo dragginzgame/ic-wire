@@ -1,12 +1,15 @@
 # Current handoff
 
-## In delivery: Core 0.17.10
+## Delivered: Core 0.17.10
 
-The maintainer requested Testkit adoption and deployment. Select only Core
-(`ic-wire-derive`, `ic-wire`) for **0.17.10** through Shared's captured release
-workflow, `origin/main` and crates.io. Endpoint remains **0.7.3**. The pending
-batch includes the completed private bool-copy research; no public codec change.
-No delivery of this candidate is claimed yet.
+Core (`ic-wire-derive`, `ic-wire`) **0.17.10** is on `origin/main` and crates.io.
+Tag **core-v0.17.10** selects **f08c249**, from source **555664a**, in Shared
+batch **batch-Kkjq3mjE**. All 20 Linux stages and final all-feature archives pass;
+registry downloads match uploaded checksums and source. The normal checkout is
+reconciled. The [receipt](../../releases/receipts/published-core01710/delivery.json)
+owns exact identities. Logs remain under `target/core01710-delivery/` and the
+managed checkout under `target/release-frozen/batch-Kkjq3mjE/`. Endpoint remains
+**0.7.3**. No cleanup was performed. Hosted CI remains asynchronous.
 
 ## Testkit 0.92 adoption
 
@@ -17,8 +20,8 @@ PocketIC constructors retain explicit 300-second request budgets, independent
 startup allowances, typed failures and awaited teardown. Testkit stays outside
 published packages. Codec bytes, identities, limits and acceptance are unchanged.
 Installed Endpoint typed calls, admission and transaction rollback pass with
-PocketIC 16.1.0; logs are under `target/testkit092-adoption/`. The captured
-release must still pass the full Core gate.
+PocketIC 16.1.0; logs are under `target/testkit092-adoption/`. This installed proof
+preceded the metadata-only version preparation; the captured full Core gate passed.
 
 Current suppliers: **Build 0.78.0**, **Host 0.75.0**, Platform **0.24.0**,
 Types **0.18.2**, Runtime/macros/guard **0.19.5**, Testkit **0.92.0**.
@@ -38,7 +41,7 @@ Testkit **0.91.0**, before this adoption; do not relabel its measurements.
 Public bool support still needs schema/client/budget qualification. Production
 bytes, identities, limits and acceptance are unchanged.
 
-## Latest delivered state
+## Previous delivered state
 
 Core **0.17.9** is on origin/main and crates.io. Tag **core-v0.17.9** selects
 **2568005**, from source **ad51c6b**, in Shared batch **batch-C3zNXsh0**. All
