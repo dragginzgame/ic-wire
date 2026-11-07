@@ -20,11 +20,11 @@ repository = "https://github.com/dragginzgame/ic-wire"
 [workspace.dependencies]
 # Core
 # Changelog : releases/core/CHANGELOG.md
-ic-wire = { path = "crates/ic-wire", version = "0.17.8" }
-ic-wire-benchmarks = { path = "crates/ic-wire-benchmarks", version = "0.17.8" }
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.17.8" }
-ic-wire-endpoint-fixture = { path = "examples/endpoint", version = "0.17.8" }
-ic-wire-qualification = { path = "crates/ic-wire-qualification", version = "0.17.8" }
+ic-wire = { path = "crates/ic-wire", version = "0.17.9" }
+ic-wire-benchmarks = { path = "crates/ic-wire-benchmarks", version = "0.17.9" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.17.9" }
+ic-wire-endpoint-fixture = { path = "examples/endpoint", version = "0.17.9" }
+ic-wire-qualification = { path = "crates/ic-wire-qualification", version = "0.17.9" }
 
 # Endpoint
 # Changelog : releases/endpoint/CHANGELOG.md
