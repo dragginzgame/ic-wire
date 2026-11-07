@@ -34,7 +34,7 @@ types. Platform reexports the same definitions; there is no wrapper or orphan-ru
 workaround, Platform-to-Wire dependency, duplicate codec or compatibility lane.
 The core/derive group keeps its identity across endpoint changes that retain the
 Types supplier. An incompatible Types package version still requires core schema alignment. The
-crypto-facade simulation holds Types/Runtime fixed to prove execution isolation;
+facade simulation holds Types/Runtime fixed to prove execution isolation;
 an actual Types change still requires Core schema alignment.
 Endpoint's attributes are implemented by `ic-wire-endpoint-macros`, selected and released
 with `ic-wire-endpoint`. Endpoint is the public import
@@ -121,8 +121,11 @@ workspace publication selection.
 cover real current schemas, Rust/TypeScript frames/refusals, feature isolation,
 Rust 1.91 host/Wasm, renamed macro imports, installed endpoint guards/rollback,
 source-aligned Metrics/Testkit and independent release-group preparation/resume.
-A maintained simulated next Endpoint/generator and crypto-facade fixture proves
-codec/derive/stable identity package IDs remain fixed. It does not claim a future runtime is released.
+A maintained simulated next Endpoint/generator and facade fixture proves
+codec/derive/stable identity package IDs remain fixed. The facade dependency has
+defaults disabled and selects no features: this checks package identity without
+activating unused hashing. Both Wasm graphs reject BLAKE3 and retain one Runtime
+guard. It does not claim a future runtime is released.
 
 The combined Platform 0.13 → 0.14 and package move adds 714/555 total Wasm bytes
 at opt-z/opt-3; instruction changes are at most +0.026%. It changes no message

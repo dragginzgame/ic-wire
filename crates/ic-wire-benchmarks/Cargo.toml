@@ -21,8 +21,6 @@ tools = "build_tooling"
 [features]
 wire = []
 candid = []
-# Prepare the crypto-only facade used by the offline identity consumer.
-identity-fixture = ["ic-platform/blake3"]
 allocations = ["dep:stats_alloc"]
 heap = ["dep:dhat"]
 # Select native IC qualification targets; the client is a native dev dependency.

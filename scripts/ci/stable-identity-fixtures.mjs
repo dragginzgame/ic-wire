@@ -76,7 +76,7 @@ endpoint = []
 [dependencies]
 ic-wire = { path = ${JSON.stringify(path.join(root, 'crates/ic-wire'))}, features = ["platform-types"] }
 ic-wire-endpoint = { path = ${JSON.stringify(endpointPath)}, features = ["typescript"] }
-ic-platform = { ${facade}, default-features = false, features = ["blake3"] }
+ic-platform = { ${facade}, default-features = false }
 ic-platform-types = { ${selection(types)}, default-features = false }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 [dev-dependencies]
@@ -96,7 +96,7 @@ serde_json = "1"
     const ids = selected(name); assert.equal(ids[0].length, 1); assert.equal(ids[1].length, 1); assert.notDeepEqual(ids[0], ids[1]); identities[name] = { current: ids[0], 'simulated-next': ids[1] };
   }
   write(path.join(out, 'identities.json'), JSON.stringify(identities, null, 2) + '\n');
-  console.log('Codec/schema/derive and Principal/Account supplier IDs unchanged across simulated endpoint/crypto-facade generation.');
+  console.log('Codec/schema/derive and Principal/Account supplier IDs unchanged across simulated endpoint/facade generation.');
 } else {
   throw new Error('select prepare ROOT OUTPUT or verify ROOT OUTPUT');
 }

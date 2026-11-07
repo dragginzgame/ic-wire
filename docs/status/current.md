@@ -1,5 +1,34 @@
 # Current handoff
 
+## Private maintenance: Git delivery only
+
+[#50](https://github.com/dragginzgame/ic-wire/issues/50) removes unused Platform
+BLAKE3 activation from the identity consumer and deletes its preparation-only
+benchmark feature. The lock drops BLAKE3 and its now-unused ArrayVec 0.7 and
+constant-time-equality dependencies. Current and simulated-next consumers pass
+all 14 Rust tests, schema/frame/refusal checks, SDK boundary inspection and Wasm
+checks; both graphs exclude BLAKE3 and retain one Runtime guard.
+
+For [#49](https://github.com/dragginzgame/ic-wire/issues/49), the
+[release selection guidance](../development.md#decide-whether-a-public-release-is-needed)
+distinguishes qualification ownership from public impact and retains public
+generator/build/dependency exceptions. The adapter only releases explicitly
+selected groups; no additional planner or automatic impact classifier was added.
+Before/after Cargo archives contain identical product files for all four public
+packages, including normalized manifests and packaged locks (54 files total).
+Evidence and source patch are under `target/evidence/private-maintenance-20261107/`,
+based on **da73f7e** and Rust/Cargo **1.99.1**. ShellCheck, JavaScript syntax and
+diff checks pass. These were package comparisons with `--no-verify`, not fresh
+release gates or performance measurements.
+
+Keep Core **0.17.12** and Endpoint **0.8.0** unchanged. The numbered pending Core
+notes are deferred until an independently justified release; they do not request
+publication or downstream adoption. Codec bytes, schemas, identities, budgets and
+acceptance remain unchanged. Shared's common planning issue #363 is separate;
+its uncommitted work was not imported. This batch uses ordinary Git delivery to
+origin/main, without release tags or crates.io uploads. Issue closure follows
+verification of that delivery.
+
 ## Delivered: Core 0.17.12 and Endpoint 0.8.0
 
 All four public crates are on origin/main and crates.io. Core tag
@@ -11,8 +40,8 @@ were required for the patch/minor increments; both completed fresh full
 readback matches every uploaded archive and release identity.
 
 The final Endpoint 0.8.0 / Core 0.17.12 fixture also passes installed typed calls,
-admission and rollback on PocketIC 16.1.0. The normal checkout is reconciled;
-there is no pending source change or release. The
+admission and rollback on PocketIC 16.1.0. The delivered checkout was reconciled;
+the private maintenance above selects no new public release. The
 [delivery receipt](../../releases/receipts/published-core01712-endpoint080/delivery.json)
 owns exact identities, package checksums and qualification. Logs are under
 `target/core01712-endpoint080-delivery/`; retain both managed checkouts under

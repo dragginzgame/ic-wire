@@ -420,6 +420,45 @@ receipt checks, commit, tag and direct Git delivery to origin/main. They do not
 publish packages. Ordinary development leaves package versions, staging, commits,
 refs and release execution to the maintainer.
 
+### Decide whether a public release is needed
+
+Group membership in `ci/cargo-release-groups.json` assigns qualification and
+coordinated version ownership; it is not a publication trigger. In particular,
+Core owns the private benchmark/qualification packages without requiring a Core
+release for every change to them. `release-patch` is an explicit request to
+release the selected group, not a command for landing ordinary maintenance.
+
+Before selecting groups for delivery, compare the complete pending batch with
+the last delivered source and trace its effect on the public packages:
+
+| Changed input | Release decision |
+|---|---|
+| Private benchmark code, fixtures or dev-only supplier selection | Qualify the affected caller. If public package contents and dependency contracts are unchanged, land as repository maintenance; do not bump or publish Core/Endpoint or request downstream adoption. |
+| Public source, features, dependency requirements, consumer compiler floor or package contents | Assess the owning group's consumer impact and select its release increment. |
+| Build script or generator, including one in a private package | Trace its output and build-time consumers. `publish = false` does not exempt an input that changes the published product. Qualify the generated result and release its public owner when affected. |
+| Root manifest or lockfile | Inspect inherited metadata, public normal/build/optional dependencies and feature selections separately from dev-only suppliers. A root-file change is neither an automatic release trigger nor proof of private-only impact; uncertain changes need investigation. |
+
+Use Cargo's actual package contents instead of guessing from directory names.
+For a private-only candidate, retain before/after archives from
+`cargo package --allow-dirty --locked --offline --no-verify --all-features`
+with explicit `-p` selections for the affected public packages and separate
+`--target-dir` directories. Compare extracted files, including normalized
+`Cargo.toml`, `Cargo.toml.orig`, packaged `Cargo.lock`, source, README and LICENSE.
+Inspect `.cargo_vcs_info.json` separately: source/dirty provenance may change
+without changing the product. Record the source revision, patch, compiler and
+commands under `target/evidence/`; never treat these uncompiled comparisons as
+replacement release qualification. Archive equality alone also cannot excuse an
+unreviewed external build/generator input. Use the existing package and graph
+checks for an actual release; do not add a second release planner.
+
+Keep meaningful private maintenance notes in the owning ledger's numbered,
+undated pending entry under the adopted Shared changelog rules, explicitly marked
+as deferred maintenance, and summarize the decision in the current handoff.
+That candidate heading does not change package versions or require publication;
+carry the notes into the next independently justified public release. Ordinary
+authorized source delivery can land the work without release tags or uploads.
+Do not rewrite previously published versions to undo an unnecessary release.
+
 The release gate runs the existing Clippy target after tool admission and before
 expensive checks. Package checks and publication also run Clippy first, with
 sequential recipes that stop on failure under parallel Make.

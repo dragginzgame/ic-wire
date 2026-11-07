@@ -5,6 +5,27 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.13]
+
+### 🧹 Cleanup
+
+- Remove unused Platform BLAKE3 selection from the private identity fixture and
+  its workspace preparation feature; retain standalone schema/byte checks and
+  current/next facade and Endpoint identity qualification.
+  [#50](https://github.com/dragginzgame/ic-wire/issues/50).
+
+### 📚 Documentation
+
+- Separate qualification ownership from public release selection: private-only
+  maintenance with unchanged public package/dependency inputs lands without a
+  Core release or downstream adoption. Document package comparisons and public
+  generator/build/manifest exceptions.
+  [#49](https://github.com/dragginzgame/ic-wire/issues/49).
+
+These are deferred maintenance notes for the next independently justified Core
+release, not a publication request. Package versions, codec bytes, schemas,
+identities, limits and acceptance remain unchanged; no consumer action is needed.
+
 ## [0.17.12] - 2026-11-07
 
 ### ⬆️ Dependencies

@@ -88,6 +88,9 @@ compile-fail and standalone Rust/TypeScript conformance owners.
 ## Local workflow
 
 Use focused checks from docs/development.md; ordinary work does not run make ci.
+Select public release groups using the
+[local impact decision](docs/development.md#decide-whether-a-public-release-is-needed),
+not private qualification ownership or the presence of a pending changelog entry.
 The maintainer-operated direct delivery destination is origin/main through Shared
 Tooling. Core and Endpoint groups use literal versions and releases/<group>/
 ledgers. Pass RELEASE_GROUP explicitly for release/resume/publication and preserve
