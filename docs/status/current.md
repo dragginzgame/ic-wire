@@ -1,5 +1,52 @@
 # Current handoff
 
+## Pending: Platform 0.24.0 qualification facade
+
+The working root requirement and lock now select published **Platform 0.24.0**
+(`fc6d419474a94a606e3c49729747e61978b4c9c7`) for benchmark Candid/crypto controls.
+Its removed unconfigured Candid decoders and native public-key derivation API
+have no Wire callers; bounded Candid controls retain their explicit limits.
+Latest published **Testkit 0.90.0** still requires Platform 0.23, so **0.23.6**
+remains on that native-only edge. Both facades share canonical **Types 0.18.2**;
+Endpoint keeps **Runtime/macros/guard 0.19.5**. No supplier patch or wrapper is
+needed, and neither facade becomes a published Wire dependency.
+
+Rust/Cargo **1.99.1** focused qualification passes: all six standard benchmark
+tests (including the 391-case corpus and damaged-frame rejection), strict caller
+Clippy, Wasm benchmark compilation, pins and dependency boundaries. Current and
+simulated next-generation consumers pass seven schema/byte/admission tests each
+and host/Wasm graph checks, retaining one execution guard and unchanged
+codec/schema/Principal/Account identities. Logs are under
+`target/platform024-adoption/`; the identity fixture is
+`target/stable-identities.UmBbmz/`. No full performance matrix or installed
+Endpoint rerun is claimed: runtime and Testkit selections are unchanged. The
+completed matrix below retains its original supplier identities.
+
+This adoption and the Shared update below are uncommitted. No package version
+or delivered receipt changes; codec bytes, contract identities, limits and
+acceptance remain unchanged. Consumers need no protocol migration.
+
+## Pending: Shared 0.31.5 and macOS bootstrap fix
+
+Adopted committed **Shared 0.31.5 / b2026a118e38de4af1555c527af327cb604eacdf**
+through the canonical exporter. The existing Core 0.17.7 / Endpoint 0.7.3 delivery
+receipts remain bound to their original Shared 0.31.0 inputs. No package version,
+dependency selection or codec contract changes in this adoption.
+
+[Actions run 42363874744](https://github.com/dragginzgame/ic-wire/actions/runs/42363874744)
+tested **2aa02ef**: all three Linux groups passed; all six macOS groups failed
+before Rust compilation in `verify-file-checksum.sh`, with Bash 3.2 reporting an
+unmatched quote. Shared's 0.31.1 fix, included here, moves the NUL-checking reader
+outside quoted command substitution. The old helper reproduces the same syntax
+failure under prepared Bash 3.2 on Linux; the adopted helper parses and passes
+SHA-256/SHA-512 verification, print mode, mismatch/NUL refusal, backend failure
+propagation and the `shasum` fallback. Wire's actual host-tool install/check,
+143-file snapshot verification, documentation links and LOC reporting with a
+previously absent scratch parent pass. Evidence is under
+`target/shared0315-adoption/`; native macOS rerun remains required after delivery.
+Rerunning the old commit alone would retain the broken helper. This adoption is
+uncommitted; package versions and the delivered receipts remain unchanged.
+
 ## Completed: full comparison refresh
 
 The full **36-cohort** Wire/Candid run measured Core **0.17.6** working source in

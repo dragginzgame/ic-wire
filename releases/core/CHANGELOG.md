@@ -5,6 +5,23 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.8]
+
+### 🔧 Changed
+
+- Adopt Platform 0.24.0 for benchmark Candid/crypto controls. Wire does not use
+  its removed unconfigured Candid decoders or native public-key derivation API.
+  Testkit 0.90.0 retains Platform 0.23.6 in native qualification only; canonical
+  Types 0.18.2 and Runtime/macros/guard 0.19.5 remain shared and unchanged.
+  Published dependencies, codec bytes, identities, limits and acceptance are unchanged.
+
+### 🩹 Fixed
+
+- Adopt Shared Tooling 0.31.5 (`b2026a1`), restoring Bash 3.2 parsing of the
+  checksum helper that blocked macOS CI during host-tool setup. Retain checksum
+  rejection behavior, improve LOC scratch-loss diagnostics and complete exported
+  release-guide links. Codec bytes, identities, limits and acceptance are unchanged.
+
 ## [0.17.7] - 2026-11-07
 
 ### 🔧 Changed
