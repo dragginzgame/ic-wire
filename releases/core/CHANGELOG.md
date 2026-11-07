@@ -5,6 +5,16 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.12]
+
+### ⬆️ Dependencies
+
+- Adopt published Platform 0.25.0 in the unpublished benchmark package, aligning
+  its IC0 calls with Runtime 0.20.0. Testkit 0.92 retains its native-only Platform
+  0.24 dependency without execution features. No facade or Candid dependency
+  enters published Wire packages. Codec bytes, schemas, identities, limits and
+  acceptance are unchanged; no consumer migration is required for this update.
+
 ## [0.17.11] - 2026-11-07
 
 ### ➕ Added

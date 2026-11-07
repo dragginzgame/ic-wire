@@ -19,22 +19,28 @@ are unchanged. See the repository endpoint guide for handler examples.
 
 Rust 1.99.1 or newer is required.
 
-Endpoint 0.7 selects published `ic-platform-runtime = "0.19.0"` directly,
-with Core 0.17 schemas on canonical Types 0.18.1. Earlier Endpoint 0.5 / Core 0.15
-used Runtime 0.18 and Types 0.17.
+Endpoint 0.8 selects published `ic-platform-runtime = "0.20.0"`
+directly, with Core 0.17 schemas on canonical Types 0.18.2. Endpoint 0.7 uses
+Runtime 0.19; earlier Endpoint 0.5 / Core 0.15 used Runtime 0.18 and Types 0.17.
 Applications that use low-level APIs select that package's `cdk` feature and use
 `ic_platform_runtime::{cdk, executor, ic0}`. Handler macros continue to target the
 runtime re-exported through Endpoint; applications need no new dependency solely
 to use an Endpoint macro. Core and derive keep their independent release identity.
 
 Select matching Timers and other runtime suppliers before upgrading applications.
-The qualified Runtime/macros/exact guard 0.19.2 share canonical Types 0.18.1;
-the compatible Runtime dependency range remains ^0.19.0.
+Runtime/macros/exact guard 0.20.0 share canonical Types 0.18.2.
+Runtime removed its prefixed `runtime_*` macro aliases; direct Runtime callers
+use the ordinary `ic_platform_runtime::cdk` macros. Wire's own attributes and
+generated paths already use the retained family and require no syntax migration.
 Do not mix older execution generations with this singleton. Crypto/Candid facade
 features may be selected separately with a facade that delegates to this owner.
 Qualification uses the normal registry lock without supplier patches. The private
 native fixture uses the matching Platform/Testkit client; no facade enters
 the production Endpoint graph.
+
+This supplier adoption preserves frame bytes, identities, limits, acceptance,
+export names and transaction behavior. It does not require client regeneration
+or a data migration. The Account byte cut below is an earlier, separate change.
 
 Types 0.18 changes Account's present subaccount from `01 + 32 bytes` to
 `01 20 + 32 bytes`; None stays `00`. Match Core's bounded-byte schema,

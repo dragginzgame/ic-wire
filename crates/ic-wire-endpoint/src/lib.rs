@@ -120,10 +120,10 @@ impl<Request: crate::typescript::Wire, Response: crate::typescript::Wire>
 pub mod __private {
     // Select the independent execution owner instead of the crypto facade.
     // Frames, budgets and transaction rules stay fixed; align executor suppliers.
-    // Runtime 0.18.1 -> 0.19 aligns Principal with canonical Types 0.18 and
-    // advances its exact guard. Exports/execution/rollback bodies and frame
-    // admission stay unchanged; align other executor adapters. The Account byte
-    // cut is a separate payload change described by Core's platform-types schema.
+    // Runtime 0.19 -> 0.20 keeps the ordinary cdk macro family used here and
+    // removes prefixed aliases. Align other executor adapters with its exact
+    // guard. Export names, frame bytes, budgets and rollback rules are unchanged;
+    // the separate Account payload cut remains owned by Core/Platform Types.
     pub use ic_platform_runtime::cdk;
 }
 

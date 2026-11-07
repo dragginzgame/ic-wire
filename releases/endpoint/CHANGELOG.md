@@ -4,6 +4,19 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.8.0]
+
+### ⚠️ Breaking
+
+- Select published Platform Runtime/macros/exact guard 0.20.0. Align Timers and
+  other execution suppliers before upgrading a shared canister graph; the exact
+  singleton guard rejects mixed runtime generations. Wire already uses Runtime's
+  retained ordinary `cdk` macro family, so its attributes need no syntax change.
+  Direct Runtime callers must replace removed `runtime_*` aliases with ordinary
+  `cdk` macros. Core's codec/schema identity, frame bytes, method identities,
+  budgets, acceptance, exports and rollback rules are unchanged. No client
+  regeneration or data migration is required by this supplier adoption.
+
 ## [0.7.3] - 2026-11-07
 
 ### 🔧 Changed

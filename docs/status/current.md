@@ -1,5 +1,29 @@
 # Current handoff
 
+## Working: Runtime 0.20 adoption for Endpoint 0.8.0
+
+The normal checkout selects published Runtime/macros/exact guard **0.20.0**.
+Align other execution suppliers before adopting Endpoint 0.8; Wire's attributes
+already use the retained ordinary `cdk` macro family. Frame bytes, identities,
+limits, acceptance, exports and rollback rules are unchanged; no client or data
+migration is needed. Core stays at the delivered **0.17.11**.
+Host/Wasm mixed consumers, 13 Endpoint diagnostics and installed PocketIC
+admission/transaction tests pass with Testkit 0.92.0 / PocketIC 16.1.0.
+The production Endpoint graph has one Runtime/guard; schema-only Core remains
+execution-free. Benchmark Platform **0.25.0** now delegates IC0 to Runtime 0.20,
+removing the old Runtime 0.19.5 entry. Testkit 0.92 retains native-only Platform
+0.24 without execution features; no second runtime/guard is selected.
+Logs: `target/runtime-adoption/`. This adoption is uncommitted and unreleased;
+the frozen Core delivery below retains Runtime 0.19.5. No performance claim.
+
+Core's pending **0.17.12** note covers the benchmark-only facade update. Its
+qualification lives under `target/platform-adoption/`; the published codec and
+schema dependency boundaries remain unchanged. No supplier patch or Testkit
+upgrade is required for this selection. Default/bulk corpus tests (6/16), strict
+benchmark Clippy, codec/Endpoint-borrowing Wasm and dependency-boundary checks
+pass on Rust 1.99.1. No fresh performance matrix is claimed. The installed
+Endpoint proof above retains the same Runtime/Types/Testkit dependency inputs.
+
 ## Delivered: public bool adapter in Core 0.17.11
 
 Added explicit `serde_packed::bools` for `Vec<bool>` with generated `boolean[]`
@@ -22,7 +46,7 @@ lock was cleared after owner inspection, and the same batch passed a fresh gate.
 The [receipt](../../releases/receipts/published-core01711/delivery.json) owns exact
 identities. Logs: `target/core01711-delivery/`; retained checkout:
 `target/release-frozen/batch-_gyXV86f/`. Endpoint stays **0.7.3**; hosted CI is
-asynchronous. Platform Runtime 0.20 adoption is the next requested work.
+asynchronous. Runtime adoption remains separate as described above.
 
 ## Previous delivery: Core 0.17.10
 
@@ -47,8 +71,9 @@ Installed Endpoint typed calls, admission and transaction rollback pass with
 PocketIC 16.1.0; logs are under `target/testkit092-adoption/`. This installed proof
 preceded the metadata-only version preparation; the captured full Core gate passed.
 
-Current suppliers: **Build 0.78.0**, **Host 0.75.0**, Platform **0.24.0**,
-Types **0.18.2**, Runtime/macros/guard **0.19.5**, Testkit **0.92.0**.
+Delivered Core 0.17.11 suppliers: **Build 0.78.0**, **Host 0.75.0**,
+Platform **0.24.0**, Types **0.18.2**, Runtime/macros/guard **0.19.5**,
+Testkit **0.92.0**. The normal checkout's pending Runtime selection is above.
 Rust/Cargo **1.99.1** remains floor and pin. Root manifests/lock own selection;
 Shared **0.31.5 / b2026a1** owns the adopted snapshot. Prepare tools through
 `make install-tools`; the release editor remains Build 0.78.0.
