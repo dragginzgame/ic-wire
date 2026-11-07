@@ -28,7 +28,7 @@ unexport CARGO_TARGET_DIR
 endif
 endif
 RELEASE_SETUP_TARGET := release-candidate-setup
-RELEASE_EDITOR_VERSION := 0.77.0
+RELEASE_EDITOR_VERSION := 0.78.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli

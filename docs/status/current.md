@@ -1,5 +1,25 @@
 # Current handoff
 
+## Prepared: Build 0.78 / Testkit 0.91 adoption
+
+The working graph selects published **Build 0.78.0** (`5bdfc9f`) and
+**Testkit 0.91.0** (`5a2fe41`), with their required **Host 0.75.0** family.
+The diagnostic library and installed release editor both select Build 0.78.0.
+Wire does not use the retired compiler wrapper, cross-call input leases or
+progress variants, nor match the changed public Host error identities. Native
+PocketIC callers retain explicit 300-second request budgets, separate startup
+allowances and awaited teardown. Strict installed-caller Clippy and the installed
+Endpoint admission/rollback test pass with the prepared PocketIC 16.1.0 server;
+logs are in `target/build078-testkit091-adoption/`.
+
+Shared's remote main still selects **0.31.5 / b2026a1**, already installed;
+no snapshot refresh is needed. Platform remains **0.24.0** directly and
+**0.23.6** through native Testkit; Runtime remains **0.19.5**, Types **0.18.2**.
+These tooling-only changes prepare Core **0.17.9**; Endpoint remains **0.7.3**.
+Published dependency selections, codec bytes, identities, limits and acceptance
+are unchanged. The full comparison retains its original supplier cohort; this
+adoption makes no new performance claim. Delivery qualification is pending.
+
 ## Delivered: Core 0.17.8
 
 Core **0.17.8** (`ic-wire-derive`, `ic-wire`) is on origin/main and crates.io.
@@ -23,7 +43,7 @@ The released root requirement and lock select published **Platform 0.24.0**
 (`fc6d419474a94a606e3c49729747e61978b4c9c7`) for benchmark Candid/crypto controls.
 Its removed unconfigured Candid decoders and native public-key derivation API
 have no Wire callers; bounded Candid controls retain their explicit limits.
-Latest published **Testkit 0.90.0** still requires Platform 0.23, so **0.23.6**
+That release's **Testkit 0.90.0** requires Platform 0.23, so **0.23.6**
 remains on that native-only edge. Both facades share canonical **Types 0.18.2**;
 Endpoint keeps **Runtime/macros/guard 0.19.5**. No supplier patch or wrapper is
 needed, and neither facade becomes a published Wire dependency.

@@ -5,6 +5,18 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.9]
+
+### 🔧 Changed
+
+- Adopt IC Build 0.78.0 for compiler diagnostics and the release metadata editor,
+  and Testkit 0.91.0 with Host 0.75.0 for native PocketIC qualification. Wire has
+  no callers of the removed Build wrappers, input leases or progress variants.
+  Preserve explicit request/startup budgets and awaited server teardown. Refresh
+  the editor with `make install-tools`. Shared 0.31.5 remains the latest reviewed
+  snapshot. Published dependencies, codec bytes, identities, limits and acceptance
+  are unchanged; consumers need no protocol migration.
+
 ## [0.17.8] - 2026-11-07
 
 ### 🔧 Changed
