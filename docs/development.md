@@ -258,11 +258,12 @@ deletes that completed batch's retained state. The old completed schema-1 Core
 0.17.5 receipt remains historical and must not be relabeled as schema 2 or resumed
 with the new runner. Its delivery was already reconciled into main.
 
-Core 0.17.5 qualified real archives, the full gate and installed Endpoint checks
-inside its managed checkout. The 0.31 hook fixture proves both groups, concurrent
+Core 0.17.7 / Endpoint 0.7.3 qualified both full gates, real all-feature archives,
+registry readback and installed Endpoint checks inside one managed checkout.
+The 0.31 hook fixture proves both groups, concurrent
 normal-lock isolation, uncertain publication refusal, saved commit identity,
-recovery, reconciliation and retirement with substituted gates/uploads. A future
-two-group deployment still needs complete supplier-first archive qualification.
+recovery, reconciliation and retirement with substituted gates/uploads. Future
+two-group deliveries retain complete supplier-first archive qualification.
 See the supplied [batch contract](release-batches.md) for custody and recovery.
 Core remains full-gate-only; Endpoint retains its qualified implementation paths.
 The default-feature Core `check` and schema-enabled host `lint` prove different

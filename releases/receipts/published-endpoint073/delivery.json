@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-07T10:52:59.873Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "group": "endpoint",
+  "version": "0.7.3",
+  "source_commit": "2aa02ef1a5466551fb736541d60c8fdd06011940",
+  "release_commit": "7c17effbd561da0a7496f6d8ba008700089ad183",
+  "tag": "endpoint-v0.7.3",
+  "frozen_batch": "batch-ZropADsX",
+  "batch_schema": 2,
+  "batch_source_commit": "e4a36ef70c7e15d2fb4bb473841701848086f025",
+  "shared_tooling": {
+    "version": "0.31.0",
+    "revision": "74313941af2fce4399bec0e6909ca6229673c3f8"
+  },
+  "source_lock_sha256": "9027dc6dba717501306ee5a4033059d092be5b42e51518c0ded99365d66ee989",
+  "release_lock_sha256": "74e93fa19fde6247f16734092130724a90779037fc2b62dbb77552be89fac622",
+  "compiler": "1.99.1",
+  "qualification": {
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "installed_endpoint_admission_and_rollback": true,
+    "pocket_ic": "16.1.0",
+    "registry_archive_readback": true,
+    "completed_resume_no_republication": true
+  },
+  "suppliers": {
+    "platform": "0.23.6",
+    "platform_types": "0.18.2",
+    "runtime": "0.19.5",
+    "runtime_macros": "0.19.5",
+    "runtime_guard": "0.19.5",
+    "testkit": "0.90.0",
+    "build": "0.77.0",
+    "host": "0.74.4"
+  },
+  "packages": [
+    {
+      "name": "ic-wire-endpoint-macros",
+      "version": "0.7.3",
+      "sha256": "a5dd7ef4c6f1ffdc01dcf1e886d1d3e8d711281db86557a1dfea209ebc67de66",
+      "registry": "crates.io",
+      "source_commit": "7c17effbd561da0a7496f6d8ba008700089ad183"
+    },
+    {
+      "name": "ic-wire-endpoint",
+      "version": "0.7.3",
+      "sha256": "7ddd653e913ff64a242cee8f8c7cd49dc961f2b5232b76f7d1c2db345a62138c",
+      "registry": "crates.io",
+      "source_commit": "7c17effbd561da0a7496f6d8ba008700089ad183"
+    }
+  ],
+  "protocol": "Codec bytes, schemas, identities, limits and acceptance are unchanged. Native qualification explicitly selects the former 300-second request allowance, now enforced by Testkit as one exchange deadline. Startup budgets and no-replay behavior remain separate.",
+  "evidence_root": "target/core0177-endpoint073-delivery/",
+  "limitations": [
+    "Full comparison retains its original Testkit 0.89.4 / Runtime 0.19.4 / Platform 0.23.5 / Build 0.76.0 graph; no new codec-performance claim.",
+    "Native macOS and big-endian execution were not qualified in this Linux delivery."
+  ]
+}

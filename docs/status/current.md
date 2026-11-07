@@ -23,7 +23,7 @@ session. Both protected matrix paths remain intact; no further cleanup is author
 
 ## Compiler, suppliers and release boundary
 
-Pending Core **0.17.7** and Endpoint **0.7.3** select published **Build 0.77.0**
+Released Core **0.17.7** and Endpoint **0.7.3** select published **Build 0.77.0**
 (`9d87394`), **Platform 0.23.6** (`51f5fbb`), **Runtime/macros/guard 0.19.5**
 (`c07b714`) and **Testkit 0.90.0** (`c03161b`). Types remains **0.18.2**, Host
 **0.74.4** and smallvec **1.16.5**. Rust/Cargo **1.99.1** remains floor and pin.
@@ -43,8 +43,10 @@ acceptance are unchanged; no codec performance claim follows from this migration
 Focused caller Clippy, installed Endpoint admission/transaction checks, all seven
 expected compiler diagnostics and the passing control, offline editor admission,
 pins/boundaries and local documentation links pass. Both groups' all-feature
-archives also pass before version preparation. Full captured delivery gates are
-still required; no release/publication has occurred for this batch. Logs are in
+archives also pass before version preparation. Both full captured 20-stage Linux
+gates, final-version all-feature archives and installed Endpoint admission/rollback
+checks pass. Registry readback matches all four uploaded archives and source
+commits; completed-batch resume performs no repeat publication. Focused logs are in
 `target/testkit090-callers.log`, `target/platform0195-installed.log`,
 `target/build077-diagnostics.log`, `target/suppliers-20261107-static.log` and the
 `target/{core0177,endpoint073}-archives-preflight.log` files.
@@ -56,14 +58,19 @@ does not establish native macOS execution.
 
 ## Delivered state and recovery
 
-Core **0.17.6** is on origin/main and crates.io (`ic-wire-derive`, `ic-wire`),
-tag **core-v0.17.6**, release commit **163d6aa**. Endpoint/macros remain **0.7.2**.
-The [receipt](../../releases/receipts/published-core0176/delivery.json) owns exact
-source/archive/graph identities. The complete 20-stage Linux gate, all-feature
-archives and installed Endpoint admission/transaction checks passed. Registry
-readback matched the uploaded archives. Normal main was reconciled to delivery.
+Core **0.17.7** (`ic-wire-derive`, `ic-wire`) and Endpoint **0.7.3**
+(`ic-wire-endpoint-macros`, `ic-wire-endpoint`) are on origin/main and crates.io.
+Tags **core-v0.17.7** and **endpoint-v0.7.3** select **2aa02ef** and **7c17eff**.
+The [Core receipt](../../releases/receipts/published-core0177/delivery.json) and
+[Endpoint receipt](../../releases/receipts/published-endpoint073/delivery.json)
+own exact source/archive/graph identities. Shared **0.31.0** captured **e4a36ef**
+in schema-2 **batch-ZropADsX**, delivered supplier-first and reconciled normal main.
+Raw logs remain in `target/core0177-endpoint073-delivery/`; the managed checkout
+and durable journal remain under `target/release-frozen/batch-ZropADsX/` and
+`.git/release-state/frozen/batch-ZropADsX/`. No cleanup is authorized.
 
-Shared **0.31.0 / 7431394** captured **245ed7a** in schema-2 **batch-1i9z2IIG**.
+The previous Core **0.17.6** delivery captured **245ed7a** with Shared
+**0.31.0 / 7431394** in schema-2 **batch-1i9z2IIG**.
 The release retained Platform **0.23.4**, Types **0.18.2**, Runtime **0.19.4**,
 Testkit **0.89.3**, Build **0.75.0**, Host **0.74.4**, Rust **1.99.1**. The later
 Platform lock edit was excluded, preserved at **7fd813f** on
@@ -113,6 +120,7 @@ prior rejected tradeoffs; consult their existing studies before repeating them.
 
 Future authorized delivery uses [Shared's captured groups](../development.md):
 Core's 20 stages, qualified Endpoint-only Linux's 11, no stage reuse/final-candidate
-opt-ins. Combined delivery still needs supplier-first archive qualification.
+opt-ins. This delivery qualified both groups' supplier-first archives and installed
+composition; later changed inputs still require their own qualification.
 Older repository history was intentionally replaced: fresh-clone rather than
 merge discarded refs; never re-upload existing registry versions to repair history.
