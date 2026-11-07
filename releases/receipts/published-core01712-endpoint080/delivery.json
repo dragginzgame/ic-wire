@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-07T16:06:21.597Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "groups": [
+    {
+      "group": "core",
+      "version": "0.17.12",
+      "source_commit": "558897d46907f621e12f938cbd18cc3c4a872dee",
+      "release_commit": "6082752bc7475299621606152ca5616458f595a8",
+      "tag": "core-v0.17.12",
+      "frozen_batch": "batch-FcrckPoz",
+      "batch_schema": 2,
+      "source_lock_sha256": "b50ca30f7c9fe4b2119018ed6dcd6edd64fa41027f437cf7c44d08f364d5b36c",
+      "release_lock_sha256": "6a4c7fbcb050d99be2cec42439a085eb26682fda1aaafbde01664e5b735f9229",
+      "validation_run": "run.OV8EyS",
+      "scope": "workspace",
+      "stage_count": 20,
+      "reconciled": true
+    },
+    {
+      "group": "endpoint",
+      "version": "0.8.0",
+      "source_commit": "6082752bc7475299621606152ca5616458f595a8",
+      "release_commit": "a967a9c919d553e4c76a02292e4d303f61bd7506",
+      "tag": "endpoint-v0.8.0",
+      "frozen_batch": "batch-vZAxlP49",
+      "batch_schema": 2,
+      "source_lock_sha256": "6a4c7fbcb050d99be2cec42439a085eb26682fda1aaafbde01664e5b735f9229",
+      "release_lock_sha256": "5168fca422ed9145d93271e9c37bb98191c093b632285231a25215c59daa8fdf",
+      "validation_run": "run.wj5tfs",
+      "scope": "workspace",
+      "stage_count": 20,
+      "reconciled": true
+    }
+  ],
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.12",
+      "sha256": "a7ffe0a1b41927712ffb12d4638ee98a6eef1cd639ba9ba0a54a621c47bc9b80",
+      "registry": "crates.io",
+      "source_commit": "6082752bc7475299621606152ca5616458f595a8"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.12",
+      "sha256": "f153b6cf7ab5239b1887db98c873b930abc76d85c08e51e3b259131ba775039d",
+      "registry": "crates.io",
+      "source_commit": "6082752bc7475299621606152ca5616458f595a8"
+    },
+    {
+      "name": "ic-wire-endpoint-macros",
+      "version": "0.8.0",
+      "sha256": "8ce93c1e3c59ff9179262f85ec5ce93d2fe61ebfb5a590e0979a7d38a24b0aac",
+      "registry": "crates.io",
+      "source_commit": "a967a9c919d553e4c76a02292e4d303f61bd7506"
+    },
+    {
+      "name": "ic-wire-endpoint",
+      "version": "0.8.0",
+      "sha256": "bde2f19112e72ec538d453b269cbd37d3e971907788e5c5bbec4101d8effd85f",
+      "registry": "crates.io",
+      "source_commit": "a967a9c919d553e4c76a02292e4d303f61bd7506"
+    }
+  ],
+  "shared_tooling": {
+    "version": "0.31.5",
+    "revision": "b2026a118e38de4af1555c527af327cb604eacdf"
+  },
+  "qualification": {
+    "compiler": "1.99.1",
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "registry_archive_readback": true,
+    "installed_endpoint_admission_and_rollback": true,
+    "pocket_ic": "16.1.0",
+    "installed_core_version": "0.17.12",
+    "installed_endpoint_version": "0.8.0",
+    "installed_guest_sha256": "972e7c44b22ab17f25b1e510b0de41b1560fc224d933b5b66c5b6e90958b5e1c"
+  },
+  "suppliers": {
+    "platform": "0.25.0",
+    "testkit_platform": "0.24.0",
+    "platform_types": "0.18.2",
+    "runtime": "0.20.0",
+    "runtime_macros": "0.20.0",
+    "runtime_guard": "0.20.0",
+    "testkit": "0.92.0",
+    "build": "0.78.0",
+    "host": "0.75.0"
+  },
+  "protocol": "Wire bytes, schemas, method identities, limits, acceptance, export names and rollback rules are unchanged. Endpoint 0.8 requires alignment of other execution suppliers with Runtime 0.20; direct Runtime users replace removed runtime_* aliases with ordinary cdk macros. No client regeneration or data migration for this adoption.",
+  "evidence_root": "target/core01712-endpoint080-delivery/",
+  "limitations": [
+    "Two sequential frozen batches were required because Shared 0.31 does not support mixed patch/minor increments in one batch. Both groups completed fresh full 20-stage gates.",
+    "Hosted CI runs asynchronously; these complete local gates ran on Linux.",
+    "No fresh performance comparison is claimed. Prior benchmark results retain their original supplier and source identities."
+  ]
+}

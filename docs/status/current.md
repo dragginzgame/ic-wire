@@ -1,105 +1,62 @@
 # Current handoff
 
-## Working: Runtime 0.20 adoption for Endpoint 0.8.0
+## Delivered: Core 0.17.12 and Endpoint 0.8.0
 
-The normal checkout selects published Runtime/macros/exact guard **0.20.0**.
-Align other execution suppliers before adopting Endpoint 0.8; Wire's attributes
-already use the retained ordinary `cdk` macro family. Frame bytes, identities,
-limits, acceptance, exports and rollback rules are unchanged; no client or data
-migration is needed. Core stays at the delivered **0.17.11**.
-Host/Wasm mixed consumers, 13 Endpoint diagnostics and installed PocketIC
-admission/transaction tests pass with Testkit 0.92.0 / PocketIC 16.1.0.
-The production Endpoint graph has one Runtime/guard; schema-only Core remains
-execution-free. Benchmark Platform **0.25.0** now delegates IC0 to Runtime 0.20,
-removing the old Runtime 0.19.5 entry. Testkit 0.92 retains native-only Platform
-0.24 without execution features; no second runtime/guard is selected.
-Logs: `target/runtime-adoption/`. This adoption is uncommitted and unreleased;
-the frozen Core delivery below retains Runtime 0.19.5. No performance claim.
+All four public crates are on origin/main and crates.io. Core tag
+**core-v0.17.12** selects **6082752**, from source **558897d**, in batch
+**batch-FcrckPoz**. Endpoint tag **endpoint-v0.8.0** selects **a967a9c**, from
+Core's release commit, in batch **batch-vZAxlP49**. Separate frozen batches
+were required for the patch/minor increments; both completed fresh full
+20-stage Linux gates. Final all-feature archives pass and independent registry
+readback matches every uploaded archive and release identity.
 
-Core's pending **0.17.12** note covers the benchmark-only facade update. Its
-qualification lives under `target/platform-adoption/`; the published codec and
-schema dependency boundaries remain unchanged. No supplier patch or Testkit
-upgrade is required for this selection. Default/bulk corpus tests (6/16), strict
-benchmark Clippy, codec/Endpoint-borrowing Wasm and dependency-boundary checks
-pass on Rust 1.99.1. No fresh performance matrix is claimed. The installed
-Endpoint proof above retains the same Runtime/Types/Testkit dependency inputs.
+The final Endpoint 0.8.0 / Core 0.17.12 fixture also passes installed typed calls,
+admission and rollback on PocketIC 16.1.0. The normal checkout is reconciled;
+there is no pending source change or release. The
+[delivery receipt](../../releases/receipts/published-core01712-endpoint080/delivery.json)
+owns exact identities, package checksums and qualification. Logs are under
+`target/core01712-endpoint080-delivery/`; retain both managed checkouts under
+`target/release-frozen/`. Hosted CI is asynchronous; local Linux passes are
+not native macOS proof. No cleanup was performed.
 
-## Delivered: public bool adapter in Core 0.17.11
+## Runtime adoption contract
 
-Added explicit `serde_packed::bools` for `Vec<bool>` with generated `boolean[]`
-clients and default advice. Packed word invariants and existing fields stay
-unchanged. Adoption preserves `02 00 01` for `[false,true]`, but requires client
-regeneration and bounds/budget review because traversal becomes one buffer.
-The [paired qualification](../evidence/primitive-bulk.md#public-bool-adapter-for-01711)
-preserves every Wire IC counter and all allocations. Wire fixture Wasm adds
-35/16 total and 19/0 code bytes at opt-z/3. Native opt-3 large decode regresses
-1.75–2.02× against the private prototype; IC decode remains ~10× faster than
-Candid at opt-3. Other native results and controls remain in the report.
-Focused Rust/browser, malformed-input, budget, compile-fail and standalone
-host/Wasm checks pass. Evidence: `target/evidence/public-bools-20261107/` and
-`target/public-bools-checks/`. Core/derive **0.17.11** is on origin/main and
-crates.io: tag **core-v0.17.11**, release **104558b**, source **d4b117b**, batch
-**batch-_gyXV86f**. All 20 Linux stages and final all-feature archives pass;
-registry readback matches the uploaded bytes and release source. The normal
-checkout is reconciled. The initial validation was terminated; its empty stale
-lock was cleared after owner inspection, and the same batch passed a fresh gate.
-The [receipt](../../releases/receipts/published-core01711/delivery.json) owns exact
-identities. Logs: `target/core01711-delivery/`; retained checkout:
-`target/release-frozen/batch-_gyXV86f/`. Endpoint stays **0.7.3**; hosted CI is
-asynchronous. Runtime adoption remains separate as described above.
+Endpoint 0.8 selects Runtime/macros/exact guard **0.20.0**. Align Timers and other
+execution suppliers before adopting it; the singleton guard rejects mixed
+execution generations. Wire already uses the retained ordinary `cdk` macro
+family. Direct Runtime users replace removed `runtime_*` aliases with ordinary
+`ic_platform_runtime::cdk` macros. Wire frame bytes, schemas, method identities,
+budgets, acceptance, export names and rollback rules remain unchanged. No client
+regeneration or data migration is required by this supplier adoption.
 
-## Previous delivery: Core 0.17.10
+Benchmark Platform **0.25.0** now delegates IC0 to Runtime 0.20, removing the old
+Runtime 0.19.5 entry. Testkit **0.92.0** retains native-only Platform **0.24.0**
+without execution features. Production Endpoint has one Runtime/guard, while
+schema-only Core remains execution-free. No supplier patch or wrapper is needed.
+Focused adoption logs remain under `target/runtime-adoption/` and
+`target/platform-adoption/`; do not relabel older performance measurements.
 
-Core (`ic-wire-derive`, `ic-wire`) **0.17.10** is on `origin/main` and crates.io.
-Tag **core-v0.17.10** selects **f08c249**, from source **555664a**, in Shared
-batch **batch-Kkjq3mjE**. All 20 Linux stages and final all-feature archives pass;
-registry downloads match uploaded checksums and source. The normal checkout is
-reconciled. The [receipt](../../releases/receipts/published-core01710/delivery.json)
-owns exact identities. Logs remain under `target/core01710-delivery/` and the
-managed checkout under `target/release-frozen/batch-Kkjq3mjE/`. Endpoint remains
-**0.7.3**. No cleanup was performed. Hosted CI remains asynchronous.
+## Compiler, suppliers and release boundary
 
-## Testkit 0.92 adoption
-
-The root requirement and lock select published **Testkit 0.92.0**, aligning its
-native `CborError` identity with **Platform 0.24.0**. The older Platform 0.23.6
-edge disappears. Wire does not match the changed error identity. All seven native
-PocketIC constructors retain explicit 300-second request budgets, independent
-startup allowances, typed failures and awaited teardown. Testkit stays outside
-published packages. Codec bytes, identities, limits and acceptance are unchanged.
-Installed Endpoint typed calls, admission and transaction rollback pass with
-PocketIC 16.1.0; logs are under `target/testkit092-adoption/`. This installed proof
-preceded the metadata-only version preparation; the captured full Core gate passed.
-
-Delivered Core 0.17.11 suppliers: **Build 0.78.0**, **Host 0.75.0**,
-Platform **0.24.0**, Types **0.18.2**, Runtime/macros/guard **0.19.5**,
-Testkit **0.92.0**. The normal checkout's pending Runtime selection is above.
-Rust/Cargo **1.99.1** remains floor and pin. Root manifests/lock own selection;
+Rust/Cargo **1.99.1** remains floor and pin. Current selections are Build **0.78.0**,
+Host **0.75.0**, Platform **0.25.0**, Types **0.18.2**, Runtime/macros/guard
+**0.20.0** and Testkit **0.92.0**. Root manifests/lock own exact selection.
 Shared **0.31.5 / b2026a1** owns the adopted snapshot. Prepare tools through
-`make install-tools`; the release editor remains Build 0.78.0.
+`make install-tools`; the release metadata editor remains Build 0.78.0.
 
-## Private checked bool-copy research
+## Public bool adapter and retained measurements
 
-Large bool decode uses 37–56% fewer IC instructions and 10/173 fewer uncompressed
-Wasm bytes at opt-z/3. Singleton decode adds 85/73 instructions; native opt-3
-large decode is 1.8–4.0% slower. The
-[matched study](../evidence/primitive-bulk.md#checked-bool-copy-follow-up-7-november)
-records all tradeoffs, 14 passing tests, strict Clippy and 2,594 paired IC rows.
-Raw artifacts remain under `target/evidence/bool-copy-20261107/`. The study used
-Testkit **0.91.0**, before this adoption; do not relabel its measurements.
-The public adapter qualification above supersedes the bool-promotion blocker;
-float support remains private research. Existing consumers remain unchanged.
-
-## Previous delivered state
-
-Core **0.17.9** is on origin/main and crates.io. Tag **core-v0.17.9** selects
-**2568005**, from source **ad51c6b**, in Shared batch **batch-C3zNXsh0**. All
-20 Linux release stages and final all-feature archives passed; registry readback
-matched source and uploaded checksums. The normal checkout was reconciled.
-The [Core receipt](../../releases/receipts/published-core0179/delivery.json) owns
-exact identities. Endpoint **0.7.3** remains published; its
-[receipt](../../releases/receipts/published-endpoint073/delivery.json) owns its proof.
-Hosted CI is asynchronous; local Linux passes do not establish native macOS proof.
+Core 0.17.11 introduced explicit `serde_packed::bools` for `Vec<bool>`, generated
+`boolean[]` clients and default advice. Adoption preserves `02 00 01` for
+`[false,true]`, but requires client regeneration and bounds/budget review because
+traversal becomes one buffer. Existing ordinary fields and Packed invariants stay
+unchanged. The [paired study](../evidence/primitive-bulk.md#public-bool-adapter-for-01711)
+preserves every Wire IC counter and all allocations against the private prototype;
+fixture Wasm adds 35/16 total and 19/0 code bytes at opt-z/3. Native opt-3 large
+decode regresses 1.75–2.02× against that prototype, despite unchanged IC costs.
+Raw artifacts remain under `target/evidence/public-bools-20261107/` and
+`target/evidence/bool-copy-20261107/`. These studies retain their original
+suppliers. Float bulk support remains private research. No new speed claim.
 
 ## Evidence and recovery custody
 
