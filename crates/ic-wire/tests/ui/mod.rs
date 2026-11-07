@@ -11,6 +11,8 @@
         reason = "ui_case is selected by the direct compiler diagnostic driver."
     )
 )]
+#[cfg(ui_case = "bool_adapter_type")]
+mod bool_adapter_type;
 #[cfg(ui_case = "borrow_escape")]
 mod borrow_escape;
 #[cfg(ui_case = "borrow_mutation")]

@@ -5,6 +5,16 @@ and supplies its Rustdoc, quickstart, limits and wire contract.
 
 ## Explicit packed domain fields
 
+`serde_packed::bools` explicitly selects byte-buffer admission for `Vec<bool>`.
+Valid bytes match ordinary bool lists (`[false, true]`: `02 00 01`); Rust and
+generated `boolean[]` clients validate 00/01 before allocating decoded values.
+No bit packing or automatic Serde change is introduced. Switching fields still
+requires regenerated clients, preserved field bounds and budget review: fewer
+nodes and different conservative allocation charges are consumed. Existing
+codec bytes, method identities, limits and acceptance remain unchanged for
+consumers that do not select the adapter. Packed integer/hash words retain their
+existing all-bit-patterns-valid invariant; `Packed<bool>` remains unsupported.
+
 `serde_packed::nonzero_i64` and `serde_packed::heap_u64` reuse the existing Packed
 byte codec for `Vec<NonZeroI64>` and `BinaryHeap<u64>`. Selection is explicit in a
 Serde `with` attribute. Nonzero decode rejects zero after bounded word decoding;

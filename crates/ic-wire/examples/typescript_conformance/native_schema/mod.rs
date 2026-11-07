@@ -131,6 +131,10 @@ struct NonzeroWords(
 struct HeapWords(
     #[serde(with = "ic_wire::serde_packed::heap_u64")] std::collections::BinaryHeap<u64>,
 );
+
+#[derive(Debug, Deserialize, Wire, Serialize, PartialEq)]
+#[serde(transparent)]
+struct BoolWords(#[serde(with = "ic_wire::serde_packed::bools")] Vec<bool>);
 impl PartialEq for HeapWords {
     fn eq(&self, other: &Self) -> bool {
         self.0.clone().into_sorted_vec() == other.0.clone().into_sorted_vec()
@@ -504,6 +508,34 @@ export function createCodec(method: unknown, types: unknown) {
         },
         "{tag:7,ids:new BigInt64Array([-1n]),queue:new BigUint64Array([7n,0n])}",
     );
+    for (offset, len) in [0, 1, 127, 128, 256].into_iter().enumerate() {
+        let values: Vec<_> = (0..len).map(|i| i % 2 == 1).collect();
+        let js = serde_json::to_string(&values).unwrap();
+        add(directory, &mut checks, 36 + offset, BoolWords(values), &js);
+    }
+    checks.push_str(
+        r#"
+for (const direction of ['Request', 'Response']) {
+  const encode = 'encode'+direction, decode = 'decode'+direction;
+  const header = [73,87,17,0,0,0,0,0,0,0,direction === 'Request' ? 0 : 1];
+  const codec = projection39;
+  for (const value of [[0], [1], [null], [undefined], new Array(1), new Uint8Array([1])])
+    rejects(() => codec[encode](value), 'value');
+  for (let invalid = 2; invalid <= 255; invalid++)
+    rejects(() => codec[decode](Uint8Array.from([...header,1,invalid])), 'malformed');
+  rejects(() => codec[decode](Uint8Array.from([...header,128,0])), 'malformed');
+  rejects(() => codec[decode](Uint8Array.from([...header,2,1])), 'malformed');
+  rejects(() => codec[decode](Uint8Array.from([...header,0,0])), 'malformed');
+  const frame = codec[encode]([false,true]);
+  const values = codec[decode](frame);
+  frame.fill(0);
+  assert.deepEqual(values, [false,true]);
+}
+const bulkFlags = createCodec({id:'17',request:{k:'packed',word:'bool'},response:{k:'packed',word:'bool'},requestBytes:4096,responseBytes:4096,requestNodes:1,responseNodes:1,requestDepth:1,responseDepth:1});
+const manyFlags = Array.from({length:128}, (_,i) => i % 2 === 1);
+assert.deepEqual(bulkFlags.decodeRequest(bulkFlags.encodeRequest(manyFlags)), manyFlags);
+"#,
+    );
     checks.push_str(
         r#"
 for (const direction of ['Request', 'Response']) {
@@ -536,7 +568,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 36 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 41 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

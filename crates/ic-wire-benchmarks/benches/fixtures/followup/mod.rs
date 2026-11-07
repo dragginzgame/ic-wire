@@ -487,7 +487,7 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         serde_json::to_vec(&(i64::MIN, i64::MAX)).unwrap()
     ));
     for n in [0, 1, 128, 16384, 1_048_576] {
-        push!(words::case(
+        push!(words::bool_case(
             format!("bool-words-{n}"),
             (0..n).map(|i| i % 2 == 0).collect()
         ));

@@ -65,6 +65,130 @@ artifact hashes. All **14** research tests and strict caller Clippy pass, includ
 every invalid bool byte at every position of lengths 1/31/32/33. Public promotion
 still requires schema/client and resource-admission qualification.
 
+### Bool promotion: byte and admission qualification
+
+The next focused checks use Core 0.17.10 with Testkit 0.92.0, Rust 1.99.1 on
+x86_64 Linux. They change tests only, not runtime code. Across 11 lengths from
+0 to 16,384 (including 127/128 and 16,383/16,384) and all-false, all-true and
+alternating patterns, ordinary `Vec<bool>` and private `Bulk<bool>` produce
+identical payloads and method frames and decode each other's values. Truncation
+and nonminimal length prefixes remain `Malformed`; extra bytes remain `Trailing`.
+The existing exhaustive invalid-bit-pattern check also passes.
+
+For 128 bools, the exact successful native allowances are below. Reducing any
+one of bytes, allocation, nodes or depth by one refuses with `Limit`.
+These are **64-bit host admission thresholds**, not measured heap allocation
+or Wasm costs; custom Serde projections and record wrappers can change charges.
+
+| Representation / operation | Bytes | Allocation allowance | Nodes | Depth |
+| --- | ---: | ---: | ---: | ---: |
+| Ordinary encode | 130 | 16,898 | 516 | 4 |
+| Bulk encode | 130 | 1,538 | 4 | 3 |
+| Ordinary decode | 130 | 2,370 | 257 | 2 |
+| Bulk decode | 130 | 1,346 | 1 | 1 |
+
+Serde's ordinary `collect_seq` hands the serializer a reference for each element;
+encoding therefore charges the reference size rather than one bool byte. Bulk
+admission charges one byte buffer. This confirms why byte equality alone cannot
+justify silently replacing consumer Serde or keeping limits without review.
+No budget policy changes here.
+
+Run the three focused tests with `cargo test --locked --offline -p
+ic-wire-benchmarks --example codec-wasm --features wire,candid,research-bulk
+private_bulk_bool`. Logs are under `target/bool-admission-qualification/`.
+No new native-time, IC-instruction or Wasm-size claim follows from test-only work.
+This established the remaining promotion requirement: existing Packed words
+require every bit pattern to be valid, while bool requires validation. The
+explicit adapter below preserves that invariant and reuses the existing codec.
+
+## Public bool adapter for 0.17.11
+
+Keep `serde_packed::bools` for explicit `Vec<bool>` fields. It uses the checked
+copy algorithm without weakening `PackedElement` or adding a wrapper type,
+dependency, const-bound codec variant or second codec. The metadata derive
+recognizes the canonical adapter path, including a leading `::`, and checks
+type equality. Generated values are `boolean[]`; the shared browser runtime
+checks 00/01 before allocating its decoded array. Default bool-list advice points
+to this adapter while retaining bounds/admission guidance.
+
+Adoption preserves valid bytes (`[false,true]`: `02 00 01`), but changes traversal
+to byte-buffer admission. Regenerate clients and review field bounds and budgets;
+`List<bool, N>` cannot silently become an unbounded vector. Existing method
+identities, ordinary lists, Packed words, budgets and primitive acceptance are
+unchanged. This compatible opt-in addition requires no migration for existing users.
+
+The paired 124-case study lives under `target/evidence/public-bools-20261107/`.
+Baseline is Core 0.17.10 source **cb9b29a** plus the pending byte/admission tests;
+the candidate uses the public adapter for its bool cases and retains private
+float research. Both use Rust/Cargo 1.99.1, LLVM 23.1.1, Testkit 0.92.0,
+PocketIC 16.1.0 and lock SHA-256
+`5e91f850a9af1fc8af6aac59af2dda9b5b36f0d4da47e158a21cd37147ae490e`.
+Separate source snapshots and fresh Cargo targets retain full source inventories,
+baked host hashes (including the new adapter) and fresh guest artifact records.
+The maintained runner uses `CORPUS_FEATURE=research-bulk RUNS=2 SAMPLES=11 BATCH_MS=2`
+with each variant's `CODEC_SOURCE_SNAPSHOT`, `CARGO_TARGET_DIR` and prepared server.
+Profiles and IC sampling match the checked-copy study above.
+
+All **2,594 paired IC rows** retain identical input/frame hashes and lengths;
+all three counters per row agree. **Every Wire IC count is unchanged**, including
+empty, singleton, large and rejection controls. All allocation/heap rows match.
+Twenty Candid bool rows drift after the fixture changes from its generic word
+case to the explicit adapter pair; there is no Candid dependency change. Do not
+attribute that control-side code-generation difference to the production adapter.
+
+Current 1,048,576-bool results, IC instructions/op:
+
+| Profile | Wire encode | Candid encode | Wire decode | Candid decode |
+| --- | ---: | ---: | ---: | ---: |
+| opt-z | 1,050,616 | 2,118,104 | 20,973,137 | 403,732,214 |
+| opt-3 | 1,049,585 | 2,112,301 | 20,972,610 | 208,686,520 |
+
+Frame sizes are **1,048,590 Wire / 1,048,588 Candid**. Whole fixture uncompressed
+Wasm, total / code-section bytes (these are not application savings):
+
+| Profile | Private baseline Wire | Public adapter Wire | Candid before → after |
+| --- | ---: | ---: | ---: |
+| opt-z | 215,958 / 181,487 | 215,993 / 181,506 | 710,264 / 648,591 → 710,372 / 648,683 |
+| opt-3 | 271,010 / 238,940 | 271,026 / 238,940 | 1,053,767 / 994,259 → 1,053,861 / 994,337 |
+
+Wire adds **35 total / 19 code bytes** at opt-z and **16 total / 0 code bytes**
+at opt-3. Large decode still allocates once with zero reallocations and 1 MiB
+peak payload heap. Native timing initially overlapped independent builds, so
+both profiles were repeated serially in alternating before/after order, twice,
+with eleven samples and the same 2 ms minimum batches. Large Wire decode medians
+in µs are **249.335 / 253.303 → 249.037 / 252.781** at opt-z and
+**244.875 / 268.250 → 493.751 / 468.683** at opt-3. The latter is a real
+**1.75–2.02× native regression against the private prototype**, despite identical
+IC counts. Candidate Candid opt-3 decode is **3,292.355 / 3,394.289 µs**.
+Native code-generation follow-up remains useful; do not claim universal speed
+parity or substitute native timings for IC instructions.
+
+Host generation was also run twice per isolated source, serially, using the
+maintained `typescript-conformance` example in the default dev profile. Each
+entry below is a median of seven samples, 100 generations/sample; diagnostic
+printing is excluded. Absolute before → after medians in µs:
+
+| Types / metadata | Run 1 | Run 2 |
+| --- | ---: | ---: |
+| 1 / manual | 18.297 → 18.530 | 18.424 → 18.488 |
+| 1 / derived | 21.242 → 21.559 | 21.681 → 21.555 |
+| 100 / manual | 1,686.181 → 1,740.435 | 1,698.623 → 1,748.898 |
+| 100 / derived | 2,014.974 → 2,048.926 | 2,003.822 → 2,045.939 |
+
+The 100-type controls regress about 1.7–3.2% on this shared host; these are
+host generator times, not codec instructions. All 36 existing projection files
+remain byte-identical. Shared browser runtime TypeScript source grows
+21,574 → 22,500 bytes (+926); this is source size, not bundled JavaScript or Wasm.
+The paired verifier checks all source/frame identities, including the serial
+native reruns. No browser timing or application-linked Wasm claim is made.
+
+Focused qualification passes: public/private byte and all-four-budget boundaries,
+all invalid bool bytes, nested Rust fields, 41 generated exact-frame vectors,
+malformed/sparse/non-boolean browser input, independent decoded ownership and
+single-buffer node admission. Standalone host/Wasm feature graphs and eight
+compile-fail diagnostics with the passing control also pass. Logs live under
+`target/public-bools-checks/`. No release or full CI gate is claimed by this work.
+
 ## Earlier primitive-bulk study
 
 This supplements the frozen [Platform 0.21 full matrix](../candid-comparison.md).

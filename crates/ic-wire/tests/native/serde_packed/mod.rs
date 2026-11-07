@@ -11,6 +11,34 @@ struct NonzeroValue(#[serde(with = "ic_wire::serde_packed::nonzero_i64")] Vec<No
 struct HeapValue(#[serde(with = "ic_wire::serde_packed::heap_u64")] BinaryHeap<u64>);
 
 #[test]
+fn bool_adapter_handles_nested_fields_and_rejects_invalid_bytes() {
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct Flags {
+        tag: u8,
+        #[serde(with = "ic_wire::serde_packed::bools")]
+        flags: Vec<bool>,
+        tail: bool,
+    }
+    let value = Flags {
+        tag: 7,
+        flags: vec![false, true],
+        tail: true,
+    };
+    let bytes = ic_wire::native::encode(&value, LIMITS).unwrap();
+    assert_eq!(bytes, [7, 2, 0, 1, 1]);
+    assert_eq!(
+        ic_wire::native::decode::<Flags>(&bytes, LIMITS).unwrap(),
+        value
+    );
+    for invalid in 2..=255 {
+        assert_eq!(
+            ic_wire::native::decode::<Flags>(&[7, 2, 0, invalid, 1], LIMITS),
+            Err(ic_wire::Error::Malformed)
+        );
+    }
+}
+
+#[test]
 fn adapters_preserve_packed_bytes_and_admission_boundaries() {
     fn compare<
         T: Serialize + serde::de::DeserializeOwned,

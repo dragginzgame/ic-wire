@@ -74,6 +74,10 @@ pub fn with_fixtures(mut identity: Value) -> Value {
     );
     for (key, source) in [
         (
+            "public_bools_adapter_sha256",
+            include_bytes!("../../../ic-wire/src/serde_packed/bools/mod.rs").as_slice(),
+        ),
+        (
             "public_nonzero_adapter_sha256",
             include_bytes!("../../../ic-wire/src/serde_packed/nonzero_i64/mod.rs").as_slice(),
         ),

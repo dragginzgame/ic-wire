@@ -260,6 +260,17 @@ For large domain collections, explicit Serde field adapters preserve your Rust
 packed words. On little-endian hosts encoding does not copy into a temporary DTO;
 decoding remains owned and rejects zero or rebuilds heap order as appropriate.
 
+For large `Vec<bool>` fields, use `#[serde(with = "ic_wire::serde_packed::bools")]`.
+It borrows the existing storage during serialization and validates every byte
+before allocating on decode. Metadata derives generate `boolean[]` browser fields;
+both readers reject bytes other than 0 and 1. This is byte-buffer serialization,
+not bit compression: `[false, true]` stays `02 00 01`, matching ordinary bool lists.
+Traversal changes from individual values to one buffer. Regenerate clients,
+review limits on the actual target and preserve field bounds; this adapter accepts
+`Vec<bool>`, not bounded `List<bool, N>`. No automatic Serde rewriting occurs.
+`Packed<bool>` remains unsupported; its word types require every bit pattern to
+be valid. The bool adapter uses the same Serde/Postcard codec with explicit validation.
+
 ```rust
 use std::{collections::BinaryHeap, num::NonZeroI64};
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -269,12 +280,14 @@ struct Queue {
     ids: Vec<NonZeroI64>,
     #[serde(with = "ic_wire::serde_packed::heap_u64")]
     pending: BinaryHeap<u64>,
+    #[serde(with = "ic_wire::serde_packed::bools")]
+    flags: Vec<bool>,
 }
 ```
 
 Add `ic_wire::Wire` to the derives when generating schemas. It recognizes these
 fully qualified adapter paths (also with a leading `::`) and type aliases for the
-same containers. Browser fields are `BigInt64Array` / `BigUint64Array`; nonzero
+same containers. Browser fields are `BigInt64Array` / `BigUint64Array` / `boolean[]`; nonzero
 validation is built in on both encode and decode. The Serde attribute applies to other serializers too; use a transport DTO when
 the domain type must retain another serialization format. Other custom adapters
 still need explicit verified metadata. `Packed<NonZeroI64>` remains unsupported.

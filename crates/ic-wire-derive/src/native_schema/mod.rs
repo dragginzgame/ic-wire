@@ -31,6 +31,7 @@ struct Projection {
 #[derive(Clone, Copy)]
 enum Adapter {
     Bytes,
+    Bools,
     NonzeroI64,
     HeapU64,
 }
@@ -79,6 +80,7 @@ fn attributes(attrs: &[syn::Attribute], site: AttributeSite) -> syn::Result<Proj
                     let path = meta.value()?.parse::<syn::LitStr>()?;
                     adapter = Some(match path.value().strip_prefix("::").unwrap_or(path.value().as_str()) {
                         "serde_bytes" => Adapter::Bytes,
+                        "ic_wire::serde_packed::bools" => Adapter::Bools,
                         "ic_wire::serde_packed::nonzero_i64" => Adapter::NonzeroI64,
                         "ic_wire::serde_packed::heap_u64" => Adapter::HeapU64,
                         _ => return Err(meta.error("unsupported Serde byte adapter; custom layouts require explicit verified metadata")),
@@ -129,6 +131,11 @@ fn fields<'a>(
             let ty = &f.ty;
             match projection.adapter {
                 Some(Adapter::Bytes) => quote!(#context.describe_bytes::<#ty>()?),
+                Some(Adapter::Bools) => quote!(({
+                    let _: ::core::marker::PhantomData<#ty> =
+                        ::core::marker::PhantomData::<::ic_wire::__private::Vec<::core::primitive::bool>>;
+                    ::ic_wire::__private::serde_json::json!({"k":"packed", "word":"bool"})
+                })),
                 Some(Adapter::NonzeroI64) => quote!(({
                     // Type equality accepts aliases without trusting a syntactic
                     // type name or introducing a second public schema trait.
@@ -264,7 +271,7 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
             let ty = &field.ty;
             let bound = match projection.adapter {
                 Some(Adapter::Bytes) => quote!(::ic_wire::typescript::SerdeBytesField),
-                Some(Adapter::NonzeroI64 | Adapter::HeapU64) => continue,
+                Some(Adapter::Bools | Adapter::NonzeroI64 | Adapter::HeapU64) => continue,
                 None => quote!(::ic_wire::typescript::Wire),
             };
             generics

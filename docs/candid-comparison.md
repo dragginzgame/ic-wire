@@ -115,9 +115,15 @@ DTO bytes can still have different record-field allowances. Follow the
 
 ## Next experiments
 
-1. **Bool bulk adapter:** checked copying now has a measured IC/Wasm win and
-   exhaustive invalid-byte tests; qualify public schema, bounds and clients before
-   promotion. Float promotion additionally needs a finite/IEEE policy.
+The **0.17.11 draft** adds the explicit `serde_packed::bools` field adapter with
+qualified schema/browser support. The [public adapter study](evidence/primitive-bulk.md#public-bool-adapter-for-01711)
+preserves every Wire IC counter versus the private prototype, with 35/16 extra
+total Wasm bytes at opt-z/3. It also records a 1.75–2.02× native opt-3 decode
+regression; the IC result is unchanged. This does not replace the original full matrix.
+
+1. **Native bool scan:** investigate the public adapter's opt-3 native regression
+   without increasing Wasm or changing admission. Float promotion still needs a
+   deliberate finite/IEEE policy and client qualification.
 2. **Narrow bound-wrapper sharing:** varied bounds add **16,810 / 25,305 total**
    and **16,671 / 25,185 code bytes** at opt-z/3 in the 100-type control. Heavy
    loops already share code; test the remaining wrapper without changing bounds.

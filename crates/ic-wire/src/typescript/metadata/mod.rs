@@ -181,6 +181,7 @@ pub(super) fn ty(
         // Qualify built-ins so consumer aliases cannot capture field/frame types.
         "bytes" => "globalThis.Uint8Array".into(),
         "packed-i16" => "globalThis.Int16Array".into(),
+        "packed" if value["word"] == "bool" => "globalThis.Array<boolean>".into(),
         "packed" => format!(
             "globalThis.{}",
             match text(value, "word")? {

@@ -94,6 +94,28 @@ pub(super) fn same<T: Word>(a: &[T], b: &[T]) -> bool {
     bytemuck::must_cast_slice::<T, u8>(a) == bytemuck::must_cast_slice::<T, u8>(b)
 }
 
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[serde(transparent)]
+pub(super) struct BoolValue(#[serde(with = "ic_wire::serde_packed::bools")] pub Vec<bool>);
+
+pub(super) fn bool_case(name: String, values: Vec<bool>) -> Case {
+    #[cfg(not(feature = "research-bulk"))]
+    {
+        case(name, values)
+    }
+    #[cfg(feature = "research-bulk")]
+    {
+        let input = serde_json::to_vec(bytemuck::must_cast_slice::<bool, u8>(&values)).unwrap();
+        paired_values(
+            name,
+            BoolValue(values.clone()),
+            #[cfg(feature = "candid")]
+            values,
+            input,
+        )
+    }
+}
+
 pub(super) fn case<T: Word>(name: String, values: Vec<T>) -> Case {
     // IEEE bits, rather than JSON nulls or PartialEq, identify non-finite inputs.
     let input_json = serde_json::to_vec(bytemuck::must_cast_slice::<T, u8>(&values)).unwrap();

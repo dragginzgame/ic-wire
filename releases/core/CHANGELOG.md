@@ -5,6 +5,26 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.11]
+
+### ➕ Added
+
+- Add the explicit `ic_wire::serde_packed::bools` field adapter for `Vec<bool>`,
+  with validated bulk decoding and generated `boolean[]` browser fields. Default
+  bulk advice points bool-list users to it; `Packed<bool>` remains unsupported.
+  Ordinary bytes are preserved (`[false, true]` stays `02 00 01`), but adopting
+  fields must regenerate clients, retain bounds and requalify buffer admission.
+  Existing codecs, identities and unadapted fields are unchanged.
+
+### 🧪 Testing
+
+- Qualify private bulk-bool byte compatibility across length-prefix boundaries,
+  typed malformed/trailing errors and exact admission thresholds. Record why
+  identical bytes still require resource-limit review before public promotion.
+  Add Rust/browser malformed-value and ownership checks, standalone host/Wasm
+  derives and rejection of incompatible adapter field types. Existing budget
+  rules and primitive acceptance are unchanged.
+
 ## [0.17.10] - 2026-11-07
 
 ### 🔧 Changed

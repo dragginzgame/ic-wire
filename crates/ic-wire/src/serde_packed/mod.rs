@@ -4,10 +4,14 @@
 //! `#[serde(with = "ic_wire::serde_packed::heap_u64")]`. Encoding borrows existing
 //! storage on little-endian hosts; decoding remains owned. Wire's metadata derive
 //! recognizes these exact paths (also with a leading `::`).
+//! [`bools`] provides the same explicit selection for `Vec<bool>`, with checked
+//! byte-buffer decoding and `boolean[]` browser values on every endian target.
 //!
 //! Adoption changes ordinary list bytes and traversal admission: `[-1]` as
 //! `Vec<NonZeroI64>` changes from `01 01` to `08 ff ff ff ff ff ff ff ff`;
 //! heap `[1]` changes from `01 01` to `08 01 00 00 00 00 00 00 00`.
+//! Bool list bytes stay identical (`02 00 01` for `[false, true]`), while their
+//! traversal admission changes to one buffer. Existing lists are never rewritten.
 //! Coordinate contract identities and consumers, regenerate clients and requalify
 //! limits. Existing ordinary lists and `Packed` bytes/acceptance are unchanged.
 //! Field adapters can charge less encoding allowance than an equivalent `Packed`
@@ -15,5 +19,6 @@
 //! Neither representation guarantees canonical heap order: retain original bytes
 //! when retries or signatures depend on them.
 
+pub mod bools;
 pub mod heap_u64;
 pub mod nonzero_i64;

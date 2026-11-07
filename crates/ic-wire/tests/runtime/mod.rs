@@ -320,6 +320,7 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
         );
     }
     for word in [
+        json!("bool"),
         json!("i16"),
         json!("u16"),
         json!("i32"),

@@ -272,7 +272,7 @@ fn representation<'a>(
                     )),
                     ("bool", _) => Some((
                         "bool",
-                        "bounded bool lists and workload-specific node limits; Packed<bool> is unsupported",
+                        "the explicit ic_wire::serde_packed::bools field adapter; preserve field bounds and review buffer admission",
                     )),
                     ("unit", _) => Some((
                         "unit",

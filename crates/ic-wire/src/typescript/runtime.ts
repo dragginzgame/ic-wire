@@ -10,6 +10,7 @@ export type Schema = ( { k: 'unit' | 'bool' }
   | { k: 'bytes'; min?: number; max?: number }
   | { k: 'packed-i16'; max: number }
   | { k: 'packed'; word: 'i64'; nonzero?: true }
+  | { k: 'packed'; word: 'bool'; nonzero?: never }
   | { k: 'packed'; word: Exclude<keyof typeof packedArrays, 'i64'>; nonzero?: never }
   | { k: 'text'; max?: number }
   | { k: 'u' | 'i' | 'float'; bits: number; min?: number; max?: number }
@@ -201,6 +202,18 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       out.varint(BigInt(bytes.length)); out.raw(bytes); return;
     }
     case 'packed-i16': case 'packed': {
+      // Explicit bool adapter: ordinary list bytes are unchanged (02 00 01),
+      // but one buffer replaces per-element visits. Regenerate adopted clients.
+      if (s.k === 'packed' && s.word === 'bool') {
+        if (!Array.isArray(value)) return fail('value');
+        out.varint(BigInt(value.length));
+        if (value.length > out.limit - out.offset) fail('limit');
+        for (const item of value) {
+          if (typeof item !== 'boolean') fail('value');
+          out.byte(item ? 1 : 0);
+        }
+        return;
+      }
       const kind = s.k === 'packed-i16' ? 'i16' : s.word, ctor = packedArrays[kind];
       if (!(value instanceof ctor)) return fail('value');
       const width = kind === 'hash32' ? 32 : ctor.BYTES_PER_ELEMENT;
@@ -294,6 +307,12 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       return new Uint8Array(input.raw(length));
     }
     case 'packed-i16': case 'packed': {
+      if (s.k === 'packed' && s.word === 'bool') {
+        const bytes = input.raw(input.length(input.bytes.length - input.offset));
+        // Validate the whole span before allocating the owned browser array.
+        for (const byte of bytes) if (byte > 1) fail('malformed');
+        return Array.from(bytes, byte => byte === 1);
+      }
       const kind = s.k === 'packed-i16' ? 'i16' : s.word, ctor = packedArrays[kind];
       const width = kind === 'hash32' ? 32 : ctor.BYTES_PER_ELEMENT;
       const max = s.k === 'packed-i16' ? s.max * width : input.bytes.length - input.offset;

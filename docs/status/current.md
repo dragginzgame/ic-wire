@@ -1,5 +1,20 @@
 # Current handoff
 
+## Working: public bool adapter for Core 0.17.11
+
+Added explicit `serde_packed::bools` for `Vec<bool>` with generated `boolean[]`
+clients and default advice. Packed word invariants and existing fields stay
+unchanged. Adoption preserves `02 00 01` for `[false,true]`, but requires client
+regeneration and bounds/budget review because traversal becomes one buffer.
+The [paired qualification](../evidence/primitive-bulk.md#public-bool-adapter-for-01711)
+preserves every Wire IC counter and all allocations. Wire fixture Wasm adds
+35/16 total and 19/0 code bytes at opt-z/3. Native opt-3 large decode regresses
+1.75–2.02× against the private prototype; IC decode remains ~10× faster than
+Candid at opt-3. Other native results and controls remain in the report.
+Focused Rust/browser, malformed-input, budget, compile-fail and standalone
+host/Wasm checks pass. Evidence: `target/evidence/public-bools-20261107/` and
+`target/public-bools-checks/`. Changes are uncommitted and unreleased.
+
 ## Delivered: Core 0.17.10
 
 Core (`ic-wire-derive`, `ic-wire`) **0.17.10** is on `origin/main` and crates.io.
@@ -38,8 +53,8 @@ large decode is 1.8–4.0% slower. The
 records all tradeoffs, 14 passing tests, strict Clippy and 2,594 paired IC rows.
 Raw artifacts remain under `target/evidence/bool-copy-20261107/`. The study used
 Testkit **0.91.0**, before this adoption; do not relabel its measurements.
-Public bool support still needs schema/client/budget qualification. Production
-bytes, identities, limits and acceptance are unchanged.
+The public adapter qualification above supersedes the bool-promotion blocker;
+float support remains private research. Existing consumers remain unchanged.
 
 ## Previous delivered state
 
@@ -91,7 +106,7 @@ production behavior; fingerprint/no-manual-ID macros are research. Keep one
 Serde/Postcard codec and no automatic consumer Serde rewriting. Metadata advice
 is not universal lint coverage for codec-only/custom layouts.
 
-Next optimization candidates: qualify public bool support, narrow bound wrappers,
+Next optimization candidates: native bool scan code generation, narrow bound wrappers,
 and packed 16-byte identifiers. Stress-fixture gains are not application savings.
 Consult prior rejected encoder/parser experiments before repeating them.
 Future delivery uses explicit groups, Core's full 20 stages, and qualified
