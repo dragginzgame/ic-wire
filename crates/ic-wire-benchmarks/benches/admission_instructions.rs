@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server =
         PathBuf::from(std::env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server"));
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
         .await?;
     let pic = owned.instance();
     let wasm = fs::read(wasm_path)?;

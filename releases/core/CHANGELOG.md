@@ -5,6 +5,28 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.7]
+
+### 🔧 Changed
+
+- Adopt IC Build 0.77.0 for compiler diagnostic qualification and the release
+  metadata editor. Refresh contributor tools with `make install-tools`; published
+  codec bytes, identities, limits and acceptance remain unchanged.
+- Adopt Platform 0.23.6 and Testkit 0.90.0 for native qualification. Give all
+  seven PocketIC constructors explicit 300-second request budgets, preserving
+  the former allowance separately from startup deadlines. Keep caller-owned
+  runtimes, typed failures and explicit teardown; never replay expired calls
+  ([#48](https://github.com/dragginzgame/ic-wire/issues/48)). Testkit remains
+  outside published packages; the completed comparison retains its original
+  0.89.4 dependency identity.
+
+### 📚 Documentation
+
+- Refresh the complete 36-cohort Candid comparison and benchmark instructions,
+  covering IC instructions, frame bytes, native time, allocations and uncompressed
+  Wasm/code size. Separate public adapter tradeoffs from private bool/float research
+  and record the remaining ordinary-collection hotspots. No codec changes.
+
 ## [0.17.6] - 2026-11-06
 
 ### ✨ Added

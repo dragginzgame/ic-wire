@@ -4,6 +4,15 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.7.3]
+
+### 🔧 Changed
+
+- Require published Platform Runtime 0.19.5 with its matching macros and exact
+  singleton guard. Adopt its task-removal and initialized-buffer copy fixes;
+  Wire codec bytes, schemas, method identities, budgets and rollback rules
+  remain unchanged. No consumer migration is required.
+
 ## [0.7.2] - 2026-11-06
 
 ### 🩹 Fixed

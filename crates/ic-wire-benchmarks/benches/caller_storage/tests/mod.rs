@@ -93,7 +93,9 @@ async fn ic_measurement() {
     let output = PathBuf::from(std::env::var_os("IC_WIRE_STORAGE_EVIDENCE").unwrap());
     let owned = PocketIcStartupConfig::from_env(std::time::Duration::from_secs(60))
         .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .build_instance(
+            PocketIcBuilder::new(std::time::Duration::from_secs(300)).with_application_subnet(),
+        )
         .await
         .unwrap();
     let pic = owned.instance();

@@ -14,12 +14,12 @@ owns shipped-codec IC, frame and Wasm measurements. The retired protocol-study
 runner is available only in the archived finite revision linked by those studies;
 it is no longer maintained alongside the production Serde suite.
 
-The [6 November full matrix](candid-comparison.md) measures its complete frozen
-28-cohort roster: 1,575 overlapping case entries, 6,300 primary comparisons and
-112 fresh modules. Its report separates 27 production-representation cohorts
+The [7 November full matrix](candid-comparison.md) measures its complete frozen
+36-cohort roster: 2,105 overlapping case entries, 8,420 primary comparisons and
+144 fresh modules. Its report separates 35 existing-field/control cohorts
 from the private float/bool research cohort.
-It includes the complete 391-case standard corpus and the Platform/Testkit
-selection recorded in that report, not the current lockfile. [Coverage gaps](candid-comparison.md) and
+It includes the complete 391-case standard corpus and the frozen Platform/Testkit
+selection recorded in that report. [Coverage gaps](candid-comparison.md) and
 [ranked hotspots](candid-comparison.md) distinguish
 supported field choices from proposed research and missing comparison controls.
 The full run includes `coverage-shapes` and paired `research-bulk`; the

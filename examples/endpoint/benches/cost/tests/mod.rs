@@ -72,7 +72,9 @@ async fn measure_ic_cost(lanes: &[&str]) {
     use ic_testkit::pocket_ic::PocketIcBuilder;
     let owned = PocketIcStartupConfig::from_env(std::time::Duration::from_secs(60))
         .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .build_instance(
+            PocketIcBuilder::new(std::time::Duration::from_secs(300)).with_application_subnet(),
+        )
         .await
         .unwrap();
     let pic = owned.instance();

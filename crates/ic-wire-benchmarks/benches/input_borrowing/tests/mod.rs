@@ -52,7 +52,7 @@ async fn physical_updates() {
     assert!(std::env::var_os("IC_TESTKIT_POCKET_IC_URL").is_none());
     let session = PocketIcStartupConfig::from_env(Duration::from_secs(90))
         .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
         .await
         .unwrap();
     let pic = session.instance();

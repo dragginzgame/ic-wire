@@ -11,7 +11,7 @@ use std::time::Duration;
 async fn typed_calls_limits_and_transactions() {
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))
         .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
         .await
         .unwrap();
     let pic = owned.instance();

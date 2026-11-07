@@ -31,9 +31,9 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.75.0 release metadata
+`make install-tools` also prepares IC Tooling's IC Build 0.77.0 release metadata
 editor with its required `cli` feature. The diagnostic library selects IC Build
-0.75.0 without default features; the CLI feature is only enabled for installation.
+0.77.0 without default features; the CLI feature is only enabled for installation.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -47,6 +47,10 @@ Native endpoint/codec controls import the async PocketIC client and DTOs from
 Drivers/tests own one Tokio runtime, await client operations and explicitly
 await `instance.close()` before dropping an owned server. Tokio stays in native
 qualification dev dependencies; no per-operation blocking wrappers are added.
+Testkit 0.90 constructors receive an explicit 300-second request budget, preserving
+the former default allowance. It covers one complete exchange, including response
+reads and accepted-operation polling. The independent 60/90-second startup
+allowances remain unchanged; expiration is propagated without replaying calls.
 The Platform facade supplies external Candid/crypto controls. See the
 [current handoff](status/current.md#compiler-suppliers-and-release-boundary) for the
 qualified supplier cohort; root manifests and Cargo.lock own selections. The
@@ -516,7 +520,7 @@ the new `tree-depth-7` row have different inputs and must not be paired. The
 upstream guard also adds Candid admission work; old codec reports keep their
 recorded Platform version and do not quantify this new comparison cost.
 For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
-prepared server and run `make evaluate-codec-matrix`. The maintained 28-cohort
+prepared server and run `make evaluate-codec-matrix`. The maintained 36-cohort
 roster (including `hotspots`) covers standard/Toko corpora, 1/10/100 ordinary
 derived records, bounded packed-i16 and
 ordinary controls, shared/varied bound records, and generic packed integer/hash
@@ -530,6 +534,10 @@ same corpus with private float/bool byte-buffer fields; it adds no public codec,
 Packed word, schema or generated client. The latest full report includes both
 cohorts while separating research from production results; their original
 qualification remains in the [follow-up study](evidence/primitive-bulk.md).
+Domain-container cohorts additionally compare ordinary Serde, copying Packed
+adapters and the public borrowed encode adapters. Their 1/10/100-record controls
+compare those public adapters against preconstructed Packed DTOs, retaining
+monomorphization cost separately from conversion latency.
 
 The runner freezes source/lock before measurement, requires a fresh output
 folder, runs cohorts serially and retains both optimization profiles, two native
