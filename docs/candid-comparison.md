@@ -86,8 +86,11 @@ instructions for bool and **12,583,841 → 1,049,588** for f32; Candid uses
 **2,112,270 / 2,112,195**. Float decode becomes **1,049,688**, versus ordinary
 f32's **12,326,591** and Candid's **21,515,241**. Bool decode remains
 **33,031,148** versus ordinary **44,570,576** and Candid **208,686,341**.
-Try validated bulk copying before promoting bool; its per-element reconstruction
-still dominates. Singleton bool encode regresses **520.25 → 672.25** instructions.
+The subsequent [checked-copy study](evidence/primitive-bulk.md#checked-bool-copy-follow-up-7-november)
+reduces private bool decode to **20,972,610** at opt-3, with **173 fewer** total
+and code-section Wasm bytes. Singleton decode adds 73 instructions and native
+opt-3 large decode is 1.8–4.0% slower. This remains private research.
+Singleton bool encode regresses **520.25 → 672.25** in the original bulk study.
 
 Whole-fixture total / code bytes change **216,815 / 182,344 → 215,963 / 181,492**
 at opt-z and **272,618 / 240,547 → 271,183 / 239,113** at opt-3. These are
@@ -112,8 +115,9 @@ DTO bytes can still have different record-field allowances. Follow the
 
 ## Next experiments
 
-1. **Bool bulk adapter:** test safe checked-slice copying, then qualify malformed
-   input, bounds and clients. Float promotion additionally needs a finite/IEEE policy.
+1. **Bool bulk adapter:** checked copying now has a measured IC/Wasm win and
+   exhaustive invalid-byte tests; qualify public schema, bounds and clients before
+   promotion. Float promotion additionally needs a finite/IEEE policy.
 2. **Narrow bound-wrapper sharing:** varied bounds add **16,810 / 25,305 total**
    and **16,671 / 25,185 code bytes** at opt-z/3 in the 100-type control. Heavy
    loops already share code; test the remaining wrapper without changing bounds.

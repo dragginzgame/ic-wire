@@ -5,6 +5,22 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.10]
+
+### 🔧 Changed
+
+- Adopt Testkit 0.92.0, aligning native client errors with the existing Platform
+  0.24 dependency. Preserve explicit request budgets, server custody and teardown;
+  published dependencies and codec contracts are unchanged.
+
+### 🧪 Testing
+
+- Improve private bulk-bool research decoding with validated slice copying and
+  exhaustive invalid-byte coverage. Large IC decode costs fall 37–56% with
+  slightly smaller Wasm; singleton IC and native opt-3 tradeoffs remain documented.
+  Public codec bytes, identities, limits and acceptance are unchanged; this does
+  not add public Packed bool support.
+
 ## [0.17.9] - 2026-11-07
 
 ### 🔧 Changed

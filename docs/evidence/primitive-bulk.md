@@ -1,8 +1,71 @@
 # Follow-up: advice, missing Candid controls and private bulk research
 
-> Historical findings only. Raw measurements, snapshots, logs and build artifacts
-> were retired from this tree. A summary/hash cannot verify missing payloads.
-> Use the maintained development commands for fresh measurements.
+> Earlier findings below are historical: their raw artifacts were retired.
+> The checked bool-copy follow-up retains its current raw artifacts under
+> `target/evidence/bool-copy-20261107/`, outside Git. A summary/hash cannot
+> verify missing payloads; use the maintained commands for fresh measurements.
+
+## Checked bool-copy follow-up (7 November)
+
+Keep the safe checked-slice copy in **private research**. Bytemuck validates
+every bool bit pattern before allocation; the decoder then copies the valid
+slice instead of reconstructing each element. Float decoding is unchanged.
+No public adapter, schema or client is added. Production bytes, identities,
+limits and acceptance are unchanged; the private representation also preserves
+its bytes, bounds and rejection rules (`02 00 01` still means `[false, true]`,
+and any bool byte above `01` is rejected). Consumers take no migration action.
+
+IC decode instructions/op, before → after:
+
+| Bool count | opt-z | opt-3 |
+| ---: | ---: | ---: |
+| 0 | 561.5 → 564.5 | 312.5 → 312.5 |
+| 1 | 993.5 → 1,078.5 | 578.5 → 651.5 |
+| 128 | 6,794.5 → 3,704.5 | 4,614.5 → 3,228.5 |
+| 16,384 | 738,626.5 → 329,136.5 | 516,939.5 → 328,609.5 |
+| 1,048,576 | 47,187,427 → 20,973,137 | 33,031,148 → 20,972,610 |
+
+Large decode improves **55.6% / 36.5%**, with singleton costs **+85 / +73**
+instructions. Bool encode and every non-bool IC counter are unchanged. The
+matched Candid large decode costs remain **403,732,016 / 208,686,329**.
+Wire's large frame remains **1,048,590 bytes**.
+
+Whole 124-case fixture uncompressed Wasm, total / code-section bytes:
+
+| Profile | Before | After | Delta |
+| --- | ---: | ---: | ---: |
+| opt-z | 215,968 / 181,497 | 215,958 / 181,487 | -10 / -10 |
+| opt-3 | 271,183 / 239,113 | 271,010 / 238,940 | -173 / -173 |
+
+Candid stays **710,264 / 648,591** at opt-z and **1,053,767 / 994,259** at
+opt-3. These are fixture sizes, not application savings. Native large decode
+run medians in µs are **668.429 / 636.207 → 278.003 / 259.611** at opt-z,
+but **266.104 / 252.335 → 270.854 / 262.325** at opt-3: a **1.8% / 4.0%
+regression** on the shared host. This is not a universal native-time speedup.
+All allocation/heap probe rows agree; large decode retains one allocation,
+zero reallocations and 1 MiB peak payload heap.
+
+Qualification uses Rust/Cargo **1.99.1**, LLVM **23.1.1**, native Linux and
+`wasm32-unknown-unknown`, fat LTO, one codegen unit and panic abort. Baseline
+**7983e8fb33d8be9ff52553ecc4c6664c4e37a48c** and the candidate use isolated
+source snapshots and separate fresh targets, with identical lock SHA-256
+`e0b2abc6f6bc868faf7fd8c76cf923ccdb77c5ea49ddfbf1ccac3c3b4a43d1a6`.
+Build 0.78.0, Testkit 0.91.0 and PocketIC 16.1.0 supply this study.
+
+Reproduce with the retained `run.sh`: the maintained `evaluate-codecs.sh` runner,
+`CORPUS_FEATURE=research-bulk RUNS=2 SAMPLES=11 BATCH_MS=2`, a prepared
+`POCKET_IC_BIN`, and separate `CODEC_SOURCE_SNAPSHOT` / `CARGO_TARGET_DIR` per
+variant. Native, allocation and heap probes run separately. IC measurements use
+three distinct callers, with four repetitions for small values and one for large
+values; counters include result destruction/loop overhead, excluding transport
+and setup. All **2,594 paired IC rows** preserve input/frame identities; all
+three samples agree, and **2,585 rows** have identical instructions. The verifier
+checks unchanged source inventories, baked host source hashes and fresh Wasm
+artifact hashes. All **14** research tests and strict caller Clippy pass, including
+every invalid bool byte at every position of lengths 1/31/32/33. Public promotion
+still requires schema/client and resource-admission qualification.
+
+## Earlier primitive-bulk study
 
 This supplements the frozen [Platform 0.21 full matrix](../candid-comparison.md).
 The production runtime remains one Serde/Postcard codec. Candid is used only by

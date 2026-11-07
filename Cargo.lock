@@ -837,32 +837,21 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.23.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09d519af82b2eadafc4b56ecd6a72b829f0ed13f38b4fcc853a8f79ec7f68a6e"
-dependencies = [
- "candid",
- "ic-certification",
- "ic-management-canister-types",
- "ic-platform-types",
- "ic-transport-types",
- "serde",
- "serde_bytes",
- "serde_cbor",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "ic-platform"
 version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f2bafc5da7b457cb0efdb622151e74c3367740d26eb8892f72be2c9b4683c53"
 dependencies = [
  "blake3",
  "candid",
+ "ic-certification",
+ "ic-management-canister-types",
  "ic-platform-runtime",
  "ic-platform-types",
+ "ic-transport-types",
  "serde",
+ "serde_bytes",
+ "serde_cbor",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -913,9 +902,9 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.91.0"
+version = "0.92.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa30dd82202efaf9d5380b57db521d24497e69a301b9df01ed3a9940616c4ecb"
+checksum = "6a45ed18109c81668ab742d2c3ed9f762331730be294ebaa6682ba28b4fa1113"
 dependencies = [
  "base64",
  "candid",
@@ -924,7 +913,7 @@ dependencies = [
  "ic-host-fs",
  "ic-host-process",
  "ic-management-canister-types",
- "ic-platform 0.23.6",
+ "ic-platform",
  "ic-platform-types",
  "libc",
  "reqwest",
@@ -975,7 +964,7 @@ dependencies = [
  "bytemuck",
  "clap",
  "dhat",
- "ic-platform 0.24.0",
+ "ic-platform",
  "ic-platform-types",
  "ic-testkit",
  "ic-wire",

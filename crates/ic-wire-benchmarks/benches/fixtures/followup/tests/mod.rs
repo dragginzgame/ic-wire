@@ -167,6 +167,32 @@ fn private_bulk_validates_bits_lengths_and_limits() {
 }
 
 #[test]
+fn private_bulk_bool_rejects_every_invalid_bit_pattern() {
+    use super::*;
+    use words::Bulk;
+    for len in [0, 1, 31, 32, 33] {
+        let expected: Vec<_> = (0..len).map(|i| i % 2 == 1).collect();
+        let frame = ic_wire::native::encode(&Bulk(expected.clone()), LIMITS).unwrap();
+        assert_eq!(
+            ic_wire::native::decode::<Bulk<bool>>(&frame, LIMITS)
+                .unwrap()
+                .0,
+            expected
+        );
+        for position in 0..len {
+            for invalid in 2..=u8::MAX {
+                let mut malformed = frame.clone();
+                malformed[1 + position] = invalid;
+                assert_eq!(
+                    ic_wire::native::decode::<Bulk<bool>>(&malformed, LIMITS).unwrap_err(),
+                    ic_wire::Error::Malformed
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn borrowed_record_views_remain_inside_the_owned_frame() {
     use super::*;
     let case = borrowed_case(65536);

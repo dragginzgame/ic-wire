@@ -1,222 +1,95 @@
 # Current handoff
 
-## Delivered: Core 0.17.9
+## In delivery: Core 0.17.10
 
-Core **0.17.9** (`ic-wire-derive`, `ic-wire`) is on origin/main and crates.io.
-Tag **core-v0.17.9** selects **2568005**, from source **ad51c6b** captured in
-Shared 0.31.5 batch **batch-C3zNXsh0**. All 20 Linux release stages and the final
-all-feature archives passed. Registry readback matches both uploaded checksums
-and the release commit. The [receipt](../../releases/receipts/published-core0179/delivery.json)
-owns exact identities. The normal checkout is reconciled; raw logs remain under
-`target/core0179-delivery/` and the captured checkout under
-`target/release-frozen/batch-C3zNXsh0/`. No cleanup was performed. Hosted CI runs
-asynchronously; this delivery does not establish full native macOS qualification.
+The maintainer requested Testkit adoption and deployment. Select only Core
+(`ic-wire-derive`, `ic-wire`) for **0.17.10** through Shared's captured release
+workflow, `origin/main` and crates.io. Endpoint remains **0.7.3**. The pending
+batch includes the completed private bool-copy research; no public codec change.
+No delivery of this candidate is claimed yet.
 
-## Included: Build 0.78 / Testkit 0.91 adoption
+## Testkit 0.92 adoption
 
-The released graph selects published **Build 0.78.0** (`5bdfc9f`) and
-**Testkit 0.91.0** (`5a2fe41`), with their required **Host 0.75.0** family.
-The diagnostic library and installed release editor both select Build 0.78.0.
-Wire does not use the retired compiler wrapper, cross-call input leases or
-progress variants, nor match the changed public Host error identities. Native
-PocketIC callers retain explicit 300-second request budgets, separate startup
-allowances and awaited teardown. Strict installed-caller Clippy and the installed
-Endpoint admission/rollback test pass with the prepared PocketIC 16.1.0 server;
-logs are in `target/build078-testkit091-adoption/`.
+The root requirement and lock select published **Testkit 0.92.0**, aligning its
+native `CborError` identity with **Platform 0.24.0**. The older Platform 0.23.6
+edge disappears. Wire does not match the changed error identity. All seven native
+PocketIC constructors retain explicit 300-second request budgets, independent
+startup allowances, typed failures and awaited teardown. Testkit stays outside
+published packages. Codec bytes, identities, limits and acceptance are unchanged.
+Installed Endpoint typed calls, admission and transaction rollback pass with
+PocketIC 16.1.0; logs are under `target/testkit092-adoption/`. The captured
+release must still pass the full Core gate.
 
-Shared's remote main still selects **0.31.5 / b2026a1**, already installed;
-no snapshot refresh is needed. Platform remains **0.24.0** directly and
-**0.23.6** through native Testkit; Runtime remains **0.19.5**, Types **0.18.2**.
-These tooling-only changes shipped in Core **0.17.9**; Endpoint remains **0.7.3**.
-Published dependency selections, codec bytes, identities, limits and acceptance
-are unchanged. The full comparison retains its original supplier cohort; this
-adoption makes no new performance claim. The installed Endpoint proof preceded
-the metadata-only version preparation; the release gate qualifies the captured source.
+Current suppliers: **Build 0.78.0**, **Host 0.75.0**, Platform **0.24.0**,
+Types **0.18.2**, Runtime/macros/guard **0.19.5**, Testkit **0.92.0**.
+Rust/Cargo **1.99.1** remains floor and pin. Root manifests/lock own selection;
+Shared **0.31.5 / b2026a1** owns the adopted snapshot. Prepare tools through
+`make install-tools`; the release editor remains Build 0.78.0.
 
-## Previous delivery: Core 0.17.8
+## Private checked bool-copy research
 
-Core **0.17.8** (`ic-wire-derive`, `ic-wire`) is on origin/main and crates.io.
-Tag **core-v0.17.8** selects **7f4e319**; source **e2bd6d6** was captured by
-Shared **0.31.5** in **batch-77451tll**. Endpoint remains **0.7.3**. The full
-20-stage Linux gate and final-version all-feature archives passed. Downloaded
-registry archives match the uploaded checksums and release source. The
-[delivery receipt](../../releases/receipts/published-core0178/delivery.json)
-owns exact identities. The normal checkout is reconciled; retained logs are in
-`target/core0178-delivery/` and the managed batch remains under
-`target/release-frozen/batch-77451tll/`. No cleanup was performed.
+Large bool decode uses 37–56% fewer IC instructions and 10/173 fewer uncompressed
+Wasm bytes at opt-z/3. Singleton decode adds 85/73 instructions; native opt-3
+large decode is 1.8–4.0% slower. The
+[matched study](../evidence/primitive-bulk.md#checked-bool-copy-follow-up-7-november)
+records all tradeoffs, 14 passing tests, strict Clippy and 2,594 paired IC rows.
+Raw artifacts remain under `target/evidence/bool-copy-20261107/`. The study used
+Testkit **0.91.0**, before this adoption; do not relabel its measurements.
+Public bool support still needs schema/client/budget qualification. Production
+bytes, identities, limits and acceptance are unchanged.
 
-The release's hosted CI started asynchronously. All six macOS jobs passed the
-bootstrap step that failed in the previous run; their full suites were still
-running at observation. Local Linux results do not establish complete native
-macOS qualification. Codec bytes, identities, limits and acceptance are unchanged.
+## Latest delivered state
 
-## Included: Platform 0.24.0 qualification facade
+Core **0.17.9** is on origin/main and crates.io. Tag **core-v0.17.9** selects
+**2568005**, from source **ad51c6b**, in Shared batch **batch-C3zNXsh0**. All
+20 Linux release stages and final all-feature archives passed; registry readback
+matched source and uploaded checksums. The normal checkout was reconciled.
+The [Core receipt](../../releases/receipts/published-core0179/delivery.json) owns
+exact identities. Endpoint **0.7.3** remains published; its
+[receipt](../../releases/receipts/published-endpoint073/delivery.json) owns its proof.
+Hosted CI is asynchronous; local Linux passes do not establish native macOS proof.
 
-The released root requirement and lock select published **Platform 0.24.0**
-(`fc6d419474a94a606e3c49729747e61978b4c9c7`) for benchmark Candid/crypto controls.
-Its removed unconfigured Candid decoders and native public-key derivation API
-have no Wire callers; bounded Candid controls retain their explicit limits.
-That release's **Testkit 0.90.0** requires Platform 0.23, so **0.23.6**
-remains on that native-only edge. Both facades share canonical **Types 0.18.2**;
-Endpoint keeps **Runtime/macros/guard 0.19.5**. No supplier patch or wrapper is
-needed, and neither facade becomes a published Wire dependency.
+## Evidence and recovery custody
 
-Rust/Cargo **1.99.1** focused qualification passes: all six standard benchmark
-tests (including the 391-case corpus and damaged-frame rejection), strict caller
-Clippy, Wasm benchmark compilation, pins and dependency boundaries. Current and
-simulated next-generation consumers pass seven schema/byte/admission tests each
-and host/Wasm graph checks, retaining one execution guard and unchanged
-codec/schema/Principal/Account identities. Logs are under
-`target/platform024-adoption/`; the identity fixture is
-`target/stable-identities.UmBbmz/`. No full performance matrix or installed
-Endpoint rerun is claimed: runtime and Testkit selections are unchanged. The
-completed matrix below retains its original supplier identities.
+The complete **36-cohort** matrix measures Core 0.17.6 working source with
+Testkit 0.89.4 and its original supplier graph. The
+[current comparison](../candid-comparison.md) owns 2,105 case entries, 8,420 primary
+comparisons, 144 fresh modules and limitations. Preserve both explicitly protected
+paths: `target/evidence/codec-matrix-20261107/` and
+`target/codec-matrix-build-20261107/`. Cleanup interrupted one cohort; `recovery-1/`
+retains the verified resume and prepared PocketIC 16.1.0 binary. The completed
+matrix retained earlier probes and reran only missing work. No cleanup is authorized.
 
-These adoptions shipped in Core 0.17.8. Earlier delivery receipts retain their
-original inputs. Consumers need no protocol migration.
+Keep release journals and retained captured checkouts. Core 0.17.9 logs remain
+under `target/core0179-delivery/`, with its checkout under
+`target/release-frozen/batch-C3zNXsh0/`. Prior receipts under
+[releases/receipts](../../releases/receipts/README.md) retain their original inputs.
+The failed **batch-1afAufRB** had no delivery effects and is superseded; do not
+resume it. Completed **batch-1i9z2IIG** was reconciled, but a separate cleanup
+removed its checkout; its journal does not prove checkout availability. Its
+deferred lock was preserved at **7fd813f** on `deferred/core0176-lock` and reapplied.
+The completed schema-1 0.17.5 batch is historical; never resume it with schema 2.
+Repository history was intentionally replaced: fresh-clone rather than merge
+obsolete refs, and never re-upload published registry versions to repair history.
 
-## Included: Shared 0.31.5 and macOS bootstrap fix
+## Contracts and next work
 
-Adopted committed **Shared 0.31.5 / b2026a118e38de4af1555c527af327cb604eacdf**
-through the canonical exporter. The existing Core 0.17.7 / Endpoint 0.7.3 delivery
-receipts remain bound to their original Shared 0.31.0 inputs. No package version,
-dependency selection or codec contract changes in this adoption.
-
-[Actions run 42363874744](https://github.com/dragginzgame/ic-wire/actions/runs/42363874744)
-tested **2aa02ef**: all three Linux groups passed; all six macOS groups failed
-before Rust compilation in `verify-file-checksum.sh`, with Bash 3.2 reporting an
-unmatched quote. Shared's 0.31.1 fix, included here, moves the NUL-checking reader
-outside quoted command substitution. The old helper reproduces the same syntax
-failure under prepared Bash 3.2 on Linux; the adopted helper parses and passes
-SHA-256/SHA-512 verification, print mode, mismatch/NUL refusal, backend failure
-propagation and the `shasum` fallback. Wire's actual host-tool install/check,
-143-file snapshot verification, documentation links and LOC reporting with a
-previously absent scratch parent pass. Evidence is under
-`target/shared0315-adoption/`. The new hosted run passed bootstrap on all six
-macOS jobs; full native suites remain asynchronous. Rerunning the old commit
-alone would retain the broken helper.
-
-## Completed: full comparison refresh
-
-The full **36-cohort** Wire/Candid run measured Core **0.17.6** working source in
-`target/evidence/codec-matrix-20261107/`, with frozen source/lock and separate
-`target/codec-matrix-build-20261107/`. It uses PocketIC **16.1.0**, two native
-runs of eleven samples, allocation/heap probes and opt-z/opt-3 Wasm. All **2,105
-case entries / 8,420 primary comparisons**, **144 fresh modules**, repeated IC
-counters and input/frame identities verify. Wire wins **7,295/7,924** non-research
-comparisons and is smaller in both Wasm metrics in all **72** fixture/profile pairs.
-The [current comparison](../candid-comparison.md) owns results, limitations and
-ranked experiments. No production code change or delivery is part of this refresh.
-
-A separate cleanup interrupted `bulk-control` during opt-3 guest compilation
-with 14 cohorts complete. Frozen sources and retained measurements verify;
-the restored prepared PocketIC executable has the identical hash. Recovery lives
-in the run's `recovery-1/`: failed build, resume script, verifier and progress.
-Completed probes were retained; only missing guests and subsequent cohorts reran.
-The maintainer stopped cleanup and explicitly protected both matrix paths.
-Only the separately approved ordinary `target/debug` cache was removed by this
-session. Both protected matrix paths remain intact; no further cleanup is authorized.
-
-## Compiler, suppliers and release boundary
-
-The previous Core **0.17.7** / Endpoint **0.7.3** release selected published **Build 0.77.0**
-(`9d87394`), **Platform 0.23.6** (`51f5fbb`), **Runtime/macros/guard 0.19.5**
-(`c07b714`) and **Testkit 0.90.0** (`c03161b`). Types remains **0.18.2**, Host
-**0.74.4** and smallvec **1.16.5**. Rust/Cargo **1.99.1** remains floor and pin.
-Root requirements and Cargo.lock own the selected graph. Build's removed timing
-getters have no Wire callers; the release editor uses the same 0.77.0 with its
-installation-only `cli` feature. Prepare through `make install-tools`.
-
-All seven native PocketIC constructors now pass a **300-second request budget**,
-matching Testkit's former default. The new finite deadline covers the whole
-exchange, including body reads and accepted-operation polling; startup retains
-its independent 60/90-second allowance. Typed failure propagation, caller-owned
-Tokio runtimes and explicit awaited teardown are preserved. No replay or fallback
-API was added. This addresses [#48](https://github.com/dragginzgame/ic-wire/issues/48).
-Testkit stays outside published packages. Codec bytes, identities, limits and
-acceptance are unchanged; no codec performance claim follows from this migration.
-
-Focused caller Clippy, installed Endpoint admission/transaction checks, all seven
-expected compiler diagnostics and the passing control, offline editor admission,
-pins/boundaries and local documentation links pass. Both groups' all-feature
-archives also pass before version preparation. Both full captured 20-stage Linux
-gates, final-version all-feature archives and installed Endpoint admission/rollback
-checks pass. Registry readback matches all four uploaded archives and source
-commits; completed-batch resume performs no repeat publication. Focused logs are in
-`target/testkit090-callers.log`, `target/platform0195-installed.log`,
-`target/build077-diagnostics.log`, `target/suppliers-20261107-static.log` and the
-`target/{core0177,endpoint073}-archives-preflight.log` files.
-The retained complete comparison predates this adoption: **Build 0.76.0**,
-**Platform 0.23.5**, **Testkit 0.89.4**, **Runtime 0.19.4**, Types **0.18.2**,
-Host **0.74.4**, Candid **0.10.40** and Postcard **1.1.3**. Its results must not
-be relabeled as measurements of the new supplier cohort. Linux qualification
-does not establish native macOS execution.
-
-## Delivered state and recovery
-
-Previous Core **0.17.7** (`ic-wire-derive`, `ic-wire`) and current Endpoint
-**0.7.3** (`ic-wire-endpoint-macros`, `ic-wire-endpoint`) remain published.
-Tags **core-v0.17.7** and **endpoint-v0.7.3** select **2aa02ef** and **7c17eff**.
-The [Core receipt](../../releases/receipts/published-core0177/delivery.json) and
-[Endpoint receipt](../../releases/receipts/published-endpoint073/delivery.json)
-own exact source/archive/graph identities. Shared **0.31.0** captured **e4a36ef**
-in schema-2 **batch-ZropADsX**, delivered supplier-first and reconciled normal main.
-Raw logs remain in `target/core0177-endpoint073-delivery/`; the managed checkout
-and durable journal remain under `target/release-frozen/batch-ZropADsX/` and
-`.git/release-state/frozen/batch-ZropADsX/`. No cleanup is authorized.
-
-The previous Core **0.17.6** delivery captured **245ed7a** with Shared
-**0.31.0 / 7431394** in schema-2 **batch-1i9z2IIG**.
-The release retained Platform **0.23.4**, Types **0.18.2**, Runtime **0.19.4**,
-Testkit **0.89.3**, Build **0.75.0**, Host **0.74.4**, Rust **1.99.1**. The later
-Platform lock edit was excluded, preserved at **7fd813f** on
-`deferred/core0176-lock`, and reapplied after reconciliation. Subsequent working
-selections are above; none is retroactively qualified by this delivery.
-
-The failed **batch-1afAufRB** stopped before version preparation because browser
-setup was missing; it had no delivery effects and is superseded. Do not resume
-it. Corrected capture installs locked browser tools and checks them offline on
-recovery. Both journals remain under `.git/release-state/frozen/`. Raw delivery
-logs remain in `target/core0176-delivery/`; the separate cleanup removed the
-completed `target/release-frozen/batch-1i9z2IIG/` checkout and adoption scratch.
-Do not treat journal presence as proof that its captured checkout still exists.
-The completed schema-1 Core 0.17.5 delivery is historical; do not resume it with
-the schema-2 runner or replay publication. See its
-[receipt](../../releases/receipts/published-core0175/delivery.json).
-
-## Current contracts and follow-up
-
-Public `serde_packed::nonzero_i64` / `heap_u64` shipped in 0.17.6. They remove
-encode copies while preserving domain validation/reconstruction; already-packed
-DTOs remain smaller in the 1/10/100-type stress controls. See the
-[matched adapter study](../candid-comparison.md#borrowed-adapter-investigation)
-and [consumer guidance](../../crates/ic-wire/README.md).
-Adopting from ordinary lists changes `[-1_i64]` from `01 01` to
-`08 ff ff ff ff ff ff ff ff` (heap `[1]`: `01 01` to
-`08 01 00 00 00 00 00 00 00`). Coordinate contracts/clients and requalify budgets;
-record-field allowances can differ from Packed DTOs. Existing consumers stay
-unchanged. Retain original retry/hash bytes: heap/custom-Serde normalization is
-consumer-owned. Native big-endian execution remains unqualified.
+Public `serde_packed::nonzero_i64` / `heap_u64` shipped in 0.17.6. Adoption from
+ordinary lists changes bytes and admission: `[-1_i64]` changes `01 01` to
+`08 ff ff ff ff ff ff ff ff`; heap `[1]` changes `01 01` to
+`08 01 00 00 00 00 00 00 00`. Coordinate clients and budgets; record-field
+allowances can differ from Packed DTOs. Retain original retry/hash bytes because
+collection/custom-Serde normalization remains consumer-owned. See
+[consumer guidance](../../crates/ic-wire/README.md). Big-endian execution is unqualified.
 
 Account's [0.16 cut](../../releases/core/0.16.md) remains `01 20 + 32 bytes` for
-present subaccounts and `00` for absent ones. Method IDs/name defaults remain
-production behavior; contract fingerprints/no-manual-ID macros remain research.
-Keep one Serde/Postcard codec; Candid and Testkit stay outside published packages.
-Default bulk advice requires supported host metadata; codec-only/custom layouts
-are not universally linted. Never silently rewrite consumer Serde.
+present subaccounts, `00` for absent ones. Method IDs/name defaults remain
+production behavior; fingerprint/no-manual-ID macros are research. Keep one
+Serde/Postcard codec and no automatic consumer Serde rewriting. Metadata advice
+is not universal lint coverage for codec-only/custom layouts.
 
-Next candidates are checked-copy bool decoding/public adapter qualification,
-narrow bound-wrapper sharing and packed 16-byte ID research. None is implemented
-by this refresh. Bool research cuts large encode instructions and fixture Wasm,
-but decode reconstruction remains expensive. Domain adapters beat Candid while
-costing more than already-packed DTOs in scale controls. Do not relabel these
-stress-fixture differences as application savings. Generic
-one-pass encoder rewrites, signed-i32 writer sharing and parser-tail sharing have
-prior rejected tradeoffs; consult their existing studies before repeating them.
-
-Future authorized delivery uses [Shared's captured groups](../development.md):
-Core's 20 stages, qualified Endpoint-only Linux's 11, no stage reuse/final-candidate
-opt-ins. This delivery qualified both groups' supplier-first archives and installed
-composition; later changed inputs still require their own qualification.
-Older repository history was intentionally replaced: fresh-clone rather than
-merge discarded refs; never re-upload existing registry versions to repair history.
+Next optimization candidates: qualify public bool support, narrow bound wrappers,
+and packed 16-byte identifiers. Stress-fixture gains are not application savings.
+Consult prior rejected encoder/parser experiments before repeating them.
+Future delivery uses explicit groups, Core's full 20 stages, and qualified
+Endpoint-only Linux's 11; stage reuse/final-candidate opt-ins remain disabled.

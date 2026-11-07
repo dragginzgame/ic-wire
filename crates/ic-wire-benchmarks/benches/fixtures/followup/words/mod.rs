@@ -7,15 +7,19 @@ pub(super) trait Word:
 {
     const WIDTH: usize;
     fn read(bytes: &[u8]) -> Self;
-    fn valid(bytes: &[u8]) -> bool;
+    fn checked_slice(_: &[u8]) -> Result<Option<&[Self]>, ()> {
+        Ok(None)
+    }
 }
 impl Word for bool {
     const WIDTH: usize = 1;
     fn read(bytes: &[u8]) -> Self {
         bytes[0] == 1
     }
-    fn valid(bytes: &[u8]) -> bool {
-        bytes.iter().all(|b| *b <= 1)
+    fn checked_slice(bytes: &[u8]) -> Result<Option<&[Self]>, ()> {
+        bytemuck::checked::try_cast_slice(bytes)
+            .map(Some)
+            .map_err(|_| ())
     }
 }
 macro_rules! float {
@@ -24,9 +28,6 @@ macro_rules! float {
             const WIDTH: usize = $width;
             fn read(bytes: &[u8]) -> Self {
                 Self::from_le_bytes(bytes.try_into().unwrap())
-            }
-            fn valid(_: &[u8]) -> bool {
-                true
             }
         }
     };
@@ -66,14 +67,23 @@ impl<'de, T: Word> serde::Deserialize<'de> for Bulk<T> {
                 // Unlike unchecked raw POD casts, bool 02 must remain invalid.
                 // Validate width and every boolean BEFORE allocating an output.
                 // Native byte-buffer admission has already checked frame/limits.
-                if !bytes.len().is_multiple_of(T::WIDTH) || !T::valid(bytes) {
+                if !bytes.len().is_multiple_of(T::WIDTH) {
                     return Err(E::custom("invalid research words"));
                 }
+                let checked =
+                    T::checked_slice(bytes).map_err(|()| E::custom("invalid research words"))?;
                 let mut values = Vec::new();
                 values
                     .try_reserve_exact(bytes.len() / T::WIDTH)
                     .map_err(|_| E::custom("allocation"))?;
-                values.extend(bytes.chunks_exact(T::WIDTH).map(T::read));
+                if let Some(words) = checked {
+                    // bool is one byte on every supported target. Validate its
+                    // bit patterns before allocation, then copy the valid slice.
+                    // Research bytes, bounds and rejection rules are unchanged.
+                    values.extend_from_slice(words);
+                } else {
+                    values.extend(bytes.chunks_exact(T::WIDTH).map(T::read));
+                }
                 Ok(Bulk(values))
             }
         }
