@@ -42,7 +42,8 @@ reports require explicit selection.
 | `tools-report` | Aggregate existing offline checks and retain all failures | Same ordered local check targets; no setup or release admission |
 | `fmt`, `fmt-check`, `format-tools-check` | Prerequisite check, compact output, retained failure logs | Cargo environment and complete custom formatter commands when needed |
 | `install-hooks` | Safe repository-local activation | Tracked root `.githooks/pre-commit` and its companions |
-| `shared-tooling-check` | Offline snapshot integrity | `SHARED_TOOLING_MANIFEST`, default `.shared-tooling.snapshot` |
+| `shared-tooling-status`, `shared-tooling-update`, `shared-tooling-install` | Report installed/locked registry identities; update Cargo selection or install the locked crate, then install/check tools | Optional `SHARED_TOOLING_VERSION` for update, `SHARED_TOOLING_MANIFEST`; `SHARED_TOOLING_SOURCE` only for one-time Git migration proof |
+| `shared-tooling-check` | Offline snapshot integrity and Cargo selection agreement | `SHARED_TOOLING_MANIFEST`, default `.shared-tooling.snapshot` |
 | `cloc` | Workspace report | Optional report/manifest selection |
 | `release-patch`, `release-minor`, `release-major`, `release-resume` | Admission and exact-version recovery runner | Metadata, validation, delivery policy, branch and remote |
 

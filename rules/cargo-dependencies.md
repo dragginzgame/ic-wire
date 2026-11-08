@@ -471,3 +471,24 @@ rustix.workspace = true
 The root lists the complete direct dependency catalog; each child declares which
 entries it uses. Cargo's supported inheritance and feature rules are documented
 in [the Cargo Book](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#inheriting-a-dependency-from-a-workspace).
+
+## Shared Tooling during dependency updates
+
+Shared Tooling is the `toko-tooling` source bundle on crates.io, owned by
+`https://github.com/dragginzgame/toko-tooling`. Select it as a registry dev-dependency
+in a private tooling/qualification member. Keep it out of published/runtime
+closures; inheriting an unused workspace declaration does not select it.
+
+After any `cargo update` that changes `toko-tooling` in `Cargo.lock`, agents must
+run `make shared-tooling-install`. It authenticates and installs that exact registry archive and runs
+`make install-tools` and `make tools-check`. `make shared-tooling-update` performs
+the targeted Cargo update and installation together. Do not claim success by
+editing only Cargo metadata, a lockfile or snapshot annotation. The offline
+`shared-tooling-check` refuses mismatched selected/installed versions or package checksums. Never
+install through a Cargo build script or implicitly during checks.
+
+Report snapshot installation, tool admission and remaining focused caller
+validation separately. Setup failure leaves adoption incomplete. Existing
+verified tools are reused. An unrelated Cargo update does not require a Shared
+refresh, reinstall or broad suite. Non-Cargo consumers retain snapshot-based
+selection under the [installation contract](../docs/consuming-snapshots.md#cargo-selection-and-installation).

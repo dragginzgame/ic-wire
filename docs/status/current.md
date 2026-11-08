@@ -1,5 +1,38 @@
 # Current handoff
 
+## Platform 0.27 qualification
+
+The unpublished benchmark facade now selects published ic-platform 0.27.0.
+Testkit 0.93.2 retains facade 0.26.1 in native qualification only. Runtime,
+macros and the sole guard remain 0.20.2; canonical Types remain 0.18.2. Wire
+does not call the removed management raw_rand API, so no source migration is
+needed. Standard and coverage comparison controls pass (22 tests), as do
+Clippy, the benchmark Wasm build, dependency boundaries, pins and tooling
+snapshot/lock verification. No new performance or Wasm saving is claimed.
+Production codec bytes, identities, limits and acceptance are unchanged. This
+private supplier change alone does not require a public release. Evidence:
+target/platform027/. Existing pending product releases remain separate.
+
+## Toko Tooling 0.33 registry migration
+
+The private qualification member selects toko-tooling = "0.33" as a registry
+dev-dependency, inherited from the root tests/tooling catalog. Cargo.lock records
+0.33.0 and checksum 4bd31469e2819833bcf120144d250c1b917b570682f7dcfdf02da3d219162e81.
+The new installer from Cargo’s downloaded package migrated the Git snapshot;
+the sibling checkout supplied historical ownership proof only. Recorded
+entrypoints and consumer-owned files are retained. Future registry operations
+need no sibling: use make shared-tooling-update, or shared-tooling-install after
+separate Cargo updates. Existing product gates, versions and publication
+exclusions remain authoritative. The earlier Git-marker proposal is superseded.
+Installation and tool admission pass. Snapshot/lock verification covers 152
+files and preserves all 79 entrypoints. Focused checks pass: dependency/pin
+boundaries, private-member compilation, formatting, documentation, 16 workflow
+classifications, 256 gate combinations, and disposable Make validation/release
+routing for both groups. The marker is absent from public Wasm normal/build
+graphs. No broad product suite or release was run.
+Migration evidence: target/toko033/. The subsequent deployment request
+authorizes delivery under the product release plan below.
+
 Delivery preparation selects Core 0.18.0 then Endpoint 0.9.0, with frozen
 source and full group gates. Endpoint’s inherited Core requirement advances
 with the Core minor cut. Public crate pairs publish supplier-first; private

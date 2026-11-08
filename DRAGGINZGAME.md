@@ -108,6 +108,10 @@ when changing interfaces, persistence or installation/recovery behavior.
   report that limitation; do not silently broaden an ordinary task into the full
   suite. Name the changed behavior each selected check proves. Keep unchanged
   generic regression matrices with their producer.
+- After `cargo update` changes `toko-tooling`, run `make shared-tooling-install`
+  to install the locked snapshot and prepare/check its tools. The combined
+  `make shared-tooling-update` does both; a lockfile update alone is incomplete. See the
+  [update rule](rules/cargo-dependencies.md#shared-tooling-during-dependency-updates).
 - Give repeated validation one execution owner: selected group scope must reach
   the leaf commands, and aggregate gates must not repeat full lint/setup through
   nested targets. Reuse unchanged release-stage evidence only through the

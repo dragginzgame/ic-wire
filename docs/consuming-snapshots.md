@@ -1,5 +1,5 @@
 # Consuming Shared Tooling Snapshots
-<!-- Shared companions: docs/rust-toolchains.md scripts/distribution/maintenance-files.txt scripts/distribution/governance-files.txt docs/ic-tools.md docs/verification-helpers.md docs/local-setup.md docs/make-interface.md tasks/snapshot-drift.md rules/dependency-pinning.md rules/changelogs.md -->
+<!-- Shared companions: docs/toko-tooling.md docs/rust-toolchains.md scripts/distribution/maintenance-files.txt scripts/distribution/governance-files.txt docs/ic-tools.md docs/verification-helpers.md docs/local-setup.md docs/make-interface.md tasks/snapshot-drift.md rules/dependency-pinning.md rules/changelogs.md -->
 
 CI and release behavior must not depend on a sibling checkout, a moving Git
 branch, or network availability. Consumers vendor a reviewed file set and
@@ -33,6 +33,10 @@ working tree or remove catalog rows to express a subset.
 
 Completing adoption includes the consumer-owned changes below; copying a new
 snapshot alone does not classify dependencies or install a deployment gate.
+For registry installation, use [Cargo selection and installation](#cargo-selection-and-installation)
+below. The following Git export procedure remains available for historical
+provenance, review and snapshot reorganization.
+
 Select a released, reviewed source revision and refresh through the canonical
 exporter. Include `rules/cargo-dependencies.md` and `rules/git-hooks.md` in the
 governance selection. If the consumer uses selected-source manifest ordering,
@@ -78,6 +82,118 @@ release checks; qualify the deployment dependency boundary and report any
 remaining enforcement gaps." Registry publication remains a separate fact;
 neither role labels nor cached build success establishes it.
 
+## Cargo selection and installation
+
+Shared Tooling's Cargo package is `toko-tooling`; its root `[package].version`
+is the sole current version source. Starting with 0.33, the crate contains the
+complete tooling payload: scripts, Make interfaces, CI actions, pin catalogs,
+engineering rules, licenses and documentation. The dependency-free `no_std`
+library has no build script; Cargo builds never install tools. Keep it in a private tooling package's
+`[dev-dependencies]`, outside published/runtime dependency graphs:
+
+```toml
+[dev-dependencies]
+toko-tooling = "0.33"
+```
+
+Declaring it only in `[workspace.dependencies]` does not select it: a member must
+inherit it. Use a private tooling/qualification member so it does not become a
+public library dependency or impose a new version constraint on public releases.
+The source is crates.io. Cargo.lock supplies the exact release and package SHA-256;
+the installer authenticates the downloaded crate before executing its exporter.
+It admits only regular, canonical package members and verifies package identity.
+Git and path dev-dependencies are rejected by registry installation. The repository
+for source review is `https://github.com/dragginzgame/toko-tooling`.
+
+```bash
+make shared-tooling-status
+make shared-tooling-update       # cargo update -p toko-tooling, then install
+# After a separate cargo update:
+make shared-tooling-install      # install exactly the Cargo.lock selection
+```
+
+`Cargo.lock` owns the registry version and checksum; `.shared-tooling.snapshot`
+records `source https://crates.io/crates/toko-tooling`, that archive checksum in
+its `revision` field, the version, entrypoints and file checksums. The offline
+`make shared-tooling-check` rejects disagreement and directs the caller to
+install. Status reports the installed and locked package identities without
+querying GitHub or claiming that the lock selection is the latest published
+release. An intentional older selection uses
+`cargo update -p toko-tooling --precise VERSION` followed by installation. Do not
+edit the snapshot's version annotation to disguise missing installation.
+
+Normal registry commands need no sibling checkout and never fetch GitHub source.
+Initial adoption and the first migration from a Git snapshot must bootstrap the
+new installer from Cargo's downloaded package. The old installed Git-only helper
+cannot perform that migration. Resolve the registry dev-dependency into Cargo.lock,
+run `cargo fetch --locked`, then locate the source bundle:
+
+```bash
+tooling_manifest="$(cargo metadata --locked --offline --format-version 1 | jq -er '
+  [.packages[] | select(.name == "toko-tooling" and
+    .source == "registry+https://github.com/rust-lang/crates.io-index")] |
+  if length == 1 then .[0].manifest_path else error("expected one registry selection") end')"
+tooling_root="${tooling_manifest%/Cargo.toml}"
+```
+
+For initial adoption, select the roots explicitly:
+
+```bash
+bash "$tooling_root/scripts/dev/shared-tooling.sh" install --consumer "$PWD" \
+  --entrypoint make/consumer.mk --entrypoint DRAGGINZGAME.md
+```
+
+For an existing Git snapshot, launch that same new installer with its historical
+source checkout for one-time ownership proof; recorded entrypoints are retained:
+
+```bash
+bash "$tooling_root/scripts/dev/shared-tooling.sh" install --consumer "$PWD" \
+  --source /home/adam/projects/toko-tooling
+```
+
+The checkout proves the earlier receipt's bytes before replacements or retirements;
+the new code comes from the registry archive. Preserve its old commits until
+migration finishes. The old GitHub repository name is accepted on historical
+receipts. After this bootstrap, use the normal Make commands above. Subsequent
+registry updates retrieve the previous registry archive for ownership proof.
+
+Prepare the project's compiler/native prerequisites and host parsers first.
+If needed, prepare jq/yq from the downloaded source with
+`make -f "$tooling_root/make/tools.mk" SHARED_TOOLING_ROOT="$tooling_root" install-host-tools`.
+Wire the consumer Makefile to include `make/consumer.mk` before installation:
+the installer writes that file before it dispatches the consumer's setup targets.
+Select additional product callers as entrypoints. Initial installation and
+updates require Perl's `Archive::Tar` and `IO::Uncompress::Gunzip` modules.
+Archive admission caps compressed input at 10 MiB and uncompressed input at
+64 MiB. Failed installation evidence stays under the consumer's `target/tmp/`;
+successful temporary package copies are removed. See the [crate README](toko-tooling.md).
+
+Installation uses the transactional exporter, preserves recorded entrypoints
+and consumer-owned files, and refuses local conflicts. It then runs
+`make install-tools` and `make tools-check`, reusing verified tools. If setup
+fails, the installed snapshot remains and adoption is reported incomplete.
+No command commits, publishes, deploys or runs broad product tests. Perform
+focused caller validation for relevant behavior changes.
+
+Non-Cargo consumers retain the same commands and snapshot ownership; updates
+select latest pushed main, or `SHARED_TOOLING_VERSION=X.Y.Z`. Version selection
+uses the newest first-parent main commit with that version. That override refuses
+when Cargo already owns the selection. Historical pre-0.32 source versions can
+still be read from their committed `VERSION`; current sources use `Cargo.toml`.
+
+After 0.32 is pushed, existing consumers bootstrap once from the updated normal
+Shared checkout:
+
+```bash
+bash ../shared-tooling/scripts/dev/shared-tooling.sh update --consumer "$PWD"
+```
+
+Consumers selecting `make/consumer.mk` acquire these targets via its companion
+closure. Other integrations must adopt that entrypoint or call the helper.
+First adoption without any snapshot still uses `refresh-consumer.sh` with
+explicit entrypoints. The executing exporter/helpers must be committed and
+unmodified; unrelated source work is preserved.
+
 ## Upgrade impact
 
 Adopt a snapshot for an applicable fix, a needed capability or an explicitly
@@ -99,7 +215,7 @@ required; branches, tags, abbreviated IDs and unavailable objects refuse. Git
 replacement refs cannot substitute another tree. No fetch, stash, branch switch,
 index update or source checkout is performed.
 
-The executing exporter and its three helpers must match their own committed
+The executing exporter and its version reader and integrity helpers must match their own committed
 HEAD in bytes and executable mode. Dirty execution files refuse before helpers
 run or consumer files change; unrelated dirty source files are allowed. Admitted
 helpers run from private committed copies, independently of the payload revision.
@@ -284,10 +400,10 @@ payload hashes/modes and required integrity tools, refresh proves prior ownershi
 against committed source, and fleet reporting checks source attribution and drift.
 Each caller uses its own reviewed reader, never a helper from an inspected repo.
 
-Refresh also writes a `# version<TAB>X.Y.Z` annotation from `VERSION` at that
+Refresh also writes a `# version<TAB>X.Y.Z` annotation from `[package].version` in `Cargo.toml` at that
 exact source commit. The committed file must contain a canonical stable version;
 the exporter never reads its display version from mutable working-tree bytes or
-changes the consumer's own `VERSION`. This descriptive annotation keeps the
+changes the consumer's own package version. This descriptive annotation keeps the
 existing v1 integrity records intact and is understood by the current verifier
 and fleet report. A snapshot without it displays `unrecorded`; its next refresh
 records the selected source version. Malformed or duplicate version annotations
@@ -297,8 +413,8 @@ The commit remains the exact source identity: several commits can carry the same
 version, and an annotation does not prove a release tag or publication. Local
 verification checks files against the reviewed manifest, not the truth of its
 source claims against GitHub. The annotation is not a second version selection
-to edit independently. Review the manifest with its snapshot refresh; no Cargo
-dependency or duplicate Cargo metadata is needed.
+to edit independently. Cargo selects the tooling dependency; the snapshot records
+installed bytes. The offline check requires both identities to agree.
 
 Use `--manifest <relative-path>` to choose a different manifest location. Its
 parent directories are created before consumer files are replaced. Pass the

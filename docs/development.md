@@ -734,3 +734,18 @@ change is adopted by these investigations.
 
 Focused evidence lives in `target/cleanup-issues/`; it is regenerable and is not
 a publication or full CI receipt. Issues 51, 52 and 54 remain declined; 55 is locally implemented. Issue 53 is now locally implemented and qualified; issue 56 now tracks adoption of a published supplying Postcard release.
+
+## Updating the tooling bundle
+
+The private qualification member selects crates.io `toko-tooling = "0.33"` as
+a dev-dependency. Cargo.lock pins the release/checksum; the installed snapshot
+records the authenticated archive and its exported entrypoints. Run
+`make shared-tooling-update` for a targeted Cargo update plus installation.
+After a separate Cargo update changes this selection, run
+`make shared-tooling-install`. Use `make shared-tooling-status` and the offline
+`make shared-tooling-check` to verify selection and installation. Cargo builds
+never install scripts implicitly. Registry operations need no sibling checkout;
+the old checkout was used only for initial Git ownership proof.
+
+Tooling adoption does not alter Wire’s product release-group selection, frozen
+gates, publication exclusions or delivery authority.

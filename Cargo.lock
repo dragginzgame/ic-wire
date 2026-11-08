@@ -830,12 +830,24 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
- "ic-platform-runtime",
  "ic-platform-types",
  "ic-transport-types",
  "serde",
  "serde_bytes",
  "serde_cbor",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33e040a299213e54bc4a37142a9d164a7daaf74181fd5520bba57fd7acb3a2cd"
+dependencies = [
+ "candid",
+ "ic-platform-runtime",
+ "ic-platform-types",
+ "serde",
  "thiserror 2.0.21",
 ]
 
@@ -898,7 +910,7 @@ dependencies = [
  "ic-host-fs",
  "ic-host-process",
  "ic-management-canister-types",
- "ic-platform",
+ "ic-platform 0.26.1",
  "ic-platform-types",
  "libc",
  "reqwest",
@@ -949,7 +961,7 @@ dependencies = [
  "bytemuck",
  "clap",
  "dhat",
- "ic-platform",
+ "ic-platform 0.27.0",
  "ic-platform-types",
  "ic-testkit",
  "ic-wire",
@@ -1022,6 +1034,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "stats_alloc",
+ "toko-tooling",
 ]
 
 [[package]]
@@ -2170,6 +2183,12 @@ dependencies = [
  "pin-project-lite",
  "tokio",
 ]
+
+[[package]]
+name = "toko-tooling"
+version = "0.33.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bd31469e2819833bcf120144d250c1b917b570682f7dcfdf02da3d219162e81"
 
 [[package]]
 name = "toml"

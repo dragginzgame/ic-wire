@@ -18,7 +18,21 @@ in [shared history](../history.md).
   feature transitively, so this does not yet remove its compiler dependencies.
   Wire metadata remains separately opt-in through `typescript`.
 
+### ⬆️ Dependencies
+
+- Deferred repository maintenance: use Platform 0.27.0 for private codec
+  comparisons. Testkit retains native facade 0.26.1; production Runtime 0.20.2
+  and Types 0.18.2 selections, codec bytes and admission remain unchanged.
+  This update alone requires no public package release.
+
 ### 🧹 Cleanup
+
+- Repository maintenance: migrate the tooling snapshot to the authenticated
+  crates.io toko-tooling 0.33.0 bundle, selected through the private qualification
+  member’s dev-dependency and Cargo.lock checksum. Keep shared-tooling command
+  names, recorded entrypoints and independent product release requirements.
+  Future Cargo tooling updates require explicit snapshot installation; this
+  migration alone does not require publishing Core or Endpoint.
 
 - Repository maintenance: replace three duplicate CI scaffold jobs with one
   qualification gate, preserving all native platform/suite jobs and docs routing.
