@@ -30,6 +30,9 @@ toko = []
 hotspots = []
 # Small paired regression corpus, never a production codec selection.
 cost-smoke = []
+# Fixed-width IDs versus an equally flattened external Candid blob.
+id16 = []
+id16-control = ["id16"]
 # Real IC identities, wide records, large variants and ragged batches.
 contract-shapes = []
 # New boundary/stdlib controls; bulk is private research, never production.

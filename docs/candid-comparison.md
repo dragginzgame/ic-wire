@@ -115,22 +115,35 @@ DTO bytes can still have different record-field allowances. Follow the
 
 ## Next experiments
 
-The **0.17.11 draft** adds the explicit `serde_packed::bools` field adapter with
+Core **0.17.11** added the explicit `serde_packed::bools` field adapter with
 qualified schema/browser support. The [public adapter study](evidence/primitive-bulk.md#public-bool-adapter-for-01711)
 preserves every Wire IC counter versus the private prototype, with 35/16 extra
 total Wasm bytes at opt-z/3. It also records a 1.75–2.02× native opt-3 decode
 regression; the IC result is unchanged. This does not replace the original full matrix.
 
 1. **Native bool scan:** investigate the public adapter's opt-3 native regression
-   without increasing Wasm or changing admission. Float promotion still needs a
+   without increasing Wasm or changing admission. The follow-up
+   [size screen](evidence/primitive-bulk.md#public-bool-decoder-size-screen-7-november)
+   rejects visitor outlining, checked-cast outlining and chunked validation;
+   all grow Wasm. Float promotion still needs a
    deliberate finite/IEEE policy and client qualification.
 2. **Narrow bound-wrapper sharing:** varied bounds add **16,810 / 25,305 total**
    and **16,671 / 25,185 code bytes** at opt-z/3 in the 100-type control. Heavy
-   loops already share code; test the remaining wrapper without changing bounds.
-   This is a diagnostic gap, not an achieved or guaranteed application saving.
-3. **Packed 16-byte identifiers:** test a single shared representation against
-   Toko-shaped ID filters, including conversion costs. Current Packed supports
-   32-byte hashes, not 16-byte IDs. This is unmeasured; database keys stay outside scope.
+   loops already share code. The [outer-visitor follow-up](evidence/bound-sharing.md#outer-list-visitor-screen-7-november)
+   saves only 0/18 total bytes in the standard corpus, with effectively unchanged
+   IC costs. Ten varied bounds save 860/2,619 bytes, but remain diagnostic evidence;
+   the extra visitor is not adopted without an application benefit.
+3. **Packed 16-byte identifiers:** public support is qualified for pending 0.17.13.
+   The [flat-Candid follow-up](evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november)
+   compares equally flattened blobs, correcting the earlier nested-vector control.
+   For 4,096 owned IDs, opt-3 Wire encode/decode is **66,637 / 66,620**, versus
+   Candid **149,171 / 85,862** instructions. At opt-z, large-list decode is 15.9%
+   more expensive than Candid. Wire wins 78/80 primary comparisons; empty inputs
+   regress by 23–186 instructions against ordinary arrays. ID-fixture total Wasm
+   saves **1,484 / 448** bytes at opt-z/3; an existing bulk fixture is byte-identical
+   when the new type is unused. Adoption changes field bytes and budgets explicitly.
+   This separate study uses Platform 0.25.1/Testkit 0.93 and does not relabel the
+   historical full matrix above. Database keys remain outside scope.
 
 Do not repeat blanket one-pass encoder or parser-tail rewrites without a new
 approach: [earlier experiments](evidence/encoder-followup.md) failed small-value,

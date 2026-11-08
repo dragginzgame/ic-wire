@@ -390,6 +390,9 @@ fn hash_lists_resolve_aliases_preserve_paths_and_acknowledgements() {
     #[derive(serde::Serialize, ic_wire::Wire)]
     struct Reply {
         hashes: Option<ic_wire::List<Hash, 128>>,
+        ids: Vec<[u8; 16]>,
+        packed_ids: ic_wire::Packed<[u8; 16]>,
+        fixed_id: [u8; 16],
         fixed_hash: Hash,
         packed: ic_wire::Packed<Hash>,
         byte_arrays: Vec<ic_wire::ByteArray<32>>,
@@ -408,6 +411,7 @@ fn hash_lists_resolve_aliases_preserve_paths_and_acknowledgements() {
             .collect::<Vec<_>>(),
         [
             ("/Reply/fields/hashes/item/list/hash32", "Packed<[u8; 32]>"),
+            ("/Reply/fields/ids/list/hash16", "Packed<[u8; 16]>"),
             (
                 "/Reply/fields/nested/item/items/1/list/hash32",
                 "Packed<[u8; 32]>"

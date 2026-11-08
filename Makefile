@@ -137,11 +137,11 @@ check-codec-costs:
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
+	+@for corpus in id16 id16-control coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
 	    $(RUST_POLICY) cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --example codec-wasm && \
 	    $(RUST_POLICY) cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
+	+@for corpus in id16 id16-control coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
 	    $(RUST_POLICY) cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
 

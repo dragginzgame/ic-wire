@@ -79,7 +79,7 @@ impl core::fmt::Display for BulkLintReport {
 /// Pass named schema roots (including request/response schemas not otherwise in
 /// the registry). Named references are inspected at their definition, once;
 /// Rust aliases already resolve through `native_schema`. Nested lists, records,
-/// variants, tuples and options are traversed. Lists of 32-byte hashes also
+/// variants, tuples and options are traversed. Lists of 16-/32-byte arrays also
 /// suggest Packed; standalone arrays, packed/byte fields
 /// and lists of nonempty records are not candidates. Bool, finite float, 128-bit
 /// integer and zero-sized lists also receive cost advice, without suggesting an
@@ -231,19 +231,24 @@ fn representation<'a>(
 ) -> Result<Option<(&'static str, &'static str)>, GenerationError> {
     // Follow aliases and at most one hash array without recursive probing.
     // Advice changes only: schemas, emitted codec bytes and admission stay intact.
-    let mut hash = false;
+    let mut hash = None;
     for _ in 0..SCHEMA_DEPTH {
         match node["k"].as_str().unwrap() {
             "ref" => node = &types[node["name"].as_str().unwrap()],
             "newtype" => node = &node["item"],
-            "array" if !hash && node["max"].as_u64() == Some(32) => {
-                hash = true;
+            "array" if hash.is_none() && matches!(node["max"].as_u64(), Some(16 | 32)) => {
+                hash = node["max"].as_u64();
                 node = &node["item"];
             }
             kind => {
-                if hash {
-                    return Ok((kind == "u" && node["bits"].as_u64() == Some(8))
-                        .then_some(("hash32", "Packed<[u8; 32]>")));
+                if let Some(width) = hash {
+                    return Ok((kind == "u" && node["bits"].as_u64() == Some(8)).then_some(
+                        if width == 16 {
+                            ("hash16", "Packed<[u8; 16]>")
+                        } else {
+                            ("hash32", "Packed<[u8; 32]>")
+                        },
+                    ));
                 }
                 return Ok(match (kind, node["bits"].as_u64()) {
                     ("u", Some(8)) => Some(("u8", "ByteBuf / Bytes<N> / serde_bytes")),

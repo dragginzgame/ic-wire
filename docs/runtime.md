@@ -5,6 +5,13 @@ and supplies its Rustdoc, quickstart, limits and wire contract.
 
 ## Explicit packed domain fields
 
+`Packed<[u8; 16]>` carries opaque 16-byte identifiers as one byte buffer. The
+`hash16` browser schema uses a flat `Uint8Array` and rejects partial identifiers.
+Adopting one ID changes `01 + 16 bytes` to `10 + 16 bytes`; eight IDs change
+`08 + 128 bytes` to `80 01 + 128 bytes`. Byte order is preserved. Coordinate
+identities and clients, retain retry/hash bytes, and requalify buffer budgets
+and field bounds. Existing fields keep their bytes, limits and acceptance.
+
 `serde_packed::bools` explicitly selects byte-buffer admission for `Vec<bool>`.
 Valid bytes match ordinary bool lists (`[false, true]`: `02 00 01`); Rust and
 generated `boolean[]` clients validate 00/01 before allocating decoded values.

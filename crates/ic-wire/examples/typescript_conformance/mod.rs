@@ -506,6 +506,11 @@ fn main() {
         ic_wire::Packed::new(vec![[0xab_u8; 32], [0xcd; 32]]),
         "Uint8Array.from([...new Uint8Array(32).fill(0xab),...new Uint8Array(32).fill(0xcd)])",
     );
+    f.add(ic_wire::Packed::<[u8; 16]>::new(vec![]), "new Uint8Array()");
+    f.add(
+        ic_wire::Packed::new(vec![core::array::from_fn::<_, 16, _>(|i| i as u8); 8]),
+        "Uint8Array.from({length:128}, (_,i)=>i%16)",
+    );
     // Issue #26: owned arbitrary unsigned evidence uses bounded byte magnitudes.
     // Canonical numeric conversion remains a consumer check; bytes are unchanged.
     f.add(

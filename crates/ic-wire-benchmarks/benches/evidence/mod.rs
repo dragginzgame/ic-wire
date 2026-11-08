@@ -35,6 +35,14 @@ pub fn with_fixtures(mut identity: Value) -> Value {
         hash(include_bytes!("../fixtures/byte_keys/mod.rs")).into(),
     );
     fields.insert(
+        "id16_fixture_sha256".into(),
+        hash(include_bytes!("../fixtures/id16/mod.rs")).into(),
+    );
+    fields.insert(
+        "packed_source_sha256".into(),
+        hash(include_bytes!("../../../ic-wire/src/packed/mod.rs")).into(),
+    );
+    fields.insert(
         "cost_smoke_fixture_sha256".into(),
         hash(include_bytes!("../fixtures/cost_smoke/mod.rs")).into(),
     );

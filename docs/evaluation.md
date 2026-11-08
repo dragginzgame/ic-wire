@@ -28,6 +28,14 @@ earlier measurements. Candid DTOs remain test-only; Wire
 serializes owned application representations. Private float/bool fields do not
 extend the production Packed element set or generated client contract.
 
+The maintained `id16` and `id16-control` cohorts each contain 20 workloads:
+0/1/8/128/4,096 identifiers in lists and filter records, with owned and
+borrowed-input encode paths. The control retains ordinary arrays; `id16` uses
+public Packed fields. Candid receives already-flat blobs in both cohorts and
+validates ID/cursor widths during decoding. Its DTO setup stays outside counters;
+the Wire borrowed-input path explicitly includes copying. These two additional
+cohorts do not retroactively change the historical 36-cohort results above.
+
 ## Maintained checks
 
 | Target | Evidence |

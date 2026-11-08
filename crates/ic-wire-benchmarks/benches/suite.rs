@@ -9,6 +9,7 @@
         feature = "byte-keys",
         feature = "contract-shapes",
         feature = "cost-smoke",
+        feature = "id16",
         feature = "coverage-shapes"
     ),
     expect(

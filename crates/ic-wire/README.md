@@ -173,6 +173,7 @@ Use these defaults when declaring a new contract:
 | Fixed-width binary data | `ic_wire::ByteArray<N>` | `Uint8Array` (exactly `N` bytes) |
 | Binary data with operation-level limits | `ic_wire::ByteBuf` or `Vec<u8>` with `#[serde(with = "serde_bytes")]` | `Uint8Array` |
 | Large homogeneous integer arrays | `Packed<T>` with `i16`, `u16`, `i32`, `u32`, `i64` or `u64` | Corresponding integer typed array |
+| Lists of 16-byte IDs | `Packed<[u8; 16]>` | Flat `Uint8Array` |
 | Lists of 32-byte hashes | `Packed<[u8; 32]>` | Flat `Uint8Array` |
 | Records, general collections or small-value varints | Ordinary `Vec<T>` or bounded `List<T,N>` | Array of element values |
 

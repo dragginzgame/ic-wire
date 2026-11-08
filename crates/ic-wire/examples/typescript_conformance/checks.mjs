@@ -392,9 +392,9 @@ assert.deepEqual(packedI16.decodeRequest(Uint8Array.from([...header,4,0,128,255,
 
 for (const [word, ctor, width] of [['i8',Int8Array,1], ['i16',Int16Array,2], ['u16',Uint16Array,2],
   ['i32',Int32Array,4], ['u32',Uint32Array,4], ['i64',BigInt64Array,8],
-  ['u64',BigUint64Array,8], ['hash32',Uint8Array,32]]) {
+  ['u64',BigUint64Array,8], ['hash16',Uint8Array,16], ['hash32',Uint8Array,32]]) {
   const codec = probe({k:'packed',word});
-  const value = new ctor(word === 'hash32' ? 32 : 2);
+  const value = new ctor(word.startsWith('hash') ? width : 2);
   const encoded = codec.encodeRequest(value);
   const offset = new Uint8Array(encoded.length + 1); offset.set(encoded,1);
   const decoded = codec.decodeRequest(offset.subarray(1));
@@ -407,3 +407,5 @@ for (const [word, ctor, width] of [['i8',Int8Array,1], ['i16',Int16Array,2], ['u
   assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,width,...new Uint8Array(width-1)])), WireError);
 }
 assert.throws(() => probe({k:'packed',word:'hash32'}).encodeRequest(new Uint8Array(31)),WireError);
+
+assert.throws(() => probe({k:'packed',word:'hash16'}).encodeRequest(new Uint8Array(15)),WireError);

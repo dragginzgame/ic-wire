@@ -39,6 +39,20 @@ mod sealed {
     )*};
 }
     words!(i8, i16, u16, i32, u32, i64, u64);
+    impl super::PackedElement for [u8; 16] {}
+    impl Word for [u8; 16] {
+        #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
+        const SCHEMA: &'static str = "hash16";
+        #[inline]
+        fn read_le(bytes: &[u8]) -> Self {
+            bytes.try_into().unwrap()
+        }
+        #[cfg(any(target_endian = "big", test))]
+        #[inline]
+        fn append_le(self, bytes: &mut Vec<u8>) {
+            bytes.extend_from_slice(&self);
+        }
+    }
     impl super::PackedElement for [u8; 32] {}
     impl Word for [u8; 32] {
         #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
@@ -59,7 +73,7 @@ mod sealed {
 ///
 /// Recommended for large homogeneous integer/hash fields. Use ordinary lists
 /// for general collections or when small-value varint compactness takes priority.
-/// Supports i8/i16/u16/i32/u32/i64/u64 and 32-byte hashes. Runtime [`crate::Limits`]
+/// Supports i8/i16/u16/i32/u32/i64/u64 and 16-/32-byte arrays. Runtime [`crate::Limits`]
 /// bound admission; this type has no per-field element limit. Small integers
 /// may use more bytes than ordinary lists. Switching from Vec requires coordinated
 /// consumers; see the packed-field guide.
@@ -93,6 +107,9 @@ impl<T: PackedElement> Serialize for Packed<T> {
         // Other existing packed encodings are unchanged.
         // Opt-in field layout: element count + per-element encoding becomes
         // byte count + fixed LE words. [32767_i16]: 01 fe ff 03 -> 02 ff 7f.
+        // One 16-byte ID changes 01 -> 10; metadata is hash16 / Uint8Array.
+        // Coordinate identities/clients and requalify buffer budgets on adoption.
+        // Existing field bytes, identities, budgets and acceptance are unchanged.
         // One 32-byte hash changes its prefix 01 -> 20; hash bytes are unchanged.
         // Adoption requires coordinated schemas/clients and retained retry bytes;
         // per-element traversal becomes byte-buffer accounting. Packed<T>

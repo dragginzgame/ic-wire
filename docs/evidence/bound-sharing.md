@@ -1,4 +1,73 @@
-# Sharing bounded-list decoding, pending Core 0.17.1
+# Bounded-list decoding: sharing and follow-up
+
+> Historical measurements: the raw `target/` artifacts were found retired on
+> 8 November. Results below describe the recorded runs, not retained proof.
+
+## Outer list visitor screen (7 November)
+
+Keep the existing production implementation. Sharing the outer Serde visitor for
+nonzero-sized elements with bounds above one passes the focused instruction
+comparison, but saves only **18 bytes at opt-3**, and none at opt-z, in the
+standard 391-case fixture. Its larger saving occurs in a varied-bound diagnostic;
+that does not establish an application benefit sufficient to justify another
+visitor. The candidate remains research, not a shipped optimization. Tiny-bound
+and zero-sized list specialization was retained in the experiment.
+
+Total uncompressed Wasm / code-section bytes for the standard fixture:
+
+| Variant | opt-z | opt-3 |
+| --- | ---: | ---: |
+| Current implementation | 594,548 / 547,752 | 891,435 / 830,841 |
+| Share the outer list visitor | 594,548 / 547,752 | 891,417 / 830,823 |
+| Also outline the list deserialize entry | 595,267 / 548,467 | 892,441 / 831,845 |
+| Outline bounded text's UTF-8 conversion only | 594,548 / 547,752 | 892,112 / 831,516 |
+
+The entry and text variants are independent alternatives against the current
+implementation. Both fail size screening and receive no runtime qualification.
+The visitor's additional ten-record diagnostic replaces each record's fixed
+byte array with `List<u8, 8192 + width>`, widths 1–10, retaining the other fields
+and runtime dispatch. Both sides use the identical diagnostic input/fixture.
+
+| Ten distinct bounds | Before total / code | Visitor total / code | Delta total / code |
+| --- | ---: | ---: | ---: |
+| opt-z | 88,777 / 77,034 | 87,917 / 76,173 | −860 / −861 |
+| opt-3 | 119,896 / 92,425 | 117,277 / 89,804 | −2,619 / −2,621 |
+
+Do not add these fixture savings together or project them onto Toko. This
+diagnostic has no native/IC timing result. No deployed application was rebuilt.
+
+The standard-corpus visitor comparison covers **52 cases / 1,594 paired IC
+operation rows**: every case with a bounded lane, u64-named controls and ordinary
+unit lists, at both profiles, with unchanged external Candid controls. The host
+filter preserves original case indices; guests retain the full corpus. All
+three unique-caller samples agree within each row. Exact frames and logical
+input hashes match, Candid modules/counters are identical, and **1,593 rows are
+unchanged**. The only movement is opt-3 bounded `relay-batch-128` decode:
+**299,192.5 → 299,191.5 instructions/op**. No row exceeds the existing
+5% + 64 instruction screen. Counts include result destruction/loop overhead,
+excluding setup and transport; small operations use four repetitions, large
+ones one. These are IC instructions, not cycles or native timings.
+
+The two focused native list tests pass in the candidate: hidden counts, bounds
+0/1/3/33, zero-sized elements, node refusal and refusal before decoding an excess
+element. Native performance and allocation/heap probes were not run because the
+candidate is not being promoted. No complete release gate or new full Candid
+matrix is claimed. Production bytes, schemas, identities, bounds, budget charges,
+malformed-input acceptance and decode order remain unchanged; no consumer action.
+
+Reproduce from `target/evidence/list-wrapper-20261107/`: `screen.sh`,
+`followup.sh`, `instructions.sh` and `compare-ic.mjs`. Retained source inventories,
+original/filtered host drivers, separate targets, build JSON, twelve fresh Wire
+modules, four Candid modules and paired raw samples bind the result. The filtered
+instruction driver embeds the bounded-code source hash and verifies returned
+frames; the comparison verifies those hashes and the installed module hashes.
+Baseline is **72ab905** plus pending Testkit **0.93.0** adoption, identical across
+pairs. Rust/Cargo **1.99.1**, LLVM **23.1.1**, `wasm32-unknown-unknown`, fat LTO,
+one codegen unit, panic abort, stripped symbols, no post-link optimizer;
+`evaluation` is opt-z and `benchmark-speed` opt-3. Prepared PocketIC **16.1.0**
+uses its retained SHA-256 `b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db`.
+
+## Earlier growth-loop sharing (Core 0.17.1)
 
 > Historical findings only. Raw measurements, snapshots, logs and build artifacts
 > were retired from this tree. A summary/hash cannot verify missing payloads.

@@ -52,7 +52,7 @@ clap = { version = "4.6.7", default-features = false, features = ["std", "help",
 dhat = "0.3.3"
 ic-build = { version = "0.78.0", default-features = false }
 ic-platform = { version = "0.25.0", default-features = false }
-ic-testkit = { version = "0.92.0", default-features = false }
+ic-testkit = { version = "0.93.0", default-features = false }
 libfuzzer-sys = "0.4.13"
 num-bigint = "0.4"
 sha2 = "0.10.9"

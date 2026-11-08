@@ -39,13 +39,13 @@ const { createCodec, WireError, arrays } = await import('data:text/javascript;ba
 assert.deepEqual(Array.from(new Uint8Array(new arrays.Uint16Array([0x1234]).buffer)), [0x12, 0x34]);
 const header = [73,87,1,0,0,0,0,0,0,0,0];
 let cases = 0;
-for (const [word, name, , setter, values] of [...specs, ['hash32', 'Uint8Array', '', '', Array.from({length:32}, (_,i)=>i)]]) {
+for (const [word, name, , setter, values] of [...specs, ['hash16', 'Uint8Array', '', '', Array.from({length:16}, (_,i)=>i)], ['hash32', 'Uint8Array', '', '', Array.from({length:32}, (_,i)=>i)]]) {
   const Ctor = arrays[name] ?? Uint8Array;
   for (const count of [0, 1, 3]) {
-    const selected = word === 'hash32' ? Array.from({length: count * 32}, (_,i)=>i % 32) : values.slice(0,count);
+    const selected = word.startsWith('hash') ? Array.from({length: count * values.length}, (_,i)=>i % values.length) : values.slice(0,count);
     const value = new Ctor(selected);
     const expected = new Uint8Array(value.byteLength);
-    if (word === 'hash32') expected.set(selected);
+    if (word.startsWith('hash')) expected.set(selected);
     else selected.forEach((v,i) => new DataView(expected.buffer)[setter](i * Ctor.BYTES_PER_ELEMENT, v, true));
     for (const schema of [{k:'packed',word}, ...(word === 'i16' ? [{k:'packed-i16',max:3}] : []), ...(word === 'i64' ? [{k:'packed',word,nonzero:true}] : [])]) {
       const codec = createCodec({id:'1',request:schema,response:schema,requestBytes:256,responseBytes:256,requestNodes:16,responseNodes:16,requestDepth:8,responseDepth:8});

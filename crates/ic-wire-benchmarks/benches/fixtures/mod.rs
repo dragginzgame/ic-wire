@@ -8,6 +8,7 @@ const _: () = assert!(
     cfg!(feature = "coverage-shapes") as usize
         + cfg!(feature = "contract-shapes") as usize
         + cfg!(feature = "cost-smoke") as usize
+        + cfg!(feature = "id16") as usize
         + cfg!(feature = "byte-keys") as usize
         + cfg!(feature = "hotspots") as usize
         + cfg!(feature = "bulk") as usize
@@ -25,6 +26,8 @@ mod byte_keys;
 mod cost_smoke;
 #[cfg(feature = "hotspots")]
 mod hotspots;
+#[cfg(feature = "id16")]
+mod id16;
 #[cfg(feature = "packed-i16")]
 mod packed_i16;
 #[cfg(feature = "derive-scale")]
@@ -304,6 +307,10 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     {
         byte_keys::cases_selected(selected)
     }
+    #[cfg(feature = "id16")]
+    {
+        id16::cases_selected(selected)
+    }
     #[cfg(feature = "cost-smoke")]
     {
         cost_smoke::cases_selected(selected)
@@ -332,6 +339,7 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         feature = "hotspots",
         feature = "byte-keys",
         feature = "cost-smoke",
+        feature = "id16",
         feature = "contract-shapes",
         feature = "coverage-shapes"
     )))]

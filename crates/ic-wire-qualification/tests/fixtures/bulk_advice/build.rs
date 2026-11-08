@@ -9,6 +9,7 @@ fn main() {
             "k":"record","fields":[
                 {"name":"data","value":{"k":"list","item":{"k":"u","bits":8}}},
                 {"name":"words","value":{"k":"list","item":{"k":"u","bits":16}}},
+                {"name":"ids","value":{"k":"list","item":{"k":"array","max":16,"item":{"k":"u","bits":8}}}},
                 {"name":"flags","value":{"k":"list","item":{"k":"bool"}}}
             ]
         }),
@@ -21,6 +22,7 @@ fn main() {
         );
     }
     if case == "all" || case == "stale" {
+        acknowledgements.insert("/types/Payload/fields/ids/list/hash16".into(), "Small bounded ID list".into());
         acknowledgements.insert("/types/Payload/fields/flags/list/bool".into(), "Bounded admin flags".into());
         acknowledgements.insert(
             "/types/Payload/fields/words/list/u16".into(),

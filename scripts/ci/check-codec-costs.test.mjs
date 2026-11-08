@@ -17,7 +17,7 @@ function fixture(t) {
       server_version:'fixture 1',sample_caller:'unique callers',small_repetitions:4,large_repetitions:1,artifacts:[]};
     for(const field of ['workspace_manifest_sha256','lock_sha256','server_sha256','fixture_sha256',
       'hotspots_fixture_sha256','bulk_fixture_sha256','packed_i16_fixture_sha256','toko_fixture_sha256',
-      'derive_fixture_sha256','byte_keys_fixture_sha256','cost_smoke_fixture_sha256','shapes_fixture_sha256','driver_sha256','wasm_driver_sha256','evidence_helper_sha256','operations_sha256',
+      'derive_fixture_sha256','byte_keys_fixture_sha256','cost_smoke_fixture_sha256','id16_fixture_sha256','shapes_fixture_sha256','driver_sha256','wasm_driver_sha256','evidence_helper_sha256','operations_sha256',
       'native_encoder_sha256','native_decoder_sha256','native_admission_sha256']) identity[field]=sha(field);
     let csv='profile,codec,wasm_bytes,wasm_sha256,code_section_bytes\n',call=0;const rows=[];
     for(const profile of profiles) for(const codec of ['wire','candid']) {
@@ -85,6 +85,7 @@ for(const [name,change,expected] of [
   ['dependency drift',f=>f.identity(v=>v.lock_sha256=sha('other lock')),/identity mismatch/],
   ['producer helper drift',f=>f.identity(v=>v.evidence_helper_sha256=sha('other producer')),/identity mismatch/],
   ['missing operation layout identity',f=>f.identity(v=>delete v.operations_sha256),/missing identity/],
+  ['ID fixture drift',f=>f.identity(v=>v.id16_fixture_sha256=sha('other ID fixture')),/identity mismatch/],
   ['nested fixture drift',f=>f.identity(v=>v.derive_fixture_sha256=sha('other scale fixture')),/identity mismatch/],
   ['Candid counter drift',f=>f.rows(rows=>{const r=rows.find(r=>r.codec==='candid');r.samples_instructions=[4004,4004,4004];r.median_instructions_per_op=1001;}),/Candid control changed/],
   ['missing compiler',f=>f.identity(v=>delete v.compiler),/missing identity/],

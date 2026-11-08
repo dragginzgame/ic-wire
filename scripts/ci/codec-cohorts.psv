@@ -34,3 +34,5 @@ adapter-borrowed-100|adapter-scale|wire-bounded
 adapter-dto-1|adapter-scale,adapter-scale-dto,derive-scale-1|wire-bounded
 adapter-dto-10|adapter-scale,adapter-scale-dto,derive-scale-10|wire-bounded
 adapter-dto-100|adapter-scale,adapter-scale-dto|wire-bounded
+id16|id16|wire-native
+id16-control|id16-control|wire-native

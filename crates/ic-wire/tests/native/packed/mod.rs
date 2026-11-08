@@ -50,7 +50,7 @@ fn invalid_widths_and_noncanonical_lengths_are_rejected() {
             assert_eq!(ic_wire::native::decode::<Packed<$ty>>(&[0x80, 0], LIMITS), Err(ic_wire::Error::Malformed));
         )*};
     }
-    check!(i8, i16, u16, i32, u32, i64, u64, [u8; 32]);
+    check!(i8, i16, u16, i32, u32, i64, u64, [u8; 16], [u8; 32]);
 }
 
 #[test]
@@ -269,6 +269,7 @@ fn packed_length_prefixes_offsets_and_budget_boundaries() {
     check::<u32>();
     check::<i64>();
     check::<u64>();
+    check::<[u8; 16]>();
     check::<[u8; 32]>();
 }
 
@@ -302,4 +303,65 @@ fn signed_bytes_keep_vec_bytes_but_use_bulk_admission() {
             Err(ic_wire::Error::Limit)
         );
     }
+}
+
+#[test]
+fn packed_ids_preserve_order_and_require_explicit_adoption() {
+    let ids = vec![core::array::from_fn::<_, 16, _>(|i| i as u8); 8];
+    let ordinary = ic_wire::native::encode(&ids, LIMITS).unwrap();
+    let pointer = ids.as_ptr();
+    let packed = Packed::new(ids);
+    let bytes = ic_wire::native::encode(&packed, LIMITS).unwrap();
+    // Explicit field adoption: element count 08 -> byte count 80 01.
+    // IDs keep byte order; coordinate clients/identities and review buffer budgets.
+    assert_eq!(&ordinary[..1], &[8]);
+    assert_eq!(&bytes[..2], &[0x80, 1]);
+    assert_eq!(&ordinary[1..], &bytes[2..]);
+    // Freeze buffer admission independently of the search-based boundary test:
+    // the payload plus eight times two Vec headers (encode), or one (decode),
+    // and 128 visited buffer bytes. This is an allowance, not physical heap.
+    let header = match usize::BITS {
+        32 => 12,
+        64 => 24,
+        _ => panic!("unqualified target"),
+    };
+    let encode_at = bytes.len() + 8 * (2 * header + 128);
+    let decode_at = bytes.len() + 8 * (header + 128);
+    for (allocation, accepted) in [(encode_at - 1, false), (encode_at, true)] {
+        let result = ic_wire::native::encode(
+            &packed,
+            ic_wire::Limits {
+                bytes: bytes.len(),
+                allocation,
+                ..LIMITS
+            },
+        );
+        if accepted {
+            assert_eq!(result.unwrap(), bytes);
+        } else {
+            assert_eq!(result, Err(ic_wire::Error::Limit));
+        }
+    }
+    for (allocation, accepted) in [(decode_at - 1, false), (decode_at, true)] {
+        let result = ic_wire::native::decode::<Packed<[u8; 16]>>(
+            &bytes,
+            ic_wire::Limits {
+                bytes: bytes.len(),
+                allocation,
+                ..LIMITS
+            },
+        );
+        if accepted {
+            assert_eq!(result.unwrap(), packed);
+        } else {
+            assert_eq!(result, Err(ic_wire::Error::Limit));
+        }
+    }
+    let recovered = packed.into_vec();
+    assert_eq!(recovered.as_ptr(), pointer);
+    #[cfg(feature = "typescript")]
+    assert_eq!(
+        ic_wire::typescript::native_schema::<Packed<[u8; 16]>>().unwrap(),
+        serde_json::json!({"k":"packed","word":"hash16"})
+    );
 }

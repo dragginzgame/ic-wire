@@ -48,6 +48,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "byte-keys",
         feature = "contract-shapes",
         feature = "cost-smoke",
+        feature = "id16",
         feature = "coverage-shapes"
     )))]
     {
@@ -66,6 +67,8 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
             "727cb175a2460a051490b723693e2f1d4c74713a866d6f89681028043e3f053e"
         );
     }
+    #[cfg(feature = "id16")]
+    assert_eq!(cases.len(), 20);
     #[cfg(feature = "bulk")]
     assert_eq!(cases.len(), 109); // Includes ten i8 small/wide length controls.
     #[cfg(feature = "toko")]
@@ -90,6 +93,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "byte-keys",
         feature = "contract-shapes",
         feature = "cost-smoke",
+        feature = "id16",
         feature = "coverage-shapes"
     )))]
     for length in [4096, 1_048_576] {

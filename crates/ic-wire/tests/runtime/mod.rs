@@ -327,6 +327,7 @@ fn typescript_registry_rejects_invalid_optional_collection_bounds() {
         json!("u32"),
         json!("i64"),
         json!("u64"),
+        json!("hash16"),
         json!("hash32"),
         json!("f64"),
         Value::Null,

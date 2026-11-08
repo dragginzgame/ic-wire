@@ -1,9 +1,256 @@
 # Follow-up: advice, missing Candid controls and private bulk research
 
-> Earlier findings below are historical: their raw artifacts were retired.
-> The checked bool-copy follow-up retains its current raw artifacts under
-> `target/evidence/bool-copy-20261107/`, outside Git. A summary/hash cannot
-> verify missing payloads; use the maintained commands for fresh measurements.
+> The 7 November and older raw artifacts were found retired on 8 November.
+> Those sections are historical; their original paths no longer provide proof.
+> New qualification uses the maintained ID cohorts and fresh output directories.
+
+## Public 16-byte IDs and flat Candid (8 November)
+
+Keep explicit `Packed<[u8; 16]>` support for pending Core **0.17.13**. It uses the
+existing sealed word implementation and byte-buffer codec, with no arbitrary-width
+generic family, second codec or automatic field rewriting. Host metadata uses
+`hash16`; generated clients use a flat `Uint8Array` with length divisible by 16.
+Default advice recognizes ordinary ID lists and retains exact-path suppression.
+
+The maintained `id16` / `id16-control` cohorts compare the same 20 workloads:
+lists and filter records at 0/1/8/128/4,096 IDs, with owned and borrowed-input
+encode paths. Candid now receives **one flattened blob**, including a decode-time
+width check, rather than thousands of byte vectors. Filter cursors also validate
+16-byte width. Candid setup is outside counters; its decoded bytes are not copied
+into an array vector. Wire's borrowed-input control includes cloning its existing
+array vector before wrapping it. This favors an already-flat Candid consumer and
+is not an equal-cost application conversion benchmark.
+
+**IC instructions/op for 4,096 owned IDs**, including normal codec framing:
+
+| Representation | opt-z encode / decode | opt-3 encode / decode | Frame bytes |
+| --- | ---: | ---: | ---: |
+| Ordinary Wire arrays | 10,098,515 / 11,609,194 | 5,096,419 / 7,483,283 | 65,549 |
+| Public Packed IDs | 67,609 / 112,047 | 66,637 / 66,620 | 65,550 |
+| Flattened Candid + width check | 155,418 / 96,673 | 149,171 / 85,862 | 65,548 |
+
+The earlier approximately 129× Candid decode comparison was against nested
+vectors. Against this flattened control, opt-3 Wire uses **55.3% fewer encode
+and 22.4% fewer decode instructions**. At opt-z, large-list decode is **15.9%
+more expensive than Candid**, while encode still wins. These are the two losses
+among 80 primary comparisons, counting both ownership controls; all 40 opt-3
+comparisons favor Wire. Keep this remaining gap visible rather than adding a
+separate decoder to chase it.
+
+All 64 nonempty comparisons improve over ordinary arrays. Thirteen empty-input
+comparisons regress by 23–186 instructions. Empty-list opt-3 encode/decode is
+**673.25 / 411 → 709.25 / 467**; singleton is **1,966.25 / 2,557 → 835.25 / 804**.
+For 128 IDs it is **160,040.25 / 236,116 → 2,950.25 / 2,942**, with unchanged
+2,061-byte Wire frames. Borrowed-input large encode costs **133,873 / 132,725**
+opt-z/3 instructions. It adds a 64 KiB temporary and changes measured peak payload
+heap from 65,549 to 131,086 bytes (two allocations instead of one). Owned-vector
+wrapping/recovery preserves the allocation. Packed decode keeps the same 64 KiB
+peak while eliminating the ordinary vector's ten reallocations. Separate native
+allocator/heap probes record these costs; they are not IC heap measurements.
+
+Whole ID fixture **uncompressed Wasm total / code-section bytes**:
+
+| Representation | opt-z | opt-3 |
+| --- | ---: | ---: |
+| Ordinary Wire arrays | 51,772 / 42,422 | 56,205 / 47,075 |
+| Public Packed IDs | 50,288 / 40,942 | 55,757 / 46,616 |
+| Flattened Candid | 280,150 / 250,103 | 457,612 / 428,658 |
+
+Packed saves **1,484 / 1,480** total/code bytes at opt-z and **448 / 459** at
+opt-3 in this maintained fixture. Do not compare these deltas with the earlier
+prototype as if only production code changed: the fixture also changed. These
+are complete fixture modules, not projected application savings.
+
+A separate existing **109-case bulk** fixture is byte-identical before/after
+adding the unused element implementation at both profiles: **98,123 / 86,970**
+opt-z and **122,644 / 112,201** opt-3 total/code bytes. The new support adds no
+linked Wasm in this control when it is unused; this is not a proof for every app.
+
+Native medians in **µs**, run 1 / run 2 (eleven samples per run):
+
+| Profile / owned operation | Ordinary Wire | Packed Wire | Flat Candid |
+| --- | ---: | ---: | ---: |
+| opt-z encode | 299.910 / 325.416 | 1.046 / 1.086 | 2.676 / 2.857 |
+| opt-z decode | 383.936 / 399.820 | 0.986 / 1.068 | 1.862 / 1.903 |
+| opt-3 encode | 103.909 / 96.323 | 1.028 / 1.035 | 2.489 / 2.508 |
+| opt-3 decode | 143.826 / 125.319 | 1.033 / 1.037 | 1.567 / 1.605 |
+
+Native time and IC instructions are different measurements; opt-z demonstrates
+why one cannot substitute for the other. The host is a shared Threadripper 7970X,
+not latency-isolated. Generator timing, full application Wasm, actual native
+big-endian execution and installed consumer integration were not measured here.
+
+Rust exact-byte/width/prefix/unaligned/admission tests pass. Browser qualification
+passes 178 bidirectional vectors, 39,448 differential mutations, and 66 simulated
+big-endian cases. Standalone no_std host/Wasm consumers pass with and without
+metadata, including codec-only dependency isolation. Core and both benchmark
+cohorts pass Clippy; default advice visibility/suppression and dependency
+boundaries pass. The consumer-owned conversion and JSON projection still need
+review when adopting a field.
+
+**Adoption:** one ID changes `01 + 16 bytes` to `10 + 16 bytes`; eight change
+`08 + 128 bytes` to `80 01 + 128 bytes`. Opaque ID bytes retain their order.
+Coordinate identities and clients, preserve original retry/hash bytes, and
+requalify buffer budgets and field bounds. Existing fields keep their bytes,
+identities, limits and acceptance. No compatibility reader is introduced.
+
+Fresh evidence: `target/evidence/id16-flat-20261108/`, with paired `ordinary` and
+`packed` source copies and separate Cargo targets, `run.sh`, `compare.mjs`,
+`comparison.json`, `verified-artifacts.json`, and `size-controls.sh` /
+`unchanged-size.csv`. Baseline is **72ab905** Core source plus the new ordinary
+fixture and current lock; candidate is the public implementation and Packed
+fixture selection. All eight measured guest builds are fresh, as are the four
+existing-field size controls. Baked runtime/fixture/lock hashes and all 16 native
+run identities match retained inputs/executables. Each of the 800 IC rows has
+three identical samples. Candid frames, counters and total/code sizes match
+between cohorts; its binary hashes differ between feature builds, so they are
+not claimed byte-identical.
+
+Rust/Cargo **1.99.1**, LLVM **23.1.1**, Candid **0.10.40**, Platform **0.25.1**,
+Types **0.18.2**, Runtime **0.20.0**, Testkit **0.93.0**, PocketIC **16.1.0**.
+The pre-existing 0.25.1 selection stayed unchanged throughout qualification.
+Profiles use fat LTO, one codegen unit, panic abort and stripped symbols, without
+post-link optimization. Reproduce both cohorts with the documented evaluator in
+fresh directories and the same prepared server. No full release gate or complete
+38-cohort matrix was run; the historical 36-cohort results are not relabelled.
+
+## Packed 16-byte ID experiment (7 November)
+
+This historical prototype is superseded by the public qualification above.
+
+**Promising for explicit field adoption; research only.** Extend the existing
+sealed Packed element set in disposable sources with `[u8; 16]`, using the same
+reader and byte-buffer codec as `[u8; 32]`. Do not introduce an arbitrary-width
+generic family or a second codec. Production sources, supported schemas, bytes,
+identities, budgets and acceptance remain unchanged; no consumer action is needed
+for this experiment. Public promotion still needs Rust/TypeScript schema,
+cross-endian, admission, standalone-consumer and default-advice qualification.
+
+Twenty workloads cover lists and filter records at 0/1/8/128/4,096 IDs, each with
+owned fields and conversion from borrowed ordinary data. Compare ordinary
+`Vec<[u8; 16]>`, existing `Vec<ByteArray<16>>`, and prototype `Packed<[u8; 16]>`.
+Filters also contain an optional ordinary ID cursor, a bool and a u16 limit.
+IDs use identical deterministic mixed bytes. Candid's identical external DTOs
+use lists of byte vectors; their construction is outside measurements and they
+do not enforce the fixed 16-byte width. These are valid-value codec comparisons,
+not equivalent malformed-value policies or whole application measurements.
+
+IC instructions/op for **4,096 owned IDs**, with complete frame bytes:
+
+| Representation | opt-z encode / decode | opt-3 encode / decode | Frame bytes |
+| --- | ---: | ---: | ---: |
+| Ordinary arrays | 10,098,515 / 11,609,169 | 5,096,419 / 7,483,281 | 65,549 |
+| ByteArray fields | 2,967,380 / 967,796 | 488,416 / 704,399 | 69,645 |
+| Packed prototype | 67,609 / 112,022 | 66,637 / 66,618 | 65,550 |
+| External Candid DTO | 2,072,287 / 13,407,128 | 979,501 / 8,595,661 | 69,645 |
+
+Packed reduces opt-3 encode/decode instructions by **98.7% / 99.1%** against
+ordinary arrays. It beats this Candid control in all 80 primary comparisons.
+All 64 nonempty comparisons improve over ordinary arrays, including singleton
+and record controls. Thirteen empty-input comparisons regress by **23–186**
+instructions; for example empty-list opt-3 encode/decode changes
+**673.25 / 409 → 709.25 / 465**. This is not an unconditional improvement.
+For 128 owned IDs, opt-3 encode/decode changes
+**160,040.25 / 236,114 → 2,950.25 / 2,940**, with unchanged 2,061-byte frames.
+The corresponding filter changes **162,497.25 / 238,165 → 4,032.25 / 4,825**.
+
+Wrapping an owned vector in Packed and recovering it preserves its allocation;
+the focused test checks the pointer. Borrowed-input encoding includes one clone
+before encoding, not hidden setup: 4,096-ID Packed encode becomes
+**133,873 / 132,725** opt-z/3 instructions. Its peak measured payload heap grows
+from **65,549 to 131,086 bytes**, with two allocations instead of one. Owned
+Packed decode keeps a 65,536-byte peak but eliminates ordinary/ByteArray decoding's
+ten reallocations. Native allocator and peak-heap probes are separate builds.
+
+Repeated native medians, µs; each cell is run 1 / run 2, with eleven samples/run:
+
+| 4,096 IDs | opt-z ordinary | opt-z Packed | opt-3 ordinary | opt-3 Packed |
+| --- | ---: | ---: | ---: | ---: |
+| Owned encode | 291.540 / 300.831 | 1.100 / 1.099 | 97.338 / 99.281 | 1.026 / 1.194 |
+| Owned decode | 336.286 / 339.947 | 1.815 / 1.782 | 127.843 / 127.480 | 1.026 / 1.237 |
+| Encode including borrowed-input copy | 295.297 / 294.703 | 2.028 / 2.050 | 96.040 / 97.935 | 2.291 / 2.698 |
+
+These are serial warm microbenchmarks on a shared Threadripper 7970X host, not IC
+instructions or request latency. Sample variation remains visible; do not project
+these ratios onto consumer traffic. Truncating the large list frame costs
+**11,609,043 / 7,483,225 → 777 / 686** opt-z/3 instructions: the packed byte count
+permits refusal before payload allocation/traversal. Truncating a filter's final
+scalar still decodes its preceding ID field; this is not universal constant-time
+malformed-input rejection. Wrong-header and loop controls are also retained.
+
+Whole 20-workload fixture **uncompressed Wasm total / code-section bytes**:
+
+| Representation | opt-z | opt-3 |
+| --- | ---: | ---: |
+| Ordinary arrays | 51,419 / 42,067 | 55,768 / 46,630 |
+| ByteArray fields | 51,049 / 41,696 | 57,012 / 47,860 |
+| Packed prototype | 49,935 / 40,587 | 56,370 / 47,213 |
+| Candid | 287,343 / 257,048 | 468,862 / 439,710 |
+
+Packed saves **1,484 total / 1,480 code bytes at opt-z**, but adds
+**602 / 583 bytes at opt-3**. Both ownership paths remain reachable in these
+modules. This is a field-representation tradeoff, not a general Wasm reduction
+or an application savings claim. No consumer compiler settings were changed.
+
+Potential adoption changes the payload prefix from an **element count** to a
+**byte count**: one ID changes `01 + 16 bytes` to `10 + 16 bytes`; eight change
+`08 + 128 bytes` to `80 01 + 128 bytes`. ID bytes retain their original order.
+The byte count must be divisible by 16; partial words are malformed. Adopters
+must coordinate contract identities/clients and requalify buffer admission and
+field bounds. Preserve original retry/hash bytes. Never rewrite existing Serde
+fields silently or add an old-layout reader. The current public API is unchanged.
+
+Reproduction: `target/evidence/id16-20261107/{screen.sh,run.sh,compare.mjs,
+verify-screen.mjs}` with `ordinary`, `bytes` and `packed` paired source/target
+directories. Each source includes the same experimental element impl; only the
+selected fixture representation differs. The normal `cost-smoke` fixture is
+replaced only in these disposable sources, retaining the existing evaluator.
+Use fresh output directories and a prepared PocketIC server for reruns. Baseline
+is **72ab905** plus pending Testkit **0.93.0**; Rust/Cargo **1.99.1**, LLVM
+**23.1.1**, Candid **0.10.40**, Platform **0.25.0**, Types **0.18.2**, Runtime
+**0.20.0**, PocketIC **16.1.0**. Both Wasm profiles use fat LTO, one codegen unit,
+panic abort and symbol stripping, without a post-link optimizer.
+
+All three seven-test runs pass, including exact bytes, prefix truncations,
+trailing input, partial packed width and the relevant corpus roundtrips.
+Twelve fresh guest modules, baked source/lock/input identities and all 24 native
+run identities are verified. The 1,200 IC rows each have three identical samples;
+Candid modules and counters are identical across all three representations.
+`comparison.json` retains every row, regression, native run and allocation/heap
+probe. No full production matrix or installed consumer qualification was rerun.
+
+## Public bool decoder size screen (7 November)
+
+Reject three further candidates; no production change is kept. The current
+124-case `wire,research-bulk` fixture exercises the public bool adapter alongside
+the existing private float controls. All candidates grow both total uncompressed
+Wasm and its code section, so none advances to native timing or IC qualification.
+Compilation and size measurements do not prove their runtime performance or
+malformed-input correctness. Production bytes, schemas, identities, budgets and
+acceptance remain unchanged; consumers take no action.
+
+| Variant | opt-z total / code bytes | opt-3 total / code bytes |
+| --- | ---: | ---: |
+| Current decoder | 215,993 / 181,506 | 271,026 / 238,940 |
+| Outline the validation/allocation/copy visitor | 216,080 / 181,592 | 271,114 / 239,027 |
+| Outline only the safe checked cast | 216,055 / 181,567 | 271,126 / 239,039 |
+| Validate 32-byte chunks by OR reduction, then construct bools | 216,103 / 181,600 | 271,327 / 239,241 |
+
+The two outlining variants add 62–100 total bytes. Chunked validation adds
+110/301 total bytes at opt-z/3. These are complete fixture modules, not projected
+application savings. Native time, IC instructions, allocation/heap comparisons
+and new Candid measurements were deliberately not run after the size refusal.
+
+Reproduction and all eight fresh modules remain under
+`target/evidence/bool-outline-20261107/`: `screen.sh`, `chunked.sh`, `size.csv`,
+`sources.json`, per-variant sources, separate Cargo targets and build JSON/logs.
+Baseline is **72ab905** plus the pending Testkit **0.93.0** adoption; each candidate
+differs only in `serde_packed/bools/mod.rs`. Source inventories verify identical
+manifests, lock, corpus and profiles; Cargo marks every Core/guest artifact as
+rebuilt, and retained module hashes match the emitted artifacts. Rust/Cargo
+**1.99.1**, LLVM **23.1.1**, `wasm32-unknown-unknown`, fat LTO, one codegen unit,
+panic abort, symbol stripping, no post-link optimizer. `evaluation` uses opt-z;
+`benchmark-speed` uses opt-3. No consumer profile setting is changed.
 
 ## Checked bool-copy follow-up (7 November)
 

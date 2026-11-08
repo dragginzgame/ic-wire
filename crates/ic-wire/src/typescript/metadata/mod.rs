@@ -192,7 +192,7 @@ pub(super) fn ty(
                 "u32" => "Uint32Array",
                 "i64" => "BigInt64Array",
                 "u64" => "BigUint64Array",
-                "hash32" => "Uint8Array",
+                "hash16" | "hash32" => "Uint8Array",
                 _ => return Err(GenerationError::Schema),
             }
         ),

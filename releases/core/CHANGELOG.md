@@ -7,6 +7,48 @@ in [shared history](../history.md).
 
 ## [0.17.13]
 
+### ➕ Added
+
+- Support explicit `Packed<[u8; 16]>` fields through the existing bulk codec,
+  with `hash16` metadata, flat `Uint8Array` browser values and default advice for
+  ordinary ID lists. Reject partial IDs and preserve byte order on every endian
+  target. Adopting one ID changes `01 + 16 bytes` to `10 + 16 bytes`; coordinate
+  contract identities/clients, retain retry bytes and requalify buffer budgets
+  and field bounds. Existing field encodings and acceptance stay unchanged.
+
+### 🧪 Testing
+
+- Add maintained 20-workload ID and ordinary-control cohorts against flattened
+  Candid blobs, including fixed-width validation, borrowed-input copy costs,
+  empty/singleton controls, native allocation/heap probes and raw Wasm size.
+  Qualify Rust/TypeScript bytes, malformed input, endian helpers, standalone
+  codec/schema host and Wasm graphs, and visible/suppressible ID-list advice.
+  Flat Candid removes the earlier nested-vector amplification: Wire wins 78/80
+  primary comparisons, with large-list opt-z decode 15.9% slower than Candid.
+  Existing bulk-field Wasm is unchanged when the new type is unused.
+  [Results](../../docs/evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november).
+
+- Investigate bounded-list visitor sharing and text validation. Retain the list
+  candidate as research: only 18 standard-corpus Wasm bytes saved at opt-3,
+  no opt-z saving, and effectively unchanged costs across 1,594 paired IC rows.
+  Larger varied-bound fixture savings do not establish application savings.
+  Reject entry/text outlining; keep production code and contracts unchanged.
+  [Results](../../docs/evidence/bound-sharing.md#outer-list-visitor-screen-7-november).
+
+- Screen three bool decoder optimizations with fresh paired Wasm artifacts.
+  Reject visitor/checked-cast outlining and chunked validation because all grow
+  uncompressed total/code size at both profiles. Production code is unchanged;
+  no native or IC speed improvement is claimed.
+  [Results](../../docs/evidence/primitive-bulk.md#public-bool-decoder-size-screen-7-november).
+
+### ⬆️ Dependencies
+
+- Adopt Testkit 0.93 for native benchmark and Endpoint qualification. Align its
+  Platform facade with the existing 0.25 selection, removing the duplicate 0.24
+  supplier. Wire does not match Testkit's changed CBOR error variant; no caller
+  migration is required. Published Wire sources, dependency contracts, bytes,
+  schemas, identities, budgets and acceptance remain unchanged.
+
 ### 🧹 Cleanup
 
 - Remove unused Platform BLAKE3 selection from the private identity fixture and
@@ -22,9 +64,10 @@ in [shared history](../history.md).
   generator/build/manifest exceptions.
   [#49](https://github.com/dragginzgame/ic-wire/issues/49).
 
-These are deferred maintenance notes for the next independently justified Core
-release, not a publication request. Package versions, codec bytes, schemas,
-identities, limits and acceptance remain unchanged; no consumer action is needed.
+The new Packed element support justifies a Core patch release; the earlier
+private maintenance alone did not. Versions remain unchanged until delivery.
+Existing bytes, identities, limits and acceptance are preserved; only consumers
+adopting the new field representation need coordinated schema/budget changes.
 
 ## [0.17.12] - 2026-11-07
 

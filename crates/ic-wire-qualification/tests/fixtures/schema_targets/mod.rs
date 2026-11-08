@@ -38,6 +38,7 @@ pub struct Domain<T> {
     pub queue: alloc::collections::BinaryHeap<u64>,
     #[serde(with = "::ic_wire::serde_packed::bools")]
     pub flags: Vec<bool>,
+    pub opaque_ids: ic_wire::Packed<[u8; 16]>,
 }
 
 pub fn roundtrip() -> Result<(), ic_wire::Error> {
@@ -85,12 +86,15 @@ pub fn roundtrip() -> Result<(), ic_wire::Error> {
         ids: alloc::vec![core::num::NonZeroI64::new(-1).unwrap()],
         queue: alloc::collections::BinaryHeap::from(alloc::vec![1]),
         flags: alloc::vec![false, true],
+        opaque_ids: ic_wire::Packed::new(alloc::vec![[0x95; 16]]),
     };
     let bytes = ic_wire::native::encode(&domain, limits)?;
-    assert_eq!(bytes, [7, 8, 255, 255, 255, 255, 255, 255, 255, 255, 8, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1]);
+    assert_eq!(&bytes[..22], &[7, 8, 255, 255, 255, 255, 255, 255, 255, 255, 8, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1]);
+    assert_eq!(&bytes[22..], &[alloc::vec![16], alloc::vec![0x95;16]].concat());
     let decoded: Domain<u8> = ic_wire::native::decode(&bytes, limits)?;
     assert_eq!(decoded.ids, domain.ids);
     assert_eq!(decoded.flags, domain.flags);
+    assert_eq!(decoded.opaque_ids, domain.opaque_ids);
     assert_eq!(decoded.queue.into_sorted_vec(), [1]);
     Ok(())
 }
@@ -109,6 +113,7 @@ fn metadata_and_runtime() {
         assert_eq!(schema["fields"][1]["value"]["nonzero"], true);
         assert_eq!(schema["fields"][2]["value"]["word"], "u64");
         assert_eq!(schema["fields"][3]["value"]["word"], "bool");
+        assert_eq!(schema["fields"][4]["value"]["word"], "hash16");
         let schema = ic_wire::typescript::native_schema::<Page<u64>>().unwrap();
         assert_eq!(schema["fields"][0]["name"], "entries");
         assert_eq!(schema["fields"][0]["value"]["k"], "list");

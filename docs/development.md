@@ -560,7 +560,7 @@ the new `tree-depth-7` row have different inputs and must not be paired. The
 upstream guard also adds Candid admission work; old codec reports keep their
 recorded Platform version and do not quantify this new comparison cost.
 For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
-prepared server and run `make evaluate-codec-matrix`. The maintained 36-cohort
+prepared server and run `make evaluate-codec-matrix`. The maintained 38-cohort
 roster (including `hotspots`) covers standard/Toko corpora, 1/10/100 ordinary
 derived records, bounded packed-i16 and
 ordinary controls, shared/varied bound records, and generic packed integer/hash
@@ -614,6 +614,10 @@ CORPUS_FEATURE=toko POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/evidence/toko-comparison
 CORPUS_FEATURE=derive-scale POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/evidence/derive-100-comparison
+CORPUS_FEATURE=id16 POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh /absolute/new/id16-output
+CORPUS_FEATURE=id16-control POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh /absolute/new/id16-control-output
 CORPUS_FEATURE=cost-smoke POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/evidence/cost-smoke-comparison
 CORPUS_FEATURE=contract-shapes POCKET_IC_BIN=/path/to/pocket-ic \

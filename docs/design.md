@@ -109,7 +109,7 @@ change to runtime limits, wire acceptance, bytes, field order or method IDs.
 ## Field selection
 
 New contracts should use byte-oriented fields for binary data and `Packed<T>`
-for large homogeneous arrays of its supported integers or 32-byte hashes.
+for large homogeneous arrays of its supported integers, 16-byte IDs or 32-byte hashes.
 These fields expose contiguous data to the existing Serde byte-buffer path.
 Use ordinary collections for records, general shapes and small integers where
 varint compactness is the priority. This is a declaration convention, not an

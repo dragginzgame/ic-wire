@@ -16,7 +16,8 @@ selected dynamically from the current input length.
 
 `ic_wire::Packed<T>` is an owned field in the production Serde/Postcard codec,
 not a second codec. It supports seven fixed-width integer types (`i8`, `i16`, `u16`,
-`i32`, `u32`, `i64`, `u64`) and 32-byte hashes (`[u8; 32]`). Floats, arbitrary
+`i32`, `u32`, `i64`, `u64`), 16-byte identifiers (`[u8; 16]`) and 32-byte hashes
+(`[u8; 32]`). Floats, arbitrary
 structs and platform-sized integers are excluded by a sealed element trait.
 Use ordinary Serde derives and `ic_wire::Wire` metadata as usual. For byte data,
 keep using `Bytes<N>`, `ic_wire::ByteBuf` or the qualified `serde_bytes` adapter.
@@ -47,6 +48,7 @@ retain their order. Examples show payload bytes, excluding the unchanged envelop
 | --- | --- | --- |
 | `[32767_i16]` | `01 fe ff 03` | `02 ff 7f` |
 | `[1_u32]` | `01 01` | `04 01 00 00 00` |
+| One 16-byte ID | `01` + 16 bytes | `10` + 16 bytes |
 | One 32-byte hash | `01` + 32 bytes | `20` + 32 bytes |
 | Empty list | `00` | `00` |
 
@@ -54,7 +56,10 @@ Switch producers and consumers together, regenerate clients and keep original
 retry bytes. There is no legacy lane or automatic format detection. Do not treat
 same bytes for empty inputs as general compatibility. Decoding rejects partial
 words, truncated buffers and noncanonical length prefixes. It supports unaligned
-input and returns owned storage. Canonical hashing and envelope rules are unchanged.
+input and returns owned storage. Canonical hashing and envelope rules are unchanged. Adopting 16-byte ID fields
+changes an eight-ID prefix from `08` to `80 01`; all 128 ID bytes keep their
+order. Review contract identities and buffer budgets along with client generation.
+The `hash16` name describes an opaque width, not a cryptographic hash algorithm.
 
 `PackedI16<N>` remains the field with an explicit element limit. Its bytes match
 `Packed<i16>`, but removing N would remove that constraint: do not substitute the
@@ -88,9 +93,10 @@ runtime bytes, schemas or acceptance rules.
 ## TypeScript
 
 Generated metadata uses `{k:'packed',word:'i16'}` (or the other supported word
-name; hashes use `hash32`). Integer fields use the corresponding typed array:
+name; opaque arrays use `hash16` or `hash32`). Integer fields use the corresponding typed array:
 Int8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, BigInt64Array or BigUint64Array.
-Hash fields use one flat Uint8Array whose length must be divisible by 32.
+ID/hash fields use one flat Uint8Array whose length must be divisible by 16/32
+respectively. The element bytes are opaque and never byte-swapped.
 Existing bounded `{k:'packed-i16',max:N}` metadata retains its limit.
 
 The runtime writes little-endian bytes regardless of host endianness and copies
@@ -210,8 +216,9 @@ summary, even for large registries. `warnings` and `stale_acknowledgements` reta
 all entries for review, exact acknowledgements and CI enforcement. Iterating those
 vectors directly deliberately requests the full output.
 
-Advice also recognizes ordinary `Vec<[u8; 32]>` hash lists, including aliases and
-newtypes, and suggests `Packed<[u8; 32]>`. The rooted path ends in `/list/hash32`,
+Advice also recognizes ordinary 16-byte ID and 32-byte hash lists, including
+aliases and newtypes, and suggests `Packed<[u8; 16]>` or `Packed<[u8; 32]>`.
+The rooted path ends in `/list/hash16` or `/list/hash32`,
 for example `/methods/upload/request/fields/chunks/list/hash32`. Standalone fixed
 hashes, explicit byte arrays and packed fields need no advice. Existing field
 bounds and consumer validation still require review.

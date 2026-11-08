@@ -32,6 +32,7 @@ byte='warning: wire-bulk-advice@0.0.0: /types/Payload/fields/data/list/u8: consi
 word='warning: wire-bulk-advice@0.0.0: /types/Payload/fields/words/list/u16: consider'
 rg -Fq "$byte" "$fixture/default.log"
 rg -Fq "$word" "$fixture/default.log"
+rg -Fq "/types/Payload/fields/ids/list/hash16: consider Packed<[u8; 16]>" "$fixture/default.log"
 rg -Fq '/types/Payload/fields/flags/list/bool: consider' "$fixture/default.log"
 rg -Fq "$word" "$fixture/partial.log"
 if rg -F "$byte" "$fixture/partial.log" || rg 'warning:' "$fixture/all.log"; then
