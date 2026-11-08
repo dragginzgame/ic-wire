@@ -27,6 +27,11 @@ graph qualification ic-wire-qualification "$host" --features allocation-fixture
 for label in codec benchmark qualification; do
     reject "$label" 'libfuzzer-sys|dhat|stats_alloc'
 done
+graph schema-cost ic-wire-qualification "$host" --features schema-cost
+grep -Eq '^stats_alloc v' "$out/schema-cost.txt"
+reject schema-cost 'libfuzzer-sys|dhat'
+graph schema-cost-wasm ic-wire-qualification wasm32-unknown-unknown --features schema-cost
+reject schema-cost-wasm 'libfuzzer-sys|dhat|stats_alloc'
 graph fuzz ic-wire-qualification "$host" --features fuzz-runtime
 grep -Eq '^libfuzzer-sys v' "$out/fuzz.txt"
 reject fuzz 'dhat|stats_alloc'

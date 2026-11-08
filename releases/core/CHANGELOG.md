@@ -48,6 +48,10 @@ in [shared history](../history.md).
 
 ### 🩹 Fixed
 
+- Keep the schema-cost allocator profiler behind an explicit native-only feature
+  and preserve the ordinary Boolean benchmark control after retiring its old
+  private bulk prototype. Codec bytes and consumer behavior are unchanged.
+
 - Bind caller-storage comparisons to complete captured sources with independent
   build targets and an explicit baseline. Vary query callers in admission and
   caller-storage measurements to prevent repeated samples reusing cached replies.

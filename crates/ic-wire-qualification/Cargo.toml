@@ -22,6 +22,7 @@ path = "benches/mod.rs"
 allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
 contract-fixture = ["dep:ic-wire", "dep:ic-platform-types"]
 schema-fixture = ["contract-fixture", "ic-wire/typescript"]
+schema-cost = ["schema-fixture", "dep:stats_alloc"]
 fuzz-runtime = ["dep:ic-wire", "dep:libfuzzer-sys"]
 
 [dependencies]
@@ -32,13 +33,13 @@ serde_bytes = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 libfuzzer-sys = { workspace = true, optional = true }
+stats_alloc = { workspace = true, optional = true }
 
 [dev-dependencies]
 clap.workspace = true
 ic-build.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-stats_alloc.workspace = true
 
 [[example]]
 name = "check-contract"
@@ -65,7 +66,7 @@ required-features = ["allocation-fixture"]
 [[example]]
 name = "schema-cost"
 path = "benches/schema_cost/mod.rs"
-required-features = ["schema-fixture"]
+required-features = ["schema-cost"]
 
 [[test]]
 name = "packed-projection"

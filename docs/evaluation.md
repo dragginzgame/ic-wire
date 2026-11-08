@@ -248,7 +248,7 @@ production Wasm or IC instruction saving is claimed. Macro compilation time
 and native executable size were not measured.
 
 Reproduce using `cargo run --locked -p ic-wire-qualification --example schema-cost
---features schema-fixture --profile evaluation` on each frozen source, selecting
+--features schema-cost --profile evaluation` on each frozen source, selecting
 a separate CARGO_TARGET_DIR. Repeat with benchmark-speed. Local raw results,
 compiler identity, source/lock hashes and summary: `target/schema-render-study/`.
 Native tests (75 passed, three opt-in probes ignored), expanded payload rejection

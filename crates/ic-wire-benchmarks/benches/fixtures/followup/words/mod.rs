@@ -74,21 +74,18 @@ pub(super) fn same<T: Word>(a: &[T], b: &[T]) -> bool {
 pub(super) struct BoolValue(#[serde(with = "ic_wire::serde_packed::bools")] pub Vec<bool>);
 
 pub(super) fn bool_case(name: String, values: Vec<bool>) -> Case {
+    let input = serde_json::to_vec(bytemuck::must_cast_slice::<bool, u8>(&values)).unwrap();
     #[cfg(not(feature = "research-bulk"))]
-    {
-        case(name, values)
-    }
+    let wire = values.clone();
     #[cfg(feature = "research-bulk")]
-    {
-        let input = serde_json::to_vec(bytemuck::must_cast_slice::<bool, u8>(&values)).unwrap();
-        paired_values(
-            name,
-            BoolValue(values.clone()),
-            #[cfg(feature = "candid")]
-            values,
-            input,
-        )
-    }
+    let wire = BoolValue(values.clone());
+    paired_values(
+        name,
+        wire,
+        #[cfg(feature = "candid")]
+        values,
+        input,
+    )
 }
 
 pub(super) fn case<T: Word>(name: String, values: Vec<T>) -> Case {
