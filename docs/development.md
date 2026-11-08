@@ -423,6 +423,13 @@ receipt checks, commit, tag and direct Git delivery to origin/main. They do not
 publish packages. Ordinary development leaves package versions, staging, commits,
 refs and release execution to the maintainer.
 
+Compatibility qualification selects the published patch in the workspace
+Endpoint minor series. Published Endpoint/Core graphs must share the current
+Core identity within a supported compatibility line. A pre-1.0 Core minor cut
+explicitly reports an old Endpoint/Core line as unsupported; it always qualifies
+the current pair and does not add a compatibility reader or adapter. After the
+coordinated release, the Endpoint manifest selects its new published series.
+
 ### Decide whether a public release is needed
 
 Group membership in `ci/cargo-release-groups.json` assigns qualification and

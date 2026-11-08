@@ -62,6 +62,11 @@ in [shared history](../history.md).
 
 ### 🩹 Fixed
 
+- Qualify the published Endpoint minor series against its declared Core line.
+  A coordinated Core minor cut explicitly rejects the old cross-line pairing
+  while retaining current-pair tests and same-line identity checks. Public
+  crate contents and frame bytes are unchanged by this qualification fix.
+
 - Keep the schema-cost allocator profiler behind an explicit native-only feature
   and preserve the ordinary Boolean benchmark control after retiring its old
   private bulk prototype. Codec bytes and consumer behavior are unchanged.

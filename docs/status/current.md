@@ -1,5 +1,13 @@
 # Current handoff
 
+Release qualification now follows the workspace Endpoint minor series instead
+of a fixed 0.8.0 pin. Current Core/Endpoint pairs are always tested; an old
+published Endpoint tied to Core 0.17 is explicitly unsupported with Core 0.18.
+Same-line identity splits still fail. Both current 0.17 and prospective 0.18
+checks pass; four public package payloads match the approved source, excluding
+Git provenance. Evidence: target/deploy018-prospective/ and
+target/deploy018-equivalence/. No push or publication has occurred.
+
 ## Platform 0.27 qualification
 
 The unpublished benchmark facade now selects published ic-platform 0.27.0.
