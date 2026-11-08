@@ -6,6 +6,10 @@ The maintainer authorized Git and crates.io delivery of Core 0.17.13 from main.
 Endpoint stays 0.8.0. Source is ready for the frozen Core workflow; the full
 20-stage gate, version preparation, tag/push and publication remain pending.
 No delivery is claimed by this handoff. Root manifests/lock own package versions.
+The first batch, **batch-mzOGyRZA** from **89e1240**, stopped at the Candid source
+boundary before version preparation or delivery. Its missing declaration for the
+private flattened-ID comparator is now registered; all boundary checks pass.
+Preserve the failed logs/state, but do not resume that superseded source.
 
 Public `Packed<[u8; 16]>` reuses the existing bulk codec, with `hash16` metadata,
 flat `Uint8Array` clients, partial-ID rejection and default/suppressible list

@@ -2,6 +2,13 @@
   "schema": 1,
   "allowances": [
     {
+      "path": "crates/ic-wire-benchmarks/benches/fixtures/id16/mod.rs",
+      "kind": "codec-comparison",
+      "protocol": "Candid comparator",
+      "reason": "Unpublished flattened ID comparison DTO; Wire uses a separate Serde-only Filter and production remains Candid-free",
+      "declaration": "#[derive(Debug, PartialEq, Serialize, serde::Deserialize, CandidType)]\n#[candid_path(\"ic_platform::candid::contract\")]\nstruct ExternalFilter"
+    },
+    {
       "path": "crates/ic-wire-benchmarks/benches/fixtures/bulk/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
