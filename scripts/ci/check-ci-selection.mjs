@@ -32,11 +32,12 @@ assert.equal(jobs.validate['runs-on'], '${{ matrix.os }}');
 assert.equal(jobs.validate.if, "${{ needs.change-scope.result == 'success' && needs.change-scope.outputs.scope != 'docs' }}");
 assert.equal(jobs.docs.needs, 'change-scope');
 assert.equal(jobs.docs.if, "${{ needs.change-scope.result == 'success' && needs.change-scope.outputs.scope == 'docs' }}");
-assert.equal(jobs.scaffold.if, '${{ always() }}');
-assert.deepEqual(jobs.scaffold.needs, ['change-scope', 'docs', 'validate']);
-assert.deepEqual(jobs.scaffold.strategy.matrix.os, hosts);
-assert.equal(jobs.scaffold['runs-on'], 'ubuntu-24.04');
-assert.equal(jobs.scaffold.name, undefined);
+assert.equal(jobs.qualification.if, '${{ always() }}');
+assert.deepEqual(jobs.qualification.needs, ['change-scope', 'docs', 'validate']);
+assert.equal(jobs.qualification.strategy, undefined);
+assert.equal(jobs.scaffold, undefined);
+assert.equal(jobs.qualification['runs-on'], 'ubuntu-24.04');
+assert.equal(jobs.qualification.name, undefined);
 assert.equal(jobs['change-scope'].outputs.scope, '${{ steps.classify.outputs.scope }}');
 for (const job of Object.values(jobs)) {
   assert.ok(!job['continue-on-error']);
@@ -58,7 +59,7 @@ assert.match(scan.run, /"\$GITLEAKS_BIN" git --redact=100/);
 assert.match(jobs['change-scope'].steps.find(s => s.id === 'security-tool').run, /scripts\/ci\/install-ci-tool\.sh gitleaks/);
 const docs = jobs.docs.steps.find(s => s.name === 'Check prose documentation').run;
 assert.equal(docs, 'make check-doc-links');
-for (const job of [jobs.docs, jobs['change-scope'], jobs.scaffold]) {
+for (const job of [jobs.docs, jobs['change-scope'], jobs.qualification]) {
   for (const step of job.steps) assert.equal(step.if, undefined, step.name);
 }
 const native = jobs.validate.steps.find(s => s.name === 'Validate selected CI group');
@@ -68,7 +69,7 @@ assert.equal(native.run, 'make "ci-$CI_GROUP"');
 const retention = jobs.validate.steps.find(s => s.uses === './.github/actions/retain-failure-evidence');
 assert.equal(retention.if, '${{ failure() }}');
 assert.ok(retention.with.name.includes('matrix.suite') && retention.with.name.includes('matrix.os'));
-const gate = jobs.scaffold.steps[0];
+const gate = jobs.qualification.steps[0];
 assert.deepEqual(gate.env, {
   CLASSIFICATION_RESULT: '${{ needs.change-scope.result }}',
   CHANGE_SCOPE: '${{ needs.change-scope.outputs.scope }}',
