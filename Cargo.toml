@@ -31,8 +31,8 @@ ic-wire-qualification = { path = "crates/ic-wire-qualification", version = "0.18
 
 # Endpoint
 # Changelog : releases/endpoint/CHANGELOG.md
-ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.8.1" }
-ic-wire-endpoint-macros = { path = "crates/ic-wire-endpoint-macros", version = "0.8.1" }
+ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.9.0" }
+ic-wire-endpoint-macros = { path = "crates/ic-wire-endpoint-macros", version = "0.9.0" }
 
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
