@@ -1,6 +1,6 @@
 # Current handoff
 
-## Endpoint 0.8.1 delivery in progress
+## Delivered: Endpoint 0.8.1
 
 Shared **0.31.9 / d95f271** was exported from its committed revision. It scopes
 formatting to workspace members, adds the shared hashing policy and replaces
@@ -20,16 +20,23 @@ Endpoint fixture lint, installed typed calls/limits/transactions on PocketIC
 16.1.0, and the native/Wasm Candid benchmark corpus pass. Schema-only Core stays
 Runtime/Candid-free. Evidence is under `target/adoption-20261108/`.
 Unrelated Windows dependency edges were preserved and final locked metadata
-passes. No sibling checkout was modified. No performance comparison, full
-release gate or native macOS qualification was run for this adoption.
+passes. No sibling checkout was modified. No new performance comparison or
+native macOS qualification is claimed.
 
 The maintainer authorized delivery. Only Endpoint **0.8.1** needs publication for
 its changed Runtime requirement; Core stays **0.17.13**. Core archive comparison
 finds identical product files, with only Git provenance and the corresponding
 locally packaged derive checksum differing. Evidence is under
 `target/endpoint081-delivery/`; this comparison is not a compiled archive check.
-Shared/dependency changes select the full 20-stage gate. Frozen validation,
-version preparation, Git delivery and crates.io publication are pending.
+All 20 Linux gate stages passed. Endpoint/macros **0.8.1** are on crates.io and
+origin/main; tag **endpoint-v0.8.1** selects **5bb495a**, from source **e0f42ca**
+in frozen batch **batch-sLAg4biN**. Final all-feature archives passed and match
+independent registry downloads, checksums and release provenance. The
+[delivery receipt](../../releases/receipts/published-endpoint081/delivery.json)
+owns exact identities. The normal checkout is reconciled. A concurrent Testkit
+**0.93.1** lock update is preserved at **c134348** on
+`deferred/endpoint081-testkit0931` and reapplied locally for the next batch;
+this release selected and qualified **0.93.0**. Hosted CI remains asynchronous.
 Wire bytes, schemas, identities, limits, acceptance and rollback are unchanged.
 Prior performance measurements below retain their original supplier identities.
 
@@ -39,7 +46,7 @@ Core/derive **0.17.13** is on origin/main and crates.io. Tag **core-v0.17.13**
 selects **c719ece**, from source **888be9b** in frozen batch **batch-Rkv2gVBa**.
 All 20 Linux gate stages passed, as did final all-feature package verification.
 Independent registry downloads match uploaded and all-feature archive checksums
-and Git provenance. The normal checkout is reconciled; Endpoint stays **0.8.0**.
+and Git provenance. That delivery left Endpoint at **0.8.0**.
 The [delivery receipt](../../releases/receipts/published-core01713/delivery.json)
 owns exact identities and verification. Evidence: `target/core01713-delivery/`,
 `target/core01713-deploy-3.log` and the retained frozen checkout. Hosted CI is
@@ -93,7 +100,7 @@ Testkit's changed CBOR error variant has no Wire matches. Native qualification
 uses prepared PocketIC **16.1.0**; production remains Testkit/Candid-free and
 schema-only Core remains execution-free. No supplier patches or wrappers.
 
-The prior Core **0.17.12** and current Endpoint **0.8.0** tags select **6082752** and
+The prior Core **0.17.12** and Endpoint **0.8.0** tags select **6082752** and
 **a967a9c**, from batches **batch-FcrckPoz** and **batch-vZAxlP49**. Both passed
 full 20-stage Linux gates, final archives and registry readback; installed
 Endpoint typed calls/admission/rollback passed on PocketIC 16.1.0. The

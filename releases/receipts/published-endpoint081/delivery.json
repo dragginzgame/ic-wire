@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-08T10:31:32.268141+00:00",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "groups": [
+    {
+      "group": "endpoint",
+      "version": "0.8.1",
+      "source_commit": "e0f42cae2bb4a1db667e9639b9debe388041679b",
+      "release_commit": "5bb495a431f814fc6bf4c571eca346c1bc8c4031",
+      "tag": "endpoint-v0.8.1",
+      "frozen_batch": "batch-sLAg4biN",
+      "batch_schema": 2,
+      "source_lock_sha256": "e3dbbf72cea018af45bd7f50fbb3f2c5fa8b895bdedb26be9d18178fd5301242",
+      "release_lock_sha256": "075aca15a3793587e3c5441ecfaed853f8db817f9c298cc2c6dad3e2bacdfdbe",
+      "validation_run": "run.95sRVE",
+      "scope": "workspace",
+      "stage_count": 20,
+      "reconciled": true
+    }
+  ],
+  "packages": [
+    {
+      "name": "ic-wire-endpoint-macros",
+      "version": "0.8.1",
+      "sha256": "0221fad6b06eb082a378ac4c618426a93f9523202f45467d2c8ecaa4270eb946",
+      "registry": "crates.io",
+      "source_commit": "5bb495a431f814fc6bf4c571eca346c1bc8c4031"
+    },
+    {
+      "name": "ic-wire-endpoint",
+      "version": "0.8.1",
+      "sha256": "8560eec53bdc5684aece34d53afd8c59194bd64a6a681e5570c5c5a406b0b881",
+      "registry": "crates.io",
+      "source_commit": "5bb495a431f814fc6bf4c571eca346c1bc8c4031"
+    }
+  ],
+  "shared_tooling": {
+    "version": "0.31.9",
+    "revision": "d95f271bc7b49951ccf286c3655cef7446b8cf56"
+  },
+  "qualification": {
+    "compiler": "1.99.1",
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "registry_archive_readback": true,
+    "registry_matches_uploaded_and_all_feature_archives": true
+  },
+  "suppliers": {
+    "platform": "0.26.0",
+    "platform_types": "0.18.2",
+    "runtime": "0.20.1",
+    "testkit": "0.93.0",
+    "build": "0.79.0",
+    "host": "0.75.0"
+  },
+  "protocol": "Wire bytes, schemas, identities, limits, acceptance, exports and rollback remain unchanged. No consumer migration or regeneration is required.",
+  "evidence_root": "target/endpoint081-delivery/",
+  "limitations": [
+    "Core/derive remain at 0.17.13. Private qualification and tooling changes do not require Core publication.",
+    "The full gate ran locally on Linux. Hosted CI is asynchronous; native macOS qualification is not claimed.",
+    "Installed typed calls, limits and transactions passed on PocketIC 16.1.0 before release version preparation; this is not a fresh installed registry-package test.",
+    "No new performance matrix was run for this supplier-only adoption."
+  ],
+  "deferred": {
+    "package": "ic-testkit",
+    "version": "0.93.1",
+    "preserved_commit": "c134348",
+    "branch": "deferred/endpoint081-testkit0931",
+    "status": "Reapplied to the normal Cargo.lock after reconciliation; not selected or qualified by this frozen release."
+  }
+}
