@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-08T09:34:05.857Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "groups": [
+    {
+      "group": "core",
+      "version": "0.17.13",
+      "source_commit": "888be9bafd2ff817ba2e1caa5e158dd8a609677a",
+      "release_commit": "c719ece69efda1093c56c5b82fc3a4a28c06446e",
+      "tag": "core-v0.17.13",
+      "frozen_batch": "batch-Rkv2gVBa",
+      "batch_schema": 2,
+      "source_lock_sha256": "835dad9bd8628abe0ed360d4dbe922c7bf3ac35120682bcb6bad9adde573c537",
+      "release_lock_sha256": "186d7710d98c6c5eaf6d5e41304d47ea2f6a1de7f24a2463aef9612ac81f0565",
+      "validation_run": "run.spmcTW",
+      "scope": "workspace",
+      "stage_count": 20,
+      "reconciled": true
+    }
+  ],
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.13",
+      "sha256": "6878d866c90a8a31e31dd9241ace489ab26a3dcef859612a6ddd3f05b933173b",
+      "registry": "crates.io",
+      "source_commit": "c719ece69efda1093c56c5b82fc3a4a28c06446e"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.13",
+      "sha256": "4771f134a57455af7bdb11ecf3d68749b08f54bf42369a5b71814847db4007e3",
+      "registry": "crates.io",
+      "source_commit": "c719ece69efda1093c56c5b82fc3a4a28c06446e"
+    }
+  ],
+  "shared_tooling": {
+    "version": "0.31.5",
+    "revision": "b2026a118e38de4af1555c527af327cb604eacdf"
+  },
+  "qualification": {
+    "compiler": "1.99.1",
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "registry_archive_readback": true,
+    "registry_matches_uploaded_and_all_feature_archives": true
+  },
+  "suppliers": {
+    "platform": "0.25.1",
+    "platform_types": "0.18.2",
+    "runtime": "0.20.0",
+    "testkit": "0.93.0",
+    "build": "0.78.0",
+    "host": "0.75.0"
+  },
+  "protocol": "Existing fields retain bytes, identities, limits and acceptance. Explicit adoption of Packed<[u8; 16]> changes one ID from 01 + 16 bytes to 10 + 16 bytes; eight IDs change 08 + 128 bytes to 80 01 + 128 bytes. Coordinate contract identities and generated clients, preserve original retry/hash bytes and requalify buffer budgets and field bounds.",
+  "evidence_root": "target/core01713-delivery/",
+  "limitations": [
+    "Endpoint remains published at 0.8.0; no Endpoint release was selected.",
+    "The complete gate ran locally on Linux; hosted CI is asynchronous and native macOS is not claimed.",
+    "The fresh ID comparison is retained separately; no new complete performance matrix or installed application qualification is claimed."
+  ],
+  "superseded_batches": [
+    {
+      "batch": "batch-mzOGyRZA",
+      "source": "89e1240864eabaee694139f8b9bfec99f0964e0c",
+      "failure": "Missing private Candid comparator declaration; no version preparation or delivery."
+    },
+    {
+      "batch": "batch-Oup1NG9b",
+      "source": "e83ad0b69e68212beb438cbebc88431c16c48fe1",
+      "failure": "Stale published Endpoint compatibility fixture; no version preparation or delivery."
+    }
+  ]
+}

@@ -1,11 +1,16 @@
 # Current handoff
 
-## Core 0.17.13 deployment in progress
+## Delivered: Core 0.17.13
 
-The maintainer authorized Git and crates.io delivery of Core 0.17.13 from main.
-Endpoint stays 0.8.0. Source is ready for the frozen Core workflow; the full
-20-stage gate, version preparation, tag/push and publication remain pending.
-No delivery is claimed by this handoff. Root manifests/lock own package versions.
+Core/derive **0.17.13** is on origin/main and crates.io. Tag **core-v0.17.13**
+selects **c719ece**, from source **888be9b** in frozen batch **batch-Rkv2gVBa**.
+All 20 Linux gate stages passed, as did final all-feature package verification.
+Independent registry downloads match uploaded and all-feature archive checksums
+and Git provenance. The normal checkout is reconciled; Endpoint stays **0.8.0**.
+The [delivery receipt](../../releases/receipts/published-core01713/delivery.json)
+owns exact identities and verification. Evidence: `target/core01713-delivery/`,
+`target/core01713-deploy-3.log` and the retained frozen checkout. Hosted CI is
+asynchronous; no native macOS or fresh installed application proof is claimed.
 The first batch, **batch-mzOGyRZA** from **89e1240**, stopped at the Candid source
 boundary before version preparation or delivery. Its missing declaration for the
 private flattened-ID comparator is now registered; all boundary checks pass.
@@ -55,7 +60,7 @@ Testkit's changed CBOR error variant has no Wire matches. Native qualification
 uses prepared PocketIC **16.1.0**; production remains Testkit/Candid-free and
 schema-only Core remains execution-free. No supplier patches or wrappers.
 
-Core **0.17.12** and Endpoint **0.8.0** are published. Tags select **6082752** and
+The prior Core **0.17.12** and current Endpoint **0.8.0** tags select **6082752** and
 **a967a9c**, from batches **batch-FcrckPoz** and **batch-vZAxlP49**. Both passed
 full 20-stage Linux gates, final archives and registry readback; installed
 Endpoint typed calls/admission/rollback passed on PocketIC 16.1.0. The
