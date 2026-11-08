@@ -1,5 +1,38 @@
 # Current handoff
 
+## Endpoint 0.8.1 delivery in progress
+
+Shared **0.31.9 / d95f271** was exported from its committed revision. It scopes
+formatting to workspace members, adds the shared hashing policy and replaces
+the old LOC selector with `CLOC_DEPTH` / `cloc.sh -d`. It does not change the
+downloader implicated in the recent hosted HTTP 504 bootstrap failures.
+
+Current sources select Build **0.79.0** for compiler diagnostics and the release
+metadata CLI, Platform **0.26.0** for private benchmarks, and Runtime/macros/guard
+**0.20.1** for Endpoint. The Runtime lock update was already present on entry.
+Types **0.18.2**, Testkit **0.93.0** and Host **0.75.0** stay unchanged. Testkit
+retains native-only Platform **0.25.1** alongside the benchmark facade; execution
+resolves one Runtime/guard. No removed Build batch or Platform hashing API is
+used. Supplier preparation, offline release-editor admission, snapshot integrity,
+formatting, hashing/dependency boundaries and both LOC depth modes pass. Build
+passes 8 Core / 13 Endpoint diagnostic cases. Mixed-version host/Wasm consumers,
+Endpoint fixture lint, installed typed calls/limits/transactions on PocketIC
+16.1.0, and the native/Wasm Candid benchmark corpus pass. Schema-only Core stays
+Runtime/Candid-free. Evidence is under `target/adoption-20261108/`.
+Unrelated Windows dependency edges were preserved and final locked metadata
+passes. No sibling checkout was modified. No performance comparison, full
+release gate or native macOS qualification was run for this adoption.
+
+The maintainer authorized delivery. Only Endpoint **0.8.1** needs publication for
+its changed Runtime requirement; Core stays **0.17.13**. Core archive comparison
+finds identical product files, with only Git provenance and the corresponding
+locally packaged derive checksum differing. Evidence is under
+`target/endpoint081-delivery/`; this comparison is not a compiled archive check.
+Shared/dependency changes select the full 20-stage gate. Frozen validation,
+version preparation, Git delivery and crates.io publication are pending.
+Wire bytes, schemas, identities, limits, acceptance and rollback are unchanged.
+Prior performance measurements below retain their original supplier identities.
+
 ## Delivered: Core 0.17.13
 
 Core/derive **0.17.13** is on origin/main and crates.io. Tag **core-v0.17.13**
@@ -52,8 +85,8 @@ and installed application qualification are not claimed.
 
 ## Suppliers and prior delivery
 
-Rust/Cargo **1.99.1** remains floor and pin. Shared **0.31.5 / b2026a1** owns the
-snapshot. Current selections: Build **0.78.0**, Host **0.75.0**, Platform **0.25.1**,
+Rust/Cargo **1.99.1** remains floor and pin. The delivered release used Shared
+**0.31.5 / b2026a1**, Build **0.78.0**, Host **0.75.0**, Platform **0.25.1**,
 Types **0.18.2**, Runtime/macros/guard **0.20.0**, Testkit **0.93.0**. The Platform
 lock selection predated the ID implementation and remained fixed throughout it.
 Testkit's changed CBOR error variant has no Wire matches. Native qualification

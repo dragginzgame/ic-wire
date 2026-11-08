@@ -5,6 +5,21 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.17.14]
+
+### 🔧 Maintenance
+
+- Adopt Shared 0.31.9 through its exporter: restrict formatting to workspace
+  members, admit the shared hashing policy and use `CLOC_DEPTH` / `cloc.sh -d`
+  for module-level reports. Download handling is unchanged.
+- Adopt Build 0.79 for the private compiler-diagnostic caller and selected release
+  metadata CLI, and Platform 0.26 for Candid/IC benchmark qualification. No Wire
+  caller uses their removed batch or pure-hashing APIs. Testkit 0.93 retains its
+  native-only Platform 0.25.1 dependency. These private/tooling changes alone do
+  not select a Core publication; notes remain pending for the next actual release.
+
+Existing Wire bytes, schemas, identities, limits and acceptance remain unchanged.
+
 ## [0.17.13] - 2026-11-08
 
 ### ➕ Added

@@ -4,6 +4,15 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.8.1]
+
+### ⬆️ Dependencies
+
+- Select Platform Runtime 0.20.1 with matching macros and exact guard, preserving
+  its entrypoint and option-parsing semantics. Retain one execution generation.
+  Frame bytes, schemas, method identities, limits, acceptance, exports and
+  rollback behavior are unchanged; no client regeneration or migration is needed.
+
 ## [0.8.0] - 2026-11-07
 
 ### ⚠️ Breaking

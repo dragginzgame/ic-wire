@@ -1,5 +1,5 @@
 # Dragginzgame Engineering Baseline
-<!-- Shared companions: audits/README.md docs/principles/rust-code-hygiene.md rules/change-reporting.md rules/contributions.md rules/engineering-details.md rules/rpc-budgets.md rules/rust-workspaces.md -->
+<!-- Shared companions: audits/README.md docs/principles/rust-code-hygiene.md rules/change-reporting.md rules/contributions.md rules/engineering-details.md rules/hashing.md rules/rpc-budgets.md rules/rust-workspaces.md -->
 
 Shared Tooling owns the common engineering rules for `dragginzgame` repositories.
 Read this core, the local `AGENTS.md` and the current handoff when present. Read
@@ -169,6 +169,11 @@ Read the
 when adding, changing or reviewing metrics and logging.
 
 ## IC application encoding
+
+Hashing choices follow the [shared algorithm/purpose inventory](rules/hashing.md).
+Review new algorithms and direct hashing packages explicitly; pure hashing may
+use approved direct dependencies without a Platform facade. Preserve existing
+hash bytes and domains when changing dependency ownership.
 
 Owned application types must not derive or implement `CandidType`. Use `ic-wire`
 for owned RPC; keep unavoidable Candid in dedicated external-protocol boundary

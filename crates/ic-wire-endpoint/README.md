@@ -19,7 +19,7 @@ are unchanged. See the repository endpoint guide for handler examples.
 
 Rust 1.99.1 or newer is required.
 
-Endpoint 0.8 selects published `ic-platform-runtime = "0.20.0"`
+The workspace selects published `ic-platform-runtime = "0.20.1"`
 directly, with Core 0.17 schemas on canonical Types 0.18.2. Endpoint 0.7 uses
 Runtime 0.19; earlier Endpoint 0.5 / Core 0.15 used Runtime 0.18 and Types 0.17.
 Applications that use low-level APIs select that package's `cdk` feature and use
@@ -28,7 +28,7 @@ runtime re-exported through Endpoint; applications need no new dependency solely
 to use an Endpoint macro. Core and derive keep their independent release identity.
 
 Select matching Timers and other runtime suppliers before upgrading applications.
-Runtime/macros/exact guard 0.20.0 share canonical Types 0.18.2.
+Runtime/macros/exact guard 0.20.1 share canonical Types 0.18.2.
 Runtime removed its prefixed `runtime_*` macro aliases; direct Runtime callers
 use the ordinary `ic_platform_runtime::cdk` macros. Wire's own attributes and
 generated paths already use the retained family and require no syntax migration.

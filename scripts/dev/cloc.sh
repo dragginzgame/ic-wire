@@ -12,32 +12,23 @@ if [[ -n "${TMPDIR:-}" && "$TMPDIR" != /* ]]; then export TMPDIR="$PWD/$TMPDIR";
 
 usage() {
     cat <<'EOF'
-Usage: cloc.sh [--subcrates] [--json] [--manifest PATH] [directory]
-       cloc.sh --check-tools
-       cloc.sh --help
+Usage: cloc.sh [options] [directory]
 
-Report Rust library/app, tests, examples, benchmarks, build/tooling,
-unclassified and all-source LOC per workspace. Inline test code is separated.
-Fixture-only packages require package.metadata.shared-tooling.loc.category.
-The directory defaults to the current working directory. A parent directory
-selects its immediate Git checkouts; --subcrates also displays member rows.
-Counts always include all members. Independent excluded workspaces require
---manifest. --json is a single-workspace report and always includes crate rows.
---manifest selects one independent Cargo workspace explicitly; its own Cargo
-configuration and target directory apply. The default is the Git root workspace.
-Prepared host tools beside this script's checkout take precedence over PATH.
---check-tools checks prerequisites without inspecting a workspace or installing.
---json emits one complete document with crate rows and totals on success.
-The ??? column is unclassified LOC. For classification notes, file paths and
-reasons, run --json for the individual workspace and inspect diagnostics.
-Scratch defaults to the selected Cargo target directory. Parent-report scratch
-belongs to this script's checkout (target/tmp); TMPDIR overrides either default.
+Count Rust LOC by category. Defaults to the current workspace;
+a parent directory reports its sibling repositories.
+
+Options:
+  -d N            Show crates and N module levels (0 = crates only)
+  --json          Full file counts and diagnostics for one workspace
+  --manifest PATH Select an independent Cargo workspace
+  --check-tools   Check prerequisites
+  -h, --help      Show this help
+
 Examples:
-  cloc.sh                         Workspace summary
-  cloc.sh --subcrates              Summary with member crates
-  cloc.sh ..                       Sibling workspace summaries
-  cloc.sh --json | jq .diagnostics Classification notes
-Each selected source path counts once, including files with identical contents.
+  cloc.sh -d 1    Top-level modules beneath each crate
+  cloc.sh -d 2 .. Sibling crates with two module levels
+
+??? = unclassified LOC. Counting details: docs/fleet-tools.md
 EOF
 }
 
@@ -91,17 +82,18 @@ report_repositories() (
             if $w.report then . as $sum | with_entries(.value += $w.report.totals[.key]) else . end))}
         | if all(.workspaces[]; .report == null) then .totals |= with_entries(.value="n/a") else . end
     ' "$report_dir/rows" > "$report_dir/report.json"
-    flags=(); if [[ "$subcrates" == true ]]; then flags+=(--subcrates); fi
-    perl "$ROOT/scripts/dev/cloc-classify.pl" --table "$report_dir/report.json" ${flags[@]+"${flags[@]}"}
+    render_table "$report_dir/report.json"
     exit "$status"
 )
 
-subcrates=false
+depth=''
 selected_manifest=''
 json=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --subcrates) subcrates=true; shift ;;
+        -d)
+            [[ $# -ge 2 && "$2" =~ ^(0|[1-9][0-9]*)$ && ${#2} -le 6 ]] || { usage >&2; exit 2; }
+            depth="$2"; shift 2 ;;
         --json) json=true; shift ;;
         --manifest)
             [[ $# -ge 2 && -n "$2" && -z "$selected_manifest" ]] || { usage >&2; exit 2; }
@@ -113,6 +105,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 [[ $# -le 1 ]] || { usage >&2; exit 2; }
+
+render_table() {
+    local flags=()
+    if [[ -n "$depth" ]]; then flags=(-d "$depth"); fi
+    perl "$ROOT/scripts/dev/cloc-classify.pl" --table "$1" ${flags[@]+"${flags[@]}"}
+}
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     usage
@@ -200,6 +198,5 @@ perl "$ROOT/scripts/dev/cloc-classify.pl" "$FILE_LIST_DIR/metadata.json" "$manif
 if [[ "$json" == true ]]; then
     cat "$FILE_LIST_DIR/report.json"
 else
-    flags=(); if [[ "$subcrates" == true ]]; then flags+=(--subcrates); fi
-    perl "$ROOT/scripts/dev/cloc-classify.pl" --table "$FILE_LIST_DIR/report.json" ${flags[@]+"${flags[@]}"}
+    render_table "$FILE_LIST_DIR/report.json"
 fi
