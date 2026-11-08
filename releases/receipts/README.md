@@ -6,11 +6,17 @@ documentation directories. All 131 moved records retain their original bytes.
 They are provenance observations for the named release, not input to the release
 runner and not a second version catalog; manifests and group ledgers own versions.
 
-The latest recorded delivery is Endpoint/macros **0.8.1**:
+The latest recorded delivery is Core/derive **0.17.14**:
+[frozen delivery record](published-core01714/delivery.json). Tag `core-v0.17.14`
+selects `c0bfb8b`; both registry checksums match uploaded and final all-feature
+archives. All 20 Linux gate stages passed. Endpoint stays **0.8.1**. The previously
+deferred Testkit 0.93.1 selection is included and qualified.
+
+Endpoint/macros **0.8.1** retains its
 [frozen delivery record](published-endpoint081/delivery.json). Tag
 `endpoint-v0.8.1` selects `5bb495a`; both registry checksums match uploaded and
-final all-feature archives. All 20 Linux gate stages passed. Core stays **0.17.13**.
-The concurrent Testkit 0.93.1 update is deferred; the frozen release used 0.93.0.
+final all-feature archives. All 20 Linux gate stages passed. That frozen release
+used Testkit 0.93.0 and left Core at 0.17.13.
 
 Core/derive **0.17.13** retains its
 [frozen delivery record](published-core01713/delivery.json). Tag `core-v0.17.13`

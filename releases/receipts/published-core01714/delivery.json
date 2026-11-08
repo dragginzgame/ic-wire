@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "observed_at": "2026-11-08T11:22:36.522Z",
+  "repository": "https://github.com/dragginzgame/ic-wire",
+  "groups": [
+    {
+      "group": "core",
+      "version": "0.17.14",
+      "source_commit": "5c9bc8152c2374b90ec8c153be0aa308d7d57fed",
+      "release_commit": "c0bfb8b61d6680a3cb356a0a363e19149a0c86db",
+      "tag": "core-v0.17.14",
+      "frozen_batch": "batch-InHQ5_ZW",
+      "batch_schema": 2,
+      "source_lock_sha256": "e779f17c4f9a0bcbd5d773434d4a2741b6a701ab320e99592108f4fb0838f64a",
+      "release_lock_sha256": "d06ec6f62d553f54d94c6d771b182a0c2f6311897fe9b376a20a561f4aef3cee",
+      "validation_run": "run.KQooF5",
+      "scope": "workspace",
+      "stage_count": 20,
+      "reconciled": true
+    }
+  ],
+  "packages": [
+    {
+      "name": "ic-wire-derive",
+      "version": "0.17.14",
+      "sha256": "1b714a982add4b4f7e5b11881d46985437f6b518423b5ae3c3de18874d1abf1e",
+      "registry": "crates.io",
+      "source_commit": "c0bfb8b61d6680a3cb356a0a363e19149a0c86db"
+    },
+    {
+      "name": "ic-wire",
+      "version": "0.17.14",
+      "sha256": "e77897d1793a8b3f40bb15b32045536904cca76bc1cf0aab8a282594e7ee99ae",
+      "registry": "crates.io",
+      "source_commit": "c0bfb8b61d6680a3cb356a0a363e19149a0c86db"
+    }
+  ],
+  "shared_tooling": {
+    "version": "0.31.9",
+    "revision": "d95f271bc7b49951ccf286c3655cef7446b8cf56"
+  },
+  "qualification": {
+    "compiler": "1.99.1",
+    "host": "x86_64-unknown-linux-gnu",
+    "release_stages": [
+      "tools-check",
+      "check-rust-policy",
+      "lint",
+      "shared-tooling-check",
+      "check-pins",
+      "check-boundary",
+      "check-doc-links",
+      "check-ci-selection",
+      "check-tooling",
+      "check-release",
+      "check-release-validation",
+      "fmt-check",
+      "check",
+      "test",
+      "check-typed-diagnostics",
+      "check-qualification",
+      "check-endpoint",
+      "check-benchmarks",
+      "check-typescript",
+      "check-wasm"
+    ],
+    "all_feature_archives": true,
+    "registry_archive_readback": true,
+    "registry_matches_uploaded_and_all_feature_archives": true
+  },
+  "suppliers": {
+    "platform": "0.26.0",
+    "platform_types": "0.18.2",
+    "runtime": "0.20.1",
+    "testkit": "0.93.1",
+    "build": "0.79.0",
+    "host": "0.75.0"
+  },
+  "protocol": "Wire bytes, schemas, identities, limits, malformed-input acceptance and allocation counts remain unchanged. One packed ID remains 10 + 16 bytes and eight IDs remain 80 01 + 128 bytes. No consumer migration is required.",
+  "evidence_root": "target/core01714-delivery/",
+  "performance_evidence": "target/evidence/packed-copy-20261108/",
+  "limitations": [
+    "Endpoint/macros remain at published 0.8.1; no Endpoint release was selected.",
+    "The full gate ran locally on Linux. Hosted CI is asynchronous; native macOS is not claimed.",
+    "The matched ID/bulk study is retained separately. No new full performance matrix or installed application performance qualification is claimed."
+  ],
+  "deferred_dependency_resolution": "The previously preserved Testkit 0.93.1 update from c134348 on deferred/endpoint081-testkit0931 is included and qualified in this release."
+}
