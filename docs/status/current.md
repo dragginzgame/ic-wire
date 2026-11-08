@@ -10,6 +10,13 @@ The first batch, **batch-mzOGyRZA** from **89e1240**, stopped at the Candid sour
 boundary before version preparation or delivery. Its missing declaration for the
 private flattened-ID comparator is now registered; all boundary checks pass.
 Preserve the failed logs/state, but do not resume that superseded source.
+The second batch, **batch-Oup1NG9b** from **e83ad0b**, passed the first 16 stages
+but exposed a stale Endpoint compatibility fixture: published Endpoint 0.7.1
+cannot select local 0.8 macros. Its published baseline now uses Core 0.17.12 /
+Endpoint 0.8.0. No version preparation or delivery occurred; retain this failed
+batch without resuming its superseded source.
+The corrected current/previous-Core/published-Endpoint lanes all pass on host
+and Wasm; evidence is under `target/compatible-consumers/run.MGmXha/`.
 
 Public `Packed<[u8; 16]>` reuses the existing bulk codec, with `hash16` metadata,
 flat `Uint8Array` clients, partial-ID rejection and default/suppressible list

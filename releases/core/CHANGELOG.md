@@ -18,6 +18,10 @@ in [shared history](../history.md).
 
 ### 🧪 Testing
 
+- Refresh mixed-version qualification to published Core 0.17.12 / Endpoint 0.8.0,
+  preserving separate previous-Core and published-Endpoint host/Wasm lanes.
+  The old 0.7 Endpoint cannot select the independently versioned 0.8 macro crate.
+
 - Add maintained 20-workload ID and ordinary-control cohorts against flattened
   Candid blobs, including fixed-width validation, borrowed-input copy costs,
   empty/singleton controls, native allocation/heap probes and raw Wasm size.

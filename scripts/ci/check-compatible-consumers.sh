@@ -17,8 +17,8 @@ for lane in current previous-core published-endpoint; do
 const fs = require('node:fs');
 const [root, fixture, lane] = process.argv.slice(2);
 const local = name => `path = ${JSON.stringify(`${root}/crates/${name}`)}`;
-const core = lane === 'previous-core' ? 'version = "=0.17.2"' : local('ic-wire');
-const endpoint = lane === 'current' ? local('ic-wire-endpoint') : 'version = "=0.7.1"';
+const core = lane === 'previous-core' ? 'version = "=0.17.12"' : local('ic-wire');
+const endpoint = lane === 'current' ? local('ic-wire-endpoint') : 'version = "=0.8.0"';
 const patches = [`ic-wire-derive = { ${local('ic-wire-derive')} }`];
 if (lane !== 'previous-core') patches.push(`ic-wire = { ${local('ic-wire')} }`);
 if (lane !== 'published-endpoint') patches.push(`ic-wire-endpoint-macros = { ${local('ic-wire-endpoint-macros')} }`);
@@ -50,7 +50,7 @@ for (const name of ['ic-wire', 'ic-wire-derive', 'ic-wire-endpoint', 'ic-wire-en
  const matches = m.packages.filter(p => p.name === name);
  assert.equal(matches.length, 1, `duplicate/missing ${name}`);
  const p = matches[0];
- if (name === 'ic-wire' && lane === 'previous-core') { assert.equal(p.version,'0.17.2'); assert.ok(p.source?.startsWith('registry+')); }
+ if (name === 'ic-wire' && lane === 'previous-core') { assert.equal(p.version,'0.17.12'); assert.ok(p.source?.startsWith('registry+')); }
  if (name === 'ic-wire-derive' || (name === 'ic-wire' && lane !== 'previous-core')) assert.equal(p.source,null);
  if (name === 'ic-wire-endpoint') assert.equal(p.source === null,lane === 'current');
  if (name === 'ic-wire-endpoint-macros') assert.equal(p.source === null,lane !== 'published-endpoint');
