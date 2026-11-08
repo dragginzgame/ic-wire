@@ -1,4 +1,69 @@
-# Focused cost investigation for Core 0.13.4
+# Focused admission cost investigations
+
+## Budget predicate screen (8 November 2026)
+
+**Keep the existing admission implementation.** Two alternatives preserve exact
+charges, sticky refusal and no partial debit, but neither improves the measured
+tradeoff. The baseline includes the retained u32 writer and Testkit 0.94.0.
+Lock SHA-256:
+`b36a8d0fdeee188f98c2d47a34e3502ba775ee8c850f1e9bbddd8bc205a39968`;
+native admission source SHA-256:
+`20c405500acf6a98ce1331a524e904e994af62a604861f7ae9ea998cc6a0676e`.
+Rust 1.99.1 / LLVM 23.1.1, existing opt-z/opt-3 profiles, LTO/one codegen unit,
+wasm32-unknown-unknown, no post-link optimizer; separate fresh Wasm targets.
+
+- `predicates` loads node/heap allowances and combines the four pure refusal
+  predicates using Boolean bitwise OR, replacing the initial sticky-refusal
+  return and subsequent short-circuit comparisons. Debits still occur only on success.
+- `subtract` computes both `overflowing_sub` results, combines their underflow
+  flags with sticky/depth refusal, and commits the results only on success.
+
+Whole-fixture uncompressed **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Combined predicates | Underflow flags |
+| --- | ---: | ---: | ---: |
+| Hotspots / opt-z | 83,384 / 72,441 | 83,438 / 72,495 | 83,442 / 72,499 |
+| Hotspots / opt-3 | 104,128 / 93,834 | 104,156 / 93,862 | 104,158 / 93,864 |
+| Standard / opt-z | 594,851 / 548,055 | 595,005 / 548,209 | 595,047 / 548,251 |
+| Standard / opt-3 | 889,425 / 828,831 | 889,570 / 828,976 | 889,605 / 829,011 |
+
+Each candidate has 1,904 matched IC rows over the 87-case hotspot corpus, with
+three identical samples and distinct callers. Candid counters, frames and logical
+inputs match; baked admission-source/lock hashes match the frozen sources.
+Both pass all **860 Wire operation comparisons** within the 5% + 64 margin, but
+both fail the no-growth Wasm screen. Passing the instruction margin is not proof
+of a useful optimization. Combined predicates improve 20 rows, leave 663 equal
+and worsen 177; underflow flags improve 20, leave 641 equal and worsen 199.
+
+Selected **IC instructions** (large lists have 16,384 elements):
+
+| Operation/profile | Baseline | Combined predicates | Underflow flags |
+| --- | ---: | ---: | ---: |
+| Wide-u32 encode / opt-z | 6,702,812 | 6,735,580 | 6,735,580 |
+| Wide-u64 decode / opt-z | 14,096,374 | 14,112,758 | 14,112,758 |
+| Empty-blob mixed decode / opt-z | 4,764.5 | 4,784.5 | 4,790.5 |
+| Wide-u32 encode / opt-3 | 3,720,193 | 3,720,193 | 3,720,193 |
+| Wide-u64 decode / opt-3 | 6,066,465 | 6,066,465 | 6,066,465 |
+| Empty-blob mixed decode / opt-3 | 2,844.5 | 2,864.5 | 2,868.5 |
+
+Retain `admission_refusal_is_sticky_and_never_partially_debits`, an independent
+byte-denominated reference test for zero/exhausted allowances, reserved bytes,
+maximum-sized charges, multiplication overflow, depth refusal and no partial
+state update. All lanes pass five library and 48 native tests (one timing probe
+ignored). The retained test and strict library/test Clippy pass in the normal
+checkout. Native timing, allocation/heap, Toko/application measurements and a full
+matrix were not run: the IC/footprint screen provides no reason to promote either.
+
+Reproduction: `target/evidence/budget-predicates-20261108/`, with `prepare.mjs`,
+`screen.sh`, `prepare-ic.sh`, `cost-screen.sh`, `analyze.mjs` and frozen inputs.
+One analysis invocation preceded the last identity file and failed; only the
+completed rerun supplies the results above. Native dependency caches were seeded,
+product inputs rebuilt, and exact baseline Candid modules reused. Production
+admission source and lock remain equal to baseline. Bytes, identities, budgets
+and acceptance are unchanged; no consumer migration or retry/hash change.
+Only the strengthened test is kept.
+
+## Historical qualification for Core 0.13.4
 
 > Historical findings only. Raw measurements, snapshots, logs and build artifacts
 > were retired from this tree. A summary/hash cannot verify missing payloads.

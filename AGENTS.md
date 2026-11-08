@@ -1,9 +1,9 @@
 # IC Wire contributor instructions
 
-Apply the reviewed [Toko Tooling 0.33.0 policy](https://github.com/dragginzgame/toko-tooling/blob/901ded00581e73bd9b978860bc58af9ce6f31dc9/DRAGGINZGAME.md)
+Apply the reviewed [Toko Tooling 0.34.0 policy](https://github.com/dragginzgame/toko-tooling/blob/44b294db78477ac253f83e02ccbdd09a96df8f73/DRAGGINZGAME.md)
 and its revision-bound references. The installed [baseline](DRAGGINZGAME.md) and
 [manifest](.shared-tooling.snapshot) own executable snapshot provenance; refresh
-through the Cargo-selected registry installer, never by editing payloads or following a moving sibling.
+through the root-selected registry installer, never by editing payloads or following a moving sibling.
 Shared owns action authority, delivery, compiler support, validation and reporting.
 Do not add local approval gates or duplicate those rules here.
 

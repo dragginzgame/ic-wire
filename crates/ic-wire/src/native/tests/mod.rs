@@ -1,6 +1,51 @@
 use super::*;
 
 #[test]
+fn admission_refusal_is_sticky_and_never_partially_debits() {
+    for allocation in [0, 8, 64, usize::MAX] {
+        for reserved in [0, 1, 11] {
+            for nodes in [0, 1, 4, usize::MAX] {
+                for depth in [0, 8, 9, usize::MAX] {
+                    for units in [0, 1, 8, usize::MAX / 8, usize::MAX] {
+                        for count in [0, 1, 4, usize::MAX] {
+                            let budget = Budget::new(Limits {
+                                bytes: reserved,
+                                allocation,
+                                nodes,
+                                depth: 8,
+                            });
+                            // Independent byte-denominated reference, including
+                            // multiplication overflow and the reserved input/output.
+                            let remaining =
+                                allocation.checked_sub(reserved).and_then(|available| {
+                                    units
+                                        .checked_mul(8)
+                                        .and_then(|cost| available.checked_sub(cost))
+                                });
+                            let expected = depth <= 8 && nodes >= count && remaining.is_some();
+                            let old_heap = budget.heap_units.get();
+                            assert_eq!(budget.enter_many(depth, units, count), expected);
+                            if expected {
+                                assert_eq!(budget.nodes.get(), nodes - count);
+                                assert_eq!(budget.heap_units.get(), remaining.unwrap() / 8);
+                                assert!(!budget.refused.get());
+                            } else {
+                                assert_eq!(budget.nodes.get(), nodes);
+                                assert_eq!(budget.heap_units.get(), old_heap);
+                                assert_eq!(budget.error(), Error::Limit);
+                                assert!(!budget.enter_many(0, 0, 0));
+                                assert_eq!(budget.nodes.get(), nodes);
+                                assert_eq!(budget.heap_units.get(), old_heap);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn automatic_method_identity_vectors_and_frame() {
     // Frozen vectors independently calculated from the documented UTF-8 domain.
     const ECHO: u64 = method_id("echo");

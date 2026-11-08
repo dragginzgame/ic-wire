@@ -40,7 +40,6 @@ clap.workspace = true
 ic-build.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
-toko-tooling.workspace = true
 
 [[example]]
 name = "check-contract"

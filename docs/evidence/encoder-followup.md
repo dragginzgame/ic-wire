@@ -234,6 +234,236 @@ limits, admission and retry/hash bytes remain intact. The next narrower candidat
 could share a private u32 raw-byte helper while keeping the shortcut in the u32
 wrapper, outside i32's path. That alternative is not implemented or measured here.
 
+## Isolating the u32 shortcut (8 November 2026)
+
+**Research only; production remains unchanged.** The narrower follow-up avoids
+routing i32 through u32's small-value branch. Two candidates were screened:
+
+- `split32`: extract the existing i32 raw tuple loop into private
+  `raw_u32<S: Serializer>(inner: S, value: u32)`. i32 zigzags then calls it
+  directly; u32 keeps its `< 128` byte shortcut and otherwise calls the helper.
+- `u32only`: use that helper only for u32, leaving the existing i32 method intact.
+  No inlining attributes, decoder changes or u64 changes are introduced.
+
+The helper computes `((32 - value.leading_zeros()).max(1) as usize).div_ceil(7)`,
+opens an inner tuple of that width, emits `(value as u8) | 128` while shifting
+right seven bits until below 128, then emits the final byte and ends the tuple.
+It wraps Postcard output/sizing only; implementation bytes never acquire extra
+admission charges. u32 128 remains `80 01`; i32 -64 remains `7f`. Bytes,
+identities, budgets and acceptance are unchanged; no consumer migration.
+
+Fresh matched source is 4f62dfb plus the pending Toko 0.34 migration. Lock SHA-256:
+`8edac5b7c18891e830db716efb866ba77bf5bd96e0a0fa2010bc362d640aaf05`.
+Rust 1.99.1 / LLVM 23.1.1, wasm32-unknown-unknown, existing evaluation opt-z and
+benchmark-speed opt-3 profiles, LTO/one codegen unit, no post-link optimizer.
+Each source has a separate target. Candidate native targets seed dependency
+caches only; touched product sources rebuild, and baked encoder/lock hashes
+match the measured source. Wasm screens use fresh targets. Raw scripts, frozen
+inputs, hashes and outputs: `target/evidence/u32-split-20261108/` (`prepare.mjs`,
+`screen.sh`, `measure.sh`, `size-controls.sh`, `analyze.mjs`). The u32-only IC
+control reuses exact baseline Candid artifacts and their build records.
+
+Whole-module uncompressed **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Shared loop | u32 only |
+| --- | ---: | ---: | ---: |
+| Hotspots / opt-z | 83,508 / 72,547 | 83,236 / 72,291 | 83,207 / 72,264 |
+| Hotspots / opt-3 | 103,969 / 93,675 | 103,826 / 93,532 | 103,826 / 93,532 |
+| Standard / opt-z | 594,633 / 547,837 | 594,647 / 547,849 | 594,690 / 547,894 |
+| Standard / opt-3 | 891,015 / 830,421 | 890,339 / 829,745 | 890,339 / 829,745 |
+
+Three identical IC samples per operation, with distinct query callers, cover
+87 hotspot cases and 1,904 rows per lane. Inputs/frame hashes match; Candid
+counters are unchanged. **Encode instructions** (lists have 16,384 elements):
+
+| Case/profile | Baseline | Shared loop | u32 only |
+| --- | ---: | ---: | ---: |
+| Wide u32 / opt-z | 12,207,902 | 8,242,906 (-32.5%) | 7,653,083 (-37.3%) |
+| Wide i32 / opt-z | 7,948,064 | 8,193,753 (+3.1%) | 7,947,996 (−68) |
+| Singleton wide u32 / opt-z | 2,286.5 | 1,976.5 | 1,941.5 |
+| Empty-blob mixed record / opt-z | 5,197.5 | 4,857.5 | 4,857.5 |
+| Wide u32 / opt-3 | 4,326,408 | 4,637,699 (+7.2%) | 4,637,699 (+7.2%) |
+| Wide i32 / opt-3 | 4,752,384 | 4,752,384 | 4,752,384 |
+| Singleton wide u32 / opt-3 | 1,062.25 | 1,088.25 | 1,088.25 |
+
+Both candidates fail four of 860 Wire operation comparisons: opt-3 wide-u32
+fresh/reused encoding at 128 and 16,384 elements. The hotspot footprint checks
+pass, but standard opt-z grows 14/12 or 57/57 total/code bytes respectively.
+The candidates produce byte-identical opt-3 hotspot modules. The u32-only
+primary-profile result is better than sharing: source factoring is not proof of
+better emitted code. This experiment does not prove a particular LLVM cause.
+
+For the shared-loop candidate, both profiles have identical baseline/candidate
+allocation counts and peak-live-heap measurements. Two native runs/profile use
+11 samples and 2 ms batches. Wide-u32 encode medians in ns are
+214,324 / 220,625 → 177,100 / 251,741 at opt-z, and
+106,789 / 102,765 → 87,649 / 90,823 at opt-3. Wide-i32 opt-z is
+150,762 / 160,224 → 175,403 / 177,144. These timings are variable and do not
+replace IC counters; the native u32 opt-3 gain accompanies an IC regression.
+u32-only native timing and memory are **not measured**; shared-loop results
+must not be attributed to it. Both candidates pass 47 native codec tests, one
+timing probe ignored, including Postcard parity and exact resource boundaries.
+Initial sandboxed local-server failures are retained separately from completed
+PocketIC 16.1.0 runs.
+
+The initial decision preferred **u32-only for the next qualification**, not the shared-helper rewrite.
+It is a plausible opt-z tradeoff, but not a passing no-regression result or an
+adopted change. Before adoption, complete its native/memory and signed32 controls,
+check a Toko-shaped footprint, and explicitly record the opt-3 cost and small
+standard opt-z growth. No full matrix, installed application, macOS or application
+Wasm saving is claimed. The standard fixture above is footprint-only.
+
+## Bounded unrolled u32 writer (8 November 2026)
+
+**Adopted locally for pending Core 0.18.0.** The loop-only candidates above are
+not adopted. Their follow-up keeps the existing u32 `< 128` shortcut and i32
+method, but unrolls `raw_u32`'s continuation steps: emit the first byte (the
+caller guarantees value >= 128), shift seven bits, then use three nested
+`>= 128` checks to emit/shift the remaining continuation groups. Finally emit
+the last byte and end the exact-width tuple. At most five bytes are written.
+One private helper is generic over the existing output/sizing serializers, not
+over each consumer's record type. No codec option or per-type variant is added.
+
+The compiler, profiles, frozen lock and input identities are those above.
+Reproduction extends the same evidence directory with `prepare-unrolled.mjs`,
+`screen-unrolled.sh`, `qualify-unrolled.sh`, `compare-final.mjs` and
+`production-wasm.sh`. `controls.sh` completes the loop candidate's controls;
+its initial invocation accidentally selected the argument-taking benchmark
+binary as a test, failed before running tests, and was corrected to the existing
+`codec-instructions` example test target. No fixture implementation changed.
+
+Uncompressed whole-fixture **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Unrolled | Change |
+| --- | ---: | ---: | ---: |
+| Hotspots / opt-z | 83,508 / 72,547 | 83,384 / 72,441 | −124 / −106 |
+| Hotspots / opt-3 | 103,969 / 93,675 | 104,128 / 93,834 | +159 / +159 |
+| Standard / opt-z | 594,633 / 547,837 | 594,851 / 548,055 | +218 / +218 |
+| Standard / opt-3 | 891,015 / 830,421 | 889,425 / 828,831 | −1,590 / −1,590 |
+| Toko-shaped / opt-z | 80,916 / 69,754 | 80,732 / 69,588 | −184 / −166 |
+| Toko-shaped / opt-3 | 103,366 / 92,866 | 103,093 / 92,592 | −273 / −274 |
+
+The signed32 fixture is byte-identical in both profiles: 75,500/63,418 bytes
+at opt-z and 91,229/80,005 at opt-3. Toko-shaped and standard results are
+footprint-only, not measured application savings.
+
+Encode **IC instructions**, with three identical samples per operation and
+distinct callers (large lists contain 16,384 values):
+
+| Case | opt-z before → after | opt-3 before → after |
+| --- | ---: | ---: |
+| Wide u32 list | 12,207,902 → 6,702,812 (−45.1%) | 4,326,408 → 3,720,193 (−14.0%) |
+| Singleton wide u32 | 2,286.5 → 1,884.5 (−17.6%) | 1,062.25 → 1,020.25 (−4.0%) |
+| Wide i32 list | 7,948,064 → 7,947,996 | 4,752,384 → 4,752,384 |
+| Empty-blob mixed record | 5,197.5 → 4,857.5 (−6.5%) | 2,136.25 → 2,136.25 |
+| 1 MiB byte buffer | 1,050,658 → 1,050,590 | 1,049,699 → 1,049,699 |
+
+All **860 hotspot Wire operation pairs** pass the instruction margin; **all
+1,070 signed32 rows**, including Candid, have exactly unchanged counters.
+Frame/input hashes and Candid artifacts/counters match. The automated hotspot
+cost screen still **fails** its opt-3 no-growth rule (+159 bytes); standard
+opt-z also grows 218 bytes. Under the opt-z-first policy, these small fixture
+increases are accepted for the large instruction reduction in both profiles.
+This is an explicit tradeoff, not a passing no-growth claim.
+
+Both profiles retain identical allocation counts and peak-live-heap observations
+across 778 rows per measurement mode. Two serial native runs/profile, eleven
+samples each, retain absolute encode medians (ns):
+
+| Case/profile | Baseline runs | Unrolled runs |
+| --- | ---: | ---: |
+| Wide u32 / opt-z | 214,324 / 220,625 | 154,821 / 145,174 |
+| Wide u32 / opt-3 | 106,789 / 102,765 | 68,965 / 67,495 |
+| Singleton u32 / opt-z | 56.8 / 56.5 | 57.7 / 73.9 |
+| Wide i32 / opt-z | 150,762 / 160,224 | 165,821 / 169,711 |
+| Empty-blob mixed / opt-z | 117.6 / 120.0 | 145.5 / 135.5 |
+
+Native small/mixed controls show regressions and variability; do not substitute
+IC improvements for a universal native-speed claim. The loop-only candidate's
+completed native/memory controls are retained in `u32only-native.json`, but it
+remains superseded because the unrolled writer removes its opt-3 IC penalty.
+
+Candidate tests pass: 47 native codec tests (one timing probe ignored), and six
+signed32 corpus tests including boundaries, truncation and deque admission.
+Production native/runtime tests and strict Core Clippy pass. Fresh production
+hotspot/standard Wasm is compared against all four measured candidate modules;
+baked encoder/lock identities bind the IC sources. No full matrix, native macOS,
+new installed-endpoint study or downstream application qualification is claimed.
+
+Codec bytes, schemas, identities, budgets and acceptance remain unchanged:
+u32 128 stays `80 01`, and u32::MAX stays `ff ff ff ff 0f`. No migration,
+client regeneration or retry/hash change. Only Core production changes;
+Endpoint does not need a release for this optimization.
+
+## Wider writer rejection screen (8 November 2026)
+
+**None adopted.** A fresh baseline includes the retained unrolled u32 writer
+and IC Build 0.80 adoption. Lock SHA-256 is
+`385b5344224449a182554018443beffd23b98164756c42a0c4acf3eb4257c534`;
+encoder SHA-256 is
+`6db3b2b563a7e854080f4324bf6d15f301057c6bd8f1286f10908fa4d01723d4`.
+Rust 1.99.1 / LLVM 23.1.1 and both existing profiles remain unchanged. Separate
+fresh Wasm targets and rebuilt native drivers bind each candidate to its source
+and lock. Native dependency caches are seeded, but product inputs are touched
+and baked source hashes checked. Baseline Candid artifacts are reused exactly.
+
+Three isolated changes were tested, retaining the original small-value shortcut:
+
+1. `unrolled64`: route wider u64 through a ten-byte raw tuple writer. Compute
+   width from leading zeros, emit/shift the first continuation byte, then use
+   eight nested `>= 128` checks before the final byte. Existing i64 zigzag
+   delegation uses this writer too; u32/i32 remain untouched.
+2. `direct16`: emit two or three raw u8 tuple elements for wider u16 using the
+   same branching structure as the existing i16 writer, without zigzag.
+3. `reuse16`: change only wider u16 forwarding to
+   `raw_u32(self.inner, u32::from(value))`; no additional writer implementation.
+
+Whole-module uncompressed **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Unrolled u64 | Direct u16 | Reused u32 for u16 |
+| --- | ---: | ---: | ---: | ---: |
+| Hotspots / opt-z | 83,384 / 72,441 | 83,609 / 72,689 | 83,201 / 72,276 | 83,208 / 72,280 |
+| Hotspots / opt-3 | 104,128 / 93,834 | 104,331 / 94,036 | 104,193 / 93,899 | 103,988 / 93,692 |
+| Standard / opt-z | 594,851 / 548,055 | 595,082 / 548,303 | 594,676 / 547,898 | 594,556 / 547,775 |
+| Standard / opt-3 | 889,425 / 828,831 | 890,418 / 829,824 | 889,101 / 828,506 | 889,146 / 828,551 |
+
+Selected **encode IC instructions** for 16,384-element ordinary lists:
+
+| Candidate / case | opt-z before → after | opt-3 before → after |
+| --- | ---: | ---: |
+| Unrolled u64 / wide u64 | 17,811,161 → 13,076,185 (−26.6%) | 6,767,606 → 9,749,494 (+44.1%) |
+| Unrolled u64 / wide i64 | 18,024,153 → 13,289,177 (−26.3%) | 6,996,982 → 9,978,870 (+42.6%) |
+| Direct u16 / wide u16 | 9,422,394.5 → 4,408,892.5 (−53.2%) | 1,770,327.25 → 2,343,767.25 (+32.4%) |
+| Reused u32 / wide u16 | 9,422,394.5 → 5,162,554.5 (−45.2%) | 1,770,327.25 → 2,818,902.25 (+59.2%) |
+| Reused u32 / wide u32 control | 6,702,812 → 7,194,330 (+7.3%) | 3,720,193 → 4,473,859 (+20.3%) |
+
+The 87-case hotspot corpus retains empty/singleton, byte-buffer, ordinary-vector
+and mixed-record controls. For example, unrolled u64 singleton encode changes
+2,559.5 → 2,270.5 at opt-z but 1,207.25 → 1,389.25 at opt-3. Direct u16 singleton
+changes 2,049.5 → 1,745.5 and 931.25 → 966.25. These are not universal gains.
+
+Each candidate has 1,904 rows with three identical IC samples and unique query
+callers; input/frame hashes and Candid counters match baseline. The independent
+cost screen rejects 12, four and 12 of 860 Wire operation pairs respectively.
+The reuse candidate passes footprint checks but regresses the already retained
+u32 path even at opt-z: sharing a source helper does not guarantee better emitted
+code. These measurements do not isolate an LLVM inlining or layout cause.
+
+All candidates pass 47 native codec tests (one timing probe ignored), including
+exhaustive u16 byte/budget checks and signed/unsigned width boundaries. Since the
+instruction screen rejects each candidate, native timing, allocation/heap,
+Toko-shaped and expanded signed32 measurements were not run. Standard modules
+are footprint-only. No application savings or full matrix are claimed.
+
+Reproduction and raw evidence: `target/evidence/wide-writers-20261108/`, including
+`prepare.mjs`, `screen.sh`, `prepare-ic.sh`, `screen-reuse16.sh`,
+`prepare-reuse16-ic.sh`, `cost-screen.sh` and `analyze-all.mjs`. The reuse candidate
+is reproduced from baseline by the single substitution above. Production source
+and lock hashes remain equal to this study's baseline. Bytes, schemas, identities,
+budgets and acceptance are unchanged; u16/u64 128 remains `80 01`, i64 -64 `7f`.
+No consumer migration, regeneration or retry/hash change. Preserve the retained
+u32 optimization; do not extend it mechanically to these widths.
+
 ## Historical follow-up for 0.7.16
 
 > Historical findings only. Raw measurements, snapshots, logs and build artifacts

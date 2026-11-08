@@ -37,6 +37,11 @@ install-hooks:
 	@bash "$(SHARED_TOOLING_ROOT)/scripts/dev/install-git-hooks.sh" --consumer "$(CURDIR)"
 endif
 
+# Root tooling selection is admitted automatically before CI or release effects.
+ifneq ($(SHARED_TOOLING_PRODUCER),1)
+ci release-patch release-minor release-major release-resume release-preflight: shared-tooling-check
+endif
+
 .DEFAULT_GOAL := $(_shared_consumer_default_goal)
 
 # Opt in with consumer-owned package policy; existing publication adapters stay local.

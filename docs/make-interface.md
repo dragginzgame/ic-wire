@@ -365,3 +365,23 @@ Selected assertion probes preserve a function context for return-based guards.
 Repeated exit probes require a fresh receipt from each child; earlier retained
 directories remain available when a later child fails during initialization.
 No consumer fixture body is run by these prefix-only probes.
+
+## Empty source directories during deployment
+
+Standard release entrypoints and release preflight automatically run
+`clean-empty-source-dirs`, including before frozen-batch capture. No consumer
+configuration is required. The helper selects existing conventional source roots:
+`src`, `crates`, `apps`, `backend`, `fleets`, `canisters`, `packages`, `tests`,
+`testing`, `schema`, `profiler`, `scripts`, `frontend/src` and `frontend/tests`.
+Repositories without those roots report zero deletions. Application deployment
+adapters that bypass the standard release entrypoints can call
+`make clean-empty-source-dirs` with the same automatic selection.
+
+The helper walks children before parents and deletes only empty directories
+matched by Git ignore rules. Git's inability to track an empty directory alone
+does not make it eligible. Selected roots, indexed paths (including missing
+tracked files), symlinks, Git metadata, target/build/dist/coverage, node_modules,
+vendor, tool/cache and recovery-evidence directories are preserved. It prints
+the number deleted. Cleanup never removes files or follows directory links.
+The helper also accepts explicit repository-relative source paths for standalone
+use, including quoted paths containing spaces.

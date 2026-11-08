@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared companions: scripts/ci/verify-shared-tooling-snapshot.sh scripts/dev/tool-store.sh scripts/distribution/registry-package.pl scripts/distribution/refresh-consumer.sh
+# Shared companions: scripts/ci/verify-shared-tooling-snapshot.sh scripts/dev/tool-store.sh scripts/dev/tooling-lock.pl scripts/distribution/registry-package.pl scripts/distribution/refresh-consumer.sh
 set -euo pipefail
 scratch=''
 complete=false
@@ -31,7 +31,7 @@ main() {
         shift 2
     done
     [[ -z "$precise" || ( "$mode" == update && "$precise" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ) ]] || {
-        echo '--version selects a registry version during update; install uses Cargo.lock unchanged' >&2; return 2;
+        echo '--version selects a registry version during update; install uses toko-tooling.lock unchanged' >&2; return 2;
     }
     case "/$manifest/" in //*|*'/../'*|*'/./'*|*'//'*) echo 'manifest must be a canonical relative path' >&2; return 2 ;; esac
     case "$consumer$previous_source$manifest" in *$'\n'*|*$'\r'*) echo 'paths must not contain line breaks' >&2; return 2 ;; esac
@@ -50,33 +50,24 @@ main() {
     elif [[ -e "$consumer/$manifest" || -L "$consumer/$manifest" ]]; then
         echo 'snapshot manifest is not a regular file' >&2; return 1
     fi
-    if [[ "$mode" == check && "$installed_source" != https://crates.io/crates/toko-tooling && ! -f "$consumer/Cargo.lock" ]]; then
-        bash "$script_root/scripts/ci/verify-shared-tooling-snapshot.sh" --consumer "$consumer" --manifest "$manifest"
-        return
-    fi
-    [[ -f "$consumer/Cargo.lock" && ! -L "$consumer/Cargo.lock" ]] || { echo 'Resolve the toko-tooling registry dev-dependency into Cargo.lock first.' >&2; return 1; }
-    read_selection() {
-        yq -p toml -o json '.' "$consumer/Cargo.lock" | jq -ce '
-        [.package[] | select(.name == "toko-tooling")] |
-        if length != 1 then error("expected one toko-tooling registry selection") else .[0] end |
-        select(.source == "registry+https://github.com/rust-lang/crates.io-index") |
-        select(.version | test("^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")) |
-        select(.checksum | test("^[0-9a-f]{64}$"))'
+    local requirement
+    [[ -f "$consumer/Cargo.toml" && ! -L "$consumer/Cargo.toml" ]] || { echo 'Root Cargo.toml tooling metadata is required.' >&2; return 1; }
+    requirement="$(yq -p toml -o json '.' "$consumer/Cargo.toml" | jq -er '
+        [.workspace.metadata["toko-tooling"], .package.metadata["toko-tooling"]] | map(select(. != null)) |
+        if length == 1 then .[0].version else error("select exactly one root tooling metadata table") end |
+        select(type == "string") | select(test("^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"))')" || {
+        echo 'Declare [workspace.metadata.toko-tooling] version = "X.Y.Z" in root Cargo.toml.' >&2; return 1;
     }
-    lock_record="$(read_selection)" || {
-        echo 'Select one crates.io toko-tooling dependency with a registry checksum; Git and path selections are not installable.' >&2; return 1;
-    }
+    [[ -z "$precise" || "$precise" == "$requirement" ]] || { echo '--version must match root tooling metadata; edit that declaration first.' >&2; return 1; }
     if [[ "$mode" == update ]]; then
-        # Admit declarations without resolving/fetching a newly introduced Git source.
-        (cd "$consumer" && cargo metadata --no-deps --locked --offline --format-version 1) | jq -e '
-            [.packages[].dependencies[] | select(.name == "toko-tooling")] |
-            length > 0 and all(.[]; .source == "registry+https://github.com/rust-lang/crates.io-index" and .path == null)' >/dev/null || {
-            echo 'Update requires crates.io declarations for toko-tooling.' >&2; return 1;
-        }
-        [[ -z "$precise" ]] || options=(--precise "$precise")
-        (cd "$consumer" && cargo update --package toko-tooling ${options[@]+"${options[@]}"}) || return 1
-        lock_record="$(read_selection)" || return 1
+        [[ ! -L "$consumer/target" && ! -L "$consumer/target/tmp" ]] || return 1
+        mkdir -p "$consumer/target/tmp"
+        scratch="$(mktemp -d "$consumer/target/tmp/toko-tooling-install.XXXXXX")"
+        curl --fail --silent --show-error --location --retry 3 --connect-timeout 20 --max-time 120 \
+            https://index.crates.io/to/ko/toko-tooling -o "$scratch/index.jsonl" || return 1
+        perl "$script_root/scripts/dev/tooling-lock.pl" resolve "$requirement" "$scratch/index.jsonl" "$consumer/toko-tooling.lock" >/dev/null || return 1
     fi
+    lock_record="$(perl "$script_root/scripts/dev/tooling-lock.pl" check "$requirement" "$consumer/toko-tooling.lock")" || return 1
     lock_version="$(printf '%s' "$lock_record" | jq -r .version)"
     lock_checksum="$(printf '%s' "$lock_record" | jq -r .checksum)"
     printf 'Installed: %s (%s)\nSelected from crates.io: %s (%s)\n' "$installed_version" "$installed_revision" "$lock_version" "$lock_checksum"
@@ -84,17 +75,17 @@ main() {
         [[ -n "$records" ]] || { echo 'No installed snapshot. Run shared-tooling-install with the initial --entrypoint selection.' >&2; return 1; }
         bash "$script_root/scripts/ci/verify-shared-tooling-snapshot.sh" --consumer "$consumer" --manifest "$manifest" || return 1
         if [[ "$installed_source" != https://crates.io/crates/toko-tooling || "$installed_revision" != "$lock_checksum" || "$installed_version" != "$lock_version" ]]; then
-            echo 'Cargo selected different toko-tooling bytes. Run make shared-tooling-install before using or deploying this snapshot.' >&2
+            echo 'The tooling lock selects different toko-tooling bytes. Run make shared-tooling-install before using or deploying this snapshot.' >&2
             [[ "$mode" == status ]] && return 0
             return 1
         fi
-        echo 'Cargo-selected registry package matches installed snapshot.'
+        echo 'Root tooling declaration, lock and installed snapshot agree.'
         return 0
     fi
     [[ -n "$records" || ${#entrypoints[@]} -gt 0 ]] || { echo 'Initial installation requires explicit --entrypoint selections.' >&2; return 2; }
     [[ ! -L "$consumer/target" && ! -L "$consumer/target/tmp" ]] || { echo 'Tooling scratch directories may not be symlinks.' >&2; return 1; }
     mkdir -p "$consumer/target/tmp"
-    scratch="$(mktemp -d "$consumer/target/tmp/toko-tooling-install.XXXXXX")"
+    [[ -n "$scratch" ]] || scratch="$(mktemp -d "$consumer/target/tmp/toko-tooling-install.XXXXXX")"
     # shellcheck source=scripts/dev/tool-store.sh
     source "$script_root/scripts/dev/tool-store.sh"
     archive="$scratch/toko-tooling-$lock_version.crate"

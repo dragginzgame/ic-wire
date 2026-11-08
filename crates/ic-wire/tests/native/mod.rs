@@ -334,6 +334,58 @@ fn strict_integer_reads_reject_every_redundant_u16_encoding() {
 }
 
 #[test]
+fn wide_integer_endings_match_independent_postcard_oracle() {
+    fn check<T>(bytes: &[u8])
+    where
+        T: serde::de::DeserializeOwned + Serialize + Copy + Eq + std::fmt::Debug,
+    {
+        // Postcard supplies value/consumption; its encoder independently decides
+        // whether that prefix is shortest-form. Wire additionally rejects trailing data.
+        let expected = postcard::take_from_bytes::<T>(bytes)
+            .map_err(|_| Error::Malformed)
+            .and_then(|(value, remaining)| {
+                let consumed = &bytes[..bytes.len() - remaining.len()];
+                if postcard::to_allocvec(&value).unwrap() != consumed {
+                    Err(Error::Malformed)
+                } else if !remaining.is_empty() {
+                    Err(Error::Trailing)
+                } else {
+                    Ok(value)
+                }
+            });
+        assert_eq!(native::decode::<T>(bytes, LIMITS), expected, "{bytes:02x?}");
+        if let Ok(value) = expected {
+            let mut following = bytes.to_vec();
+            following.push(0x5a);
+            assert_eq!(
+                native::decode::<(T, u8)>(&following, LIMITS),
+                Ok((value, 0x5a)),
+                "reader must not consume the following field: {following:02x?}"
+            );
+            assert_eq!(
+                native::decode::<T>(&following, LIMITS),
+                Err(Error::Trailing)
+            );
+        }
+    }
+
+    for prefix in [0x80, 0xff] {
+        for length in 0..=11 {
+            let mut bytes = vec![prefix; length];
+            for last in 0..=u8::MAX {
+                if let Some(end) = bytes.last_mut() {
+                    *end = last;
+                }
+                check::<u32>(&bytes);
+                check::<i32>(&bytes);
+                check::<u64>(&bytes);
+                check::<i64>(&bytes);
+            }
+        }
+    }
+}
+
+#[test]
 fn strict_parsing_allows_consumer_normalization() {
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     #[serde(from = "u8")]

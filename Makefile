@@ -28,7 +28,7 @@ unexport CARGO_TARGET_DIR
 endif
 endif
 RELEASE_SETUP_TARGET := release-candidate-setup
-RELEASE_EDITOR_VERSION := 0.79.0
+RELEASE_EDITOR_VERSION := 0.80.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -53,6 +53,9 @@ $(error PUBLISH_PACKAGES was replaced by PACKAGE; use PACKAGE=ic-wire for a sele
 endif
 endif
 include make/consumer.mk
+
+# These custom routes bypass the generic CI/release entrypoint admission.
+ci-core ci-typescript ci-benchmarks publish publish-check release-batch-resume release-batch-reconcile: shared-tooling-check
 
 # Shared owns default capture. Wire admits only its complete supplier-first roster.
 ifneq ($(filter release-patch release-minor release-major,$(MAKECMDGOALS)),)
@@ -96,7 +99,7 @@ ifneq ($(filter WIRE_ROSTER_REFUSED,$(IC_WIRE_CI_TARGETS)),)
 $(error Wire validation roster admission failed)
 endif
 .PHONY: check-package
-check-package:
+check-package: shared-tooling-check
 	+@$(MAKE) lint
 	+@$(RUST_POLICY) cargo package --locked --allow-dirty $(foreach package,$(CARGO_PUBLISH_PACKAGES),-p $(package)) --all-features --target-dir target/publication-check
 

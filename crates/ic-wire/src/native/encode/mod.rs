@@ -31,6 +31,34 @@ impl<T: Serialize + ?Sized> Serialize for Bounded<'_, T> {
     }
 }
 
+// Wider u32 values use at most five Postcard varint bytes. Unroll the bounded
+// continuation steps instead of constructing Postcard's temporary buffer. The
+// caller handles values below 128; i32 retains its independently qualified path.
+// Only Postcard output/sizing serializers receive this prefix-free tuple. Bytes
+// (128 -> 80 01, u32::MAX -> ff ff ff ff 0f), identities, admission and acceptance
+// remain unchanged. No consumer migration, schema regeneration or retry/hash change.
+fn raw_u32<S: Serializer>(inner: S, mut value: u32) -> Result<S::Ok, S::Error> {
+    let len = ((32 - value.leading_zeros()).max(1) as usize).div_ceil(7);
+    let mut tuple = inner.serialize_tuple(len)?;
+    // The sole caller has already handled values below 128.
+    ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+    value >>= 7;
+    if value >= 128 {
+        ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+        value >>= 7;
+        if value >= 128 {
+            ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+            value >>= 7;
+            if value >= 128 {
+                ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+                value >>= 7;
+            }
+        }
+    }
+    ser::SerializeTuple::serialize_element(&mut tuple, &(value as u8))?;
+    ser::SerializeTuple::end(tuple)
+}
+
 struct Checked<'a, S> {
     inner: S,
     budget: &'a Budget,
@@ -133,7 +161,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         if value < 128 {
             self.inner.serialize_u8(value as u8)
         } else {
-            self.inner.serialize_u32(value)
+            raw_u32(self.inner, value)
         }
     }
     fn serialize_u64(self, value: u64) -> Result<Self::Ok, Self::Error> {

@@ -1,4 +1,71 @@
-# Runtime optimization qualification for 0.7.16
+# Runtime optimization qualification
+
+## Decoder tail screen (8 November 2026)
+
+**Neither candidate is adopted.** This study starts from the current unrolled
+u32 writer and Build 0.80 lock. Baseline parser SHA-256:
+`67240609997fde1ccf2fe54544d77387015f1b67b812aa94000aeee28b3b84a8`;
+lock SHA-256:
+`385b5344224449a182554018443beffd23b98164756c42a0c4acf3eb4257c534`.
+Rust 1.99.1 / LLVM 23.1.1, wasm32-unknown-unknown, existing opt-z/opt-3 profiles,
+LTO/one codegen unit and no post-link optimizer. Fresh separate Wasm targets
+and rebuilt native drivers retain exact parser/lock identities.
+
+- `tail` changes the existing u32/u64 reader macro: loop over intermediate
+  groups only, then read the last byte separately and require
+  `1..=max_of_last_byte::<T>()` before shifting it into the result.
+- `unrolled32` replaces only the u32 macro invocation with five explicit reads.
+  The first byte retains its early return; groups at shifts 7, 14 and 21 reject
+  a terminating zero. The fifth byte must be in `1..=15`. u64 stays unchanged.
+
+Whole-fixture uncompressed **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Split tail | Unrolled u32 |
+| --- | ---: | ---: | ---: |
+| Hotspots / opt-z | 83,384 / 72,441 | 83,560 / 72,612 | 83,665 / 72,713 |
+| Hotspots / opt-3 | 104,128 / 93,834 | 104,218 / 93,924 | 104,391 / 94,097 |
+| Standard / opt-z | 594,851 / 548,055 | 595,023 / 548,226 | 595,132 / 548,327 |
+| Standard / opt-3 | 889,425 / 828,831 | 889,323 / 828,730 | 890,095 / 829,500 |
+
+**Owned-decode IC instructions**, lists with 16,384 values:
+
+| Case/profile | Baseline | Split tail | Unrolled u32 |
+| --- | ---: | ---: | ---: |
+| Wide u32 / opt-z | 7,083,521 | 7,493,113 (+5.8%) | 6,510,046 (−8.1%) |
+| Wide u32 / opt-3 | 2,724,229 | 2,527,618 (−7.2%) | 2,560,384 (−6.0%) |
+| Wide u64 / opt-z | 14,096,374 | 14,686,190 (+4.2%) | 14,096,339 |
+| Wide u64 / opt-3 | 6,066,465 | 5,722,394 (−5.7%) | 6,066,457 |
+| Wide u16 control / opt-z | 4,069,359.5 | 4,593,639.5 (+12.9%) | 4,593,612.5 (+12.9%) |
+
+The independent cost screen rejects 18 and ten of 860 Wire operation pairs
+respectively, including decode and truncated-input rejection. Each lane has
+1,904 IC rows across 87 cases, with three identical samples and unique query
+callers. Inputs, frames and Candid counters match. Changes outside the directly
+edited integer method show why whole-module controls matter; these results do
+not prove a particular compiler inlining or code-layout cause. Both candidates
+also grow primary-profile Wasm. Native timing, memory profiling, application
+measurements and a full comparison matrix were not run after rejection.
+
+**Retained test coverage:** `wide_integer_endings_match_independent_postcard_oracle`
+checks u32/i32/u64/i64 with all possible final bytes after zero/all-one
+continuation groups, at lengths zero through eleven. Postcard supplies decoded
+value and consumed prefix; its encoder independently determines shortest-form
+acceptance. Tests distinguish malformed input from valid values with trailing
+bytes and check that a following tuple field remains untouched. Baseline and
+both candidates pass 48 native tests (one timing probe ignored). The retained
+test and strict native-test Clippy pass in the normal checkout.
+
+Raw evidence/reproduction: `target/evidence/decoder-tail-20261108/`, including
+`prepare.mjs`, `screen.sh`, `prepare-ic.sh`, `prepare-unrolled32-ic.sh`,
+`cost-screen.sh`, `analyze.mjs` and source snapshots. The first driver-setup
+attempt reached unrolled32 before its screen artifact existed; only that lane's
+setup was rerun after the artifacts were ready. Completed runs and source hashes,
+not that incomplete setup, supply the results above. Production parser and lock
+remain byte-identical to baseline. Bytes, identities, budgets and acceptance
+stay unchanged: `80 00` remains malformed; u32 `ff ff ff ff 0f` remains valid.
+No consumer migration or retry/hash change. Only the test is retained.
+
+## Historical qualification for 0.7.16
 
 > Historical findings only. Raw measurements, snapshots, logs and build artifacts
 > were retired from this tree. A summary/hash cannot verify missing payloads.

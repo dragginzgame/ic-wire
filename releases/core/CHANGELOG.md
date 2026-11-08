@@ -20,6 +20,18 @@ in [shared history](../history.md).
 
 ### ⬆️ Dependencies
 
+- Repository maintenance: adopt Testkit 0.94.0 for private codec and Endpoint
+  qualification. Remove duplicate native Platform 0.26/Host 0.75 selections;
+  installed limits/rollback checks pass with PocketIC 16.1.0. Production Runtime,
+  Types, codec bytes and budgets stay unchanged. No additional public release is
+  required for this private supplier adoption alone.
+
+- Repository maintenance: adopt ic-build 0.80.0 for private compiler diagnostics
+  and the pinned release-metadata executable. Qualify both diagnostic owners and
+  Core/Endpoint metadata edits in a disposable fixture. Required Host/HMAC updates
+  remain private; runtime bytes and budgets are unchanged. This tooling change
+  alone requires no public package release.
+
 - Deferred repository maintenance: use Platform 0.27.0 for private codec
   comparisons. Testkit retains native facade 0.26.1; production Runtime 0.20.2
   and Types 0.18.2 selections, codec bytes and admission remain unchanged.
@@ -27,12 +39,11 @@ in [shared history](../history.md).
 
 ### 🧹 Cleanup
 
-- Repository maintenance: migrate the tooling snapshot to the authenticated
-  crates.io toko-tooling 0.33.0 bundle, selected through the private qualification
-  member’s dev-dependency and Cargo.lock checksum. Keep shared-tooling command
-  names, recorded entrypoints and independent product release requirements.
-  Future Cargo tooling updates require explicit snapshot installation; this
-  migration alone does not require publishing Core or Endpoint.
+- Repository maintenance: select toko-tooling 0.34.0 through root metadata and
+  its dedicated registry/checksum lock. Remove the old Cargo dependency while
+  retaining the real qualification package. Guard custom CI/publication/recovery
+  entrypoints against tooling drift. Keep command names and product release
+  requirements; no public release is required for tooling adoption alone.
 
 - Repository maintenance: replace three duplicate CI scaffold jobs with one
   qualification gate, preserving all native platform/suite jobs and docs routing.
@@ -79,6 +90,15 @@ in [shared history](../history.md).
 
 ### ⚡ Performance
 
+- Unroll the bounded u32 varint writer while retaining the small-value shortcut
+  and i32 path. Matched wide-list encode IC instructions fall 45.1% at opt-z
+  and 14.0% at opt-3. Accept +218 standard opt-z Wasm bytes and +159 hotspot
+  opt-3 bytes; Toko-shaped modules shrink at both profiles. All hotspot instruction
+  comparisons pass, but the automated no-growth screen does not. Native small
+  opt-z regressions remain documented in the [study](../../docs/evidence/encoder-followup.md#bounded-unrolled-u32-writer-8-november-2026).
+  Bytes, identities, budgets and acceptance are unchanged: u32 128 remains
+  `80 01`; no consumer migration or retry/hash change.
+
 - Suppress discarded type rendering during host schema validation, registry
   finish and bulk prevalidation while retaining one validation walker. Matched
   opt-z validation improves 40–56%; small generation adds 85 ns (4%). Generated
@@ -94,6 +114,16 @@ in [shared history](../history.md).
   i32 -64 is still `7f` and 64 is `80 01`. No consumer migration or regeneration.
 
 ### 🧪 Testing
+
+- Check admission against independent byte arithmetic at zero, exhausted and
+  maximum allowances, including overflow, depth refusal, sticky failure and
+  unchanged counters after refusal. Budget rewrites remain rejected; production
+  admission and wire bytes are unchanged.
+
+- Check wide integer decoding against an independent Postcard value/consumption
+  and canonical-encoding oracle. Exercise final-byte values, overflow, redundant
+  groups, truncation, trailing bytes and following tuple fields for u32/i32/u64/i64.
+  Decoder experiments remain rejected; production bytes and acceptance are unchanged.
 
 - Expand the maintained comparison roster to 39 cohorts with 49 signed-i32
   boundary, list-distribution, deque, set, tuple/option/result and Packed-control

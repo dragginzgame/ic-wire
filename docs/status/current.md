@@ -1,5 +1,75 @@
 # Current handoff
 
+The [budget predicate screen](../evidence/cost-experiments.md#budget-predicate-screen-8-november-2026)
+rejects combined comparisons and underflow-flag admission rewrites. Both grow
+standard Wasm (154/196 bytes at opt-z) with mostly unchanged or slightly higher
+instruction costs. All 860 instruction pairs pass the margin, but footprint
+checks fail; that is not an optimization win. Keep the independent sticky-refusal,
+overflow and no-partial-debit test. All lanes pass five library and 48 native
+tests; retained test and Clippy pass. Production budget code is unchanged.
+Native timing/memory and a full matrix were not run after rejection. Evidence:
+target/evidence/budget-predicates-20261108/.
+
+## Testkit 0.94 adoption
+
+Private qualification now selects published ic-testkit 0.94.0. Wire has no
+removed extension-trait/prelude imports, so no caller rewrite is needed. The
+lock drops native Platform 0.26.1 and Host 0.75.1 duplicates, leaving Platform
+0.27.0 and Host 0.76.0. Runtime/macros/guard 0.20.2 and Types 0.18.2 remain
+unchanged. The prepared PocketIC 16.1.0 installed Endpoint catalogue, limits and
+rollback test passes; codec/admission instruction drivers compile. Snapshot,
+dependency-boundary and pin checks pass. No new performance matrix is claimed.
+Codec bytes, identities, budgets and acceptance are unchanged. This private
+supplier adoption alone requires no public release. Evidence: target/testkit094/.
+No commit, push or publication is part of this adoption.
+
+The [decoder tail screen](../evidence/runtime.md#decoder-tail-screen-8-november-2026)
+rejects separated-tail and unrolled-u32 readers: both grow primary-profile Wasm
+and slow the opt-z wide-u16 control by 12.9%. Unrolled u32 improves its own
+wide decode 8.1%/6.0% at opt-z/3, but ten operation pairs regress; separated-tail
+fails 18. Production parser remains unchanged. Keep the independent Postcard
+oracle for u32/i32/u64/i64 ending bytes, overflow/nonminimal/truncated inputs,
+trailing data and following-field consumption. All three lanes pass 48 native
+tests; the retained test and strict test Clippy pass. No native timing/memory or
+full matrix was run after rejection. Evidence: target/evidence/decoder-tail-20261108/.
+
+The [wider writer screen](../evidence/encoder-followup.md#wider-writer-rejection-screen-8-november-2026)
+rejects three follow-ups. Unrolled u64 reduces wide-list opt-z encode instructions
+26.6% but adds 44.1% at opt-3; direct u16 saves 53.2% at opt-z but adds 32.4%
+at opt-3. Reusing the u32 writer for u16 shrinks Wasm but slows u16 59.2% at
+opt-3 and regresses retained u32 by 7.3%/20.3% at opt-z/3. All pass 47 native
+tests; cost screens fail 12/four/12 operation pairs. Native timing/memory was
+not run after rejection. No new production changes; the retained u32 writer
+and Build 0.80 adoption remain intact. Evidence: target/evidence/wide-writers-20261108/.
+
+## IC Build 0.80 adoption
+
+The private diagnostic dependency and separately installed release-metadata
+executable now select published ic-build 0.80.0. Its batch-report API cut has
+no Wire callers. Required private dependencies add Host 0.76 and HMAC 0.13;
+older Host identities remain for other private suppliers. Runtime/Types,
+production codec bytes, identities, budgets and acceptance are unchanged.
+Installation/offline executable admission, eight Core and thirteen Endpoint
+diagnostic refusals with passing controls, both groups' metadata prepare/check
+in a disposable fixture, oversize editor-input rejection, dependency boundaries
+and tooling snapshot verification pass. No actual release effects occurred.
+Evidence: target/build080/. This tooling-only adoption needs no additional
+public release and does not requalify the preceding performance study's lock.
+
+Adopt the [bounded unrolled u32 writer](../evidence/encoder-followup.md#bounded-unrolled-u32-writer-8-november-2026)
+for pending Core 0.18.0. Wide-list encode IC instructions drop 45.1% at opt-z
+and 14.0% at opt-3; all 860 hotspot instruction pairs pass. Signed32 modules
+and all 1,070 counters remain identical. Allocations/heap match. Toko-shaped
+Wasm shrinks 184/273 total bytes at opt-z/3; standard opt-z grows 218 bytes,
+while standard opt-3 shrinks 1,590. The hotspot screen fails its opt-3 size
+rule (+159 bytes), explicitly accepted for the instruction gain. Native
+small/mixed opt-z regressions remain reported. Loop-only candidates are not
+adopted. Native/runtime and signed32 tests plus Core Clippy pass; this is not a
+full matrix or application measurement. Bytes, identities, budgets and acceptance
+are unchanged: u32 128 stays 80 01, u32::MAX stays ff ff ff ff 0f. No migration,
+client regeneration or retry/hash change; Endpoint needs no release for this.
+Pending tooling edits are preserved. Evidence: target/evidence/u32-split-20261108/.
+
 Release qualification now follows the workspace Endpoint minor series instead
 of a fixed 0.8.0 pin. Current Core/Endpoint pairs are always tested; an old
 published Endpoint tied to Core 0.17 is explicitly unsupported with Core 0.18.
@@ -21,25 +91,29 @@ Production codec bytes, identities, limits and acceptance are unchanged. This
 private supplier change alone does not require a public release. Evidence:
 target/platform027/. Existing pending product releases remain separate.
 
-## Toko Tooling 0.33 registry migration
+## Toko Tooling 0.34 root-owned selection
 
-The private qualification member selects toko-tooling = "0.33" as a registry
-dev-dependency, inherited from the root tests/tooling catalog. Cargo.lock records
-0.33.0 and checksum 4bd31469e2819833bcf120144d250c1b917b570682f7dcfdf02da3d219162e81.
-The new installer from Cargo’s downloaded package migrated the Git snapshot;
-the sibling checkout supplied historical ownership proof only. Recorded
-entrypoints and consumer-owned files are retained. Future registry operations
-need no sibling: use make shared-tooling-update, or shared-tooling-install after
-separate Cargo updates. Existing product gates, versions and publication
-exclusions remain authoritative. The earlier Git-marker proposal is superseded.
-Installation and tool admission pass. Snapshot/lock verification covers 152
-files and preserves all 79 entrypoints. Focused checks pass: dependency/pin
-boundaries, private-member compilation, formatting, documentation, 16 workflow
-classifications, 256 gate combinations, and disposable Make validation/release
-routing for both groups. The marker is absent from public Wasm normal/build
-graphs. No broad product suite or release was run.
-Migration evidence: target/toko033/. The subsequent deployment request
-authorizes delivery under the product release plan below.
+Root Cargo.toml workspace metadata selects exact toko-tooling 0.34.0;
+toko-tooling.lock owns registry identity/checksum independently of application
+Cargo.lock. The installed snapshot matches checksum
+5ca8ad09ad9359bc4945a4afdaafce301dd5a4b4955cd5c9f5058d7a54ffcf10.
+The old workspace dependency and private dev-dependency are removed; Cargo
+removed only the marker and its dependency edge. All seven real members remain,
+including qualification’s tools/tests; there was no marker-only package to delete.
+Use shared-tooling-update after changing the root version, or
+shared-tooling-install to reinstall the existing tooling lock. Application Cargo
+updates no longer select tooling. Custom CI, publication, recovery and local
+release adapters delegate admission to shared-tooling-check before effects.
+Product group gates and publication exclusions remain unchanged. Installation,
+tool admission and 154-file snapshot verification pass; all 79 entrypoints remain.
+Focused checks pass: seven-member/default-member/release-group consistency,
+unchanged non-tooling lock selections, private compilation, dependency/pin
+boundaries, formatting/docs, 16 CI classifications and 256 gate combinations.
+Ten drifted-entrypoint refusals and the complete disposable Make routing/
+publication/formatting-hook fixture pass, with real release effects substituted.
+No active tooling dependency, marker-only package or cargo-machete exception
+remains. Evidence: target/toko034/. No commit, push or release is part of this
+migration.
 
 Delivery preparation selects Core 0.18.0 then Endpoint 0.9.0, with frozen
 source and full group gates. Endpoint’s inherited Core requirement advances

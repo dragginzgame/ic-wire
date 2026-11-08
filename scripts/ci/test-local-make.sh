@@ -24,7 +24,7 @@ export WIRE_FIXTURE_COMPILER="$compiler"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
+paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock toko-tooling.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
 paths+=(ci/release-validation.json scripts/ci/wire-validation-roster.pl scripts/ci/wire-release-validation.mjs scripts/ci/check-release-validation.mjs scripts/ci/rust-policy.sh scripts/ci/ic-wire-release.sh scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 paths+=(scripts/ci/check-lint.sh scripts/ci/prepare-browser-tools.sh)
 paths+=(scripts/ci/check-compatible-consumers.sh)
@@ -45,6 +45,29 @@ for path in "${paths[@]}"; do
     mkdir -p "$fixture/repo/$(dirname "$path")"
     cp -pP "$root/$path" "$fixture/repo/$path"
 done
+
+# New release preparation also checks the actual repository root for source cleanup.
+git -C "$fixture/repo" init -q
+
+# Exercise real root selection admission before substituting any execution.
+make --no-print-directory -C "$fixture/repo" shared-tooling-check > "$fixture/tooling-valid.log" 2>&1
+cp "$fixture/repo/toko-tooling.lock" "$fixture/tooling-lock-before"
+perl -MJSON::PP -e 'local $/; my $p=decode_json(<>); $p->{version}="0.0.0"; print JSON::PP->new->encode($p)' < "$fixture/tooling-lock-before" > "$fixture/repo/toko-tooling.lock"
+for target in ci ci-core ci-typescript ci-benchmarks publish publish-check check-package release-batch-resume release-batch-reconcile; do
+    if make -j4 --no-print-directory -C "$fixture/repo" "$target" RELEASE_GROUP=core BATCH=batch-fixture > "$fixture/$target-tooling-drift.log" 2>&1; then exit 1; fi
+    grep -F 'tooling declaration and lock' "$fixture/$target-tooling-drift.log" >/dev/null
+done
+if (cd "$fixture/repo" && RELEASE_GROUP=core bash scripts/ci/ic-wire-release.sh preflight) > "$fixture/adapter-tooling-drift.log" 2>&1; then exit 1; fi
+grep -F 'tooling declaration and lock' "$fixture/adapter-tooling-drift.log" >/dev/null
+cp "$fixture/tooling-lock-before" "$fixture/repo/toko-tooling.lock"
+# Routing probes deliberately replace exported runners. Admission was exercised
+# above on pristine payloads; substitute only that gate for subsequent dispatch.
+cat > "$fixture/repo/fixture-admission.mk" <<'STUB'
+.PHONY: shared-tooling-check
+shared-tooling-check:
+	@:
+STUB
+printf '\ninclude fixture-admission.mk\n' >> "$fixture/repo/Makefile"
 
 check_ci_routing() {
     # Roster admission must work before bootstrap tools exist, including system Make.

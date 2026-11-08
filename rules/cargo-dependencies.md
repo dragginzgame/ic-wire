@@ -474,21 +474,21 @@ in [the Cargo Book](https://doc.rust-lang.org/cargo/reference/specifying-depende
 
 ## Shared Tooling during dependency updates
 
-Shared Tooling is the `toko-tooling` source bundle on crates.io, owned by
-`https://github.com/dragginzgame/toko-tooling`. Select it as a registry dev-dependency
-in a private tooling/qualification member. Keep it out of published/runtime
-closures; inheriting an unused workspace declaration does not select it.
+Toko Tooling is a repository-level source-bundle dependency, independent of Cargo's
+application graph. Root `[workspace.metadata.toko-tooling]` (or standalone root
+`[package.metadata.toko-tooling]`) declares an exact published version.
+`toko-tooling.lock` records its crates.io archive checksum. Do not declare it as a
+normal, dev or build dependency, or create a workspace package to hold it.
 
-After any `cargo update` that changes `toko-tooling` in `Cargo.lock`, agents must
-run `make shared-tooling-install`. It authenticates and installs that exact registry archive and runs
-`make install-tools` and `make tools-check`. `make shared-tooling-update` performs
-the targeted Cargo update and installation together. Do not claim success by
-editing only Cargo metadata, a lockfile or snapshot annotation. The offline
-`shared-tooling-check` refuses mismatched selected/installed versions or package checksums. Never
-install through a Cargo build script or implicitly during checks.
+After intentionally changing the root tooling version, run
+`make shared-tooling-update` to resolve and install it. `make shared-tooling-install`
+reinstalls the existing lock. Both authenticate actual crates.io source bytes and
+prepare/check tools. Offline `make shared-tooling-check` requires the declaration,
+lock and installed receipt to agree; common CI/release entrypoints run it
+before effects. Custom application deployment adapters must also admit tooling.
+No Cargo build script or ordinary check installs tooling.
 
-Report snapshot installation, tool admission and remaining focused caller
-validation separately. Setup failure leaves adoption incomplete. Existing
-verified tools are reused. An unrelated Cargo update does not require a Shared
-refresh, reinstall or broad suite. Non-Cargo consumers retain snapshot-based
-selection under the [installation contract](../docs/consuming-snapshots.md#cargo-selection-and-installation).
+Application `cargo update` has no effect on tooling selection. Remove the former
+Cargo dependency and any selection-only package during migration, preserving real
+tools/tests and updating affected membership/group rosters. Follow
+[the migration procedure](../docs/consuming-snapshots.md#migration-from-cargo-dependencies).
