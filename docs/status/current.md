@@ -1,5 +1,24 @@
 # Current handoff
 
+## Core 0.17.14 delivery in progress
+
+Keep the checked slice-copy path for existing Packed signed bytes and 16-/32-byte
+hashes on little-endian targets. Wider words and big-endian readers stay intact.
+Matched opt-z IC decode drops **112,047 → 67,100** for 4,096 IDs and
+**394,599.5 → 17,879.5** for 16,384 signed bytes. Whole-fixture total/code Wasm
+shrinks **30/19 bytes** (ID) and **70/28 bytes** (bulk) at opt-z/3. Singleton
+opt-z decode can add up to **104 instructions**. All **1,032 operation pairs**
+pass the cost policy; allocation counts/heap stay unchanged. Focused Packed
+byte/admission/endian tests and Clippy pass. The [matched study](../evidence/primitive-bulk.md#byte-aligned-packed-copy-8-november)
+records native time, regressions and reproduction under
+`target/evidence/packed-copy-20261108/`. Testkit **0.93.1** is fixed on both sides;
+its previously deferred lock update is included. No new full matrix or application
+performance claim. Bytes, identities, limits and acceptance remain unchanged:
+one packed ID is still `10 + 16 bytes`; no consumer action is required.
+The maintainer authorized Core/derive delivery to origin/main and crates.io.
+The full 20-stage frozen gate precedes version preparation/publication; Endpoint
+stays **0.8.1**. Source preparation and delivery are in progress.
+
 ## Delivered: Endpoint 0.8.1
 
 Shared **0.31.9 / d95f271** was exported from its committed revision. It scopes
@@ -7,10 +26,10 @@ formatting to workspace members, adds the shared hashing policy and replaces
 the old LOC selector with `CLOC_DEPTH` / `cloc.sh -d`. It does not change the
 downloader implicated in the recent hosted HTTP 504 bootstrap failures.
 
-Current sources select Build **0.79.0** for compiler diagnostics and the release
+That release selected Build **0.79.0** for compiler diagnostics and the release
 metadata CLI, Platform **0.26.0** for private benchmarks, and Runtime/macros/guard
 **0.20.1** for Endpoint. The Runtime lock update was already present on entry.
-Types **0.18.2**, Testkit **0.93.0** and Host **0.75.0** stay unchanged. Testkit
+Types **0.18.2**, Testkit **0.93.0** and Host **0.75.0** were unchanged. Testkit
 retains native-only Platform **0.25.1** alongside the benchmark facade; execution
 resolves one Runtime/guard. No removed Build batch or Platform hashing API is
 used. Supplier preparation, offline release-editor admission, snapshot integrity,
@@ -35,8 +54,8 @@ independent registry downloads, checksums and release provenance. The
 [delivery receipt](../../releases/receipts/published-endpoint081/delivery.json)
 owns exact identities. The normal checkout is reconciled. A concurrent Testkit
 **0.93.1** lock update is preserved at **c134348** on
-`deferred/endpoint081-testkit0931` and reapplied locally for the next batch;
-this release selected and qualified **0.93.0**. Hosted CI remains asynchronous.
+`deferred/endpoint081-testkit0931` and is now included in the Core candidate;
+Endpoint's release qualified **0.93.0**. Hosted CI remains asynchronous.
 Wire bytes, schemas, identities, limits, acceptance and rollback are unchanged.
 Prior performance measurements below retain their original supplier identities.
 
@@ -51,17 +70,11 @@ The [delivery receipt](../../releases/receipts/published-core01713/delivery.json
 owns exact identities and verification. Evidence: `target/core01713-delivery/`,
 `target/core01713-deploy-3.log` and the retained frozen checkout. Hosted CI is
 asynchronous; no native macOS or fresh installed application proof is claimed.
-The first batch, **batch-mzOGyRZA** from **89e1240**, stopped at the Candid source
-boundary before version preparation or delivery. Its missing declaration for the
-private flattened-ID comparator is now registered; all boundary checks pass.
-Preserve the failed logs/state, but do not resume that superseded source.
-The second batch, **batch-Oup1NG9b** from **e83ad0b**, passed the first 16 stages
-but exposed a stale Endpoint compatibility fixture: published Endpoint 0.7.1
-cannot select local 0.8 macros. Its published baseline now uses Core 0.17.12 /
-Endpoint 0.8.0. No version preparation or delivery occurred; retain this failed
-batch without resuming its superseded source.
-The corrected current/previous-Core/published-Endpoint lanes all pass on host
-and Wasm; evidence is under `target/compatible-consumers/run.MGmXha/`.
+Failed Core batches **batch-mzOGyRZA** (source **89e1240**) and
+**batch-Oup1NG9b** (source **e83ad0b**) had no delivery effects and are superseded;
+retain their state without resuming. The delivery receipt records their repaired
+Candid declaration and compatibility-fixture failures. Current/previous-Core/
+published-Endpoint lanes pass; evidence: `target/compatible-consumers/run.MGmXha/`.
 
 Public `Packed<[u8; 16]>` reuses the existing bulk codec, with `hash16` metadata,
 flat `Uint8Array` clients, partial-ID rejection and default/suppressible list
@@ -71,24 +84,12 @@ Adopting one ID changes `01 + 16 bytes` to `10 + 16 bytes`; eight IDs change
 retain original retry/hash bytes, and requalify buffer budgets and field bounds.
 Existing field bytes, identities, limits and acceptance remain unchanged.
 
-The [fresh flat-Candid comparison](../evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november)
-corrects the earlier nested-vector interpretation. For 4,096 owned IDs, opt-3
-Wire encode/decode is **66,637 / 66,620**, versus flat Candid **149,171 / 85,862**
-instructions. Wire wins 78/80 primary comparisons; both losses are large-list
-opt-z decode, **112,047 vs 96,673** for the owned case (15.9% more). All nonempty
-cases improve over ordinary Wire arrays; empty regressions are 23–186 instructions.
-Borrowed-input encoding includes a copy: 132,725 opt-3 instructions and 64 KiB
-extra heap. This is not a universal 129× advantage.
-
-Whole ID-fixture uncompressed Wasm saves **1,484 / 448 total bytes at opt-z/3**.
-The existing 109-case bulk fixture is byte-identical before/after when the new
-type is unused. These are fixture measurements, not application savings. All
-800 IC rows have three identical samples. Candid frames/counters/sizes match
-across cohorts; feature-build module hashes differ. Focused Rust/admission,
-178 browser vectors, 39,448 mutations, 66 simulated endian cases, standalone
-no_std host/Wasm, Clippy, advice and dependency-boundary checks pass. Evidence:
-`target/evidence/id16-flat-20261108/`, `target/id16-work/`. Actual native big-endian
-and installed application qualification are not claimed.
+The [flat-Candid study](../evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november)
+corrected the prior nested-vector interpretation; retain its ordinary controls and
+borrowed-input copy costs. Its two opt-z large-ID decode losses are addressed by
+the pending slice-copy change above. Original evidence remains under
+`target/evidence/id16-flat-20261108/` and `target/id16-work/`. Fixture savings
+are not application savings; native big-endian/application proofs remain absent.
 
 ## Suppliers and prior delivery
 

@@ -7,6 +7,18 @@ in [shared history](../history.md).
 
 ## [0.17.14]
 
+### ⚡ Performance
+
+- Copy byte-aligned Packed elements directly into reserved storage on
+  little-endian targets, retaining the existing reader for wider words. In the
+  matched opt-z IC fixtures, decoding 4,096 IDs drops from 112,047 to 67,100
+  instructions and 16,384 signed bytes from 394,599.5 to 17,879.5. Total and
+  code-section Wasm both shrink by 30/19 bytes in the ID fixture and 70/28 bytes
+  in the broader Packed fixture at opt-z/3. Singleton opt-z decode can cost up
+  to 104 extra instructions. Bytes, identities, limits, acceptance and allocation
+  counts stay unchanged; no consumer migration is required. See the
+  [matched study](../../docs/evidence/primitive-bulk.md#byte-aligned-packed-copy-8-november).
+
 ### 🔧 Maintenance
 
 - Adopt Shared 0.31.9 through its exporter: restrict formatting to workspace
@@ -14,9 +26,10 @@ in [shared history](../history.md).
   for module-level reports. Download handling is unchanged.
 - Adopt Build 0.79 for the private compiler-diagnostic caller and selected release
   metadata CLI, and Platform 0.26 for Candid/IC benchmark qualification. No Wire
-  caller uses their removed batch or pure-hashing APIs. Testkit 0.93 retains its
-  native-only Platform 0.25.1 dependency. These private/tooling changes alone do
-  not select a Core publication; notes remain pending for the next actual release.
+  caller uses their removed batch or pure-hashing APIs. Include the Testkit
+  0.93.1 lock selection used for the matched Packed study; it retains its
+  native-only Platform 0.25.1 dependency. These private/tooling changes alone
+  did not select a Core publication and ship with the codec optimization.
 
 Existing Wire bytes, schemas, identities, limits and acceptance remain unchanged.
 

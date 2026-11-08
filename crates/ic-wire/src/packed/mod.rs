@@ -186,6 +186,23 @@ impl<T: PackedElement> serde::de::Visitor<'_> for PackedVisitor<T> {
     #[inline(never)]
     fn visit_bytes<E: serde::de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
         let width = size_of::<T>();
+        // Byte-aligned words can use the slice copy without initialization or
+        // per-word iteration. Wider words keep their unaligned LE reader.
+        // Bytes, identities, limits and malformed-input acceptance are unchanged.
+        #[cfg(target_endian = "little")]
+        if align_of::<T>() == 1 {
+            if !bytes.len().is_multiple_of(width) {
+                return Err(E::custom("invalid packed length"));
+            }
+            let mut values = Vec::new();
+            values
+                .try_reserve_exact(bytes.len() / width)
+                .map_err(|_| E::custom("allocation"))?;
+            let words =
+                bytemuck::try_cast_slice(bytes).map_err(|_| E::custom("invalid packed length"))?;
+            values.extend_from_slice(words);
+            return Ok(values);
+        }
         decode_words!(
             E,
             bytes,

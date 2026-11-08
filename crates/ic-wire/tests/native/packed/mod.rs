@@ -263,6 +263,7 @@ fn packed_length_prefixes_offsets_and_budget_boundaries() {
             assert!(ic_wire::native::decode::<Packed<T>>(bytes, LIMITS).is_err());
         }
     }
+    check::<i8>();
     check::<i16>();
     check::<u16>();
     check::<i32>();

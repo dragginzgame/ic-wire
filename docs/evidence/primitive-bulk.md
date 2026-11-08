@@ -4,6 +4,72 @@
 > Those sections are historical; their original paths no longer provide proof.
 > New qualification uses the maintained ID cohorts and fresh output directories.
 
+## Byte-aligned Packed copy (8 November)
+
+Keep the byte-aligned slice-copy change for Core **0.17.14**. On little-endian
+targets, the existing Packed visitor copies `i8`, 16-byte IDs and 32-byte hashes
+through a checked bytemuck slice into fallibly reserved storage. Wider integers
+and big-endian targets retain their existing readers. No unsafe code, dependency,
+public API, new codec or per-record generated machinery is added. The initial
+zero-initialize-then-copy candidate was rejected: it grew total Wasm by 321/549
+bytes in the ID fixture and 1,265/1,104 bytes in the bulk fixture at opt-z/3.
+
+**IC decode instructions per operation**, normal Wire framing included:
+
+| Workload | Profile | Before | After | Matched Candid |
+| --- | --- | ---: | ---: | ---: |
+| 4,096 owned 16-byte IDs | opt-z | 112,047 | 67,100 | 96,648 |
+| 4,096 owned 16-byte IDs | opt-3 | 66,620 | 66,609 | 85,978 |
+| 16,384 signed bytes | opt-z | 394,599.5 | 17,879.5 | 1,127,362.5 |
+| 16,384 signed bytes | opt-3 | 17,432.5 | 17,432.5 | 1,461,213.5 |
+| 1,024 32-byte hashes | opt-z | 37,348.5 | 34,383.5 | 5,268,300.5 |
+| 1,024 32-byte hashes | opt-3 | 33,957.5 | 33,945.5 | 4,741,164.5 |
+
+The ID Candid DTO is a flat blob plus width checks. The older bulk corpus keeps
+its nested hash DTO; do not compare the two Candid rows as equivalent layouts.
+Large ID opt-z decode improves **40.1%** and signed bytes **95.5%**. Smaller inputs
+can regress: singleton ID opt-z decode is **1,105.5 → 1,203.5** instructions;
+eight IDs are **1,384.5 → 1,405.5**. The worst observed increase is **104** for a
+singleton hash (1,145.5 → 1,249.5), including the corresponding nested late-failure
+path. Opt-3 empty ID decode adds **3** instructions. The maintained regression
+policy passes all **1,032 Wire operation pairs** across the 20-case ID and
+109-case bulk cohorts, including rejection; every IC row has three identical
+samples with distinct callers. Candid counters, frames and input hashes match.
+
+Whole uncompressed Wasm **total / code-section bytes**, no post-link optimizer:
+
+| Fixture | Profile | Before | After | Total / code delta |
+| --- | --- | ---: | ---: | ---: |
+| ID | opt-z | 50,256 / 40,910 | 50,226 / 40,880 | -30 / -30 |
+| ID | opt-3 | 55,757 / 46,616 | 55,738 / 46,597 | -19 / -19 |
+| Bulk | opt-z | 98,118 / 86,965 | 98,048 / 86,895 | -70 / -70 |
+| Bulk | opt-3 | 122,644 / 112,201 | 122,616 / 112,173 | -28 / -28 |
+
+These are complete fixture modules, not application savings or per-type
+attribution. Code size is the final module's section-10 payload. Two serial
+native ID runs/profile retain eleven samples: large opt-z decode medians are
+**1,975/1,944 → 1,048/1,083 ns**, while opt-3 is **1,058/1,064 → 1,052/1,049 ns**.
+Native time is distinct from IC instructions. Bulk native probes retain only one
+three-sample run for frame/allocation controls; no stable native speed claim is
+made for that cohort. Allocation counts and peak payload heap are unchanged in
+both cohorts. Existing bytes, schemas, identities, budgets and malformed-input
+acceptance remain unchanged: one packed ID is still `10 + 16 bytes`, and eight
+IDs remain `80 01 + 128 bytes`. No consumer migration or regeneration is needed.
+
+Reproduction: `target/evidence/packed-copy-20261108/` retains `screen.sh`,
+`screen-aligned.sh`, `measure.sh`, `measure-bulk.sh`, both source snapshots,
+separate Cargo targets, the rejected candidate, raw measurements and analysis.
+Base is **3ac49b5** plus the preserved Testkit **0.93.1** lock selection, SHA-256
+`e779f17c4f9a0bcbd5d773434d4a2741b6a701ab320e99592108f4fb0838f64a`.
+Rust/Cargo **1.99.1**, LLVM **23.1.1**, Linux host, `wasm32-unknown-unknown`, fat
+LTO/one codegen unit/panic abort, `evaluation` opt-z and `benchmark-speed` opt-3;
+PocketIC **16.1.0**. Platform 0.26.0, Types 0.18.2 and Runtime 0.20.1 are fixed.
+The maintained cost checker verifies fresh library/guest builds, exact loaded
+artifacts and paired controls; baked Packed/lock hashes match each source.
+Native macOS, actual big-endian execution and installed application performance
+are not claimed. Focused Packed byte/admission/endian tests and lint qualify the
+implementation; this is not a new full Candid matrix.
+
 ## Public 16-byte IDs and flat Candid (8 November)
 
 Keep explicit `Packed<[u8; 16]>` support for pending Core **0.17.13**. It uses the
