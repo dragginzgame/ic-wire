@@ -45,6 +45,27 @@ fn compare<T: Serialize + ?Sized>(value: &T) {
 fn caller_slice_matches_owned_payload_and_both_frame_directions() {
     compare(&());
     compare(&7_u64);
+    // Direct i32 writer: every varint width through payload/request/response
+    // slice destinations, including exact and short storage.
+    compare(&[
+        i32::MIN,
+        -134_217_729,
+        -134_217_728,
+        -1_048_577,
+        -1_048_576,
+        -8193,
+        -8192,
+        -65,
+        -64,
+        0,
+        63,
+        64,
+        8191,
+        8192,
+        1_048_576,
+        134_217_728,
+        i32::MAX,
+    ]);
     for length in [0, 1, 128, 4096] {
         compare(&vec![u32::MAX; length]);
         compare(&ic_wire::ByteBuf::from(vec![0xa5; length]));

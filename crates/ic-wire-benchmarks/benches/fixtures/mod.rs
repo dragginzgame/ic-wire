@@ -11,6 +11,7 @@ const _: () = assert!(
         + cfg!(feature = "id16") as usize
         + cfg!(feature = "byte-keys") as usize
         + cfg!(feature = "hotspots") as usize
+        + cfg!(feature = "signed32") as usize
         + cfg!(feature = "bulk") as usize
         + cfg!(feature = "derive-scale") as usize
         + cfg!(feature = "toko") as usize
@@ -32,6 +33,8 @@ mod id16;
 mod packed_i16;
 #[cfg(feature = "derive-scale")]
 mod scale;
+#[cfg(feature = "signed32")]
+mod signed32;
 #[cfg(feature = "toko")]
 mod toko;
 #[cfg(all(feature = "derive-scale-1", feature = "derive-scale-10"))]
@@ -303,6 +306,10 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     {
         hotspots::cases_selected(selected)
     }
+    #[cfg(feature = "signed32")]
+    {
+        signed32::cases_selected(selected)
+    }
     #[cfg(feature = "byte-keys")]
     {
         byte_keys::cases_selected(selected)
@@ -337,6 +344,7 @@ pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         feature = "packed-i16",
         feature = "bulk",
         feature = "hotspots",
+        feature = "signed32",
         feature = "byte-keys",
         feature = "cost-smoke",
         feature = "id16",

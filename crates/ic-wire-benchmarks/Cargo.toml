@@ -28,6 +28,8 @@ ic = []
 toko = []
 # Focused ordinary-list/output-writer qualification, not a production mode.
 hotspots = []
+# Signed boundaries and container shapes, retaining ordinary and Packed controls.
+signed32 = []
 # Small paired regression corpus, never a production codec selection.
 cost-smoke = []
 # Fixed-width IDs versus an equally flattened external Candid blob.
@@ -82,7 +84,7 @@ ic-platform = { workspace = true, features = ["candid", "ic0"] }
 ic-platform-types.workspace = true
 ic-wire.workspace = true
 num-bigint.workspace = true
-serde.workspace = true
+serde = { workspace = true, features = ["derive"] }
 serde_bytes.workspace = true
 serde_json.workspace = true
 sha2.workspace = true

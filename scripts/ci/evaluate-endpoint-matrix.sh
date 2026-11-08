@@ -24,6 +24,6 @@ for profile in evaluation benchmark-speed; do
     cp "$CARGO_TARGET_DIR/wasm32-unknown-unknown/$profile/ic_wire_endpoint_fixture.wasm" "$directory/endpoint.wasm"
     node "$out/summarize.mjs" "$directory" --exports
     cargo run --locked --offline -p ic-wire-benchmarks --example codec-report -- --code-size "$directory/endpoint.wasm" > "$directory/code-bytes.txt" 2> "$directory/report-build.log"
-    ENDPOINT_MATRIX_DIR="$directory" cargo test --locked --offline -p ic-wire-endpoint-fixture --test cost-matrix --features ic -- --ignored --test-threads=1 > "$directory/ic.log" 2>&1
+    ENDPOINT_MATRIX_DIR="$directory" cargo test --locked --offline -p ic-wire-endpoint-fixture --test endpoints --features ic -- --exact cost_matrix::all_endpoint_costs --ignored --test-threads=1 > "$directory/ic.log" 2>&1
     node "$out/summarize.mjs" "$directory" > "$directory/summary.log"
 done

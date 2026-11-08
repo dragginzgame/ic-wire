@@ -2,6 +2,7 @@
 #[cfg_attr(
     any(
         feature = "hotspots",
+        feature = "signed32",
         feature = "toko",
         feature = "derive-scale",
         feature = "packed-i16",

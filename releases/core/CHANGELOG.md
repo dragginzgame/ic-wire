@@ -5,6 +5,92 @@ ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.18.0]
+
+### ⚠️ Breaking
+
+- Keep one explicit-root bulk lint API. Replace `lint_bulk_fields` calls with
+  `lint_bulk_roots` and migrate acknowledgement paths to rooted use sites.
+  Codec bytes, method identities, runtime budgets and acceptance are unchanged;
+  stored records and retained retry/hash bytes need no migration.
+- Select Serde’s `derive` feature explicitly in deriving consumers instead of
+  enabling it on Wire’s direct runtime dependency. Postcard still enables that
+  feature transitively, so this does not yet remove its compiler dependencies.
+  Wire metadata remains separately opt-in through `typescript`.
+
+### 🧹 Cleanup
+
+- Repository maintenance: replace three duplicate CI scaffold jobs with one
+  qualification gate, preserving all native platform/suite jobs and docs routing.
+  This workflow change alone requires no public package release.
+
+- Repository maintenance: adopt Shared Tooling 0.31.11 and its authenticated
+  hosted-download cache, cloc selectors and issue-closure policy. Keep one
+  repository secret scan; this tooling change alone requires no publication.
+
+- Share one endpoint scenario catalogue and reply checker between installed
+  qualification and instrumented costs. Retain ordered transaction-history
+  proofs and independent trace validation; production code and protocol remain
+  unchanged. Private runners now select exact tests in the `endpoints` target.
+
+- Remove the redundant `make check-msrv` alias. Use `make check check-wasm`
+  for host/Wasm compilation; the one-compiler policy and CI stages remain intact.
+- Retire historical timing loops from browser conformance, the old Endpoint
+  hook-extraction comparison, and the private Boolean bulk prototype. Retain
+  current byte/admission controls, installed endpoint checks and full execution
+  measurements. These private deletions do not establish production Wasm savings.
+- Consolidate benchmark fingerprint insertion into one fixed source list, preserving
+  all 22 identity keys and independently maintained verifier coverage.
+- Select host/Wasm benchmark qualification from the existing cohort roster,
+  removing duplicate Makefile lists without changing selected coverage.
+- Retire the previous-Core qualification lane while preserving current-package
+  and independently published Endpoint coherence checks.
+
+### 🩹 Fixed
+
+- Bind caller-storage comparisons to complete captured sources with independent
+  build targets and an explicit baseline. Vary query callers in admission and
+  caller-storage measurements to prevent repeated samples reusing cached replies.
+  Endpoint reports reject repeated callers, unsafe counters and overflowing sums.
+
+
+### ⚡ Performance
+
+- Suppress discarded type rendering during host schema validation, registry
+  finish and bulk prevalidation while retaining one validation walker. Matched
+  opt-z validation improves 40–56%; small generation adds 85 ns (4%). Generated
+  TypeScript, codec bytes, identities, limits and acceptance are unchanged.
+
+- Write i32 zigzag groups directly through the existing bounded Postcard codec.
+  At opt-z, encoding 4,096 small/wide integers, deque entries and set entries
+  uses 46%/28%/37%/30% fewer IC instructions. Accept 150/90 extra uncompressed
+  Wasm bytes in focused/standard fixtures for these gains. Opt-3 saves 1,143/420
+  Wasm bytes, but wide-list encode adds 3.52%; opt-3 remains a regression check,
+  with opt-z the primary decision profile. Keep the automated no-growth failure
+  visible. Bytes, schemas, identities, budgets and acceptance remain unchanged:
+  i32 -64 is still `7f` and 64 is `80 01`. No consumer migration or regeneration.
+
+### 🧪 Testing
+
+- Expand the maintained comparison roster to 39 cohorts with 49 signed-i32
+  boundary, list-distribution, deque, set, tuple/option/result and Packed-control
+  cases. Preserve existing case indices and freeze the new inventory. Check
+  malformed varints, every scalar prefix, wrapped-deque order and matched
+  Packed/ordinary Candid frames. Include the fixture in evidence fingerprints
+  and reject comparisons made from different fixture sources.
+- Screen three i32 encoder-sharing experiments at opt-z/3 against the focused
+  and complete standard Wasm fixtures. Retain none: footprint tradeoffs fail the
+  no-growth objective. Production bytes, identities, limits and acceptance are
+  unchanged by those rejected experiments.
+- Expand deque tests to every 128-element storage split with exact/one-short
+  encoder budgets, malformed scalar tests to the four-/five-byte transition,
+  and i32 slice-output coverage across all varint widths and frame directions.
+- Investigate shared unsigned writers with separate width screens, a combined
+  87-case native/IC/memory comparison and standard/Toko-shaped Wasm controls.
+  Reject the combined rewrite: despite smaller Wasm, wide i32 adds 5.56% opt-z
+  encode instructions and wide u64 adds 49.9% at opt-3. Keep the adopted i32 path;
+  these additional experiments change no production bytes, limits or identities.
+
 ## [0.17.14] - 2026-11-08
 
 ### ⚡ Performance

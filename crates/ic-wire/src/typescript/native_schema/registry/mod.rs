@@ -111,7 +111,7 @@ impl SchemaRegistry {
         let types = self.context.names.unwrap().definitions;
         let mut remaining = SCHEMA_WORK;
         for node in types.values() {
-            metadata::ty(node, &types, 0, &mut remaining)?;
+            metadata::ty(node, &types, 0, &mut remaining, false)?;
         }
         metadata::validate_aliases(&types)?;
         Ok(types)

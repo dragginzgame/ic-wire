@@ -257,21 +257,20 @@ consumer's responsibility. When migrating from definition-level review, rerun
 the rooted lint and explicitly review each new path instead of copying a
 synthetic definition acknowledgement to every use site.
 
-With the host-only `typescript` feature, `typescript::lint_bulk_fields` scans
-resolved schemas for ordinary primitive lists and recommends byte buffers or
-`Packed<T>`. Rust type aliases are resolved by `native_schema`; nested schemas
-and named references are supported. Named references are reported at their
-shared definition once, not at every referring endpoint. Include inline method
-request/response schemas as named roots too. Types without Wire metadata are
-outside this lint's coverage.
+With the host-only `typescript` feature, `typescript::lint_bulk_roots` scans
+explicit roots and resolves named definitions. Types without Wire metadata are
+outside this lint's coverage. The definition-only API has been removed; review
+new use-site paths rather than copying old acknowledgements. This changes only
+host diagnostics: codec bytes, identities, admission and generated clients stay
+unchanged.
 
 ```rust
 use std::collections::BTreeMap;
-use ic_wire::typescript::{lint_bulk_fields, native_schema};
+use ic_wire::typescript::{lint_bulk_roots, native_schema};
 
 let schemas = BTreeMap::from([("Samples".into(), native_schema::<Vec<i64>>().unwrap())]);
 let acknowledgements = BTreeMap::new();
-let report = lint_bulk_fields(&schemas, &acknowledgements).unwrap();
+let report = lint_bulk_roots(&schemas, &BTreeMap::new(), &acknowledgements).unwrap();
 for warning in &report.warnings {
     eprintln!("{}: consider {}", warning.path, warning.representation);
 }
@@ -279,9 +278,9 @@ for warning in &report.warnings {
 ```
 
 Diagnostic paths escape `~` and `/` as `~0` and `~1`. For example,
-`/Request/fields/samples/item` identifies a list inside an optional `samples`
+`/Request/fields/samples/item/list/i64` identifies a list inside an optional `samples`
 field. Acknowledge an intentional compact vector with an exact path and a
-nonempty reason, such as `{"/Samples":"At most four small values; retain varints"}`.
+nonempty reason, such as `{"/Samples/list/i64":"At most four small values; retain varints"}`.
 Stale acknowledgements make `is_clean()` false. There is no wildcard suppression.
 
 For a JSON object of named schema roots, the repository command is:

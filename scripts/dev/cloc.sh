@@ -12,7 +12,7 @@ if [[ -n "${TMPDIR:-}" && "$TMPDIR" != /* ]]; then export TMPDIR="$PWD/$TMPDIR";
 
 usage() {
     cat <<'EOF'
-Usage: cloc.sh [options] [directory]
+Usage: cloc.sh [options] [directory | crate[::module]]
 
 Count Rust LOC by category. Defaults to the current workspace;
 a parent directory reports its sibling repositories.
@@ -27,6 +27,7 @@ Options:
 Examples:
   cloc.sh -d 1    Top-level modules beneath each crate
   cloc.sh -d 2 .. Sibling crates with two module levels
+  cloc.sh -d 1 my-crate::parser  Drill into one module
 
 ??? = unclassified LOC. Counting details: docs/fleet-tools.md
 EOF
@@ -54,27 +55,49 @@ report_repositories() (
     shopt -s nullglob dotglob
     status=0
     count=0
-    : > "$report_dir/rows"
+    repositories=()
     for repo in "$parent_root"/*; do
         [[ -d "$repo" && ! -L "$repo" && -e "$repo/.git" ]] || continue
+        repositories+=("$repo")
+    done
+    progress_width=0
+    progress_active=false
+    finish_progress() {
+        if [[ "$progress_active" == true ]]; then
+            printf '\r%*s\r' "$progress_width" '' >&2
+            progress_active=false
+        fi
+    }
+    : > "$report_dir/rows"
+    for repo in ${repositories[@]+"${repositories[@]}"}; do
         count=$((count + 1))
         name="${repo##*/}"
         case "$name" in *$'\n'*|*$'\r'*|*$'\t'*) echo 'error: repository name contains line breaks or tabs' >&2; exit 1 ;; esac
+        progress="cloc: scanning $count/${#repositories[@]} $name"
+        if [[ ${#progress} -gt "$progress_width" ]]; then progress_width=${#progress}; fi
+        printf '\r%-*s' "$progress_width" "$progress" >&2
+        progress_active=true
         result=n/a
         if ! git_root="$(git -C "$repo" rev-parse --show-toplevel 2>/dev/null)" || [[ "$git_root" != "$repo" ]]; then
             result=ERROR
         elif [[ -f "$repo/Cargo.toml" ]]; then
-            printf 'cloc: scanning %s\n' "$name" >&2
-            if (cd "$repo" && bash "$ROOT/scripts/dev/cloc.sh" --json "$repo") > "$report_dir/child.json"; then
+            child_status=0
+            (cd "$repo" && bash "$ROOT/scripts/dev/cloc.sh" --json "$repo") > "$report_dir/child.json" 2> "$report_dir/child.err" || child_status=$?
+            if [[ -s "$report_dir/child.err" ]]; then
+                finish_progress
+                cat "$report_dir/child.err" >&2
+            fi
+            if [[ "$child_status" == 0 ]]; then
                 jq -cn --arg name "$name" --slurpfile report "$report_dir/child.json" \
                     '{name:$name,report:$report[0]}' >> "$report_dir/rows"
                 continue
             fi
             result=ERROR
         fi
-        if [[ "$result" == ERROR ]]; then status=1; echo "error: unable to count $repo" >&2; fi
+        if [[ "$result" == ERROR ]]; then finish_progress; status=1; echo "error: unable to count $repo" >&2; fi
         jq -cn --arg name "$name" --arg status "$result" '{name:$name,status:$status}' >> "$report_dir/rows"
     done
+    finish_progress
     [[ "$count" != 0 ]] || { echo "error: no Git checkouts found in $parent_root" >&2; exit 1; }
     jq -s --argjson partial "$status" '
         {workspaces:.,partial:($partial != 0),totals:
@@ -145,7 +168,13 @@ if [[ -n "$selected_manifest" ]]; then
     selected_directory="${selected_directory%/.}"
     selected_manifest="$selected_directory/$(basename "$selected_manifest")"
 fi
-requested_root="$(resolve_directory "${1:-${selected_directory:-$PWD}}")"
+selection=''
+requested_directory="${1:-${selected_directory:-$PWD}}"
+if [[ $# == 1 && ! -d "$1" && "$1" != */* ]]; then
+    selection="$1"
+    requested_directory="${selected_directory:-$PWD}"
+fi
+requested_root="$(resolve_directory "$requested_directory")"
 requested_root="${requested_root%/.}"
 has_checkouts=false
 for child in "$requested_root"/* "$requested_root"/.[!.]*; do
@@ -189,12 +218,26 @@ if ! metadata="$(
     exit 1
 fi
 
+if [[ -n "$selection" ]]; then
+    crate="${selection%%::*}"
+    if ! metadata="$(printf '%s\n' "$metadata" | jq -e --arg crate "$crate" '
+        .workspace_members as $members |
+        .packages |= map(select(.name == $crate and (.id as $id | $members | index($id)))) |
+        if (.packages | length) == 1 then .workspace_members = [.packages[0].id]
+        else error("unknown or ambiguous workspace crate: " + $crate) end
+    ')"; then exit 1; fi
+fi
+
 scratch="${TMPDIR:-$(printf '%s\n' "$metadata" | jq -er .target_directory)/tmp}"
 mkdir -p -- "$scratch"
 FILE_LIST_DIR="$(mktemp -d "$scratch/shared-tooling-cloc.XXXXXX")"
 trap 'rm -rf "$FILE_LIST_DIR"' EXIT
 printf '%s\n' "$metadata" > "$FILE_LIST_DIR/metadata.json"
 perl "$ROOT/scripts/dev/cloc-classify.pl" "$FILE_LIST_DIR/metadata.json" "$manifest_path" "$FILE_LIST_DIR" > "$FILE_LIST_DIR/report.json"
+if [[ -n "$selection" ]]; then
+    perl "$ROOT/scripts/dev/cloc-classify.pl" --select "$FILE_LIST_DIR/report.json" "$selection" > "$FILE_LIST_DIR/selected.json"
+    mv "$FILE_LIST_DIR/selected.json" "$FILE_LIST_DIR/report.json"
+fi
 if [[ "$json" == true ]]; then
     cat "$FILE_LIST_DIR/report.json"
 else

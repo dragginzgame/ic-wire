@@ -11,12 +11,6 @@ mkdir -p "$out"
 generation_log="$out/generation.log"
 generation_status=0
 cargo run --locked -p ic-wire --features typescript --example typescript-conformance -- "$out" 2> "$generation_log" || generation_status=$?
-# These names belong to the timed synthetic benchmark, not contract fixtures.
-# Check before replaying stderr so a regression cannot flood the CI console.
-if grep -Eq '^warning: /types/Page[0-9]+/' "$generation_log"; then
-    echo "Synthetic benchmark diagnostics leaked; generation log: $generation_log" >&2
-    exit 1
-fi
 cat "$generation_log" >&2
 [[ "$generation_status" == 0 ]] || exit "$generation_status"
 node "$root/scripts/ci/check-ic-sdk-boundary.mjs" "$out"

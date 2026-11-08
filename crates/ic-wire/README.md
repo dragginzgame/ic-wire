@@ -808,12 +808,13 @@ acknowledgement stale. Bounds and custom scalar constraints still need consumer
 review; these paths are not full contract fingerprints. Pass inline request/error
 schemas as named roots when they are not registered types.
 
-`typescript::lint_bulk_fields` retains definition-level advice for ordinary primitive
-lists that may benefit from byte buffers or `Packed<T>`. Pass a map of named
-schemas and a map of exact diagnostic paths to acknowledgement reasons. Inspect
-`report.warnings` and `report.stale_acknowledgements`; optionally require
-`report.is_clean()` in consumer CI. Include inline method request/response roots.
-Both generators always compute advice; the standalone lint is also available.
+`typescript::lint_bulk_roots` is the sole standalone review API. Pass explicit
+roots, their named definitions, and exact acknowledgement paths with reasons.
+The definition-level `lint_bulk_fields` API has been removed: rerun rooted
+review and acknowledge each use-site path, including its primitive suffix.
+Inspect `report.warnings` and `report.stale_acknowledgements`; optionally require
+`report.is_clean()` in consumer CI. Both generators always compute this advice.
+Codec bytes, identities, runtime admission and generated clients are unchanged.
 Bool, float, 128-bit integer and zero-sized lists receive bound/node-limit advice
 even though no production Packed representation exists for them. Warnings do
 not predict a slowdown ratio: measure legitimate maximum and malformed inputs.
@@ -821,3 +822,8 @@ Advice does not rewrite Serde or affect Wasm. Small lists may be better
 left compact; preserve field bounds and custom validation when adopting advice.
 `Packed<i8>` uses `Int8Array` metadata and preserves ordinary signed-byte payloads
 while changing traversal to bulk admission (`[-128,127]` stays `02 80 7f`).
+
+Codec-only consumers do not select Serde derive through Wire. Consumers deriving
+`Serialize`/`Deserialize` must enable their own `serde` dependency’s `derive` feature.
+Postcard currently enables it transitively, so this ownership change does not
+yet remove `serde_derive` from codec-only builds.

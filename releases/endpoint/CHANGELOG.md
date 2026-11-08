@@ -4,6 +4,16 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.9.0]
+
+### ⚠️ Breaking
+
+- Select Core 0.18 alongside its rooted metadata-lint API hard cut. Endpoint
+  handlers and macro syntax are unchanged. Frame bytes, method identities,
+  limits, acceptance and rollback behavior remain unchanged; retained retry
+  bytes and stored records need no migration. Host lint callers must migrate
+  to Core’s `lint_bulk_roots` API and rooted acknowledgement paths.
+
 ## [0.8.1] - 2026-11-08
 
 ### ⬆️ Dependencies

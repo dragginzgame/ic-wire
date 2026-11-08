@@ -8,11 +8,12 @@ replies, synchronous borrowed requests/replies and explicit composition around a
 guarded handler. Borrowed tests verify input custody, matching schemas, malformed
 request refusal before mutation and rollback on oversized replies.
 
-The `inline-baseline` feature affects only the `endpoint-cost` measurement example;
-it is a qualification comparator, not an alternative production codec. The
-[measurement runner](../../scripts/ci/evaluate-endpoint.sh) retains matched input,
-compiler, lock, server and Wasm identities, repeated native/IC samples and raw
-uncompressed/code-section sizes.
+The `endpoints` integration target shares one `tests/cases` catalogue between
+`tests/installed` and `tests/cost_matrix`. The standard-server test retains explicit
+transaction-history assertions and also executes every catalogue case; the cost
+runner independently validates profiler traces. Scripts select each ignored test
+by its exact module-qualified name, so ordinary installed checks never start the
+profiler runner. No test helpers enter the canister library.
 
 `tests/cost_matrix` benchmarks every endpoint exported by this fixture, including
 success, malformed input, limits, policy refusals and reply traps. The runner

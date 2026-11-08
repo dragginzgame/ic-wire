@@ -92,6 +92,7 @@ pub(super) fn ty(
     types: &BTreeMap<String, Value>,
     depth: usize,
     remaining: &mut usize,
+    render: bool,
 ) -> Result<String, GenerationError> {
     if depth > SCHEMA_DEPTH || *remaining == 0 {
         return Err(GenerationError::Complexity);
@@ -166,25 +167,31 @@ pub(super) fn ty(
             return Err(GenerationError::Schema);
         }
     }
-    let mut child = |node| ty(node, types, depth + 1, remaining);
+    // A runtime flag keeps one traversal/validation owner without specializing
+    // the walker. Validation visits every child but allocates no type strings.
+    macro_rules! output {
+        ($($tokens:tt)*) => {
+            if render { format!($($tokens)*) } else { String::new() }
+        };
+    }
+    let mut child = |node| ty(node, types, depth + 1, remaining, render);
     Ok(match kind {
         "ref" => {
             let name = text(value, "name")?;
             if !types.contains_key(name) {
                 return Err(GenerationError::Schema);
             }
-            name.into()
+            output!("{name}")
         }
-        "unit" => "null".into(),
-        "bool" => "boolean".into(),
-        "text" => "string".into(),
+        "unit" => output!("null"),
+        "bool" => output!("boolean"),
+        "text" => output!("string"),
         // Qualify built-ins so consumer aliases cannot capture field/frame types.
-        "bytes" => "globalThis.Uint8Array".into(),
-        "packed-i16" => "globalThis.Int16Array".into(),
-        "packed" if value["word"] == "bool" => "globalThis.Array<boolean>".into(),
-        "packed" => format!(
-            "globalThis.{}",
-            match text(value, "word")? {
+        "bytes" => output!("globalThis.Uint8Array"),
+        "packed-i16" => output!("globalThis.Int16Array"),
+        "packed" if value["word"] == "bool" => output!("globalThis.Array<boolean>"),
+        "packed" => {
+            let array = match text(value, "word")? {
                 "i8" => "Int8Array",
                 "i16" => "Int16Array",
                 "u16" => "Uint16Array",
@@ -194,39 +201,47 @@ pub(super) fn ty(
                 "u64" => "BigUint64Array",
                 "hash16" | "hash32" => "Uint8Array",
                 _ => return Err(GenerationError::Schema),
-            }
-        ),
+            };
+            output!("globalThis.{array}")
+        }
         "u" | "i" => {
             let bits = value["bits"].as_u64().ok_or(GenerationError::Schema)?;
             if ![8, 16, 32, 64, 128].contains(&bits) {
                 return Err(GenerationError::Schema);
             }
-            if bits > 32 { "bigint" } else { "number" }.into()
+            let scalar = if bits > 32 { "bigint" } else { "number" };
+            output!("{scalar}")
         }
         "float" => {
             if !matches!(value["bits"].as_u64(), Some(32 | 64)) {
                 return Err(GenerationError::Schema);
             }
-            "number".into()
+            output!("number")
         }
         "newtype" => child(&value["item"])?,
-        "list" | "array" => format!("globalThis.ReadonlyArray<{}>", child(&value["item"])?),
-        "tuple" => format!(
-            "readonly [{}]",
-            value["items"]
-                .as_array()
-                .ok_or(GenerationError::Schema)?
-                .iter()
-                .map(&mut child)
-                .collect::<Result<Vec<_>, _>>()?
-                .join(", ")
-        ),
-        "option" => format!("null | {{ readonly some: {} }}", child(&value["item"])?),
-        "result" => format!(
-            "{{ readonly ok: {} }} | {{ readonly err: {} }}",
-            child(&value["ok"])?,
-            child(&value["err"])?
-        ),
+        "list" | "array" => {
+            let item = child(&value["item"])?;
+            output!("globalThis.ReadonlyArray<{item}>")
+        }
+        "tuple" => {
+            let mut items = Vec::new();
+            for item in value["items"].as_array().ok_or(GenerationError::Schema)? {
+                let item = child(item)?;
+                if render {
+                    items.push(item);
+                }
+            }
+            output!("readonly [{}]", items.join(", "))
+        }
+        "option" => {
+            let item = child(&value["item"])?;
+            output!("null | {{ readonly some: {item} }}")
+        }
+        "result" => {
+            let ok = child(&value["ok"])?;
+            let err = child(&value["err"])?;
+            output!("{{ readonly ok: {ok} }} | {{ readonly err: {err} }}")
+        }
         "record" | "enum" => {
             let is_enum = value["k"] == "enum";
             let fields = value[if is_enum { "variants" } else { "fields" }]
@@ -253,19 +268,21 @@ pub(super) fn ty(
                     }
                 }
                 let item = child(&field["value"])?;
-                rendered.push(if is_enum {
-                    format!(
-                        "{{ readonly tag: {}; readonly value: {item} }}",
-                        json!(name)
-                    )
-                } else {
-                    format!("readonly {}: {item}", json!(name))
-                });
+                if render {
+                    rendered.push(if is_enum {
+                        format!(
+                            "{{ readonly tag: {}; readonly value: {item} }}",
+                            json!(name)
+                        )
+                    } else {
+                        format!("readonly {}: {item}", json!(name))
+                    });
+                }
             }
             if is_enum {
-                rendered.join(" | ")
+                output!("{}", rendered.join(" | "))
             } else {
-                format!("{{ {} }}", rendered.join("; "))
+                output!("{{ {} }}", rendered.join("; "))
             }
         }
         _ => return Err(GenerationError::Schema),
@@ -362,8 +379,8 @@ pub fn generate_registry(
             return Err(GenerationError::Schema);
         }
         super::limits::validate(method)?;
-        let request = ty(&method["request"], types, 0, &mut remaining)?;
-        let response = ty(&method["response"], types, 0, &mut remaining)?;
+        let request = ty(&method["request"], types, 0, &mut remaining, true)?;
+        let response = ty(&method["response"], types, 0, &mut remaining, true)?;
         source.push_str(&format!(
             "export const {name} = (() => {{ const codec = $createCodec({method}, $types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): globalThis.Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: globalThis.Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): globalThis.Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: globalThis.Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();\n",
             name_json = json!(name), mode = method["mode"],
@@ -400,7 +417,7 @@ pub fn generate_payload_registry(
             return Err(GenerationError::Schema);
         }
         super::limits::validate_payload(payload)?;
-        let rendered = ty(&payload["schema"], types, 0, &mut remaining)?;
+        let rendered = ty(&payload["schema"], types, 0, &mut remaining, true)?;
         source.push_str(&format!(
             "export const {name} = (() => {{ const codec = $createCodec({payload}, $types); return {{ encode: (value: {rendered}): globalThis.Uint8Array => codec.encode(value), decode: (bytes: globalThis.Uint8Array): {rendered} => codec.decode(bytes) as {rendered} }}; }})();\n"
         ));
@@ -417,7 +434,6 @@ pub fn generate_payload_registry(
             }),
             types,
             acknowledgements,
-            true,
         )?
     };
     diagnostics(report);
@@ -447,21 +463,22 @@ pub fn validate_payload_schema(
     schema: &Value,
 ) -> Result<(), GenerationError> {
     let mut remaining = SCHEMA_WORK;
-    render_types(types, &mut remaining, |_, _| {})?;
-    ty(schema, types, 0, &mut remaining).map(|_| ())
+    render_types(types, &mut remaining, false, |_, _| {})?;
+    ty(schema, types, 0, &mut remaining, false).map(|_| ())
 }
 
 // Validation and generation consume definitions in the same order, with one
-// shared work allowance and alias check. Validation discards rendered types;
+// shared work allowance and alias check. Validation suppresses type rendering;
 // generation appends them without building another intermediate registry.
 fn render_types(
     types: &BTreeMap<String, Value>,
     remaining: &mut usize,
+    render: bool,
     mut emit: impl FnMut(&str, String),
 ) -> Result<(), GenerationError> {
     for (name, node) in types {
         identifier(name)?;
-        emit(name, ty(node, types, 0, remaining)?);
+        emit(name, ty(node, types, 0, remaining, render)?);
     }
     validate_aliases(types)
 }
@@ -476,7 +493,7 @@ fn registry_source(
         "// Generated from IC Wire metadata; edit the source contracts.\nimport {{ {factory} as $createCodec }} from {};\n",
         json!(runtime_module)
     );
-    render_types(types, &mut remaining, |name, rendered| {
+    render_types(types, &mut remaining, true, |name, rendered| {
         source.push_str(&format!("export type {name} = {rendered};\n"));
     })?;
     // `$` is outside consumer identifiers, so helpers cannot capture exports.

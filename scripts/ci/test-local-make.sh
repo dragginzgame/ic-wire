@@ -208,7 +208,7 @@ printf '%s|%s|%s\n' "${RUSTUP_TOOLCHAIN:-development}" "${CARGO_TARGET_DIR:-}" "
 STUB
 chmod +x "$fixture/bin/cargo"
 export CARGO_CALLS="$fixture/cargo-calls"
-for target in build check test lint check-wasm check-msrv; do
+for target in build check test lint check-wasm; do
     PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" "$target"
 done
 cat > "$fixture/expected-calls" <<EOF
@@ -216,8 +216,6 @@ $compiler|$fixture/repo/target|build --locked -p ic-wire
 $compiler|$fixture/repo/target|check --locked -p ic-wire --all-targets
 $compiler|$fixture/repo/target|test --locked -p ic-wire
 $compiler|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint-macros -p ic-wire-endpoint --all-targets --features ic-wire-endpoint/typescript -- -D warnings
-$compiler|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
-$compiler|$fixture/repo/target|check --locked -p ic-wire --all-targets
 $compiler|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 EOF
 # Policy selection overrides the caller's ambient compiler lane.

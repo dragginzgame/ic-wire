@@ -60,12 +60,12 @@ fn changes(before: &Snapshot, after: &Snapshot) -> Vec<String> {
         ("payloads", &before.payloads, &after.payloads),
     ] {
         // Both inputs have passed generation, including duplicate-name refusal.
-        let named = |values: &Vec<Value>| {
+        fn named(values: &[Value]) -> BTreeMap<&str, &Value> {
             values
                 .iter()
-                .map(|v| (v["name"].as_str().unwrap().to_owned(), v.clone()))
+                .map(|v| (v["name"].as_str().unwrap(), v))
                 .collect()
-        };
+        }
         changed(kind, &named(a), &named(b), &mut output);
     }
     changed("vectors", &before.vectors, &after.vectors, &mut output);

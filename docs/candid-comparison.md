@@ -113,6 +113,68 @@ the small/mixed-profile screen. Adoption changes bytes/budgets; matching Packed
 DTO bytes can still have different record-field allowances. Follow the
 [consumer guidance](../crates/ic-wire/README.md#representation-and-adoption-details).
 
+## Signed32 follow-up (8 November, Core 0.17.14)
+
+The new 49-case `signed32` cohort expands the maintained roster to **39 cohorts**.
+It adds scalar zigzag boundaries, small/negative/wide/mixed lists, deques, sets,
+tuple/option/result combinations and explicit Packed controls. Existing standard
+indices and the historical full-matrix results above are unchanged. Wire wins
+**74/98 opt-z and 77/98 opt-3** primary encode/decode comparisons in this focused
+run. Ordinary-list encode still reaches **60.68× / 26.86× Candid** at opt-z/3.
+
+Selected **opt-3 IC instructions**, 4,096 elements; frames are Wire / Candid bytes:
+
+| Shape | Wire encode / decode | Candid encode / decode | Frame bytes |
+| --- | ---: | ---: | ---: |
+| Ordinary wide i32 list | 1,278,846.25 / 1,232,510.5 | 47,618.25 / 498,481.5 | 20,493 / 16,395 |
+| Existing Packed i32 control | 17,215.25 / 17,359.5 | 47,618.25 / 498,543.5 | 16,398 / 16,395 |
+| Ordinary small i32 list | 947,070.25 / 687,630.5 | 47,618.25 / 498,481.5 | 4,109 / 16,395 |
+| Mixed i32 deque | 989,259.25 / 957,687.5 | 211,730.25 / 527,756.5 | 10,371 / 16,395 |
+| Unique i32 set | 1,383,715.25 / 5,805,197.5 | 339,983.25 / 5,533,594.25 | 8,077 / 16,395 |
+
+The ordinary/Packed wide controls have identical logical inputs and Candid
+frames. Their Candid decode counters differ by 62 instructions at opt-3 and 63
+at opt-z; retain each measured control rather than treating them as identical
+executions. Both set lanes reconstruct the same sorted set; these are not raw
+vector-only decode costs. Deque timings use contiguous storage; the separate
+wrapped-storage test checks order/bytes, not performance. Consumer conversions
+to Packed are outside these already-constructed field measurements. Packing
+small-value lists trades away their varint compactness; it is not a silent rewrite.
+
+Local source inspection of Candid 0.10.40's `types/impls.rs` shows `seq_impl!`
+iterates deque/set elements individually. Vec delegates to the slice path, which
+can select bulk primitives. Serde 1.0.229's deque/set implementations both use
+`collect_seq`, and Wire wraps each visited item with resource admission during
+sizing and writing. Thus the container gap is not just missing Candid-style bulk
+vector handling. A Packed replacement for a set would additionally need explicit
+consumer handling of uniqueness/order; it is not a transparent optimization.
+
+Whole-fixture uncompressed Wasm **total / code-section bytes**:
+
+| Profile | Wire | Candid |
+| --- | ---: | ---: |
+| opt-z | 75,350 / 63,270 | 348,839 / 313,603 |
+| opt-3 | 92,373 / 81,148 | 529,072 / 495,357 |
+
+These are complete 49-case modules, not application savings or per-type costs.
+Two serial native runs/profile retain eleven samples. At opt-3, ordinary wide
+list encode medians are **31,403 / 31,564 ns** versus Candid **1,066 / 1,038 ns**;
+the Packed control is **171 / 176 ns** versus its Candid **996 / 945 ns**.
+Native timing and separate allocation/heap probes do not establish IC costs.
+The IC study retains **1,070 rows**, each with three identical counter samples
+from distinct callers, exact input/frame hashes and loaded module identities.
+
+Reproduction: `target/evidence/signed32-20261108/measure.sh`, retained baseline
+source/results and `analysis.json`. Rust/Cargo **1.99.1**, LLVM **23.1.1**, Linux,
+PocketIC **16.1.0**, Platform **0.26.0**, Types **0.18.2**, Testkit **0.93.1**;
+the [encoder screen](evidence/encoder-followup.md#signed-i32-writer-screen-8-november-2026)
+records exact source/lock/profile identities and rejected candidates. Fresh
+artifact checks and baked fixture/encoder/lock hashes pass. These baseline results
+precede the [i32 writer adopted for 0.18.0](evidence/encoder-followup.md#raw-tuple-i32-follow-up-8-november-2026);
+they are not relabelled as its results. No new TypeScript support is added. The new cohort,
+unchanged standard inventory, malformed-input tests, Clippy and evidence-drift
+tests pass. Native macOS and installed application performance are unqualified.
+
 ## Next experiments
 
 Core **0.17.11** added the explicit `serde_packed::bools` field adapter with
@@ -133,17 +195,17 @@ regression; the IC result is unchanged. This does not replace the original full 
    saves only 0/18 total bytes in the standard corpus, with effectively unchanged
    IC costs. Ten varied bounds save 860/2,619 bytes, but remain diagnostic evidence;
    the extra visitor is not adopted without an application benefit.
-3. **Packed 16-byte identifiers:** public support is qualified for pending 0.17.13.
-   The [flat-Candid follow-up](evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november)
-   compares equally flattened blobs, correcting the earlier nested-vector control.
-   For 4,096 owned IDs, opt-3 Wire encode/decode is **66,637 / 66,620**, versus
-   Candid **149,171 / 85,862** instructions. At opt-z, large-list decode is 15.9%
-   more expensive than Candid. Wire wins 78/80 primary comparisons; empty inputs
-   regress by 23–186 instructions against ordinary arrays. ID-fixture total Wasm
-   saves **1,484 / 448** bytes at opt-z/3; an existing bulk fixture is byte-identical
-   when the new type is unused. Adoption changes field bytes and budgets explicitly.
-   This separate study uses Platform 0.25.1/Testkit 0.93 and does not relabel the
-   historical full matrix above. Database keys remain outside scope.
+3. **Signed containers:** the new cohort above keeps ordinary-list losses and
+   Packed controls explicit, and identifies deque/set traversal as additional
+   targets. Three i32 writer rewrites failed the footprint screen; do not repeat
+   them without a new approach. Packed IDs shipped in 0.17.13; the
+   [0.17.14 copy improvement](evidence/primitive-bulk.md#byte-aligned-packed-copy-8-november)
+   fixes their large-list opt-z loss. These focused studies do not relabel the
+   historical full matrix. Database keys remain outside scope.
+   The subsequent [unsigned writer sharing](evidence/encoder-followup.md#unsigned-writer-sharing-8-november-2026)
+   screen shrinks Wasm but regresses wide i32 even at opt-z and wide u64 by 49.9%
+   at opt-3; the combined candidate is rejected. A narrower private u32 helper
+   must keep the unsigned shortcut out of i32's path before reconsideration.
 
 Do not repeat blanket one-pass encoder or parser-tail rewrites without a new
 approach: [earlier experiments](evidence/encoder-followup.md) failed small-value,

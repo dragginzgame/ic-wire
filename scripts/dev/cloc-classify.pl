@@ -31,21 +31,29 @@ sub safe_label { my $s=shift; $s =~ s/([\x00-\x1f\x7f])/sprintf('\\x%02x',ord($1
 
 # Reuse the classified file counts: presentation must never recount source or
 # change category attribution. Merge foo.rs with foo/ and foo/mod.rs naturally.
+sub module_parts {
+    my ($crate,$file)=@_;
+    my $path=$file->{path};
+    my @parts;
+    if (index($path,"$crate->{root}/")==0) {
+        $path=substr($path,length($crate->{root})+1);
+        if ($path =~ s{\Asrc/}{}) {
+            $path =~ s{\A(?:lib|main)\.rs\z}{};
+        }
+        $path =~ s{(?:\A|/)mod\.rs\z}{};
+        $path =~ s{\.rs\z}{};
+        @parts=length($path) ? split(m{/},$path) : ();
+    } else { $path =~ s{\.rs\z}{}; @parts=('(external)', $path); }
+    return @parts;
+}
 sub module_rows {
     my ($crate,$records,$depth)=@_;
     my $tree={children=>{},counts=>zero()};
     for my $file (@$records) {
-        my $path=$file->{path};
-        my @parts;
-        if (index($path,"$crate->{root}/")==0) {
-            $path=substr($path,length($crate->{root})+1);
-            if ($path =~ s{\Asrc/}{}) {
-                $path =~ s{\A(?:lib|main)\.rs\z}{};
-            }
-            $path =~ s{(?:\A|/)mod\.rs\z}{};
-            $path =~ s{\.rs\z}{};
-            @parts=length($path) ? split(m{/},$path) : ();
-        } else { $path =~ s{\.rs\z}{}; @parts=('(external)', $path); }
+        my @parts=module_parts($crate,$file);
+        if (defined $crate->{module_prefix}) {
+            splice @parts,0,scalar(@{$crate->{module_prefix}});
+        }
         my $node=$tree;
         splice @parts,$depth if @parts>$depth;
         for my $part (@parts) {
@@ -57,11 +65,38 @@ sub module_rows {
     @pending=map {[$_,$tree->{children}{$_},1]} reverse sort keys %{$tree->{children}};
     while (my $entry=pop @pending) {
         my ($label,$node,$level)=@$entry;
-        push @rows,[('  ' x ($level+1)).safe_label($label),$node->{counts}];
+        push @rows,[('  ' x ($level+1)).safe_label($label),$node->{counts},37];
         next if $level >= $depth || !keys %{$node->{children}};
         push @pending,map {[$_,$node->{children}{$_},$level+1]} reverse sort keys %{$node->{children}};
     }
     return @rows;
+}
+if (($ARGV[0] // '') eq '--select') {
+    shift;
+    @ARGV==2 or die "usage: --select REPORT CRATE[::MODULE]\n";
+    my $r=$json->decode(read_file(shift));
+    my $selection=shift;
+    my ($name,@prefix)=split /::/,$selection,-1;
+    !grep { !length($_) || /[^a-zA-Z0-9_-]/ } ($name,@prefix)
+        or die "invalid crate/module selector: $selection\n";
+    my ($crate)=grep {$_->{crate} eq $name} @{$r->{crates}};
+    $crate or die "unknown workspace crate: $name\n";
+    my @files=grep {
+        my @parts=module_parts($crate,$_);
+        my $matches=$_->{crate} eq $name && @parts>=@prefix;
+        for my $i (0..$#prefix) { $matches=0 if !defined($parts[$i]) || $parts[$i] ne $prefix[$i]; }
+        $matches;
+    } @{$r->{files}};
+    @files || !@prefix or die "unknown source module: $selection\n";
+    my $counts=zero(); add($counts,$_->{counts}) for @files;
+    $crate->{counts}=$counts;
+    $crate->{module_prefix}=\@prefix;
+    $r->{selection}=$selection;
+    $r->{crates}=[$crate]; $r->{files}=\@files; $r->{totals}=$counts;
+    my %paths=map {$_->{path}=>1} @files;
+    $r->{diagnostics}=[grep {$paths{$_->{path}}} @{$r->{diagnostics}}];
+    print $json->encode($r),"\n";
+    exit;
 }
 if (($ARGV[0] // '') eq '--table') {
     shift; my $r=$json->decode(read_file(shift));
@@ -71,19 +106,26 @@ if (($ARGV[0] // '') eq '--table') {
     my @rows;
     for my $w (@{$r->{workspaces} // [{name=>basename(dirname($r->{manifest})),report=>$r}]}) {
         if ($w->{report}) {
-            push @rows, [safe_label($w->{name}), $w->{report}{totals}];
+            my $label=safe_label($w->{report}{selection} // $w->{name});
+            my $kind=$w->{report}{selection} ? ($w->{report}{selection} =~ /::/ ? 37 : 34) : 32;
+            push @rows, [$label, $w->{report}{totals},$kind];
             if (defined $depth) {
                 my %files_by_crate;
                 if ($depth) {
                     push @{$files_by_crate{$_->{crate}}},$_ for @{$w->{report}{files}};
                 }
                 for my $crate (@{$w->{report}{crates}}) {
-                    push @rows,['  '.safe_label($crate->{crate}),$crate->{counts}];
-                    push @rows,module_rows($crate,$files_by_crate{$crate->{crate}} // [],$depth) if $depth;
+                    push @rows,['  '.safe_label($crate->{crate}),$crate->{counts},34] unless $w->{report}{selection};
+                    if ($depth) {
+                        my @modules=module_rows($crate,$files_by_crate{$crate->{crate}} // [],$depth);
+                        if ($w->{report}{selection}) { $_->[0] =~ s/^  // for @modules; }
+                        push @rows,@modules;
+                    }
                 }
             }
-        } else { push @rows, [safe_label($w->{name}), {map {$_=>$w->{status}} (@categories,'total')}]; }
+        } else { push @rows, [safe_label($w->{name}), {map {$_=>$w->{status}} (@categories,'total')},32]; }
     }
+    my $colour=-t STDOUT && !length($ENV{NO_COLOR} // '') && ($ENV{TERM} // '') ne 'dumb';
     my $aggregate=exists $r->{workspaces};
     push @rows, [$r->{partial} ? 'TOTAL (partial)' : 'TOTAL', $r->{totals}] if $aggregate;
     my @keys=(@categories,'total');
@@ -104,7 +146,11 @@ if (($ARGV[0] // '') eq '--table') {
     print "\n",$separator;
     for my $i (0..$#rows) {
         print $separator if $aggregate && $i==$#rows;
-        printf '%-*s', $width,$rows[$i][0];
+        my $code=$colour ? $rows[$i][2] : undef;
+        print "\e[${code}m" if defined $code;
+        print $rows[$i][0];
+        print "\e[0m" if defined $code;
+        print ' ' x ($width-length($rows[$i][0]));
         for my $j (0..$#keys) {printf '%s%*s', $gaps[$j],$widths[$j],$rows[$i][1]{$keys[$j]} // 'n/a';}
         print "\n";
     }

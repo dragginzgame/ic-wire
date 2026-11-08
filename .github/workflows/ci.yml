@@ -28,11 +28,17 @@ jobs:
           persist-credentials: false
       - name: Check reviewed snapshot integrity
         run: make shared-tooling-check
+      - name: Restore pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
       - name: Prepare pinned security scanner
         id: security-tool
         run: |
           scanner="$(bash scripts/ci/install-ci-tool.sh gitleaks --install-dir "$RUNNER_TEMP/ci-security")"
           echo "gitleaks=$scanner" >> "$GITHUB_OUTPUT"
+      - name: Save pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
+        with:
+          mode: save
       - name: Scan repository history for secrets
         env:
           GITLEAKS_BIN: ${{ steps.security-tool.outputs.gitleaks }}
@@ -80,6 +86,8 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
+      - name: Restore pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
       - name: Prepare reviewed bootstrap tools
         run: make install-host-tools
       - name: Prepare the compiler from local policy
@@ -90,6 +98,10 @@ jobs:
           echo "RUSTUP_TOOLCHAIN=$(bash scripts/ci/read-cargo-workspace-rust-version.sh Cargo.toml)" >> "$GITHUB_ENV"
       - name: Install reviewed common tools
         run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
+      - name: Save pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
+        with:
+          mode: save
       - name: Prepare Node for TypeScript qualification
         if: matrix.suite == 'typescript'
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -117,14 +129,10 @@ jobs:
           repository-root: ${{ github.workspace }}
           compact-successful-tools: 'true'
 
-  # Preserve the existing required check names. These light gates qualify the
-  # selected qualification. A docs pass does not claim native execution.
-  scaffold:
+  # One aggregate gate admits the selected docs or native qualification.
+  qualification:
     if: ${{ always() }}
     needs: [change-scope, docs, validate]
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-15, macos-15-intel]
     runs-on: ubuntu-24.04
     steps:
       - name: Require selected qualification

@@ -88,7 +88,7 @@ install-release-editor:
 release-editor-check:
 	+@$(RELEASE_EDITOR_COMMAND) --check
 
-.PHONY: help build check test lint check-wasm check-msrv check-doc-links check-pins check-tooling ci ci-core ci-typescript ci-benchmarks version
+.PHONY: help build check test lint check-wasm check-doc-links check-pins check-tooling ci ci-core ci-typescript ci-benchmarks version
 # One declaration in ci/release-validation.json; Shared admits the Cargo-group projection.
 # macOS system Make predates .SHELLSTATUS; retain failure admission in shell output.
 override IC_WIRE_CI_TARGETS := $(shell perl "$(CURDIR)/scripts/ci/wire-validation-roster.pl" || printf '%s\n' WIRE_ROSTER_REFUSED)
@@ -137,11 +137,13 @@ check-codec-costs:
 
 .PHONY: check-consumer-benchmarks
 check-consumer-benchmarks:
-	+@for corpus in id16 id16-control coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale-1 derive-scale-10 derive-scale packed-i16 packed-i16-baseline packed-scale packed-scale-shared,derive-scale-10 bulk bulk,bulk-baseline bulk-scale bulk-scale,bulk-baseline; do \
+	+@corpora="$$(awk -F'|' '$$4 ~ /(^|,)host(,|$$)/ { print $$2 }' scripts/ci/codec-cohorts.psv)" && test -n "$$corpora" || exit 1; \
+	for corpus in $$corpora; do \
 	    $(RUST_POLICY) cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --example codec-wasm && \
 	    $(RUST_POLICY) cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
-	+@for corpus in id16 id16-control coverage-shapes packed-containers borrowed-containers adapter-scale adapter-scale,adapter-scale-dto research-bulk contract-shapes cost-smoke byte-keys byte-keys-control hotspots toko derive-scale packed-i16 packed-scale bulk bulk-scale; do \
+	+@corpora="$$(awk -F'|' '$$4 ~ /(^|,)wasm(,|$$)/ { print $$2 }' scripts/ci/codec-cohorts.psv)" && test -n "$$corpora" || exit 1; \
+	for corpus in $$corpora; do \
 	    $(RUST_POLICY) cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
 
@@ -195,7 +197,7 @@ help:
 	@printf '%s\n' \
 		'IC Wire — bounded Postcard runtime' \
 		'Setup: install-tools, install-hooks; offline admission: tools-check' \
-		'Rust: build, check, test, lint, check-wasm, check-msrv, fmt, fmt-check' \
+		'Rust: build, check, test, lint, check-wasm, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
 		'Qualification: check-platform-types (standalone Principal/Account, MSRV and feature isolation)' \
@@ -233,9 +235,6 @@ check-wasm:
 .PHONY: check-rust-policy
 check-rust-policy: host-tools-check
 	+@$(RUST_POLICY)
-
-# Explicit convenience target; CI already owns check and check-wasm separately.
-check-msrv: check check-wasm
 
 check-doc-links:
 	@bash scripts/ci/check-repository-documentation.sh

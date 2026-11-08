@@ -74,33 +74,6 @@ impl core::fmt::Display for BulkLintReport {
     }
 }
 
-/// Find ordinary primitive lists in resolved Wire metadata, on the host only.
-///
-/// Pass named schema roots (including request/response schemas not otherwise in
-/// the registry). Named references are inspected at their definition, once;
-/// Rust aliases already resolve through `native_schema`. Nested lists, records,
-/// variants, tuples and options are traversed. Lists of 16-/32-byte arrays also
-/// suggest Packed; standalone arrays, packed/byte fields
-/// and lists of nonempty records are not candidates. Bool, finite float, 128-bit
-/// integer and zero-sized lists also receive cost advice, without suggesting an
-/// unsupported Packed element or silently changing their representation.
-///
-/// Acknowledgements map exact diagnostic paths to nonempty reasons. Unmatched
-/// entries are reported as stale, preventing broad suppression after a schema
-/// change. Warnings are advisory for all lengths: metadata cannot predict actual
-/// payload sizes or a 10x slowdown. Preserve field bounds/custom checks when
-/// adopting a suggestion; primitive newtypes may carry consumer constraints.
-///
-/// This does not alter generator output, encoding, budgets or client types.
-/// Consumers choose whether to print warnings or require `report.is_clean()`.
-/// Invalid schemas/reasons return Schema; traversal uses generation's limits.
-pub fn lint_bulk_fields(
-    types: &BTreeMap<String, Value>,
-    acknowledgements: &BTreeMap<String, String>,
-) -> Result<BulkLintReport, GenerationError> {
-    lint(types, types, acknowledgements, false)
-}
-
 /// Review primitive lists at explicit public use sites, resolving named references.
 ///
 /// Root labels are consumer-owned identities; values may be inline schemas or
@@ -120,24 +93,13 @@ pub fn lint_bulk_roots(
     types: &BTreeMap<String, Value>,
     acknowledgements: &BTreeMap<String, String>,
 ) -> Result<BulkLintReport, GenerationError> {
-    lint(roots, types, acknowledgements, true)
-}
-
-fn lint(
-    roots: &BTreeMap<String, Value>,
-    types: &BTreeMap<String, Value>,
-    acknowledgements: &BTreeMap<String, String>,
-    rooted: bool,
-) -> Result<BulkLintReport, GenerationError> {
     let mut remaining = SCHEMA_WORK;
     for node in types.values() {
-        metadata::ty(node, types, 0, &mut remaining)?;
+        metadata::ty(node, types, 0, &mut remaining, false)?;
     }
     metadata::validate_aliases(types)?;
-    if rooted {
-        for node in roots.values() {
-            metadata::ty(node, types, 0, &mut remaining)?;
-        }
+    for node in roots.values() {
+        metadata::ty(node, types, 0, &mut remaining, false)?;
     }
     lint_validated(
         roots
@@ -145,7 +107,6 @@ fn lint(
             .map(|(name, node)| (format!("/{}", escape(name)), node)),
         types,
         acknowledgements,
-        rooted,
     )
 }
 
@@ -163,7 +124,6 @@ pub(super) fn lint_generated(
                 .map(|(name, node)| (format!("/types/{}", escape(name)), node)),
             types,
             acknowledgements,
-            true,
         )
     } else {
         lint_validated(
@@ -180,7 +140,6 @@ pub(super) fn lint_generated(
             }),
             types,
             acknowledgements,
-            true,
         )
     }
 }
@@ -189,7 +148,6 @@ pub(super) fn lint_validated<'a>(
     roots: impl Iterator<Item = (String, &'a Value)>,
     types: &BTreeMap<String, Value>,
     acknowledgements: &BTreeMap<String, String>,
-    rooted: bool,
 ) -> Result<BulkLintReport, GenerationError> {
     if acknowledgements
         .values()
@@ -199,7 +157,6 @@ pub(super) fn lint_validated<'a>(
     }
     let mut warnings = Vec::new();
     let mut traversal = Traversal {
-        rooted,
         active: BTreeSet::new(),
         remaining: ROOTED_WORK,
         root_remaining: SCHEMA_WORK,
@@ -306,7 +263,6 @@ fn representation<'a>(
 }
 
 struct Traversal {
-    rooted: bool,
     active: BTreeSet<String>,
     remaining: usize,
     root_remaining: usize,
@@ -320,15 +276,13 @@ fn walk(
     traversal: &mut Traversal,
     depth: usize,
 ) -> Result<(), GenerationError> {
-    if traversal.rooted {
-        if depth >= SCHEMA_DEPTH || traversal.remaining == 0 || traversal.root_remaining == 0 {
-            return Err(GenerationError::Complexity);
-        }
-        traversal.remaining -= 1;
-        traversal.root_remaining -= 1;
+    if depth >= SCHEMA_DEPTH || traversal.remaining == 0 || traversal.root_remaining == 0 {
+        return Err(GenerationError::Complexity);
     }
+    traversal.remaining -= 1;
+    traversal.root_remaining -= 1;
     match node["k"].as_str().unwrap() {
-        "ref" if traversal.rooted => {
+        "ref" => {
             let name = node["name"].as_str().unwrap();
             if traversal.active.insert(name.into()) {
                 walk(&types[name], path, types, warnings, traversal, depth + 1)?;
@@ -338,11 +292,7 @@ fn walk(
         "list" => {
             if let Some((word, representation)) = representation(&node["item"], types)? {
                 warnings.push(BulkWarning {
-                    path: if traversal.rooted {
-                        format!("{path}/list/{word}")
-                    } else {
-                        path.into()
-                    },
+                    path: format!("{path}/list/{word}"),
                     representation,
                 });
             }
@@ -404,7 +354,7 @@ fn walk(
                 )?;
             }
         }
-        _ => {} // Scalars, bulk fields, and references to separately visited definitions.
+        _ => {} // Scalars and bulk fields.
     }
     Ok(())
 }

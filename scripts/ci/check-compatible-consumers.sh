@@ -5,9 +5,9 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/rust-policy.sh"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 mkdir -p "$root/target/compatible-consumers"
 out="$(mktemp -d "$root/target/compatible-consumers/run.XXXXXX")"
-# Previous supported Core and currently published Endpoint. These are test inputs,
-# not production pins; keep them old when advancing the candidate patch.
-for lane in current previous-core published-endpoint; do
+# Qualify current packages and independently published Endpoint. No previous-Core
+# support lane: public hard cuts migrate consumers to the current Core contract.
+for lane in current published-endpoint; do
     fixture="$out/$lane"
     mkdir -p "$fixture/src"
     cp "$root/crates/ic-wire-qualification/tests/fixtures/compatibility/mod.rs" "$fixture/src/lib.rs"
@@ -17,10 +17,10 @@ for lane in current previous-core published-endpoint; do
 const fs = require('node:fs');
 const [root, fixture, lane] = process.argv.slice(2);
 const local = name => `path = ${JSON.stringify(`${root}/crates/${name}`)}`;
-const core = lane === 'previous-core' ? 'version = "=0.17.12"' : local('ic-wire');
+const core = local('ic-wire');
 const endpoint = lane === 'current' ? local('ic-wire-endpoint') : 'version = "=0.8.0"';
 const patches = [`ic-wire-derive = { ${local('ic-wire-derive')} }`];
-if (lane !== 'previous-core') patches.push(`ic-wire = { ${local('ic-wire')} }`);
+patches.push(`ic-wire = { ${local('ic-wire')} }`);
 if (lane !== 'published-endpoint') patches.push(`ic-wire-endpoint-macros = { ${local('ic-wire-endpoint-macros')} }`);
 fs.writeFileSync(`${fixture}/Cargo.toml`, `[workspace]
 [package]
@@ -50,8 +50,7 @@ for (const name of ['ic-wire', 'ic-wire-derive', 'ic-wire-endpoint', 'ic-wire-en
  const matches = m.packages.filter(p => p.name === name);
  assert.equal(matches.length, 1, `duplicate/missing ${name}`);
  const p = matches[0];
- if (name === 'ic-wire' && lane === 'previous-core') { assert.equal(p.version,'0.17.12'); assert.ok(p.source?.startsWith('registry+')); }
- if (name === 'ic-wire-derive' || (name === 'ic-wire' && lane !== 'previous-core')) assert.equal(p.source,null);
+ if (name === 'ic-wire-derive' || name === 'ic-wire') assert.equal(p.source,null);
  if (name === 'ic-wire-endpoint') assert.equal(p.source === null,lane === 'current');
  if (name === 'ic-wire-endpoint-macros') assert.equal(p.source === null,lane !== 'published-endpoint');
 }

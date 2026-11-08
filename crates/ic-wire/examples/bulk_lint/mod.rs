@@ -1,6 +1,6 @@
 //! Host-only schema advice, optionally enforced in consumer CI.
 use clap::{Arg, ArgAction, Command};
-use ic_wire::typescript::lint_bulk_fields;
+use ic_wire::typescript::lint_bulk_roots;
 use std::{collections::BTreeMap, fs, process::ExitCode};
 
 fn run() -> Result<ExitCode, String> {
@@ -27,7 +27,7 @@ fn run() -> Result<ExitCode, String> {
             .map_err(|e| e.to_string())?,
         None => BTreeMap::new(),
     };
-    let report = lint_bulk_fields(&types, &acknowledged)
+    let report = lint_bulk_roots(&types, &types, &acknowledged)
         .map_err(|e| format!("invalid bulk-lint input: {e:?}"))?;
     eprint!("{report}");
     Ok(if args.get_flag("deny-warnings") && !report.is_clean() {

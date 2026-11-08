@@ -45,6 +45,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "packed-i16",
         feature = "bulk",
         feature = "hotspots",
+        feature = "signed32",
         feature = "byte-keys",
         feature = "contract-shapes",
         feature = "cost-smoke",
@@ -69,6 +70,8 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
     }
     #[cfg(feature = "id16")]
     assert_eq!(cases.len(), 20);
+    #[cfg(feature = "signed32")]
+    assert_eq!(cases.len(), 49);
     #[cfg(feature = "bulk")]
     assert_eq!(cases.len(), 109); // Includes ten i8 small/wide length controls.
     #[cfg(feature = "toko")]
@@ -90,6 +93,7 @@ fn corpus_roundtrips_and_rejects_damaged_frames() {
         feature = "packed-i16",
         feature = "bulk",
         feature = "hotspots",
+        feature = "signed32",
         feature = "byte-keys",
         feature = "contract-shapes",
         feature = "cost-smoke",

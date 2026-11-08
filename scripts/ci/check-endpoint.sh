@@ -4,6 +4,7 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/rust-policy.sh"
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 export RUSTUP_AUTO_INSTALL=0
+node --test scripts/ci/summarize-endpoint-matrix.test.mjs
 mkdir -p target
 output="$(mktemp -d "$PWD/target/endpoint-check.XXXXXX")"
 printf 'Endpoint compile evidence: %s\n' "$output"
@@ -12,9 +13,7 @@ cargo test --locked -p ic-wire-endpoint-fixture --lib
 cargo test --locked -p ic-wire-endpoint-fixture --lib --features schema
 cargo test --locked -p ic-wire --lib automatic_method_identity_vectors_and_frame
 # Public-package lint (including schemas) belongs to make lint; this owns the fixture.
-cargo clippy --locked -p ic-wire-endpoint-fixture --lib --tests --example endpoint-cost --features ic,schema,inline-baseline -- -D warnings
-# The cost example's IC caller lives behind cfg(test), outside ordinary example lint.
-cargo test --locked -p ic-wire-endpoint-fixture --example endpoint-cost --features ic,schema,inline-baseline --no-run
+cargo clippy --locked -p ic-wire-endpoint-fixture --lib --tests --features ic,schema -- -D warnings
 # Compile the benchmark's actual reverse-consumer path without running a cost study.
 cargo test --locked -p ic-wire-benchmarks --example input-borrowing --features ic,endpoint-input --no-run
 cargo build --locked -p ic-wire-endpoint --message-format=json > "$output/artifacts.jsonl"

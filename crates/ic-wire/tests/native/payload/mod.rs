@@ -35,6 +35,10 @@ fn standalone_schema_reuses_generator_rejections_including_unused_definitions() 
         json!({"k":"array","item":{"k":"unit"}}),
         json!({"k":"unit","check":false}),
         json!({"k":"unknown"}),
+        json!({"k":"packed","word":"unknown"}),
+        json!({"k":"tuple","items":[{"k":"float","bits":7}]}),
+        json!({"k":"result","ok":{"k":"unit"},"err":{"k":"u","bits":7}}),
+        json!({"k":"record","fields":[{"name":"field","value":{"k":"unknown"}}]}),
     ] {
         let types = BTreeMap::new();
         assert_eq!(

@@ -155,7 +155,6 @@ fn case<T: typescript::Wire + for<'de> Deserialize<'de>>(name: &str, value: T, j
 }
 
 pub(super) fn generate(directory: &Path) -> String {
-    benchmark_limits(directory);
     let cases = vec![
         case(
             "recursive-record",
@@ -255,40 +254,4 @@ pub(super) fn generate(directory: &Path) -> String {
         .unwrap();
     }
     include_str!("checks.mjs").into()
-}
-
-fn benchmark_limits(directory: &Path) {
-    use std::{hint::black_box, time::Instant};
-    let project = |typed| {
-        let request = black_box(LIMITS);
-        let response = black_box(LIMITS);
-        if typed {
-            typescript::method_limits(request, response).unwrap()
-        } else {
-            json!({"requestBytes":request.bytes,"responseBytes":response.bytes,
-            "requestNodes":request.nodes,"responseNodes":response.nodes,
-            "requestDepth":request.depth,"responseDepth":response.depth})
-        }
-    };
-    assert_eq!(project(false), project(true));
-    let mut rows = Vec::new();
-    for sample in 0..7 {
-        for typed in if sample % 2 == 0 {
-            [false, true]
-        } else {
-            [true, false]
-        } {
-            black_box(project(typed));
-            let start = Instant::now();
-            for _ in 0..1000 {
-                black_box(project(typed));
-            }
-            rows.push(json!({"typed":typed,"sample":sample,"iterations":1000,"ns_per_iteration":start.elapsed().as_nanos()/1000}));
-        }
-    }
-    fs::write(
-        directory.join("method-limits-host-benchmark.json"),
-        serde_json::to_vec_pretty(&rows).unwrap(),
-    )
-    .unwrap();
 }

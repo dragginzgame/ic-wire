@@ -58,7 +58,6 @@ make fmt-check
 
 Then select the package/test or named contract target for the changed behavior;
 see [local commands](docs/development.md). `make lint` spans all public packages.
-`make check-msrv` repeats `check` and `check-wasm`, so do not stack those commands.
 `make ci` is the complete gate for explicit broad validation or release qualification.
 Release commands deliver Git versions
 and tags; registry publication is a separate maintainer action.

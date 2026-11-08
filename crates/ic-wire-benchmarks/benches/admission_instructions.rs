@@ -40,6 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "server_sha256": format!("{:x}", Sha256::digest(fs::read(server)?)),
             "lock_sha256": format!("{:x}", Sha256::digest(include_bytes!("../../../Cargo.lock"))),
             "fixture_sha256": format!("{:x}", Sha256::digest(include_bytes!("admission/mod.rs"))),
+            "sample_caller":"unique 8-byte little-endian principal per query; caller not read by guest",
             "samples":3,"counter":"ic0.performance_counter(0)",
             "notes":"Warm decode, including destruction; setup/transport excluded. Budgets are illustrative, not equivalent to Candid quotas."
         }))?,
@@ -48,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pic.add_cycles(canister, 100_000_000_000_000).await?;
     pic.install_canister(canister, wasm, vec![], None).await?;
     let mut file = fs::File::create(output.join("samples.jsonl"))?;
+    let mut sample_caller = 0_u64;
     for (kind, name) in admission::KINDS.iter().enumerate() {
         for (index, length) in admission::LENGTHS.into_iter().enumerate() {
             for truncated in [false, true] {
@@ -62,11 +64,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         assert_ne!(expected, 0);
                     }
                     let mut samples = Vec::new();
+                    let mut sample_caller_ids = Vec::new();
                     for _ in 0..3 {
+                        // Distinct callers prevent identical queries hitting the query cache.
+                        sample_caller += 1;
+                        sample_caller_ids.push(sample_caller);
                         let reply = pic
                             .query_call(
                                 canister,
-                                Principal::anonymous(),
+                                Principal::from_slice(&sample_caller.to_le_bytes()),
                                 "benchmark",
                                 vec![kind as u8, index as u8, policy as u8, u8::from(truncated)],
                             )
@@ -83,7 +89,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "policy":label,"bytes":limits.bytes,"allocation":limits.allocation,
                         "nodes":limits.nodes,"depth":limits.depth,"frame_bytes":bytes.len(),
                         "frame_sha256":format!("{:x}", Sha256::digest(&bytes)),
-                        "result":expected,"samples":samples})
+                        "result":expected,"samples":samples,"sample_caller_ids":sample_caller_ids})
                     )?;
                 }
             }

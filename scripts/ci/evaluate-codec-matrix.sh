@@ -27,7 +27,7 @@ export CARGO_NET_OFFLINE=true RUSTUP_AUTO_INSTALL=0
 export RUNS="${RUNS:-2}" SAMPLES="${SAMPLES:-11}" BATCH_MS="${BATCH_MS:-2}"
 cp scripts/ci/codec-cohorts.psv "$out/cohorts.psv"
 cd "$out/source"
-while IFS='|' read -r name features primary; do
+while IFS='|' read -r name features primary qualification; do
     printf 'Running %s (%s)\n' "$name" "$primary"
     CODEC_SOURCE_SNAPSHOT="$out/source" CORPUS_FEATURE="$features" bash "$out/source/scripts/ci/evaluate-codecs.sh" "$out/$name" > "$out/$name.log" 2>&1
     printf 'Completed %s\n' "$name"

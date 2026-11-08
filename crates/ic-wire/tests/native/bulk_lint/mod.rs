@@ -1,5 +1,5 @@
 use ic_wire::typescript::native_schema;
-use ic_wire::typescript::{GenerationError, lint_bulk_fields};
+use ic_wire::typescript::{GenerationError, lint_bulk_roots};
 use serde_json::json;
 use std::collections::BTreeMap;
 mod composition_tests;
@@ -20,7 +20,7 @@ fn resolved_aliases_nested_fields_and_acknowledgements() {
         unsupported: Vec<u128>,
     }
     let types = BTreeMap::from([("Request".into(), native_schema::<Request>().unwrap())]);
-    let report = lint_bulk_fields(&types, &BTreeMap::new()).unwrap();
+    let report = lint_bulk_roots(&types, &types, &BTreeMap::new()).unwrap();
     assert_eq!(
         report
             .warnings
@@ -28,11 +28,17 @@ fn resolved_aliases_nested_fields_and_acknowledgements() {
             .map(|w| (w.path.as_str(), w.representation))
             .collect::<Vec<_>>(),
         [
-            ("/Request/fields/samples/item", "Packed<i64>"),
-            ("/Request/fields/bytes", "ByteBuf / Bytes<N> / serde_bytes"),
-            ("/Request/fields/records/item/items/1", "Packed<u16>"),
+            ("/Request/fields/samples/item/list/i64", "Packed<i64>"),
             (
-                "/Request/fields/unsupported",
+                "/Request/fields/bytes/list/u8",
+                "ByteBuf / Bytes<N> / serde_bytes"
+            ),
+            (
+                "/Request/fields/records/item/items/1/list/u16",
+                "Packed<u16>"
+            ),
+            (
+                "/Request/fields/unsupported/list/u128",
                 "bounded u128 lists and workload-specific node limits; Packed<u128> is unsupported"
             ),
         ]
@@ -47,14 +53,18 @@ fn resolved_aliases_nested_fields_and_acknowledgements() {
             )
         })
         .collect();
-    assert!(lint_bulk_fields(&types, &acknowledged).unwrap().is_clean());
+    assert!(
+        lint_bulk_roots(&types, &types, &acknowledged)
+            .unwrap()
+            .is_clean()
+    );
     acknowledged.insert("/Old/field".into(), "Former field".into());
-    let report = lint_bulk_fields(&types, &acknowledged).unwrap();
+    let report = lint_bulk_roots(&types, &types, &acknowledged).unwrap();
     assert!(!report.is_clean());
     assert_eq!(report.stale_acknowledgements, ["/Old/field"]);
     acknowledged.insert("/Old/field".into(), "  ".into());
     assert_eq!(
-        lint_bulk_fields(&types, &acknowledged),
+        lint_bulk_roots(&types, &types, &acknowledged),
         Err(GenerationError::Schema)
     );
 }
@@ -79,21 +89,31 @@ fn references_cycles_and_escaped_names_are_bounded() {
             ]}),
         ),
     ]);
-    let report = lint_bulk_fields(&types, &BTreeMap::new()).unwrap();
+    let report = lint_bulk_roots(&types, &types, &BTreeMap::new()).unwrap();
     assert_eq!(
         report
             .warnings
             .iter()
             .map(|w| w.path.as_str())
             .collect::<Vec<_>>(),
-        ["/List", "/Tree/fields/a~1b~0c"]
+        [
+            "/List/list/i8",
+            "/Tree/fields/a~1b~0c/list/i32",
+            "/Tree/fields/next/item/fields/a~1b~0c/list/i32",
+            "/Tree/fields/next/item/fields/list/list/i8",
+            "/Tree/fields/list/list/i8"
+        ]
     );
     for bad in [
         json!({"k":"ref","name":"Bad"}),
         json!({"k":"list","item":{"k":"absent"}}),
     ] {
         assert_eq!(
-            lint_bulk_fields(&BTreeMap::from([("Bad".into(), bad)]), &BTreeMap::new()),
+            lint_bulk_roots(
+                &BTreeMap::from([("Bad".into(), bad)]),
+                &BTreeMap::new(),
+                &BTreeMap::new()
+            ),
             Err(GenerationError::Schema)
         );
     }
@@ -102,7 +122,11 @@ fn references_cycles_and_escaped_names_are_bounded() {
         deep = json!({"k":"option","item":deep});
     }
     assert_eq!(
-        lint_bulk_fields(&BTreeMap::from([("Deep".into(), deep)]), &BTreeMap::new()),
+        lint_bulk_roots(
+            &BTreeMap::from([("Deep".into(), deep)]),
+            &BTreeMap::new(),
+            &BTreeMap::new()
+        ),
         Err(GenerationError::Complexity)
     );
 }
@@ -121,9 +145,12 @@ fn all_supported_list_words_and_enum_result_paths() {
         {"k":"list","item":{"k":"u","bits":64}}
     ]},"err":{"k":"bytes"}}}]}),
     )]);
-    let report = lint_bulk_fields(&types, &BTreeMap::new()).unwrap();
+    let report = lint_bulk_roots(&types, &types, &BTreeMap::new()).unwrap();
     assert_eq!(report.warnings.len(), 7);
-    assert_eq!(report.warnings[6].path, "/Root/variants/Words/ok/items/6");
+    assert_eq!(
+        report.warnings[6].path,
+        "/Root/variants/Words/ok/items/6/list/u64"
+    );
     assert_eq!(report.warnings[6].representation, "Packed<u64>");
 }
 
@@ -455,9 +482,9 @@ fn hash_lists_resolve_aliases_preserve_paths_and_acknowledgements() {
             json!({"k":"list","item":{"k":"ref","name":"Recursive"}}),
         ),
     ]);
-    let report = lint_bulk_fields(&types, &BTreeMap::new()).unwrap();
+    let report = lint_bulk_roots(&types, &types, &BTreeMap::new()).unwrap();
     assert_eq!(report.warnings.len(), 1);
-    assert_eq!(report.warnings[0].path, "/Hashes");
+    assert_eq!(report.warnings[0].path, "/Hashes/list/hash32");
     assert_eq!(report.warnings[0].representation, "Packed<[u8; 32]>");
 }
 

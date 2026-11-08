@@ -6,99 +6,34 @@ pub fn hash(bytes: &[u8]) -> String {
 }
 pub fn with_fixtures(mut identity: Value) -> Value {
     let fields = identity.as_object_mut().unwrap();
-    fields.insert(
-        "fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/mod.rs")).into(),
-    );
-    fields.insert(
-        "hotspots_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/hotspots/mod.rs")).into(),
-    );
-    fields.insert(
-        "bulk_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/bulk/mod.rs")).into(),
-    );
-    fields.insert(
-        "packed_i16_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/packed_i16/mod.rs")).into(),
-    );
-    fields.insert(
-        "toko_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/toko/mod.rs")).into(),
-    );
-    fields.insert(
-        "derive_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/scale/mod.rs")).into(),
-    );
-    fields.insert(
-        "byte_keys_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/byte_keys/mod.rs")).into(),
-    );
-    fields.insert(
-        "id16_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/id16/mod.rs")).into(),
-    );
-    fields.insert(
-        "packed_source_sha256".into(),
-        hash(include_bytes!("../../../ic-wire/src/packed/mod.rs")).into(),
-    );
-    fields.insert(
-        "cost_smoke_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/cost_smoke/mod.rs")).into(),
-    );
-    fields.insert(
-        "shapes_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/shapes/mod.rs")).into(),
-    );
-    fields.insert(
-        "followup_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/followup/mod.rs")).into(),
-    );
-    fields.insert(
-        "container_fixture_sha256".into(),
-        hash(include_bytes!("../fixtures/followup/containers/mod.rs")).into(),
-    );
-    fields.insert(
-        "container_transport_sha256".into(),
-        hash(include_bytes!(
-            "../fixtures/followup/containers/transport/mod.rs"
-        ))
-        .into(),
-    );
-    fields.insert(
-        "container_adapter_sha256".into(),
-        hash(include_bytes!(
-            "../fixtures/followup/containers/transport/adapters/mod.rs"
-        ))
-        .into(),
-    );
-    fields.insert(
-        "followup_words_sha256".into(),
-        hash(include_bytes!("../fixtures/followup/words/mod.rs")).into(),
-    );
-    fields.insert(
-        "evidence_helper_sha256".into(),
-        hash(include_bytes!("mod.rs")).into(),
-    );
-    for (key, source) in [
-        (
-            "public_bools_adapter_sha256",
-            include_bytes!("../../../ic-wire/src/serde_packed/bools/mod.rs").as_slice(),
-        ),
-        (
-            "public_nonzero_adapter_sha256",
-            include_bytes!("../../../ic-wire/src/serde_packed/nonzero_i64/mod.rs").as_slice(),
-        ),
-        (
-            "public_heap_adapter_sha256",
-            include_bytes!("../../../ic-wire/src/serde_packed/heap_u64/mod.rs").as_slice(),
-        ),
-    ] {
-        fields.insert(key.into(), hash(source).into());
+    macro_rules! sources {
+        ($($key:literal => $source:literal),* $(,)?) => {
+            $(fields.insert($key.into(), hash(include_bytes!($source)).into());)*
+        };
     }
-    fields.insert(
-        "operations_sha256".into(),
-        hash(include_bytes!("../operations/mod.rs")).into(),
-    );
+    sources! {
+        "fixture_sha256" => "../fixtures/mod.rs",
+        "hotspots_fixture_sha256" => "../fixtures/hotspots/mod.rs",
+        "signed32_fixture_sha256" => "../fixtures/signed32/mod.rs",
+        "bulk_fixture_sha256" => "../fixtures/bulk/mod.rs",
+        "packed_i16_fixture_sha256" => "../fixtures/packed_i16/mod.rs",
+        "toko_fixture_sha256" => "../fixtures/toko/mod.rs",
+        "derive_fixture_sha256" => "../fixtures/scale/mod.rs",
+        "byte_keys_fixture_sha256" => "../fixtures/byte_keys/mod.rs",
+        "id16_fixture_sha256" => "../fixtures/id16/mod.rs",
+        "packed_source_sha256" => "../../../ic-wire/src/packed/mod.rs",
+        "cost_smoke_fixture_sha256" => "../fixtures/cost_smoke/mod.rs",
+        "shapes_fixture_sha256" => "../fixtures/shapes/mod.rs",
+        "followup_fixture_sha256" => "../fixtures/followup/mod.rs",
+        "container_fixture_sha256" => "../fixtures/followup/containers/mod.rs",
+        "container_transport_sha256" => "../fixtures/followup/containers/transport/mod.rs",
+        "container_adapter_sha256" => "../fixtures/followup/containers/transport/adapters/mod.rs",
+        "followup_words_sha256" => "../fixtures/followup/words/mod.rs",
+        "evidence_helper_sha256" => "mod.rs",
+        "public_bools_adapter_sha256" => "../../../ic-wire/src/serde_packed/bools/mod.rs",
+        "public_nonzero_adapter_sha256" => "../../../ic-wire/src/serde_packed/nonzero_i64/mod.rs",
+        "public_heap_adapter_sha256" => "../../../ic-wire/src/serde_packed/heap_u64/mod.rs",
+        "operations_sha256" => "../operations/mod.rs",
+    }
     identity
 }

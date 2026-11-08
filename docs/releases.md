@@ -102,6 +102,11 @@ authorize partial publication of a selected group or stale-proof reuse.
 
 ## Required workflow
 
+Repository secret scanning runs once in CI under the
+[shared scanning contract](../rules/engineering-details.md#repository-secret-scanning),
+not in group release gates, batch setup or publication. Preserve required checks
+without installing or rerunning Gitleaks for each deployment.
+
 Content-bound reuse across independent groups has an
 [opt-in exact-input stage interface](release-validation-reuse.md). Consumers must
 qualify their selected stages and fresh group admission before integrating it.

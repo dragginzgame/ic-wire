@@ -7,20 +7,6 @@ pub(super) trait Word:
 {
     const WIDTH: usize;
     fn read(bytes: &[u8]) -> Self;
-    fn checked_slice(_: &[u8]) -> Result<Option<&[Self]>, ()> {
-        Ok(None)
-    }
-}
-impl Word for bool {
-    const WIDTH: usize = 1;
-    fn read(bytes: &[u8]) -> Self {
-        bytes[0] == 1
-    }
-    fn checked_slice(bytes: &[u8]) -> Result<Option<&[Self]>, ()> {
-        bytemuck::checked::try_cast_slice(bytes)
-            .map(Some)
-            .map_err(|_| ())
-    }
 }
 macro_rules! float {
     ($ty:ty, $width:expr) => {
@@ -39,8 +25,7 @@ pub(super) struct Bulk<T>(pub Vec<T>);
 impl<T: Word> Serialize for Bulk<T> {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         // RESEARCH ONLY: float lists change element-count prefixes to byte counts:
-        // [1_f32] 01 00 00 80 3f -> 04 00 00 80 3f. Bool bytes stay identical
-        // (02 00 01), but admission changes from element visits to one buffer.
+        // [1_f32] 01 00 00 80 3f -> 04 00 00 80 3f.
         // Any production adoption needs word/schema/client qualification and
         // consumer review of layout, limits and retained retry/hash bytes.
         // The prototype qualifies the supported little-endian hosts/Wasm only.
@@ -64,26 +49,16 @@ impl<'de, T: Word> serde::Deserialize<'de> for Bulk<T> {
                 f.write_str("research fixed-width words")
             }
             fn visit_bytes<E: serde::de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
-                // Unlike unchecked raw POD casts, bool 02 must remain invalid.
-                // Validate width and every boolean BEFORE allocating an output.
+                // Validate width before allocating an output.
                 // Native byte-buffer admission has already checked frame/limits.
                 if !bytes.len().is_multiple_of(T::WIDTH) {
                     return Err(E::custom("invalid research words"));
                 }
-                let checked =
-                    T::checked_slice(bytes).map_err(|()| E::custom("invalid research words"))?;
                 let mut values = Vec::new();
                 values
                     .try_reserve_exact(bytes.len() / T::WIDTH)
                     .map_err(|_| E::custom("allocation"))?;
-                if let Some(words) = checked {
-                    // bool is one byte on every supported target. Validate its
-                    // bit patterns before allocation, then copy the valid slice.
-                    // Research bytes, bounds and rejection rules are unchanged.
-                    values.extend_from_slice(words);
-                } else {
-                    values.extend(bytes.chunks_exact(T::WIDTH).map(T::read));
-                }
+                values.extend(bytes.chunks_exact(T::WIDTH).map(T::read));
                 Ok(Bulk(values))
             }
         }

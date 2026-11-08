@@ -1,6 +1,6 @@
 # IC Wire contributor instructions
 
-Apply the reviewed [Shared 0.31.9 policy](https://github.com/dragginzgame/shared-tooling/blob/d95f271bc7b49951ccf286c3655cef7446b8cf56/DRAGGINZGAME.md)
+Apply the reviewed [Shared 0.31.12 policy](https://github.com/dragginzgame/shared-tooling/blob/eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f/DRAGGINZGAME.md)
 and its revision-bound references. The installed [baseline](DRAGGINZGAME.md) and
 [manifest](.shared-tooling.snapshot) own executable snapshot provenance; refresh
 through Shared's exporter, never by editing payloads or following a moving sibling.
@@ -81,6 +81,12 @@ compile-fail and standalone Rust/TypeScript conformance owners.
   repeated absolute results and regressions. Label native time, IC instructions,
   code-section and total uncompressed Wasm separately. No gzip objective or
   symbol-attribution-as-saving claims. State blocked/not-applicable measurements.
+- Use opt-z as the primary optimization decision profile for our size-constrained
+  deployments. Keep opt-3 as a secondary regression check and report its losses;
+  a candidate need not win both profiles. Small measured uncompressed Wasm growth
+  may be accepted for substantial instruction savings with an explicit recorded
+  tradeoff. Automated cost-screen failures remain visible; do not call an approved
+  tradeoff a passing no-growth check or silently relax its thresholds.
 - Give isolated paired sources separate Cargo targets and verify fresh artifacts
   and baked source hashes; copied timestamps can admit stale builds. Check for
   active builds sharing target/ before compilation. Do not run broad sibling suites.

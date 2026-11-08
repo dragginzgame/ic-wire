@@ -116,19 +116,19 @@ fn candid_byte_adapters_preserve_frames_and_owned_principal_boundary() {
     }
 }
 #[test]
-fn private_bulk_validates_bits_lengths_and_limits() {
+fn public_bools_and_research_floats_validate_lengths_and_limits() {
     use super::*;
     use words::Bulk;
-    let bools = Bulk(vec![false, true]);
+    let bools = words::BoolValue(vec![false, true]);
     assert_eq!(ic_wire::native::encode(&bools, LIMITS).unwrap(), [2, 0, 1]);
     assert_eq!(
-        ic_wire::native::decode::<Bulk<bool>>(&[2, 0, 1], LIMITS)
+        ic_wire::native::decode::<words::BoolValue>(&[2, 0, 1], LIMITS)
             .unwrap()
             .0,
         [false, true]
     );
     for bad in [vec![1, 2], vec![2, 0], vec![3, 0, 1]] {
-        assert!(ic_wire::native::decode::<Bulk<bool>>(&bad, LIMITS).is_err());
+        assert!(ic_wire::native::decode::<words::BoolValue>(&bad, LIMITS).is_err());
     }
     for bad in [vec![1, 0], vec![3, 0, 0, 0], vec![4, 0, 0, 0]] {
         assert!(ic_wire::native::decode::<Bulk<f32>>(&bad, LIMITS).is_err());
@@ -146,7 +146,7 @@ fn private_bulk_validates_bits_lengths_and_limits() {
             bits
         );
     }
-    let bytes = ic_wire::native::encode(&Bulk(vec![true; 128]), LIMITS).unwrap();
+    let bytes = ic_wire::native::encode(&words::BoolValue(vec![true; 128]), LIMITS).unwrap();
     for limits in [
         ic_wire::Limits {
             bytes: bytes.len() - 1,
@@ -160,21 +160,20 @@ fn private_bulk_validates_bits_lengths_and_limits() {
         ic_wire::Limits { depth: 0, ..LIMITS },
     ] {
         assert_eq!(
-            ic_wire::native::decode::<Bulk<bool>>(&bytes, limits).unwrap_err(),
+            ic_wire::native::decode::<words::BoolValue>(&bytes, limits).unwrap_err(),
             ic_wire::Error::Limit
         );
     }
 }
 
 #[test]
-fn private_bulk_bool_rejects_every_invalid_bit_pattern() {
+fn public_bool_rejects_every_invalid_bit_pattern() {
     use super::*;
-    use words::Bulk;
     for len in [0, 1, 31, 32, 33] {
         let expected: Vec<_> = (0..len).map(|i| i % 2 == 1).collect();
-        let frame = ic_wire::native::encode(&Bulk(expected.clone()), LIMITS).unwrap();
+        let frame = ic_wire::native::encode(&words::BoolValue(expected.clone()), LIMITS).unwrap();
         assert_eq!(
-            ic_wire::native::decode::<Bulk<bool>>(&frame, LIMITS)
+            ic_wire::native::decode::<words::BoolValue>(&frame, LIMITS)
                 .unwrap()
                 .0,
             expected
@@ -183,10 +182,6 @@ fn private_bulk_bool_rejects_every_invalid_bit_pattern() {
             for invalid in 2..=u8::MAX {
                 let mut malformed = frame.clone();
                 malformed[1 + position] = invalid;
-                assert_eq!(
-                    ic_wire::native::decode::<Bulk<bool>>(&malformed, LIMITS).unwrap_err(),
-                    ic_wire::Error::Malformed
-                );
                 assert_eq!(
                     ic_wire::native::decode::<words::BoolValue>(&malformed, LIMITS).unwrap_err(),
                     ic_wire::Error::Malformed
@@ -197,9 +192,8 @@ fn private_bulk_bool_rejects_every_invalid_bit_pattern() {
 }
 
 #[test]
-fn private_bulk_bool_preserves_list_bytes_at_length_boundaries() {
+fn public_bool_preserves_list_bytes_at_length_boundaries() {
     use super::*;
-    use words::Bulk;
     for len in [0, 1, 31, 32, 33, 127, 128, 255, 256, 16_383, 16_384] {
         for pattern in 0..3 {
             let values: Vec<_> = (0..len)
@@ -209,21 +203,15 @@ fn private_bulk_bool_preserves_list_bytes_at_length_boundaries() {
                     _ => index % 2 == 1,
                 })
                 .collect();
-            let bulk = Bulk(values.clone());
+            let bulk = words::BoolValue(values.clone());
             let bytes = ic_wire::native::encode(&values, LIMITS).unwrap();
             assert_eq!(ic_wire::native::encode(&bulk, LIMITS).unwrap(), bytes);
-            let public = words::BoolValue(values.clone());
-            assert_eq!(ic_wire::native::encode(&public, LIMITS).unwrap(), bytes);
-            assert_eq!(
-                ic_wire::native::decode::<words::BoolValue>(&bytes, LIMITS).unwrap(),
-                public
-            );
             assert_eq!(
                 ic_wire::native::encode_request(METHOD, &values, LIMITS).unwrap(),
                 ic_wire::native::encode_request(METHOD, &bulk, LIMITS).unwrap()
             );
             assert_eq!(
-                ic_wire::native::decode::<Bulk<bool>>(&bytes, LIMITS)
+                ic_wire::native::decode::<words::BoolValue>(&bytes, LIMITS)
                     .unwrap()
                     .0,
                 values
@@ -237,10 +225,6 @@ fn private_bulk_bool_preserves_list_bytes_at_length_boundaries() {
                 if cut == bytes.len() {
                     continue;
                 }
-                assert_eq!(
-                    ic_wire::native::decode::<Bulk<bool>>(&bytes[..cut], LIMITS).unwrap_err(),
-                    ic_wire::Error::Malformed
-                );
                 assert_eq!(
                     ic_wire::native::decode::<Vec<bool>>(&bytes[..cut], LIMITS).unwrap_err(),
                     ic_wire::Error::Malformed
@@ -257,10 +241,6 @@ fn private_bulk_bool_preserves_list_bytes_at_length_boundaries() {
                 ic_wire::Error::Trailing
             );
             assert_eq!(
-                ic_wire::native::decode::<Bulk<bool>>(&trailing, LIMITS).unwrap_err(),
-                ic_wire::Error::Trailing
-            );
-            assert_eq!(
                 ic_wire::native::decode::<Vec<bool>>(&trailing, LIMITS).unwrap_err(),
                 ic_wire::Error::Trailing
             );
@@ -274,10 +254,6 @@ fn private_bulk_bool_preserves_list_bytes_at_length_boundaries() {
             ic_wire::Error::Malformed
         );
         assert_eq!(
-            ic_wire::native::decode::<Bulk<bool>>(bytes, LIMITS).unwrap_err(),
-            ic_wire::Error::Malformed
-        );
-        assert_eq!(
             ic_wire::native::decode::<Vec<bool>>(bytes, LIMITS).unwrap_err(),
             ic_wire::Error::Malformed
         );
@@ -285,29 +261,14 @@ fn private_bulk_bool_preserves_list_bytes_at_length_boundaries() {
 }
 
 #[test]
-fn private_bulk_bool_adoption_changes_admission_despite_identical_bytes() {
+fn public_bool_adoption_changes_admission_despite_identical_bytes() {
     use super::*;
-    use words::Bulk;
     let values = vec![true; 128];
-    let bulk = Bulk(values.clone());
+    let bulk = words::BoolValue(values.clone());
     let bytes = ic_wire::native::encode(&values, LIMITS).unwrap();
     for encoding in [false, true] {
         for packed in [false, true] {
             let admit = |limits| {
-                if packed {
-                    let public = if encoding {
-                        ic_wire::native::encode(&words::BoolValue(values.clone()), limits)
-                            .map(|_| ())
-                    } else {
-                        ic_wire::native::decode::<words::BoolValue>(&bytes, limits).map(|_| ())
-                    };
-                    let research = if encoding {
-                        ic_wire::native::encode(&bulk, limits).map(|_| ())
-                    } else {
-                        ic_wire::native::decode::<Bulk<bool>>(&bytes, limits).map(|_| ())
-                    };
-                    assert_eq!(public, research, "public/research admission: {limits:?}");
-                }
                 if encoding {
                     if packed {
                         ic_wire::native::encode(&bulk, limits).map(|_| ())
@@ -315,12 +276,12 @@ fn private_bulk_bool_adoption_changes_admission_despite_identical_bytes() {
                         ic_wire::native::encode(&values, limits).map(|_| ())
                     }
                 } else if packed {
-                    ic_wire::native::decode::<Bulk<bool>>(&bytes, limits).map(|_| ())
+                    ic_wire::native::decode::<words::BoolValue>(&bytes, limits).map(|_| ())
                 } else {
                     ic_wire::native::decode::<Vec<bool>>(&bytes, limits).map(|_| ())
                 }
             };
-            // Bulk changes traversal, not values: one buffer charge replaces
+            // Byte admission changes traversal, not values: one buffer charge replaces
             // per-element visits. These are allowance units, not heap bytes.
             let root_units = size_of::<Vec<bool>>() * if encoding { 2 } else { 1 };
             // Serde's collect_seq passes each borrowed element as &bool, so

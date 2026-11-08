@@ -10,7 +10,7 @@ const requiredOperations = ['encode-fresh','decode-owned-or-labelled-borrowed','
 const operations = [...requiredOperations,'encode-reuse'];
 const matchedIdentityFields = ['compiler','workspace_manifest_sha256','build_environment','lock_sha256',
   'server_version','server_sha256','counter','samples','sample_caller','small_repetitions','large_repetitions',
-  'fixture_sha256','hotspots_fixture_sha256','bulk_fixture_sha256','packed_i16_fixture_sha256',
+  'fixture_sha256','hotspots_fixture_sha256','signed32_fixture_sha256','bulk_fixture_sha256','packed_i16_fixture_sha256',
   'toko_fixture_sha256','derive_fixture_sha256','byte_keys_fixture_sha256','cost_smoke_fixture_sha256','id16_fixture_sha256','shapes_fixture_sha256',
   'driver_sha256','wasm_driver_sha256','evidence_helper_sha256','operations_sha256'];
 const groupKey = r => [r.profile,r.case,r.codec].join('|');

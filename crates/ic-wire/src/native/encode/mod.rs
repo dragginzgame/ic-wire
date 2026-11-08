@@ -64,13 +64,28 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     forward_scalar! {
         serialize_bool: bool,
         serialize_i8: i8,
-        serialize_i32: i32,
         serialize_i128: i128,
         serialize_u8: u8,
         serialize_u128: u128,
         serialize_f32: f32,
         serialize_f64: f64,
         serialize_char: char,
+    }
+    // As with i16 below, write zigzag groups directly instead of constructing
+    // Postcard's temporary varint buffer. Only Postcard output/sizing serializers
+    // receive this prefix-free tuple. Original i32 admission and bytes remain
+    // unchanged (-64 -> 7f, 64 -> 80 01); consumers need no migration, schema
+    // regeneration or retry/hash change. Implementation bytes add no visits.
+    fn serialize_i32(self, value: i32) -> Result<Self::Ok, Self::Error> {
+        let mut value = ((value << 1) ^ (value >> 31)) as u32;
+        let len = ((32 - value.leading_zeros()).max(1) as usize).div_ceil(7);
+        let mut tuple = self.inner.serialize_tuple(len)?;
+        while value >= 128 {
+            ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
+            value >>= 7;
+        }
+        ser::SerializeTuple::serialize_element(&mut tuple, &(value as u8))?;
+        ser::SerializeTuple::end(tuple)
     }
     // The private adapter wraps Postcard output and sizing serializers.
     // Previously i16 used its temporary varint buffer;

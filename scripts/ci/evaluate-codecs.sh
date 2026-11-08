@@ -7,7 +7,7 @@ out="${1:-$root/target/evidence/codec-comparison}"
 case "$out" in /*) ;; *) out="$root/$out" ;; esac
 corpus="${CORPUS_FEATURE:-}"
 primary=""
-while IFS='|' read -r name features lane; do
+while IFS='|' read -r name features lane qualification; do
     if [ "$corpus" = "$features" ]; then primary="$lane"; break; fi
 done < scripts/ci/codec-cohorts.psv
 [ -n "$primary" ] || { echo "unknown corpus: $corpus" >&2; exit 1; }

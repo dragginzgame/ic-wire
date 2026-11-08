@@ -36,6 +36,20 @@ validates ID/cursor widths during decoding. Its DTO setup stays outside counters
 the Wire borrowed-input path explicitly includes copying. These two additional
 cohorts do not retroactively change the historical 36-cohort results above.
 
+The `signed32` cohort adds 49 cases without changing any existing case indices:
+17 zigzag boundary scalars plus ordinary lists with small, negative, wide and
+mixed values; `VecDeque`, `BTreeSet`, tuple/option/result combinations; and Packed
+controls at 0/1/128/4,096 values. Set names denote actual cardinality. Packed and
+ordinary wide lists retain identical logical inputs and Candid frames; their
+Wire layouts intentionally differ. Names and order have a frozen digest.
+Tests reject every truncated scalar prefix, overlong zero and overflowing
+varints, including the four-/five-byte transition beyond the timed scalar set.
+Deque tests hold logical input fixed across every physical split at 128 values,
+plus empty/singleton controls, and check exact encoder allowances and one-short
+allocation/node/depth refusal while preserving list bytes in both codecs.
+This is native Serde coverage, not new TypeScript schema or adapter support.
+The maintained roster now has 39 cohorts; the historical full matrix is unchanged.
+
 ## Maintained checks
 
 | Target | Evidence |
@@ -51,7 +65,7 @@ cohorts do not retroactively change the historical 36-cohort results above.
 | `check-endpoint` | Typed endpoint/native schema checks, compiler diagnostics, mixed-version consumers, lint, Wasm/MSRV and graph isolation |
 | `check-endpoint-ic` | Explicit installed endpoint/rollback and async qualification using a prepared PocketIC server |
 | `evaluate-endpoints` | Every exported fixture endpoint: repeated complete IC instructions, observed cycle debits, frame sizes and Wasm; explicitly prepared instrumented server |
-| `check-wasm`, `check-msrv` | Runtime compilation for Wasm and the Rust 1.99.1 floor |
+| `check-wasm` | Runtime compilation for Wasm under the Rust 1.99.1 floor/pin |
 
 The unpublished `ic-wire-qualification` package owns the maintained allocation,
 borrowing and buffer-reuse fixtures plus the IC Build compiler-diagnostic runner.
@@ -147,6 +161,9 @@ size in either profile, so they do not proceed to instruction/timing qualificati
 controls. It rejects growth in either raw Wasm metric and instruction increases
 above baseline × 1.05 + 64 per operation. The absolute margin is explicit for
 tiny inputs; this is a screening policy, not a universal performance promise.
+Opt-z drives adoption decisions; opt-3 checks secondary regressions. A measured,
+explicitly accepted instruction/size tradeoff may justify small Wasm growth;
+retain the automated failure and the decision rather than claiming no growth.
 It starts no server, never updates a baseline and does not replace native-time
 review or the complete comparison matrix. Ordinary CI runs its cheap corruption
 fixtures through `check-benchmark-cli`; measurements remain explicitly invoked.
@@ -196,3 +213,84 @@ historical 44-case experiment; its finite API/canonicalization claims are histor
 
 The [historical experiments](history/evaluation.md) preserve earlier measurements,
 source revisions and rejected designs. They are not supported runtime APIs.
+
+## Host schema rendering suppression (8 November 2026)
+
+Issue [53](https://github.com/dragginzgame/ic-wire/issues/53) is implemented using
+one runtime rendering flag in the existing metadata walker. Standalone schema
+validation, registry finish and bulk prevalidation visit the same nodes and
+checks but suppress type-string construction. Generation enables rendering.
+There is no second validator or per-type codec implementation. Bytes, schema
+identities, limits, acceptance and generated output remain unchanged; no consumer
+action or storage migration is required.
+
+Matched sources use Rust 1.99.1, the same lock and native target, separate Cargo
+targets, evaluation (opt-z) and benchmark-speed (opt-3) profiles. The maintained
+private `schema-cost` example uses stats_alloc for both lanes. Inputs are built
+outside measurement. Each profile has three before/after runs with 11 calibrated
+batches each; below are medians of 33 per-operation samples. Allocator accounting
+is enabled in timing runs, so these are instrumented native times, not IC costs.
+Baked source hashes distinguish paired artifacts; input and generated-output
+hashes and rejection results agree in every row.
+
+| Validation shape | opt-z before → after | Allocations before → after | opt-3 time change |
+| --- | --- | --- | --- |
+| One-field record | 531 → 318 ns | 10 → 3 | −52.2% |
+| 4,096-field record | 1,138,542 → 675,667 ns | 12,929 → 637 | −45.7% |
+| 128 fields, 32 nested options each | 666,319 → 293,642 ns | 4,506 → 22 | −75.7% |
+| Large registry with invalid unused definition | 1,160,866 → 689,655 ns | 12,926 → 635 | −44.8% |
+
+Generation allocations remain equal. At opt-z, small generation adds 85 ns
+(4.0%), large changes −0.3%, nested +0.2%, and invalid-unused +2.4%. At opt-3,
+generation changes −2.9%/−3.1%/+1.0%/+2.2% respectively. These host regressions
+are retained alongside the validation benefit. This code is host-only: no
+production Wasm or IC instruction saving is claimed. Macro compilation time
+and native executable size were not measured.
+
+Reproduce using `cargo run --locked -p ic-wire-qualification --example schema-cost
+--features schema-fixture --profile evaluation` on each frozen source, selecting
+a separate CARGO_TARGET_DIR. Repeat with benchmark-speed. Local raw results,
+compiler identity, source/lock hashes and summary: `target/schema-render-study/`.
+Native tests (75 passed, three opt-in probes ignored), expanded payload rejection
+cases, strict Clippy, Rust/TypeScript conformance, simulated big-endian checks
+and dependency boundaries pass. Allocation decreases reflect this host fixture,
+not application runtime savings.
+
+## Postcard derive dependency qualification (8 November 2026)
+
+Upstream already merged [Postcard PR 219](https://github.com/jamesmunns/postcard/pull/219)
+(commit 9d14e69d5aef2aac6d6beb83bbcf486eae53562e). It replaces the error enum's
+derived serialization with manual implementations and enables Serde derive only
+for tests. Current upstream 7fdd14028b51a5ff7480c48843999f6209eee735 contains it.
+The freshly fetched crates.io index still ends at 1.1.3, whose manifest enables
+Serde derive on the normal dependency. A duplicate upstream contribution is
+unnecessary; Wire adoption requires a published supplying release.
+
+A disposable standalone Wire codec consumer patches Postcard to the pinned
+upstream source for qualification only. A derive-control feature re-enables
+serde/derive, isolating that feature's build cost with the same sources, lock and
+compiler. This is not a complete published-1.1.3 versus upstream comparison.
+Rust 1.99.1 native default dev-profile builds use fresh targets, incremental
+compilation disabled, compiler wrappers unset, locked offline dependencies and
+prepared download/page caches. Three sequential alternating clean builds give:
+
+| Lane | Absolute build seconds | Median |
+| --- | --- | --- |
+| With derive control | 2.65, 2.53, 2.51 | 2.53 s |
+| Without derive control | 1.89, 1.85, 1.83 | 1.85 s |
+
+This fixture improves 26.9%. It removes serde_derive from the selected normal/build
+graph; syn, quote and proc-macro2 remain through cobs/thiserror. Consumers already
+selecting derive elsewhere should not expect this dependency-removal saving.
+No linked Wasm size, IC instruction or codec throughput improvement is claimed.
+The measurement is a native compilation study; opt-z/opt-3 runtime profiles are
+not its objective. Source archive and fixture/lock hashes, compiler identity,
+graphs and raw logs are under `target/postcard-derive-study/`.
+
+Primitive exact bytes and malformed input pass, as do both directions of all
+16 Postcard error variant byte indices (plus invalid index rejection), with and
+without the derive control. The existing standalone schema fixture passes its
+derive/metadata/byte test; codec-only and schema-enabled Wasm checks pass. This
+is focused Wire consumer qualification, not a full upstream feature/test matrix
+or a complete future release adoption. Production manifests/lock selections are
+unchanged by this study; no downstream patch is required.

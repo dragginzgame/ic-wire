@@ -1,5 +1,103 @@
 # Current handoff
 
+Delivery preparation selects Core 0.18.0 then Endpoint 0.9.0, with frozen
+source and full group gates. Endpoint’s inherited Core requirement advances
+with the Core minor cut. Public crate pairs publish supplier-first; private
+qualification packages remain excluded. Delivery is not yet complete.
+
+Cleanup issues 51–56 are investigated; see the
+[decisions](../development.md#cleanup-investigation-decisions-8-november-2026).
+One CI qualification gate replaces three identical scaffold jobs; 192 local
+state combinations and workflow lint pass. Issues 51, 52 and 54 remain declined.
+Issue 53 now suppresses discarded schema rendering in the shared walker; the
+[host study](../evaluation.md#host-schema-rendering-suppression-8-november-2026)
+measures 40–56% faster opt-z validation and large allocation reductions. Small
+generation adds 85 ns (4%); generated output and rejection results match. Native
+tests, Clippy, TypeScript/endian conformance and dependency checks pass.
+Issue 56 now tracks published-release adoption: upstream PR 219 already merged
+the derive removal. Pinned-upstream codec/schema host/Wasm and error-byte checks
+pass; isolating derive gives 2.53 → 1.85 s clean native build medians (26.9%).
+The registry index still ends at old 1.1.3; production selection is unchanged.
+See the [qualification](../evaluation.md#postcard-derive-dependency-qualification-8-november-2026).
+No new codec or Wasm saving is claimed.
+Hosted gate execution awaits delivery.
+
+Shared 0.31.12 / eb3c8e0 updates cloc progress and terminal presentation;
+codec and runtime behavior are unchanged.
+
+The preceding Shared **0.31.11 / 6c529e6** adoption was exported from the pinned
+upstream commit, excluding sibling working changes. CI restores authenticated
+tool downloads before setup and saves them before product checks. One Gitleaks
+scan remains outside the host/group matrix. Crate/module cloc selectors and the
+updated ordinary-issue closure policy are adopted. This tooling-only update
+does not select an additional public release or alter codec/runtime behavior.
+Snapshot verification (146 files), 995 documentation references, actionlint,
+crate/module cloc selection and disposable Make validation routing pass. Hosted
+cache restore/save remains unexecuted locally. Evidence: `target/shared03111/`.
+
+## Pending Core 0.18.0: rooted lint hard cut and i32 writer
+
+Core 0.18 requires `lint_bulk_roots` and rooted acknowledgement paths. Serde
+derive selection is explicit. Codec bytes, identities, runtime budgets and
+acceptance remain unchanged; no stored-data migration.
+Historical conformance timings, Endpoint extraction comparisons and the private
+Boolean prototype are retired. Benchmark integrity fixes use captured source
+and distinct query callers; Endpoint reports reject duplicate callers and unsafe
+counters. Postcard still selects Serde derive transitively: direct feature
+ownership cleanup does not yet save that compilation.
+
+Focused checks pass: 97 Core tests (three timing probes ignored), 16 corpus tests,
+three contract tests, 19 report corruption cases, Clippy, standalone host/Wasm
+consumers, released Endpoint coherence and Rust/TS conformance (178 vectors,
+39,448 mutations). Caller-storage orchestration
+was checked with 23 substituted Cargo invocations; no new PocketIC cost study
+or production Wasm saving is claimed. Evidence: `target/architectural-core/`,
+`target/architectural-qualification/` and `target/architectural-compatible.log`.
+Fingerprint cleanup removes 69 host-only lines; 22 mappings and 30 verifier cases pass.
+The cohort roster now owns qualification subsets: dry dispatch preserves exactly
+26 test/26 Clippy/20 Wasm calls and all 39 measurement rows. No matrix rerun.
+Current lock selects Testkit 0.93.2; focused checks are not supplier qualification.
+Removed `check-msrv`; dry dispatch retains host/Wasm checks and compiler admission.
+Endpoint qualification now shares its scenario catalogue and result checker in
+one private integration target. Installed checks also execute the unchanged cost
+catalogue; explicit transaction-history proofs and independent trace validation
+remain. This removes 71 net Rust lines from the two prior test roots, including
+the new shared modules. Installed PocketIC 16.1.0, Wasm build, strict Clippy,
+exact runner discovery and report-corruption checks pass;
+no profiler cost rerun or production Wasm saving is claimed. Bytes, identities,
+limits and acceptance are unchanged. Evidence: `target/endpoint-consolidation/`.
+No full CI/delivery; package versions remain unchanged.
+
+Adopt the [raw-tuple i32 writer](../evidence/encoder-followup.md#raw-tuple-i32-follow-up-8-november-2026).
+The maintainer accepted opt-z as the primary decision profile and opt-3 as a
+secondary regression check. At opt-z, 4,096-element small/wide-list/deque/set
+encode instructions drop 46%/28%/37%/30%, at a cost of 150/90 total Wasm bytes
+in focused/standard fixtures. Opt-3 saves 1,143/420 Wasm bytes; wide-list encode
+adds 3.52%, while small-list/deque/set improve 54%/34%/30%. All 482 matched
+operation pairs meet the instruction margin; the automated no-growth screen
+still fails and is explicitly accepted, not reported as a pass. Allocation/heap
+and Candid controls stay identical. These are fixture results, not application
+savings or a fresh full matrix.
+
+Bytes, schemas, identities, limits and acceptance remain unchanged: i32 -64
+remains `7f`, 64 remains `80 01`. No consumer migration, client regeneration or
+retry/hash change. This affects Core production; Endpoint needs no release.
+Native tests, slice-output coverage, both standard/signed32 corpus tests and
+Core/corpus Clippy pass. Fresh production signed32/standard Wasm matches all
+four measured candidate modules byte-for-byte. The private roster
+now has 39 cohorts, adding 49 [baseline cases](../candid-comparison.md#signed32-follow-up-8-november-core-01714).
+Deque tests cover all 128-element storage splits and exact/one-short limits;
+scalar prefix tests cover the four-/five-byte transition. Evidence: `target/evidence/signed32-20261108/`.
+
+The subsequent [unsigned writer study](../evidence/encoder-followup.md#unsigned-writer-sharing-8-november-2026)
+rejects a combined u32/i32 + u64/i64 rewrite. It saves 301 standard / 613
+Toko-shaped opt-z Wasm bytes, but slows wide i32 by 5.56% at opt-z and wide u64
+by 49.9% at opt-3. Twenty-four of 860 operation pairs fail the instruction screen;
+frames, Candid controls and allocation/heap measurements match. No additional
+production change. Evidence: `target/evidence/integer-writers-20261108/`.
+An independent lock edit selects Build 0.79.1 / Host 0.75.1; it is preserved.
+This study uses the previous frozen lock and does not qualify that supplier update.
+
 ## Delivered: Core 0.17.14
 
 Core/derive **0.17.14** is on origin/main and crates.io. Tag **core-v0.17.14**
@@ -55,26 +153,22 @@ Adoption evidence remains under `target/adoption-20261108/`.
 
 ## Prior qualification and contract boundaries
 
-Core **0.17.13**, tag **core-v0.17.13** at **c719ece**, retains its
-[receipt](../../releases/receipts/published-core01713/delivery.json) and
-`target/core01713-delivery/` evidence. Its public ID field deliberately changes
-ordinary `01 + 16 bytes` to packed `10 + 16 bytes`; eight IDs change
+Core **0.17.13** retains its [receipt](../../releases/receipts/published-core01713/delivery.json).
+Its public ID field changes ordinary `01 + 16 bytes` to packed `10 + 16 bytes`; eight IDs change
 `08 + 128 bytes` to `80 01 + 128 bytes`. New field adoption requires coordinated
 identities/clients, original retained retry/hash bytes and reviewed budgets.
 The [flat-Candid study](../evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november)
 corrected the earlier nested-vector comparison; retain its ordinary controls and
 borrowed-input copy costs. The latest copy optimization addresses its two large-ID
-opt-z losses. Original evidence: `target/evidence/id16-flat-20261108/` and
-`target/id16-work/`. Actual native big-endian execution remains unqualified.
+opt-z losses. Original evidence: `target/evidence/id16-flat-20261108/`, `target/id16-work/`.
+Actual native big-endian execution remains unqualified.
 
-Rejected bool outlining/chunk scans grew Wasm. Outer-list visitor sharing saved
-only 0/18 standard-corpus bytes at opt-z/3 with effectively unchanged instructions.
-See [primitive bulk](../evidence/primitive-bulk.md) and
-[bound sharing](../evidence/bound-sharing.md); do not repeat those candidates.
+Rejected experiments remain in [primitive bulk](../evidence/primitive-bulk.md)
+and [bound sharing](../evidence/bound-sharing.md); do not repeat those candidates.
 The earlier 7 November raw targets were found removed; summaries do not prove
 those artifacts remain available. The [full comparison](../candid-comparison.md)
 is still the 36-cohort Core 0.17.6/Testkit 0.89.4 study: 2,105 cases and 8,420
-primary comparisons. The maintained roster has 38 cohorts; no fresh full run.
+primary comparisons. The maintained roster has 39 cohorts; no fresh full run.
 
 Keep one Serde/Postcard codec and no silent field rewrites. Collection/custom
 Serde normalization remains consumer-owned, so preserve original retry/hash bytes.

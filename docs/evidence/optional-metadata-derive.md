@@ -83,7 +83,11 @@ and build targets are excluded. Compression is storage only. Extract and run:
 python3 verify.py /absolute/extracted-directory
 ```
 
-For a fresh rebuild, place the extracted `before`/`after` sources in a new study
+The following reproduction uses the historical sources: `endpoint-cost` and its
+metadata comparison have been retired from the current workspace. Current
+endpoint measurements use `make evaluate-endpoints`.
+
+For a rebuild of that historical study, place the extracted `before`/`after` sources in a new study
 directory and use `../endpoint-macro-owner/wasm-pair.sh STUDY` with an empty
 `STUDY/wasm` and separate source target directories. Rebuild each default library
 with `cargo build --locked --offline -p ic-wire --message-format=json`. For IC

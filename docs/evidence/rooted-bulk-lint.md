@@ -19,8 +19,9 @@ path stop expansion, while sibling uses are inspected independently. A 64-level,
 65,536-visit bound prevents exponential DAG expansion; exhaustion returns a typed
 Complexity error, without a partial report. Metadata validation remains separate.
 
-The existing `lint_bulk_fields` API retains its documented definition-once
-semantics and paths. Both APIs use one structural walker and candidate detector.
+At the time of this study, `lint_bulk_fields` retained definition-once semantics
+and paths. That API has since been removed; `lint_bulk_roots` is the sole
+standalone review API. Consumers review each new use-site acknowledgement.
 No runtime bytes, encoding, admission budgets or generated client types change.
 Rooted consumers must review new paths rather than copy a shared-definition
 acknowledgement across every field. Publication and IcyDB adoption are pending.

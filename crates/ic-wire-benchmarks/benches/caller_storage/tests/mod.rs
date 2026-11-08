@@ -100,6 +100,7 @@ async fn ic_measurement() {
         .unwrap();
     let pic = owned.instance();
     let mut rows = Vec::new();
+    let mut sample_caller = 0_u64;
     for profile in ["evaluation", "benchmark-speed"] {
         for lane in ["before-vec", "after-vec", "after-slice", "after-scoped"] {
             let canister = pic.create_canister().await.unwrap();
@@ -115,11 +116,15 @@ async fn ic_measurement() {
             for (case, label) in CASES.iter().enumerate() {
                 let mut samples = Vec::new();
                 let mut length = 0;
+                let mut sample_caller_ids = Vec::new();
                 for _ in 0..3 {
+                    // Distinct callers prevent identical queries hitting the query cache.
+                    sample_caller += 1;
+                    sample_caller_ids.push(sample_caller);
                     let reply = pic
                         .query_call(
                             canister,
-                            Principal::anonymous(),
+                            Principal::from_slice(&sample_caller.to_le_bytes()),
                             "benchmark",
                             vec![case as u8],
                         )
@@ -129,7 +134,7 @@ async fn ic_measurement() {
                     samples.push(u64::from_le_bytes(reply[..8].try_into().unwrap()));
                     length = u64::from_le_bytes(reply[8..].try_into().unwrap());
                 }
-                rows.push(json!({"profile":profile,"lane":lane,"case":label,"bytes":length,"ic_instructions":samples}));
+                rows.push(json!({"profile":profile,"lane":lane,"case":label,"bytes":length,"ic_instructions":samples,"sample_caller_ids":sample_caller_ids}));
             }
             pic.stop_canister(canister, None).await.unwrap();
             pic.delete_canister(canister, None).await.unwrap();

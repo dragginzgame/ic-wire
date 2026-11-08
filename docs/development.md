@@ -76,14 +76,14 @@ preserves unrelated edits. It never installs tools implicitly.
 Check for active builds sharing `target/` before compilation or source edits.
 Rust 1.99.1 is both the minimum supported and pinned development/release compiler.
 `make check-rust-policy` reads the workspace floor, verifies the pin and records
-actual Cargo/rustc identities. `make check-msrv` runs the existing host/Wasm core
-checks as an explicit convenience; CI does not repeat them under another compiler.
+actual Cargo/rustc identities. `make check` and `make check-wasm` qualify the
+host and Wasm targets under that same compiler. There is no separate MSRV lane.
 
 | Target | Scope |
 | --- | --- |
 | `build`, `check`, `test` | Locked runtime builds and behavior |
 | `lint` | Public-package strict Clippy with schema features; `RELEASE_GROUP=core` or `endpoint` narrows packages, full release plans explicitly lint both groups |
-| `check-wasm`, `check-msrv` | Runtime Wasm and minimum-toolchain checks |
+| `check-wasm` | Runtime compilation for Wasm under the pinned compiler |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
 | `check-qualification` | Allocation/borrowing, frozen bytes/admission and contract-diff tests |
 | `check-compatible-consumers` | Published/current Core, derive and Endpoint combinations; standalone Rust 1.99.1 host/Wasm checks; included in `check-endpoint` |
@@ -282,8 +282,8 @@ make check-typescript
 
 `check-typescript` is included in `make ci` and release validation. Generation
 retains stderr in `target/typescript-conformance/generation.log` and
-replays normal diagnostics. A synthetic benchmark-warning flood fails before
-replay. Benchmark timings still compute bulk advice but exclude its output.
+replays normal bounded diagnostics. Historical handwritten-versus-derived timing
+experiments are no longer part of conformance.
 Local release operators select the pinned Node/npm environment; captured release
 setup installs the locked package inside its own checkout. Recovery uses
 `bash scripts/ci/prepare-browser-tools.sh check` without installation or network
@@ -293,7 +293,11 @@ the single public `lint` stage owns strict schema Clippy. It also runs a disposa
 consumer that forwards a local schema feature: native metadata and exact runtime
 frames must work, while Wasm builds with and without forwarding exclude Wire's
 optional `serde_json` metadata dependency from the normal graph. The consumer
-uses `ic_wire::ByteBuf` without a direct serde_bytes dependency, and the check
+uses `ic_wire::ByteBuf` without a direct serde_bytes dependency. A separate
+primitive-only host/Wasm consumer excludes Wire metadata derive and checks that
+Wire directly selects only Serde alloc. Postcard currently selects Serde derive
+transitively, so this does not remove that compiler dependency. Consumers needing
+Serde derives explicitly select them. The check
 requires serde_bytes with only its `alloc` feature in the Wasm runtime graph.
 The forwarded Wasm build is checked on Rust 1.99.1 too. Run only this boundary check
 with `bash scripts/ci/check-schema-targets.sh`; evidence remains under
@@ -390,9 +394,8 @@ The default codec graph has no Platform or simulator dependencies. The independe
 support; its standalone consumer check also qualifies the combined endpoint graph.
 The unpublished benchmark and endpoint fixture packages use Testkit's async
 PocketIC client and lifecycle for qualification; Platform supplies external
-Candid/protocol controls. Endpoint cost comparisons use
-`bash scripts/ci/evaluate-endpoint.sh NEW_OUTPUT_DIRECTORY` with an explicitly
-prepared `POCKET_IC_BIN`; see [scope and results](evidence/endpoints.md).
+Candid/protocol controls. The historical inline/extracted Endpoint comparison
+has been retired; its [results](evidence/endpoints.md) remain historical.
 
 For the complete exported-endpoint matrix, run
 `POCKET_IC_BIN=/path/to/instrumented/pocket-ic-server make evaluate-endpoints EVIDENCE_DIR=/absolute/new/path`.
@@ -402,8 +405,8 @@ observed cycle debits, frame sizes and whole-artifact Wasm sizes. Query cycle
 debits may be zero; instruction costs are measured independently. Async calls
 include self-call, reply callback and cleanup executions. See the
 [matrix evidence and limitations](evidence/endpoint-matrix.md).
-This explicit benchmark is separate from ordinary compile checks and the older
-inline/extracted-hook comparison. It requires the profiler-enabled server in
+This explicit benchmark is separate from ordinary compile checks and installed
+standard-server correctness tests. It requires the profiler-enabled server in
 the evidence receipt; a standard PocketIC server lacks the trace API.
 
 ## Snapshot maintenance and release boundary
@@ -603,7 +606,10 @@ See [methodology and results](candid-comparison.md) before interpreting ratios.
 The optional `CORPUS_FEATURE` selects `hotspots` (ordinary integer/byte lists
 with empty, singleton and byte-buffer controls), `toko`, `derive-scale-1`,
 `derive-scale-10`, `derive-scale` (100 distinct types), or `contract-shapes`.
-The [cohort roster](../scripts/ci/codec-cohorts.psv) owns the full selection list.
+The [cohort roster](../scripts/ci/codec-cohorts.psv) owns the full selection list:
+`name|features|primary-codec|qualification`. The last column selects `host`
+(test/Clippy) and/or `wasm` compile qualification; an empty column selects neither.
+All rows still participate in the explicitly requested measurement matrix.
 Omit it for the standard corpus. Each selection uses the same runner and separate
 codec artifacts:
 
@@ -622,6 +628,8 @@ CORPUS_FEATURE=cost-smoke POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/evidence/cost-smoke-comparison
 CORPUS_FEATURE=contract-shapes POCKET_IC_BIN=/path/to/pocket-ic \
   bash scripts/ci/evaluate-codecs.sh target/evidence/contract-shapes-comparison
+CORPUS_FEATURE=signed32 POCKET_IC_BIN=/path/to/pocket-ic \
+  bash scripts/ci/evaluate-codecs.sh target/evidence/signed32-comparison
 ```
 
 `make check-consumer-benchmarks` qualifies these fixtures without timings;
@@ -658,10 +666,18 @@ Old reports lacking the current producer metadata require a fresh matched pair.
 This includes the shared fixture-inventory and operation-layout source hashes;
 producer consolidation does not relax the independent verifier.
 
-The policy permits no growth in total or code-section bytes; each Wire operation
+The automated screen permits no growth in total or code-section bytes; each Wire operation
 must cost at most baseline × 1.05 + 64 IC instructions. Candid artifacts/counters
 must remain unchanged. Native timing, allocation and heap findings still need
 separate review; the gate does not infer cycles or application code-limit headroom.
+Opt-z is the primary decision profile for our deployments; opt-3 remains a
+secondary regression check. Adoption does not require winning both profiles.
+Small measured uncompressed Wasm growth may be accepted for substantial
+instruction savings with an explicitly recorded tradeoff. Keep the screen's
+failure visible rather than relaxing thresholds or reporting it as a pass;
+evidence-integrity requirements still apply. The approved i32 writer's
+[study](evidence/encoder-followup.md#raw-tuple-i32-follow-up-8-november-2026)
+records one such decision.
 Unknown codec/operation labels and Candid cases without Wire counterparts are
 rejected; optional Wire buffer-reuse rows need no Candid reuse measurement.
 It accepts no compressed artifact as a raw Wasm measurement. It never rebuilds,
@@ -700,3 +716,21 @@ metadata derive has no endpoint feature. The maintained
 `evaluate-endpoint-generation.sh BEFORE_SOURCE NEW_OUTPUT` probe compares exact
 expansion tokens and eleven alternating-lane host samples against a saved
 expander source, building the current Endpoint macro owner.
+
+## Cleanup investigation decisions (8 November 2026)
+
+The architectural follow-ups distinguish source simplification from potential
+host/runtime optimizations. No codec-byte, schema, identity, budget or acceptance
+change is adopted by these investigations.
+
+| Issue | Decision and evidence |
+| --- | --- |
+| [51](https://github.com/dragginzgame/ic-wire/issues/51) | Retain admission APIs. Contract guards know the identity and call the shared full-header preflight; manual composition can admit size before it obtains an argument buffer. Both paths share the length check, and standalone decode must validate its own inputs. Unifying the signatures would broaden the manual API and add header-copy work rather than remove a duplicate implementation. |
+| [52](https://github.com/dragginzgame/ic-wire/issues/52) | Retain bounded packed-i16 metadata. Rust already shares the word writer and bounds-erased decoder; TypeScript already shares packed read/write branches. A unified grammar would introduce optional element limits, word-width/overflow rules and client regeneration to replace a small explicit bounded form. No demonstrated net reduction justifies that cut. |
+| [53](https://github.com/dragginzgame/ic-wire/issues/53) | Implemented: one shared walker suppresses rendering in validation paths. Matched opt-z validation improves 40–56%, with 95–99.5% fewer allocations in large/nested controls. Small generation adds 85 ns (4%); output/rejections match. See the host study in docs/evaluation.md. |
+| [54](https://github.com/dragginzgame/ic-wire/issues/54) | Retain benchmark constructor boundaries. Generic lane/case helpers already share codec setup. Bulk paired constructors deliberately use different Wire and Candid DTOs; packed-i16 preserves ordinary-vector controls; scale macros instantiate nominally distinct types to measure growth; Toko DTOs preserve their field/layout semantics. Collapsing these into one constructor would require more feature/generic configuration and could change measured monomorphization. No fixture rewrite or new matrix saving is claimed. |
+| [55](https://github.com/dragginzgame/ic-wire/issues/55) | Replace three identical scaffold jobs with one qualification gate. GitHub reported no main branch protection and no rulesets at investigation time. All nine native OS/suite jobs and docs-only routing remain; 192 combinations of classifier, scope and aggregate job states pass the local truth-table check. Workflow lint passes. Final hosted execution awaits delivery. |
+| [56](https://github.com/dragginzgame/ic-wire/issues/56) | Upstream PR 219 already merged the fix. Qualified pinned upstream with codec/schema host/Wasm consumers and all error variant bytes. Isolating the derive feature gives 2.53 → 1.85 s clean native build medians (26.9%); macro dependencies remain via thiserror. The registry still supplies old 1.1.3, so track published-release adoption rather than submit a duplicate fix. See docs/evaluation.md. |
+
+Focused evidence lives in `target/cleanup-issues/`; it is regenerable and is not
+a publication or full CI receipt. Issues 51, 52 and 54 remain declined; 55 is locally implemented. Issue 53 is now locally implemented and qualified; issue 56 now tracks adoption of a published supplying Postcard release.

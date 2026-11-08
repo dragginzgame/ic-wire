@@ -5,6 +5,41 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 mkdir -p "$root/target/schema-targets"
 fixture="$(mktemp -d "$root/target/schema-targets/consumer.XXXXXX")"
 printf 'Schema forwarding fixture: %s\n' "$fixture"
+# A primitive-only consumer must not acquire Wire metadata derive. Postcard
+# currently selects serde/derive itself; Wire must not duplicate that selection.
+mkdir "$fixture/codec-only"
+cat > "$fixture/codec-only/Cargo.toml" <<EOF_CODEC
+[workspace]
+[package]
+name = "wire-codec-only"
+version = "0.0.0"
+edition = "2024"
+[lib]
+path = "lib.rs"
+[dependencies]
+ic-wire = { path = "$root/crates/ic-wire" }
+EOF_CODEC
+cp "$root/crates/ic-wire-qualification/tests/fixtures/codec_only/mod.rs" "$fixture/codec-only/lib.rs"
+cp "$root/Cargo.lock" "$fixture/codec-only/Cargo.lock"
+export CARGO_TARGET_DIR="$root/target/schema-targets/build"
+cargo metadata --offline --format-version 1 --manifest-path "$fixture/codec-only/Cargo.toml" > "$fixture/codec-only/metadata.json"
+node --input-type=module - "$fixture/codec-only/metadata.json" <<'EOF_FEATURES'
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const wire = JSON.parse(readFileSync(process.argv[2], 'utf8')).packages.find(p => p.name === 'ic-wire');
+const serde = wire.dependencies.find(d => d.name === 'serde' && d.kind === null);
+assert.equal(serde.uses_default_features, false);
+assert.deepEqual(serde.features, ['alloc']);
+EOF_FEATURES
+for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+    cargo check --locked --offline --manifest-path "$fixture/codec-only/Cargo.toml" --target "$target"
+    cargo tree --locked --offline --manifest-path "$fixture/codec-only/Cargo.toml" \
+        --target "$target" --edges normal,build --prefix none > "$fixture/codec-only/$target.txt"
+    if rg '^ic-wire-derive v' "$fixture/codec-only/$target.txt"; then
+        echo 'Primitive codec-only consumer selected Wire metadata derive' >&2
+        exit 1
+    fi
+done
 cp "$root/crates/ic-wire-qualification/tests/fixtures/schema_targets/mod.rs" "$fixture/lib.rs"
 # Start with the selected workspace versions; resolution may only update this
 # disposable consumer lock. Every build/check after resolution is locked/offline.
