@@ -39,8 +39,6 @@ metadata() {
     fi
     if [[ "$1" == check ]]; then
         bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
-    elif [[ "$1" == prepare ]]; then
-        bash scripts/ci/prepare-wire-metadata.sh
     else
         bash scripts/ci/cargo-release-metadata.sh "$1" "$primary"
     fi

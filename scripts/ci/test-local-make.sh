@@ -27,7 +27,6 @@ mkdir "$fixture/repo" "$fixture/bin"
 paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .toko-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
 paths+=(ci/release-validation.json scripts/ci/wire-validation-roster.pl scripts/ci/wire-release-validation.mjs scripts/ci/check-release-validation.mjs scripts/ci/rust-policy.sh scripts/ci/ic-wire-release.sh scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 paths+=(scripts/ci/check-lint.sh scripts/ci/prepare-browser-tools.sh)
-paths+=(scripts/ci/prepare-wire-metadata.sh)
 paths+=(scripts/ci/check-testkit-boundary.mjs scripts/ci/check-testkit-boundary.test.mjs)
 paths+=(scripts/ci/check-compatible-consumers.sh)
 paths+=(scripts/benchmarks/generator/mod.rs scripts/dev/inspect-wire.mjs)

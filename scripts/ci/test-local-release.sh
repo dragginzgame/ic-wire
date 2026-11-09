@@ -149,20 +149,24 @@ if [[ "$metadata_only" == true ]]; then
     # A saved receipt commit must not redirect live preparation into its archive.
     RELEASE_COMMIT="$(git rev-parse HEAD)"
     export RELEASE_COMMIT
-    # A broken integration resolution must restore both product and private locks
-    # after candidate installation. Only the deliberately broken input remains.
+    # Broken integration resolution must leave both product and private locks
+    # unchanged. Only the deliberately broken input may remain.
     perl -0pi -e 's/ic-testkit = \{ version = "[^"]+"/ic-testkit = { version = "=0.0.0"/' qualification/Cargo.toml
-    if bash scripts/ci/prepare-wire-metadata.sh > "$fixture/metadata-refused.log" 2>&1; then exit 1; fi
+    if bash scripts/ci/cargo-release-group.sh prepare "$RELEASE_GROUP" > "$fixture/metadata-refused.log" 2>&1; then exit 1; fi
     [[ "$(git diff --name-only)" == qualification/Cargo.toml ]]
     git restore qualification/Cargo.toml
-    bash scripts/ci/prepare-wire-metadata.sh > "$fixture/metadata-prepared.log" 2>&1
+    bash scripts/ci/cargo-release-group.sh prepare "$RELEASE_GROUP" > "$fixture/metadata-prepared.log" 2>&1
     cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --format-version 1 > "$fixture/qualification-prepared.json"
     [[ "$(yq -p toml -o json '.' qualification/Cargo.toml | jq -r .workspace.package.version)" == "$private_version" ]]
     git diff --name-only | LC_ALL=C sort > "$fixture/metadata-actual"
     bash scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP" | jq -r '.files[]' | LC_ALL=C sort > "$fixture/metadata-expected"
-    cmp "$fixture/metadata-actual" "$fixture/metadata-expected"
+    # Path-only qualification aliases leave the manifest byte-identical.
+    # It is still owned by the transaction and must be present in its file plan.
+    grep -Fx qualification/Cargo.toml "$fixture/metadata-expected" >/dev/null
+    grep -Fxv qualification/Cargo.toml "$fixture/metadata-expected" > "$fixture/metadata-changed"
+    cmp "$fixture/metadata-actual" "$fixture/metadata-changed"
     complete=true
-    echo "Private lock metadata passed for $RELEASE_GROUP: pins, exact paths, unchanged private version, locked resolution and rollback."
+    echo "Private lock metadata passed for $RELEASE_GROUP: pins, exact paths, unchanged private version, locked resolution and failed-input preservation."
     exit 0
 fi
 git init -q --bare "$fixture/remote.git"

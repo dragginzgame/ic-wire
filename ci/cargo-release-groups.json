@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "shared_metadata_files": ["qualification/Cargo.lock"],
+  "qualification_workspace": "qualification",
   "groups": [
     {
       "name": "core",

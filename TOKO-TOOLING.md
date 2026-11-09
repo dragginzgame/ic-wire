@@ -53,8 +53,14 @@ local overlays must not duplicate it or add routine permission gates.
   Use branches there when needed; coordinate or wait when another session owns
   the inputs. Separate checkouts are explicit exceptions, not the default for
   isolation, PRs or deployment.
-  Ordinary fixes include focused checks and pending notes, not staging, commits
-  or delivery. Toko Tooling alone also prepares its pending `VERSION`.
+  Ordinary fixes include focused checks and pending notes, not staging file
+  contents, commits or delivery. They do authorize `git add -N -- <explicit-paths>`
+  for newly created, task-owned files when an applicable validation check requires
+  Git to know those paths (for example, a new qualification lockfile). This is
+  intent-to-add bookkeeping, not content staging: inspect the index, preserve
+  existing staged work, explain the reason and proceed without asking again.
+  This narrow permission supersedes older linked wording that reserves every
+  index change. Toko Tooling alone also prepares its pending `VERSION`.
 - A PR request includes its topic branch, scoped commits, branch push and PR.
   Release/ship/deploy requests include their necessary delivery steps and direct
   integration-branch pushes. An unqualified “deploy”, “ship” or “release” applies

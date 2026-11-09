@@ -1,6 +1,6 @@
 # IC Wire contributor instructions
 
-Apply the reviewed [Toko Tooling 0.38.0 policy](https://github.com/dragginzgame/toko-tooling/blob/b171c182dbab832c74c97e978f70a6a0e3b8fb7c/TOKO-TOOLING.md)
+Apply the reviewed [Toko Tooling 0.38.2 policy](https://github.com/dragginzgame/toko-tooling/blob/9446ca1d18fe027f5fb89d989e0609f137184198/TOKO-TOOLING.md)
 and its revision-bound references. The installed [baseline](TOKO-TOOLING.md) and
 [manifest](.toko-tooling.snapshot) own executable snapshot provenance; refresh
 through the Cargo-selected registry installer, never by editing payloads or following a moving sibling.

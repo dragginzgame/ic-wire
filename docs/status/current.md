@@ -1,9 +1,27 @@
 # Current handoff
 
-Core 0.18.0 and Endpoint 0.9.0 were delivered at df071a4. Pending local work is
-explicit finite field adapters plus the supplier/tooling adoptions below. Delivery is now authorized for both groups. Core 0.19.0 and Endpoint 0.10.0
-notes are pending because canonical Types Rust identities change. Package version
-preparation and registry delivery have not occurred.
+Core 0.19.0 (7132e08) and Endpoint 0.10.0 (01c9890) were delivered to
+origin/main and crates.io on 2026-11-09. Both full 20-stage release gates passed;
+batch-Hq3YAiQU is complete and reconciled. The sections below retain the
+pre-release qualification history, not outstanding delivery work.
+
+## Toko Tooling 0.38.2 maintenance delivery
+
+Both workspace pins and locks select published 0.38.2. Its authenticated
+snapshot supplies qualification-aware release preparation; the group policy now
+selects `qualification_workspace`, and the redundant Wire metadata renderer
+is deleted. Shared owns both manifests and locks atomically; private versions
+and unrelated supplier selections remain fixed. Locked fetch, snapshot/tool/pin admission, formatting, documentation, both
+groups’ metadata preparation and failed-input preservation, Make routing,
+20/11-stage selection and captured two-group recovery all passed. Evidence:
+`/tmp/wire382-*.log`. No codec bytes, identities, budgets or acceptance change.
+Delivery decision: repository maintenance only. Compared all four freshly
+packaged all-feature archives against the published 0.19.0/0.10.0 archives.
+Source, README, LICENSE, original manifests and production requirements are
+unchanged. Normalized dev-only Toko pins, packaged lock selections (including
+local archive checksums) and Git provenance differ. Evidence and extracted
+archives: `target/evidence/tooling0382-delivery/`. Push this adoption without
+version bumps, tags or registry publication; the 0.19.1 note stays pending.
 
 ## Toko Tooling 0.38 adoption
 

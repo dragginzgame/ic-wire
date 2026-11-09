@@ -461,10 +461,10 @@ coordinated release, the Endpoint manifest selects its new published series.
 
 ### Decide whether a public release is needed
 
-Group membership in `ci/cargo-release-groups.json` assigns qualification and
-coordinated version ownership; it is not a publication trigger. In particular,
-Core owns the private benchmark/qualification packages without requiring a Core
-release for every change to them. `release-patch` is an explicit request to
+Group membership in `ci/cargo-release-groups.json` assigns coordinated public
+version ownership; it is not a publication trigger. Private benchmark and
+qualification packages live in their independent workspace, outside both
+product release groups. `release-patch` is an explicit request to
 release the selected group, not a command for landing ordinary maintenance.
 
 Before selecting groups for delivery, compare the complete pending batch with
@@ -778,7 +778,7 @@ Declare the same exact published tooling release once per workspace root
 
 ```toml
 [workspace.dependencies]
-toko-tooling = "=0.38.0"
+toko-tooling = "=0.38.2"
 ```
 
 Every real workspace package inherits `toko-tooling.workspace = true` in its
@@ -806,3 +806,9 @@ checkout; initial migrations use the published producer installer described in
 Custom CI, publication and recovery targets, and the local release adapter,
 check tooling admission before effects. Product release-group selection, frozen
 gates, publication exclusions and delivery authority remain unchanged.
+
+Release metadata selects `qualification_workspace` in
+`ci/cargo-release-groups.json`. Toko Tooling owns the product and qualification
+manifests/locks in one transaction; Wire has no custom metadata renderer.
+Use `bash scripts/ci/test-local-release.sh core --metadata` and the corresponding
+`endpoint --metadata` command to qualify both local callers and failed-input preservation.

@@ -1081,14 +1081,10 @@ The [product/qualification standard](../rules/rust-workspaces.md#qualification-a
 requires affected product references and qualification locks to be prepared,
 validated and installed atomically with release metadata, without advancing
 qualification-package versions or unrelated suppliers. Shared qualification
-metadata is not a group-membership declaration. Reusable multi-lock rendering,
-admission and rollback belong in Toko Tooling; consumers retain product-specific
-semantic checks and the mapping of groups to qualification commands. The current
-additional-file mechanism above is not itself generic multi-lock rendering.
-Do not infer implemented support from this policy or copy a renderer into every
-consumer. The review in [#369](https://github.com/dragginzgame/toko-tooling/issues/369)
-owns the remaining mechanics assessment and proof; preserve qualified existing
-adapters until a reviewed shared replacement is available.
+metadata is not a group-membership declaration. Use the shared
+[qualification release preparation](#qualification-release-preparation) below;
+consumers retain product-specific semantic checks and the mapping of groups to
+qualification commands. Additional-file declarations alone do not render locks.
 
 `dependencies` explicitly lists root `workspace.dependencies` aliases with both
 path and version that refer to members of that group, including renamed aliases
@@ -1192,6 +1188,62 @@ with the existing publication adapter; it admits each package's own version and
 leaves Cargo's dependency ordering intact. Group release does not publish another
 group or waive any package's publication checks. No group is inferred and no
 second release runner is introduced.
+
+### Qualification release preparation
+
+From 0.38.1, declare `"qualification_workspace": "qualification"` at the top
+level of `ci/cargo-release-groups.json`. This selects the standard independent
+virtual workspace; it is not a second release group. Remove its manifest and
+lock from `shared_metadata_files` or group-local `metadata_files`: the shared
+helper now owns both paths and rejects duplicate ownership.
+
+Use `cargo-release-group.sh prepare GROUP` (or the existing
+`cargo-release-metadata.sh` dispatch with `RELEASE_GROUP`) and its `files`,
+`check` and `check-graph` operations. The admitted file plan automatically
+includes `qualification/Cargo.toml` and `qualification/Cargo.lock`. Keep the
+prepared IC Build editor and byte allowance described above. Delete consumer
+copies of group-manifest/lock rendering after qualifying this shared caller.
+No new editor installation belongs in ordinary setup or metadata checks.
+
+A coordinated product workspace can use one group with `version: "workspace"`,
+all product members and its existing `CHANGELOG.md`. This selects the same
+multi-lock implementation without creating independent product versions or
+changing private versions. Pass that group explicitly through the release
+adapter and consume its exact file plan; the unconfigured coordinated helper
+continues to handle one workspace only.
+
+Qualification members must be unpublished and consume product packages through
+their own `workspace.dependencies` catalog. Product aliases use local paths,
+optionally with the full current version and a bare, `^`, `~` or `=` requirement.
+Path-only aliases are supported. Members inherit those aliases; direct member
+requirements and stale bounds refuse. Every product alias is checked against
+its actual product member path, including unused aliases. A group need not be
+used by qualification: in that case its qualification lock stays unchanged.
+
+Preparation admits both locked/offline graphs, renders every candidate before
+installation, and validates both resulting graphs in one
+`release_metadata_prepare` transaction. Only selected product versions and their
+requirements change; private versions and unrelated package identities remain
+fixed. Editor lock projection preserves unrelated supplier selections and
+checksums. Product edges into qualification refuse. Commit-bound checks export
+and check both workspaces; optional manifest ordering checks both too.
+
+Here, atomic preparation means all-or-rollback for caught failures, not a
+filesystem-wide atomic rename or crash durability. Originals and candidates are
+retained on failure; an uncatchable interruption still requires the existing
+release reconciliation workflow. Do not adopt a changed file plan during an
+unfinished release attempt. Exclusive source custody remains the adapter's job.
+
+The shared qualification fixture covers versioned/renamed and path-only aliases,
+an unused group, private-version preservation, malformed inputs, committed-source
+checks, renderer failure and rollback after qualification graph failure.
+Consumers qualify only their actual wiring, required feature/target checks,
+file/receipt inventories and recovery integration. Resolver isolation should
+also be demonstrated locally: an incompatible qualification-only supplier must
+fail qualification without preventing product resolution. Do not copy the
+generic fixture suite into consumers or equate metadata admission with tests of
+the product. This completes the shared mechanics identified in
+[#369](https://github.com/dragginzgame/toko-tooling/issues/369).
 
 ### Pure release input admission
 
