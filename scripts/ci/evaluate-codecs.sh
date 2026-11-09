@@ -23,6 +23,9 @@ else
     mkdir -p "$out/source/scripts/ci"
     cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
     cp -R crates examples "$out/source/"
+    mkdir -p "$out/source/qualification"
+    cp "$root/qualification/Cargo.toml" "$root/qualification/Cargo.lock" "$out/source/qualification/"
+    cp -R "$root/qualification" "$out/source/qualification/"
     cp scripts/ci/evaluate-codecs.sh scripts/ci/codec-cohorts.psv "$out/source/scripts/ci/"
 fi
 runs="${RUNS:-2}"
@@ -35,31 +38,31 @@ printf 'profile,codec,wasm_bytes,wasm_sha256,code_section_bytes\n' > "$out/wasm.
 for profile in evaluation benchmark-speed; do
     run=1
     while [ "$run" -le "$runs" ]; do
-        cargo bench --locked --profile "$profile" -p ic-wire-benchmarks --bench suite --features "wire,candid$extra" -- \
+        cargo bench --locked --profile "$profile" --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --bench suite --features "wire,candid$extra" -- \
             "$out/$profile-native-$run" "$profile" "$samples" "$batch_ms" > "$out/$profile-native-$run.log" 2>&1
         run=$((run + 1))
     done
     for mode in allocations heap; do
-        cargo bench --locked --profile "$profile" -p ic-wire-benchmarks --bench suite --features "wire,candid,$mode$extra" -- \
+        cargo bench --locked --profile "$profile" --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --bench suite --features "wire,candid,$mode$extra" -- \
             "$out/$profile-$mode" "$profile" "$samples" "$batch_ms" > "$out/$profile-$mode.log" 2>&1
     done
     for codec in wire candid; do
         started="$SECONDS"
-        cargo build --locked --profile "$profile" -p ic-wire-benchmarks --example codec-wasm \
+        cargo build --locked --profile "$profile" --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-wasm \
             --target wasm32-unknown-unknown --features "$codec$extra" --message-format=json \
             > "$out/$profile-$codec-build.jsonl" 2> "$out/$profile-$codec-wasm.log"
         printf '%s,%s,%s\n' "$profile" "$codec" "$((SECONDS - started))" >> "$out/build-times.csv"
-        artifact="$(cargo run --locked -p ic-wire-benchmarks --example codec-report -- \
+        artifact="$(cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report -- \
             --artifact "$out/$profile-$codec-build.jsonl" 2>> "$out/$profile-$codec-wasm.log")"
         cp "$artifact" "$out/$profile-$codec.wasm"
         bytes="$(wc -c < "$artifact" | tr -d ' ')"
         digest="$(shasum -a 256 "$artifact")"
-        code_bytes="$(cargo run --locked -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$profile-$codec-wasm.log")"
+        code_bytes="$(cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$profile-$codec-wasm.log")"
         printf '%s,%s,%s,%s,%s\n' "$profile" "$codec" "$bytes" "${digest%% *}" "$code_bytes" >> "$out/wasm.csv"
     done
 done
-cargo run --locked -p ic-wire-benchmarks --example codec-report -- "$out" "$primary"
+cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report -- "$out" "$primary"
 if [ -n "${POCKET_IC_BIN:-}" ]; then
-    cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features "wire,candid,ic$extra" -- "$out" > "$out/instructions.log" 2>&1
+    cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-instructions --features "wire,candid,ic$extra" -- "$out" > "$out/instructions.log" 2>&1
 fi
 printf 'Evidence: %s\n' "$out"

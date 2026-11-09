@@ -15,29 +15,32 @@ mkdir "$out/source"
 # endpoint-input selects the optional runtime integration; codec bytes are shared.
 cp "$root/Cargo.toml" "$root/Cargo.lock" "$root/rust-toolchain.toml" "$out/source/"
 cp -R "$root/crates" "$root/examples" "$out/source/"
+mkdir -p "$out/source/qualification"
+cp "$root/qualification/Cargo.toml" "$root/qualification/Cargo.lock" "$out/source/qualification/"
+cp -R "$root/qualification" "$out/source/qualification/"
 cp "$0" "$out/runner.sh"
 cp "$root/scripts/ci/summarize-input-borrowing.mjs" "$out/summarize.mjs"
 printf '%s\n' "$profile" > "$out/profile.txt"
 printf '%s\n' "$entry" > "$out/entry.txt"
 git -C "$root" rev-parse HEAD > "$out/base-commit.txt"
 rustc -vV > "$out/compiler.txt"
-sha256sum "$POCKET_IC_BIN" "$out/source/Cargo.lock" "$out/source/crates/ic-wire-benchmarks/benches/input_borrowing/mod.rs" > "$out/hashes.txt"
+sha256sum "$POCKET_IC_BIN" "$out/source/Cargo.lock" "$out/source/qualification/Cargo.lock" "$out/source/qualification/ic-wire-benchmarks/benches/input_borrowing/mod.rs" > "$out/hashes.txt"
 find "$out/source" -type f -print0 | sort -z | xargs -0 sha256sum > "$out/source-hashes.txt"
 export CARGO_TARGET_DIR="$out/target"
 cd "$out/source"
-cargo test --locked --offline -p ic-wire-benchmarks --example input-borrowing --features ic -- --test-threads=1 > "$out/native.log" 2>&1
+cargo test --locked --offline --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example input-borrowing --features ic -- --test-threads=1 > "$out/native.log" 2>&1
 base_features=""
 if [[ "$entry" == endpoint ]]; then base_features="endpoint-input,"; fi
-cargo clippy --locked --offline -p ic-wire-benchmarks --example input-borrowing --target wasm32-unknown-unknown --features "${base_features}borrowed-input" -- -D warnings > "$out/clippy.log" 2>&1
+cargo clippy --locked --offline --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example input-borrowing --target wasm32-unknown-unknown --features "${base_features}borrowed-input" -- -D warnings > "$out/clippy.log" 2>&1
 printf 'lane,total_wasm_bytes,code_section_bytes\n' > "$out/wasm.csv"
 for lane in owned borrowed; do
     features=(--features "${base_features}")
     if [[ "$lane" == borrowed ]]; then features=(--features "${base_features}borrowed-input"); fi
-    cargo build --locked --offline --profile "$profile" -p ic-wire-benchmarks --example input-borrowing --target wasm32-unknown-unknown "${features[@]}" > "$out/$lane-build.log" 2>&1
+    cargo build --locked --offline --profile "$profile" --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example input-borrowing --target wasm32-unknown-unknown "${features[@]}" > "$out/$lane-build.log" 2>&1
     artifact="$CARGO_TARGET_DIR/wasm32-unknown-unknown/$profile/examples/input_borrowing.wasm"
     cp "$artifact" "$out/$lane.wasm"
-    code="$(cargo run --locked --offline -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$lane-build.log")"
+    code="$(cargo run --locked --offline --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$lane-build.log")"
     printf '%s,%s,%s\n' "$lane" "$(wc -c < "$artifact" | tr -d ' ')" "$code" >> "$out/wasm.csv"
 done
-IC_WIRE_INPUT_EVIDENCE="$out" cargo test --locked --offline -p ic-wire-benchmarks --example input-borrowing --features ic physical_updates -- --ignored --test-threads=1 > "$out/ic.log" 2>&1
+IC_WIRE_INPUT_EVIDENCE="$out" cargo test --locked --offline --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example input-borrowing --features ic physical_updates -- --ignored --test-threads=1 > "$out/ic.log" 2>&1
 node "$out/summarize.mjs" "$out" > "$out/summary.log"

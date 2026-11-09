@@ -1,9 +1,88 @@
 # Core group changelog
 
-Covers ic-wire, ic-wire-derive and the private ic-wire-benchmarks,
-ic-wire-qualification and ic-wire-endpoint-fixture packages. This independent
+Covers ic-wire and ic-wire-derive. Private qualification packages previously
+shared this version series and now have an independent workspace. This independent
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
+
+## [0.19.0]
+
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.38.0 and its independent qualification layout. Flatten
+  private package paths under `qualification/` and migrate all active callers;
+  public package identities, codec bytes, limits and acceptance are unchanged.
+
+### ⚠️ Breaking
+
+- Move optional Principal/Account schemas to canonical Platform Types 0.19.
+  Consumers select the matching Types generation; mixed Types 0.18/0.19 Rust
+  values do not implement each other's traits. Principal remains bounded to 29
+  bytes; Account field order and absent/zero subaccount bytes remain unchanged
+  (`00` versus `01 20` plus 32 bytes). No wire identity, budget, acceptance or
+  persisted-byte migration. Qualify schema-only and combined Endpoint consumers.
+  [#58](https://github.com/dragginzgame/ic-wire/issues/58)
+
+### 🧪 Testing
+
+- Isolate the three private qualification packages and their lockfile under
+  `qualification/`. Ordinary product resolution no longer selects Build,
+  Testkit, Platform's facade or Tokio; native qualification enables Build and
+  Testkit only for explicit diagnostics and IC checks. Release setup alone
+  prepares the metadata editor. Bytes, identities, limits and acceptance are
+  unchanged; this private tooling change alone requires no public release.
+
+- Enforce the native Testkit qualification boundary in the existing dependency
+  stage: private optional native edges, raw transport without Testkit's Wire adapter,
+  and matching local codec/Types/Runtime identities. Keep product proofs and
+  release stages intact without reciprocal adapter-release waits. Codec bytes,
+  identities, budgets and acceptance are unchanged.
+  [#57](https://github.com/dragginzgame/ic-wire/issues/57)
+
+### ✨ Added
+
+- Add explicit finite f32/f64 Serde field adapters with generated typed-array
+  clients and bulk-field advice. Reject NaNs/infinities before decode allocation;
+  preserve signed zero and subnormal bits. Adoption changes element counts to
+  byte counts (`01` to `04` for one f32, `08` for f64): coordinate identities and
+  clients, retain retry/hash bytes, preserve field bounds and requalify budgets.
+  Existing fields, Packed words and codec behavior are unchanged without adoption.
+  Add finite-only comparison controls independently of the raw IEEE research cases.
+
+### ⬆️ Dependencies
+
+- Adopt Testkit 0.96 / native Platform 0.28 with canonical Types 0.19 callers.
+  Remove the old Platform facade dependency; keep upstream Candid 0.10.40 as
+  the private benchmark's direct dev oracle under Toko Tooling 0.37.5's scoped
+  boundary. Preserve Candid byte ceilings, quotas and exact-result framing;
+  remove Platform's former depth pre-scan and label this benchmark admission
+  change explicitly. Old performance matrices require a fresh matched baseline.
+  Production Wire bytes, identities, limits and acceptance remain unchanged.
+
+- Update private qualification SHA-2 to 0.11.1 without optional allocation/OID
+  features; adapt digest formatting while preserving existing golden hashes.
+  Probe num-bigint 0.5.1: Candid's public 0.4 BigUint identity prevents direct
+  adoption; retain 0.4.8 solely for private Candid comparison dev dependencies
+  under the maintainer-approved, documented type-identity exception.
+  Published codec bytes, identities, budgets and acceptance are unchanged.
+
+- Repository maintenance: migrate to published Toko Tooling 0.37.5 using one
+  exact root Cargo pin inherited by all seven real packages as a dev-dependency.
+  Remove metadata selection and the separate tooling lock; retain Cargo.lock,
+  snapshot provenance, qualification packages and CI/release admission. Record
+  the tooling-required exact-pin exception. Adopt the toko-tooling command,
+  receipt, baseline, environment and LOC metadata names without aliases; migrate
+  CI/release callers together. Include the corrected dependency-report distinction
+  between production, conditional and qualification edges. Explicitly retain
+  offline rules and the Candid checker under the standalone baseline; adopt the
+  latest-direct-dependency policy with shared-type constraints recorded. Runtime bytes and
+  budgets are unchanged.
+
+- Repository maintenance: adopt Build 0.81.0 and Testkit 0.95.0, retaining Host
+  0.76.1 and adding Testkit's native Host HTTP body-admission dependency. Qualify
+  compiler diagnostics, the release-metadata editor and installed Endpoint
+  limits/rollback. No Wire caller migration or codec byte, identity, budget or
+  acceptance change; these private tooling updates alone need no public release.
 
 ## [0.18.0] - 2026-11-08
 

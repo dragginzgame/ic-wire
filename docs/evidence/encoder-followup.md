@@ -1,5 +1,53 @@
 # Encoder experiments
 
+## U32 length thresholds (9 November 2026)
+
+Do not adopt the threshold-count rewrite of `raw_u32`'s exact tuple length.
+For values already known to be at least 128, replace the leading-zero/division
+formula with `2 + (value >= 2^14) + (value >= 2^21) + (value >= 2^28)`.
+This preserves the exact tuple length, bytes and admission; the signed-i32
+writer remains untouched. Production encoding is unchanged.
+
+Matched baseline/candidate use Core 0.18.0 (`df071a4`) plus the pending
+Build 0.81/Testkit 0.95 adoption and preserved dependency updates. Lock SHA-256:
+`39145cb64911b59ae8c1026d74bc32298912b550dd73496072eb4c61c4697389`.
+Rust/Cargo 1.99.1, LLVM 23.1.1, wasm32-unknown-unknown, fat LTO, one codegen
+unit, panic abort, stripped symbols; `evaluation` is opt-z and
+`benchmark-speed` is opt-3. Each lane has its own source and Cargo target.
+Fresh Wasm builds and rebuilt instruction drivers bind the lock/encoder hashes.
+
+Uncompressed Wasm, **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Thresholds | Delta |
+| --- | ---: | ---: | ---: |
+| hotspots / opt-z | 82,973 / 72,062 | 82,966 / 72,055 | -7 / -7 |
+| hotspots / opt-3 | 104,101 / 93,943 | 104,101 / 93,943 | 0 / 0 |
+| standard / opt-z | 594,278 / 547,562 | 594,308 / 547,592 | +30 / +30 |
+| standard / opt-3 | 893,678 / 833,247 | 893,666 / 833,235 | -12 / -12 |
+
+PocketIC 16.1.0 runs 87 hotspot cases, three identical samples per operation,
+1,904 rows per lane. Payload/input hashes, frame sizes and Candid counters
+match; baked lock/encoder identities match the sources. All 860 Wire operation
+pairs pass the `baseline * 1.05 + 64` screen, and the hotspot-only size screen
+passes. Wide-u32 list encode (16,384 elements) drops from **6,702,812 to
+6,637,276 IC instructions (-0.98%)** at opt-z; opt-3 stays **3,720,193**.
+Wide-u32 decode stays **7,083,521 / 2,724,229** at opt-z/3. The selected
+wide-u16/i32/u64/i64 and empty mixed-blob encode/decode controls are unchanged.
+
+Both lanes pass five library and 48 native tests, with the existing timing
+probe ignored. This includes exact integer boundary bytes/budgets and malformed
+wide-integer coverage. Reject the candidate: the tiny targeted instruction gain
+does not justify the broader primary-profile size increase. Native timing,
+allocation/heap, Toko-shaped Wasm and the full comparison matrix were not run
+after this decision; no application saving is claimed. Codec bytes, identities,
+budgets and acceptance remain unchanged; no consumer action is required.
+
+Raw inputs/results and reproduction scripts:
+`target/evidence/u32-length-20261109/` (`prepare.mjs`, `screen.sh`,
+`prepare-ic.sh`, `analyze.mjs`, `cost-screen.sh`, `sizes.csv`). Run each lane's
+`build/debug/examples/codec-instructions` with its absolute `results` directory
+and explicitly prepared `POCKET_IC_BIN`. Raw evidence remains outside Git.
+
 ## Signed i32 writer screen (8 November 2026)
 
 Retain none of three rewrites against Core **0.17.14**. The new `signed32`

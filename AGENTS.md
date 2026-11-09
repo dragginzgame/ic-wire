@@ -1,10 +1,10 @@
 # IC Wire contributor instructions
 
-Apply the reviewed [Toko Tooling 0.34.0 policy](https://github.com/dragginzgame/toko-tooling/blob/44b294db78477ac253f83e02ccbdd09a96df8f73/DRAGGINZGAME.md)
-and its revision-bound references. The installed [baseline](DRAGGINZGAME.md) and
-[manifest](.shared-tooling.snapshot) own executable snapshot provenance; refresh
-through the root-selected registry installer, never by editing payloads or following a moving sibling.
-Shared owns action authority, delivery, compiler support, validation and reporting.
+Apply the reviewed [Toko Tooling 0.38.0 policy](https://github.com/dragginzgame/toko-tooling/blob/b171c182dbab832c74c97e978f70a6a0e3b8fb7c/TOKO-TOOLING.md)
+and its revision-bound references. The installed [baseline](TOKO-TOOLING.md) and
+[manifest](.toko-tooling.snapshot) own executable snapshot provenance; refresh
+through the Cargo-selected registry installer, never by editing payloads or following a moving sibling.
+Toko Tooling owns action authority, delivery, compiler support, validation and reporting.
 Do not add local approval gates or duplicate those rules here.
 
 Read [the current handoff](docs/status/current.md) and this overlay first.
@@ -25,12 +25,13 @@ and docs/development.md for local commands. These are task-specific references.
   Keep schema-only hosts free of CDK/executor/endpoint machinery. Endpoint alone
   selects CDK; require one Runtime guard where execution is selected.
 - Candid remains outside published packages. The unpublished benchmark package
-  may compare external Candid DTOs through Platform and use Testkit's maintained
-  PocketIC client, types and lifecycle as native dev dependencies. The unpublished
+  may select Candid directly as an unconditional dev-only comparison oracle
+  under the reviewed tooling exception and use Testkit's maintained
+  PocketIC client, types and lifecycle behind native-only `ic` features. The unpublished
   endpoint fixture qualifies integration through those same owners.
 - Keep qualification packages `publish = false`; their publication needs its own
   explicit scope. Keep current supplier selections/publication state in the
-  handoff and root manifests/lock, not a second catalog here. No supplier patches
+  handoff and the owning workspace manifests/locks, not a second catalog here. No supplier patches
   or downstream wrapper/new-schema-trait requirements.
 - Canic, Relay and IcyDB retain their contracts and runtime semantics. IcyDB's
   database storage/key encodings are outside this repository's initial scope.
@@ -43,11 +44,21 @@ and docs/development.md for local commands. These are task-specific references.
 Use the virtual root workspace, inherited package metadata/lints and root-owned
 workspace.dependencies. Keep existing codec, schema-derive and Endpoint owners;
 no speculative crate splits or placeholder public APIs. Production modules use
-directories with mod.rs; tests follow Shared's tests.rs / *_tests.rs / tests/
+directories with mod.rs; tests follow Toko Tooling's tests.rs / *_tests.rs / tests/
 conventions and ordinary module discovery. Declare private package LOC roles.
 
+The independent virtual workspace `qualification/Cargo.toml` owns the three
+unpublished packages in `qualification/` and `qualification/Cargo.lock`.
+It isolates Build/Testkit/Platform-facade resolution from the four public root
+members under the tooling core/integration boundary. Native corpus/allocation
+checks do not enable `ic` or `diagnostics`; these features select Testkit and
+Build only when needed. Both workspaces retain the same compiler, formatting
+and tooling admission. Use the focused commands in docs/development.md; retain
+explicit integration proofs and the existing release roster. No public package
+version or protocol change is implied by this private workspace split.
+
 Rust **1.99.1** is both minimum and pinned compiler (maintainer decision #42).
-Admit the exact workspace floor through the Shared reader and require equality
+Admit the exact workspace floor through the Toko Tooling reader and require equality
 with rust-toolchain.toml and Cargo/rustc identities. Preserve one-compiler host,
 Wasm, macro, schema and Endpoint proofs; 1.91 evidence is historical. The
 maintainer approved a separate dated nightly for the opt-in sanitizer fuzzer
@@ -97,13 +108,13 @@ Use focused checks from docs/development.md; ordinary work does not run make ci.
 Select public release groups using the
 [local impact decision](docs/development.md#decide-whether-a-public-release-is-needed),
 not private qualification ownership or the presence of a pending changelog entry.
-The maintainer-operated direct delivery destination is origin/main through Shared
+The maintainer-operated direct delivery destination is origin/main through Toko
 Tooling. Core and Endpoint groups use literal versions and releases/<group>/
 ledgers. Pass RELEASE_GROUP explicitly for release/resume/publication and preserve
-qualification-only publication exclusions. Shared owns delegated effects.
+qualification-only publication exclusions. Toko Tooling owns delegated effects.
 
 One roster in ci/release-validation.json owns CI and release plans. Core retains
-20 stages; qualified Endpoint-only Linux/default changes use 11. Shared/uncertain
+20 stages; qualified Endpoint-only Linux/default changes use 11. Toko Tooling/uncertain
 inputs and other hosts broaden to full. Stage reuse/final-candidate execution
 stay disabled until Wire qualifies those opt-ins. Local adapter fixtures use
 only disposable repositories and never invoke release effects in this checkout.

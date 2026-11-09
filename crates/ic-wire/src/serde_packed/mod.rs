@@ -6,6 +6,11 @@
 //! recognizes these exact paths (also with a leading `::`).
 //! [`bools`] provides the same explicit selection for `Vec<bool>`, with checked
 //! byte-buffer decoding and `boolean[]` browser values on every endian target.
+//! [`finite_f32`] and [`finite_f64`] explicitly encode primitive float vectors
+//! as finite little-endian words, with typed-array browser values. They reject
+//! NaNs/infinities before decode allocation and preserve signed zero/subnormals.
+//! A singleton f32 prefix changes from `01` to `04`; f64 changes `01` to `08`.
+//! Preserve consumer field bounds and regenerate clients before adoption.
 //!
 //! Adoption changes ordinary list bytes and traversal admission: `[-1]` as
 //! `Vec<NonZeroI64>` changes from `01 01` to `08 ff ff ff ff ff ff ff ff`;
@@ -20,5 +25,8 @@
 //! when retries or signatures depend on them.
 
 pub mod bools;
+mod finite;
+pub mod finite_f32;
+pub mod finite_f64;
 pub mod heap_u64;
 pub mod nonzero_i64;

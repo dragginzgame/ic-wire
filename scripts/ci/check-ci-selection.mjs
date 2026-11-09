@@ -52,7 +52,7 @@ assert.deepEqual(classifier.env, {
 });
 assert.equal(jobs['change-scope'].steps[0].with['fetch-depth'], 0);
 assert.equal(jobs['change-scope'].steps[0].with['persist-credentials'], false);
-assert.equal(jobs['change-scope'].steps.find(s => s.name === 'Check reviewed snapshot integrity').run, 'make shared-tooling-check');
+assert.equal(jobs['change-scope'].steps.find(s => s.name === 'Check reviewed snapshot integrity').run, 'make toko-tooling-check');
 const scan = jobs['change-scope'].steps.find(s => s.name === 'Scan repository history for secrets');
 assert.equal(scan.env.GITLEAKS_BIN, '${{ steps.security-tool.outputs.gitleaks }}');
 assert.match(scan.run, /"\$GITLEAKS_BIN" git --redact=100/);
@@ -81,7 +81,7 @@ const policyPath = 'ci/docs-only-paths.txt';
 const policy = fs.readFileSync(path.join(root, policyPath), 'utf8');
 const allowed = policy.split('\n').filter(p => p && !p.startsWith('#'));
 assert.deepEqual(allowed, ['docs/design.md', 'docs/evaluation.md', 'docs/performance.md', 'docs/status/current.md']);
-const snapshot = fs.readFileSync(path.join(root, '.shared-tooling.snapshot'), 'utf8');
+const snapshot = fs.readFileSync(path.join(root, '.toko-tooling.snapshot'), 'utf8');
 for (const p of allowed) {
   const info = fs.lstatSync(path.join(root, p));
   assert.ok(info.isFile() && !(info.mode & 0o111), p);

@@ -4,6 +4,24 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.10.0]
+
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.38.0 and its independent qualification layout. Flatten
+  private package paths under `qualification/` and migrate all active callers;
+  public package identities, codec bytes, limits and acceptance are unchanged.
+
+### ⚠️ Breaking
+
+- Select Runtime/macros/guard 0.21 for canonical Types 0.19 composition with
+  Core's pending 0.19 integration. Align consumer package generations; old
+  published Endpoint/Types pairs are not supported mixed compositions. Handler
+  syntax, exports, frame bytes, identities, limits and rollback remain unchanged.
+  Qualify raw Testkit transport through explicit native principal bytes without
+  requiring its private infrastructure to adopt the product's Types generation.
+  [#58](https://github.com/dragginzgame/ic-wire/issues/58)
+
 ## [0.9.0] - 2026-11-08
 
 ### ⚠️ Breaking

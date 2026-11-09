@@ -19,6 +19,8 @@ mod borrow_escape;
 mod borrow_mutation;
 #[cfg(ui_case = "encode_only_decode")]
 mod encode_only_decode;
+#[cfg(ui_case = "finite_adapter_type")]
+mod finite_adapter_type;
 #[cfg(ui_case = "native_schema_attributes")]
 mod native_schema_attributes;
 #[cfg(ui_case = "packed_adapter_type")]

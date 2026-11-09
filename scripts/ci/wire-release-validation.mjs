@@ -93,9 +93,9 @@ function selection(group, source, previous) {
   const ambientConfig = configurationRoots.some(p => ['config', 'config.toml'].some(f => fs.existsSync(path.join(p, f))));
   const endpointPath = p => /^crates\/ic-wire-endpoint(?:-macros)?\/src\/.+\.rs$/.test(p)
     || /^crates\/ic-wire-endpoint(?:-macros)?\/(README|CHANGELOG)\.md$/.test(p)
-    || /^examples\/endpoint\/(src|tests)\/.+\.rs$/.test(p)
-    || p === 'examples/endpoint/README.md' || p === 'docs/endpoints.md' || p === 'docs/status/current.md'
-    || p === 'crates/ic-wire-benchmarks/benches/input_borrowing/mod.rs'
+    || /^qualification\/ic-wire-endpoint-fixture\/(src|tests)\/.+\.rs$/.test(p)
+    || p === 'qualification/ic-wire-endpoint-fixture/README.md' || p === 'docs/endpoints.md' || p === 'docs/status/current.md'
+    || p === 'qualification/ic-wire-benchmarks/benches/input_borrowing/mod.rs'
     || /^releases\/endpoint\/[^/]+\.md$/.test(p);
   let reason = 'Core codec/derive identities and all reverse consumers require the complete roster';
   let narrow = false;

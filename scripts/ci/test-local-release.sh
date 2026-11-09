@@ -3,10 +3,13 @@ set -euo pipefail
 # Real local adapters/runner and Git delivery; expensive gate/setup substituted.
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 batch_mode=false
+metadata_only=false
 if [[ $# == 2 && "$1" == core && "$2" == --batch ]]; then
     batch_mode=true
+elif [[ $# == 2 && "$2" == --metadata ]]; then
+    metadata_only=true
 elif [[ $# != 1 ]]; then
-    echo 'usage: test-local-release.sh core|endpoint [--batch (core batch only)]' >&2
+    echo 'usage: test-local-release.sh core|endpoint [--metadata | --batch (core batch only)]' >&2
     exit 2
 fi
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES
@@ -65,10 +68,10 @@ cat >> Makefile <<'MAKE'
 include fixture-gates.mk
 MAKE
 cat > fixture-gates.mk <<'MAKE'
-.PHONY: install-tools tools-check release-editor-check release-browser-tools
+.PHONY: install-tools tools-check install-release-editor release-editor-check release-browser-tools
 release-editor-check:
 	@printf '%s\n' "$$FIXTURE_RELEASE_EDITOR"
-install-tools tools-check:
+install-tools tools-check install-release-editor:
 	@printf '%s\n' '$@' >> "$$(git rev-parse --git-path fixture-gates)"
 release-browser-tools:
 	@printf '%s\n' '$@:$(RELEASE_SETUP_MODE)' >> "$$(git rev-parse --git-path fixture-gates)"
@@ -138,6 +141,30 @@ git config user.email fixture@example.invalid
 git config core.hooksPath /dev/null
 git add -- .
 git commit -qm 'Disposable release baseline'
+if [[ "$metadata_only" == true ]]; then
+    bash scripts/ci/check-dependency-pins.sh --consumer "$PWD" --cargo-inheritance > "$fixture/metadata-pins.log" 2>&1
+    export RELEASE_PREVIOUS="$previous" RELEASE_VERSION="$candidate" RELEASE_DATE=2026-11-09
+    export CARGO_RELEASE_METADATA_EDITOR="$FIXTURE_RELEASE_EDITOR" CARGO_RELEASE_METADATA_MAX_BYTES=8388608
+    private_version="$(yq -p toml -o json '.' qualification/Cargo.toml | jq -r .workspace.package.version)"
+    # A saved receipt commit must not redirect live preparation into its archive.
+    RELEASE_COMMIT="$(git rev-parse HEAD)"
+    export RELEASE_COMMIT
+    # A broken integration resolution must restore both product and private locks
+    # after candidate installation. Only the deliberately broken input remains.
+    perl -0pi -e 's/ic-testkit = \{ version = "[^"]+"/ic-testkit = { version = "=0.0.0"/' qualification/Cargo.toml
+    if bash scripts/ci/prepare-wire-metadata.sh > "$fixture/metadata-refused.log" 2>&1; then exit 1; fi
+    [[ "$(git diff --name-only)" == qualification/Cargo.toml ]]
+    git restore qualification/Cargo.toml
+    bash scripts/ci/prepare-wire-metadata.sh > "$fixture/metadata-prepared.log" 2>&1
+    cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --format-version 1 > "$fixture/qualification-prepared.json"
+    [[ "$(yq -p toml -o json '.' qualification/Cargo.toml | jq -r .workspace.package.version)" == "$private_version" ]]
+    git diff --name-only | LC_ALL=C sort > "$fixture/metadata-actual"
+    bash scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP" | jq -r '.files[]' | LC_ALL=C sort > "$fixture/metadata-expected"
+    cmp "$fixture/metadata-actual" "$fixture/metadata-expected"
+    complete=true
+    echo "Private lock metadata passed for $RELEASE_GROUP: pins, exact paths, unchanged private version, locked resolution and rollback."
+    exit 0
+fi
 git init -q --bare "$fixture/remote.git"
 git remote add origin "$fixture/remote.git"
 git push -q -u origin main
@@ -250,7 +277,7 @@ cmp "$fixture/expected-files" "$fixture/changed-files"
 for package in ic-wire ic-wire-derive; do
     yq -p toml -o json '.' "crates/$package/Cargo.toml" | jq -e '.package.publish == ["crates-io"]' >/dev/null
 done
-yq -p toml -o json '.' crates/ic-wire-qualification/Cargo.toml | jq -e '.package.publish == false' >/dev/null
+yq -p toml -o json '.' qualification/ic-wire-qualification/Cargo.toml | jq -e '.package.publish == false' >/dev/null
 make release-resume "VERSION=$candidate" > "$fixture/resume.log" 2>&1
 [[ "$(git rev-parse HEAD)" == "$commit" ]]
 # Current-source ordering refuses disorder, while committed-source admission

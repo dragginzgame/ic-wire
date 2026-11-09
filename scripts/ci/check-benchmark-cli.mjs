@@ -11,6 +11,9 @@ const temporary = fs.mkdtempSync(path.join(root, 'target/benchmark-cli-'));
 const features = 'wire,candid,ic';
 let checks = 0;
 function run(binary, args, status = 0, cwd = root, env = process.env) {
+  if (binary === 'cargo' && args.includes('ic-wire-benchmarks')) {
+    args = [...args.slice(0, 1), '--manifest-path', 'qualification/Cargo.toml', ...args.slice(1)];
+  }
   const result = spawnSync(binary, args, { cwd, env, encoding: 'utf8', timeout: 300_000, maxBuffer: 32 * 1024 * 1024 });
   assert.ifError(result.error);
   assert.equal(result.status, status, `${binary} ${args.join(' ')}\n${result.stdout}\n${result.stderr}`);

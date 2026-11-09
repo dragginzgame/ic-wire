@@ -7,6 +7,68 @@ framework policies and browser SDKs remain consumer-owned. The unpublished codec
 benchmark package may use PocketIC for isolated IC instruction measurements;
 it does not qualify consumer endpoint integrations.
 
+## Native qualification ownership
+
+| Owner | Proof | Execution entrypoint |
+| --- | --- | --- |
+| Core | Codec bytes, malformed input, budgets, borrowing and generated schemas | `test`, `check-qualification`, `check-typescript` |
+| Endpoint | Local codec plus generated exports, handler composition and rollback | `check-endpoint`; installed execution through `check-endpoint-ic` |
+| Private benchmark harness | Codec/admission instruction measurements and the explicit Endpoint borrowing probe | `evaluate-codecs.sh`, `codec-instructions`, `admission-instructions`, `input-borrowing` |
+| Testkit | PocketIC transport, server admission and lifecycle | Optional native `ic` dependency used through raw query/update calls |
+
+Wire constructs and decodes frames itself. Its native harnesses deliberately do
+not enable Testkit's optional `wire` adapter. Testing/adopting that upstream
+adapter belongs to Tooling ([#349](https://github.com/dragginzgame/ic-tooling/issues/349));
+it is not a reciprocal Wire release prerequisite. Published Core/Endpoint
+normal/build graphs stay Testkit-free. The two harness packages remain private,
+with Testkit selected only by the native `ic` feature and defaults disabled.
+
+`make check-testkit-boundary` verifies ten product graphs and rejects Build,
+Testkit, the Platform facade and Tokio anywhere in the product resolution.
+`make check-integration-boundary` verifies twenty product/private graphs using
+the separate qualification lock: default native harnesses exclude Testkit,
+while IC codec/Endpoint selections and the Endpoint borrowing probe select it.
+It rejects Testkit's Wire feature, registry/duplicate Wire identities, split
+local Types/Runtime identities and missing execution guards. These are composed
+consumer checks, not separate supplier qualification or reciprocal release waits.
+Every local direct Types requirement must match Core. Published schema/Endpoint
+graphs still require the canonical generation, and execution has one guard.
+The report records actual
+local Wire, Types and Runtime identities, source hashes and graph inputs under
+`target/product-boundary.*/` and `target/integration-boundary.*/`; neither starts
+PocketIC or rebuilds suppliers.
+
+The existing `check-boundary` stage owns the product proof; `check-benchmarks`
+owns the private integration proof and future-facade identity simulation.
+Core retains 20 stages and qualified Endpoint-only changes retain 11. Reviewing
+the group selector, release adapter and compatible-consumer checks found no
+Testkit adapter release wait to remove. Required Wire product and installed
+composition proofs stay with their existing owners; private fixture membership
+does not make simulator infrastructure or Tooling's adapter a published Core API.
+This enforcement resolves [Wire #57](https://github.com/dragginzgame/ic-wire/issues/57)
+without a new crate, client wrapper, supplier pin change or codec change.
+
+## Candid bigint type identity
+
+The private benchmark package's only direct num-bigint uses construct upstream Candid
+`Nat` values, including the timed bounded-magnitude conversion. Candid 0.10.40
+exposes num-bigint 0.4's `BigUint` in that public tuple field. A 9 November probe
+with num-bigint 0.5.1 fails with E0308 in `fixtures/followup::nat_case` and
+`unsigned_magnitude::to_nat`; the two `BigUint` types are distinct.
+
+The maintainer approved retaining 0.4.8 on 9 November 2026 solely as this private
+Candid-comparison dev dependency. Revisit when the Candid supplier accepts the newer type or this
+comparison is retired. Adding decimal/byte conversion solely to accommodate two
+versions would change the measured conversion path. Published Wire packages do
+not depend on num-bigint or Candid. Probe: `target/deps0374/bigint-coverage-probe.log`.
+
+SHA-2 is independent: private evidence producers select 0.11.1 with defaults
+disabled, and format digest bytes explicitly as lowercase two-digit hex. Existing
+golden corpus hashes verify unchanged digest inputs and outputs. The older
+transitive SHA-2 remains supplier-owned; it does not hold back this selection.
+
+## Historical context
+
 The released 0.6.0 Serde hard cut removed the finite Wire API. Archived sections recording
 finite admission and WireSchema experiments are historical research; the
 [current production comparisons](candid-comparison.md)
@@ -14,10 +76,11 @@ owns shipped-codec IC, frame and Wasm measurements. The retired protocol-study
 runner is available only in the archived finite revision linked by those studies;
 it is no longer maintained alongside the production Serde suite.
 
-The [7 November full matrix](candid-comparison.md) measures its complete frozen
-36-cohort roster: 2,105 overlapping case entries, 8,420 primary comparisons and
-144 fresh modules. Its report separates 35 existing-field/control cohorts
-from the private float/bool research cohort.
+The [9 November full matrix](candid-comparison.md) measures its complete frozen
+39-cohort roster: 2,194 overlapping case entries, 8,776 primary comparisons and
+156 fresh modules. Its report separates 38 existing-field/control cohorts
+from the mixed cohort containing the public bool adapter, private float bulk
+prototypes and unchanged controls.
 It includes the complete 391-case standard corpus and the frozen Platform/Testkit
 selection recorded in that report. [Coverage gaps](candid-comparison.md) and
 [ranked hotspots](candid-comparison.md) distinguish
@@ -25,16 +88,17 @@ supported field choices from proposed research and missing comparison controls.
 The full run includes `coverage-shapes` and paired `research-bulk`; the
 [original follow-up](evidence/primitive-bulk.md) retains their design and
 earlier measurements. Candid DTOs remain test-only; Wire
-serializes owned application representations. Private float/bool fields do not
-extend the production Packed element set or generated client contract.
+serializes owned application representations. Private float fields do not
+extend the production Packed element set or generated client contract; the
+explicit bool adapter is already public.
 
 The maintained `id16` and `id16-control` cohorts each contain 20 workloads:
 0/1/8/128/4,096 identifiers in lists and filter records, with owned and
 borrowed-input encode paths. The control retains ordinary arrays; `id16` uses
 public Packed fields. Candid receives already-flat blobs in both cohorts and
 validates ID/cursor widths during decoding. Its DTO setup stays outside counters;
-the Wire borrowed-input path explicitly includes copying. These two additional
-cohorts do not retroactively change the historical 36-cohort results above.
+the Wire borrowed-input path explicitly includes copying. Both cohorts are
+included in the current full matrix.
 
 The `signed32` cohort adds 49 cases without changing any existing case indices:
 17 zigzag boundary scalars plus ordinary lists with small, negative, wide and
@@ -48,7 +112,7 @@ Deque tests hold logical input fixed across every physical split at 128 values,
 plus empty/singleton controls, and check exact encoder allowances and one-short
 allocation/node/depth refusal while preserving list bytes in both codecs.
 This is native Serde coverage, not new TypeScript schema or adapter support.
-The maintained roster now has 39 cohorts; the historical full matrix is unchanged.
+The maintained roster has 39 cohorts, all included in the current full matrix.
 
 ## Maintained checks
 
@@ -83,7 +147,12 @@ The standard corpus test freezes both its 391-case count and ordered-name digest
 review an intentional inventory update when adding cases, never silently bless
 a smaller corpus or a reordered case index.
 
-The `coverage-shapes` follow-up now contains 124 cases. Its 30 appended cases
+The `coverage-shapes` follow-up now contains 134 cases. Ten new finite-only
+f32/f64 cases exercise the public field adapters (empty/singleton through 1 MiB)
+against raw Candid vectors, preserving signed zeros, subnormals and finite maxima.
+They are separate from the all-IEEE research controls. These additions have
+focused correctness qualification; the preceding full matrix predates them.
+The earlier 30 container cases
 cover nested optional byte buffers (outer absent, inner absent and empty),
 success/error results containing packed integers or blobs, byte-array versus
 Packed hash lists, nonzero signed-integer lists and binary heaps. Collections
@@ -95,7 +164,7 @@ admission and heap reconstruction are additional Wire-side semantics, not
 identical invalid-value or reconstruction policies. These native Serde cases
 do not add schema support or change production bytes, limits or acceptance.
 
-The `borrowed-containers` selection uses the same 124 logical inputs with public
+The `borrowed-containers` selection uses the same 134 logical inputs with public
 `serde_packed` field adapters for the nonzero-list and heap cases. The private
 `packed-containers` control copies into Packed inside serialization; the original
 one-copy DTO is also preserved in paired study snapshots. Candid's external
@@ -176,7 +245,7 @@ for the last source revision and reproduction boundary. Raw Postcard controls in
 the retained protocol probes omit Wire admission/canonicality and are not runtime
 modes. Native timings, IC instructions and artifact sizes remain distinct evidence.
 
-Run focused checks under the shared [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
+Run focused checks under the shared [validation policy](../TOKO-TOOLING.md#validation-and-evidence).
 The complete `make ci` scaffold gate is reserved for an explicit local request
 or the maintainer's release flow. Wire does not qualify sibling endpoints,
 authentication, storage formats or delivery policy.
@@ -189,7 +258,7 @@ recorded in the [handoff](status/current.md).
 
 For late failures in blob batches, callers can deserialize bounded `BytesRef`
 views and copy into owned `Bytes` only after the full frame has been accepted.
-The [compiled qualification example](../crates/ic-wire-qualification/tests/deferred_blob_ownership/mod.rs)
+The [compiled qualification example](../qualification/ic-wire-qualification/tests/deferred_blob_ownership/mod.rs)
 checks borrowing, unchanged encoding, bounds and copy ordering. This uses the
 existing Serde decoder. Borrowed traversal has its own admission charges;
 subsequent ownership allocations need a consumer budget in addition to the
@@ -247,7 +316,7 @@ are retained alongside the validation benefit. This code is host-only: no
 production Wasm or IC instruction saving is claimed. Macro compilation time
 and native executable size were not measured.
 
-Reproduce using `cargo run --locked -p ic-wire-qualification --example schema-cost
+Reproduce using `cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-qualification --example schema-cost
 --features schema-cost --profile evaluation` on each frozen source, selecting
 a separate CARGO_TARGET_DIR. Repeat with benchmark-speed. Local raw results,
 compiler identity, source/lock hashes and summary: `target/schema-render-study/`.

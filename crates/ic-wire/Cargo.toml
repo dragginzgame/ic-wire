@@ -10,6 +10,9 @@ publish = ["crates-io"]
 readme = "README.md"
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
 [features]
 platform-types = ["dep:ic-platform-types", "typescript"]
 typescript = ["dep:ic-wire-derive", "dep:serde_json"]
@@ -29,6 +32,7 @@ serde_bytes.workspace = true
 clap.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
+toko-tooling.workspace = true
 
 [[test]]
 name = "runtime"

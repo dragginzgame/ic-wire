@@ -16,7 +16,7 @@ mkdir "$out"
 mkdir "$out/source"
 cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
 # Copy source inputs, including local additions, without ignored build/dependency trees.
-git ls-files -z --cached --others --exclude-standard -- crates examples > "$out/source-files"
+git ls-files -z --cached --others --exclude-standard -- crates examples qualification > "$out/source-files"
 node - "$root" "$out/source" "$out/source-files" <<'JS'
 const fs = require('node:fs');
 const path = require('node:path');
@@ -40,7 +40,7 @@ printf '%s\n' "$baseline" > "$out/baseline-commit.txt"
 rustc -vV > "$out/compiler.txt"
 git rev-parse HEAD > "$out/base-commit.txt"
 git diff > "$out/dirty.patch"
-shasum -a 256 Cargo.lock "$POCKET_IC_BIN" crates/ic-wire-benchmarks/benches/caller_storage/mod.rs > "$out/hashes.txt"
+shasum -a 256 Cargo.lock qualification/Cargo.lock "$POCKET_IC_BIN" qualification/ic-wire-benchmarks/benches/caller_storage/mod.rs > "$out/hashes.txt"
 node - "$out" > "$out/source-hashes.json" <<'JS'
 const fs = require('node:fs');
 const path = require('node:path');
@@ -66,19 +66,19 @@ for profile in evaluation benchmark-speed; do
         if [[ "$lane" == after-scoped ]]; then features=(--features caller-scoped); fi
         if [[ "$lane" == before-vec ]]; then
             CARGO_TARGET_DIR="$out/baseline-target" cargo build --locked --offline \
-                --manifest-path "$out/baseline/Cargo.toml" --profile "$profile" \
+                --manifest-path "$out/baseline/qualification/Cargo.toml" --profile "$profile" \
                 -p ic-wire-benchmarks --example caller-storage --target wasm32-unknown-unknown \
                 > "$out/$profile-$lane-build.log" 2>&1
             artifact="$out/baseline-target/wasm32-unknown-unknown/$profile/examples/caller_storage.wasm"
         else
-            cargo build --locked --offline --profile "$profile" -p ic-wire-benchmarks \
+            cargo build --locked --offline --profile "$profile" --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks \
             --example caller-storage --target wasm32-unknown-unknown "${features[@]}" \
             > "$out/$profile-$lane-build.log" 2>&1
             artifact="$CARGO_TARGET_DIR/wasm32-unknown-unknown/$profile/examples/caller_storage.wasm"
         fi
         cp "$artifact" "$out/$profile-$lane.wasm"
         bytes="$(wc -c < "$artifact" | tr -d ' ')"
-        code="$(cargo run --locked --offline -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$profile-$lane-build.log")"
+        code="$(cargo run --locked --offline --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report -- --code-size "$artifact" 2>> "$out/$profile-$lane-build.log")"
         printf '%s,%s,%s,%s\n' "$profile" "$lane" "$bytes" "$code" >> "$out/wasm.csv"
     done
     mkdir "$out/$profile-native"
@@ -86,12 +86,12 @@ for profile in evaluation benchmark-speed; do
         features=()
         if [[ "$mode" != time ]]; then features=(--features "$mode"); fi
         IC_WIRE_STORAGE_EVIDENCE="$out/$profile-native" cargo test --locked --offline \
-            --profile "$profile" -p ic-wire-benchmarks --example caller-storage "${features[@]}" \
+            --profile "$profile" --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example caller-storage "${features[@]}" \
             native_measurement -- --ignored --test-threads=1 \
             > "$out/$profile-native-$mode.log" 2>&1
     done
 done
-IC_WIRE_STORAGE_EVIDENCE="$out" cargo test --locked --offline -p ic-wire-benchmarks \
+IC_WIRE_STORAGE_EVIDENCE="$out" cargo test --locked --offline --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks \
     --example caller-storage --features ic ic_measurement -- --ignored --test-threads=1 \
     > "$out/ic.log" 2>&1
 printf 'Evidence: %s\n' "$out"

@@ -22,7 +22,7 @@ for (const name of ['proc_macro2','quote','syn']) {
  fs.writeFileSync(`${dir}/${name}.path`, artifact.filenames.find(p=>p.endsWith('.rlib')));
 }
 JS
-cp crates/ic-wire-qualification/benches/endpoint_generation/main.rs "$out/main.rs"
+cp qualification/ic-wire-qualification/benches/endpoint_generation/main.rs "$out/main.rs"
 rustc -Vv > "$out/compiler.txt"
 shasum -a 256 Cargo.lock "$out/before/mod.rs" "$out/after/mod.rs" "$out/main.rs" > "$out/inputs.sha256"
 rustc --edition=2024 -O "$out/main.rs" \

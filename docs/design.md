@@ -22,7 +22,7 @@ primitive validation, resource limits and typed errors.
 | Application/framework owner | Authentication, dispatch policy and final artifact admission |
 | Delivery owner | Retry decisions, exact retained bytes and effect recovery |
 | Database owner | Storage layouts, ordered keys and persistence semantics |
-| IC Build | Compiler-diagnostic execution for the private qualification fixture |
+| IC Build | Opt-in compiler-diagnostic execution in the private qualification workspace |
 | Shared Tooling | Reviewed contributor setup, formatting and release mechanics |
 
 The core codec remains Wasm-safe and independent of platform and host tooling.
@@ -41,10 +41,18 @@ selected by an application's lockfile without republishing every dependent
 library. A new minor that changes public type identities or a payload layout
 still needs explicit consumer qualification; these are separate decisions.
 See [typed endpoints](endpoints.md). Browser transports remain consumer-owned. The unpublished
-benchmark crate may use Candid and PocketIC as dev dependencies for codec
-comparisons and IC instruction measurements. The standalone endpoint fixture also
+benchmark crate uses Candid as a dev-only oracle and selects Testkit with `ic`
+for IC instruction measurements. The standalone endpoint fixture also
 uses Platform/Testkit for installed qualification. Published runtime graphs retain
 no Candid or simulator dependencies.
+
+The four published packages resolve in the root workspace. The three private
+qualification packages resolve separately under `qualification/`, consuming
+current product sources by path and retaining their own lockfile. This keeps
+native build/test infrastructure out of product dependency resolution. Within
+qualification, `ic` selects Testkit/Tokio and `diagnostics` selects Build;
+native corpus and allocation work leave both disabled. Release validation
+retains the private proofs; ordinary product checks require only the product graph.
 
 ## Contract discipline
 

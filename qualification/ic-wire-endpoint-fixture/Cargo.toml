@@ -1,0 +1,50 @@
+[package]
+name = "ic-wire-endpoint-fixture"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+ic-platform-types.workspace = true
+ic-wire = { workspace = true, features = ["typescript"] }
+serde_json.workspace = true
+sha2.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Select the native simulator only for installed qualification targets.
+ic = ["dep:ic-testkit", "dep:tokio"]
+schema = ["ic-wire/typescript", "ic-wire-endpoint/typescript"]
+admission-contract = ["dep:ic-wire-qualification"]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+ic-testkit = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+
+[dependencies]
+ic-platform-runtime = { workspace = true, features = ["cdk"] }
+ic-wire.workspace = true
+ic-wire-endpoint.workspace = true
+ic-wire-qualification = { workspace = true, optional = true, features = ["contract-fixture"] }
+serde = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+toko-tooling.workspace = true
+
+[[test]]
+name = "endpoints"
+path = "tests/mod.rs"
+required-features = ["ic"]
+
+[lints]
+workspace = true

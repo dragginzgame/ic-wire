@@ -21,4 +21,3 @@ bash "$root/scripts/ci/check-schema-targets.sh"
 
 bash "$root/scripts/ci/check-bulk-advice.sh"
 bash "$root/scripts/ci/check-platform-types.sh"
-bash "$root/scripts/ci/check-stable-identities.sh"

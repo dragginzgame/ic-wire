@@ -29,7 +29,7 @@ keys and coordinated clients. Native qualification selects facade 0.22 and Testk
 0.85; Testkit's internal management adapter retains facade 0.21. All are outside
 production Wasm, sharing Runtime 0.19.2 and Types 0.18.1. Rust 1.99.1 is minimum and pinned. Source
 qualification uses registry suppliers without Cargo patches; see the
-[standalone fixture](../examples/endpoint/Cargo.toml).
+[standalone fixture](../qualification/ic-wire-endpoint-fixture/Cargo.toml).
 
 ```rust,ignore
 use ic_wire_endpoint::query;
@@ -178,7 +178,7 @@ async fn entry(request: Request) {
 
 The framework must keep the pre-copy admission guard and exactly one reply path.
 It should not export the guarded function separately. The
-[standalone fixture](../examples/endpoint/src/lib.rs) includes an installed
+[standalone fixture](../qualification/ic-wire-endpoint-fixture/src/lib.rs) includes an installed
 composition example proving that dispatch executes once and access refusals keep
 their transport meaning. It contains no Canic policy implementation.
 

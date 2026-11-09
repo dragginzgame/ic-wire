@@ -31,9 +31,10 @@ make tools-check
 make install-hooks
 ```
 
-`make install-tools` also prepares IC Tooling's IC Build 0.80.0 release metadata
-editor with its required `cli` feature. The diagnostic library selects IC Build
-0.80.0 without default features; the CLI feature is only enabled for installation.
+`make install-tools` prepares ordinary development tools. Release setup explicitly
+runs `make install-release-editor`; its `cli` feature is confined to that tool.
+The private diagnostic runner selects Build through `diagnostics`, without
+default features.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -45,15 +46,15 @@ Production Endpoint selects Runtime; optional schemas select canonical Types.
 Native endpoint/codec controls import the async PocketIC client and DTOs from
 `ic_testkit::pocket_ic`, with Testkit also owning server admission/lifecycle.
 Drivers/tests own one Tokio runtime, await client operations and explicitly
-await `instance.close()` before dropping an owned server. Tokio stays in native
-qualification dev dependencies; no per-operation blocking wrappers are added.
+await `instance.close()` before dropping an owned server. Tokio and Testkit are optional native dependencies selected by `ic`; no per-operation blocking wrappers are added.
 Testkit 0.90 constructors receive an explicit 300-second request budget, preserving
 the former default allowance. It covers one complete exchange, including response
 reads and accepted-operation polling. The independent 60/90-second startup
 allowances remain unchanged; expiration is propagated without replaying calls.
-The Platform facade supplies external Candid/crypto controls. See the
+The private benchmark selects upstream Candid directly as its dev-only oracle;
+Testkit supplies native infrastructure through Platform. See the
 [current handoff](status/current.md#compiler-suppliers-and-release-boundary) for the
-qualified supplier cohort; root manifests and Cargo.lock own selections. The
+qualified supplier cohort; each workspace's manifest and lock own its selections. The
 release metadata executable is pinned separately.
 
 Installation is explicit; checks install nothing. IC Wire selects only the
@@ -70,6 +71,30 @@ export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 Hook installation selects repository-local `core.hooksPath`. The reviewed hook
 sorts manifests and formats selected Rust inputs, refuses partial staging and
 preserves unrelated edits. It never installs tools implicitly.
+
+## Independent qualification workspace
+
+The root manifest and lock resolve only the four published packages. The three
+private packages live in `qualification/`, with their own virtual root
+and `qualification/Cargo.lock`. They consume current product sources by path.
+Public releases do not advance private package versions. The release adapter
+updates only the selected public path-package identities in both locks, in one
+Shared-owned rollback transaction; it does not refresh private suppliers.
+Keep both locks reviewed;
+refreshes are explicit dependency maintenance, never a side effect of a check.
+
+Native corpus/allocation checks omit `ic` and `diagnostics`, so they do not compile
+Testkit/Tokio or Build. Compiler refusals select `diagnostics`; simulator checks
+select `ic` and still require an explicitly prepared server. Make targets select
+the correct manifest. Direct private Cargo commands need
+`--manifest-path qualification/Cargo.toml`; use `CARGO_TARGET_DIR=$PWD/target`
+when sharing the repository's prepared build cache.
+
+`check-testkit-boundary` checks the independent product graph;
+`check-integration-boundary` checks the private composition. Future Platform-facade
+identity simulation runs explicitly via `check-stable-identities` and in the
+benchmark release/CI stage, rather than ordinary TypeScript/schema checks.
+Both workspaces remain covered by formatting and dependency-pin checks.
 
 ## Focused commands
 
@@ -92,15 +117,17 @@ host and Wasm targets under that same compiler. There is no separate MSRV lane.
 | `evaluate-endpoints` | All exported endpoint costs and rejection paths; fresh absolute `EVIDENCE_DIR` and instrumented `POCKET_IC_BIN` required |
 | `check-typescript` | Feature-enabled Rust tests, generated vectors and differential mutations; public lint belongs to `lint` |
 | `check-platform-types` | Standalone Principal/Account derives, exact Rust/TS bytes and malformed inputs, Rust 1.99.1 host/Wasm, schema-only/combined endpoint graphs; included in `check-typescript` |
-| `check-stable-identities` | Current and simulated next endpoint/runtime consumers retain identical codec/derive/Principal/Account package IDs; included in `check-platform-types` |
+| `check-stable-identities` | Current and simulated next endpoint/runtime consumers retain identical codec/derive/Principal/Account package IDs; included in `check-benchmarks` |
 | `evaluate-codec-matrix` | Full Wire/Candid cohort roster; requires explicit prepared PocketIC |
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](performance.md) |
 | `fuzz-runtime` | Prepared nightly/C++ coverage-guided codec fuzzing |
 | `fmt-check` | Grouped manifests, derive order and Rust formatting |
 | `check-pins`, `check-boundary` | Dependency inheritance/pins, external IC/CBOR guard, Rust source and browser import boundaries |
-| `check-candid-boundary` | Read-only Candid/CBOR source checks over crates, examples and the generator probe; no Cargo or macro expansion |
+| `check-testkit-boundary` | Locked default/selected native and Wasm graphs, local codec/Types/Runtime identities and Testkit feature isolation; included once in `check-boundary` |
+| `check-integration-boundary` | Separate qualification lock, optional native simulator features and matching product identities; included in `check-benchmarks` |
+| `check-candid-boundary` | Read-only Candid/CBOR source checks over product/qualification crates and the generator probe; no Cargo or macro expansion |
 | `check-browser-boundary` | Shared SDK/CBOR checks for the browser example, crate runtime/fixture JS/TS and inspection helper |
-| `shared-tooling-check` | Recorded snapshot bytes and modes |
+| `toko-tooling-check` | Recorded snapshot bytes and modes |
 | `tools-report` | Aggregate offline host/Cargo/local-tool diagnostics; runs every checker |
 | `check-doc-links` | Maintained local references and every snapshot-declared Shared Markdown file |
 | `check-release-validation` | Source-bound release selector/runner/receipt failure and recovery fixtures; disposable Git only |
@@ -111,7 +138,7 @@ host and Wasm targets under that same compiler. There is no separate MSRV lane.
 The [Candid/CBOR source check](candid-boundary.md) uses ci/candid-boundary.json to
 admit only named unpublished Candid comparison DTOs/helpers, with no CBOR
 exceptions. Shared owns the codec inventory; Wire does not duplicate it.
-The root Cargo check covers all seven workspace members. Materialized schema,
+The product and qualification Cargo checks cover four and three workspace members respectively. Materialized schema,
 bulk-advice, platform-type, compatibility, future-identity and generator CLI
 workspaces invoke the same dependency check before compilation. Generated
 Rust fixture bodies come from the checked source roots; copied Platform source
@@ -124,12 +151,12 @@ New raw benchmark output defaults to `target/evidence/`; keep only compact topic
 results under the [research retention policy](evidence/README.md).
 
 Private corpus correctness checks now use the guest's ordinary test modules:
-`cargo test --locked -p ic-wire-benchmarks --features wire,candid --example codec-wasm`.
+`cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --features wire,candid --example codec-wasm`.
 Add a single cohort feature to select another corpus. The former standalone
 `roundtrip` integration target is retired; no alias or second fixture library remains.
 
 Use the smallest meaningful checks under the
-[validation policy](../DRAGGINZGAME.md#validation-and-evidence).
+[validation policy](../TOKO-TOOLING.md#validation-and-evidence).
 The complete `make ci` gate requires an explicit local request or the selected
 maintainer release operation. Configured hosted CI remains independent.
 
@@ -160,7 +187,7 @@ and optional `vectors` (named arrays of exact retained bytes). Omitted sections
 default to empty. Both snapshots pass Wire's existing schema validation first.
 
 ```sh
-cargo run --locked -p ic-wire-qualification --example check-contract \
+cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-qualification --example check-contract \
   --features schema-fixture -- BEFORE.json AFTER.json
 ```
 
@@ -334,7 +361,7 @@ checkout. Seeds cover every supported word type, both directions, empty fields,
 length-prefix boundaries and partial-word rejection. Existing discovered corpus
 entries are preserved. Cell variant indices in the seed oracle must track the
 qualification enum in
-`crates/ic-wire-qualification/tools/fuzz_runtime/mod.rs`.
+`qualification/ic-wire-qualification/tools/fuzz_runtime/mod.rs`.
 Payload-only checks include maps/sets with reordered or duplicate entries,
 recursive values, zero-sized collections and borrowed text/bytes. They exercise
 fixed and input-dependent limits and compare output-buffer APIs. Maps/sets use
@@ -371,7 +398,7 @@ ignored benchmark tests are explicit measurements, not ordinary CI gates.
 default. To isolate codec work, select a fresh output directory:
 
 ```sh
-cargo run --locked --profile evaluation -p ic-wire-qualification --example allocation --features allocation-fixture -- target/evidence/allocation-codec evaluation --codec-only
+cargo run --locked --profile evaluation --manifest-path qualification/Cargo.toml -p ic-wire-qualification --example allocation --features allocation-fixture -- target/evidence/allocation-codec evaluation --codec-only
 ```
 
 Both modes include primitive validation and result destruction. Codec-only mode
@@ -390,11 +417,13 @@ IC Build is restricted to that unpublished package. Alternative-codec dependenci
 are retired.
 The default codec graph has no Platform or simulator dependencies. The independent
 `ic-wire-endpoint` package selects Runtime's Candid-free `cdk` surface. The optional
-`platform-types` integration independently selects `principal` and host TypeScript
-support; its standalone consumer check also qualifies the combined endpoint graph.
+`platform-types` integration independently selects canonical Types 0.19 and host
+TypeScript support; its standalone consumer check also qualifies the combined
+Runtime 0.21 endpoint graph. Old published Endpoint 0.9's Runtime 0.20 composition
+is not a supported mixed pair for the new canonical Types generation.
 The unpublished benchmark and endpoint fixture packages use Testkit's async
-PocketIC client and lifecycle for qualification; Platform supplies external
-Candid/protocol controls. The historical inline/extracted Endpoint comparison
+PocketIC client and lifecycle for qualification; upstream Candid supplies the
+independent benchmark oracle. Platform 0.28 is selected by native Testkit. The historical inline/extracted Endpoint comparison
 has been retired; its [results](evidence/endpoints.md) remain historical.
 
 For the complete exported-endpoint matrix, run
@@ -412,7 +441,7 @@ the evidence receipt; a standard PocketIC server lacks the trace API.
 ## Snapshot maintenance and release boundary
 
 The reviewed Shared Tooling revision is recorded in
-[AGENTS.md](../AGENTS.md) and the [snapshot manifest](../.shared-tooling.snapshot).
+[AGENTS.md](../AGENTS.md) and the [snapshot manifest](../.toko-tooling.snapshot).
 The main snapshot owns the common setup, formatting, hooks, release runner and
 receipt helper. Update through the canonical exporter and reviewed adoption;
 do not patch snapshot-owned files. Product adapters stay local.
@@ -547,7 +576,7 @@ compilation distinct from runtime performance or consumer deployment acceptance.
 ## Candid comparison benchmarks
 
 For CLI-only changes, run `make check-benchmark-cli` and
-`cargo test --locked -p ic-wire-benchmarks --example codec-report`.
+`cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report`.
 The smoke check uses disposable files, exercises actual Cargo/CLI callers and
 builds the copy-only generator probe; it starts no measurements or servers.
 The initial locked workspace build supplies dependencies for the subsequent
@@ -562,15 +591,15 @@ separate run; the [current report](candid-comparison.md)
 records the latest full matrix. The [0.7.10 report](full-comparison-0710.md)
 retains its matched previous-release qualification; the current refresh is not
 a matched regression comparison against that older dependency/server graph.
-Platform 0.7.5's bounded Candid decoder admits at most 16 constructed wire levels.
-The shared tree comparison therefore uses depth 7 (eight record/vector pairs).
-Depth 8 stays covered as Wire-success / typed Candid nesting refusal, rather than
-a successful-decode speed comparison. Historical `tree-depth-8` measurements and
-the new `tree-depth-7` row have different inputs and must not be paired. The
-upstream guard also adds Candid admission work; old codec reports keep their
-recorded Platform version and do not quantify this new comparison cost.
+The independent upstream Candid oracle retains the 2 MiB byte ceiling, finite
+work/type/header quotas, exact-one-result and trailing-byte checks. Platform's
+former depth-16 pre-scan is removed; depth-8 trees now decode successfully. The
+maintained measured corpus retains depth 7 to preserve case indices. Old and new
+Candid instruction results have different admission policies and must not be
+presented as a codec optimization. Evidence identifies the decoder policy; rerun
+matched matrices after this migration. Production Wire admission is unchanged.
 For the complete maintained comparison, set `POCKET_IC_BIN` to an explicitly
-prepared server and run `make evaluate-codec-matrix`. The maintained 38-cohort
+prepared server and run `make evaluate-codec-matrix`. The maintained 39-cohort
 roster (including `hotspots`) covers standard/Toko corpora, 1/10/100 ordinary
 derived records, bounded packed-i16 and
 ordinary controls, shared/varied bound records, and generic packed integer/hash
@@ -744,22 +773,35 @@ a publication or full CI receipt. Issues 51, 52 and 54 remain declined; 55 is lo
 
 ## Updating the tooling bundle
 
-Select the exact published release in root Cargo.toml:
+Declare the same exact published tooling release once per workspace root
+(`Cargo.toml` and `qualification/Cargo.toml`):
 
 ```toml
-[workspace.metadata.toko-tooling]
-version = "0.34.0"
+[workspace.dependencies]
+toko-tooling = "=0.38.0"
 ```
 
-Run `make shared-tooling-update` after changing that declaration. It resolves
-and installs the declared release, writing `toko-tooling.lock`. Commit that
-lock with the declaration and snapshot receipt. `make shared-tooling-install`
-reinstalls the existing tooling lock; `make shared-tooling-status` and the offline
-`make shared-tooling-check` report/admit declaration, lock and installed bytes.
-There is no tooling dependency or selection-only crate in the application graph;
-application Cargo updates neither select nor install tooling. Initial migration
-uses the new installer from the reviewed source or authenticated source bundle;
-normal registry updates need no sibling checkout.
+Every real workspace package inherits `toko-tooling.workspace = true` in its
+unconditional dev-dependencies and includes `"toko-tooling"` in its existing
+`package.metadata.cargo-machete.ignored` list. No Rust import or selection-only
+package is needed. Keep all real qualification packages.
+
+The exact tooling pin is required by its admission contract. The narrow
+`cargo-exact` exception in `ci/dependency-pinning-exceptions.json` records this
+requirement; qualify pin changes with `make check-pins toko-tooling-check`.
+
+After changing both pins, run `cargo update -p toko-tooling` and
+`cargo update --manifest-path qualification/Cargo.toml -p toko-tooling`, then
+`make toko-tooling-update`. The root Cargo.lock supplies the installer version/checksum;
+there is no separate tooling lock or metadata selection. The installer verifies
+crates.io payloads and preserves recorded entrypoints and consumer-owned edits.
+`make toko-tooling-install` installs the existing Cargo.lock selection without
+updating it. `make toko-tooling-status` and offline `make toko-tooling-check`
+admit the product declarations, Cargo.lock and installed snapshot together.
+`check-integration-boundary` verifies that private members select the same tooling.
+Cargo builds never install scripts implicitly. Ordinary updates need no sibling
+checkout; initial migrations use the published producer installer described in
+[the adoption guide](consuming-snapshots.md#cargo-selection-and-installation).
 
 Custom CI, publication and recovery targets, and the local release adapter,
 check tooling admission before effects. Product release-group selection, frozen

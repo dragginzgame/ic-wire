@@ -5,7 +5,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/rust-policy.sh"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 mkdir -p "$root/target/bulk-advice"
 fixture="$(mktemp -d "$root/target/bulk-advice/consumer.XXXXXX")"
-cp "$root/crates/ic-wire-qualification/tests/fixtures/bulk_advice/build.rs" "$fixture/build.rs"
+cp "$root/qualification/ic-wire-qualification/tests/fixtures/bulk_advice/build.rs" "$fixture/build.rs"
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 : > "$fixture/lib.rs"
 cat > "$fixture/Cargo.toml" <<EOF_MANIFEST

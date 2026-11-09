@@ -23,6 +23,8 @@ function bigEndianArray(Native, getter, setter) {
   };
 }
 const specs = [
+  ['finite-f32', 'Float32Array', 'getFloat32', 'setFloat32', [-0, 1, Math.fround(1e-40)]],
+  ['finite-f64', 'Float64Array', 'getFloat64', 'setFloat64', [-0, 1, Number.MIN_VALUE]],
   ['i8', 'Int8Array', 'getInt8', 'setInt8', [-128, 1, 127]],
   ['i16', 'Int16Array', 'getInt16', 'setInt16', [-32768, 1, 32767]],
   ['u16', 'Uint16Array', 'getUint16', 'setUint16', [0, 1, 65535]],

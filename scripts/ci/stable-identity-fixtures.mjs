@@ -7,13 +7,13 @@ const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const write = (file, text) => fs.writeFileSync(file, text);
 if (mode === 'prepare') {
   const m = read(path.join(out, 'workspace.json'));
-  const local = name => m.packages.find(p => p.manifest_path === path.join(root, 'crates', name, 'Cargo.toml'));
+  const local = name => m.packages.find(p => !p.source && p.name === name);
   const dependency = (owner, name) => m.packages.find(p => p.id === m.resolve.nodes.find(n => n.id === owner.id).deps.find(d => d.name === name).pkg);
   const selection = p => p.source ? `version = "=${p.version}"` : `path = ${JSON.stringify(path.dirname(p.manifest_path))}`;
   const next = version => { const [major, minor] = version.split('.').map(Number); return `${major}.${minor + 1}.0`; };
   const wire = local('ic-wire'), endpoint = local('ic-wire-endpoint');
   const types = dependency(wire, 'ic_platform_types');
-  const platform = dependency(local('ic-wire-benchmarks'), 'ic_platform');
+  const platform = dependency(dependency(local('ic-wire-benchmarks'), 'ic_testkit'), 'ic_platform');
   const runtime = dependency(endpoint, 'ic_platform_runtime');
   const futureEndpoint = next(endpoint.version);
   const nextPlatform = path.join(out, 'next-platform');
@@ -59,7 +59,7 @@ serde = { version = "1", default-features = false, features = ["derive", "alloc"
   for (const lane of ['current', 'next']) {
     const directory = path.join(out, lane); fs.mkdirSync(path.join(directory, 'src'), { recursive: true });
     fs.copyFileSync(path.join(root, 'Cargo.lock'), path.join(directory, 'Cargo.lock'));
-    const fixtures = path.join(root, 'crates/ic-wire-qualification/tests/fixtures/platform_types');
+    const fixtures = path.join(root, 'qualification/ic-wire-qualification/tests/fixtures/platform_types');
     fs.copyFileSync(path.join(fixtures, 'mod.rs'), path.join(directory, 'src/lib.rs'));
     fs.cpSync(path.join(fixtures, 'tests'), path.join(directory, 'src/tests'), { recursive: true });
     const facade = lane === 'current' ? `version = "=${platform.version}"` : `path = ${JSON.stringify(nextPlatform)}`;

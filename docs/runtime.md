@@ -22,6 +22,20 @@ codec bytes, method identities, limits and acceptance remain unchanged for
 consumers that do not select the adapter. Packed integer/hash words retain their
 existing all-bit-patterns-valid invariant; `Packed<bool>` remains unsupported.
 
+`serde_packed::finite_f32` / `finite_f64` explicitly select finite byte fields
+for primitive `Vec<f32>` / `Vec<f64>`. Generated clients use Float32Array /
+Float64Array. Both runtimes validate finite words before allocating decoded
+output; signed zero and subnormal bits remain exact. `[1.0_f32]` changes from
+`01 00 00 80 3f` to `04 00 00 80 3f`, and f64 singleton `01` becomes `08`.
+Raw float NaNs/infinities become invalid; finite wrapper lists already reject
+them but require an explicit domain-type change to primitive vectors. Preserve
+field bounds, coordinate identities/clients, retain original retry/hash bytes
+and requalify buffer budgets. No existing reader or layout changes automatically.
+Validation occurs twice on encoding, as trusted custom Serde work; this does not
+claim per-element instruction admission. No new codec or Packed word invariant
+is introduced. Small-value opt-3 losses and the remaining Candid encode gap are
+recorded in the [finite study](evidence/primitive-bulk.md#matched-finite-float-cost-study--9-november-2026).
+
 `serde_packed::nonzero_i64` and `serde_packed::heap_u64` reuse the existing Packed
 byte codec for `Vec<NonZeroI64>` and `BinaryHeap<u64>`. Selection is explicit in a
 Serde `with` attribute. Nonzero decode rejects zero after bounded word decoding;

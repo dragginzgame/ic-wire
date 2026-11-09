@@ -27,7 +27,7 @@ with bounded defaults and automatic method IDs; explicit overrides remain availa
 Their generator lives in `ic-wire-endpoint-macros` within the Endpoint release
 group, independently of Core's metadata derive.
 See the [endpoint guide](docs/endpoints.md)
-and [standalone consumer](examples/endpoint/src/lib.rs). `ic-platform-runtime` owns IC exports
+and [standalone consumer](qualification/ic-wire-endpoint-fixture/src/lib.rs). `ic-platform-runtime` owns IC exports
 and the executor; the core codec retains its runtime-independent default graph.
 
 Enable `platform-types` for host `Wire` schemas on Platform's owned `Principal`
@@ -66,7 +66,7 @@ The release policy requires `RELEASE_GROUP=core` or `RELEASE_GROUP=endpoint`,
 using each group's ledger, exact metadata files and receipts while retaining the
 complete gate. The [stable identity and release guide](docs/stable-identities.md)
 describes the implemented boundary, migration and publication order. Shared
-Tooling owns the [group mechanism](https://github.com/dragginzgame/shared-tooling/issues/328).
+Tooling owns the [group mechanism](https://github.com/dragginzgame/toko-tooling/issues/328).
 
 ## License
 

@@ -1,7 +1,7 @@
 # Contributions, commits and pull requests
 <!-- Shared companions: docs/release-batches.md -->
 
-These rules are part of the [engineering baseline](../DRAGGINZGAME.md).
+These rules are part of the [engineering baseline](../TOKO-TOOLING.md).
 Direct local edits are the default; requested or required review contributions
 use a topic branch and PR. Human contributors use their normal repository/fork
 permissions. The agent authority below does not restrict that human workflow.
@@ -23,7 +23,7 @@ does not establish current access or authorship of every included commit.
 
 For repositories that adopt an approved contributor agreement, verify executed
 acceptance and rights-holder authority before merging covered contributions.
-Follow the canonical [CLA and relicensing guidance](https://github.com/dragginzgame/shared-tooling/blob/main/docs/licenses.md#contributor-agreements-and-relicensing).
+Follow the canonical [CLA and relicensing guidance](https://github.com/dragginzgame/toko-tooling/blob/main/docs/licenses.md#contributor-agreements-and-relicensing).
 A PR, DCO sign-off or agent-generated checkbox does not establish a signed CLA;
 agents must not sign on another person's or entity's behalf. Publishing an
 agreement does not establish acceptance or configure fleet-wide signing checks.
@@ -34,14 +34,14 @@ agreement does not establish acceptance or configure fleet-wide signing checks.
 
 **Prefer direct edits in the normal authorized checkout when a PR is optional.**
 Ordinary fixes end with reviewable working-tree changes, focused checks and
-[pending notes](changelogs.md#automatic-next-version-selection). Shared Tooling
+[pending notes](changelogs.md#automatic-next-version-selection). Toko Tooling
 also prepares its local `VERSION`; other package versions remain unchanged.
 Use a PR when requested or required by the authorized delivery workflow or branch
 protections. Optional hosted CI is not a reason to add a PR or approval round.
 
 The [authorization table](#agent-authorization) defines Git and release effects.
 Inspect wrappers and Make targets for those effects before running them.
-Beyond the pending notes and Shared Tooling `VERSION` preparation above,
+Beyond the pending notes and Toko Tooling `VERSION` preparation above,
 implementation and validation alone do not authorize staging, commits, package
 version changes, tags, pushes or publication. Disposable validation fixtures may
 exercise those operations only in their documented test repositories.
@@ -153,9 +153,9 @@ permission for already-authorized steps.
 | Merge a PR or push directly to a named integration branch | Perform the specifically authorized action, subject to repository protections and required checks. |
 | Change the repository version to an exact value | Make the named metadata edit and its required consistency updates; no commit, tag, push or release execution. |
 | Run a selected standard release command | Execute its documented release effects under the [release contract](../docs/releases.md); package publication and deployment remain separate. |
-| Release the scoped changes | Select affected approved groups and appropriate semantic-version increments, prepare scoped commits and execute delivery, including direct integration-branch pushes. Publication is included when the established request includes registry delivery. |
+| Release the scoped changes | Select affected approved groups and appropriate semantic-version increments, prepare scoped commits, complete GitHub delivery and publish affected publishable groups to crates.io, without another push/publication approval. |
 | Ship or deploy the scoped crate changes | Complete Git delivery to the established integration branch and registry publication for the affected groups, including validation and verification, without another push/publication approval. |
-| Deploy, without a narrower repository/group or application target | Discover all changed eligible Dragginzgame repositories in the established local projects directory, push their reviewed changes to `origin/main` (or their established integration branch), and release/publish affected eligible crate groups to crates.io in dependency order. |
+| Deploy, without a named repository/group or application target | Deliver only the current repository: push its reviewed changes to `origin/main` (or its established integration branch), and release/publish its affected eligible crate groups to crates.io. Do not discover or include sibling repositories. |
 | Deploy an application to an established environment | Complete its documented build/release/deployment workflow for the named or already established target. Resolve an unknown destination before deployment. |
 
 Carry the repository, base branch, destination and scope already established in
@@ -168,18 +168,34 @@ narrows the authorized steps.
 ## Delegated delivery
 
 Interpret requests by their outcome and session context. “Ship these changes”
-in a crate-publication task includes release and upload; “how do I deploy?” asks
-for guidance. Running only `release-patch` retains its documented Git-only
-effects. Readiness, implementation, policy and PR-only requests are not deployment.
+includes both GitHub delivery and crates.io publication, as do “release” and
+“deploy”; “how do I deploy?” asks for guidance. A request explicitly limited to
+running a particular command retains that command's documented effects.
+Readiness, implementation, policy and PR-only requests are not deployment.
 
-- **An unqualified “deploy” covers all changed eligible Dragginzgame repositories
-  in the established local projects directory.** Inventory dirty changes, commits
+GitHub push and crates.io upload are separate executable steps of one authorized
+delivery outcome. Do not stop after pushing, ask whether publication is wanted,
+or require the user to name both destinations. Publish affected publishable
+groups and verify both destinations before reporting delivery complete. A
+repository with no publishable crates has only GitHub delivery; report that
+crates.io is not applicable. Explicit limits such as "GitHub only", "do not
+publish" or "do not push" still take precedence.
+
+- **An unqualified “deploy”, “ship” or “release” applies only to the current
+  repository in the active task's checkout.** Inventory that repository's dirty changes, commits
   awaiting push and committed releases awaiting publication; verify origins and
   release state. Include reviewed existing changes, required release preparation,
   direct integration to `origin/main` or the established integration branch,
   tags and crates.io publication for affected publishable groups. Deliver changed
-  non-publishable repositories through Git only.
-- A named repository/group, application environment or explicit limit narrows
+  non-publishable changes through Git only.
+- Sibling or fleet delivery requires an explicit user request naming the
+  repositories or selecting a cross-repository scope. Do not scan sibling
+  checkouts, select "qualified" siblings or ask whether an ordinary deploy
+  includes them. Earlier sibling audits, shared dependencies, dirty siblings
+  and other active editor sessions do not expand delivery scope. A previous
+  multi-repository task does not make later unqualified deploys fleet-wide;
+  explicit continuation of an active multi-repository delivery retains its scope.
+- A named repository/group, application environment or explicit limit selects
   scope. `toko`, `toko-miner`, DFINITY and other GitHub owners retain their
   exclusions under the [cross-repository rules](#cross-repository-pull-requests).
   Do not scan arbitrary directories. A dependency blocker or “keep going” alone
@@ -222,7 +238,7 @@ workflow. Prefer direct edits when authorized and a PR is optional.
 `dragginzgame/toko` and `dragginzgame/toko-miner` require explicit inclusion.
 Repositories outside Dragginzgame require explicit destination/action authority;
 DFINITY contributions remain excluded under the
-[own-the-solution rule](../DRAGGINZGAME.md#dfinity-dependencies-own-the-solution).
+[own-the-solution rule](../TOKO-TOOLING.md#dfinity-dependencies-own-the-solution).
 Explicit read-only and no-push instructions remain binding.
 
 - Verify the repository, read its adopted baseline/local overlay, and compare
@@ -264,7 +280,7 @@ PR closure or branch deletion; a policy update does not request fleet adoption P
   authority. Ordinary delivery does not waive these restrictions.
 - Respect branch protections, required checks/reviews and repository permissions.
   Report actual unmet requirements without inventing optional approval gates.
-  Follow the [asynchronous CI policy](../DRAGGINZGAME.md#validation-and-evidence);
+  Follow the [asynchronous CI policy](../TOKO-TOOLING.md#validation-and-evidence);
   pending optional CI alone does not require holding the turn open.
 - Keep each PR scoped to one destination and coherent change. Use its template,
   describing behavior, relevant validation and remaining gaps. Maintain

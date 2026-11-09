@@ -37,7 +37,19 @@ const utf16 = new TextEncoder();
 // Signed-byte packed fields preserve raw Vec<i8> bytes, with bulk budgets and
 // Int8Array ownership. Existing schemas are unchanged; regenerate adopted fields.
 const packedArrays = { i8: Int8Array, i16: Int16Array, u16: Uint16Array, i32: Int32Array, u32: Uint32Array,
-  i64: BigInt64Array, u64: BigUint64Array, hash16: Uint8Array, hash32: Uint8Array } as const;
+  i64: BigInt64Array, u64: BigUint64Array, hash16: Uint8Array, hash32: Uint8Array,
+  'finite-f32': Float32Array, 'finite-f64': Float64Array } as const;
+// Explicit float adapters replace element counts with byte counts (f32: 01 -> 04).
+// Check exponent bits before decode copying, including unaligned input spans.
+function finiteWords(bytes: Uint8Array, width: number, little: boolean): boolean {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  for (let offset = 0; offset < bytes.length; offset += width) {
+    const high = view.getUint32(offset + (width === 8 && little ? 4 : 0), little);
+    const mask = width === 4 ? 0x7f800000 : 0x7ff00000;
+    if ((high & mask) === mask) return false;
+  }
+  return true;
+}
 const littleEndian = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 function swapWords(bytes: Uint8Array, width: number): void {
   for (let start = 0; start < bytes.length; start += width) {
@@ -225,6 +237,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (value.byteLength > out.limit - out.offset) fail('limit');
       if (s.k === 'packed' && s.nonzero && (value as BigInt64Array).includes(0n)) fail('value');
       const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+      if ((kind === 'finite-f32' || kind === 'finite-f64') && !finiteWords(bytes, width, littleEndian)) fail('value');
       if (littleEndian || kind === 'hash16' || kind === 'hash32') out.raw(bytes);
       else { const copy = new Uint8Array(bytes); swapWords(copy, width); out.raw(copy); }
       return;
@@ -325,7 +338,9 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       if (length === 0) return new ctor(0);
       // Check the entire span before allocating. Copy also handles unaligned input
       // and ensures decoded values never retain or mutate the caller's buffer.
-      const bytes = new Uint8Array(input.raw(length));
+      const span = input.raw(length);
+      if ((kind === 'finite-f32' || kind === 'finite-f64') && !finiteWords(span, width, true)) fail('malformed');
+      const bytes = new Uint8Array(span);
       if (!littleEndian && kind !== 'hash16' && kind !== 'hash32') swapWords(bytes, width);
       const value = new ctor(bytes.buffer);
       if (s.k === 'packed' && s.nonzero && (value as BigInt64Array).includes(0n)) fail('malformed');

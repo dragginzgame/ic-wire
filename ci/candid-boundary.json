@@ -2,249 +2,256 @@
   "schema": 1,
   "allowances": [
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/id16/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/id16/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished flattened ID comparison DTO; Wire uses a separate Serde-only Filter and production remains Candid-free",
-      "declaration": "#[derive(Debug, PartialEq, Serialize, serde::Deserialize, CandidType)]\n#[candid_path(\"ic_platform::candid::contract\")]\nstruct ExternalFilter"
+      "declaration": "#[derive(Debug, PartialEq, Serialize, serde::Deserialize, CandidType)]\n#[candid_path(\"candid\")]\nstruct ExternalFilter"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/bulk/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/bulk/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct BulkEnvelope"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct BulkEnvelope"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct ExternalAccountBytes"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct ExternalAccountBytes"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
       "declaration": "impl CandidType for ExternalBytes32"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct BorrowRecord"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct BorrowRecord"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nenum ExternalIp"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nenum ExternalIp"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nenum ExternalSocket"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nenum ExternalSocket"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/hotspots/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/hotspots/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct MixedBlob"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct MixedBlob"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
       "declaration": "pub trait Compared: CandidType"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
       "declaration": "impl<T: CandidType> Compared for T"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
       "declaration": "impl CandidType for Blob"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Scalars"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Scalars"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Message"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Message"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nenum Event"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nenum Event"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Manifest"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Manifest"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct PackedManifest"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct PackedManifest"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\npub(super) struct Node"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\npub(super) struct Node"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct AccountSnapshot"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct AccountSnapshot"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Page"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Page"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct TupleRecord"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct TupleRecord"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nenum GenericEvent"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nenum GenericEvent"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct EmptyRecord"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct EmptyRecord"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nenum Delivery"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nenum Delivery"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/scale/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/scale/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[derive(Debug, PartialEq, serde::Deserialize, Serialize, CandidType)]\n#[candid_path(\"ic_platform::candid::contract\")]\nstruct CandidRecord"
+      "declaration": "#[derive(Debug, PartialEq, serde::Deserialize, Serialize, CandidType)]\n#[candid_path(\"candid\")]\nstruct CandidRecord"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\npub(super) struct ExternalAccount"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\npub(super) struct ExternalAccount"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct SparseRecord"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct SparseRecord"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct WideRecord"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct WideRecord"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/shapes/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\npub(super) enum Value"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\npub(super) enum Value"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Funding"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Funding"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Billing"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Billing"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
       "declaration": "impl CandidType for Id"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Filters"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Filters"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct VariantInput"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct VariantInput"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct TokenCard"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct TokenCard"
     },
     {
-      "path": "crates/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/toko/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
       "reason": "Unpublished named reference DTO or type bound for Wire/Candid qualification; never an owned production endpoint",
-      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"ic_platform::candid::contract\"))]\nstruct Page"
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Page"
+    },
+    {
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/mod.rs",
+      "kind": "codec-comparison",
+      "protocol": "Candid comparator",
+      "reason": "Private independent upstream decoder with explicit quotas and exact single-result framing; never a production API",
+      "declaration": "pub fn decode_candid<'a, T: serde::Deserialize<'a> + CandidType>(bytes: &'a [u8],) -> Result<T, candid::Error>"
     }
   ]
 }

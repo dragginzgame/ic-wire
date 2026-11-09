@@ -409,3 +409,29 @@ for (const [word, ctor, width] of [['i8',Int8Array,1], ['i16',Int16Array,2], ['u
 assert.throws(() => probe({k:'packed',word:'hash32'}).encodeRequest(new Uint8Array(31)),WireError);
 
 assert.throws(() => probe({k:'packed',word:'hash16'}).encodeRequest(new Uint8Array(15)),WireError);
+
+for (const [word, Ctor, width] of [['finite-f32',Float32Array,4],['finite-f64',Float64Array,8]]) {
+  const codec = probe({k:'packed',word});
+  for (const value of [NaN, Infinity, -Infinity]) {
+    assert.throws(() => codec.encodeRequest(new Ctor([value])), WireError);
+  }
+  for (const high of width === 4 ? [0x7f800000,0xff800000,0x7fc00001,0x7f800001] : [0x7ff00000,0xfff00000,0x7ff80001,0x7ff00001]) {
+    const body = new Uint8Array(width * 9);
+    for (const position of [0,4,8]) {
+      body.fill(0);
+      new DataView(body.buffer).setUint32(position * width + (width === 8 ? 4 : 0), high, true);
+      assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,body.length,...body])),
+        e => e instanceof WireError && e.code === 'malformed');
+    }
+  }
+  const values = new Ctor([0,-0,1,-1]);
+  const frame = codec.encodeRequest(values);
+  for (let offset=0; offset<16; offset++) {
+    const padded = new Uint8Array(frame.length+offset); padded.set(frame,offset);
+    const decoded = codec.decodeRequest(padded.subarray(offset));
+    assert.deepEqual(decoded,values); padded.fill(0); assert.deepEqual(decoded,values);
+  }
+  for (let length=1;length<width;length++)
+    assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,length,...new Uint8Array(length)])), WireError);
+  assert.throws(() => codec.encodeRequest([1]), WireError);
+}

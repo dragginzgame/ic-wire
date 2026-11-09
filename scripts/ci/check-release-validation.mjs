@@ -63,6 +63,10 @@ put('crates/ic-wire-endpoint-macros/src/lib.rs', '// Endpoint macro-only candida
 commit();
 assert.equal(select('endpoint-macros').plan.scope, qualified ? 'group' : 'workspace');
 git('reset', '--hard', source);
+put('qualification/ic-wire-endpoint-fixture/src/lib.rs', '// Relocated Endpoint consumer\n');
+commit();
+assert.equal(select('endpoint-private-workspace').plan.scope, qualified ? 'group' : 'workspace');
+git('reset', '--hard', source);
 const core = select('core', 'core'); assert(core.plan.stages.every(s => s.required));
 run(core); seal(core, 'core-proof');
 run(narrow); seal(narrow, 'endpoint-proof'); check('endpoint-proof');

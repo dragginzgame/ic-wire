@@ -32,8 +32,10 @@ implementations and JSON stay out of the Wasm runtime.
 
 Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on the canonical
 `ic-platform-types` Principal and Account. This selects host TypeScript support
-without CDK, executor, Candid or the runtime facade. Platform re-exports these
-same identities; direct `ic_platform_types` imports work too.
+without CDK, executor, Candid or the runtime facade. This integration selects
+Types 0.19; Platform 0.28 re-exports those same identities. Direct
+`ic_platform_types` imports work too. Types 0.18 values are distinct Rust types
+and are not supported by this schema implementation.
 
 Consumers remove Platform's retired `wire-schema` selection and enable Wire's
 `platform-types`. Keep ordinary Serde derives alongside native `ic_wire::Wire`.
@@ -41,6 +43,11 @@ Match the Types supplier and Wire minor when exchanging their Rust types; the
 root dependency catalog records this checkout's selected versions. Runtime
 integration can advance independently when the Types identity remains compatible.
 There are no wrappers, Cargo patches or second schema trait.
+
+The 0.18-to-0.19 Types adoption preserves Principal's 29-byte bound and Account's
+ordered owner/subaccount fields: absent remains `00`, present remains `01 20`
+followed by 32 bytes, including explicit zero. Update Rust supplier selections;
+no client byte format, contract key, budget or persisted-data migration is needed.
 
 Principal's schema stays bounded bytes with maximum length 29. Account stays an
 ordered record of `owner: Principal`, then `subaccount: Option<[u8; 32]>`.
@@ -271,6 +278,23 @@ review limits on the actual target and preserve field bounds; this adapter accep
 `Vec<bool>`, not bounded `List<bool, N>`. No automatic Serde rewriting occurs.
 `Packed<bool>` remains unsupported; its word types require every bit pattern to
 be valid. The bool adapter uses the same Serde/Postcard codec with explicit validation.
+
+For large primitive `Vec<f32>` / `Vec<f64>` fields, explicitly select
+`#[serde(with = "ic_wire::serde_packed::finite_f32")]` or `finite_f64`.
+Wire metadata generates `Float32Array` / `Float64Array`; ordinary number arrays
+are not accepted. Both Rust and browser readers reject non-finite values before
+allocating the decoded vector, preserving signed zero and subnormal bits.
+Little-endian Rust encoding borrows storage; big-endian encoding uses a fallible
+little-endian staging buffer. The two encoding passes both validate the values.
+
+Adoption changes `[1.0_f32]` from `01 00 00 80 3f` to `04 00 00 80 3f`;
+f64's singleton count changes `01` to `08`. Raw float NaN/infinity acceptance
+becomes rejection. Coordinate identities/clients, retain original retry/hash
+bytes and requalify buffer admission. These adapters accept primitive vectors,
+not `Vec<FiniteF32>` / `Vec<FiniteF64>` or bounded lists. Preserve count/range
+constraints explicitly; no per-field bounds are inferred. Small lists may be
+better left ordinary. `Packed<float>` remains unsupported; existing lists,
+integer/hash Packed and consumers without these adapters are unchanged.
 
 ```rust
 use std::{collections::BinaryHeap, num::NonZeroI64};
@@ -815,8 +839,9 @@ review and acknowledge each use-site path, including its primitive suffix.
 Inspect `report.warnings` and `report.stale_acknowledgements`; optionally require
 `report.is_clean()` in consumer CI. Both generators always compute this advice.
 Codec bytes, identities, runtime admission and generated clients are unchanged.
-Bool, float, 128-bit integer and zero-sized lists receive bound/node-limit advice
-even though no production Packed representation exists for them. Warnings do
+Bool and float lists receive explicit field-adapter advice, including bounds and
+adoption review; 128-bit integer and zero-sized lists receive bound/node-limit
+advice without a production Packed representation. Warnings do
 not predict a slowdown ratio: measure legitimate maximum and malformed inputs.
 Advice does not rewrite Serde or affect Wasm. Small lists may be better
 left compact; preserve field bounds and custom validation when adopting advice.

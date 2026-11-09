@@ -12,7 +12,9 @@ host="$(rustc -vV | sed -n 's/^host: //p')"
 graph() {
     local label="$1" package="$2" target="$3"
     shift 3
-    cargo tree --locked --offline -p "$package" --target "$target" \
+    local manifest="$root/qualification/Cargo.toml"
+    [[ "$package" != ic-wire ]] || manifest="$root/Cargo.toml"
+    cargo tree --manifest-path "$manifest" --locked --offline -p "$package" --target "$target" \
         --edges normal,build,dev --prefix none "$@" > "$out/$label.txt"
 }
 reject() {
@@ -26,6 +28,7 @@ graph benchmark ic-wire-benchmarks "$host" --features wire,candid
 graph qualification ic-wire-qualification "$host" --features allocation-fixture
 for label in codec benchmark qualification; do
     reject "$label" 'libfuzzer-sys|dhat|stats_alloc'
+    reject "$label" 'ic-build|ic-testkit|ic-platform|tokio'
 done
 graph schema-cost ic-wire-qualification "$host" --features schema-cost
 grep -Eq '^stats_alloc v' "$out/schema-cost.txt"

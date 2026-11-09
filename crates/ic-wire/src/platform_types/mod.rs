@@ -1,6 +1,10 @@
 //! Host schemas for canonical Platform Types; Platform owns Serde bytes.
 // Transferred from Platform commit 421edbc. Core owns this sole schema trait;
 // neither a facade wrapper nor runtime selection is needed for these schemas.
+// Types 0.18 -> 0.19 changes Rust identity only: the Principal byte bound (29),
+// owner/subaccount order, None = 00 and Some = 01 20 + 32 bytes are unchanged.
+// Consumers select Types 0.19 with this Wire integration; no schema wrapper,
+// byte migration, identity-key rotation or budget change is required.
 use crate::typescript::{GenerationError, SchemaContext, Wire};
 
 impl Wire for ic_platform_types::Principal {

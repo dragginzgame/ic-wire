@@ -1,310 +1,217 @@
 # Current handoff
 
-The [budget predicate screen](../evidence/cost-experiments.md#budget-predicate-screen-8-november-2026)
-rejects combined comparisons and underflow-flag admission rewrites. Both grow
-standard Wasm (154/196 bytes at opt-z) with mostly unchanged or slightly higher
-instruction costs. All 860 instruction pairs pass the margin, but footprint
-checks fail; that is not an optimization win. Keep the independent sticky-refusal,
-overflow and no-partial-debit test. All lanes pass five library and 48 native
-tests; retained test and Clippy pass. Production budget code is unchanged.
-Native timing/memory and a full matrix were not run after rejection. Evidence:
-target/evidence/budget-predicates-20261108/.
+Core 0.18.0 and Endpoint 0.9.0 were delivered at df071a4. Pending local work is
+explicit finite field adapters plus the supplier/tooling adoptions below. Delivery is now authorized for both groups. Core 0.19.0 and Endpoint 0.10.0
+notes are pending because canonical Types Rust identities change. Package version
+preparation and registry delivery have not occurred.
 
-## Testkit 0.94 adoption
+## Toko Tooling 0.38 adoption
 
-Private qualification now selects published ic-testkit 0.94.0. Wire has no
-removed extension-trait/prelude imports, so no caller rewrite is needed. The
-lock drops native Platform 0.26.1 and Host 0.75.1 duplicates, leaving Platform
-0.27.0 and Host 0.76.0. Runtime/macros/guard 0.20.2 and Types 0.18.2 remain
-unchanged. The prepared PocketIC 16.1.0 installed Endpoint catalogue, limits and
-rollback test passes; codec/admission instruction drivers compile. Snapshot,
-dependency-boundary and pin checks pass. No new performance matrix is claimed.
-Codec bytes, identities, budgets and acceptance are unchanged. This private
-supplier adoption alone requires no public release. Evidence: target/testkit094/.
-No commit, push or publication is part of this adoption.
+Adopted the authenticated published 0.38.0 snapshot and both workspace pins.
+The three private packages now live directly under `qualification/`, without
+a redundant `crates/` layer. Updated manifests, callers, source fingerprints
+and documentation together; package identities, bytes, limits and acceptance
+remain unchanged. Both moved workspaces pass locked metadata and fetch; benchmark and qualification
+all-target builds, formatting, documentation, snapshot and dependency boundaries
+pass. Release routing and delivery qualification are in progress.
 
-The [decoder tail screen](../evidence/runtime.md#decoder-tail-screen-8-november-2026)
-rejects separated-tail and unrolled-u32 readers: both grow primary-profile Wasm
-and slow the opt-z wide-u16 control by 12.9%. Unrolled u32 improves its own
-wide decode 8.1%/6.0% at opt-z/3, but ten operation pairs regress; separated-tail
-fails 18. Production parser remains unchanged. Keep the independent Postcard
-oracle for u32/i32/u64/i64 ending bytes, overflow/nonminimal/truncated inputs,
-trailing data and following-field consumption. All three lanes pass 48 native
-tests; the retained test and strict test Clippy pass. No native timing/memory or
-full matrix was run after rejection. Evidence: target/evidence/decoder-tail-20261108/.
+## Independent qualification workspace
 
-The [wider writer screen](../evidence/encoder-followup.md#wider-writer-rejection-screen-8-november-2026)
-rejects three follow-ups. Unrolled u64 reduces wide-list opt-z encode instructions
-26.6% but adds 44.1% at opt-3; direct u16 saves 53.2% at opt-z but adds 32.4%
-at opt-3. Reusing the u32 writer for u16 shrinks Wasm but slows u16 59.2% at
-opt-3 and regresses retained u32 by 7.3%/20.3% at opt-z/3. All pass 47 native
-tests; cost screens fail 12/four/12 operation pairs. Native timing/memory was
-not run after rejection. No new production changes; the retained u32 writer
-and Build 0.80 adoption remain intact. Evidence: target/evidence/wide-writers-20261108/.
+The four public packages now resolve through the root manifest/lock without
+Build, Testkit, the Platform facade or Tokio. The three existing private packages
+moved to `qualification/` and share `qualification/Cargo.toml` and its
+own lock. They consume current public sources by path; private versions remain
+unchanged. Native corpus/allocation work leaves `ic` and `diagnostics` disabled,
+so simulator and Build dependencies are absent from those compilation graphs.
+Optional canonical Types schemas and Endpoint's Runtime owner are retained.
 
-## IC Build 0.80 adoption
+Ordinary tool setup excludes the release editor. Release setup selects it
+explicitly; the metadata adapter uses Shared's transaction and Build's editor
+to update public identities in both locks atomically, including rollback when
+private resolution refuses. No private supplier refresh is implied by release.
+The full/Endpoint release rosters remain 20/11; future facade simulation and
+integration graph checks belong to the explicit benchmark qualification stage.
 
-The private diagnostic dependency and separately installed release-metadata
-executable now select published ic-build 0.80.0. Its batch-report API cut has
-no Wire callers. Required private dependencies add Host 0.76 and HMAC 0.13;
-older Host identities remain for other private suppliers. Runtime/Types,
-production codec bytes, identities, budgets and acceptance are unchanged.
-Installation/offline executable admission, eight Core and thirteen Endpoint
-diagnostic refusals with passing controls, both groups' metadata prepare/check
-in a disposable fixture, oversize editor-input rejection, dependency boundaries
-and tooling snapshot verification pass. No actual release effects occurred.
-Evidence: target/build080/. This tooling-only adoption needs no additional
-public release and does not requalify the preceding performance study's lock.
+Product tests, native corpus/allocation/contracts, both diagnostic suites,
+private native Clippy, benchmark/Endpoint Wasm checks, current/future identity
+consumers, CLI routing, source boundaries, formatting and docs are qualified.
+The isolation fixture proves an incompatible Testkit selection fails only the
+private workspace. Both groups' disposable metadata fixtures qualify lock
+updates, unchanged private versions and rollback. Pins are checked in the
+tracked disposable fixture: the normal checkout's new lock remains untracked,
+so its tracking guard correctly refuses until delivery captures the new files.
+Evidence: `target/wire-isolation-*.log` and product/integration-boundary reports.
+No full CI, simulator/cost matrix, commit, push or publication was performed.
+This refactor changes no codec bytes, identities, limits or acceptance and alone
+requires no public release. No wall-time or artifact-size saving is claimed.
 
-Adopt the [bounded unrolled u32 writer](../evidence/encoder-followup.md#bounded-unrolled-u32-writer-8-november-2026)
-for pending Core 0.18.0. Wide-list encode IC instructions drop 45.1% at opt-z
-and 14.0% at opt-3; all 860 hotspot instruction pairs pass. Signed32 modules
-and all 1,070 counters remain identical. Allocations/heap match. Toko-shaped
-Wasm shrinks 184/273 total bytes at opt-z/3; standard opt-z grows 218 bytes,
-while standard opt-3 shrinks 1,590. The hotspot screen fails its opt-3 size
-rule (+159 bytes), explicitly accepted for the instruction gain. Native
-small/mixed opt-z regressions remain reported. Loop-only candidates are not
-adopted. Native/runtime and signed32 tests plus Core Clippy pass; this is not a
-full matrix or application measurement. Bytes, identities, budgets and acceptance
-are unchanged: u32 128 stays 80 01, u32::MAX stays ff ff ff ff 0f. No migration,
-client regeneration or retry/hash change; Endpoint needs no release for this.
-Pending tooling edits are preserved. Evidence: target/evidence/u32-split-20261108/.
+## Canonical Types 0.19 schema adoption (#58)
 
-Release qualification now follows the workspace Endpoint minor series instead
-of a fixed 0.8.0 pin. Current Core/Endpoint pairs are always tested; an old
-published Endpoint tied to Core 0.17 is explicitly unsupported with Core 0.18.
-Same-line identity splits still fail. Both current 0.17 and prospective 0.18
-checks pass; four public package payloads match the approved source, excluding
-Git provenance. Evidence: target/deploy018-prospective/ and
-target/deploy018-equivalence/. No push or publication has occurred.
+Core's optional platform-types selects Types 0.19.0; Endpoint and benchmark IC0
+select Runtime/macros/guard 0.21.0 directly. Principal/Account schema code and
+byte vectors are unchanged: Principal is at most 29 bytes, absent subaccount is
+00 and present is 01 20 plus 32 bytes. Align consumers' Rust Types generation;
+no byte, method identity, admission-budget or persisted-data migration is needed.
 
-## Platform 0.27 qualification
+Standalone Rust/TypeScript roundtrips and malformed inputs, host/Wasm isolation,
+combined Endpoint composition and simulated future facade identities pass. The
+installed Endpoint catalogue/limits/rollback test passes on the existing PocketIC
+server. Evidence: target/issues58-56/. The consumer uses local unpublished Wire
+with registry Types 0.19; registry-only Wire delivery remains outstanding.
 
-The unpublished benchmark facade now selects published ic-platform 0.27.0.
-Testkit 0.93.2 retains facade 0.26.1 in native qualification only. Runtime,
-macros and the sole guard remain 0.20.2; canonical Types remain 0.18.2. Wire
-does not call the removed management raw_rand API, so no source migration is
-needed. Standard and coverage comparison controls pass (22 tests), as do
-Clippy, the benchmark Wasm build, dependency boundaries, pins and tooling
-snapshot/lock verification. No new performance or Wasm saving is claimed.
-Production codec bytes, identities, limits and acceptance are unchanged. This
-private supplier change alone does not require a public release. Evidence:
-target/platform027/. Existing pending product releases remain separate.
+Testkit 0.96 now selects native Platform 0.28 and canonical Types 0.19. Native
+callers use that identity directly; the temporary RawPrincipalId conversion is
+removed. Private comparison selects upstream Candid 0.10.40 directly; the old
+Platform 0.27 facade and Types 0.18 have left the graph. Bigint 0.4.8 remains only
+the approved upstream-Candid dev-type exception; Platform independently uses
+0.5.1. Core and Endpoint retain one Runtime/guard generation.
 
-## Toko Tooling 0.34 root-owned selection
+The oracle now uses upstream configured decoding with the same byte ceiling,
+quotas and exact-one-result framing, without Platform's former depth-16 pre-scan.
+Depth-8 trees now pass. Production Wire acceptance is unchanged. Evidence records
+`upstream-exact-one-no-platform-nesting-prescan`; previous matrix comparisons
+are historical until a fresh matched run. No speed or Wasm savings are claimed.
+Evidence: target/platform028-testkit096/. The upstream tooling exception is
+released as 0.37.5 (Git 1ea86ca and crates.io) with focused refusal tests;
+its authenticated registry snapshot is installed and admitted (156 files).
+Wire itself is not being delivered.
 
-Root Cargo.toml workspace metadata selects exact toko-tooling 0.34.0;
-toko-tooling.lock owns registry identity/checksum independently of application
-Cargo.lock. The installed snapshot matches checksum
-5ca8ad09ad9359bc4945a4afdaafce301dd5a4b4955cd5c9f5058d7a54ffcf10.
-The old workspace dependency and private dev-dependency are removed; Cargo
-removed only the marker and its dependency edge. All seven real members remain,
-including qualification’s tools/tests; there was no marker-only package to delete.
-Use shared-tooling-update after changing the root version, or
-shared-tooling-install to reinstall the existing tooling lock. Application Cargo
-updates no longer select tooling. Custom CI, publication, recovery and local
-release adapters delegate admission to shared-tooling-check before effects.
-Product group gates and publication exclusions remain unchanged. Installation,
-tool admission and 154-file snapshot verification pass; all 79 entrypoints remain.
-Focused checks pass: seven-member/default-member/release-group consistency,
-unchanged non-tooling lock selections, private compilation, dependency/pin
-boundaries, formatting/docs, 16 CI classifications and 256 gate combinations.
-Ten drifted-entrypoint refusals and the complete disposable Make routing/
-publication/formatting-hook fixture pass, with real release effects substituted.
-No active tooling dependency, marker-only package or cargo-machete exception
-remains. Evidence: target/toko034/. No commit, push or release is part of this
-migration.
+All 26 maintained host corpus selections pass correctness tests and Clippy; all
+20 Wasm selections compile. Default oracle tests cover exact arity, trailing
+bytes, byte ceilings and the changed nesting acceptance. Native drivers compile;
+installed Endpoint catalogue/limits/rollback, stable identities, 22 graphs/eight
+checker tests, source/Cargo boundaries, pins, formatting and docs pass. An initial
+network-restricted Cargo attempt was resumed offline after preparing the new
+tooling package; both logs are retained. This is not a new performance matrix.
 
-Delivery preparation selects Core 0.18.0 then Endpoint 0.9.0, with frozen
-source and full group gates. Endpoint’s inherited Core requirement advances
-with the Core minor cut. Public crate pairs publish supplier-first; private
-qualification packages remain excluded. Delivery is not yet complete.
+Issue 56 was rechecked on 9 November: crates.io still supplies only Postcard
+1.1.3, so its already-qualified upstream derive removal remains unreleased.
 
-Cleanup issues 51–56 are investigated; see the
-[decisions](../development.md#cleanup-investigation-decisions-8-november-2026).
-One CI qualification gate replaces three identical scaffold jobs; 192 local
-state combinations and workflow lint pass. Issues 51, 52 and 54 remain declined.
-Issue 53 now suppresses discarded schema rendering in the shared walker; the
-[host study](../evaluation.md#host-schema-rendering-suppression-8-november-2026)
-measures 40–56% faster opt-z validation and large allocation reductions. Small
-generation adds 85 ns (4%); generated output and rejection results match. Native
-tests, Clippy, TypeScript/endian conformance and dependency checks pass.
-Issue 56 now tracks published-release adoption: upstream PR 219 already merged
-the derive removal. Pinned-upstream codec/schema host/Wasm and error-byte checks
-pass; isolating derive gives 2.53 → 1.85 s clean native build medians (26.9%).
-The registry index still ends at old 1.1.3; production selection is unchanged.
-See the [qualification](../evaluation.md#postcard-derive-dependency-qualification-8-november-2026).
-No new codec or Wasm saving is claimed.
-Hosted gate execution awaits delivery.
+## Finite float adapters
 
-Shared 0.31.12 / eb3c8e0 updates cloc progress and terminal presentation;
-codec and runtime behavior are unchanged.
+The [public finite-adapter qualification](../evidence/primitive-bulk.md#public-finite-adapters--9-november-2026)
+implements explicit finite_f32 / finite_f64 Serde fields with typed-array clients,
+actual Vec type checks, finite-before-copy validation and lint advice. No new
+codec or Packed word type. Ordinary fields and runtime admission are unchanged.
+Adoption changes singleton f32 prefix 01 to 04, f64 01 to 08; coordinate
+identities/clients, preserve bounds and retained bytes, and requalify budgets.
 
-The preceding Shared **0.31.11 / 6c529e6** adoption was exported from the pinned
-upstream commit, excluding sibling working changes. CI restores authenticated
-tool downloads before setup and saves them before product checks. One Gitleaks
-scan remains outside the host/group matrix. Crate/module cloc selectors and the
-updated ordinary-issue closure policy are adopted. This tooling-only update
-does not select an additional public release or alter codec/runtime behavior.
-Snapshot verification (146 files), 995 documentation references, actionlint,
-crate/module cloc selection and disposable Make validation routing pass. Hosted
-cache restore/save remains unexecuted locally. Evidence: `target/shared03111/`.
+Matched public opt-z 1 MiB f32 encode/decode costs 7,210,930/10,159,614 versus
+ordinary 72,877,809/19,930,633, saving 473 total/543 code Wasm bytes. f32 encode
+still costs 3.40 times raw Candid. Opt-3 public Wasm saves 645 total/612 code
+bytes, but 20 small-control instruction comparisons fail the margin. Keep the
+large-field choice explicit; this is not a passing all-profile cost screen.
 
-## Pending Core 0.18.0: rooted lint hard cut and i32 writer
+Native tests, malformed/allocation refusal, nine compiler refusals, standalone
+host/Wasm consumers, generated Rust/TS bytes and simulated browser endian tests
+pass. Native big-endian execution is not qualified. Final adapter hashes and
+fresh modules verify; results are fixture measurements, not application savings.
+Raw evidence: target/evidence/finite-float-cost-20261109/{public,public-qualified}/.
+The maintained follow-up corpus adds ten finite-only cases (134 total); both
+coverage/research correctness suites pass. No full enlarged matrix was run.
 
-Core 0.18 requires `lint_bulk_roots` and rooted acknowledgement paths. Serde
-derive selection is explicit. Codec bytes, identities, runtime budgets and
-acceptance remain unchanged; no stored-data migration.
-Historical conformance timings, Endpoint extraction comparisons and the private
-Boolean prototype are retired. Benchmark integrity fixes use captured source
-and distinct query callers; Endpoint reports reject duplicate callers and unsafe
-counters. Postcard still selects Serde derive transitively: direct feature
-ownership cleanup does not yet save that compilation.
+The [full Candid matrix](../candid-comparison.md) completes 39 cohorts, 2,194
+overlapping cases and 8,776 primary comparisons on the pending supplier lock.
+Wire is smaller in total/code Wasm in all 78 cohort/profile pairs. All 156 guest
+builds, 46,178 IC rows and 148,832 native/frame comparisons verify. Native time
+is shared-host evidence. Raw source/results: target/evidence/codec-matrix-20261109/.
+The mixed cohort's raw float prototype does not enforce finite-only semantics.
 
-Focused checks pass: 97 Core tests (three timing probes ignored), 16 corpus tests,
-three contract tests, 19 report corruption cases, Clippy, standalone host/Wasm
-consumers, released Endpoint coherence and Rust/TS conformance (178 vectors,
-39,448 mutations). Caller-storage orchestration
-was checked with 23 substituted Cargo invocations; no new PocketIC cost study
-or production Wasm saving is claimed. Evidence: `target/architectural-core/`,
-`target/architectural-qualification/` and `target/architectural-compatible.log`.
-Fingerprint cleanup removes 69 host-only lines; 22 mappings and 30 verifier cases pass.
-The cohort roster now owns qualification subsets: dry dispatch preserves exactly
-26 test/26 Clippy/20 Wasm calls and all 39 measurement rows. No matrix rerun.
-Current lock selects Testkit 0.93.2; focused checks are not supplier qualification.
-Removed `check-msrv`; dry dispatch retains host/Wasm checks and compiler admission.
-Endpoint qualification now shares its scenario catalogue and result checker in
-one private integration target. Installed checks also execute the unchanged cost
-catalogue; explicit transaction-history proofs and independent trace validation
-remain. This removes 71 net Rust lines from the two prior test roots, including
-the new shared modules. Installed PocketIC 16.1.0, Wasm build, strict Clippy,
-exact runner discovery and report-corruption checks pass;
-no profiler cost rerun or production Wasm saving is claimed. Bytes, identities,
-limits and acceptance are unchanged. Evidence: `target/endpoint-consolidation/`.
-No full CI/delivery; package versions remain unchanged.
+The rejected 9 November [reader studies](../evidence/runtime.md) and
+[u32 threshold experiment](../evidence/encoder-followup.md#u32-length-thresholds-9-november-2026)
+remain recorded with their size/instruction losses; do not repeat them unchanged.
 
-Adopt the [raw-tuple i32 writer](../evidence/encoder-followup.md#raw-tuple-i32-follow-up-8-november-2026).
-The maintainer accepted opt-z as the primary decision profile and opt-3 as a
-secondary regression check. At opt-z, 4,096-element small/wide-list/deque/set
-encode instructions drop 46%/28%/37%/30%, at a cost of 150/90 total Wasm bytes
-in focused/standard fixtures. Opt-3 saves 1,143/420 Wasm bytes; wide-list encode
-adds 3.52%, while small-list/deque/set improve 54%/34%/30%. All 482 matched
-operation pairs meet the instruction margin; the automated no-growth screen
-still fails and is explicitly accepted, not reported as a pass. Allocation/heap
-and Candid controls stay identical. These are fixture results, not application
-savings or a fresh full matrix.
+## Previous Toko Tooling 0.37.5 qualification
 
-Bytes, schemas, identities, limits and acceptance remain unchanged: i32 -64
-remains `7f`, 64 remains `80 01`. No consumer migration, client regeneration or
-retry/hash change. This affects Core production; Endpoint needs no release.
-Native tests, slice-output coverage, both standard/signed32 corpus tests and
-Core/corpus Clippy pass. Fresh production signed32/standard Wasm matches all
-four measured candidate modules byte-for-byte. The private roster
-now has 39 cohorts, adding 49 [baseline cases](../candid-comparison.md#signed32-follow-up-8-november-core-01714).
-Deque tests cover all 128-element storage splits and exact/one-short limits;
-scalar prefix tests cover the four-/five-byte transition. Evidence: `target/evidence/signed32-20261108/`.
+Before workspace isolation, published 0.37.5 was selected at the root Cargo dev
+pin inherited by all seven packages. This selection is superseded by 0.38.0 above. The authenticated exporter preserves 156 snapshot files and
+all explicit entrypoints. Registry checksum:
+9fc1a752f4f8203d999c4cd593afb9ea18717b28d407492fc98aab5722526be3.
 
-The subsequent [unsigned writer study](../evidence/encoder-followup.md#unsigned-writer-sharing-8-november-2026)
-rejects a combined u32/i32 + u64/i64 rewrite. It saves 301 standard / 613
-Toko-shaped opt-z Wasm bytes, but slows wide i32 by 5.56% at opt-z and wide u64
-by 49.9% at opt-3. Twenty-four of 860 operation pairs fail the instruction screen;
-frames, Candid controls and allocation/heap measurements match. No additional
-production change. Evidence: `target/evidence/integer-writers-20261108/`.
-An independent lock edit selects Build 0.79.1 / Host 0.75.1; it is preserved.
-This study uses the previous frozen lock and does not qualify that supplier update.
+The narrow upstream boundary exception admits only unpublished
+ic-wire-benchmarks' unconditional Candid dev dependency. Normal/build,
+target-specific, public, other-owner and other-SDK edges remain refused.
+Tooling was explicitly authorized for delivery: Git 1ea86ca, tag v0.37.5 and
+crates.io publication are verified. Wire installation/tool admission, pin and
+source/Cargo boundary checks pass. Its 22 identity graphs and eight checker tests
+now require one Types generation; no temporary older-Types exception remains.
+Evidence: target/platform028-testkit096/. Wire is uncommitted and unpublished.
 
-## Delivered: Core 0.17.14
+Use toko-tooling-check/update/install/status, TOKO_TOOLING_* variables,
+TOKO-TOOLING.md and .toko-tooling.snapshot. No old-command aliases are retained.
+Historical delivery receipts preserve their original stage names.
 
-Core/derive **0.17.14** is on origin/main and crates.io. Tag **core-v0.17.14**
-selects **c0bfb8b**, from source **5c9bc81** in frozen batch **batch-InHQ5_ZW**.
-All **20 Linux gate stages** passed, including benchmark correctness, standalone
-consumers, Endpoint compatibility and Rust/TypeScript conformance. Final
-all-feature packages passed; independent registry downloads match uploaded and
-all-feature checksums and release provenance. The normal checkout is reconciled.
-The [delivery receipt](../../releases/receipts/published-core01714/delivery.json)
-owns exact identities. Evidence: `target/core01714-delivery/` and the frozen
-checkout. Hosted CI is asynchronous; native macOS is not claimed.
+## SHA-2 update and bigint probe
 
-The existing Packed visitor now uses a checked slice copy for signed bytes and
-16-/32-byte hashes on little-endian targets. Wider words and big-endian readers
-stay intact. Matched opt-z IC decode drops **112,047 → 67,100** for 4,096 IDs and
-**394,599.5 → 17,879.5** for 16,384 signed bytes. Whole-fixture total/code Wasm
-shrinks **30/19 bytes** (ID) and **70/28 bytes** (bulk) at opt-z/3. Singleton
-opt-z decode can add up to **104 instructions**. All **1,032 operation pairs**
-pass the cost policy; allocation counts and heap stay unchanged. Focused Packed
-byte/admission/endian tests and Clippy pass. The
-[matched study](../evidence/primitive-bulk.md#byte-aligned-packed-copy-8-november)
-records native time, regressions and reproduction under
-`target/evidence/packed-copy-20261108/`. These are fixture measurements, not
-application savings or a fresh full matrix. Bytes, schemas, identities, limits
-and acceptance remain unchanged: one packed ID is still `10 + 16 bytes`, and
-eight remain `80 01 + 128 bytes`. No consumer migration or regeneration is needed.
+Private qualification selects SHA-2 0.11.1 with defaults disabled. Explicit hex
+formatting replaces the removed digest LowerHex implementation; existing corpus
+hash assertions pass. No production codec or protocol change, no measured Wasm
+or instruction saving. Unrelated supplier selections are preserved.
 
-## Suppliers and Endpoint
+num-bigint 0.5.1 fails the real Candid Nat conversion with E0308: Candid 0.10.40
+exposes the distinct 0.4 BigUint type. The working 0.4.8 selection and unchanged
+measurement path are retained with maintainer approval (9 November) of the dev-only
+[exception](../evaluation.md#candid-bigint-type-identity). Evidence and focused
+host/Wasm checks: target/deps0374/. No commit, push or publication.
 
-Rust/Cargo **1.99.1** remains floor and pin. This release selects Shared
-**0.31.9 / d95f271**, Build **0.79.0**, Host **0.75.0**, Platform **0.26.0**,
-Types **0.18.2**, Runtime/macros/guard **0.20.1** and Testkit **0.93.1**.
-Testkit retains native-only Platform **0.25.1**; execution selects one guard.
-The previously deferred Testkit selection at **c134348** on
-`deferred/endpoint081-testkit0931` is now included and qualified. No supplier
-patches, wrappers or sibling checkout edits. Production stays Candid/Testkit-free;
-schema-only Core stays Runtime/CDK-free. PocketIC **16.1.0** was used for the
-matched instruction study. No installed application performance proof is claimed.
+Default/coverage/signed corpora pass (6/16/9 tests), including retained digest
+goldens and Nat conversion bounds. Benchmark and qualification all-target host
+checks/Clippy, Endpoint test compilation and coverage guest Wasm compilation pass.
+Tool setup/check, 156-file snapshot admission, pins, dependency boundaries,
+20 Testkit graphs, CI selection, 20/11-stage release routing and docs pass.
+No full matrix or simulator rerun was required for these private evidence changes.
 
-Endpoint/macros remain at **0.8.1**. Tag **endpoint-v0.8.1** selects **5bb495a**,
-from source **e0f42ca** in batch **batch-sLAg4biN**. Its full 20-stage Linux gate,
-all-feature archives and independent registry readback passed; see its
-[receipt](../../releases/receipts/published-endpoint081/delivery.json).
-That release used Testkit **0.93.0**. Its preceding installed typed-call, limit
-and transaction checks used PocketIC 16.1.0, not newly installed registry packages.
-Endpoint 0.8 aligns Runtime/Timers with one exact 0.20 guard and ordinary `cdk`
-macros; frames, identities, budgets, exports and rollback remain unchanged.
+## Build 0.81 / Testkit 0.95 / Host 0.76.1 adoption
 
-Shared 0.31.9 scopes formatting to workspace members, adds the hashing policy
-and replaces the LOC selector with `CLOC_DEPTH` / `cloc.sh -d`. It does not change
-the downloader involved in the earlier hosted HTTP 504 bootstrap failures.
-Adoption evidence remains under `target/adoption-20261108/`.
+Root declarations and the release-metadata executable now select Build 0.81.0
+and Testkit 0.95.0. Host artifacts/fs/process remain at the already selected
+0.76.1; Testkit adds native Host HTTP 0.76.1. Wire has no callers of the removed
+Build batch-error wrapper or generic PocketIcInstance, so no source migration
+is needed. The targeted lock update changes only Build/Testkit and adds Host
+HTTP. Pre-existing Platform 0.27.1, Runtime/macros/guard 0.20.3, Types 0.18.3,
+Syn 3.0.10 and itoa 1.0.19 edits are preserved.
 
-## Prior qualification and contract boundaries
+Eight Core and thirteen Endpoint diagnostic refusals plus passing controls,
+codec/admission instruction-driver compilation, the installed PocketIC 16.1.0
+Endpoint catalogue/limits/rollback test, both groups' disposable metadata edits
+and oversize editor-input refusal pass. Tool installation/admission, snapshot,
+dependency boundaries and pins pass. Evidence: target/adoption-20261109/.
+Codec bytes, identities, budgets and acceptance are unchanged; no performance
+matrix or new Wasm saving is claimed. These private supplier updates alone need
+no public release. Changes are uncommitted; no push or publication was requested.
 
-Core **0.17.13** retains its [receipt](../../releases/receipts/published-core01713/delivery.json).
-Its public ID field changes ordinary `01 + 16 bytes` to packed `10 + 16 bytes`; eight IDs change
-`08 + 128 bytes` to `80 01 + 128 bytes`. New field adoption requires coordinated
-identities/clients, original retained retry/hash bytes and reviewed budgets.
-The [flat-Candid study](../evidence/primitive-bulk.md#public-16-byte-ids-and-flat-candid-8-november)
-corrected the earlier nested-vector comparison; retain its ordinary controls and
-borrowed-input copy costs. The latest copy optimization addresses its two large-ID
-opt-z losses. Original evidence: `target/evidence/id16-flat-20261108/`, `target/id16-work/`.
-Actual native big-endian execution remains unqualified.
+## Native Testkit qualification boundary (#57)
 
-Rejected experiments remain in [primitive bulk](../evidence/primitive-bulk.md)
-and [bound sharing](../evidence/bound-sharing.md); do not repeat those candidates.
-The earlier 7 November raw targets were found removed; summaries do not prove
-those artifacts remain available. The [full comparison](../candid-comparison.md)
-is still the 36-cohort Core 0.17.6/Testkit 0.89.4 study: 2,105 cases and 8,420
-primary comparisons. The maintained roster has 39 cohorts; no fresh full run.
+The existing check-boundary stage now runs check-testkit-boundary: eight checker
+tests and twenty locked host/Wasm dependency graphs pass. Private native harnesses
+use raw Testkit transport with its optional Wire adapter disabled; published
+graphs remain Testkit-free. Local Wire, Types and Runtime identities are checked,
+including one execution guard. Evidence: target/testkit-boundary.hPbjkJ/.
 
-Keep one Serde/Postcard codec and no silent field rewrites. Collection/custom
-Serde normalization remains consumer-owned, so preserve original retry/hash bytes.
-Metadata advice does not cover every codec-only/custom layout. Account's
+Core and Endpoint retain their existing product proofs and 20/11-stage release
+plans. No reciprocal wait for Testkit's optional adapter is introduced. Ownership
+and callers are documented in [evaluation](../evaluation.md#native-qualification-ownership).
+Bytes, identities, budgets and acceptance remain unchanged. This change is local,
+uncommitted and unpushed; no simulator rerun or performance saving is claimed.
+
+## Remaining boundaries and custody
+
+Postcard's derive-feature removal remains a published-supplier follow-up; Wire
+still selects 1.1.3. See the [qualification](../evaluation.md#postcard-derive-dependency-qualification-8-november-2026)
+and issue 56 rather than treating the previous upstream probe as an adoption.
+Native big-endian execution remains unqualified. Keep one codec, no silent field
+rewrites, original retry/hash bytes and consumer-owned normalization. Account's
 [0.16 cut](../../releases/core/0.16.md) remains `01 20 + 32 bytes` for present
-subaccounts and `00` for absent ones. Method IDs/name defaults remain production
-behavior; fingerprint macros remain research.
+subaccounts and `00` for absent ones. Method IDs remain production behavior;
+fingerprint macros remain research.
 
-## Evidence and recovery custody
-
-Preserve current evidence, prepared server, journals and managed release state;
-no cleanup is authorized. Older paths may have been removed externally; receipts
-alone do not prove checkout availability. Prior records live under
-[releases/receipts](../../releases/receipts/README.md), including Core 0.17.12 /
-Endpoint 0.8.0. Failed Core batches **batch-mzOGyRZA** (source **89e1240**) and
-**batch-Oup1NG9b** (source **e83ad0b**) had no delivery effects and are superseded;
-retain their state without resuming. Core 0.17.13's receipt records their fixes.
-Failed **batch-1afAufRB** is also superseded. Completed **batch-1i9z2IIG** was
-reconciled but its checkout was removed; deferred lock **7fd813f** on
-`deferred/core0176-lock` was reapplied. Never resume the schema-1 0.17.5 batch
-with schema 2. History was intentionally replaced: fresh-clone rather than merge
-obsolete refs, and never re-upload published versions to repair Git history.
+Preserve evidence, target/id16-work/pocket-ic, journals and release state; no
+cleanup is authorized. Older paths may have been removed externally; receipts
+do not prove checkout availability. [Delivery receipts](../../releases/receipts/README.md)
+retain prior identities. Failed batches batch-mzOGyRZA, batch-Oup1NG9b and
+batch-1afAufRB are superseded: do not resume them. Completed batch-1i9z2IIG was
+reconciled but its checkout was removed; deferred lock 7fd813f was reapplied.
+Never resume schema-1 0.17.5 with schema 2. History was intentionally replaced:
+fresh-clone obsolete refs and never re-upload published versions to repair Git.
 Future delivery uses explicit groups, Core's 20 stages and qualified Endpoint-only
-Linux's 11. Stage reuse/final-candidate opt-ins remain disabled.
+Linux's 11; stage reuse/final-candidate opt-ins remain disabled.

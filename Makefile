@@ -1,12 +1,10 @@
 .DEFAULT_GOAL := help
 
-override SHARED_TOOLING_ROOT := $(CURDIR)
-SHARED_TOOLING_RUST := 1
+override TOKO_TOOLING_ROOT := $(CURDIR)
+TOKO_TOOLING_RUST := 1
 _wire_cargo_target_origin := $(origin CARGO_TARGET_DIR)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0
-LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
-LOCAL_TOOL_CHECK_TARGETS += release-editor-check
 export RELEASE_GROUP
 # Refuse ambiguous group effects before any setup, gate or release runner.
 ifneq ($(filter-out release-editor-check release-batch-status release-batch-resume release-batch-reconcile release-batch-retire,$(filter release-% publish publish-check version,$(MAKECMDGOALS))),)
@@ -28,7 +26,7 @@ unexport CARGO_TARGET_DIR
 endif
 endif
 RELEASE_SETUP_TARGET := release-candidate-setup
-RELEASE_EDITOR_VERSION := 0.80.0
+RELEASE_EDITOR_VERSION := 0.81.0
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
 RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
@@ -45,7 +43,7 @@ endif
 endif
 override CARGO_PUBLISH_REGISTRY := crates-io
 override CARGO_PUBLISH_VERIFY_TARGETS := lint
-FORMAT_RUST_ARGS := --rustfmt-source crates/ic-wire-qualification/benches/endpoint_generation/main.rs --rustfmt-edition 2024
+FORMAT_RUST_ARGS := --extra-workspace qualification --rustfmt-source qualification/ic-wire-qualification/benches/endpoint_generation/main.rs --rustfmt-edition 2024
 # Reject the retired selector rather than silently publishing the default roster.
 ifneq ($(filter publish publish-check,$(MAKECMDGOALS)),)
 ifneq ($(origin PUBLISH_PACKAGES),undefined)
@@ -55,7 +53,7 @@ endif
 include make/consumer.mk
 
 # These custom routes bypass the generic CI/release entrypoint admission.
-ci-core ci-typescript ci-benchmarks publish publish-check release-batch-resume release-batch-reconcile: shared-tooling-check
+ci-core ci-typescript ci-benchmarks publish publish-check release-batch-resume release-batch-reconcile: toko-tooling-check
 
 # Shared owns default capture. Wire admits only its complete supplier-first roster.
 ifneq ($(filter release-patch release-minor release-major,$(MAKECMDGOALS)),)
@@ -80,10 +78,10 @@ RUST_POLICY = bash "$(CURDIR)/scripts/ci/rust-policy.sh"
 release-candidate-setup:
 	@case "$(RELEASE_SETUP_MODE)" in prepare|check) ;; *) echo 'Shared must select RELEASE_SETUP_MODE=prepare or check' >&2; exit 2 ;; esac
 	+@$(RUST_POLICY) bash scripts/ci/cargo-release-preflight.sh "$(CURDIR)" "$(if $(filter prepare,$(RELEASE_SETUP_MODE)),1,0)" \
-	    --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
+	    --pin Cargo.lock --pin qualification/Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
 	    --pin examples/browser/.nvmrc --pin examples/browser/package.json --pin examples/browser/package-lock.json \
-	    --prepare install-tools --prepare tools-check --prepare release-browser-tools \
-	    --check tools-check --check release-browser-tools
+	    --prepare install-tools --prepare tools-check --prepare install-release-editor --prepare release-editor-check --prepare release-browser-tools \
+	    --check tools-check --check release-editor-check --check release-browser-tools
 release-browser-tools:
 	@bash scripts/ci/prepare-browser-tools.sh "$(RELEASE_SETUP_MODE)"
 install-release-editor:
@@ -99,7 +97,7 @@ ifneq ($(filter WIRE_ROSTER_REFUSED,$(IC_WIRE_CI_TARGETS)),)
 $(error Wire validation roster admission failed)
 endif
 .PHONY: check-package
-check-package: shared-tooling-check
+check-package: toko-tooling-check
 	+@$(MAKE) lint
 	+@$(RUST_POLICY) cargo package --locked --allow-dirty $(foreach package,$(CARGO_PUBLISH_PACKAGES),-p $(package)) --all-features --target-dir target/publication-check
 
@@ -111,17 +109,19 @@ evaluate-codec-matrix:
 	+@$(RUST_POLICY) bash scripts/ci/evaluate-codec-matrix.sh "$(CURDIR)/target/evidence/codec-matrix"
 
 evaluate-codec-instructions:
-	+@$(RUST_POLICY) cargo run --locked -p ic-wire-benchmarks --example codec-instructions --features wire,candid,ic -- "$(CURDIR)/target/evidence/codec-comparison"
+	+@$(RUST_POLICY) cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-instructions --features wire,candid,ic -- "$(CURDIR)/target/evidence/codec-comparison"
 
 check-benchmarks:
+	+@$(MAKE) check-integration-boundary
+	+@bash scripts/ci/check-stable-identities.sh
 	+@$(MAKE) check-benchmark-cli
-	+@$(RUST_POLICY) cargo test --locked -p ic-wire-benchmarks --example codec-report
-	+@$(RUST_POLICY) cargo test --locked -p ic-wire-benchmarks --features wire,candid --example codec-wasm
-	+@$(RUST_POLICY) cargo clippy --locked -p ic-wire-benchmarks --all-targets --features wire,candid,ic -- -D warnings
+	+@$(RUST_POLICY) cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-report
+	+@$(RUST_POLICY) cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --features wire,candid --example codec-wasm
+	+@$(RUST_POLICY) cargo clippy --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --all-targets --features wire,candid,ic -- -D warnings
 	+@for mode in allocations heap; do \
-	    $(RUST_POLICY) cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,$$mode" -- -D warnings || exit $$?; \
+	    $(RUST_POLICY) cargo clippy --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --all-targets --features "wire,candid,$$mode" -- -D warnings || exit $$?; \
 	done
-	+@$(RUST_POLICY) cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features wire,candid
+	+@$(RUST_POLICY) cargo check --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features wire,candid
 	+@$(MAKE) check-consumer-benchmarks
 
 .PHONY: check-benchmark-cli
@@ -142,17 +142,17 @@ check-codec-costs:
 check-consumer-benchmarks:
 	+@corpora="$$(awk -F'|' '$$4 ~ /(^|,)host(,|$$)/ { print $$2 }' scripts/ci/codec-cohorts.psv)" && test -n "$$corpora" || exit 1; \
 	for corpus in $$corpora; do \
-	    $(RUST_POLICY) cargo test --locked -p ic-wire-benchmarks --features "wire,candid,$$corpus" --example codec-wasm && \
-	    $(RUST_POLICY) cargo clippy --locked -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
+	    $(RUST_POLICY) cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --features "wire,candid,$$corpus" --example codec-wasm && \
+	    $(RUST_POLICY) cargo clippy --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --all-targets --features "wire,candid,ic,$$corpus" -- -D warnings || exit $$?; \
 	done
 	+@corpora="$$(awk -F'|' '$$4 ~ /(^|,)wasm(,|$$)/ { print $$2 }' scripts/ci/codec-cohorts.psv)" && test -n "$$corpora" || exit 1; \
 	for corpus in $$corpora; do \
-	    $(RUST_POLICY) cargo check --locked -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
+	    $(RUST_POLICY) cargo check --locked --manifest-path qualification/Cargo.toml -p ic-wire-benchmarks --example codec-wasm --target wasm32-unknown-unknown --features "wire,candid,$$corpus" || exit $$?; \
 	done
 
 .PHONY: evaluate-allocation
 evaluate-allocation:
-	+@$(RUST_POLICY) cargo run --locked --profile evaluation -p ic-wire-qualification --example allocation --features allocation-fixture -- target/evidence/allocation-comparison evaluation
+	+@$(RUST_POLICY) cargo run --locked --profile evaluation --manifest-path qualification/Cargo.toml -p ic-wire-qualification --example allocation --features allocation-fixture -- target/evidence/allocation-comparison evaluation
 
 .PHONY: fuzz-runtime
 
@@ -171,12 +171,12 @@ check-stable-identities:
 
 check-platform-types:
 	+@bash scripts/ci/check-platform-types.sh
-	+@bash scripts/ci/check-stable-identities.sh
 
 check-qualification:
 	+@bash scripts/ci/check-qualification-tools.sh
-	+@$(RUST_POLICY) cargo test --locked -p ic-wire-qualification --lib --tests --example check-diagnostics --example check-contract --features allocation-fixture,schema-fixture
-	+@$(RUST_POLICY) cargo clippy --locked -p ic-wire-qualification --all-targets --features allocation-fixture,schema-fixture -- -D warnings
+	+@$(RUST_POLICY) cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-qualification --lib --tests --example check-contract --features allocation-fixture,schema-fixture
+	+@$(RUST_POLICY) cargo test --locked --manifest-path qualification/Cargo.toml -p ic-wire-qualification --example check-diagnostics --features diagnostics
+	+@$(RUST_POLICY) cargo clippy --locked --manifest-path qualification/Cargo.toml -p ic-wire-qualification --all-targets --features allocation-fixture,schema-fixture,diagnostics -- -D warnings
 
 check-compatible-consumers:
 	+@bash scripts/ci/check-compatible-consumers.sh
@@ -200,6 +200,7 @@ help:
 	@printf '%s\n' \
 		'IC Wire — bounded Postcard runtime' \
 		'Setup: install-tools, install-hooks; offline admission: tools-check' \
+		'Release tooling: install-release-editor; not part of ordinary setup' \
 		'Rust: build, check, test, lint, check-wasm, fmt, fmt-check' \
 		'Evaluation: check-typed-diagnostics (isolated compile-fail checks)' \
 		'Evaluation: check-typescript (Rust/TypeScript runtime conformance)' \
@@ -211,9 +212,10 @@ help:
 		'Evaluation: fuzz-runtime (prepared nightly/C++/cache; FUZZ_RUNS=100000)' \
 		'Qualification: check-qualification (allocation fixtures and compiler support)' \
 		'Qualification: check-endpoint; check-endpoint-ic requires prepared POCKET_IC_BIN' \
+		'Qualification graph: check-integration-boundary (independent qualification/Cargo.lock)' \
 		'Evaluation: evaluate-endpoints EVIDENCE_DIR=/absolute/new/path (instrumented POCKET_IC_BIN)' \
 		'Registry: publish (uploads); publish-check (dry run); PACKAGE selects a subset; check-package (archives)' \
-		'Focused tooling: shared-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
+		'Focused tooling: toko-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
 		'Hosted CI groups: ci-core, ci-typescript, ci-benchmarks (separate runners)' \
@@ -244,12 +246,22 @@ check-doc-links:
 
 .PHONY: check-boundary check-candid-boundary check-browser-boundary
 check-candid-boundary:
-	@perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates examples scripts/benchmarks
+	@perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates qualification scripts/benchmarks
 
 check-browser-boundary:
-	@node scripts/ci/check-ic-sdk-boundary.mjs examples/browser crates scripts/dev/inspect-wire.mjs
+	@node scripts/ci/check-ic-sdk-boundary.mjs examples/browser crates qualification scripts/dev/inspect-wire.mjs
 
-check-boundary: check-candid-boundary check-browser-boundary
+.PHONY: check-testkit-boundary
+check-testkit-boundary:
+	+@node --test scripts/ci/check-testkit-boundary.test.mjs
+	+@node scripts/ci/check-testkit-boundary.mjs
+
+.PHONY: check-integration-boundary
+check-integration-boundary:
+	+@node scripts/ci/check-testkit-boundary.mjs --integration
+	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)/qualification" --external-ic
+
+check-boundary: check-candid-boundary check-browser-boundary check-testkit-boundary
 	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 
 .PHONY: check-ci-selection

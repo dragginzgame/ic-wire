@@ -2,10 +2,10 @@
 set -euo pipefail
 case_selection=all
 if [[ $# != 0 ]]; then
-    [[ $# == 2 && "$1" == --case ]] || { echo 'usage: test-local-make.sh [--case validation|release-routing]' >&2; exit 2; }
+    [[ $# == 2 && "$1" == --case ]] || { echo 'usage: test-local-make.sh [--case validation|release-routing|setup]' >&2; exit 2; }
     case "$2" in
-        validation|release-routing) case_selection="$2" ;;
-        *) echo 'usage: test-local-make.sh [--case validation|release-routing]' >&2; exit 2 ;;
+        validation|release-routing|setup) case_selection="$2" ;;
+        *) echo 'usage: test-local-make.sh [--case validation|release-routing|setup]' >&2; exit 2 ;;
     esac
 fi
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES GNUMAKEFLAGS MAKEFILES RELEASE_GROUP WIRE_LINT_GROUP
@@ -24,23 +24,25 @@ export WIRE_FIXTURE_COMPILER="$compiler"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock toko-tooling.lock rust-toolchain.toml .gitignore .shared-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
+paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .toko-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
 paths+=(ci/release-validation.json scripts/ci/wire-validation-roster.pl scripts/ci/wire-release-validation.mjs scripts/ci/check-release-validation.mjs scripts/ci/rust-policy.sh scripts/ci/ic-wire-release.sh scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 paths+=(scripts/ci/check-lint.sh scripts/ci/prepare-browser-tools.sh)
+paths+=(scripts/ci/prepare-wire-metadata.sh)
+paths+=(scripts/ci/check-testkit-boundary.mjs scripts/ci/check-testkit-boundary.test.mjs)
 paths+=(scripts/ci/check-compatible-consumers.sh)
 paths+=(scripts/benchmarks/generator/mod.rs scripts/dev/inspect-wire.mjs)
 paths+=(scripts/ci/check-repository-documentation.sh)
 paths+=(ci/candid-boundary.json)
 # Include authored crate inputs automatically, including new untracked modules.
 # Git exclusions keep ignored build/cache output out of the disposable export.
-git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/ releases/ > "$fixture/crate-paths"
+git -C "$root" ls-files --cached --others --exclude-standard -z -- crates/ examples/ qualification/ releases/ > "$fixture/crate-paths"
 while IFS= read -r -d '' path; do
     [[ ! -f "$root/$path" ]] || paths+=("$path")
 done < "$fixture/crate-paths"
 while IFS=$'\t' read -r record _ _ path; do
     [[ "$record" == file ]] || continue
     paths+=("$path")
-done < "$root/.shared-tooling.snapshot"
+done < "$root/.toko-tooling.snapshot"
 for path in "${paths[@]}"; do
     mkdir -p "$fixture/repo/$(dirname "$path")"
     cp -pP "$root/$path" "$fixture/repo/$path"
@@ -50,24 +52,48 @@ done
 git -C "$fixture/repo" init -q
 
 # Exercise real root selection admission before substituting any execution.
-make --no-print-directory -C "$fixture/repo" shared-tooling-check > "$fixture/tooling-valid.log" 2>&1
-cp "$fixture/repo/toko-tooling.lock" "$fixture/tooling-lock-before"
-perl -MJSON::PP -e 'local $/; my $p=decode_json(<>); $p->{version}="0.0.0"; print JSON::PP->new->encode($p)' < "$fixture/tooling-lock-before" > "$fixture/repo/toko-tooling.lock"
+make --no-print-directory -C "$fixture/repo" toko-tooling-check > "$fixture/tooling-valid.log" 2>&1
+cp "$fixture/repo/Cargo.lock" "$fixture/tooling-lock-before"
+perl -0777 -pe 's/(name = "toko-tooling"\nversion = "[^"\n]+"\nsource = "[^"\n]+"\nchecksum = ")[0-9a-f]{64}/$1 . ("0" x 64)/e' < "$fixture/tooling-lock-before" > "$fixture/repo/Cargo.lock"
 for target in ci ci-core ci-typescript ci-benchmarks publish publish-check check-package release-batch-resume release-batch-reconcile; do
     if make -j4 --no-print-directory -C "$fixture/repo" "$target" RELEASE_GROUP=core BATCH=batch-fixture > "$fixture/$target-tooling-drift.log" 2>&1; then exit 1; fi
-    grep -F 'tooling declaration and lock' "$fixture/$target-tooling-drift.log" >/dev/null
+    grep -F 'Cargo.lock selects different toko-tooling bytes' "$fixture/$target-tooling-drift.log" >/dev/null
 done
 if (cd "$fixture/repo" && RELEASE_GROUP=core bash scripts/ci/ic-wire-release.sh preflight) > "$fixture/adapter-tooling-drift.log" 2>&1; then exit 1; fi
-grep -F 'tooling declaration and lock' "$fixture/adapter-tooling-drift.log" >/dev/null
-cp "$fixture/tooling-lock-before" "$fixture/repo/toko-tooling.lock"
+grep -F 'Cargo.lock selects different toko-tooling bytes' "$fixture/adapter-tooling-drift.log" >/dev/null
+cp "$fixture/tooling-lock-before" "$fixture/repo/Cargo.lock"
 # Routing probes deliberately replace exported runners. Admission was exercised
 # above on pristine payloads; substitute only that gate for subsequent dispatch.
 cat > "$fixture/repo/fixture-admission.mk" <<'STUB'
-.PHONY: shared-tooling-check
-shared-tooling-check:
+.PHONY: toko-tooling-check
+toko-tooling-check:
 	@:
 STUB
 printf '\ninclude fixture-admission.mk\n' >> "$fixture/repo/Makefile"
+
+if [[ "$case_selection" == setup ]]; then
+    cat >> "$fixture/repo/fixture-admission.mk" <<'STUB'
+print-local-setup:
+	@printf '%s\n' '$(LOCAL_TOOL_INSTALL_TARGETS)' '$(LOCAL_TOOL_CHECK_TARGETS)'
+STUB
+    make --no-print-directory -s -C "$fixture/repo" print-local-setup > "$fixture/local-setup"
+    if grep -E 'install-release-editor|release-editor-check' "$fixture/local-setup"; then exit 1; fi
+    cat > "$fixture/repo/scripts/ci/cargo-release-preflight.sh" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "$SETUP_CALLS"
+STUB
+    export SETUP_CALLS="$fixture/release-setup"
+    for mode in prepare check; do
+        make --no-print-directory -s -C "$fixture/repo" release-candidate-setup \
+            RELEASE_GROUP=core "RELEASE_SETUP_MODE=$mode" RUST_POLICY=env
+        grep -F -- '--prepare install-release-editor --prepare release-editor-check' "$SETUP_CALLS" >/dev/null
+        grep -F -- '--check tools-check --check release-editor-check' "$SETUP_CALLS" >/dev/null
+        grep -F -- '--pin qualification/Cargo.lock' "$SETUP_CALLS" >/dev/null
+    done
+    complete=true
+    echo 'Setup split passed: ordinary setup excludes the editor; release prepare/check selects it explicitly.'
+    exit 0
+fi
 
 check_ci_routing() {
     # Roster admission must work before bootstrap tools exist, including system Make.
@@ -373,11 +399,11 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
     git -c user.name=Fixture -c user.email=fixture@example.invalid -c core.hooksPath=/dev/null commit -qm 'Disposable formatting baseline'
     printf '\nconst _:u8=1;\n' >> crates/ic-wire/src/lib.rs
     git add -- crates/ic-wire/src/lib.rs
-    printf '\nUnrelated fixture edit.\n' >> DRAGGINZGAME.md
-    cp DRAGGINZGAME.md "$fixture/unrelated-before"
+    printf '\nUnrelated fixture edit.\n' >> TOKO-TOOLING.md
+    cp TOKO-TOOLING.md "$fixture/unrelated-before"
     bash .githooks/pre-commit > "$fixture/selected-hook.log" 2>&1
     grep -F 'const _: u8 = 1;' crates/ic-wire/src/lib.rs >/dev/null
-    cmp "$fixture/unrelated-before" DRAGGINZGAME.md
+    cmp "$fixture/unrelated-before" TOKO-TOOLING.md
     [[ "$(git diff --cached --name-only)" == crates/ic-wire/src/lib.rs ]]
     printf '\n// Unstaged fixture edit.\n' >> crates/ic-wire/src/lib.rs
     git diff --binary > "$fixture/unstaged-before"

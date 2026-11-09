@@ -1,248 +1,230 @@
 # Latest recorded Candid comparison
 
-Measured **7 November 2026**, Core **0.17.6 working source** with uncommitted dependency updates.
-The complete **36-cohort** run contains **2,105 overlapping case entries** and
-**8,420 primary encode/decode comparisons**, not unique types or traffic weights.
-Wire wins **7,295/7,924** non-research comparisons and **471/496** private research
-comparisons; Candid wins 629 and 25, with no ties. There is one production
-Serde/Postcard codec; Packed/adapters select fields explicitly. Candid is test-only.
+This recorded matrix predates the direct Candid oracle migration. New runs use
+upstream Candid 0.10.40 with explicit quotas and exact single-result framing,
+without Platform's former depth-16 pre-scan. That changes Candid admission cost
+and nesting acceptance; these numbers are historical, not a qualified performance
+baseline for the new comparator. Rerun matched sources before claiming a gain.
+
+Measured **9 November 2026**, Core **0.18.0** with pending tooling/supplier
+adoptions. The complete **39-cohort** run contains **2,194 overlapping case
+entries** and **8,776 primary encode/decode comparisons**. These are not unique
+types or traffic weights. Wire wins **7,587/8,280** comparisons outside the mixed
+research cohort, and **470/496** inside it; Candid wins 693 and 26, with no ties.
+There remains one production Serde/Postcard codec. Candid is test-only.
+
+The `research-bulk` name predates the public bool adapter. That cohort now mixes
+**public bool-adapter cases**, **private float bulk prototypes**, and unchanged
+controls. Its aggregate must not be presented as either wholly private research
+or wholly production-ready. This run changes no production code, bytes, schemas,
+identities, budgets or acceptance rules.
 
 ## Uncompressed Wasm
 
-Wire is smaller in total and code bytes in **all 72 cohort/profile pairs**.
-Below: total / code-section bytes, without a post-link optimizer. These are
-complete fixture modules, not full Toko builds or projected application savings.
+Wire is smaller in total and code-section bytes in **all 78 cohort/profile pairs**.
+Below: total / code-section bytes, without a post-link optimizer. Opt-z is the
+primary decision profile; opt-3 remains a secondary check. These are linked
+fixture modules, not full Toko builds or projected application savings.
 
 | Fixture | Profile | Wire total / code | Candid total / code |
 | --- | --- | ---: | ---: |
-| Standard, 391 cases | opt-z | 594,543 / 547,747 | 1,450,722 / 1,374,903 |
-| Standard, 391 cases | opt-3 | 891,463 / 830,841 | 2,099,418 / 2,008,919 |
-| Toko-shaped, 10 cases | opt-z | 80,916 / 69,754 | 387,103 / 351,919 |
-| Toko-shaped, 10 cases | opt-3 | 103,366 / 92,866 | 610,572 / 576,846 |
-| 100 ordinary derived types | opt-z | 310,732 / 291,995 | 1,445,295 / 1,390,228 |
-| 100 ordinary derived types | opt-3 | 396,160 / 361,734 | 2,111,725 / 2,041,547 |
+| Standard, 391 cases | opt-z | 594,277 / 547,562 | 1,452,370 / 1,376,612 |
+| Standard, 391 cases | opt-3 | 893,678 / 833,247 | 2,054,997 / 1,964,584 |
+| Toko-shaped, 10 cases | opt-z | 80,498 / 69,354 | 387,078 / 351,883 |
+| Toko-shaped, 10 cases | opt-3 | 103,306 / 92,906 | 596,200 / 562,506 |
+| 100 ordinary derived types | opt-z | 310,569 / 291,848 | 1,460,475 / 1,405,395 |
+| 100 ordinary derived types | opt-3 | 395,846 / 361,556 | 2,130,654 / 2,060,333 |
+| Packed ID16, 20 cases | opt-z | 50,226 / 40,880 | 279,862 / 249,821 |
+| Packed ID16, 20 cases | opt-3 | 55,738 / 46,597 | 450,374 / 421,393 |
+| Signed32, 49 cases | opt-z | 75,386 / 63,304 | 348,519 / 313,294 |
+| Signed32, 49 cases | opt-3 | 92,579 / 81,454 | 529,997 / 496,386 |
 
-The 100-type controls keep all Serde/CandidType codec paths reachable. Wire's
-metadata derive is host-only. Stress-fixture differences are not application savings.
+The 100-type controls retain reachable Serde/CandidType codec paths. Wire's
+metadata derive is host-only. Source reductions and stress-fixture differences
+are not application Wasm savings.
 
 ## Instructions and frame bytes
 
-Selected **opt-3 IC instructions/op**; encode allocates fresh output. Each row
-uses its labelled linked fixture context. Frame bytes include codec framing.
+Selected **opt-z IC instructions/op**; encode allocates fresh output. Each row
+uses its own labelled fixture context. Frame sizes include codec framing.
 
 | Cohort / payload | Wire encode / decode | Candid encode / decode | Wire / Candid bytes |
 | --- | ---: | ---: | ---: |
-| Standard: owned 1 MiB byte buffer | 1,049,704 / 1,049,508 | 2,115,234 / 1,068,979 | 1,048,590 / 1,048,588 |
-| i16 control: 16,384 wide values | 2,638,738.25 / 1,905,088 | 80,320.25 / 1,411,845 | 49,166 / 32,780 |
-| Packed-i16: same values | 33,489.25 / 33,476 | 80,320.25 / 1,411,845 | 32,782 / 32,780 |
-| Standard: 128 explicit-zero Accounts | 122,726.25 / 104,781.5 | 104,445.75 / 1,686,854.5 | 8,205 / 8,349 |
-| Byte-key maps: 128 keys | 62,377.25 / 221,495 | 87,093.25 / 1,360,194.5 | 6,477 / 6,485 |
-| Public adapter: 4,096 nonzero i64 | 33,480.25 / 94,943.5 | 81,318.75 / 510,916.5 | 32,782 / 32,779 |
-| Public adapter: heap of 4,096 u64 | 33,900.25 / 169,198.5 | 81,318.75 / 506,819.5 | 32,782 / 32,779 |
+| Standard: owned 1 MiB byte buffer | 1,050,683 / 1,049,829 | 2,121,766 / 1,080,091 | 1,048,590 / 1,048,588 |
+| Ordinary i16: 16,384 wide values | 3,999,090.5 / 1,988,434.5 | 86,112.5 / 1,225,077.5 | 49,166 / 32,780 |
+| Packed-i16: same values | 34,327.5 / 34,001.5 | 86,112.5 / 1,225,077.5 | 32,782 / 32,780 |
+| Standard: 128 explicit-zero Accounts | 278,676.5 / 224,995.5 | 289,520 / 2,484,773.5 | 8,205 / 8,349 |
+| Byte-key map: 128 keys | 172,131.5 / 266,594.5 | 221,552.5 / 1,703,083 | 6,477 / 6,485 |
+| Public adapter: 4,096 nonzero i64 | 34,539.5 / 181,477.5 | 87,286 / 549,883.5 | 32,782 / 32,779 |
+| Public adapter: heap of 4,096 u64 | 34,985.5 / 274,053.5 | 87,287 / 549,890.5 | 32,782 / 32,779 |
+| Packed ID16: 4,096 owned IDs | 67,598 / 67,100 | 155,601 / 96,694 | 65,550 / 65,548 |
+| Packed ID16: borrowed input, copying included | 133,862 / 67,098 | 155,601 / 96,694 | 65,550 / 65,548 |
+| Signed32: 4,096 ordinary wide values | 2,348,650.5 / 2,520,051.5 | 53,494.5 / 557,894.5 | 20,493 / 16,395 |
+| Signed32: explicit Packed control | 18,058.5 / 95,595.5 | 53,494.5 / 557,957.5 | 16,398 / 16,395 |
 
-Standard opt-3 favors Wire on **319/391 encodes and 370/391 decodes**; Toko-shaped
-cases win **37/40** comparisons. Losses are two opt-z ID filters (1.19× / 1.39×)
-and one opt-3 projection (1.02×). The Account row uses plain-array Candid DTOs;
-coverage also measures byte-adapted DTOs. External DTO setup is outside timing.
+Generic Packed wins **436/436**, bounded Packed-i16 **80/80**, and Packed ID16
+**80/80** primary comparisons. Toko-shaped inputs win **38/40**; the two losses
+are opt-z ID-filter encodes at 500/1,000 IDs (1.09× / 1.27× Candid). The ID16
+controls are separate shapes, not an installed Toko adoption. Their Candid DTOs
+receive already-flat blobs and validate ID/cursor widths; DTO setup is untimed.
+The labelled Wire borrowed-input encode includes copying into Packed.
 
-Generic Packed wins **all 436** primary comparisons and bounded Packed-i16 wins
-**all 80**. Packing can cost bytes: 128 small u16 values encode in
-**10,016.25 → 1,176.25 instructions**, while frames grow **141 → 269 bytes**.
-Byte-key maps reduce encode **236,900.25 → 62,377.25** and decode
-**699,614 → 221,495**, but add 128 frame bytes and **1,543 total / 1,545 code**
-Wasm bytes at opt-3. Coordinate consumers and requalify bounds when changing
-representations; retain original retry/hash bytes.
+Profile losses remain visible. The Account row encodes in **122,726.25 vs
+104,445.75** instructions at opt-3, despite winning opt-z. Ordinary wide i32
+encodes in **1,323,901.25 vs 47,618.25** at opt-3; Packed takes **17,215.25**.
+Use each control's measured Candid decode: the signed32 ordinary/Packed controls
+share inputs and Candid bytes but differ by 63/62 decode instructions at opt-z/3.
+Accounts use plain-array external Candid DTOs here; other controls exercise
+byte-adapted DTOs. Wire's production types do not require CandidType.
 
-Ordinary-list encode still reaches **119.50× / 49.67× Candid** at opt-z/3.
-There are **105 / 81** encode and **4 / 0** decode comparisons at least 10× slower
-among non-research cohorts. These include overlapping ordinary controls.
-Default [bulk advice](packed-fields.md) requires supported host metadata;
-codec-only/custom layouts are not universally linted. Float/bool advice warns
-about cost, not unsupported Packed types. Consumer Serde is never rewritten.
-Rejection is separate: truncated 1 MiB ordinary bytes cost **42,472,926** opt-3
-instructions versus Candid **4,289**; a byte field costs **636** versus **4,290**.
-Wire limits and Candid quotas are not equivalent rejection policies.
+## Remaining hotspots and representation tradeoffs
+
+Outside the mixed research cohort, **114 / 82 encode** and **10 / 6 decode**
+comparisons are at least 10× slower than Candid at opt-z/3. These include
+repeated ordinary controls. The largest ratio is ordinary ID16-array decode:
+**11,609,194 vs 96,694** instructions (120.06×) at 4,096 IDs; the public Packed
+control takes **67,100**. This is a flat-blob Candid control, not an unexplained
+regression in the same representation.
+
+Large ordinary byte vectors and wide integer/hash arrays dominate absolute
+avoidable costs. At opt-z a generic 1 MiB byte-vector encode takes **158,336,943
+vs 2,117,991** instructions; the explicit byte-buffer row above takes **1,050,683**.
+Supported host metadata emits [bulk advice](packed-fields.md), including bool
+adapter advice and bounded-cost warnings for unsupported float/i128 packing.
+Codec-only/custom Serde layouts are not universally linted. Never silently
+rewrite consumer Serde or infer set semantics from vector results.
+
+Packing trades representation costs. In the i16 fixture it adds **2,619 total /
+2,481 code bytes** at opt-z (43,065/34,298 vs 40,446/31,817), while the 100-type
+generic bulk fixture becomes **8,343 total / 8,316 code bytes smaller**. Small
+varints can produce much smaller payloads than fixed-width Packed fields.
+Byte-key maps at 128 keys reduce opt-z encode **356,635.5 → 172,131.5** and decode
+**892,485.5 → 266,594.5**, adding 128 frame bytes. Consumer adoption must review
+layout, bounds and retained retry/hash bytes; this measurement changes none.
+
+Not all residual costs have a bulk replacement:
+
+| Opt-z case | Wire / Candid instructions | Interpretation |
+| --- | ---: | --- |
+| f32 list, 1 MiB, encode | 55,838,553 / 2,118,212 | No public Packed float contract |
+| f64 list, 1 MiB, encode | 28,444,505 / 2,118,315 | Same policy/qualification gap |
+| 4,096 Result-of-unit items, encode | 2,942,555.5 / 1,288,478.5 | Repeated variant/admission traversal |
+| 4,096 mixed i32 deque values, decode | 1,822,579.5 / 595,531.5 | Container traversal; not raw Vec bulk |
+| 4,096 unique i32 set values, decode | 6,617,962.5 / 5,571,708.5 | Includes ordered-set reconstruction |
+| Toko-shaped 1,000-ID filter, encode | 861,544.5 / 678,003.5 | Separate field-adoption opportunity |
+
+Zero-byte elements still cost traversal: 4,096 units encode in **181,839.5 vs
+19,192.75** instructions at opt-z, but **783.25 vs 13,145.5** at opt-3. Do not
+change resource admission just to erase that profile-dependent work.
 
 ## Expanded container coverage
 
-The **124-case** follow-up includes nested options/results, hash lists, nonzero
-lists and heaps, with empty/singleton controls. Public adapters cut encode from
-**1,337,370.25 / 1,349,956.25** to the table's **33,480.25 / 33,900.25** instructions.
-They use one allocation per operation; the copying Serde control uses three on
-encode. Frames grow from **28,688 / 24,525** to **32,782 bytes**. Both domain
-families beat Candid at 0/1/128/4,096 values in both profiles and directions.
-
-## Packed domain conversion follow-up
-
-`packed-containers` copies inside Serde during sizing and writing; the earlier
-one-copy DTO study included conversion once. `adapter-dto-1/10/100` constructs
-Packed DTOs **before timing**. Keep these controls distinct. Candid vectors do
-not perform Wire's nonzero validation or heap reconstruction.
-
-## Private bool/float research
-
-For 1 MiB of values at opt-3, encode changes **60,818,316 → 1,049,585**
-instructions for bool and **12,583,841 → 1,049,588** for f32; Candid uses
-**2,112,270 / 2,112,195**. Float decode becomes **1,049,688**, versus ordinary
-f32's **12,326,591** and Candid's **21,515,241**. Bool decode remains
-**33,031,148** versus ordinary **44,570,576** and Candid **208,686,341**.
-The subsequent [checked-copy study](evidence/primitive-bulk.md#checked-bool-copy-follow-up-7-november)
-reduces private bool decode to **20,972,610** at opt-3, with **173 fewer** total
-and code-section Wasm bytes. Singleton decode adds 73 instructions and native
-opt-3 large decode is 1.8–4.0% slower. This remains private research.
-Singleton bool encode regresses **520.25 → 672.25** in the original bulk study.
-
-Whole-fixture total / code bytes change **216,815 / 182,344 → 215,963 / 181,492**
-at opt-z and **272,618 / 240,547 → 271,183 / 239,113** at opt-3. These are
-private representations, with no public Packed/schema/client support. Float
-prefixes change from element counts to byte counts (`01` → `04` for one f32);
-bool's valid bytes match but admission changes. Consumer coordination, malformed
-input tests, finite/IEEE policy and generated-client qualification remain required.
+Nested options/results, hash/nonzero lists and heaps retain empty/singleton
+controls. The public nonzero/heap adapters include validation/reconstruction;
+Candid vectors do not perform the same domain work. `packed-containers` copies
+inside Serde during sizing and writing. `adapter-dto-1/10/100` constructs DTOs
+before timing; do not present these controls as end-to-end conversion timings.
 
 ## Borrowed adapter investigation
 
-Public `serde_packed::nonzero_i64` / `heap_u64` shipped in 0.17.6. The
-[6 November matched study](https://github.com/dragginzgame/ic-wire/blob/bcbcec53ce9eaadf5a839efdb95595b834d2583b/docs/candid-comparison.md#borrowed-adapter-investigation)
-halved large-case encode versus the original one-copy DTO, reduced allocations
-2 → 1 and saved 198/579 total and code bytes at opt-z/3. Its raw inputs remain
-under `target/evidence/public-adapters-20261106/`. Current 100-type DTO → adapter
-total/code bytes are **338,091/319,115 → 346,308/327,327** at opt-z and
-**551,576/516,943 → 567,725/533,090** at opt-3. Already-packed data stays smaller;
-these controls omit domain conversion. Forced non-inlining previously failed
-the small/mixed-profile screen. Adoption changes bytes/budgets; matching Packed
-DTO bytes can still have different record-field allowances. Follow the
-[consumer guidance](../crates/ic-wire/README.md#representation-and-adoption-details).
+The [earlier matched study](https://github.com/dragginzgame/ic-wire/blob/bcbcec53ce9eaadf5a839efdb95595b834d2583b/docs/candid-comparison.md#borrowed-adapter-investigation)
+records why the public adapters were adopted. Current 100-type DTO → adapter
+Wasm total/code is **337,928/318,968 → 346,145/327,180** at opt-z and
+**551,262/516,765 → 567,411/532,912** at opt-3. Already-packed data stays smaller;
+these DTO controls omit domain conversion. This is not a new before/after codec
+change. Follow the [consumer guidance](../crates/ic-wire/README.md#representation-and-adoption-details).
 
 ## Signed32 follow-up (8 November, Core 0.17.14)
 
-The new 49-case `signed32` cohort expands the maintained roster to **39 cohorts**.
-It adds scalar zigzag boundaries, small/negative/wide/mixed lists, deques, sets,
-tuple/option/result combinations and explicit Packed controls. Existing standard
-indices and the historical full-matrix results above are unchanged. Wire wins
-**74/98 opt-z and 77/98 opt-3** primary encode/decode comparisons in this focused
-run. Ordinary-list encode still reaches **60.68× / 26.86× Candid** at opt-z/3.
+The historical baseline and rejected writer experiments remain in the
+[encoder study](evidence/encoder-followup.md#signed-i32-writer-screen-8-november-2026).
+The 49-case cohort is now included in this complete 9 November matrix with the
+released Core 0.18.0 encoder. It covers zigzag scalars, small/negative/wide/mixed
+lists, deque/set/tuple/option/result shapes and Packed controls. Set cardinality
+and physical deque split tests remain meaningful; no TypeScript support is added.
+Do not compare the historical counters to this supplier graph as a matched regression.
 
-Selected **opt-3 IC instructions**, 4,096 elements; frames are Wire / Candid bytes:
+## Public bool and private float controls
 
-| Shape | Wire encode / decode | Candid encode / decode | Frame bytes |
-| --- | ---: | ---: | ---: |
-| Ordinary wide i32 list | 1,278,846.25 / 1,232,510.5 | 47,618.25 / 498,481.5 | 20,493 / 16,395 |
-| Existing Packed i32 control | 17,215.25 / 17,359.5 | 47,618.25 / 498,543.5 | 16,398 / 16,395 |
-| Ordinary small i32 list | 947,070.25 / 687,630.5 | 47,618.25 / 498,481.5 | 4,109 / 16,395 |
-| Mixed i32 deque | 989,259.25 / 957,687.5 | 211,730.25 / 527,756.5 | 10,371 / 16,395 |
-| Unique i32 set | 1,383,715.25 / 5,805,197.5 | 339,983.25 / 5,533,594.25 | 8,077 / 16,395 |
+At opt-z, the public bool adapter reduces 1 MiB encode **97,519,445 → 1,050,620**
+instructions; Candid takes **2,118,112**. Adapter decode takes **20,973,137** vs
+Candid **403,732,189**, including validation of every bool byte.
 
-The ordinary/Packed wide controls have identical logical inputs and Candid
-frames. Their Candid decode counters differ by 62 instructions at opt-3 and 63
-at opt-z; retain each measured control rather than treating them as identical
-executions. Both set lanes reconstruct the same sorted set; these are not raw
-vector-only decode costs. Deque timings use contiguous storage; the separate
-wrapped-storage test checks order/bytes, not performance. Consumer conversions
-to Packed are outside these already-constructed field measurements. Packing
-small-value lists trades away their varint compactness; it is not a silent rewrite.
+The private f32 prototype encodes in **1,050,623** and decodes in **7,079,401**
+instructions, versus Candid **2,118,212 / 19,166,352**. The paired complete
+coverage → mixed-cohort fixture changes total/code Wasm **216,523/182,068 →
+215,661/181,206** at opt-z and **272,914/240,946 → 271,306/239,339** at opt-3.
+These whole-fixture differences combine bool and float changes; they are not
+isolated float savings or application savings.
 
-Local source inspection of Candid 0.10.40's `types/impls.rs` shows `seq_impl!`
-iterates deque/set elements individually. Vec delegates to the slice path, which
-can select bulk primitives. Serde 1.0.229's deque/set implementations both use
-`collect_seq`, and Wire wraps each visited item with resource admission during
-sizing and writing. Thus the container gap is not just missing Candid-style bulk
-vector handling. A Packed replacement for a set would additionally need explicit
-consumer handling of uniqueness/order; it is not a transparent optimization.
-
-Whole-fixture uncompressed Wasm **total / code-section bytes**:
-
-| Profile | Wire | Candid |
-| --- | ---: | ---: |
-| opt-z | 75,350 / 63,270 | 348,839 / 313,603 |
-| opt-3 | 92,373 / 81,148 | 529,072 / 495,357 |
-
-These are complete 49-case modules, not application savings or per-type costs.
-Two serial native runs/profile retain eleven samples. At opt-3, ordinary wide
-list encode medians are **31,403 / 31,564 ns** versus Candid **1,066 / 1,038 ns**;
-the Packed control is **171 / 176 ns** versus its Candid **996 / 945 ns**.
-Native timing and separate allocation/heap probes do not establish IC costs.
-The IC study retains **1,070 rows**, each with three identical counter samples
-from distinct callers, exact input/frame hashes and loaded module identities.
-
-Reproduction: `target/evidence/signed32-20261108/measure.sh`, retained baseline
-source/results and `analysis.json`. Rust/Cargo **1.99.1**, LLVM **23.1.1**, Linux,
-PocketIC **16.1.0**, Platform **0.26.0**, Types **0.18.2**, Testkit **0.93.1**;
-the [encoder screen](evidence/encoder-followup.md#signed-i32-writer-screen-8-november-2026)
-records exact source/lock/profile identities and rejected candidates. Fresh
-artifact checks and baked fixture/encoder/lock hashes pass. These baseline results
-precede the [i32 writer adopted for 0.18.0](evidence/encoder-followup.md#raw-tuple-i32-follow-up-8-november-2026);
-they are not relabelled as its results. No new TypeScript support is added. The new cohort,
-unchanged standard inventory, malformed-input tests, Clippy and evidence-drift
-tests pass. Native macOS and installed application performance are unqualified.
+Float fields remain private research: element-count prefixes become byte counts
+(`01` → `04` for one f32). Promotion needs an explicit finite/IEEE-bit policy,
+malformed-input/admission proofs, endian handling, schema/browser conformance and
+consumer coordination. Current bool support must not be confused with nonexistent
+public Packed<float> support. See [the original studies](evidence/primitive-bulk.md).
 
 ## Next experiments
 
-Core **0.17.11** added the explicit `serde_packed::bools` field adapter with
-qualified schema/browser support. The [public adapter study](evidence/primitive-bulk.md#public-bool-adapter-for-01711)
-preserves every Wire IC counter versus the private prototype, with 35/16 extra
-total Wasm bytes at opt-z/3. It also records a 1.75–2.02× native opt-3 decode
-regression; the IC result is unchanged. This does not replace the original full matrix.
+1. **Measure finite fields in consumer-shaped records.** The pending public
+   adapters now have [Rust/TS qualification and matched costs](evidence/primitive-bulk.md#public-finite-adapters--9-november-2026).
+   They save 473 opt-z Wasm bytes and cut large f32 encode 90.1% versus ordinary
+   finite lists in the focused fixture, but remain 3.40 times Candid and fail
+   20 opt-3 small-control comparisons. Preserve explicit adoption and bounds;
+   these are not application savings. Ten new maintained finite cases have
+   correctness coverage, not a new full-matrix measurement. The all-IEEE
+   prototype remains separate research; do not drop finite validation to copy
+   its better results.
+2. **Measure shared Serde/admission traversal on non-packable payloads.** Target
+   Result/unit lists, deques and batches of tiny buffers, retaining exact budgets,
+   typed failures and opt-3 losses. Avoid per-consumer codec specializations.
+3. **Prove bound-sharing value in a real consumer before redesigning it.** The
+   100-type varied-bound fixture adds 16,811 total bytes at opt-z, but prior
+   [outer-visitor experiments](evidence/bound-sharing.md#outer-list-visitor-screen-7-november)
+   barely changed the broad corpus. Do not adopt complexity for stress-only wins.
 
-1. **Native bool scan:** investigate the public adapter's opt-3 native regression
-   without increasing Wasm or changing admission. The follow-up
-   [size screen](evidence/primitive-bulk.md#public-bool-decoder-size-screen-7-november)
-   rejects visitor outlining, checked-cast outlining and chunked validation;
-   all grow Wasm. Float promotion still needs a
-   deliberate finite/IEEE policy and client qualification.
-2. **Narrow bound-wrapper sharing:** varied bounds add **16,810 / 25,305 total**
-   and **16,671 / 25,185 code bytes** at opt-z/3 in the 100-type control. Heavy
-   loops already share code. The [outer-visitor follow-up](evidence/bound-sharing.md#outer-list-visitor-screen-7-november)
-   saves only 0/18 total bytes in the standard corpus, with effectively unchanged
-   IC costs. Ten varied bounds save 860/2,619 bytes, but remain diagnostic evidence;
-   the extra visitor is not adopted without an application benefit.
-3. **Signed containers:** the new cohort above keeps ordinary-list losses and
-   Packed controls explicit, and identifies deque/set traversal as additional
-   targets. Three i32 writer rewrites failed the footprint screen; do not repeat
-   them without a new approach. Packed IDs shipped in 0.17.13; the
-   [0.17.14 copy improvement](evidence/primitive-bulk.md#byte-aligned-packed-copy-8-november)
-   fixes their large-list opt-z loss. These focused studies do not relabel the
-   historical full matrix. Database keys remain outside scope.
-   The subsequent [unsigned writer sharing](evidence/encoder-followup.md#unsigned-writer-sharing-8-november-2026)
-   screen shrinks Wasm but regresses wide i32 even at opt-z and wide u64 by 49.9%
-   at opt-3; the combined candidate is rejected. A narrower private u32 helper
-   must keep the unsigned shortcut out of i32's path before reconsideration.
-
-Do not repeat blanket one-pass encoder or parser-tail rewrites without a new
-approach: [earlier experiments](evidence/encoder-followup.md) failed small-value,
-allocation, semantic or Wasm tradeoffs. Whole-list bound erasure also regressed
-zero-sized lists; retain the [qualified specialized paths](evidence/bound-sharing.md).
+Do not repeat blanket one-pass encoding, forced varint-reader sharing or common
+buffer-reader extraction without a new hypothesis. The
+[encoder](evidence/encoder-followup.md) and [runtime](evidence/runtime.md) studies
+record rejected instruction/Wasm tradeoffs. Existing byte/Packed/adapters and
+lint guidance remain the first action for the ordinary-control gaps.
 
 ## Native time, memory and reproduction
 
-Standard 1 MiB blob, opt-3, two native run medians in **µs/op**:
+Standard 1 MiB byte buffer, two native run medians in **µs/op**:
 
-| Operation | Wire run 1 / run 2 | Candid run 1 / run 2 |
+| Profile / operation | Wire run 1 / run 2 | Candid run 1 / run 2 |
 | --- | ---: | ---: |
-| Fresh encode | 17.064 / 17.199 | 759.928 / 754.623 |
-| Owned decode | 17.282 / 17.153 | 18.298 / 18.949 |
+| opt-z fresh encode | 17.598 / 17.303 | 760.735 / 761.406 |
+| opt-z owned decode | 17.267 / 17.480 | 18.894 / 19.551 |
+| opt-3 fresh encode | 18.158 / 17.405 | 741.388 / 737.800 |
+| opt-3 owned decode | 18.076 / 17.687 | 18.528 / 18.692 |
 
-The shared host is not latency-isolated. Separate probes record Wire **one
-allocation, zero reallocations** per operation;
-Candid encode uses **17 + 3 reallocations**, decode **31 + 0**. Peak live bytes
-are Wire **1,048,590 / 1,048,576**, Candid **2,098,807 / 1,049,380** for encode/decode.
+The host was shared and sometimes heavily loaded; small timing differences are
+not isolated latency evidence. Separate probes record Wire one allocation and
+zero reallocations per operation. Candid encode uses 17 allocations plus three
+reallocations; decode uses 31 allocations. Peak live bytes for encode/decode are
+Wire **1,048,590 / 1,048,576**, Candid **2,098,807 / 1,049,380** in both profiles.
 
-Rust/Cargo **1.99.1**, LLVM **23.1.1**; x86_64 native, wasm32-unknown-unknown;
+Rust/Cargo **1.99.1**, LLVM **23.1.1**, Linux x86_64 and wasm32-unknown-unknown;
 opt-z/opt-3, fat LTO, one codegen unit, abort, stripped symbols. Candid **0.10.40**,
-Postcard **1.1.3**, Platform **0.23.5**, Types **0.18.2**, Runtime **0.19.4**,
-Testkit **0.89.4**, Build **0.76.0**, Host **0.74.4**. Prepared PocketIC **16.1.0**.
-Lock SHA-256: `43bde528b6e4216f5eaf6f98d81e051fb8707406c658b84951a266fba9525cb9`.
+Serde **1.0.229**, Postcard **1.1.3**, Platform **0.27.1**, Types **0.18.3**,
+Runtime **0.20.3**, Testkit **0.95.0**, Build **0.81.0**, Host **0.76.1**;
+prepared PocketIC **16.1.0**. Lock SHA-256:
+`a1b3e79781eb208c581a850aa2151f111df263ed8daaef93366c6c5e8e6e51e8`.
 
-Reproduce with the [maintained matrix command](development.md#candid-comparison-benchmarks):
-two native runs, eleven samples, minimum 2 ms batches, three distinct-caller IC
-samples, fresh target and explicit prepared server. IC counters include codec
-work, result destruction and loop overhead; exclude transport, authentication,
-ingress copies and physical cycles. Domain work inside adapters is included.
-No full CI, installed Endpoint, consumer build or real big-endian proof is implied.
-Older graphs are not regression baselines; feature-paired Candid modules can differ.
+Reproduce using the [maintained matrix command](development.md#candid-comparison-benchmarks)
+with a fresh output directory/target and an explicitly prepared server. Two native
+runs/profile retain eleven samples and minimum 2 ms batches. IC measurements use
+three distinct callers; counters include codec work, result destruction and loop
+overhead, excluding transport/authentication, ingress copies and physical cycles.
+Rejection costs remain separate: Wire limits and Candid quotas are not equivalent
+policies. No full CI, installed Endpoint, consumer build, macOS or real big-endian
+qualification is implied. Older supplier graphs are not regression baselines.
 
-Raw evidence: `target/evidence/codec-matrix-20261107/`, source base **bcbcec5** plus
-recorded working edits. All **171 source hashes**, **144 fresh module hashes/code
-sizes**, **44,308 IC rows** with three equal repeats and **142,776 native/IC
-input/frame checks** verify, including 12 representation pairs. Cleanup recovery
-retained probes and rebuilt missing guests using the identical server; see `recovery-1/`.
-No production bytes, schemas, identities, budgets or acceptance changed.
+Raw evidence: `target/evidence/codec-matrix-20261109/`; frozen source base
+**df071a4** plus recorded working edits. `summarize.mjs`, `pairs.py`, `summary.json`
+and per-cohort logs/CSVs retain the analysis. All **351 source-identity records**,
+**156 fresh guest module hashes/code sizes**, **46,178 IC rows** with three equal
+samples, **148,832 native/IC input/frame checks**, and **13 representation pairs**
+verify. Core dependency artifacts are shared only within this one frozen source;
+all guest builds are observed fresh. Nothing was committed, pushed or published.

@@ -11,11 +11,11 @@ mkdir -p target
 inventory="$(mktemp "$root/target/documentation-inventory.XXXXXX")"
 selection="$(mktemp "$root/target/documentation-selection.XXXXXX")"
 trap 'rm -f "$inventory" "$selection"' EXIT
-bash scripts/ci/verify-shared-tooling-snapshot.sh --read-manifest .shared-tooling.snapshot > "$inventory"
+bash scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$inventory"
 while IFS=$'\t' read -r kind _ _ file; do
     [[ "$kind" != file || "$file" != *.md ]] || printf '%s\n' "$file" >> "$selection"
 done < "$inventory"
-git ls-files --cached --others --exclude-standard -z -- AGENTS.md README.md CHANGELOG.md docs releases crates examples > "$inventory"
+git ls-files --cached --others --exclude-standard -z -- AGENTS.md README.md CHANGELOG.md docs releases crates examples qualification > "$inventory"
 while IFS= read -r -d '' file; do
     [[ "$file" == *.md ]] || continue
     case "$file" in *$'\n'*|*$'\r'*|*$'\t'*) echo 'Unsupported documentation path' >&2; exit 1 ;; esac

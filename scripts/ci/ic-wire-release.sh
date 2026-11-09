@@ -6,7 +6,7 @@ operation="${1:?release adapter operation}"
 export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 case "$operation" in
     version|files) ;;
-    *) bash scripts/dev/shared-tooling.sh check --consumer "$PWD" ;;
+    *) bash scripts/dev/toko-tooling.sh check --consumer "$PWD" ;;
 esac
 : "${RELEASE_GROUP:?select RELEASE_GROUP=core or endpoint explicitly}"
 export RELEASE_GROUP
@@ -39,6 +39,8 @@ metadata() {
     fi
     if [[ "$1" == check ]]; then
         bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
+    elif [[ "$1" == prepare ]]; then
+        bash scripts/ci/prepare-wire-metadata.sh
     else
         bash scripts/ci/cargo-release-metadata.sh "$1" "$primary"
     fi
@@ -70,8 +72,9 @@ case "$operation" in
         # standard-runner recovery retains its existing preparation contract.
         if [[ "${RELEASE_BATCH_ACTIVE:-}" != 1 ]]; then
             bash scripts/ci/cargo-release-preflight.sh "$PWD" "${RELEASE_CACHE_PREPARE:-1}" \
-                --pin Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
-                --prepare install-tools --prepare tools-check --check tools-check
+                --pin Cargo.lock --pin qualification/Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
+                --prepare install-tools --prepare tools-check --prepare install-release-editor --prepare release-editor-check \
+                --check tools-check --check release-editor-check
         fi
         metadata check-graph
         ;;

@@ -1,0 +1,1000 @@
+//! Matched values; setup and semantic roundtrip assertions are outside measurement.
+#[cfg(feature = "coverage-shapes")]
+mod followup;
+mod shapes;
+// Cargo features are additive. Primary corpora are mutually exclusive;
+// representation and cohort-size subfeatures retain their own checks below.
+const _: () = assert!(
+    cfg!(feature = "coverage-shapes") as usize
+        + cfg!(feature = "contract-shapes") as usize
+        + cfg!(feature = "cost-smoke") as usize
+        + cfg!(feature = "id16") as usize
+        + cfg!(feature = "byte-keys") as usize
+        + cfg!(feature = "hotspots") as usize
+        + cfg!(feature = "signed32") as usize
+        + cfg!(feature = "bulk") as usize
+        + cfg!(feature = "derive-scale") as usize
+        + cfg!(feature = "toko") as usize
+        + cfg!(feature = "packed-i16") as usize
+        <= 1,
+    "select one benchmark corpus"
+);
+#[cfg(any(feature = "bulk", feature = "bulk-scale"))]
+mod bulk;
+#[cfg(any(feature = "byte-keys", feature = "cost-smoke"))]
+mod byte_keys;
+#[cfg(feature = "cost-smoke")]
+mod cost_smoke;
+#[cfg(feature = "hotspots")]
+mod hotspots;
+#[cfg(feature = "id16")]
+mod id16;
+#[cfg(feature = "packed-i16")]
+mod packed_i16;
+#[cfg(feature = "derive-scale")]
+mod scale;
+#[cfg(feature = "signed32")]
+mod signed32;
+#[cfg(feature = "toko")]
+mod toko;
+#[cfg(all(feature = "derive-scale-1", feature = "derive-scale-10"))]
+compile_error!("select one derive cohort size");
+#[cfg(all(
+    feature = "bulk-scale",
+    any(feature = "toko", feature = "packed-i16", feature = "packed-scale")
+))]
+compile_error!("select one scaling field representation");
+#[cfg(all(
+    feature = "adapter-scale",
+    any(feature = "bulk-scale", feature = "packed-scale")
+))]
+compile_error!("select one scaling field representation");
+#[cfg(all(
+    feature = "bulk-baseline",
+    not(any(feature = "bulk", feature = "bulk-scale"))
+))]
+compile_error!("bulk-baseline requires a bulk corpus");
+#[cfg(feature = "candid")]
+use candid::CandidType;
+use serde::{Serialize, de::DeserializeOwned};
+use std::{fmt::Debug, hint::black_box, rc::Rc};
+
+pub const LIMITS: ic_wire::Limits = ic_wire::Limits {
+    bytes: 2 * 1024 * 1024,
+    allocation: 256 * 1024 * 1024,
+    nodes: 8 * 1024 * 1024,
+    depth: 64,
+};
+pub const METHOD: u64 = 0x6265_6e63_6800_0001;
+#[cfg(feature = "candid")]
+pub fn candid_config() -> candid::de::DecoderConfig {
+    let mut config = candid::de::DecoderConfig::new();
+    config
+        .set_decoding_quota(128 * 1024 * 1024)
+        .set_skipping_quota(128 * 1024 * 1024)
+        .set_max_type_len(4096)
+        .set_max_header_len(64 * 1024)
+        .set_full_error_message(false);
+    config
+}
+
+// Independent upstream Candid oracle. Platform's former depth-16 pre-scan is
+// intentionally absent; quotas, byte ceiling and exact one-result framing remain.
+// This changes benchmark admission/cost, not Wire's production protocol.
+#[cfg(feature = "candid")]
+pub fn decode_candid<'a, T: serde::Deserialize<'a> + CandidType>(
+    bytes: &'a [u8],
+) -> Result<T, candid::Error> {
+    if bytes.len() > LIMITS.bytes {
+        return Err(candid::Error::msg("comparison reply byte limit"));
+    }
+    let config = candid_config();
+    let mut decoder = candid::de::IDLDeserialize::new_with_config(bytes, &config)?;
+    if decoder.is_done() {
+        return Err(candid::Error::msg("expected one comparison result"));
+    }
+    let value = decoder.get_value()?;
+    if !decoder.is_done() {
+        return Err(candid::Error::msg("extra comparison result"));
+    }
+    decoder.done()?;
+    Ok(value)
+}
+
+type Decode = Box<dyn Fn(&[u8]) -> bool>;
+type Reuse = Box<dyn Fn(&mut Vec<u8>)>;
+pub struct Lane {
+    pub name: &'static str,
+    pub bytes: Vec<u8>,
+    pub encode: Box<dyn Fn() -> Vec<u8>>,
+    pub decode: Decode,
+    pub reuse: Option<Reuse>,
+}
+pub struct Case {
+    pub name: String,
+    pub input_json: Vec<u8>,
+    pub lanes: Vec<Lane>,
+}
+
+fn lane<T: PartialEq + Debug + 'static>(
+    name: &'static str,
+    value: Rc<T>,
+    encode: impl Fn(&T) -> Vec<u8> + 'static,
+    decode: impl Fn(&[u8]) -> Option<T> + 'static,
+) -> Lane {
+    let bytes = encode(&value);
+    // Keep per-type diagnostic formatting out of the measured Wasm artifact.
+    #[cfg(not(target_family = "wasm"))]
+    assert_eq!(decode(&bytes).as_ref(), Some(value.as_ref()), "{name}");
+    #[cfg(target_family = "wasm")]
+    assert!(
+        decode(&bytes).as_ref() == Some(value.as_ref()),
+        "{name}: roundtrip mismatch"
+    );
+    Lane {
+        name,
+        bytes,
+        encode: Box::new(move || encode(black_box(&value))),
+        decode: Box::new(move |bytes| {
+            let result = decode(black_box(bytes));
+            let ok = result.is_some();
+            black_box(result);
+            ok
+        }),
+        reuse: None,
+    }
+}
+
+// The optional bound keeps Candid out of the wire-only linked artifact.
+#[cfg(feature = "candid")]
+pub trait Compared: CandidType {}
+#[cfg(feature = "candid")]
+impl<T: CandidType> Compared for T {}
+#[cfg(not(feature = "candid"))]
+pub trait Compared {}
+#[cfg(not(feature = "candid"))]
+impl<T> Compared for T {}
+
+fn case<T: Serialize + DeserializeOwned + Compared + PartialEq + Debug + 'static>(
+    name: &str,
+    value: T,
+) -> Case {
+    let input_json = serde_json::to_vec(&value).unwrap();
+    case_with_input_json(name, value, input_json)
+}
+
+fn case_with_input_json<
+    T: Serialize + DeserializeOwned + Compared + PartialEq + Debug + 'static,
+>(
+    name: &str,
+    value: T,
+    input_json: Vec<u8>,
+) -> Case {
+    let value = Rc::new(value);
+    let lanes = vec![
+        #[cfg(feature = "wire")]
+        {
+            let mut wire = lane(
+                "wire-native",
+                value.clone(),
+                |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
+                |bytes| ic_wire::native::decode_request(METHOD, bytes, LIMITS).ok(),
+            );
+            let v = value.clone();
+            wire.reuse = Some(Box::new(move |out| {
+                ic_wire::native::encode_request_into(METHOD, black_box(&*v), LIMITS, out).unwrap();
+            }));
+            wire
+        },
+        #[cfg(feature = "candid")]
+        lane(
+            "candid",
+            value,
+            |v| candid::encode_one(v).unwrap(),
+            |bytes| crate::fixtures::decode_candid(bytes).ok(),
+        ),
+    ];
+    Case {
+        name: name.into(),
+        input_json,
+        lanes,
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, serde::Deserialize, Serialize)]
+#[serde(transparent)]
+struct Blob(#[serde(with = "serde_bytes")] Vec<u8>);
+
+// Use Candid's bulk blob primitive, matching Serde's byte-oriented path.
+// Keep the byte contract explicit; Candid can also optimize generic vectors.
+#[cfg(feature = "candid")]
+impl CandidType for Blob {
+    fn _ty() -> candid::types::Type {
+        Vec::<u8>::ty()
+    }
+    fn idl_serialize<S: candid::types::Serializer>(&self, serializer: S) -> Result<(), S::Error> {
+        serializer.serialize_blob(&self.0)
+    }
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct Scalars {
+    flag: bool,
+    small: u8,
+    signed: i64,
+    unsigned: u64,
+    wide: u128,
+    single: f32,
+    double: f64,
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct Message {
+    sequence: u64,
+    topic: String,
+    payload: Blob,
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+enum Event {
+    Idle,
+    Data(Message),
+    Failure { code: u32, detail: String },
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct Manifest {
+    object: u128,
+    size: u64,
+    content_type: String,
+    hashes: Vec<[u8; 32]>,
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct PackedManifest {
+    object: u128,
+    size: u64,
+    content_type: String,
+    hashes: Blob,
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+pub(super) struct Node {
+    value: u64,
+    children: Vec<Node>,
+}
+#[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct AccountSnapshot {
+    id: u64,
+    owner: String,
+    balance: u128,
+    delta: i64,
+    tags: std::collections::BTreeMap<String, String>,
+    events: Vec<Event>,
+    samples: Vec<Option<i64>>,
+    proofs: Vec<Blob>,
+}
+pub(super) fn tree(depth: usize) -> Node {
+    Node {
+        value: depth as u64,
+        children: if depth == 0 {
+            vec![]
+        } else {
+            vec![tree(depth - 1), tree(depth - 1)]
+        },
+    }
+}
+fn data(n: usize) -> Vec<u8> {
+    let mut state = 0x1234_5678_9abc_def0_u64;
+    (0..n)
+        .map(|_| {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state as u8
+        })
+        .collect()
+}
+fn message(n: usize) -> Message {
+    Message {
+        sequence: 16_384,
+        topic: "relay/events".into(),
+        payload: Blob(data(n)),
+    }
+}
+
+/// Deterministic corpus, including tiny controls and representation boundaries.
+pub fn cases() -> Vec<Case> {
+    cases_selected(None)
+}
+/// Construct only the selected workload for IC calls, preserving corpus indices.
+pub fn cases_selected(selected: Option<usize>) -> Vec<Case> {
+    #[cfg(feature = "coverage-shapes")]
+    {
+        followup::cases_selected(selected)
+    }
+    #[cfg(feature = "contract-shapes")]
+    {
+        shapes::cases_selected(selected)
+    }
+    #[cfg(feature = "hotspots")]
+    {
+        hotspots::cases_selected(selected)
+    }
+    #[cfg(feature = "signed32")]
+    {
+        signed32::cases_selected(selected)
+    }
+    #[cfg(feature = "byte-keys")]
+    {
+        byte_keys::cases_selected(selected)
+    }
+    #[cfg(feature = "id16")]
+    {
+        id16::cases_selected(selected)
+    }
+    #[cfg(feature = "cost-smoke")]
+    {
+        cost_smoke::cases_selected(selected)
+    }
+    #[cfg(feature = "bulk")]
+    {
+        bulk::cases_selected(selected)
+    }
+    #[cfg(feature = "toko")]
+    {
+        toko::cases_selected(selected)
+    }
+    #[cfg(feature = "derive-scale")]
+    {
+        scale::cases_selected(selected)
+    }
+    #[cfg(feature = "packed-i16")]
+    {
+        packed_i16::cases_selected(selected)
+    }
+    #[cfg(not(any(
+        feature = "toko",
+        feature = "derive-scale",
+        feature = "packed-i16",
+        feature = "bulk",
+        feature = "hotspots",
+        feature = "signed32",
+        feature = "byte-keys",
+        feature = "cost-smoke",
+        feature = "id16",
+        feature = "contract-shapes",
+        feature = "coverage-shapes"
+    )))]
+    {
+        standard_cases_selected(selected)
+    }
+}
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct Page<T> {
+    entries: Vec<T>,
+    total: u64,
+    cursor: Option<String>,
+}
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct TupleRecord(u32, String);
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+enum GenericEvent<T> {
+    Empty,
+    Value(T),
+    Batch(Vec<T>),
+    Failure { code: u32, detail: String },
+}
+
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct EmptyRecord {}
+
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+enum Delivery {
+    Empty,
+    Chunk(u64, Blob, Option<String>),
+    Refused { code: u16, retry_after: Option<u64> },
+}
+
+fn standard_cases_selected(selected: Option<usize>) -> Vec<Case> {
+    let mut out = Vec::new();
+    let mut index = 0;
+    macro_rules! push {
+        ($value:expr) => {{
+            if selected.is_none_or(|s| s == index) {
+                out.push($value);
+            }
+            index += 1;
+        }};
+    }
+    push!(case("unit", ()));
+    push!(case("bool", true));
+    macro_rules! integers {
+        ($($ty:ty),*) => {$({
+            push!(case(concat!(stringify!($ty), "-zero"), 0 as $ty));
+            push!(case(concat!(stringify!($ty), "-max"), <$ty>::MAX));
+        })*};
+    }
+    integers!(u8, u16, u32, i8, i16, i32);
+    macro_rules! integer_lists {
+        ($($ty:ty),*) => {$({
+            for n in [0, 1, 1024, 16384] {
+                push!(case(&format!("{}-list-small-{n}", stringify!($ty)),
+                    (0..n).map(|i| (i % 64) as $ty).collect::<Vec<_>>()));
+                push!(case(&format!("{}-list-wide-{n}", stringify!($ty)),
+                    vec![<$ty>::MAX; n]));
+            }
+        })*};
+    }
+    integer_lists!(u16, u32, i16, i32, i64);
+
+    push!(case("f32-subnormal", f32::from_bits(1)));
+    push!(case("f64-negative-zero", -0.0_f64));
+    push!(case("f64-max", f64::MAX));
+    push!(case("principal-anonymous", candid::Principal::anonymous(),));
+    push!(case(
+        "principal-29-bytes",
+        candid::Principal::from_slice(&[7; 29]),
+    ));
+    for n in [0, 1, 127, 128, 16_383, 16_384, u32::MAX as u64, u64::MAX] {
+        push!(case(&format!("u64-{n}"), n));
+    }
+    for n in [i64::MIN, -65, -64, -1, 0, 63, 64, i64::MAX] {
+        push!(case(&format!("i64-{n}"), n));
+    }
+    push!(case("u128-max", u128::MAX));
+    push!(case("i128-min", i128::MIN));
+    push!(case(
+        "scalar-record",
+        Scalars {
+            flag: true,
+            small: 255,
+            signed: -65,
+            unsigned: 128,
+            wide: u128::MAX,
+            single: 1.5,
+            double: -0.0,
+        },
+    ));
+    push!(case("tuple", (true, 128_u64, "hello".to_owned())));
+    push!(case("option-none", None::<u64>));
+    push!(case("option-some", Some(128_u64)));
+    push!(case("result-ok", Ok::<u64, String>(128)));
+    push!(case(
+        "result-error",
+        Err::<u64, String>("permission denied".into()),
+    ));
+    push!(case("nested-option", Some(Some(128_u64))));
+    push!(case("hash-array", [0x95_u8; 32]));
+    for n in [4096, 1_048_576] {
+        push!(case(&format!("generic-byte-vector-{n}"), data(n)));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            // Same input and bytes; compare bounded Serde fields under the same runtime admission.
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 1_048_576>::new(data(n)).unwrap(),
+            );
+        }
+    }
+    for n in [0, 1, 32, 127, 128, 4096, 65_536, 1_048_576] {
+        push!(case(&format!("blob-random-{n}"), Blob(data(n))));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            add_blob_lanes(out.last_mut().unwrap(), data(n));
+        }
+        push!(case(&format!("blob-zero-{n}"), Blob(vec![0; n])));
+    }
+    for n in [0, 1, 32, 127, 128, 4096, 65_536] {
+        push!(case(&format!("text-ascii-{n}"), "a".repeat(n)));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::Text::<65536>::new("a".repeat(n)).unwrap(),
+            );
+        }
+        push!(case(&format!("text-unicode-{n}"), "é水🌍".repeat(n / 9)));
+    }
+    for n in [0, 1, 16, 1024, 16_384] {
+        push!(case(
+            &format!("u64-list-small-{n}"),
+            (0..n).map(|i| (i % 128) as u64).collect::<Vec<_>>(),
+        ));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            // Same input and bytes; compare bounded Serde fields under the same runtime admission.
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 16_384>::new((0..n).map(|i| (i % 128) as u64).collect())
+                    .unwrap(),
+            );
+        }
+        push!(case(
+            &format!("u64-list-wide-{n}"),
+            (0..n).map(|i| u64::MAX - i as u64).collect::<Vec<_>>(),
+        ));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            // Same input and bytes; compare bounded Serde fields under the same runtime admission.
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 16_384>::new((0..n).map(|i| u64::MAX - i as u64).collect())
+                    .unwrap(),
+            );
+        }
+    }
+    for n in [0, 1, 16, 128] {
+        push!(case(
+            &format!("sorted-map-{n}"),
+            (0..n)
+                .map(|i| (format!("key-{i:04}"), i as u64))
+                .collect::<std::collections::BTreeMap<_, _>>(),
+        ));
+        push!(case(
+            &format!("text-pairs-{n}"),
+            (0..n)
+                .map(|i| (format!("key-{i}"), "value".repeat(4)))
+                .collect::<Vec<_>>(),
+        ));
+        push!(case(
+            &format!("relay-batch-{n}"),
+            (0..n).map(|_| message(256)).collect::<Vec<_>>(),
+        ));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            add_bounded(
+                out.last_mut().unwrap(),
+                ic_wire::List::<_, 128>::new((0..n).map(|_| bounded_message(256)).collect())
+                    .unwrap(),
+            );
+        }
+    }
+    for n in [0, 1, 32, 1024] {
+        push!(case(
+            &format!("blob-manifest-{n}"),
+            Manifest {
+                object: u128::MAX,
+                size: n as u64 * 1_048_576,
+                content_type: "application/octet-stream".into(),
+                hashes: (0..n).map(|i| [i as u8; 32]).collect(),
+            },
+        ));
+        #[cfg(feature = "wire")]
+        if selected.is_none_or(|s| s + 1 == index) {
+            add_bounded(
+                out.last_mut().unwrap(),
+                BoundedManifest {
+                    object: u128::MAX,
+                    size: n as u64 * 1_048_576,
+                    content_type: ic_wire::Text::new("application/octet-stream".into()).unwrap(),
+                    hashes: ic_wire::List::new((0..n).map(|i| [i as u8; 32]).collect()).unwrap(),
+                },
+            );
+        }
+    }
+    for n in [0, 1, 32, 1024] {
+        push!(case(
+            &format!("packed-manifest-{n}"),
+            PackedManifest {
+                object: u128::MAX,
+                size: n as u64 * 1_048_576,
+                content_type: "application/octet-stream".into(),
+                hashes: Blob((0..n).flat_map(|i| [i as u8; 32]).collect())
+            }
+        ));
+    }
+    push!(case("variant-unit", Event::Idle));
+    #[cfg(feature = "wire")]
+    if selected.is_none_or(|s| s + 1 == index) {
+        add_bounded(out.last_mut().unwrap(), BoundedEvent::Idle);
+    }
+    push!(case("variant-record", Event::Data(message(128))));
+    #[cfg(feature = "wire")]
+    if selected.is_none_or(|s| s + 1 == index) {
+        add_bounded(
+            out.last_mut().unwrap(),
+            BoundedEvent::Data(bounded_message(128)),
+        );
+    }
+    push!(case(
+        "variant-error",
+        Event::Failure {
+            code: 403,
+            detail: "permission denied".into(),
+        },
+    ));
+    // Preserve historical case indices; depth 8 is now also accepted by the
+    // independent Candid oracle and qualified in tests, outside this corpus.
+    for depth in [0, 1, 4, 7] {
+        push!(case(&format!("tree-depth-{depth}"), tree(depth)));
+    }
+    // Append new cases so existing benchmark identities retain their indices.
+    macro_rules! signed_distributions {
+        ($($ty:ty),*) => {$({
+            for n in [1, 128, 4096] {
+                push!(case(&format!("{}-list-negative-{n}", stringify!($ty)),
+                    (0..n).map(|i| -1 - (i % 64) as $ty).collect::<Vec<_>>()));
+                let values = [<$ty>::MIN, -16385, -65, -64, -1, 0, 63, 64, 16384, <$ty>::MAX];
+                push!(case(&format!("{}-list-mixed-{n}", stringify!($ty)),
+                    (0..n).map(|i| values[i % values.len()]).collect::<Vec<_>>()));
+            }
+        })*};
+    }
+    signed_distributions!(i16, i32, i64);
+    macro_rules! unsigned_distributions {
+        ($($ty:ty),*) => {$({
+            for n in [1, 128, 4096] {
+                let values = [0, 127, 128, 16383, 16384, <$ty>::MAX];
+                push!(case(&format!("{}-list-mixed-{n}", stringify!($ty)),
+                    (0..n).map(|i| values[i % values.len()]).collect::<Vec<_>>()));
+            }
+        })*};
+    }
+    unsigned_distributions!(u16, u32, u64);
+    for n in [63, 64, 65, 129, 16383, 16384, 16385, 65535, 65537] {
+        push!(case(&format!("blob-random-{n}"), Blob(data(n))));
+    }
+    for n in [0, 1, 32, 127, 128] {
+        push!(case(&format!("generic-byte-vector-{n}"), data(n)));
+    }
+    for n in [0, 1, 1024] {
+        push!(case(
+            &format!("bool-list-{n}"),
+            (0..n).map(|i| i % 2 == 0).collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("optional-i64-list-{n}"),
+            (0..n)
+                .map(|i| if i % 3 == 0 { None } else { Some(-(i as i64)) })
+                .collect::<Vec<_>>()
+        ));
+        let singles = [0.0_f32, -0.0, f32::MIN_POSITIVE, f32::MAX, -1.5];
+        let doubles = [0.0_f64, -0.0, f64::MIN_POSITIVE, f64::MAX, -1.5];
+        push!(case(
+            &format!("f32-list-{n}"),
+            (0..n)
+                .map(|i| singles[i % singles.len()])
+                .collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("f64-list-{n}"),
+            (0..n)
+                .map(|i| doubles[i % doubles.len()])
+                .collect::<Vec<_>>()
+        ));
+    }
+    for n in [0, 1, 16, 128] {
+        push!(case(
+            &format!("nested-blobs-{n}"),
+            (0..n)
+                .map(|i| Blob(data([0, 1, 63, 64, 128, 4096][i % 6])))
+                .collect::<Vec<_>>()
+        ));
+    }
+    for n in [0, 1, 128] {
+        push!(case(
+            &format!("account-snapshot-{n}"),
+            AccountSnapshot {
+                id: 42,
+                owner: "account:benchmark".into(),
+                balance: 1_000_000_000_000,
+                delta: -65,
+                tags: [
+                    ("tier".into(), "standard".into()),
+                    ("region".into(), "eu".into())
+                ]
+                .into(),
+                events: (0..n)
+                    .map(|i| match i % 3 {
+                        0 => Event::Idle,
+                        1 => Event::Data(message(128)),
+                        _ => Event::Failure {
+                            code: 403,
+                            detail: "permission denied".into()
+                        },
+                    })
+                    .collect(),
+                samples: (0..n)
+                    .map(|i| if i % 2 == 0 { None } else { Some(-(i as i64)) })
+                    .collect(),
+                proofs: (0..n).map(|i| Blob(vec![i as u8; 32])).collect(),
+            }
+        ));
+    }
+    // Additional deterministic Serde/Candid shapes; preserve earlier case indices.
+    macro_rules! minimums {
+        ($($ty:ty),*) => {$(push!(case(concat!(stringify!($ty), "-min"), <$ty>::MIN));)*};
+    }
+    minimums!(i8, i16, i32);
+    push!(case("bool-false", false));
+    push!(case("u128-zero", 0_u128));
+    push!(case("i128-zero", 0_i128));
+    push!(case("i128-max", i128::MAX));
+    push!(case("f32-zero", 0_f32));
+    push!(case("f32-max", f32::MAX));
+    push!(case("f64-subnormal", f64::from_bits(1)));
+    macro_rules! extra_lists {
+        ($($ty:ty),*) => {$(
+            for n in [0, 1, 128, 4096] {
+                push!(case(&format!("{}-extra-list-small-{n}", stringify!($ty)),
+                    (0..n).map(|i| (i % 64) as $ty).collect::<Vec<_>>()));
+                push!(case(&format!("{}-extra-list-wide-{n}", stringify!($ty)), vec![<$ty>::MAX; n]));
+            }
+        )*};
+    }
+    extra_lists!(u8, i8, u128, i128);
+    for n in [0, 1, 16, 128] {
+        push!(case(
+            &format!("ordered-set-{n}"),
+            (0..n as u64).collect::<std::collections::BTreeSet<_>>()
+        ));
+        push!(case(
+            &format!("deque-{n}"),
+            (0..n as u64).collect::<std::collections::VecDeque<_>>()
+        ));
+        push!(case(
+            &format!("linked-list-{n}"),
+            (0..n as i64)
+                .map(|i| -i)
+                .collect::<std::collections::LinkedList<_>>()
+        ));
+        push!(case(
+            &format!("nested-map-{n}"),
+            (0..n)
+                .map(|i| (i as u32, vec![Some(i as u64), None, Some(u64::MAX)]))
+                .collect::<std::collections::BTreeMap<_, _>>()
+        ));
+        push!(case(
+            &format!("page-blob-{n}"),
+            Page {
+                entries: (0..n).map(|_| Blob(data(32))).collect(),
+                total: n as u64,
+                cursor: Some("next".into())
+            }
+        ));
+        push!(case(
+            &format!("page-option-result-{n}"),
+            Page {
+                entries: (0..n)
+                    .map(|i| if i % 3 == 0 {
+                        None
+                    } else {
+                        Some(if i % 2 == 0 {
+                            Ok(i as u64)
+                        } else {
+                            Err("denied".to_owned())
+                        })
+                    })
+                    .collect(),
+                total: n as u64,
+                cursor: None
+            }
+        ));
+        push!(case(
+            &format!("nested-page-{n}"),
+            Page {
+                entries: (0..n)
+                    .map(|i| Page {
+                        entries: vec![i as u32, u32::MAX],
+                        total: 2,
+                        cursor: None
+                    })
+                    .collect(),
+                total: n as u64,
+                cursor: Some("next".into())
+            }
+        ));
+    }
+    push!(case("fixed-u64-empty", [0_u64; 0]));
+    push!(case("fixed-u16-16", [u16::MAX; 16]));
+    push!(case("fixed-u64-32", [u64::MAX; 32]));
+    push!(case("fixed-i32-32", [i32::MIN; 32]));
+    push!(case("fixed-hashes-16", [[0x95_u8; 32]; 16]));
+    push!(case(
+        "boxed-slice-u64",
+        vec![0_u64, 128, u64::MAX].into_boxed_slice()
+    ));
+    push!(case(
+        "duration",
+        std::time::Duration::new(u32::MAX as u64, 999_999_999)
+    ));
+    push!(case("nested-option-none", Some(None::<u64>)));
+    push!(case("result-optional", Ok::<_, String>(Some(u64::MAX))));
+    push!(case("tuple-struct", TupleRecord(128, "tuple".into())));
+    push!(case("generic-enum-empty", GenericEvent::<u64>::Empty));
+    push!(case("generic-enum-value", GenericEvent::Value(u64::MAX)));
+    push!(case(
+        "generic-enum-batch",
+        GenericEvent::Batch(vec![0_u64, 128, u64::MAX])
+    ));
+    push!(case(
+        "generic-enum-failure",
+        GenericEvent::<u64>::Failure {
+            code: 403,
+            detail: "denied".into()
+        }
+    ));
+
+    // Append only: prior IC workload indices and their type definitions stay fixed.
+    // Zero-byte elements test work admission independently of payload byte count.
+    for n in [0, 1, 128, 4096] {
+        push!(case(&format!("unit-list-{n}"), vec![(); n]));
+        push!(case(
+            &format!("empty-record-list-{n}"),
+            (0..n).map(|_| EmptyRecord {}).collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("optional-unit-list-{n}"),
+            (0..n)
+                .map(|i| (i % 2 == 0).then_some(()))
+                .collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("result-unit-list-{n}"),
+            (0..n)
+                .map(|i| if i % 2 == 0 { Ok(()) } else { Err(()) })
+                .collect::<Vec<_>>()
+        ));
+    }
+    for n in [0, 1, 16, 128] {
+        push!({
+            let value = (0..n)
+                .map(|i| {
+                    let mut key = [0x95_u8; 32];
+                    key[0] = i as u8;
+                    (key, (i % 2 == 0).then(|| Blob(data(32))))
+                })
+                .collect::<std::collections::BTreeMap<_, _>>();
+            // JSON cannot represent array keys. Use ordered pairs only for
+            // input identity; both measured codecs still serialize the map.
+            let input_json = serde_json::to_vec(&value.iter().collect::<Vec<_>>()).unwrap();
+            case_with_input_json(&format!("binary-key-map-{n}"), value, input_json)
+        });
+        push!(case(
+            &format!("result-blob-list-{n}"),
+            (0..n)
+                .map(|i| {
+                    let blob = Blob(data([0, 1, 127, 128, 4096][i % 5]));
+                    if i % 2 == 0 { Ok(blob) } else { Err(blob) }
+                })
+                .collect::<Vec<_>>()
+        ));
+        push!(case(
+            &format!("empty-inner-lists-{n}"),
+            vec![Vec::<u64>::new(); n]
+        ));
+    }
+    push!(case(
+        "fixed-option-array",
+        [None, Some(0_u64), Some(128), Some(u64::MAX)]
+    ));
+    push!(case("boxed-message", Box::new(message(128))));
+    push!(case(
+        "cow-unicode-text",
+        std::borrow::Cow::<'static, str>::Borrowed("é水🌍")
+    ));
+    push!(case("boxed-optional-blob", Box::new(Some(Blob(data(128))))));
+    push!(case("delivery-empty", Delivery::Empty));
+    push!(case(
+        "delivery-tuple",
+        Delivery::Chunk(128, Blob(data(128)), Some("next".into()))
+    ));
+    push!(case(
+        "delivery-record",
+        Delivery::Refused {
+            code: 429,
+            retry_after: Some(16_384)
+        }
+    ));
+    // Append new workloads without changing any of the 333 existing IC indices.
+    if selected.is_none_or(|s| s >= index) {
+        out.extend(shapes::cases_selected(selected.map(|s| s - index)));
+    }
+    out
+}
+
+#[cfg(feature = "wire")]
+fn add_bounded<T: Serialize + DeserializeOwned + PartialEq + Debug + 'static>(
+    case: &mut Case,
+    value: T,
+) {
+    let bounded = lane(
+        "wire-bounded",
+        Rc::new(value),
+        |v| ic_wire::native::encode_request(METHOD, v, LIMITS).unwrap(),
+        |bytes| ic_wire::native::decode_request::<T>(METHOD, bytes, LIMITS).ok(),
+    );
+    assert_eq!(bounded.bytes, case.lanes[0].bytes);
+    case.lanes.push(bounded);
+}
+#[cfg(feature = "wire")]
+fn add_blob_lanes(case: &mut Case, value: Vec<u8>) {
+    add_bounded(
+        case,
+        ic_wire::Bytes::<1_048_576>::new(value.clone()).unwrap(),
+    );
+    let bytes = case.lanes[0].bytes.clone();
+    let view: &serde_bytes::Bytes =
+        ic_wire::native::decode_request(METHOD, &bytes, LIMITS).unwrap();
+    assert_eq!(view.as_ref(), value);
+    if !view.is_empty() {
+        let address = view.as_ptr() as usize;
+        assert!(
+            (bytes.as_ptr() as usize..bytes.as_ptr() as usize + bytes.len()).contains(&address)
+        );
+    }
+    case.lanes.push(Lane {
+        name: "wire-borrowed",
+        bytes,
+        encode: Box::new(move || {
+            ic_wire::native::encode_request(METHOD, serde_bytes::Bytes::new(&value), LIMITS)
+                .unwrap()
+        }),
+        decode: Box::new(|bytes| {
+            let result = ic_wire::native::decode_request::<&serde_bytes::Bytes>(
+                METHOD,
+                black_box(bytes),
+                LIMITS,
+            );
+            let ok = result.is_ok();
+            black_box(result).ok();
+            ok
+        }),
+        reuse: None,
+    });
+}
+
+#[cfg(feature = "wire")]
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+struct BoundedMessage {
+    sequence: u64,
+
+    topic: ic_wire::Text<64>,
+
+    payload: ic_wire::Bytes<256>,
+}
+#[cfg(feature = "wire")]
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+struct BoundedManifest {
+    object: u128,
+
+    size: u64,
+
+    content_type: ic_wire::Text<64>,
+
+    hashes: ic_wire::List<[u8; 32], 1024>,
+}
+#[cfg(feature = "wire")]
+#[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+enum BoundedEvent {
+    Idle,
+
+    Data(BoundedMessage),
+}
+#[cfg(feature = "wire")]
+fn bounded_message(n: usize) -> BoundedMessage {
+    BoundedMessage {
+        sequence: 16_384,
+        topic: ic_wire::Text::new("relay/events".into()).unwrap(),
+        payload: ic_wire::Bytes::new(data(n)).unwrap(),
+    }
+}

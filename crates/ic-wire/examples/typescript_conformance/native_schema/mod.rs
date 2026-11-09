@@ -135,6 +135,15 @@ struct HeapWords(
 #[derive(Debug, Deserialize, Wire, Serialize, PartialEq)]
 #[serde(transparent)]
 struct BoolWords(#[serde(with = "ic_wire::serde_packed::bools")] Vec<bool>);
+type FloatWords = Vec<f32>;
+#[derive(Debug, Deserialize, Wire, Serialize, PartialEq)]
+struct FloatRecord<T> {
+    tag: T,
+    #[serde(with = "::ic_wire::serde_packed::finite_f32")]
+    small: FloatWords,
+    #[serde(with = "ic_wire::serde_packed::finite_f64")]
+    wide: Vec<f64>,
+}
 impl PartialEq for HeapWords {
     fn eq(&self, other: &Self) -> bool {
         self.0.clone().into_sorted_vec() == other.0.clone().into_sorted_vec()
@@ -512,6 +521,17 @@ export function createCodec(method: unknown, types: unknown) {
         let js = serde_json::to_string(&values).unwrap();
         add(directory, &mut checks, 36 + offset, BoolWords(values), &js);
     }
+    add(
+        directory,
+        &mut checks,
+        41,
+        FloatRecord {
+            tag: 7_u8,
+            small: vec![0.0, -0.0, f32::from_bits(1), f32::MAX],
+            wide: vec![0.0, -0.0, f64::from_bits(1), f64::MAX],
+        },
+        "{tag:7,small:new Float32Array([0,-0,1.401298464324817e-45,3.4028234663852886e38]),wide:new Float64Array([0,-0,5e-324,Number.MAX_VALUE])}",
+    );
     checks.push_str(
         r#"
 for (const direction of ['Request', 'Response']) {
@@ -567,7 +587,7 @@ for (const bad of ['AB'.repeat(32), 'ab', 'gg'.repeat(32)]) {
   rejects(() => projection9.decodeRequest(Uint8Array.from([73,87,17,0,0,0,0,0,0,0,0,bytes.length,...bytes])), 'value');
 }
 rejects(() => createCodec({id:'17',request:{k:'text',check:'networkHex'},response:{k:'unit'},requestBytes:4096,responseBytes:4096,requestNodes:512,responseNodes:512,requestDepth:32,responseDepth:32}).encodeRequest('ab'.repeat(32)), 'value');
-console.log('Wire: 41 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
+console.log('Wire: 42 Rust/TypeScript exact-frame vectors, custom scalar checks and both directions passed');
 "#);
     for bad in ["AB".repeat(32), "ab".into(), "gg".repeat(32)] {
         let frame = native::encode_request(17, &bad, LIMITS).unwrap();

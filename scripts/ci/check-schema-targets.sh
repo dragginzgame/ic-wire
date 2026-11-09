@@ -19,7 +19,7 @@ path = "lib.rs"
 [dependencies]
 ic-wire = { path = "$root/crates/ic-wire" }
 EOF_CODEC
-cp "$root/crates/ic-wire-qualification/tests/fixtures/codec_only/mod.rs" "$fixture/codec-only/lib.rs"
+cp "$root/qualification/ic-wire-qualification/tests/fixtures/codec_only/mod.rs" "$fixture/codec-only/lib.rs"
 cp "$root/Cargo.lock" "$fixture/codec-only/Cargo.lock"
 export CARGO_TARGET_DIR="$root/target/schema-targets/build"
 cargo metadata --offline --format-version 1 --manifest-path "$fixture/codec-only/Cargo.toml" > "$fixture/codec-only/metadata.json"
@@ -40,7 +40,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         exit 1
     fi
 done
-cp "$root/crates/ic-wire-qualification/tests/fixtures/schema_targets/mod.rs" "$fixture/lib.rs"
+cp "$root/qualification/ic-wire-qualification/tests/fixtures/schema_targets/mod.rs" "$fixture/lib.rs"
 # Start with the selected workspace versions; resolution may only update this
 # disposable consumer lock. Every build/check after resolution is locked/offline.
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"

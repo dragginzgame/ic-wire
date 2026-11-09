@@ -10,8 +10,8 @@ out="$(mktemp -d "$root/target/compatible-consumers/run.XXXXXX")"
 for lane in current published-endpoint; do
     fixture="$out/$lane"
     mkdir -p "$fixture/src"
-    cp "$root/crates/ic-wire-qualification/tests/fixtures/compatibility/mod.rs" "$fixture/src/lib.rs"
-    cp "$root/crates/ic-wire-qualification/benches/contract_tests.rs" "$fixture/src/contract_tests.rs"
+    cp "$root/qualification/ic-wire-qualification/tests/fixtures/compatibility/mod.rs" "$fixture/src/lib.rs"
+    cp "$root/qualification/ic-wire-qualification/benches/contract_tests.rs" "$fixture/src/contract_tests.rs"
     cp "$root/Cargo.lock" "$fixture/Cargo.lock"
     node - "$root" "$fixture" "$lane" <<'JS'
 const fs = require('node:fs');
@@ -37,7 +37,7 @@ publish = false
 [dependencies]
 ic-wire = { ${core}, features = ["platform-types"] }
 ic-wire-endpoint = { ${endpoint}, features = ["typescript"] }
-ic-platform-types = { version = "0.18.1", default-features = false }
+ic-platform-types = { version = "0.19.0", default-features = false }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 [patch.crates-io]
 ${patches.join('\n')}
@@ -58,6 +58,20 @@ const dependency = m.resolve.nodes.find(n => n.id === endpoint.id).deps.find(d =
 const selectedCore = m.packages.find(p => p.id === dependency.pkg);
 const line = v => { const [major, minor] = v.split('.'); return major === '0' ? major + '.' + minor : major; };
 assert.ok(!m.packages.some(p => ['candid','ic-testkit','tokio'].includes(p.name)));
+if (lane === 'published-endpoint') {
+ const runtime = endpoint.dependencies.find(d => d.name === 'ic-platform-runtime');
+ const selectedRuntime = m.packages.find(p => p.id === m.resolve.nodes.find(n => n.id === endpoint.id).deps.find(d => d.name === 'ic_platform_runtime').pkg);
+ if (line(selectedRuntime.version) !== '0.21') {
+  // The canonical Types 0.19 hard cut requires the matching Runtime generation.
+  // An older published Endpoint is not a supported mixed pair. The current pair
+  // below remains mandatory; publication will make that pair registry-installable.
+  assert.notEqual(endpoint.source, null);
+  assert.equal(line(selectedRuntime.version), '0.20', 'unreviewed published Runtime generation');
+  console.log(`Published Endpoint ${endpoint.version} selects Runtime ${runtime.req}; Types 0.19 requires the current Runtime 0.21 pair.`);
+  fs.writeFileSync(file + '.unsupported-core-line', selectedRuntime.version + '\n');
+  process.exit(0);
+ }
+}
 for (const name of ['ic-wire-endpoint', 'ic-wire-endpoint-macros', 'ic-platform-types', 'ic-platform-runtime', 'ic-platform-runtime-guard']) {
  assert.equal(m.packages.filter(p => p.name === name).length, 1, `duplicate/missing ${name}`);
 }

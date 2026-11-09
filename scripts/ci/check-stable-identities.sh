@@ -7,7 +7,7 @@ cd "$root"
 mkdir -p target
 out="$(mktemp -d "$root/target/stable-identities.XXXXXX")"
 printf 'Stable identity evidence: %s\n' "$out"
-cargo metadata --locked --offline --features ic-wire/platform-types --format-version 1 > "$out/workspace.json"
+cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --features ic-wire/platform-types,ic-wire-benchmarks/ic --format-version 1 > "$out/workspace.json"
 node scripts/ci/stable-identity-fixtures.mjs prepare "$root" "$out"
 for owner in next-platform next-endpoint next-endpoint-macros; do
     bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$out/$owner" --external-ic

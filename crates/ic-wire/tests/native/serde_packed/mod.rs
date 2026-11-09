@@ -217,3 +217,130 @@ fn metadata_constraints_are_validated_and_do_not_change_plain_packed() {
         [0]
     );
 }
+
+#[test]
+fn finite_adapters_preserve_bits_and_reject_nonfinite_partial_and_truncated_words() {
+    macro_rules! check {
+        ($ty:ty, $bits:ty, $adapter:literal, $width:expr, $bad:expr) => {{
+            #[derive(Debug, Serialize, Deserialize)]
+            #[serde(transparent)]
+            struct Values(#[serde(with = $adapter)] Vec<$ty>);
+            for count in [0, 1, 7, 8, 9, 15, 16, 17, 31, 32, 127, 128] {
+                let values: Vec<$ty> = (0..count)
+                    .map(|i| {
+                        [
+                            0.0,
+                            -0.0,
+                            <$ty>::from_bits(1),
+                            -<$ty>::from_bits(1),
+                            <$ty>::MAX,
+                            -<$ty>::MAX,
+                            <$ty>::MIN_POSITIVE,
+                            1.0,
+                        ][i % 8]
+                    })
+                    .collect();
+                let raw: Vec<u8> = values.iter().flat_map(|v| v.to_le_bytes()).collect();
+                let encoded = ic_wire::native::encode(&Values(values.clone()), LIMITS).unwrap();
+                assert_eq!(
+                    encoded,
+                    ic_wire::native::encode(&ic_wire::ByteBuf::from(raw), LIMITS).unwrap()
+                );
+                for offset in 0..16 {
+                    let mut padded = vec![0; offset];
+                    padded.extend_from_slice(&encoded);
+                    let decoded: Values =
+                        ic_wire::native::decode(&padded[offset..], LIMITS).unwrap();
+                    assert_eq!(
+                        decoded.0.iter().map(|v| v.to_bits()).collect::<Vec<_>>(),
+                        values.iter().map(|v| v.to_bits()).collect::<Vec<_>>()
+                    );
+                }
+                for end in 0..encoded.len() {
+                    assert!(ic_wire::native::decode::<Values>(&encoded[..end], LIMITS).is_err());
+                }
+                for bad in $bad {
+                    assert!(
+                        ic_wire::native::encode(&Values(vec![<$ty>::from_bits(bad)]), LIMITS)
+                            .is_err()
+                    );
+                    for position in [0, count / 2, count.saturating_sub(1)] {
+                        if count == 0 {
+                            continue;
+                        }
+                        let mut words = values.clone();
+                        words[position] = <$ty>::from_bits(bad);
+                        let bytes: Vec<u8> = words.iter().flat_map(|v| v.to_le_bytes()).collect();
+                        let bytes = ic_wire::native::encode(&ic_wire::ByteBuf::from(bytes), LIMITS)
+                            .unwrap();
+                        assert_eq!(
+                            ic_wire::native::decode::<Values>(&bytes, LIMITS).err(),
+                            Some(ic_wire::Error::Malformed)
+                        );
+                    }
+                }
+            }
+            for length in 1..$width {
+                let bytes =
+                    ic_wire::native::encode(&ic_wire::ByteBuf::from(vec![0; length]), LIMITS)
+                        .unwrap();
+                assert_eq!(
+                    ic_wire::native::decode::<Values>(&bytes, LIMITS).err(),
+                    Some(ic_wire::Error::Malformed)
+                );
+            }
+            let value = Values(vec![1.0, -0.0]);
+            let bytes = ic_wire::native::encode(&value, LIMITS).unwrap();
+            for which in 0..4 {
+                let limit = |n| {
+                    let mut limits = ic_wire::Limits {
+                        bytes: bytes.len(),
+                        ..LIMITS
+                    };
+                    match which {
+                        0 => limits.bytes = n,
+                        1 => limits.allocation = n,
+                        2 => limits.nodes = n,
+                        _ => limits.depth = n,
+                    }
+                    limits
+                };
+                let exact = (0..4096)
+                    .find(|&n| ic_wire::native::decode::<Values>(&bytes, limit(n)).is_ok())
+                    .unwrap();
+                assert!(exact > 0);
+                assert_eq!(
+                    ic_wire::native::decode::<Values>(&bytes, limit(exact - 1)).err(),
+                    Some(ic_wire::Error::Limit)
+                );
+                let exact = (0..4096)
+                    .find(|&n| ic_wire::native::encode(&value, limit(n)).is_ok())
+                    .unwrap();
+                assert!(exact > 0);
+                assert_eq!(
+                    ic_wire::native::encode(&value, limit(exact - 1)),
+                    Err(ic_wire::Error::Limit)
+                );
+            }
+        }};
+    }
+    check!(
+        f32,
+        u32,
+        "ic_wire::serde_packed::finite_f32",
+        4,
+        [0x7f80_0000_u32, 0xff80_0000, 0x7fc0_0001, 0x7f80_0001]
+    );
+    check!(
+        f64,
+        u64,
+        "ic_wire::serde_packed::finite_f64",
+        8,
+        [
+            0x7ff0_0000_0000_0000_u64,
+            0xfff0_0000_0000_0000,
+            0x7ff8_0000_0000_0001,
+            0x7ff0_0000_0000_0001
+        ]
+    );
+}

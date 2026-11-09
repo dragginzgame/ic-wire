@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Check reviewed snapshot integrity
-        run: make shared-tooling-check
+        run: make toko-tooling-check
       - name: Restore pinned tool downloads
         uses: ./.github/actions/cache-tool-downloads
       - name: Prepare pinned security scanner
@@ -98,6 +98,9 @@ jobs:
           echo "RUSTUP_TOOLCHAIN=$(bash scripts/ci/read-cargo-workspace-rust-version.sh Cargo.toml)" >> "$GITHUB_ENV"
       - name: Install reviewed common tools
         run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
+      - name: Prepare editor for release-adapter fixtures
+        if: matrix.suite == 'core'
+        run: make install-release-editor
       - name: Save pinned tool downloads
         uses: ./.github/actions/cache-tool-downloads
         with:

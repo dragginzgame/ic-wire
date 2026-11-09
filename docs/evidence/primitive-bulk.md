@@ -618,3 +618,331 @@ codec rows do not. The 64 KiB borrowed record decodes at **938** instructions
 versus owned Wire **67,272** and Candid **108,299**, using the identical frame.
 Borrowing is inside an already-owned frame and is not ingress zero-copy or a
 claim about application work that later requires ownership.
+
+## Finite float field investigation — 9 November 2026
+
+Recommendation: investigate two explicit Serde field adapters for `Vec<f32>` and
+`Vec<f64>`, provisionally named `serde_packed::finite_f32` and `finite_f64`.
+These are **proposals, not available APIs**. Reuse the existing byte-buffer codec;
+keep ordinary lists and integer/hash Packed unchanged. No new crate, codec,
+feature switch or automatic derive rewrite is needed.
+
+The [full matrix](../candid-comparison.md) measures raw IEEE-bit research fields,
+not these finite adapters. Its f32 input includes infinities, quiet/signalling
+NaNs, signed zero, subnormals and finite extremes
+(`benches/fixtures/followup/mod.rs`, `f32-bits-*`/`f64-bits-*`). A finite adapter
+would reject those non-finite fixtures. Consequently the 55,838,553 → 1,050,623
+opt-z encode result for 1 MiB is evidence for bulk transport, **not a measured
+finite-adapter saving**. The combined bool/float Wasm difference likewise is not
+an isolated float result.
+
+### Boundary and simplest implementation
+
+- `src/float/mod.rs` already defines finite-only schema floats, preserving negative
+  zero and subnormals. `typescript/runtime.ts` rejects non-finite scalar values;
+  `typescript/native_schema/mod.rs` deliberately omits raw Rust float metadata.
+  Follow that existing browser contract instead of quietly extending it to NaNs.
+- `packed/mod.rs` seals words behind `Pod + Eq`. Raw floats lack `Eq`; finite
+  wrappers cannot be `Pod` because non-finite bit patterns are invalid. Do not
+  alter this integer/hash owner merely to fit the finite domain. The established
+  explicit bool adapter is the better model.
+- On little-endian Rust, validate the borrowed primitive slice, then serialize its
+  safe bytemuck byte view. No temporary encoding Vec is needed. Sizing and writing
+  each invoke Serde, so the finite scan can run twice: this must be measured.
+  Big-endian encoding needs an explicit fallible LE buffer path, as existing
+  Packed encoding has; the current private float prototype rejects that host.
+- Decode checks width and finite exponent bits in the borrowed byte span before
+  reserving an output Vec, then reads unaligned LE words into owned storage.
+  The existing native `CheckedVisitor::visit_bytes` charges the buffer before
+  the adapter visitor runs. Reuse that admission; do not invent float budgets.
+  Validation scans add work and can inhibit an optimized copy loop. Measure
+  scan-then-copy against alternatives rather than assuming the raw result survives.
+- Browser values can be `Float32Array` / `Float64Array`, with finite-word checking
+  before allocating the decoded copy. Existing packed machinery already handles
+  byte offsets, alignment, ownership and endian swapping. Check raw exponent
+  words with DataView before copying; no NaN arithmetic or bigint loop is needed.
+  A Float32Array is already rounded to f32 by its caller. Do not silently accept
+  arbitrary `number[]` and round it inside the codec.
+
+The adapter's custom scan before `serialize_bytes` is trusted Serde work, as
+specified by the runtime contract; it is not bounded by per-element node visits.
+Do not claim strict instruction admission for arbitrary custom Serde. Decode
+buffer admission still precedes the scan and allocation. `Vec<f32>` is not
+`Vec<FiniteF32>`: do not transmute wrappers, add unsafe casts or accidentally
+accept a different domain type through syntactic macro matching.
+
+### Adoption contract and complete integration scope
+
+An adopting f32 field changes `[1.0]` from `01 00 00 80 3f` to
+`04 00 00 80 3f`; f64 changes its singleton count `01` to byte count `08`.
+Finite value bits stay exact, but count-prefix widths can change payload size.
+Starting from raw float lists, NaN/infinity acceptance changes to rejection.
+Starting from finite-value lists, that rejection policy already exists. Traversal
+changes from per-element admission to a buffer, so bounds and allocation/node
+allowances need requalification. Consumers must coordinate identities, regenerate
+clients and preserve retained retry/hash bytes. No automatic migration/dual reader.
+
+Promotion would update these existing owners together:
+
+| Owner | Required work |
+| --- | --- |
+| Core `serde_packed` | Two concrete finite field adapters and endian/error tests |
+| Derive `native_schema::attributes` / `fields` | Recognize exact adapter paths; verify actual Vec element types, including aliases |
+| TypeScript metadata/runtime | Finite packed schema words, typed-array rendering, finite-before-copy checks, endian handling |
+| Bulk lint | Recommend supported adapters only after qualification; retain ordinary float controls |
+| Qualification fixtures | Rust/TS exact bytes, scalar finite-policy parity, malformed and budget refusal, standalone derives |
+| Docs/consumer adoption | Explicit old/new bytes, field-bound preservation, identity and budget action |
+
+The proposed Vec adapters do not introduce a per-field length bound. Existing
+consumer bounds/custom checks must remain explicit; runtime byte limits are not
+a substitute for all field constraints. Numeric per-element range constraints
+must not disappear when moving from scalar/list metadata to a packed field.
+
+### Executed feasibility probes and remaining proof
+
+Evidence: `target/evidence/finite-float-investigation-20261109/`. With the admitted
+Rust 1.99.1 compiler, four standalone tests pass: f32/f64 boundary classification,
+offsets 0–15, partial words, empty input, invalid first/middle/last values, and
+one million deterministic bit-pattern iterations against scalar `is_finite`.
+The Node probe passes 1,280 classification/copy assertions, checking finite bit
+preservation and that owned output does not retain the caller's buffer.
+
+These are isolated semantic helpers, **not implemented adapters or generated-client
+conformance**. Native typed-array copying was tested on little-endian only. No
+new IC instruction, native timing, allocation or Wasm saving is claimed.
+
+The next measured experiment needs matched finite-only f32/f64 inputs in both
+lanes, separate from the existing all-IEEE controls: 0/1/small/large lengths,
+signed zeros, subnormals and finite extremes. Compare ordinary finite lists,
+raw bulk and checked finite bulk; retain Candid inputs identically. Measure
+opt-z first, opt-3 losses, repeated IC samples, total/code Wasm and native
+allocations. Separately exercise non-finite refusal, truncated/misaligned spans,
+exact/one-short frame/allocation/node/depth limits, and check rejection precedes
+allocation. Qualify the actual generated client and big-endian strategy before
+promotion. No production bytes, identities, budgets, acceptance or API changed
+in this investigation.
+
+## Matched finite float cost study — 9 November 2026
+
+**Keep the chunked scan as research; do not publish an adapter yet.** Finite
+bulk fields substantially improve ordinary finite lists and reduce this fixture's
+Wasm, but large f32 encoding still costs 3.40 times Candid at opt-z. Candid's raw
+float DTO does not enforce Wire's finite-only policy. This is a matched finite
+input comparison, not identical non-finite acceptance or an application saving.
+
+### Matched inputs and executed proof
+
+Six isolated sources use the same manifests/lock, Rust/Cargo 1.99.1, LLVM 23.1.1,
+Postcard 1.1.3, Serde 1.0.229, Candid 0.10.40, Platform 0.27.1, Types 0.18.3,
+Runtime 0.20.3, Testkit 0.95.0 and PocketIC 16.1.0. Source is df071a4 plus the
+pending tooling/supplier adoptions. Lock SHA-256:
+`a1b3e79781eb208c581a850aa2151f111df263ed8daaef93366c6c5e8e6e51e8`.
+Each source has a separate Cargo target. The maintained evaluation script runs
+opt-z/evaluation and opt-3/benchmark-speed, two native runs with eleven samples
+and 2 ms batches, separate allocation/heap modes, and three distinct-caller IC
+samples per operation. Every IC repeat agrees exactly.
+
+The 36 cases include empty/singleton, small lengths around byte-prefix boundaries,
+127/128 elements, 16,384 elements, and 1 MiB: 262,144 f32 or 131,072 f64 values.
+Eight singleton edge cases per width cover signed zeros, signed subnormals,
+finite extremes, smallest normal and one. Ordinary Wire stores public FiniteF32 /
+FiniteF64 values, constructed before measurement; Candid stores primitive floats.
+Inputs are identified by their exact bits. This replaces the research corpus
+only in disposable sources; it does not add a second production codec.
+
+The lanes are ordinary finite lists, raw bulk, scalar-checked bulk, checked plus
+inline hints, explicit exponent masks, and an eight-word checked loop. The last
+uses one non-inlined helper instantiated only for f32/f64; eight bit predicates
+are combined before branching, with a scalar tail. Both encoding passes validate;
+decode validates the borrowed bytes before reserving output. No per-field bound
+or per-consumer codec specialization is introduced.
+
+All 24 Wasm builds are fresh; baked source identities, loaded-module hashes,
+code-section lengths, 4,320 IC rows and 13,824 native/frame comparisons verify.
+All six Candid controls have identical frames and instruction counts. The five
+bulk lanes have identical finite Wire frames. Initial allocator-test setup and
+an incorrect test allowance search were fixed before completed measurements;
+`ordinary/attempt-1` is incomplete and excluded. The filtered contract test passes
+for both checked and chunked sources; this is not a pass of the original replaced
+corpus's unrelated tests.
+
+### IC instructions and uncompressed Wasm
+
+Instructions per operation for 1 MiB of finite values:
+
+| Profile / operation | Ordinary finite list | Raw bulk | Scalar checked | Eight-word checked | Candid |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| opt-z f32 encode | 72,877,809 | 1,050,470 | 12,060,534 | 7,210,930 | 2,118,122 |
+| opt-z f32 decode | 19,930,633 | 7,079,382 | 13,108,705 | 10,159,614 | 19,166,309 |
+| opt-z f64 encode | 36,964,081 | 1,050,470 | 6,555,510 | 4,130,731 | 2,118,225 |
+| opt-z f64 decode | 10,362,009 | 3,540,438 | 6,555,105 | 5,080,572 | 9,991,272 |
+| opt-3 f32 encode | 12,583,845 | 1,049,592 | 12,059,658 | 7,144,510 | 2,112,181 |
+| opt-3 f32 decode | 14,685,793 | 1,049,690 | 7,079,011 | 4,097,148 | 18,893,809 |
+| opt-3 f64 encode | 6,292,389 | 1,049,592 | 6,554,640 | 4,097,090 | 2,112,181 |
+| opt-3 f64 decode | 8,525,137 | 1,049,690 | 4,064,355 | 2,573,438 | 9,063,423 |
+
+| Lane | opt-z total / code bytes | opt-3 total / code bytes |
+| --- | ---: | ---: |
+| Ordinary finite list | 44,200 / 35,483 | 47,681 / 39,006 |
+| Raw bulk | 42,776 / 34,087 | 45,615 / 36,975 |
+| Scalar checked (also inline / mask) | 43,144 / 34,455 | 46,003 / 37,363 |
+| Eight-word checked | 43,727 / 34,940 | 46,656 / 38,014 |
+| Candid | 279,705 / 250,195 | 392,612 / 364,445 |
+
+Chunking saves 473 total / 543 code bytes against ordinary at opt-z, and
+1,025 / 992 at opt-3. Against scalar checked it costs 583 / 485 bytes at opt-z
+and 653 / 651 at opt-3. Inline hints and integer masks produce **no instruction
+or size improvement**. The final Wasm backend already lowers scalar is_finite
+into integer checks; intermediate LLVM floating operations were not evidence of
+floating arithmetic in the final loop. The remaining cost includes two full
+validation scans during sizing/writing, absent from raw bulk.
+
+Small controls remain material. Chunked empty opt-z encode/decode costs
+1,460.5 / 607.5 versus ordinary 1,379.5 / 556.5. Singleton f32 costs
+1,620.5 / 1,030.5 versus 1,657.5 / 1,069.5. At opt-3 singleton f32 encode
+rises 645.25 to 777.25; singleton f64 encode rises 638.25 to 783.25 (22.7%).
+Chunking beats ordinary in 68/72 primary opt-z comparisons and 29/72 at opt-3;
+it beats Candid in 68/72 at each profile. Applying the instruction screen
+`candidate <= 1.05 * ordinary + 64` yields zero opt-z failures and **20 opt-3
+failures** (including repeated singleton edge inputs). Scalar checked fails 13
+opt-3 comparisons. This is not a passing all-profile screen or promotion approval.
+
+For 1 MiB, both ordinary and bulk frames are 1,048,590 bytes; Candid is
+1,048,588. Prefix boundaries differ: 32 f32 / 16 f64 elements require a two-byte
+bulk byte count while the ordinary element count still fits one byte. See the
+old/new singleton bytes and coordinated-consumer requirements above.
+
+### Native time, memory and refusal
+
+Repeated native medians in microseconds, shown as run 1 / run 2. These are
+shared-host measurements, not IC instructions or isolated latency guarantees.
+
+| Profile / operation | Ordinary | Scalar checked | Eight-word checked | Candid in chunked run |
+| --- | ---: | ---: | ---: | ---: |
+| opt-z f32 encode | 1,931.65 / 1,967.96 | 245.89 / 259.42 | 156.62 / 153.03 | 36.96 / 37.61 |
+| opt-z f32 decode | 965.57 / 1,013.59 | 235.93 / 236.56 | 132.20 / 135.81 | 561.39 / 561.87 |
+| opt-z f64 encode | 957.34 / 1,000.97 | 87.28 / 83.42 | 110.06 / 112.87 | 37.34 / 37.97 |
+| opt-z f64 decode | 520.89 / 541.54 | 110.65 / 109.82 | 84.15 / 81.98 | 272.12 / 272.23 |
+| opt-3 f32 encode | 325.49 / 333.40 | 150.50 / 148.80 | 61.80 / 62.07 | 39.53 / 38.38 |
+| opt-3 f32 decode | 213.01 / 216.25 | 102.97 / 101.04 | 39.13 / 41.74 | 312.35 / 325.57 |
+| opt-3 f64 encode | 170.90 / 171.17 | 82.29 / 91.33 | 65.10 / 66.53 | 37.13 / 36.90 |
+| opt-3 f64 decode | 139.61 / 132.73 | 75.55 / 80.51 | 41.60 / 43.12 | 151.49 / 166.56 |
+
+Native opt-z f64 encode regresses versus scalar checked; do not hide that loss
+behind the IC improvement. Chunked opt-z empty encode/decode medians are
+41.99/41.10 ns and 22.03/22.51 ns; singleton f32 is 44.88/46.12 ns and
+31.77/32.86 ns. All Wire large encodes allocate one 1,048,590-byte output.
+Bulk decode allocates one 1,048,576-byte output with no reallocations, versus
+ordinary f32/f64's 16/15 reallocations. Peak live bytes remain 1,048,576;
+ordinary total allocation traffic is 2,097,136/2,097,120 versus bulk 1,048,576.
+These are native allocator measurements, not a measured Wasm heap profile.
+
+Contract probes reject infinities and quiet/signalling NaNs before allocation,
+including first/middle/last positions and counts 1/7/8/9/15/16/17 for chunk edges.
+They preserve finite bits at frame offsets 0–15, reject partial words and all
+small-frame truncations, and check exact/one-short frame, allocation, node and
+depth allowances. Non-finite decode returns typed Malformed; allowance refusal
+returns Limit, with zero observed allocations. Invalid values may inspect up to
+eight words before rejecting in the chunked scan. Browser-generated conformance,
+actual big-endian execution and non-finite IC rejection costs remain unqualified.
+
+### Decision and reproduction
+
+Keep one production Serde/Postcard codec. Retain the chunked finite scan as a
+bounded research candidate, not public Packed<float> support. A plain Vec field
+adapter necessarily validates again during both encoder visits; avoiding this
+would require a separately justified invariant-bearing collection or an encoder
+change. Neither is authorized by these measurements. Do not remove finite checks
+or reintroduce blanket one-pass encoding merely to match Candid.
+
+Before promotion, qualify explicit field adapters end to end: endian encoding,
+metadata/derive, generated typed arrays, preserved field bounds, Rust/TS bytes,
+and consumer identity/budget action. Resolve or explicitly accept the opt-3 small
+controls. Production APIs, bytes, identities, budgets and acceptance are unchanged.
+
+Raw source, scripts and results: `target/evidence/finite-float-cost-20261109/`.
+`prepare.py` creates the first three frozen fixture variants; `run.sh` executes
+them serially. `run-inline.sh`, `run-bits.sh` and `run-chunks.sh` run the subsequent
+frozen variants through the same maintained evaluate-codecs.sh entrypoint. Each
+sets RUNS=2, SAMPLES=11, BATCH_MS=2, CORPUS_FEATURE=research-bulk, its own
+CARGO_TARGET_DIR and adjacent CODEC_SOURCE_SNAPSHOT. `analyze.py` independently
+checks identities, frames, samples, freshness and Wasm sections. Reruns require
+fresh output directories/targets; do not overwrite retained measurements. The
+scratch scripts are research evidence, not new maintained repository tooling.
+
+## Public finite adapters — 9 November 2026
+
+The next local implementation qualifies explicit `serde_packed::finite_f32` /
+`finite_f64` fields end to end; it is not published. This supersedes the earlier
+"proposed API" status, not the measurements or caveats above. Ordinary lists and
+Packed integer/hash types remain unchanged. One shared macro emits two concrete
+finite scanners, independent of consumer type or field bound. Derive checks
+actual primitive Vec types (including aliases), and generated schemas use
+`finite-f32` / `finite-f64` typed arrays. The existing Postcard byte codec remains
+the only production codec. Float lint advice names the explicit primitive-vector
+adapters and preserves consumer bound/admission review.
+
+The public implementation was measured in `public` and then `public-qualified`
+under the same study directory, using separate fresh targets. The final run adds
+hashes of all three adapter source files to the maintained evidence producer;
+its four Wasm modules are byte-identical to the preceding public run. Final
+adapter source bytes match the checkout. Eight lanes now verify 32 fresh guests,
+5,760 IC rows and 18,432 native/frame checks. Candid controls remain equal.
+The final run retains the same compiler, lock, inputs and parameters above.
+
+At opt-z, public instruction counts and total/code Wasm match the chunked
+prototype exactly. At opt-3, the public fixture is **47,036 / 38,394 bytes**:
+645 / 612 below ordinary, but 380 / 380 above the prototype. Public 1 MiB
+f32 encode/decode costs **7,144,510 / 5,932,077** instructions; f64 costs
+**4,097,096 / 2,966,575**. Do not reuse the prototype's better opt-3 decode
+numbers. Public wins 68/72 primary comparisons against ordinary at opt-z and
+47/72 at opt-3; it retains **20 opt-3 instruction-screen failures**. This is an
+explicit large-field option, not a default replacement or a passing all-profile
+cost screen. Small ordinary lists remain a valid choice. Large f32/f64 encode
+still costs about 3.40/1.95 times raw Candid at opt-z, with additional finite
+validation that raw Candid does not require.
+
+Final native repeated medians (microseconds; shared host):
+
+| Profile / operation | Run 1 | Run 2 |
+| --- | ---: | ---: |
+| opt-z f32 encode | 144.71 | 144.69 |
+| opt-z f32 decode | 181.32 | 183.11 |
+| opt-z f64 encode | 105.20 | 103.71 |
+| opt-z f64 decode | 80.43 | 77.16 |
+| opt-3 f32 encode | 58.90 | 59.11 |
+| opt-3 f32 decode | 41.69 | 40.27 |
+| opt-3 f64 encode | 66.99 | 62.07 |
+| opt-3 f64 decode | 45.21 | 43.88 |
+
+Native opt-z f32 decode is slower than the private prototype despite equal IC
+counts. Native allocation/heap observations retain one output allocation with no
+reallocations for large bulk encode/decode; this is not a Wasm heap measurement.
+The public isolated contract test passes with zero observed allocation for
+non-finite and one-short-limit refusal. Rust preserves bits across chunk/prefix
+boundaries and offsets 0–15; generated clients validate before copying, reject
+partial/non-finite words and preserve input custody. Rust/TS vectors, differential
+mutations and 78 simulated big-endian browser checks pass. Actual native
+big-endian execution remains unqualified; Rust's branch uses checked-length,
+fallible LE staging, following the existing Packed strategy.
+An isolated copy selecting that Rust staging branch on the native host passes
+the same finite-bit, malformed, chunk/prefix, offset and exact-limit test. Only
+its two endian cfg selections change. This compiles and exercises the fallback,
+but does not replace execution on a real big-endian target.
+
+Focused qualification passes 78 native tests (three timing probes ignored), nine
+compiler refusals with a passing control, standalone codec/schema host/Wasm
+consumers, and Core/derive/example Clippy. Adding two vectors required raising
+only the standalone fixture's allocation allowance from 4,096 to 8,192; runtime
+admission rules did not change. Coverage and research correctness each pass 16
+tests with ten additional maintained finite-only cases, taking those corpora to
+134. Existing 94 historical names stay ordered; subsequent container indices
+move under the new source identity. No full matrix of the enlarged corpus or
+application build is claimed. Raw all-IEEE controls remain distinctly labelled.
+
+Adopting a field still changes f32 singleton prefix `01` to `04` and f64 `01`
+to `08`; NaN/infinity acceptance narrows if starting from raw floats. Consumers
+must coordinate identities/clients, preserve count/range constraints, retain
+retry/hash bytes and requalify buffer budgets. No dependent crate needs changing
+merely to retain an ordinary field. This is additive to Wire's public API; the
+pending Core patch records it, with no Endpoint change, commit or publication.

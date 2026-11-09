@@ -14,5 +14,5 @@ trap 'status=$?; if [[ "$status" != 0 ]]; then printf "Diagnostic failure logs: 
 # Schema diagnostics are metadata consumers; runtime-only builds need no Wire derive.
 cargo build --offline --locked -p ic-wire --features typescript \
     --message-format=json > "$run/artifacts.jsonl"
-cargo run --quiet --offline --locked -p ic-wire-qualification \
-    --example check-diagnostics -- "$run"
+cargo run --quiet --offline --locked --manifest-path qualification/Cargo.toml -p ic-wire-qualification \
+    --example check-diagnostics --features diagnostics -- "$run"

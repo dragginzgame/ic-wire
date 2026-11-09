@@ -516,3 +516,27 @@ fn display_bounds_warning_and_stale_output_without_losing_paths() {
     assert!(stale.to_string().contains("2 more bulk diagnostics"));
 }
 mod cost_tests;
+
+#[test]
+fn float_advice_distinguishes_ordinary_finite_lists_from_explicit_adapters() {
+    #[derive(serde::Serialize, ic_wire::Wire)]
+    struct Floats {
+        ordinary: Vec<ic_wire::FiniteF32>,
+        #[serde(with = "ic_wire::serde_packed::finite_f32")]
+        adapted: Vec<f32>,
+    }
+    let roots = BTreeMap::from([("Floats".into(), native_schema::<Floats>().unwrap())]);
+    let report = lint_bulk_roots(&roots, &roots, &BTreeMap::new()).unwrap();
+    assert_eq!(report.warnings.len(), 1);
+    assert_eq!(report.warnings[0].path, "/Floats/fields/ordinary/list/f32");
+    assert!(
+        report.warnings[0]
+            .representation
+            .contains("primitive Vec<f32>")
+    );
+    assert!(
+        report.warnings[0]
+            .representation
+            .contains("preserve bounds")
+    );
+}

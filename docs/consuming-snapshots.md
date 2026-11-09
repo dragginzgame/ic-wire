@@ -1,9 +1,110 @@
-# Consuming Shared Tooling Snapshots
+# Consuming Toko Tooling Snapshots
 <!-- Shared companions: docs/toko-tooling.md docs/rust-toolchains.md scripts/distribution/maintenance-files.txt scripts/distribution/governance-files.txt docs/ic-tools.md docs/verification-helpers.md docs/local-setup.md docs/make-interface.md tasks/snapshot-drift.md rules/dependency-pinning.md rules/changelogs.md -->
 
 CI and release behavior must not depend on a sibling checkout, a moving Git
 branch, or network availability. Consumers vendor a reviewed file set and
-record its exact Shared Tooling source revision.
+record its exact Toko Tooling source revision.
+
+## Small baseline snapshots
+
+`TOKO-TOOLING.md` is a standalone entrypoint. Its detailed policy and procedure
+links point to an immutable reviewed revision rather than pulling every linked
+guide, audit and maintenance task into a product snapshot. This changes document
+selection, not the Cargo pin, receipt, installer or policy authority contract.
+Executable entrypoints still carry their required executable companions.
+
+Choose the baseline, `make/consumer.mk` and the hook as needed. For offline policy
+access, additionally select the required guide entrypoints or the complete list
+in `scripts/distribution/governance-files.txt`. That list intentionally remains
+the comprehensive option; selecting all of it does not produce a minimal bundle.
+Keep required references available before a task; a small installation is not
+permission to skip the detailed rules. The crate retains the full documents.
+
+During an ordinary refresh, preview the selected roots. Previously derived,
+unchanged files that are no longer required retire through the exporter. Explicitly
+selected roots remain selected: use the complete `--entrypoint` list to remove
+unneeded audit/task roots, preserving guides used by local commands or offline
+workflows. Never edit receipt records or delete snapshot files by hand. No
+immediate refresh is required for an intact consumer installation.
+
+Policy adoption uses the checklist in `TOKO-TOOLING.md`: binding rules,
+consumer-owned choices, explicitly permitted defaults, and scoped approved
+exceptions. Record unresolved conflicts before claiming adoption; tooling can
+be installed and verified independently. This checklist clarifies existing
+authority and does not create blanket exceptions for legacy product practices.
+
+Maintainers should batch changes to selection, receipt and installer contracts
+at a planned minor boundary and document the concrete need and migration once.
+Do not introduce another migration merely to refresh terminology or policy prose.
+Consumers adopt for a needed correction or capability; an older intact snapshot
+alone is not an adoption defect or a reason to block a product release.
+
+The baseline's detailed-reference revision is a policy selection, not a moving
+"latest" pointer. Keep it unchanged for unrelated script releases. When revising
+the detailed rules themselves, review and update that reference deliberately;
+do not claim a newer policy is adopted merely because its files are packaged.
+
+## Baseline filename migration in 0.37.0
+
+This is a hard cut to the Toko Tooling name, including `TOKO-TOOLING.md`,
+`scripts/dev/toko-tooling.sh`, `.toko-tooling.snapshot`, Make targets prefixed
+`toko-tooling-`, environment variables prefixed `TOKO_TOOLING_`, and
+`package.metadata.toko-tooling.loc`. There are no command or filename aliases.
+Existing reviewed snapshots remain usable until deliberate adoption.
+
+Update the exact Cargo pin and Cargo.lock together. Bootstrap with the installer
+from the reviewed new crate, rather than assuming an older installed script can
+run the new contract. Preserve the existing receipt: pass its current relative
+path with `--manifest` during migration. Select the complete entrypoint set with
+repeated `--entrypoint`, replacing renamed paths and preserving other roots.
+The exporter authenticates the prior crate and retires unchanged owned files;
+never edit receipt hashes or delete modified files to bypass admission. After
+refresh, move the receipt to `.toko-tooling.snapshot` and update consumer-owned
+Make callers, CI, environment settings, instruction links and LOC metadata in
+one adoption batch. Use an explicit manifest setting until that move is complete.
+
+For Git provenance changes, use `refresh-consumer.sh --previous-source` with a
+checkout retaining the recorded origin and revision. The new source must contain
+that prior revision in its ancestry. Git-to-crate migration uses the installer's
+`--source` argument for the same explicit proof. Redirects alone are not identity
+proof. Preview first and retain the old receipt until admission succeeds.
+
+### Adoption choices and prerequisites
+
+- Keep the exact root Cargo pin inherited by every real member, Cargo.lock and
+  installed-byte verification. A single carrier or metadata-only pin is not an
+  alternative selection contract.
+- Before hook activation, inspect tracked symlinks. The formatting hook requires
+  regular tracked files, even for internal links permitted by the general source
+  policy. For agent instructions, use a regular `AGENTS.md` and a regular
+  `CLAUDE.md` containing `@AGENTS.md`. Commit removal of a replaced local hook
+  before refreshing: the exporter will not overwrite staged deletions.
+- Prepare jq, Mike Farah yq v4, Perl with JSON::PP and Digest::SHA, and Cargo.
+  Archive refresh also needs Archive::Tar and IO::Uncompress::Gunzip. Installation
+  checks these prerequisites before extracting or changing the snapshot.
+- Run `bash scripts/dev/toko-tooling.sh update --preview` or
+  `make toko-tooling-preview` to inspect without changing consumer files or tools.
+  Preview downloads authenticated archives into external temporary scratch.
+  Use `--snapshot-only` or `make toko-tooling-update TOKO_TOOLING_INSTALL_TOOLS=0`
+  to apply files without installing tools; prepare tools explicitly before checks
+  or workflows that require them. Normal update still installs and checks tools.
+- Select executable entrypoints for the runtime closure. Governance guides are
+  explicit optional entrypoints, not companions of runtime scripts. Adopt the
+  baseline either as the standalone `TOKO-TOOLING.md` entrypoint or
+  through a reviewed revision-bound link. The crate still contains the full source
+  bundle; a smaller consumer snapshot does not change that distribution.
+- Common engineering rules, integrity and execution admission remain mandatory.
+  Product architecture, limits, supported targets and local commands belong in
+  the consumer overlay. Conflicts such as existing Python tooling need a scoped
+  maintainer-approved exception with its reason; they are not implicit defaults.
+  Review conflicts before claiming baseline adoption. Snapshot installation and
+  policy adoption are distinct results.
+
+The current adoption contract remains exact Cargo selection plus authenticated
+export and offline admission. Future incompatible adoption changes require a
+minor release and an explicit migration guide; this pre-1.0 contract provides no
+deprecation aliases. Verify snapshot integrity, local links and affected callers
+before claiming a completed upgrade.
 
 ## Explicit IC tool selection in 0.26.0
 
@@ -76,7 +177,7 @@ No step depends on a local draft, sibling working tree or `/tmp` proposal.
    check must not be reported as automated deployment admission.
 
 Report baseline/snapshot adoption, formatting activation and deployment
-enforcement separately. To request the complete change, say: "Adopt Shared
+enforcement separately. To request the complete change, say: "Adopt Toko
 Tooling with two comment-headed dependency sections and matching formatting and
 release checks; qualify the deployment dependency boundary and report any
 remaining enforcement gaps." Registry publication remains a separate fact;
@@ -84,84 +185,108 @@ neither role labels nor cached build success establishes it.
 
 ## Cargo selection and installation
 
-Starting with 0.34, repository tooling is independent of Cargo's package graph.
-Declare one exact published release in the repository-root `Cargo.toml`:
+Starting with 0.36, Cargo owns tooling selection so `cargo update -v` reports
+newer available releases. Declare the exact version once in root `Cargo.toml`:
 
 ```toml
-[workspace.metadata.toko-tooling]
-version = "0.34.0"
+[workspace.dependencies]
+toko-tooling = "=0.36.0"
 ```
 
-A standalone root package may instead use `[package.metadata.toko-tooling]`.
-Declare only one table. Versions are exact stable `X.Y.Z` identities, not ranges;
-change this field intentionally to select a different release. No workspace member,
-normal dependency, dev-dependency, Rust import or cargo-machete exception is needed.
-Non-Cargo repositories may use the same metadata-only root file.
+Every real workspace package, including a root package and private/test packages,
+must inherit it unconditionally:
+
+```toml
+[dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+```
+
+Merge the cargo-machete exemption with existing entries: the dependency supplies
+installed source tooling, not imported Rust APIs. Do not add an artificial Rust
+import. Do not create a package to hold this dependency. A standalone package
+without `[workspace]` declares `toko-tooling = "=0.36.0"` directly in its root
+`[dev-dependencies]`, with the same exemption. The producer `toko-tooling` itself
+is exempt from consuming its own package; it validates the packaged payload.
+
+"Every manifest" means maintained workspace packages, not vendored dependencies,
+build output or intentionally isolated fixture manifests. Independent maintained
+workspaces apply the same rule at their own root. Non-Cargo repositories do not
+create synthetic packages for notifications; they can use the authenticated
+snapshot exporter directly, but have no `cargo update` visibility or Cargo-based
+admission. The standard `toko-tooling-*` selection commands require a real
+Cargo workspace/package.
+
+An exact pin allows `cargo update -v` to show a newer available version without
+silently adopting it. After deliberately editing the root pin:
 
 ```bash
-make shared-tooling-update   # resolve declared release, write lock, install
-make shared-tooling-install  # reinstall the existing lock, without resolving
-make shared-tooling-check    # offline declaration/lock/snapshot admission
-make shared-tooling-status   # offline installed/selected identity report
+cargo update -p toko-tooling # update Cargo.lock; leave unrelated selections alone
+make toko-tooling-update  # install the selected authenticated crate and tools
+make toko-tooling-check   # offline member/pin/lock/snapshot admission
 ```
 
-Commit `toko-tooling.lock` with the root declaration and `.shared-tooling.snapshot`.
-The JSON lock records format, package name, exact version, crates.io source and
-archive SHA-256. Update obtains the checksum from the crates.io index and rejects
-missing/yanked releases. Install authenticates the downloaded crate before running
-its exporter. Existing locked releases remain installable if subsequently yanked.
-Neither command changes application Cargo.lock or package dependency declarations.
-A failed installation may leave the new lock selected; check then refuses the
-old installed snapshot until installation succeeds. Failed evidence is retained.
+`make toko-tooling-install` also installs the existing Cargo.lock selection;
+`make toko-tooling-status` reports selected and installed identities offline.
+Neither install nor update edits manifests or Cargo.lock. Commit the root pin,
+member declarations, Cargo.lock and `.toko-tooling.snapshot` together. Cargo.lock
+supplies the exact crates.io version and archive SHA-256; no separate tooling lock
+or metadata version is used. Installation downloads the actual scripts, Make
+interfaces, rules, pins, licenses and documentation from crates.io, authenticates
+the archive, and preserves consumer-owned edits and recorded entrypoints.
 
-The offline check requires the root declaration, tooling lock and installed
-version/checksum to agree, and verifies installed file bytes/modes. It refuses a
-missing declaration or lock, including after workspace members change. Normal
-CI and release entrypoints from `make/consumer.mk` require this check. Custom
-application deployment adapters must invoke it before effects if they bypass
-those entrypoints. Checks never resolve, download or repair tooling.
+Offline admission checks every workspace member, not just default-members, for
+one inherited dev-dependency at the root pin. It rejects missing declarations,
+local version overrides, normal/build dependencies, aliases, target-specific
+selection and non-registry source overrides. Cargo.lock must contain exactly one
+matching crates.io entry, and the installed receipt's version/checksum and owned
+files must agree. Deleting a member cannot remove the dependency from remaining
+members; deleting the last declaration fails admission. A changed Cargo selection
+never silently installs tools. Common CI/release entrypoints require admission;
+custom deployment adapters must invoke it before effects when bypassing them.
 
 ### Migration from Cargo dependencies
 
-Undo the 0.33 selection scheme as part of this migration:
+This migration replaces both the 0.34–0.35 metadata/lock scheme and the earlier
+selection-only package approach:
 
-1. Add the root metadata table above. Bootstrap with the new 0.34 installer from
-   a reviewed Toko Tooling checkout or an authenticated 0.34 crate extraction;
-   the old installed helper cannot read the new lock:
+1. Add the root exact dependency and inherited dev-dependency to every maintained
+   workspace package, with the cargo-machete exemption above. Remove old
+   `workspace.metadata.toko-tooling` / `package.metadata.toko-tooling` tables and
+   `toko-tooling.lock`. Remove renamed, normal, build or independently versioned
+   tooling dependencies; retain one inherited dev-dependency per package.
+2. Remove packages created solely to hold tooling selection and their workspace,
+   default-member, release-group, CI and documentation references. Preserve
+   packages with real tools, tests or qualification code. No new helper package,
+   `crates/Cargo.toml` or Rust import is needed.
+3. Update Cargo.lock with Cargo. Bootstrap with the 0.36 installer from a reviewed
+   producer checkout or an authenticated published 0.36+ crate extraction, since
+   the old installer still expects metadata and a separate lock:
 
    ```bash
-   bash /home/adam/projects/toko-tooling/scripts/dev/shared-tooling.sh update \
+   bash /home/adam/projects/toko-tooling/scripts/dev/toko-tooling.sh update \
      --consumer "$PWD"
    ```
 
-   New payload bytes still come from crates.io. For a historical Git receipt,
-   also pass `--source /home/adam/projects/toko-tooling` for one-time old-file
-   ownership proof. Existing registry receipts use their previous authenticated
-   archive. Recorded entrypoints and consumer-owned edits remain protected.
-   For first adoption, pass `--entrypoint make/consumer.mk --entrypoint DRAGGINZGAME.md`
-   and any other required roots. Wire the consumer Makefile to include
-   `make/consumer.mk` before setup; the exporter installs it first.
-2. Remove every old `toko-tooling` normal/dev/build dependency and root catalog
-   entry, including renamed entries, and any dedicated cargo-machete exception.
-   Remove packages created solely to hold that dependency, along with their
-   workspace/default-member, release-group, dependency-boundary, CI and documentation
-   references. Preserve packages that contain real tools or qualification code.
-3. Refresh the application lock with Cargo to remove obsolete graph entries;
-   preserve unrelated selections. Remove old Cargo-based bootstrap/update
-   instructions from consumer-owned AGENTS and guides. Use the root metadata,
-   dedicated lock and normal Make commands going forward.
-4. Run `make shared-tooling-check`, focused caller checks and the consumer's
-   existing membership/release-group validation. Confirm no obsolete selection-only
-   package or dependency remains. Do not hand-edit snapshot-owned files or receipts.
+   The selected version must already be published. Payload bytes still come from
+   crates.io. Historical Git receipts also need `--source` pointing at the old
+   checkout for ownership proof; registry receipts use their prior authenticated
+   archive. For first adoption, pass `--entrypoint make/consumer.mk
+   --entrypoint TOKO-TOOLING.md` and other required roots, and include
+   `make/consumer.mk` from the consumer Makefile before setup.
+4. Run `make toko-tooling-check`, focused caller checks and existing membership/
+   release-group validation. Replace obsolete metadata/lock and helper-package
+   instructions in consumer-owned guides. Never hand-edit snapshot-owned files
+   or receipts. Do not migrate consumers to an unpublished producer release.
 
 Prepare the project's compiler/native prerequisites and host parsers first.
-The installer requires jq, Mike Farah yq, Perl Archive::Tar and
-IO::Uncompress::Gunzip. It runs `make install-tools` and `make tools-check` after
-installation and reports incomplete adoption if setup fails. Cargo builds do not
-install tools. Ordinary application dependency updates no longer select or update
-Toko Tooling. The repository for source review is
-`https://github.com/dragginzgame/toko-tooling`; the crate supplies the actual scripts,
-Make interfaces, CI actions, rules, pins, licenses and documentation.
+Installation requires Cargo, jq, Mike Farah yq, Perl Archive::Tar and
+IO::Uncompress::Gunzip, then runs `make install-tools` and `make tools-check`.
+Failure leaves evidence and reports incomplete adoption. Cargo builds themselves
+never install tooling. Source review lives at
+`https://github.com/dragginzgame/toko-tooling`.
 
 ## Upgrade impact
 
@@ -219,10 +344,10 @@ Use the explicit `--takeover-snapshot ROOT MANIFEST` option on
 must still be a Git checkout root. For example:
 
 ```sh
-/path/to/shared-tooling/scripts/distribution/refresh-consumer.sh --preview \
+/path/to/toko-tooling/scripts/distribution/refresh-consumer.sh --preview \
   --consumer /path/to/consumer \
   --takeover-snapshot . .supplement.snapshot \
-  --takeover-snapshot helpers .shared-tooling.snapshot
+  --takeover-snapshot helpers .toko-tooling.snapshot
 ```
 
 Review the preview, then repeat without `--preview`. Without an explicit complete
@@ -272,7 +397,7 @@ explicit exceptions. Do not delete catalogs still used by local CI tools.
 Preview the full entrypoint closure, adopt the reviewed commit, explicitly run
 `make install-tools` and `make tools-check`, then qualify formatting and the
 consumer gate on its supported native hosts. Existing installations, failed logs
-and release plans remain retained. This is a Shared Tooling breaking selection
+and release plans remain retained. This is a Toko Tooling breaking selection
 change; a library consumer assesses its own published API impact independently.
 
 ## Entrypoint selection in 0.7.0
@@ -326,23 +451,23 @@ see [storage configuration and retention](local-setup.md#shared-executable-stora
 Consumers must not copy payloads or invent their own cache/link manager. Rust
 tool installation and PocketIC ownership are unchanged in this batch.
 
-This storage-admission change requires a Shared Tooling minor release. A consumer
+This storage-admission change requires a Toko Tooling minor release. A consumer
 library adopting it still classifies its own release by its published contract;
 setup changes alone do not require a library minor release.
 
 ## Initial snapshot
 
-Run the refresh helper from a clean Shared Tooling checkout:
+Run the refresh helper from a clean Toko Tooling checkout:
 
 ```bash
-/path/to/shared-tooling/scripts/distribution/refresh-consumer.sh \
+/path/to/toko-tooling/scripts/distribution/refresh-consumer.sh \
   --consumer /path/to/consumer \
   --entrypoint make/consumer.mk
 ```
 
 The helper validates every source path, exports regular files and their
 executable modes from the selected Git revision at the same relative paths,
-and writes `.shared-tooling.snapshot` in the consumer. Ignored or otherwise
+and writes `.toko-tooling.snapshot` in the consumer. Ignored or otherwise
 uncommitted files cannot enter the snapshot, and concurrent working-tree edits
 cannot change the exported bytes. The manifest
 records format version `1`, source remote, source commit, and the SHA-256 digest
@@ -357,7 +482,7 @@ already included in every snapshot. Existing v1 manifests need no conversion.
 For metadata inspection without payload verification, use:
 
 ```bash
-bash scripts/ci/verify-shared-tooling-snapshot.sh --read-manifest /path/to/snapshot
+bash scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest /path/to/snapshot
 ```
 
 This emits admitted tab-separated records in their original order after the
@@ -408,7 +533,7 @@ After adoption, omit selection options to reuse the recorded entrypoints. Their
 companion closure is resolved again from the new selected revision:
 
 ```bash
-/path/to/shared-tooling/scripts/distribution/refresh-consumer.sh \
+/path/to/toko-tooling/scripts/distribution/refresh-consumer.sh \
   --consumer /path/to/consumer
 ```
 
@@ -440,7 +565,7 @@ manifest replacement stays on the same filesystem. Each payload is copied to a
 temporary file beside its destination, rechecked against concurrent edits and
 atomically renamed into place. An interrupted copy leaves the destination intact,
 including when a selected subtree is on a different filesystem. Consumers should
-ignore `.shared-tooling-refresh.*` and `.shared-tooling-payload.*` in case an
+ignore `.toko-tooling-refresh.*` and `.toko-tooling-payload.*` in case an
 ungraceful process termination prevents normal cleanup.
 
 Refresh replaces files individually and then publishes the manifest; it is not
@@ -451,7 +576,7 @@ source revision. Verify the completed snapshot before resuming validation.
 To extend an existing selection, repeat `--add-entrypoint` for each reviewed root:
 
 ```bash
-/path/to/shared-tooling/scripts/distribution/refresh-consumer.sh \
+/path/to/toko-tooling/scripts/distribution/refresh-consumer.sh \
   --consumer /path/to/consumer \
   --add-entrypoint scripts/ci/archive-evidence.sh
 ```
@@ -480,7 +605,7 @@ Add `--preview` to the same initial or refresh command to inspect the complete
 proposed selection without writing in the consumer, including its Git index:
 
 ```bash
-/path/to/shared-tooling/scripts/distribution/refresh-consumer.sh \
+/path/to/toko-tooling/scripts/distribution/refresh-consumer.sh \
   --preview --consumer /path/to/consumer
 ```
 
@@ -551,7 +676,7 @@ retains the original nonzero status if reporting fails. Sourcing it has no effec
 The release runner also includes `scripts/ci/check-release-tag.sh` so direct and
 PR release paths use the same annotated-tag and exact-commit checks.
 
-Run `test-snapshot-distribution.sh` from Shared Tooling for upstream exporter and
+Run `test-snapshot-distribution.sh` from Toko Tooling for upstream exporter and
 governance qualification. Consumers should normally omit that integration fixture
 and its invocation, retaining actual snapshot verification and local adoption
 checks rather than importing its growing upstream test roster.
@@ -559,14 +684,14 @@ If a consumer retains it, the optional companion-pair catalog checks only
 entrypoints present in that checkout; omitted fleet reporters do not become
 dependencies. Present entries still undergo derived-companion checks.
 The remaining exporter, focused-fixture and governance integration inputs must
-be available. Shared Tooling runs the complete catalog; a reduced consumer run
+be available. Toko Tooling runs the complete catalog; a reduced consumer run
 reports omissions and does not qualify the omitted upstream cases.
 
 The validation-runner fixture is different: `test-validation-target-runner.sh`
 invokes `scripts/ci/test-release-metadata.sh` in nested Make/release contexts.
 Consumers retaining this fixture own that metadata-test entrypoint. Keep an
 existing qualified adapter to the consumer's own release tests, as IC Backup
-does. Do not import Shared Tooling's release metadata adapter or root Makefile
+does. Do not import Toko Tooling's release metadata adapter or root Makefile
 to satisfy it; without a local metadata-test adapter, run this integration check
 upstream and retain focused local validation-runner checks.
 
@@ -634,10 +759,10 @@ consumer's CI/release invocation. The workspace-version reader is independently 
 ## Drift verification
 
 Consumers that vendor the verifier and checksum helper can check their snapshot
-without the Shared Tooling checkout or network access:
+without the Toko Tooling checkout or network access:
 
 ```bash
-bash scripts/ci/verify-shared-tooling-snapshot.sh
+bash scripts/ci/verify-toko-tooling-snapshot.sh
 ```
 
 The verifier fails when a declared file is absent, symlinked, has different
@@ -650,13 +775,13 @@ against replacement of the verifier and manifest themselves. The source commit
 and normal review establish provenance.
 
 At adoption, independently select the reviewed full commit from the trusted
-Shared Tooling repository. Do not take that trust decision from the consumer's
+Toko Tooling repository. Do not take that trust decision from the consumer's
 manifest or its `source` URL. Use a trusted verifier to compare every declared
 payload's bytes and executable mode against that commit:
 
 ```bash
-/trusted/shared-tooling/scripts/ci/verify-shared-tooling-snapshot.sh \
-  --consumer /path/to/consumer --source /trusted/shared-tooling \
+/trusted/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh \
+  --consumer /path/to/consumer --source /trusted/toko-tooling \
   --revision FULL_REVIEWED_COMMIT_ID
 ```
 
@@ -672,10 +797,10 @@ through the exporter and consumer diff; ordinary builds retain offline checks.
 
 ## Shared baseline and local instructions
 
-[`DRAGGINZGAME.md`](../DRAGGINZGAME.md) is the reusable engineering baseline.
+[`TOKO-TOOLING.md`](../TOKO-TOOLING.md) is the reusable engineering baseline.
 Vendor it with its linked guides so the complete rule set remains readable
 offline. Keep the consumer's `AGENTS.md` as its entry point and local overlay;
-do not copy Shared Tooling's `AGENTS.md` over it.
+do not copy Toko Tooling's `AGENTS.md` over it.
 
 Keep the local entry point organised around four things: the adopted baseline,
 local safeguards and approved exceptions, development/delivery commands, and
@@ -699,12 +824,12 @@ For a new governance snapshot, use the canonical
 linked guides and required helpers. Add selected tools explicitly to the command:
 
 ```bash
-shared_tooling=/path/to/shared-tooling
+toko_tooling=/path/to/toko-tooling
 files=()
 while IFS= read -r file; do
   files+=(--entrypoint "$file")
-done < "$shared_tooling/scripts/distribution/governance-files.txt"
-bash "$shared_tooling/scripts/distribution/refresh-consumer.sh" \
+done < "$toko_tooling/scripts/distribution/governance-files.txt"
+bash "$toko_tooling/scripts/distribution/refresh-consumer.sh" \
   --consumer /path/to/consumer "${files[@]}"
 ```
 
@@ -718,7 +843,7 @@ For an existing snapshot with recorded roots, add paths with `--add-entrypoint`
 procedure above, including all shared rule files. Include
 `docs/releases.md`, the release runner and its version/changelog helpers when
 adopting the release command contract. The local `AGENTS.md` must direct contributors to
-`DRAGGINZGAME.md`, identify `.shared-tooling.snapshot` as its source record, and
+`TOKO-TOOLING.md`, identify `.toko-tooling.snapshot` as its source record, and
 state local product contracts, commands and approved exceptions. Resolve local
 conflicts before claiming adoption. Do not edit a vendored shared document in
 place or attribute dirty upstream bytes to a committed revision.
@@ -735,7 +860,7 @@ adopting these rules does not itself authorize Git writes or a release. Policy
 adoption requires no native builds. Existing pinned snapshots do not update
 automatically; preserve their bytes until a reviewed refresh is authorized.
 
-When adopting asynchronous hosted CI, refresh `DRAGGINZGAME.md`,
+When adopting asynchronous hosted CI, refresh `TOKO-TOOLING.md`,
 `rules/contributions.md`, `docs/supported-hosts.md` and
 `docs/principles/reviewable-changes.md` from the reviewed commit.
 Remove local instructions that require waiting for every integration/native job
@@ -753,7 +878,7 @@ policy. An explicit synchronous qualification request still applies. This rule
 does not supply merge authority or relax an issue's stated acceptance criteria.
 
 When adopting the local-repair and owning-repository issue workflow, refresh
-`DRAGGINZGAME.md` and `rules/agent-maintenance.md` together from the reviewed
+`TOKO-TOOLING.md` and `rules/agent-maintenance.md` together from the reviewed
 commit. Remove equivalent local instructions after checking their obligations;
 retain approved scoped exceptions and consumer release boundaries. Walk through
 an authorized local repair (apply in the working tree and run focused checks)
@@ -778,13 +903,13 @@ Consumers using the maintenance rule's exact-commit CI inspection command also
 refresh `scripts/dev/gh-ci.sh` from that reviewed revision. It remains a read-only
 interactive helper using the consumer checkout and authenticated GitHub CLI.
 When adopting the repeatable task commands, include the `tasks/` catalog,
-definitions, prompt and schedule guidance from the governance file list. Shared
+definitions, prompt and schedule guidance from the governance file list. Toko
 Tooling coordinates central runs; consumers retain their focused commands and
 product scope. The operational runner and systemd units are optional: their
 selection roots are listed in
 [`scripts/distribution/maintenance-files.txt`](../scripts/distribution/maintenance-files.txt).
 A host that needs copied operational files may add those roots explicitly with
-`--add-entrypoint`; their normal owner is the selected Shared Tooling checkout.
+`--add-entrypoint`; their normal owner is the selected Toko Tooling checkout.
 Existing snapshots retain recorded roots on ordinary refresh. To stop carrying
 these files, pass the complete retained `--entrypoint` selection without the
 optional roots. Canonical retirement refuses modified payloads; preserve local
@@ -793,7 +918,7 @@ owned files to bypass that check. Catalog/guidance adoption does not select
 operational files, install a timer, activate an agent, grant sibling edit authority
 or require Codex/systemd on every consumer host. Enable one local scheduler
 separately when requested.
-The portable-suite prerequisite check is Shared Tooling's own test setup, not a
+The portable-suite prerequisite check is Toko Tooling's own test setup, not a
 required consumer gate. If vendoring the complete portable suite, include its
 new `scripts/ci/check-portable-prerequisites.sh`, `scripts/ci/test-portable-prerequisites.sh`
 and `scripts/ci/test-gh-ci.sh` dependencies along with the existing suite inputs.
@@ -831,7 +956,7 @@ Resolve existing exceptions under the
 
 ## Consumer qualification selection
 
-Shared Tooling CI qualifies the shared implementation. A consumer qualifies how
+Toko Tooling CI qualifies the shared implementation. A consumer qualifies how
 its selected snapshot is wired into its own repository. Installing a snapshot
 does not require running every exported upstream test in routine consumer CI or
 adding the complete producer suite to its release gate.
@@ -859,7 +984,7 @@ complete native/product acceptance.
 | Proof | Owner and selection |
 | --- | --- |
 | Snapshot bytes, modes and declared roots | Consumer: verify every maintained bundle. Integrity alone does not establish caller behavior. |
-| Shared parser, installer and helper implementation cases | Shared Tooling: keep the general regression matrix beside its owner. Select relevant cases during a changed-contract adoption or when they supply a missing consumer proof. |
+| Shared parser, installer and helper implementation cases | Toko Tooling: keep the general regression matrix beside its owner. Select relevant cases during a changed-contract adoption or when they supply a missing consumer proof. |
 | Actual Make, hook, release adapter and CI wiring | Consumer: exercise its real callers, selected inputs, status propagation and applicable recovery/evidence boundaries. |
 | Installed tools and host behavior | Consumer: retain prepared-tool admission and applicable native platform qualification for its own selected catalogs and workflows. |
 | Product correctness and release acceptance | Consumer: retain its product tests and release obligations. A passing upstream job does not qualify them. |
@@ -881,7 +1006,7 @@ or recovery tests merely because their helpers are now shared.
 
 Revisit the selection when adopted helper bytes or contracts, caller wiring,
 tool catalogs or supported-host inputs change. Reuse evidence only for unchanged
-inputs under the [validation policy](../DRAGGINZGAME.md#validation-and-evidence).
+inputs under the [validation policy](../TOKO-TOOLING.md#validation-and-evidence).
 Keep evidence and consumer-specific exceptions with their existing owners; no
 new scheduler or parallel test inventory is required. This guidance does not
 itself rewrite existing CI/release targets or authorize broad local execution.
@@ -893,10 +1018,12 @@ Shared fixtures that remain dependencies of another selected root stay exported.
 
 ## Audit method adoption
 
-Include the complete `audits/` file set in the governance list when adopting this
-baseline, so its method links work offline. The snapshot's reviewed source revision identifies
-the common contract; do not read methods from a moving sibling checkout or copy
-uncommitted documents and attribute them to an older revision.
+Audit methods are optional export roots, not an automatic baseline dependency.
+Select `audits/README.md` and its companions when offline audit procedures are
+needed; otherwise use the baseline's revision-bound method links for an explicitly
+requested audit. The snapshot's reviewed source revision identifies the common
+contract; do not read methods from a moving sibling checkout or copy uncommitted
+documents and attribute them to an older revision.
 
 For each selected existing local audit, map its questions to the shared method
 and retain product-specific obligations in a local overlay under the consumer's
@@ -950,7 +1077,7 @@ Existing checkouts need an explicit snapshot refresh and installation to receive
 new files and executables; they never execute a mutable sibling checkout.
 
 For the required shared Cargo-installed set, include
-`SHARED_TOOLING_CARGO_SORT_VERSION` and `SHARED_TOOLING_CARGO_SORT_DERIVES_VERSION`
+`TOKO_TOOLING_CARGO_SORT_VERSION` and `TOKO_TOOLING_CARGO_SORT_DERIVES_VERSION`
 in the selected versions file. Candid extraction callers own an explicit selected
 Cargo-tool pin, install/check target and executable PATH; qualify those before
 adopting this snapshot. The common set no longer selects the extractor.
@@ -968,7 +1095,7 @@ profile. Source-checkout builds and application executable overrides stay local.
 
 ### Rust installation adoption in 0.4.0
 
-This is a breaking installation contract for Shared Tooling. Consumer libraries
+This is a breaking installation contract for Toko Tooling. Consumer libraries
 whose published contracts remain unchanged should use compatible patch notes
 for adoption, even though contributors must reinstall tools and change PATH.
 Do not mirror Shared's minor bump. Assess independent product changes under the
@@ -1062,7 +1189,7 @@ early exits, including Bash 3.2 nounset errors. Native consumer qualification
 remains separate from upstream source acceptance.
 
 Defaults use scripts and pins from the reviewed snapshot. For a snapshot stored below
-that root, set `SHARED_TOOLING_ROOT` to its reviewed local directory before the
+that root, set `TOKO_TOOLING_ROOT` to its reviewed local directory before the
 include, and include its `make/consumer.mk`. `HOST_TOOL_VERSIONS`,
 `RUST_TOOL_VERSIONS` and `IC_TOOL_PINS` independently select consumer-owned pin
 exceptions; their defaults use the snapshot's `ci/tool-versions.env` and
@@ -1072,7 +1199,7 @@ The [consumer Make interface](make-interface.md) selects the setup, release and
 Rust formatting modules and supplies hook installation and snapshot checking.
 Select `make/consumer.mk` and review its derived closure, keeping product admission,
 metadata, validation and custom formatter adapters local. Non-Rust consumers explicitly
-set `SHARED_TOOLING_RUST := 0`. Existing focused module includes remain supported;
+set `TOKO_TOOLING_RUST := 0`. Existing focused module includes remain supported;
 do not include them again alongside `consumer.mk`.
 
 Export every parsed include in isolated Make/hook fixtures, including the extra
@@ -1095,10 +1222,10 @@ recipes only after testing their actual callers and hook, following the
 [adoption checklist](make-interface.md#adoption).
 
 `make cloc` reports the consumer's root Cargo workspace and requires its prepared
-Rust toolchain. Shared Tooling itself selects `CLOC_REPORT` and `CLOC_ROOT` before
+Rust toolchain. Toko Tooling itself selects `CLOC_REPORT` and `CLOC_ROOT` before
 the include to summarize sibling workspaces; consumers normally use the defaults.
 Installing the raw cloc executable alone does not add these Make commands.
-Use the [tooling audit tasks](https://github.com/dragginzgame/shared-tooling/blob/08cd17240fd60dfd309e35eb131e73323e883e6f/docs/fleet-tools.md#tooling-adoption-audit) for snapshot
+Use the [tooling audit tasks](https://github.com/dragginzgame/toko-tooling/blob/08cd17240fd60dfd309e35eb131e73323e883e6f/docs/fleet-tools.md#tooling-adoption-audit) for snapshot
 integrity, applicable upstream changes and actual consumer wiring. The former
 `cloc-tooling` command is retired; Rust LOC remains available through `cloc.sh`.
 
@@ -1113,7 +1240,7 @@ and historical evidence. Automatic retirement is limited to verified unchanged
 payloads outside the selected closure.
 This is a consumer-owned selection change, not permission for another repository
 to edit its files. Snapshot verification and its regression coverage remain maintained
-and tested in Shared Tooling.
+and tested in Toko Tooling.
 
 Review pins against existing qualified versions before activation. A local
 exception uses its own explicitly selected matrix outside the snapshot; remove

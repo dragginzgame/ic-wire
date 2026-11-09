@@ -226,11 +226,11 @@ fn representation<'a>(
                     )),
                     ("float", Some(32)) => Some((
                         "f32",
-                        "bounded float lists and workload-specific node limits; Packed<f32> is unsupported",
+                        "the explicit finite_f32 adapter for primitive Vec<f32> fields; preserve bounds and review changed bytes/buffer admission; Packed<f32> remains unsupported",
                     )),
                     ("float", Some(64)) => Some((
                         "f64",
-                        "bounded float lists and workload-specific node limits; Packed<f64> is unsupported",
+                        "the explicit finite_f64 adapter for primitive Vec<f64> fields; preserve bounds and review changed bytes/buffer admission; Packed<f64> remains unsupported",
                     )),
                     ("bool", _) => Some((
                         "bool",

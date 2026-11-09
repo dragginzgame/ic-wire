@@ -10,6 +10,9 @@ publish = ["crates-io"]
 readme = "README.md"
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
 [features]
 typescript = ["ic-wire/typescript", "dep:serde_json"]
 
@@ -21,6 +24,9 @@ ic-platform-runtime = { workspace = true, features = ["cdk"] }
 ic-wire.workspace = true
 ic-wire-endpoint-macros.workspace = true
 serde.workspace = true
+
+[dev-dependencies]
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

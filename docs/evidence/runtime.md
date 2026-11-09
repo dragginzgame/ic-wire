@@ -1,5 +1,106 @@
 # Runtime optimization qualification
 
+## Shared buffer reader screen (9 November 2026)
+
+Reject consolidating length-prefix parsing and slice extraction into a
+`take_buffer` helper called by str/string/bytes/byte_buf deserializers. Compare
+an ordinary helper and a forced non-inlined helper. Each keeps the original
+owned/borrowed visitor methods and UTF-8 checks. Postcard's Slice implements
+`try_take_n_temp` through the default delegation to `try_take_n`, so extracting
+this step changes neither buffer lifetime guarantees nor acceptance rules.
+Production stays unchanged: no byte, identity, budget or consumer migration.
+
+Baseline is Core 0.18.0 (`df071a4`) with the pending Build 0.81/Testkit 0.95 and
+Toko Tooling 0.36 adoptions plus preserved lock changes. Sources and Cargo targets
+are separate per lane, with fresh Wasm builds and rebuilt hash-bound instruction
+drivers. Rust/Cargo 1.99.1, LLVM 23.1.1, wasm32-unknown-unknown, fat LTO, one
+codegen unit, panic abort and stripped symbols. Lock/parser identities are
+retained in each lane's inputs.json and checked against the measured driver.
+
+Uncompressed Wasm **total / code-section bytes**:
+
+| Fixture/profile | Baseline | Ordinary helper | Forced shared helper |
+| --- | ---: | ---: | ---: |
+| hotspots / opt-z | 82,973 / 72,062 | 83,108 / 72,196 | 83,108 / 72,196 |
+| hotspots / opt-3 | 104,101 / 93,943 | 103,762 / 93,603 | 103,762 / 93,603 |
+| standard / opt-z | 594,277 / 547,562 | 594,238 / 547,522 | 594,238 / 547,522 |
+| standard / opt-3 | 893,678 / 833,247 | 894,131 / 833,701 | 892,898 / 832,468 |
+
+The ordinary helper stops at the footprint screen. Baseline and forced sharing
+pass five library and 48 native tests (existing timing probe ignored). PocketIC
+16.1.0 measures 87 hotspot cases, three identical samples per operation and
+1,904 rows per lane. Input/payload hashes, frame sizes and Candid counters match.
+All 860 Wire instruction pairs pass the regression margin, but the hotspot size
+check fails: +135 total / +134 code bytes at primary opt-z.
+
+Mixed-record **decode IC instructions**, baseline → forced sharing:
+
+| Blob bytes | opt-z | opt-3 |
+| --- | ---: | ---: |
+| 0 | 4,764.5 → 4,732.5 (-0.67%) | 2,844.5 → 2,977.5 (+4.68%) |
+| 4,096 | 105,304.5 → 105,267.5 (-0.04%) | 16,919.5 → 17,093.5 (+1.03%) |
+| 1,048,576 | 1,149,966 → 1,149,931 | 1,061,540 → 1,061,714 |
+
+Small, fixture-dependent savings do not justify the hotspot growth and extra
+calls. Native timing, allocation/heap, Toko-shaped Wasm and the full matrix were
+not run after rejection. No application saving is claimed. Raw artifacts and
+reproduction scripts remain under `target/evidence/buffer-reader-20261109/`:
+`prepare.mjs`, `screen.sh`, `prepare-ic.sh`, `analyze.mjs`, `cost-screen.sh` and
+`sizes.csv`. Invoke each measured lane's rebuilt `codec-instructions` with its
+absolute results directory and explicitly prepared `POCKET_IC_BIN`.
+
+## Shared varint reader screen (9 November 2026)
+
+Reject both removing `#[inline]` and applying `#[inline(never)]` to the shared
+u32/u64 reader macro. The latter reduces opt-3 Wasm but has substantial instruction
+regressions; neither improves primary opt-z size. Production code is unchanged.
+Parsing, malformed-input errors, bytes, identities and resource admission remain
+unchanged; no consumer migration is required.
+
+Baseline is Core 0.18.0 (`df071a4`) plus pending Build 0.81/Testkit 0.95 adoption
+and preserved lock updates. Lock SHA-256:
+`39145cb64911b59ae8c1026d74bc32298912b550dd73496072eb4c61c4697389`.
+Rust/Cargo 1.99.1, LLVM 23.1.1, wasm32-unknown-unknown, fat LTO, one codegen
+unit, panic abort and stripped symbols. Independent sources and targets produce
+fresh artifacts; instruction drivers are rebuilt with source hashes.
+
+Uncompressed Wasm **total / code-section bytes**:
+
+| Fixture/profile | Baseline | No hint | Forced shared calls |
+| --- | ---: | ---: | ---: |
+| hotspots / opt-z | 82,973 / 72,062 | 82,979 / 72,068 | 82,979 / 72,068 |
+| hotspots / opt-3 | 104,101 / 93,943 | 104,101 / 93,943 | 102,432 / 92,273 |
+| standard / opt-z | 594,278 / 547,562 | 594,281 / 547,565 | 594,281 / 547,565 |
+| standard / opt-3 | 893,678 / 833,247 | 893,678 / 833,247 | 881,488 / 821,062 |
+
+No-hint stops at its size screen. Baseline and forced-sharing lanes each pass
+five library and 48 native tests (existing timing probe ignored). PocketIC 16.1.0
+measures 87 hotspot cases with three identical samples per operation, 1,904 rows
+per lane; payload/input hashes, encoded lengths and Candid counters match.
+Candidate baked lock/parser identities match source. Of 860 Wire operation
+pairs, 64 exceed `baseline * 1.05 + 64`; primary hotspot size also grows six bytes.
+
+Selected absolute **decode IC instructions**, baseline → forced sharing:
+
+| Case | opt-z | opt-3 |
+| --- | ---: | ---: |
+| wide u32 × 16,384 | 7,083,521 → 7,083,521 | 2,724,229 → 3,412,410 (+25.3%) |
+| wide i32 × 16,384 | 7,231,669 → 7,231,669 | 2,888,202 → 3,527,229 (+22.1%) |
+| wide u16 × 16,384 | 4,069,359.5 → 4,069,359.5 | 1,708,360.5 → 1,823,092.5 (+6.7%) |
+| mixed record, empty blob | 4,764.5 → 4,765.5 | 2,844.5 → 3,026.5 (+6.4%) |
+
+Forcing calls changes optimizer decisions beyond the directly named widths;
+the u16/control regressions demonstrate why source deduplication is not a free
+runtime saving. The standard opt-3 reduction is 12,190 total / 12,185 code bytes,
+not an application saving. Native timing, allocation/heap, Toko-shaped Wasm and
+the full matrix were not run after rejection.
+
+Raw sources, results and reproduction scripts live in
+`target/evidence/shared-varints-20261109/`: `prepare.mjs`, `screen.sh`,
+`prepare-ic.sh`, `analyze.mjs`, `cost-screen.sh` and `sizes.csv`.
+Run each measured lane's rebuilt `build/debug/examples/codec-instructions`
+against its absolute `results` directory with explicitly prepared `POCKET_IC_BIN`.
+
 ## Decoder tail screen (8 November 2026)
 
 **Neither candidate is adopted.** This study starts from the current unrolled
