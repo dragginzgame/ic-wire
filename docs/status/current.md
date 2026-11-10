@@ -1,15 +1,16 @@
 # Current handoff
 
-Core 0.19.0 (7132e08) and Endpoint 0.10.0 (01c9890) were delivered to
-origin/main and crates.io on 2026-11-09. Their full release gates passed;
-batch-Hq3YAiQU is complete and reconciled. Current optimization work is
-committed/unpublished. Delivery is now requested for Core 0.20.0 followed by
-Endpoint 0.11.0, using the complete gates and the supplier-first frozen batch.
-All four public packages are selected; private qualification stays unpublished.
+Core 0.20.0 (efdc034) and Endpoint 0.11.0 (b556f09) were delivered to
+origin/main and crates.io on 2026-11-10. Both complete 20-stage release gates
+passed; supplier-first batch-aZjXt3P2 is complete and reconciled. All four public
+packages are published; the three private qualification packages stay unpublished.
+The earlier failed batches remain retained. Release qualification corrected two
+private Candid DTO declarations, unchanged qualification-manifest custody, the
+frozen redundant-varint assertion and identity-fixture lock ownership.
 
-## Upstream decoder hard cut — focused qualification complete
+## Upstream decoder hard cut — released in Core 0.20.0
 
-The pending Core release is 0.20.0: upstream Postcard replaces the private parser.
+Core 0.20.0 uses upstream Postcard in place of the private parser.
 `80 00` now accepts integer zero; `02 61 62` accepts Rust char `'a'` instead of
 Malformed. Browser varints/Result tags follow the same rule; collection lengths
 use the Wasm32 five-group width (64-bit Rust hosts admit ten). Rust char has no browser schema.
@@ -22,7 +23,8 @@ opt-z. Nineteen opt-z rows exceed the instruction screen; none do at opt-3.
 The automated checker stops on provenance identity differences; independent
 verification checks all frame/input, allocation, source and counter evidence.
 Core/Clippy/browser/Platform/corpus checks and 10,000 sanitizer fuzz inputs pass.
-Full release CI and the whole 39-cohort matrix have not run for this cut.
+Both full release gates passed. The whole 39-cohort performance matrix has not
+run for this cut.
 Prior parser measurements below are historical for this decoder change.
 
 ## Optimization and matrix refresh — 10 November
