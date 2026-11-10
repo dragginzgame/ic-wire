@@ -64,6 +64,8 @@ in [shared history](../history.md).
 
 ### 🔧 Tooling
 
+- Correct release-fixture file custody for the unchanged path-only qualification
+  manifest; keep exact changed-file and unchanged-manifest checks.
 - Organize product documentation into guides, benchmarks and historical reports,
   with a central index. Update links, CI path classification and release fixtures
   together. Correct retired sizing APIs, old supplier combinations and public

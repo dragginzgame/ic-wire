@@ -275,8 +275,13 @@ commit="$(git rev-parse HEAD)"
 [[ "$(git --git-dir="$fixture/remote.git" rev-parse refs/heads/main)" == "$commit" ]]
 [[ "$(git --git-dir="$fixture/remote.git" rev-parse "refs/tags/$RELEASE_GROUP-v$candidate^{}")" == "$commit" ]]
 bash scripts/ci/cargo-release-group.sh files "$RELEASE_GROUP" | tr '\0' '\n' | sort > "$fixture/expected-files"
+# Path-only qualification aliases remain part of metadata custody, but their
+# manifest must stay byte-identical when only public versions are prepared.
+grep -Fx qualification/Cargo.toml "$fixture/expected-files" >/dev/null
+git diff --exit-code HEAD^ HEAD -- qualification/Cargo.toml
+grep -Fxv qualification/Cargo.toml "$fixture/expected-files" > "$fixture/expected-changes"
 git diff-tree --no-commit-id --name-only -r HEAD | sort > "$fixture/changed-files"
-cmp "$fixture/expected-files" "$fixture/changed-files"
+cmp "$fixture/expected-changes" "$fixture/changed-files"
 [[ -z "$(git status --porcelain)" ]]
 for package in ic-wire ic-wire-derive; do
     yq -p toml -o json '.' "crates/$package/Cargo.toml" | jq -e '.package.publish == ["crates-io"]' >/dev/null

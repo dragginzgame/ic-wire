@@ -3,7 +3,7 @@
 Core 0.19.0 (7132e08) and Endpoint 0.10.0 (01c9890) were delivered to
 origin/main and crates.io on 2026-11-09. Their full release gates passed;
 batch-Hq3YAiQU is complete and reconciled. Current optimization work is
-uncommitted/unpublished. Delivery is now requested for Core 0.20.0 followed by
+committed/unpublished. Delivery is now requested for Core 0.20.0 followed by
 Endpoint 0.11.0, using the complete gates and the supplier-first frozen batch.
 All four public packages are selected; private qualification stays unpublished.
 
