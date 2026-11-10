@@ -47,6 +47,8 @@ in [shared history](../history.md).
 
 ### 🧪 Testing
 
+- Align frozen qualification contracts with upstream redundant-varint acceptance
+  and seed standalone identity consumers from the qualification workspace lock.
 - Expand the comparison matrix with 20 application-composition cases: paginated
   Packed records, mixed enum batches, sparse optional blobs, maps of results and
   mixed-width tuples. Preserve existing case indices and qualify malformed enum

@@ -88,7 +88,12 @@ pub fn frozen_contracts() {
         // Account equality intentionally treats None/zero alike; compare the raw field.
         assert_eq!(decoded.subaccount, subaccount);
     }
-    for bad in [&[128, 0][..], &[255, 255, 4], &[128]] {
+    // Core 0.20 follows upstream Postcard: redundant zero (80 00), formerly
+    // Malformed, now decodes to zero and re-encodes as 00. Retain original bytes
+    // for retry/hash identity; encoded bytes and admission budgets are unchanged.
+    assert_eq!(native::decode::<u16>(&[128, 0], LIMITS), Ok(0));
+    frozen(0_u16, &[0]);
+    for bad in [&[255, 255, 4][..], &[128]] {
         assert_eq!(native::decode::<u16>(bad, LIMITS), Err(Error::Malformed));
     }
     assert_eq!(native::decode::<bool>(&[2], LIMITS), Err(Error::Malformed));

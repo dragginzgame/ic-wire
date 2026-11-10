@@ -58,7 +58,8 @@ serde = { version = "1", default-features = false, features = ["derive", "alloc"
 `);
   for (const lane of ['current', 'next']) {
     const directory = path.join(out, lane); fs.mkdirSync(path.join(directory, 'src'), { recursive: true });
-    fs.copyFileSync(path.join(root, 'Cargo.lock'), path.join(directory, 'Cargo.lock'));
+    // Match workspace.json's qualification graph, not the independent product lock.
+    fs.copyFileSync(path.join(root, 'qualification/Cargo.lock'), path.join(directory, 'Cargo.lock'));
     const fixtures = path.join(root, 'qualification/ic-wire-qualification/tests/fixtures/platform_types');
     fs.copyFileSync(path.join(fixtures, 'mod.rs'), path.join(directory, 'src/lib.rs'));
     fs.cpSync(path.join(fixtures, 'tests'), path.join(directory, 'src/tests'), { recursive: true });
