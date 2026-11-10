@@ -2,6 +2,20 @@
   "schema": 1,
   "allowances": [
     {
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/containers/mod.rs",
+      "kind": "codec-comparison",
+      "protocol": "Candid comparator",
+      "reason": "Unpublished comparison envelope; Wire and Candid lanes select distinct payload representations, with no production Candid dependency",
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nstruct Page<T>"
+    },
+    {
+      "path": "qualification/ic-wire-benchmarks/benches/fixtures/followup/containers/mod.rs",
+      "kind": "codec-comparison",
+      "protocol": "Candid comparator",
+      "reason": "Unpublished comparison envelope; Wire and Candid lanes select distinct payload representations, with no production Candid dependency",
+      "declaration": "#[cfg_attr(feature = \"candid\", derive(CandidType))]\n#[cfg_attr(feature = \"candid\", candid_path(\"candid\"))]\nenum Change<T>"
+    },
+    {
       "path": "qualification/ic-wire-benchmarks/benches/fixtures/id16/mod.rs",
       "kind": "codec-comparison",
       "protocol": "Candid comparator",
