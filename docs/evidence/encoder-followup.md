@@ -632,3 +632,251 @@ and Retired raw output (see retention notice) retain hashes and controls.
 All four fresh paths still make one initial allocation. Reuse with sufficient
 capacity remains allocation-free in these controls. Geometric growth increases
 reserved output memory and may recopy data; it is not a free removal of sizing.
+
+## Unit enum tags — 10 November 2026
+
+Aggregate encoding retains admission/sizing before output allocation and a
+second bounded writing traversal. Their individual contribution to the new
+record/map gaps has not been isolated. Removing the sizing or second admission
+pass is not this change; the earlier one-pass allocation/failure tradeoffs above
+still apply.
+
+The retained narrow change routes unit-variant indices through Checked's existing
+u32 writer rather than directly through Postcard's general unit-variant method.
+Only Postcard serializers are wrapped. Bytes remain `0 -> 00`, `128 -> 80 01`;
+full-u32 indices, original value/node charges, limits and failure rules remain
+unchanged. No new codec, per-type strategy or consumer migration is introduced.
+
+Matched source/evidence:
+`target/evidence/expanded-hotspots-20261110/` (baseline) and
+`target/evidence/aggregate-tags-20261110/candidate/`. Both execute from the same
+checkout path with separate fresh targets, Rust 1.99.1, identical locks and 154
+cases. Native sampling uses two runs, 11 batches, 2 ms minimum; IC operations use
+three identical independent samples. Candid modules/counters, input/frame bytes
+and 5,140 allocation/heap observations are unchanged. Captured source hashes,
+8 fresh guests, 6,404 IC rows and 20,560 native/frame comparisons verify.
+
+| Opt-z mixed enum encode | Before instructions | After instructions |
+| --- | ---: | ---: |
+| One unit variant | 2,025.5 | 1,643.5 |
+| 128 mixed variants | 181,395.5 | 164,969.5 |
+| 4,096 mixed variants | 5,774,676.5 | 5,252,864.5 |
+
+These are the only changed IC rows. Opt-3 counters and all decode/rejection
+counters are identical. The strict 1,338-operation cost screen passes: opt-z
+Wasm total/code falls from 265,567/230,348 to 265,554/230,335 (-13 each);
+opt-3 falls from 348,715/315,953 to 348,704/315,942 (-11 each).
+These are fixture savings, not an application-size projection. The large enum
+encode still costs about 1.86 times Candid at opt-z; the other aggregate gaps
+are unchanged.
+
+Repeated native medians for that batch (microseconds, shared host): opt-z encode
+106.33/107.03 -> 97.47/97.07; decode 121.40/119.33 -> 123.30/130.35. Opt-3 encode
+31.73/31.52 -> 31.39/32.04; decode 52.63/54.07 -> 55.82/55.74. Native decode
+moves despite unchanged deterministic IC counters; no decode improvement is
+claimed. Core all-feature tests/doctests and Clippy pass; an added test compares
+unit indices through every u32 varint boundary with Postcard, encoded length,
+exact output storage and one-short refusal.
+
+The cost checker initially refused the corpus's existing borrowed-record and
+Nat-conversion lane labels. Both explicit labels are now admitted with the same
+input/frame/counter/artifact requirements; unknown labels remain rejected. All
+44 checker tests pass. No policy thresholds were relaxed.
+
+## Aggregate preflight attribution — 10 November 2026
+
+Temporary instrumentation measured `encoded_frame_len` separately from full
+request encoding on the 20 appended application cases. It reused the private
+optional-operation slot with an explicit `encode-preflight` label, rather than
+adding a production API or codec. Fixture values were cloned during untimed
+setup. The existing result frame identifies the input; preflight writes no frame.
+All five edited harness files are restored after measurement.
+
+Only `target/evidence/aggregate-phases-20261110/corrected/` is authoritative.
+The earlier `probe/` is marked superseded: tuple cases used a different factory
+and their relabelled operation measured reusable encoding, not preflight. The
+corrected probe routes all 20 cases through the same preflight factory. The
+standard comparative report refuses a missing Candid preflight counterpart;
+the existing IC driver was therefore run directly and raw evidence verified.
+This diagnostic is not a matched optimization cost-screen pass.
+
+Rust 1.99.1, both locked workspaces, two native runs of 11 batches (2 ms minimum),
+fresh guests and three identical IC samples are retained. Baked sources, 440 IC
+rows and 1,440 native/frame comparisons verify. All 80 profile/codec input and
+frame identities match the maintained 154-case baseline. Each of the 40 measured
+preflight/profile cases allocates and reallocates zero times.
+
+Opt-z IC instructions/op, 4,096 entries:
+
+| Aggregate | Full encoding | Standalone preflight | Preflight / full |
+| --- | ---: | ---: | ---: |
+| Paginated Packed records | 10,677,846 | 3,437,618 | 32.2% |
+| Mixed enum batch | 5,367,638.5 | 1,900,609.5 | 35.4% |
+| Sparse optional blobs | 3,159,121.5 | 1,076,184.5 | 34.1% |
+| Map of results | 9,027,392 | 2,963,810 | 32.8% |
+| Mixed-width tuples | 13,289,255 | 4,735,603 | 35.6% |
+
+Opt-3 ratios are respectively 11.6%, 19.1%, 16.0%, 19.3% and 20.2%. Standalone
+preflight is significant, but these are separate calls with their own compiler
+inlining and wrapper costs, not exact additive internal phases. Subtracting them
+does not yield a qualified write-only cost or promise equivalent savings from
+removing admission. The cloned setup and smaller corpus also preclude comparing
+these module sizes as an optimization against the earlier 154-case fixture.
+
+The corrected native tuple medians (microseconds, shared host) are full encode
+246.84/248.68 and preflight 74.64/74.93 at opt-z, consistent with the IC finding.
+The record/blob preflight ratios are also roughly 26–30% in native measurements.
+No production behavior, bytes, identities, limits or acceptance changed during
+this attribution study. Keep pre-allocation admission and bounded writing.
+
+## Consolidated encoding depth admission — 10 November 2026
+
+The retained change passes `actual_depth.saturating_add(2)` to shared admission
+once instead of checking it in Bounded and then checking actual depth again.
+The same required depth, four node charges, two value-size charges and sticky
+refusal apply; Checked still carries the original depth to children. Invalid
+values are refused before their serializer runs. No codec, per-type variant,
+byte/identity change, budget migration or acceptance change is introduced.
+
+Baseline: `target/evidence/aggregate-tags-20261110/candidate/`. Candidate:
+`target/evidence/aggregate-depth-20261110/candidate/`. Same checkout path,
+compiler (1.99.1), locks, 154 cases, profiles, native parameters and three
+independent identical IC samples. The strict 1,338-operation paired screen
+passes with identical Candid modules/counters and input/frame identities.
+Candidate verification covers 3,202 IC rows and 10,280 native/frame comparisons;
+all 5,140 paired allocation/heap observations are unchanged.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| opt-z total / code Wasm bytes | 265,554 / 230,335 | 264,758 / 229,539 |
+| opt-3 total / code Wasm bytes | 348,704 / 315,942 | 348,688 / 315,926 |
+| opt-z 4,096-item page encode instructions | 10,405,151 | 10,233,124 |
+| opt-z 4,096-item result-map encode instructions | 9,459,476 | 9,365,268 |
+| opt-z 4,096-item tuple encode instructions | 14,042,872 | 13,977,336 |
+| opt-z 4,096-item enum encode instructions | 5,252,864.5 | 5,258,314.5 |
+| opt-3 4,096-item page encode instructions | 4,881,074 | 4,864,690 |
+| opt-3 4,096-item result-map encode instructions | 3,892,252 | 3,871,772 |
+
+142 IC rows change: 124 improve, 18 regress within the screen. The largest
+relative regression is empty Principal encode, 1,796.5 -> 1,806.5 (+0.56%);
+the large enum adds 5,450 instructions (+0.10%). Only fresh/reused encoding
+changes; decode, rejection and loop controls remain identical. Fixture size
+reductions are not projected application savings.
+
+Repeated native encode medians (microseconds, shared host): opt-z page
+251.16/254.43 -> 249.41/239.60 and enum 97.47/97.07 -> 90.83/90.33;
+opt-3 page 76.01/79.91 -> 74.81/79.92 and enum 31.39/32.04 -> 30.00/31.45.
+Native timing and IC instruction effects are distinct.
+
+Core all-feature tests/doctests, Clippy and the new nested-depth refusal test
+pass. `Some(Some(leaf))` with depth below five never visits the leaf; depth five
+preserves bytes `01 01 07` and exactly one sizing plus one writing visit. Existing
+one-short depth/node/allocation controls and sticky non-partial-debit tests pass.
+The temporary phase-attribution harness is fully restored; only this shared
+check simplification and its boundary regression remain from this investigation.
+
+## Newtype enum tags — 10 November 2026
+
+Retain the opt-z-focused candidate with an explicit opt-3 regression tradeoff.
+The existing Checked serializer writes a newtype variant through an unprefixed
+Postcard tuple: the shared u32 tag writer, then the same Bounded body. A private
+VariantIndex serializer has no consumer-type parameter. It adds no budget visit;
+body depth and charges are unchanged. Tuple/struct variants retain their existing
+paths. This is neither a second codec nor a consumer-selected specialization.
+Tag 128 with a u8 body of 7 remains `80 01 07`; bytes, identities, limits and
+acceptance remain unchanged. No consumer or retained-byte migration is needed.
+
+Baseline: `target/evidence/aggregate-depth-20261110/candidate/`. Candidate:
+`target/evidence/newtype-tags-20261110/candidate/`. Same checkout, Rust 1.99.1,
+locks, 154-case inputs, two native runs of 11 batches with a 2 ms minimum, fresh
+separate Cargo target and three identical IC samples per operation. Source/hash
+verification covers 3,202 IC rows and 10,280 native/frame checks. All 5,140 paired
+allocation/heap observations and both Candid modules/counters are identical.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| opt-z total / code Wasm bytes | 264,758 / 229,539 | 264,432 / 229,215 |
+| opt-3 total / code Wasm bytes | 348,688 / 315,926 | 348,920 / 316,157 |
+| opt-z 4,096-item result-map encode instructions | 9,365,268 | 7,814,676 |
+| opt-z 4,096-item mixed-enum encode instructions | 5,258,314.5 | 4,772,387.5 |
+| opt-z 4,096-item page encode instructions | 10,233,124 | 10,429,732 |
+| opt-3 4,096-item page encode instructions | 4,864,690 | 5,126,831 |
+| opt-z empty Packed result encode instructions | 2,125.5 | 1,805.5 |
+| opt-3 empty Packed result encode instructions | 631.25 | 762.25 |
+
+The 1,338-operation strict screen **fails**, with four opt-3 instruction failures
+(empty/singleton Packed results and 128/4,096-item pages) plus opt-3 total/code
+Wasm growth of 232/231 bytes. No policy threshold is relaxed. Of 77 changed IC
+rows, 53 improve and 24 regress; all are encoding. The largest opt-z regression
+is the 128-item page (+2.24%); the 4,096-item page adds 1.92%. Opt-3's largest
+relative loss is the empty result (+20.75%, 131 instructions); its large page
+adds 5.39%. Decode, malformed rejection and loop controls remain unchanged.
+
+Accept this measured tradeoff for the primary size-constrained opt-z profile:
+326 fewer total Wasm bytes, 16.56% fewer large result-map instructions and 9.24%
+fewer large mixed-enum instructions. These are fixture savings, not projected
+application savings. A follow-up may investigate compiler inlining around the
+body wrapper, but must preserve both profiles and small controls; the cause of
+the secondary-profile losses is not established by these measurements.
+
+Native medians are noisy shared-host observations, not a claimed speedup:
+opt-z result-map 187.03/189.37 -> 176.09/190.02 microseconds and mixed-enum
+90.83/90.33 -> 90.10/92.65; opt-3 result-map 53.53/54.02 -> 57.06/55.02 and
+mixed-enum 30.00/31.45 -> 31.78/31.18. Preserve the absolute raw repeats.
+
+All 82 active native tests (three ignored measurements) and Core all-feature
+Clippy pass. The new boundary test passes on both original and candidate code:
+every u32 tag-width transition matches Postcard, sizing and exact-slice output;
+one-short byte, allocation, node and depth limits refuse. Original admission
+reserves output bytes plus 80 allocation bytes for this u32-tag/u8-body probe,
+with eight nodes and depth four. This test protects the contract independently
+of the optimization.
+
+## Newtype tag inlining probe — 10 November 2026
+
+Rejected as ineffective: add `#[cfg_attr(target_arch = "wasm32", inline(always))]`
+only to `VariantIndex::serialize`, leaving the bounded body and all other source
+unchanged. Fresh `coverage-shapes` Wire guests built at both evaluation/opt-z
+and benchmark-speed/opt-3 with Rust 1.99.1, the same lock and checkout path, in
+`target/newtype-inline-build-20261110/`. Both artifacts are byte-for-byte identical
+to the retained newtype candidate:
+
+- opt-z: 264,432 bytes, SHA-256
+  `e3efe6bdcbd3017c5ce500f87a6c0d731302f4a02f321df940d61ae2ea659189`.
+- opt-3: 348,920 bytes, SHA-256
+  `3fa7dd9ea8346e70379dbfbdf9d1b1ec7beb85752425874119ee24586e965b8e`.
+
+Evidence: `target/evidence/newtype-inline-20261110/` retains original/candidate
+encoder source and artifact comparisons. The annotation is removed and the
+encoder matches the retained source exactly. There is no source, Wasm-size or
+instruction improvement; no new native/IC run is justified for identical Wasm.
+This rules out forcing this tag helper inline as a remedy, not other causes of
+the body-wrapper regressions. Existing byte/admission tests remain applicable.
+
+## Newtype body tuple simplification — 10 November 2026
+
+Rejected on size screening. Replace the explicit `serialize_tuple(2)`, two
+`serialize_element` calls and `end` with Serde's ordinary tuple implementation:
+`(VariantIndex(index), Bounded { value, budget, depth }).serialize(self.inner)`.
+The same tag and bounded body are preserved, with no new adapter or codec option.
+Fresh same-checkout coverage-shapes Wire guests, Rust 1.99.1 and unchanged locks:
+
+| Uncompressed Wasm | Retained total / code | Tuple candidate total / code |
+| --- | ---: | ---: |
+| opt-z | 264,432 / 229,215 | 264,484 / 229,267 |
+| opt-3 | 348,920 / 316,157 | 348,936 / 316,173 |
+
+The shorter source grows both profiles, so it is not retained. This was a size
+screen, not a completed instruction/native comparison; do not infer faster or
+slower execution from the result. The prior page/small-result instruction
+regressions remain unresolved. Original/candidate encoder source is preserved
+in `target/evidence/newtype-tuple-20261110/`, fresh builds in
+`target/newtype-tuple-build-20261110/`. Candidate Wasm SHA-256 values:
+
+- opt-z: `f0c55f7b6494bb16878e46bca545e82a0ff962e4e3b879b53325b35638394d97`.
+- opt-3: `3662a81828d51f4839e5e986eec892ef6173b9f0ce9b995b81f428bce1525eb8`.
+
+The encoder was restored and compared exactly with the qualified retained
+newtype source. Core all-feature tests and doctests pass on that restored
+implementation. Stop this experiment line for the pending patch: no additional
+public API, specialization or dual implementation is justified by these probes.

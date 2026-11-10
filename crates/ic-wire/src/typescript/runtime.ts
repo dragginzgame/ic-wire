@@ -148,12 +148,14 @@ class Reader {
     return value;
   }
   byte(): number { const value = this.bytes[this.offset++]; if (value === undefined) return fail('malformed'); return value; }
+  // Match upstream Postcard: redundant groups are accepted within the integer
+  // width (80 00 -> 0); overflow and unterminated encodings remain malformed.
   varint(bits: number): bigint {
     let value = 0n;
     for (let i = 0; i < Math.ceil(bits / 7); i++) {
       const byte = this.byte(); value |= BigInt(byte & 127) << BigInt(i * 7);
       if (!(byte & 128)) {
-        if (value >= (1n << BigInt(bits)) || (i > 0 && byte === 0)) return fail('malformed');
+        if (value >= (1n << BigInt(bits))) return fail('malformed');
         return value;
       }
     }
@@ -164,13 +166,14 @@ class Reader {
     for (let i = 0; i < Math.ceil(bits / 7); i++) {
       const byte = this.byte(); value += (byte & 127) * 2 ** (i * 7);
       if (!(byte & 128)) {
-        if (value >= 2 ** bits || (i > 0 && byte === 0)) return fail('malformed');
+        if (value >= 2 ** bits) return fail('malformed');
         return value;
       }
     }
     return fail('malformed');
   }
-  length(max: number): number { const n = this.varint(64); if (n > BigInt(max)) return fail('limit'); return Number(n); }
+  // Collection lengths follow the Wasm32 endpoint usize width, not host usize.
+  length(max: number): number { const n = this.varint(32); if (n > BigInt(max)) return fail('limit'); return Number(n); }
   raw(length: number): Uint8Array {
     if (length > this.bytes.length - this.offset) return fail('malformed');
     const value = this.bytes.subarray(this.offset, this.offset + length); this.offset += length; return value;
@@ -367,7 +370,8 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
       return { some: child(s.item) };
     }
     case 'result': {
-      const tag = input.byte(); if (tag > 1) return fail('malformed');
+      // Serde Result is an enum: Postcard reads its tag as a u32 varint.
+      const tag = input.numberVarint(32); if (tag > 1) return fail('malformed');
       return tag === 0 ? { ok: child(s.ok) } : { err: child(s.err) };
     }
     case 'record': {

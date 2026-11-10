@@ -165,7 +165,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         "native_encoder_sha256":hash(include_bytes!("../../../crates/ic-wire/src/native/encode/mod.rs")),"native_decoder_sha256":hash(include_bytes!("../../../crates/ic-wire/src/native/decode/mod.rs")),"native_admission_sha256":hash(include_bytes!("../../../crates/ic-wire/src/native/mod.rs")),
         "contract_sha256":hash(include_bytes!("../../../crates/ic-wire/src/contract/mod.rs")),
-        "native_parser_sha256":hash(include_bytes!("../../../crates/ic-wire/src/native/parser/mod.rs")),
+        "native_parser":"upstream-postcard-locked",
         "lock_sha256":hash(include_bytes!("../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         ))?,
     )?;

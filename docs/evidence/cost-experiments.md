@@ -93,7 +93,7 @@ remaining application code-limit headroom.
 The matched Candid smoke modules remain identical: opt-z **402,762 total /
 367,085 code** and opt-3 **624,858 total / 590,483 code**. The 100-type follow-up
 measures Wire before/after only; it is not another complete Candid matrix.
-The [earlier full matrix](../candid-comparison.md) retains its original
+The [earlier full matrix](../benchmarks/candid-comparison.md) retains its original
 source/dependency graph and cannot substitute for this matched baseline.
 
 ## IC instructions and bytes

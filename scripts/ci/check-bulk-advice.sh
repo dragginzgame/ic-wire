@@ -34,6 +34,9 @@ rg -Fq "$byte" "$fixture/default.log"
 rg -Fq "$word" "$fixture/default.log"
 rg -Fq "/types/Payload/fields/ids/list/hash16: consider Packed<[u8; 16]>" "$fixture/default.log"
 rg -Fq '/types/Payload/fields/flags/list/bool: consider' "$fixture/default.log"
+for entry in 'signed/list/i32: consider Packed<i32>' 'hashes/list/hash32: consider Packed<[u8; 32]>' 'samples32/list/f32: consider the explicit finite_f32 adapter' 'samples64/list/f64: consider the explicit finite_f64 adapter'; do
+    rg -Fq "/types/Payload/fields/$entry" "$fixture/default.log"
+done
 rg -Fq "$word" "$fixture/partial.log"
 if rg -F "$byte" "$fixture/partial.log" || rg 'warning:' "$fixture/all.log"; then
     echo 'Acknowledged field still emitted a warning' >&2

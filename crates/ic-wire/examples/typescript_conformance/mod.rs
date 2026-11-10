@@ -140,11 +140,13 @@ impl Fixture {
             }
             // Nonminimal, overflowing and unterminated prefixes, independently
             // judged by Rust even when the first field is not a scalar varint.
+            // A five-continuation prefix followed by zero is host-only for
+            // collection lengths. That target-width difference is covered
+            // explicitly by native and browser tests, not this equality oracle.
             for prefix in [
                 vec![0x80, 0],
                 vec![0xff, 0xff, 4],
                 vec![0xff, 0xff, 0xff, 0xff, 16],
-                vec![0x80; 5],
                 vec![0x80; 10],
                 vec![0xff; 19],
             ] {
@@ -173,9 +175,6 @@ impl Fixture {
                     ic_wire::native::decode_response::<T>(ID, &bytes, LIMITS)
                         .map(|v| ic_wire::native::encode_response::<T>(ID, &v, LIMITS).unwrap())
                 };
-                if let Ok(encoded) = &accepted {
-                    assert_eq!(encoded, &bytes);
-                }
                 serde_json::to_writer(
                     &mut self.mutation_data,
                     &serde_json::json!({
@@ -183,6 +182,7 @@ impl Fixture {
                         "direction": direction,
                         "bytes": bytes,
                         "accepted": accepted.is_ok(),
+                        "normalized": accepted.ok(),
                     }),
                 )
                 .unwrap();
@@ -570,7 +570,7 @@ assert.throws(() => magnitudeToBigInt(new Uint8Array(65).fill(1)));
     )
     .unwrap();
     writeln!(f.checks, "console.log('Rust/TypeScript conformance: {} vectors, both directions, truncation and identity rejection passed');", f.count).unwrap();
-    writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and canonical re-encode checks passed');", f.mutations).unwrap();
+    writeln!(f.checks, "console.log('Differential mutations: {} Rust/TypeScript acceptance and normalized re-encode checks passed');", f.mutations).unwrap();
     for name in ["JSON", "types", "createCodec", "globalThis"] {
         writeln!(f.checks, "{{ const module = await import('./compiled/shadow-{name}.js'); const codec = module['{name}']; const value = new Int16Array([-32768, 32767]); assert.deepEqual(codec.decodeRequest(codec.encodeRequest(value)), value); }}").unwrap();
     }

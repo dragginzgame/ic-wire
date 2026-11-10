@@ -5,13 +5,13 @@
 > Use the maintained development commands for fresh measurements.
 
 These measurements describe their recorded revisions, not the current runtime.
-See the [current evaluation scope](../evaluation.md) for maintained checks.
+See the [current evaluation scope](../benchmarks/evaluation.md) for maintained checks.
 
 ## Historical experiments
 
 The remaining sections preserve earlier measurements and source revisions. They
 are evidence, not additional supported APIs. Current results are indexed in the
-[comparison guide](../candid-comparison.md).
+[comparison guide](../benchmarks/candid-comparison.md).
 
 The 0.5 borrowed-contract [Retired artifact: summary and retention status](../evidence/README.md)
 compares owned and borrowed finite decoding of the same name/chunk frames. On

@@ -1,5 +1,5 @@
 //! Admission before native payload decoding and visitor allocation.
-// Adapted from IcyDB native admission; see ../LICENSE-MIT.
+// Adapted from IcyDB native admission.
 
 use super::Budget;
 use alloc::{string::String, vec::Vec};

@@ -26,7 +26,7 @@ no sibling was edited, and its substantial uncommitted work was left intact.
 Canic must pass an acknowledgement map and diagnostic handler at each caller,
 route reports to normal CLI/build output, and test both default visibility and
 intentional suppression. Its artifact generator should not silently discard the
-report. See the [migration examples](../packed-fields.md#host-side-bulk-advice-and-ci).
+report. See the [migration examples](../guides/packed-fields.md#host-side-bulk-advice-and-ci).
 Installed warning visibility therefore remains **unverified**, not complete.
 
 ## Rejection audit

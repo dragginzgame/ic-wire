@@ -24,7 +24,7 @@ export WIRE_FIXTURE_COMPILER="$compiler"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
 mkdir "$fixture/repo" "$fixture/bin"
-paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .toko-tooling.snapshot docs/runtime.md .github/workflows/ci.yml)
+paths=(CHANGELOG.md ci/cargo-release-groups.json Makefile Cargo.toml Cargo.lock rust-toolchain.toml .gitignore .toko-tooling.snapshot docs/guides/runtime.md .github/workflows/ci.yml)
 paths+=(ci/release-validation.json scripts/ci/wire-validation-roster.pl scripts/ci/wire-release-validation.mjs scripts/ci/check-release-validation.mjs scripts/ci/rust-policy.sh scripts/ci/ic-wire-release.sh scripts/ci/fuzz-runtime.sh scripts/ci/check-diagnostics.sh scripts/ci/check-endpoint.sh scripts/ci/check-endpoint-ic.sh)
 paths+=(scripts/ci/check-lint.sh scripts/ci/prepare-browser-tools.sh)
 paths+=(scripts/ci/check-testkit-boundary.mjs scripts/ci/check-testkit-boundary.test.mjs)
@@ -368,11 +368,11 @@ if FIXTURE_PUBLISH_STATUS=37 PATH="$fixture/bin:$PATH" make --no-print-directory
 [[ "$(grep -c '|publish ' "$CARGO_CALLS")" == 1 ]]
 grep -rlx 37 "$fixture/repo/target/publication" | grep '/cargo-status$' >/dev/null
 # Dirty source is refused before the simulated Cargo upload as well.
-printf '\nDirty publication fixture.\n' >> "$fixture/repo/docs/runtime.md"
+printf '\nDirty publication fixture.\n' >> "$fixture/repo/docs/guides/runtime.md"
 : > "$CARGO_CALLS"
 if PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" publish RELEASE_GROUP=core > "$fixture/publish-dirty.log" 2>&1; then exit 1; fi
 if grep -q '|publish ' "$CARGO_CALLS"; then exit 1; fi
-git -C "$fixture/repo" restore docs/runtime.md
+git -C "$fixture/repo" restore docs/guides/runtime.md
 
 check_ci_routing
 

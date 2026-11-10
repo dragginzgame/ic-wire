@@ -542,7 +542,7 @@ for (const direction of ['Request', 'Response']) {
     rejects(() => codec[encode](value), 'value');
   for (let invalid = 2; invalid <= 255; invalid++)
     rejects(() => codec[decode](Uint8Array.from([...header,1,invalid])), 'malformed');
-  rejects(() => codec[decode](Uint8Array.from([...header,128,0])), 'malformed');
+  assert.deepEqual(codec[decode](Uint8Array.from([...header,128,0])), []);
   rejects(() => codec[decode](Uint8Array.from([...header,2,1])), 'malformed');
   rejects(() => codec[decode](Uint8Array.from([...header,0,0])), 'malformed');
   const frame = codec[encode]([false,true]);

@@ -120,16 +120,14 @@ fn copied_record_checks_prefixes_truncation_and_preserves_owned_bytes() {
         for end in 0..frame.len() {
             assert!(decode::<CopiedRecord>(&frame[..end]).is_err());
         }
-        // Nonminimal scalar and length prefixes must still be rejected.
+        // Redundant scalar and length prefixes normalize through upstream Postcard.
         for start in [11, 13] {
             let mut longer = frame.clone();
             let end = start + longer[start..].iter().position(|b| b & 128 == 0).unwrap();
             longer[end] |= 128;
             longer.insert(end + 1, 0);
-            assert!(matches!(
-                decode::<CopiedRecord>(&longer),
-                Err(Error::Malformed)
-            ));
+            let decoded = decode::<CopiedRecord>(&longer).unwrap();
+            assert_eq!(encode(&decoded).unwrap(), frame);
         }
         let mut changed = frame.clone();
         if len != 0 {

@@ -14,10 +14,11 @@ function fixture(t) {
   for(const lane of ['before','after']) {
     const root=path.join(directory,lane);fs.mkdirSync(path.join(root,'instructions'),{recursive:true});
     const identity={compiler:'rustc fixture',build_environment:{},counter:'ic0.performance_counter(0)',samples:3,
-      server_version:'fixture 1',sample_caller:'unique callers',small_repetitions:4,large_repetitions:1,artifacts:[]};
+      server_version:'fixture 1',candid_decoder:'fixture decoder',sample_caller:'unique callers',small_repetitions:4,large_repetitions:1,artifacts:[]};
     for(const field of ['workspace_manifest_sha256','lock_sha256','server_sha256','fixture_sha256',
       'hotspots_fixture_sha256','signed32_fixture_sha256','bulk_fixture_sha256','packed_i16_fixture_sha256','toko_fixture_sha256',
       'derive_fixture_sha256','byte_keys_fixture_sha256','cost_smoke_fixture_sha256','id16_fixture_sha256','shapes_fixture_sha256','driver_sha256','wasm_driver_sha256','evidence_helper_sha256','operations_sha256',
+      'followup_fixture_sha256','followup_words_sha256','container_fixture_sha256','container_transport_sha256','container_adapter_sha256',
       'native_encoder_sha256','native_decoder_sha256','native_admission_sha256']) identity[field]=sha(field);
     let csv='profile,codec,wasm_bytes,wasm_sha256,code_section_bytes\n',call=0;const rows=[];
     for(const profile of profiles) for(const codec of ['wire','candid']) {
@@ -49,7 +50,8 @@ test('paired unchanged evidence passes with both raw Wasm metrics',t=>{
   assert.deepEqual(result.failures,[]);assert.equal(result.instructions.length,8);
   assert(result.wasm.every(row=>row.total_delta===0&&row.code_delta===0));
 });
-for (const codec of ['wire-bounded','wire-borrowed','wire-packed-i16']) test(`qualified ${codec} rows remain comparable`,t=>{
+for (const codec of ['wire-bounded','wire-borrowed','wire-packed-i16',
+  'wire-borrowed-record','wire-with-nat-conversion']) test(`qualified ${codec} rows remain comparable`,t=>{
   const f=fixture(t);
   for (const root of [f.before,f.after]) f.rows(rows=>{for(const row of rows) if(row.codec==='wire-native') row.codec=codec;},root);
   const result=compareCosts(f.before,f.after);
@@ -81,6 +83,17 @@ test('instruction regression fails while the small absolute margin is explicit',
   const f=fixture(t);f.rows(rows=>{rows[0].samples_instructions=[4800,4800,4800];rows[0].median_instructions_per_op=1200;});
   assert.match(compareCosts(f.before,f.after).failures[0],/1000 → 1200 instructions/);
 });
+for (const field of ['candid_decoder','followup_fixture_sha256','followup_words_sha256',
+  'container_fixture_sha256','container_transport_sha256','container_adapter_sha256']) {
+  test(`rejects changed ${field} even when counters and frames match`,t=>{
+    const f=fixture(t);f.identity(v=>v[field]=sha('changed fixture or oracle'));
+    assert.throws(()=>compareCosts(f.before,f.after),/identity mismatch/);
+  });
+  test(`requires ${field} in paired evidence`,t=>{
+    const f=fixture(t);f.identity(v=>delete v[field]);
+    assert.throws(()=>compareCosts(f.before,f.after),/missing identity/);
+  });
+}
 for(const [name,change,expected] of [
   ['dependency drift',f=>f.identity(v=>v.lock_sha256=sha('other lock')),/identity mismatch/],
   ['producer helper drift',f=>f.identity(v=>v.evidence_helper_sha256=sha('other producer')),/identity mismatch/],

@@ -24,8 +24,7 @@ else
     cp Cargo.toml Cargo.lock rust-toolchain.toml "$out/source/"
     cp -R crates examples "$out/source/"
     mkdir -p "$out/source/qualification"
-    cp "$root/qualification/Cargo.toml" "$root/qualification/Cargo.lock" "$out/source/qualification/"
-    cp -R "$root/qualification" "$out/source/qualification/"
+    cp -R "$root/qualification/." "$out/source/qualification/"
     cp scripts/ci/evaluate-codecs.sh scripts/ci/codec-cohorts.psv "$out/source/scripts/ci/"
 fi
 runs="${RUNS:-2}"

@@ -1,6 +1,6 @@
 //! Shared source for the two concrete finite-float adapters, not consumer types.
 macro_rules! adapter {
-    ($float:ty, $width:expr; $($index:expr),+) => {
+    ($float:ty, $width:expr; $($index:expr),+; $($pair:expr),+) => {
         use alloc::vec::Vec;
         use serde::{Deserializer, Serializer, de};
 
@@ -8,6 +8,21 @@ macro_rules! adapter {
         // overhead without generating a codec for each consumer or field bound.
         #[inline(never)]
         fn finite(bytes: &[u8]) -> bool {
+            if $width == 4 {
+                // Each u64 holds two independent f32 exponents. Adding one to
+                // the masked exponent sets its sign bit only for 0xff (NaN or
+                // infinity); neither lane can carry into the other. Preserve
+                // the same finite-only acceptance, bytes and admission limits.
+                let mut chunks = bytes.chunks_exact(32);
+                for chunk in chunks.by_ref() {
+                    let mut exponent_carries = 0_u64;
+                    $(let bits = u64::from_le_bytes(chunk[$pair * 8..($pair + 1) * 8].try_into().unwrap());
+                    exponent_carries |= (bits & 0x7f80_0000_7f80_0000) + 0x0080_0000_0080_0000;)+
+                    if exponent_carries & 0x8000_0000_8000_0000 != 0 { return false; }
+                }
+                return chunks.remainder().chunks_exact(4).all(|word|
+                    f32::from_le_bytes(word.try_into().unwrap()).is_finite());
+            }
             let mut chunks = bytes.chunks_exact($width * 8);
             for chunk in chunks.by_ref() {
                 let mut valid = true;

@@ -7,4 +7,4 @@ Each release group owns its versions and ledger:
 - [Coordinated history](releases/history.md): original repository-wide releases through 0.11.0.
 
 Select `RELEASE_GROUP=core` or `RELEASE_GROUP=endpoint` explicitly for release,
-resume and publication. See the [release guide](docs/stable-identities.md).
+resume and publication. See the [release guide](docs/guides/stable-identities.md).

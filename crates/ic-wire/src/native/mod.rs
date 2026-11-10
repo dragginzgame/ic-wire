@@ -9,7 +9,6 @@ mod tests;
 
 mod decode;
 mod encode;
-mod parser;
 
 use crate::{Error, Limits, contract};
 use alloc::vec::Vec;
@@ -327,13 +326,16 @@ pub fn encode_response_into<T: Serialize + ?Sized>(
 
 /// Decode a complete Postcard payload; allocation admission precedes visitor calls.
 /// Borrowed bytes and strings may refer directly to the input for its lifetime.
-/// Primitive representations are checked while reading; Serde normalization is consumer-owned.
+/// Postcard owns primitive acceptance; Serde normalization is consumer-owned.
 pub fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8], limits: Limits) -> Result<T, Error> {
     if bytes.len() > limits.bytes {
         return Err(Error::Limit);
     }
     let budget = Budget::new(limits);
-    let mut input = parser::Deserializer::from_bytes(bytes);
+    // Hard cut: upstream Postcard accepts redundant varints (80 00 -> 0) and
+    // multi-scalar char payloads (02 61 62 -> a). Encoded bytes and budgets stay
+    // unchanged; consumers must retain original bytes, not re-encode for identity.
+    let mut input = postcard::Deserializer::from_bytes(bytes);
     let value = T::deserialize(decode::Bounded {
         inner: &mut input,
         budget: &budget,
@@ -344,7 +346,7 @@ pub fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8], limits: Limits) -> Res
         return Err(Error::Trailing);
     }
     // Hard cut: decoding no longer reserializes or charges a serialization pass.
-    // Primitive parsing stays strict, but maps/sets and custom Serde may normalize:
+    // Postcard, maps/sets and custom Serde may normalize:
     // e.g. map bytes 02 02 14 01 0a now decode and re-encode as 02 01 0a 02 14.
     // Consumers own normalization and must retain original bytes for exact retries.
     Ok(value)

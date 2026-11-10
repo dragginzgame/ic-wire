@@ -202,7 +202,7 @@ fn lifetime_derives_cover_enums_nested_containers_bounds_and_name_collisions() {
 }
 
 #[test]
-fn borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input() {
+fn borrowed_leaves_preserve_bounds_utf8_and_upstream_length_acceptance() {
     assert_eq!(BytesRef::<2>::new(&[1, 2, 3]), Err(Error::Limit));
     assert_eq!(TextRef::<2>::new("€"), Err(Error::Limit));
     assert!(BytesRef::<0>::new(&[]).is_ok());
@@ -236,7 +236,7 @@ fn borrowed_leaves_refuse_bounds_noncanonical_lengths_utf8_and_nonborrowed_input
     assert_eq!(decode(&bad), Err(Error::Trailing));
     let mut bad = frame.clone();
     bad.splice(11..12, [0x83, 0]);
-    assert_eq!(decode(&bad), Err(Error::Malformed));
+    assert_eq!(decode(&bad), Ok(3));
     let mut bad = frame.clone();
     bad[12] = 0xff;
     assert_eq!(decode(&bad), Err(Error::Malformed));

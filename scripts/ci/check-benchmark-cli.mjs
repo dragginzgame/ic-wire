@@ -26,6 +26,26 @@ function artifacts(output) {
     .map(row => [row.target.name, row.executable]));
 }
 try {
+  // Exercise real snapshot creation, stopping at the first measurement command.
+  const stub = path.join(temporary, "snapshot-bin");
+  fs.mkdirSync(stub);
+  fs.writeFileSync(path.join(stub, "cargo"), "#!/bin/sh\nexit 93\n", { mode: 0o755 });
+  for (const script of ["evaluate-codecs.sh", "evaluate-codec-matrix.sh", "evaluate-endpoint-matrix.sh", "evaluate-input-borrowing.sh"]) {
+    const output = path.join(temporary, script);
+    run("bash", [path.join(root, "scripts/ci", script), output], 93, root, {
+      ...process.env, PATH: `${stub}:${process.env.PATH}`, POCKET_IC_BIN: "/bin/true",
+      CORPUS_FEATURE: "", CODEC_SOURCE_SNAPSHOT: "",
+    });
+    const source = path.join(output, "source");
+    for (const name of ["ic-wire-benchmarks", "ic-wire-qualification", "ic-wire-endpoint-fixture"]) {
+      assert.ok(fs.existsSync(path.join(source, "qualification", name, "Cargo.toml")));
+    }
+    assert.equal(fs.existsSync(path.join(source, "qualification", "qualification")), false);
+    for (const name of ["Cargo.toml", "Cargo.lock"]) {
+      assert.deepEqual(fs.readFileSync(path.join(source, "qualification", name)),
+        fs.readFileSync(path.join(root, "qualification", name)));
+    }
+  }
   for (const [selection, message] of [
     ['cost-smoke,toko', 'select one benchmark corpus'],
     ['coverage-shapes,contract-shapes', 'select one benchmark corpus'],

@@ -34,7 +34,7 @@ expected one-byte-per-key increase for Wire. Empty Wire frames are identical.
 Both Candid cohorts have identical counters and sizes here, although artifact
 hashes differ. The original 333-case corpus and its array-key controls remain
 unchanged. Do not subtract this focused control from counters in the larger
-[full matrix](../candid-comparison.md): linked contexts differ.
+[full matrix](../benchmarks/candid-comparison.md): linked contexts differ.
 
 Ordinary `[0_u8,255]` retains payload `00 ff`; explicitly selecting `ByteArray<2>`
 produces `02 00 ff`. Its schema is `{"k":"bytes","min":2,"max":2}` rather than

@@ -48,14 +48,20 @@ for (const direction of ['Request', 'Response']) {
   rejects(() => signedByte['decode'+direction](unsignedFrame), 'identity');
   assert.equal(signedByte['decode'+direction](signedByte['encode'+direction](-1)), -1);
 }
-for (const payload of [[128,0],[255,255,4],[128,128,128]]) rejects(() => probe({k:'u',bits:16}).decodeRequest(frame(...payload)), 'malformed');
+for (const payload of [[255,255,4],[128,128,128]]) rejects(() => probe({k:'u',bits:16}).decodeRequest(frame(...payload)), 'malformed');
+for (const bits of [16,32,64,128]) {
+  const codec = probe({k:'u',bits});
+  const value = bits <= 32 ? 0 : 0n;
+  assert.equal(codec.decodeRequest(frame(128,0)),value);
+  assert.deepEqual(codec.encodeRequest(value),frame(0));
+}
 rejects(() => probe({k:'bool'}).decodeRequest(frame(2)), 'malformed');
 rejects(() => probe({k:'option',item:{k:'unit'}}).decodeRequest(frame(2)), 'malformed');
 rejects(() => probe({k:'result',ok:{k:'unit'},err:{k:'unit'}}).decodeRequest(frame(2)), 'malformed');
 rejects(() => probe({k:'enum',variants:[{name:'Unit',id:128,value:{k:'unit'}}]}).decodeRequest(frame(3)), 'malformed');
 for (const payload of [[1,255],[2,192,128],[3,237,160,128],[1,239]]) rejects(() => probe({k:'text',max:8}).decodeRequest(frame(...payload)), 'malformed');
 for (const k of ['bytes','text','list']) rejects(() => probe({k,max:4,item:{k:'unit'}}).decodeRequest(frame(5)), 'limit');
-// Length fast paths must preserve bounds and the full u64 prefix error contract.
+// Lengths follow the Wasm32 usize prefix width and preserve schema bounds.
 for (const k of ['bytes','text','list']) {
   for (let length = 0; length < 128; length++) {
     const schema = {k,max:length,item:{k:'unit'}};
@@ -69,10 +75,13 @@ for (const k of ['bytes','text','list']) {
     }
   }
   const codec = probe({k,max:127,item:{k:'unit'}});
-  for (const payload of [[],[128],[128,0],[255,255,255,255,255,255,255,255,255,2],Array(10).fill(128)]) {
+  assert.equal(codec.decodeRequest(frame(128,0)).length,0);
+  assert.equal(codec.decodeRequest(frame(128,128,128,128,0)).length,0);
+  rejects(() => codec.decodeRequest(frame(128,128,128,128,128,0)), 'malformed');
+  for (const payload of [[],[128],[255,255,255,255,255,255,255,255,255,2],Array(10).fill(128)]) {
     rejects(() => codec.decodeRequest(frame(...payload)),'malformed');
   }
-  for (const payload of [[128,1],[255,255,255,255,255,255,255,255,255,1]]) {
+  for (const payload of [[128,1],[255,255,255,255,15]]) {
     rejects(() => codec.decodeRequest(frame(...payload)),'limit');
   }
 }
@@ -99,7 +108,11 @@ for (const id of [0,127,128,16383,16384,2097151,2097152,268435455,268435456,4294
     const bytes = frame(...payload); bytes[10] = direction === 'Request' ? 0 : 1;
     assert.deepEqual(codec['encode'+direction](value),bytes);
     assert.deepEqual(codec['decode'+direction](bytes),value);
-    for (const bad of [[2],[128],[128,0],[255,255,255,255,16],[128,128,128,128,128]]) {
+    if (id === 0) {
+      const redundant = frame(128,0); redundant[10] = bytes[10];
+      assert.deepEqual(codec['decode'+direction](redundant), value);
+    }
+    for (const bad of [[2],[128],[255,255,255,255,16],[128,128,128,128,128]]) {
       const malformed = frame(...bad); malformed[10] = bytes[10];
       rejects(() => codec['decode'+direction](malformed),'malformed');
     }
@@ -146,7 +159,8 @@ for (const bits of [8,16,32]) for (const kind of ['u','i']) {
       for (let end=11;end<expected.length;end++) rejects(()=>codec['decode'+direction](expected.slice(0,end)),'malformed');
       if (bits > 8) {
         const overlong = new Uint8Array(expected.length+1); overlong.set(expected); overlong[expected.length-1] |= 128;
-        rejects(()=>codec['decode'+direction](overlong),'malformed');
+        if (payload.length < Math.ceil(bits / 7)) assert.equal(codec['decode'+direction](overlong),value === 0 ? 0 : value);
+        else rejects(()=>codec['decode'+direction](overlong),'malformed');
       }
     }
   }
@@ -352,12 +366,12 @@ console.log('Recursive native metadata, tuples, aliases, scalar validation and e
 for (const schema of [{k:'list',item:{k:'unit'}}, {k:'array',max:1,item:{k:'unit'}}, {k:'tuple',items:[{k:'unit'}]}]) {
   rejects(() => createCodec({...nativeMeta,request:schema},{}).encodeRequest(new Array(1)), 'value');
 }
-function mutation(codec, direction, bytes, accepted) {
+function mutation(codec, direction, bytes, accepted, normalized) {
   const input = Uint8Array.from(bytes);
   const decode = direction === 0 ? codec.decodeRequest : codec.decodeResponse;
   const encode = direction === 0 ? codec.encodeRequest : codec.encodeResponse;
   if (!accepted) assert.throws(() => decode(input), WireError);
-  else assert.deepEqual(encode(decode(input)), input);
+  else assert.deepEqual(encode(decode(input)), Uint8Array.from(normalized));
 }
 
 // Records are replayable data; keep assertion logic independent of generation.
@@ -370,11 +384,11 @@ async function checkMutations(codecs, expected) {
   for await (const line of lines) {
     count++;
     try {
-      const { codec, direction, bytes, accepted } = JSON.parse(line);
+      const { codec, direction, bytes, accepted, normalized } = JSON.parse(line);
       assert.ok(Object.hasOwn(codecs, codec), 'unknown mutation codec');
       assert.ok(direction === 0 || direction === 1, 'invalid mutation direction');
       assert.equal(typeof accepted, 'boolean');
-      mutation(codecs[codec], direction, bytes, accepted);
+      mutation(codecs[codec], direction, bytes, accepted, normalized);
     } catch (cause) {
       throw new Error(`mutation line ${count}`, { cause });
     }
@@ -387,7 +401,7 @@ assert.throws(() => packedI16.encodeRequest([1,2]), WireError);
 assert.throws(() => packedI16.encodeRequest(new Int16Array(3)), WireError);
 assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,1,0])), WireError);
 assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,6,0,0,0,0,0,0])), WireError);
-assert.throws(() => packedI16.decodeRequest(Uint8Array.from([...header,0x82,0,0,0])), WireError);
+assert.deepEqual(packedI16.decodeRequest(Uint8Array.from([...header,0x82,0,0,0])),new Int16Array([0]));
 assert.deepEqual(packedI16.decodeRequest(Uint8Array.from([...header,4,0,128,255,127])),new Int16Array([-32768,32767]));
 
 for (const [word, ctor, width] of [['i8',Int8Array,1], ['i16',Int16Array,2], ['u16',Uint16Array,2],
@@ -403,7 +417,7 @@ for (const [word, ctor, width] of [['i8',Int8Array,1], ['i16',Int16Array,2], ['u
   assert.deepEqual(offset.subarray(1),encoded);
   assert.throws(() => codec.encodeRequest([]), WireError);
   assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,width === 1 ? 2 : 1,0])), WireError);
-  assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,0x80,0])), WireError);
+  assert.deepEqual(codec.decodeRequest(Uint8Array.from([...header,0x80,0])),new ctor(0));
   assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,width,...new Uint8Array(width-1)])), WireError);
 }
 assert.throws(() => probe({k:'packed',word:'hash32'}).encodeRequest(new Uint8Array(31)),WireError);
@@ -435,3 +449,13 @@ for (const [word, Ctor, width] of [['finite-f32',Float32Array,4],['finite-f64',F
     assert.throws(() => codec.decodeRequest(Uint8Array.from([...header,length,...new Uint8Array(length)])), WireError);
   assert.throws(() => codec.encodeRequest([1]), WireError);
 }
+
+for (const direction of ['Request','Response']) {
+  const codec = probe({k:'result',ok:{k:'unit'},err:{k:'unit'}});
+  for (const [tag, value] of [[128,{ok:null}],[129,{err:null}]]) {
+    const input = frame(tag,0); input[10] = direction === 'Response' ? 1 : 0;
+    assert.deepEqual(codec['decode'+direction](input),value);
+  }
+}
+rejects(() => probe({k:'option',item:{k:'unit'}}).decodeRequest(frame(128,0)), 'malformed');
+rejects(() => probe({k:'bool'}).decodeRequest(frame(128,0)), 'malformed');

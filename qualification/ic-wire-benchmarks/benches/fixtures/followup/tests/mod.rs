@@ -3,7 +3,35 @@ fn container_cases_append_without_reordering_historical_indices() {
     use super::*;
     use sha2::{Digest, Sha256};
     let cases = cases_selected(None);
-    assert_eq!(cases.len(), 134);
+    assert_eq!(cases.len(), 154);
+    let appended = cases[134..]
+        .iter()
+        .map(|case| case.name.clone())
+        .collect::<Vec<_>>();
+    let expected = [0, 1, 128, 4096]
+        .into_iter()
+        .flat_map(|n| {
+            [
+                "page-packed-records",
+                "mixed-change-batch",
+                "sparse-optional-blobs",
+                "map-result-blobs",
+                "mixed-width-tuples",
+            ]
+            .map(|shape| format!("{shape}-{n}"))
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(appended, expected);
+    for (index, full) in cases.iter().enumerate().skip(134) {
+        let selected = cases_selected(Some(index));
+        assert_eq!(selected.len(), 1);
+        assert_eq!(selected[0].name, full.name);
+        assert_eq!(selected[0].input_json, full.input_json);
+        for (a, b) in selected[0].lanes.iter().zip(&full.lanes) {
+            assert_eq!(a.name, b.name);
+            assert_eq!(a.bytes, b.bytes);
+        }
+    }
     let historical = cases[..94]
         .iter()
         .map(|case| case.name.as_str())
@@ -249,17 +277,10 @@ fn public_bool_preserves_list_bytes_at_length_boundaries() {
             );
         }
     }
-    // Both readers must retain primitive Postcard validation even when the
-    // logical values match: a nonminimal zero-length prefix is malformed.
+    // Both readers follow upstream Postcard's redundant length acceptance.
     for bytes in [&[0x80, 0][..], &[0x81, 0, 1][..]] {
-        assert_eq!(
-            ic_wire::native::decode::<words::BoolValue>(bytes, LIMITS).unwrap_err(),
-            ic_wire::Error::Malformed
-        );
-        assert_eq!(
-            ic_wire::native::decode::<Vec<bool>>(bytes, LIMITS).unwrap_err(),
-            ic_wire::Error::Malformed
-        );
+        assert!(ic_wire::native::decode::<words::BoolValue>(bytes, LIMITS).is_ok());
+        assert!(ic_wire::native::decode::<Vec<bool>>(bytes, LIMITS).is_ok());
     }
 }
 

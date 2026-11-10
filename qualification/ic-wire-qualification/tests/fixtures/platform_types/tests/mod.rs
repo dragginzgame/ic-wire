@@ -210,10 +210,6 @@ fn malformed_account_frames_are_refused() {
             "retired unprefixed present-zero field",
             account_frames(&(owner, 1_u8, [0_u8; 32])),
         ),
-        (
-            "nonminimal byte length",
-            account_frames(&(owner, 1_u8, 0xa0_u8, 0_u8, [0_u8; 32])),
-        ),
         ("invalid option tag", account_frames(&(owner, 2_u8))),
         (
             "oversized owner",
@@ -249,6 +245,26 @@ fn malformed_account_frames_are_refused() {
             serde_json::to_vec(&vectors).unwrap(),
         )
         .unwrap();
+    }
+}
+
+#[test]
+fn account_redundant_length_matches_upstream_and_preserves_zero_subaccount() {
+    let owner = serde_bytes::Bytes::new(&[4]);
+    let (request, response) = account_frames(&(owner, 1_u8, 0xa0_u8, 0_u8, [0_u8; 32]));
+    let expected = account_frames(&(owner, Some(serde_bytes::ByteArray::new([0_u8; 32]))));
+    let request_value = native::decode_request::<AccountRequest>(18, &request, LIMITS).unwrap();
+    let response_value = native::decode_response::<AccountRequest>(18, &response, LIMITS).unwrap();
+    assert_eq!(native::encode_request(18, &request_value, LIMITS).unwrap(), expected.0);
+    assert_eq!(native::encode_response(18, &response_value, LIMITS).unwrap(), expected.1);
+    if let Some(directory) = std::env::var_os("WIRE_PLATFORM_TYPES_OUTPUT") {
+        std::fs::write(
+            std::path::PathBuf::from(directory).join("accounts-normalized.json"),
+            serde_json::to_vec(&serde_json::json!({
+                "request": request, "response": response,
+                "normalizedRequest": expected.0, "normalizedResponse": expected.1
+            })).unwrap(),
+        ).unwrap();
     }
 }
 

@@ -89,7 +89,6 @@ fn byte_array_rejects_wrong_lengths_and_invalid_prefixes() {
         vec![1, 0],
         vec![3, 0, 128, 255],
         vec![2, 0],
-        vec![0x82, 0, 0, 255],
         vec![0x80; 10],
         vec![0xff; 10],
     ] {
@@ -104,7 +103,7 @@ fn byte_array_rejects_wrong_lengths_and_invalid_prefixes() {
         Err(Error::Malformed)
     );
     assert_eq!(
-        native::decode::<ByteArray<2>>(&[2, 0, 255], LIMITS),
+        native::decode::<ByteArray<2>>(&[0x82, 0, 0, 255], LIMITS),
         Ok(ByteArray::new([0, 255]))
     );
 }

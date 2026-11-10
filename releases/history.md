@@ -110,7 +110,7 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
   owns IC0 and the executor; endpoint consumers must coordinate their application
   runtime dependencies on Platform 0.9. Core-only Wire users need no migration.
   Handler syntax, wire bytes, identities, limits and accepted inputs are unchanged.
-  See the [endpoint migration](../docs/endpoints.md).
+  See the [endpoint migration](../docs/guides/endpoints.md).
 
 ### 🩹 Fixed
 
@@ -163,7 +163,7 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
   and a separate selective-blob prototype with strict malformed-frame controls.
   Keep valid-call and small-module regressions visible. Selective/direct-range
   input remains research only; no second codec or lazy production validation.
-- Refresh the [full Candid comparison](../docs/candid-comparison.md):
+- Refresh the [full Candid comparison](../docs/benchmarks/candid-comparison.md):
   22 cohorts, 1,208 case entries and 4,832 primary comparisons across both profiles,
   including native time, IC instructions, allocations, frame bytes and raw/code
   Wasm sizes. Audit all 25,670 instruction rows with fresh queries; retain ordinary
@@ -1044,7 +1044,7 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
 
 ## [0.5.2] - 2026-10-20
 
-- Retain the [native pointer-comparison experiment](../docs/evaluation.md#native-borrowed-pointer-equality-experiment)
+- Retain the [native pointer-comparison experiment](../docs/benchmarks/evaluation.md#native-borrowed-pointer-equality-experiment)
   as rejected evidence: borrowed blob gains came with packed-manifest regressions.
   Keep the existing runtime behavior.
 
@@ -1057,21 +1057,21 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
   Preserve output bytes, capacity and fallible allocation while avoiding the
   general growth path on every encode. Tiny Relay probe messages use 5.8–11.5%
   fewer encode instructions under opt-3; both measured profiles shrink linked
-  Wasm. See [matched evidence](../docs/evaluation.md#direct-header-initialization).
+  Wasm. See [matched evidence](../docs/benchmarks/evaluation.md#direct-header-initialization).
 
 ## [0.5.1] - 2026-10-20
 
 - Evaluate and reject per-type codec preferences: mixed opt-3 saves 1.8% linked
   and 4.2% compressed Wasm, but opt-z linked size grows 3.9%. The maintenance
   cost does not justify adoption; no preference API is shipped. Retain the
-  [experimental measurements](../docs/evaluation.md#public-api-code-generation-adapter).
+  [experimental measurements](../docs/benchmarks/evaluation.md#public-api-code-generation-adapter).
 
 - Grow finite encoder output fallibly within the admitted schema ceiling instead
   of reserving the maximum for every tiny message. Preserve one-pass encoding,
   canonical bytes, typed failures and conservative admission. Relay-shaped small
   batches use 88–96% fewer encode instructions in isolated IC probes; document
   large-message, native-time and linked-size tradeoffs in the
-  [evaluation evidence](../docs/evaluation.md#bounded-finite-output-growth).
+  [evaluation evidence](../docs/benchmarks/evaluation.md#bounded-finite-output-growth).
 
 ## [0.5.0] - 2026-10-19
 
@@ -1086,7 +1086,7 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
 
 - Qualify final borrowed contracts with native timing, IC instruction and linked
   Wasm probes; retain identical frame hashes and document full-scan tradeoffs in
-  the [evaluation evidence](../docs/evaluation.md#final-05-borrowed-contract-measurements).
+  the [evaluation evidence](../docs/benchmarks/evaluation.md#final-05-borrowed-contract-measurements).
 
 ## [0.4.10] - 2026-10-19
 
@@ -1099,33 +1099,33 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
 - Skip redundant Wasm canonical byte comparisons when a borrowed value emits
   the exact input slice, preserving limits and rejection behavior. Large borrowed
   decode-plus-scan probes use 12–17% fewer IC instructions; see the
-  [qualification and hard-cut assessment](../docs/bounded-allocation-study.md#follow-up-where-a-hard-cut-would-help).
+  [qualification and hard-cut assessment](../docs/history/bounded-allocation-study.md#follow-up-where-a-hard-cut-would-help).
 
 ## [0.4.8] - 2026-10-19
 
 - Grow bounded lists geometrically within their declared maximum when decode
   length hints are hidden, avoiding repeated one-element reallocations.
 - Investigate exact-size encoding and borrowed finite contracts; retain current
-  APIs and allocation defaults based on the [measured tradeoffs](../docs/bounded-allocation-study.md).
+  APIs and allocation defaults based on the [measured tradeoffs](../docs/history/bounded-allocation-study.md).
 
 ## [0.4.7] - 2026-10-19
 
 - Allow native decoding to borrow input bytes/strings and add reusable-output
   encoding APIs, preserving canonical validation, admission and existing frames.
 - Qualify bounded contracts, packed consumer layouts, borrowing and buffer reuse
-  with native/IC measurements; see the [tradeoffs](../docs/allocation-comparison.md).
+  with native/IC measurements; see the [tradeoffs](../docs/history/allocation-comparison.md).
 
 ## [0.4.6] - 2026-10-19
 
 - Reduce Wasm budget-check and bulk canonical-comparison costs without changing
   bytes or resource admission. Blob-shaped probes show 30–39% fewer manifest
   encode instructions across speed/size profiles; see the
-  [optimization report](../docs/runtime-optimization.md) for decode gains and tradeoffs.
+  [optimization report](../docs/history/runtime-optimization.md) for decode gains and tradeoffs.
 
 - Add a reproducible, unpublished MessagePack/Postcard benchmark for Blob-shaped
   workloads, with native timings, external IC instruction evidence and independent
   Wasm sizes. Keep Postcard as the production encoding; see the
-  [comparison report](../docs/messagepack-comparison.md).
+  [comparison report](../docs/history/messagepack-comparison.md).
 
 - Reduce Wasm canonical bulk-byte comparison instructions using exact wordwise
   XOR/OR accumulation. Preserve bytes, resource admission and typed failures.
@@ -1157,7 +1157,7 @@ release was 0.11.0; independent core and endpoint ledgers are indexed by the
 - Reduce canonical-comparison work on Wasm and combine dynamic admission charges,
   preserving wire bytes, canonical rejection and resource budgets. Matched local
   measurements show substantial blob/text decoding gains, with a small
-  empty-blob regression; see [performance evidence](../docs/performance.md).
+  empty-blob regression; see [performance evidence](../docs/benchmarks/performance.md).
 ## [0.4.3] - 2026-10-18
 
 - Refresh the maintainer handoff against released 0.4.2's Linux/macOS acceptance.
@@ -1326,7 +1326,7 @@ Pending PR integration; these changes are not yet on main.
 - Add exact request/reply frame-length helpers without output allocation,
   source-matched bounded IcyDB success fixtures and Rust/TypeScript differential
   mutation checks. Add offline inspection through generated contract modules;
-  see [consumer qualification](../docs/consumer-fixtures.md) for scope and limits.
+  see [consumer qualification](../docs/guides/consumer-fixtures.md) for scope and limits.
 
 ## [0.2.2] - 2026-10-16
 

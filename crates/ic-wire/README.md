@@ -2,7 +2,7 @@
 
 IC Wire has one production codec: bounded Serde traversal with Postcard encoding.
 Use `Serialize` / `Deserialize` on consumer DTOs and the `native` module for
-framing, resource admission and strict primitive validation. `Wire` generates
+framing, resource admission and upstream Postcard decoding. `Wire` generates
 host-only metadata; it never generates a serializer. Alternative codec and
 derive designs are research, not selectable runtime modes.
 
@@ -119,25 +119,31 @@ the access-denial wrapper as an application response. Authentication, Fleet
 admission, startup checks, dispatch instrumentation and artifact policy remain
 Canic-owned when Canic adopts this surface.
 
-## One-pass decoding (0.7 hard cut)
+## Upstream Postcard decoding (hard cut)
 
-Decode requires only `Deserialize`, validates primitive encodings while reading,
-and does not serialize the decoded value again. Encoder bytes and the envelope
-are unchanged. Overlong varints, invalid booleans/options, malformed UTF-8 and
-multi-character char payloads are rejected; trailing bytes remain rejected.
-`Error::Noncanonical` is removed; invalid representations return `Error::Malformed`.
+Decode requires only `Deserialize` and uses upstream Postcard directly through
+Wire's resource-admission wrapper. No private parser or reserialization pass
+remains. Encoder bytes, envelopes, identities and budget rules are unchanged.
 
-Collections and custom Serde visitors now own normalization. For example, map
+Acceptance broadens: `80 00` now decodes as integer zero, and `02 61 62` as
+Rust char `'a'`, where the previous reader returned `Error::Malformed`.
+Redundant integer and length groups are accepted within Postcard's width bounds.
+Overflow, unterminated integers, invalid booleans/options and malformed UTF-8
+remain malformed; trailing bytes remain rejected. Browser integer/length readers
+follow the same redundant-group acceptance. Collection lengths follow the target
+`usize` width: up to five groups on Wasm32 and ten on a 64-bit Rust host. Browser
+length readers target Wasm32, so a six-group zero length is host-only; ordinary
+encoded endpoint lengths are unchanged. Rust `char` has no browser schema.
+
+Collections and custom Serde visitors also own normalization. For example, map
 payload `02 02 14 01 0a` is accepted as `{1: 10, 2: 20}` and re-encodes as
 `02 01 0a 02 14`. Duplicate map keys or set entries may collapse. Successful
 decoding does not promise that re-encoding reproduces the received bytes.
-Consumers must validate any required ordering, uniqueness or normalization, and
-retain original immutable frames for exact retries/raw-byte signatures/hashes.
-Do not reconstruct those bytes from a decoded value. No fallback mode is provided.
-
-The private reader is adapted from Postcard 1.1.3 with minimal-varint and exact-char
-checks; its MIT notice is retained in `src/native/parser/LICENSE-MIT`. Upstream
-Postcard still owns encoding. No forked dependency or public parser API is added.
+Consumers must regenerate browser clients and review any reliance on strict
+primitive rejection. Retain original immutable frames for exact retries,
+raw-byte signatures and hashes; do not reconstruct them from decoded values.
+There is one decoder and no compatibility mode. Existing encoded data requires
+no rewriting or storage migration.
 
 ## Hard cut from the finite API
 
@@ -197,7 +203,7 @@ big-endian magnitude: zero is empty bytes, and nonzero values start with a
 nonzero byte. The consumer checks numeric canonicality and converts its external
 arithmetic type losslessly; generic Wire byte decoding still accepts opaque
 leading zeroes. `Option<Bytes<N>>` keeps missing evidence distinct from zero.
-See the [unsigned evidence guide](../../docs/unsigned-magnitude.md) for bounds,
+See the [unsigned evidence guide](../../docs/guides/unsigned-magnitude.md) for bounds,
 exact payload examples, Nat conversion and generated browser handling.
 
 This complete DTO combines the recommended fields with an ordinary collection:
@@ -500,7 +506,7 @@ Custom Serde code is trusted: work and allocations outside these visited boundar
 must be bounded by its owner. Standard/custom Deserialize allocations may abort on
 allocator exhaustion; the adapter does not make arbitrary Serde allocation fallible.
 The codec's own output reserve is fallible. Resource refusals are `Error::Limit`;
-invalid primitive representations (including overlong integers) are
+invalid primitive representations rejected by Postcard are
 `Error::Malformed`; trailing bytes and envelope identity retain their own errors. Caller input custody is excluded. Native depth allowances must fit the
 consumer's stack budget. No schema-independent performance claim is made.
 
@@ -509,8 +515,8 @@ messages use explicit lowercase text, such as `wire malformed`, and remain usefu
 when compiler settings strip derived Debug output. Compared with earlier releases,
 text comparisons must account for the former capitalization (`wire Malformed`).
 
-The traversal adapters are adapted from IcyDB's native admission implementation;
-its MIT notice is retained in `src/native/LICENSE-MIT`. IcyDB's numeric policies,
+The traversal adapters are adapted from IcyDB's native admission implementation.
+IcyDB's numeric policies,
 SQL semantics, endpoint roster and storage encodings are not imported.
 
 ## Consumer integration qualification
@@ -524,7 +530,7 @@ owned input before the callback and never calls it on encoding failure. Passing
 a reference retains caller ownership; the root type's size still affects
 admission. Callback bytes cannot escape as a borrow/future; copy bytes needed for
 retries or asynchronous delivery. The existing allocation ledger, Postcard bytes
-and framing APIs are unchanged. See [SDK integration](https://github.com/dragginzgame/ic-wire/blob/main/docs/sdk-integration.md).
+and framing APIs are unchanged. See [SDK integration](https://github.com/dragginzgame/ic-wire/blob/main/docs/guides/sdk-integration.md).
 
 `native::encode_to_slice`, `encode_request_to_slice` and `encode_response_to_slice`
 use caller-owned storage with the same bounded Serde/Postcard encoder and
@@ -604,7 +610,7 @@ native policy). Its runtime module exports `createPayloadCodec`, and generated
 objects expose typed `encode` / `decode`. Unit is empty and u64 7 is `07`, matching
 Rust `native::encode` without a synthetic method ID. Existing framed codecs keep
 their headers and identity/direction checks. See the
-[SDK integration recipe](../../docs/sdk-integration.md) for output ownership,
+[SDK integration recipe](../../docs/guides/sdk-integration.md) for output ownership,
 consumer scalar conversions, typed client facades and compiling JavaScript.
 Generation checks names, references, supported type shapes and bounded metadata
 traversal; it preserves supplied wire metadata and never infers native limits.
@@ -735,7 +741,7 @@ handler before returning source. CLI tools can print the report as above. In
 report stale acknowledgements too. CI can reject a non-clean report with
 `assert!(report.is_clean())`. Exact diagnostic paths map to nonempty suppression
 reasons; no optional warning feature or separate lint call is needed. See the
-[bulk advice guide](../../docs/packed-fields.md#host-side-bulk-advice-and-ci).
+[bulk advice guide](../../docs/guides/packed-fields.md#host-side-bulk-advice-and-ci).
 Nested derived declarations are collected automatically, including mutual recursion
 and distinct generic instantiations. Registering an already collected type under
 a new root name produces an alias; duplicate names reject without overwriting.
@@ -811,7 +817,9 @@ the frame ceiling; this is not a JavaScript heap bound.
 
 ## Package and license
 
-Runtime and derive crates use the MIT License. Candid and simulator dependencies
+Runtime and derive crates use the Toko Studios Network Licence 1.0; see the
+packaged LICENSE.md. Prior MIT and imported-source notices are retained.
+Candid and simulator dependencies
 are confined to unpublished qualification packages. The default codec remains
 platform-independent; `endpoint` and `platform-types` are explicit integrations.
 

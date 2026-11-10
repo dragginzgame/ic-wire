@@ -2,6 +2,7 @@
 
 override TOKO_TOOLING_ROOT := $(CURDIR)
 TOKO_TOOLING_RUST := 1
+TOKO_TOOLING_RELEASE := 1
 _wire_cargo_target_origin := $(origin CARGO_TARGET_DIR)
 export CARGO_TARGET_DIR := $(CURDIR)/target
 export RUSTUP_AUTO_INSTALL := 0

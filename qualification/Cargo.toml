@@ -6,7 +6,7 @@ resolver = "3"
 version = "0.18.0"
 edition = "2024"
 rust-version = "1.99.1"
-license = "MIT"
+license-file = "../LICENSE.md"
 repository = "https://github.com/dragginzgame/ic-wire"
 
 [workspace.dependencies]
@@ -25,7 +25,7 @@ ic-wire = { path = "../crates/ic-wire" }
 ic-wire-endpoint = { path = "../crates/ic-wire-endpoint" }
 ic-wire-qualification = { path = "ic-wire-qualification" }
 libfuzzer-sys = "0.4.13"
-# Approved Candid Nat identity exception; see ../docs/evaluation.md.
+# Approved Candid Nat identity exception; see ../docs/benchmarks/evaluation.md.
 num-bigint = "0.4.8"
 serde = { version = "1.0", default-features = false, features = ["alloc"] }
 serde_bytes = { version = "0.11.19", default-features = false, features = ["alloc"] }
@@ -33,7 +33,7 @@ serde_json = "1.0"
 sha2 = { version = "0.11.1", default-features = false }
 stats_alloc = "0.1.10"
 tokio = { version = "1.54.1", default-features = false, features = ["macros", "net", "rt", "time"] }
-toko-tooling = "=0.38.2"
+toko-tooling = "=0.39.7"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

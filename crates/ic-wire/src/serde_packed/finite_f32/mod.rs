@@ -5,4 +5,4 @@
 //! NaNs/infinities are rejected; signed zero and subnormal bits are preserved.
 //! Coordinate identities/clients, preserve field constraints and retained retry
 //! bytes, and requalify buffer budgets. No ordinary list is silently rewritten.
-super::finite::adapter!(f32, 4; 0, 1, 2, 3, 4, 5, 6, 7);
+super::finite::adapter!(f32, 4; 0, 1, 2, 3, 4, 5, 6, 7; 0, 1, 2, 3);

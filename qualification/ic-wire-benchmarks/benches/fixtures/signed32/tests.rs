@@ -110,7 +110,7 @@ fn wrapped_deque_keeps_logical_order_and_list_bytes() {
 }
 
 #[test]
-fn scalar_boundaries_reject_every_prefix_and_nonminimal_values() {
+fn scalar_boundaries_reject_truncation_and_overflow() {
     use super::*;
     // Include the four-/five-byte transition beyond the timed scalar inventory.
     for value in
@@ -127,8 +127,9 @@ fn scalar_boundaries_reject_every_prefix_and_nonminimal_values() {
             value
         );
     }
-    // Overlong zero, fifth-byte overflow and a continuation past u32's width.
-    for bytes in [&[0x80, 0][..], &[0xff, 0xff, 0xff, 0xff, 0x10], &[0x80; 5]] {
+    // Redundant zero is accepted; overflow and continuation past the width are not.
+    assert_eq!(ic_wire::native::decode::<i32>(&[0x80, 0], LIMITS), Ok(0));
+    for bytes in [&[0xff, 0xff, 0xff, 0xff, 0x10][..], &[0x80; 5]] {
         assert_eq!(
             ic_wire::native::decode::<i32>(bytes, LIMITS),
             Err(ic_wire::Error::Malformed)

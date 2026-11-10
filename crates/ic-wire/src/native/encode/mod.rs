@@ -1,5 +1,5 @@
 //! Admission before native payload serialization.
-// Adapted from IcyDB native admission; see ../LICENSE-MIT.
+// Adapted from IcyDB native admission.
 
 use super::Budget;
 use serde::{Serialize, Serializer, ser};
@@ -13,13 +13,14 @@ pub(super) struct Bounded<'a, T: ?Sized> {
 impl<T: Serialize + ?Sized> Serialize for Bounded<'_, T> {
     #[cfg_attr(target_arch = "wasm32", inline(always))]
     fn serialize<S: Serializer>(&self, inner: S) -> Result<S::Ok, S::Error> {
-        if self.depth.saturating_add(2) > self.budget.depth
-            // Preserve four node charges and two value-size charges, but admit
-            // them together. Refusal is sticky; no serializer runs on failure.
-            || !size_of_val(self.value)
-                .checked_mul(2)
-                .is_some_and(|size| self.budget.enter_many(self.depth, size, 4))
-        {
+        // Encoding requires two further levels. Check that required depth once
+        // in shared admission, while child serialization keeps the actual depth.
+        // Preserve four nodes, two value-size charges and sticky refusal; bytes,
+        // budgets and acceptance are unchanged, with no consumer migration.
+        if !size_of_val(self.value).checked_mul(2).is_some_and(|size| {
+            self.budget
+                .enter_many(self.depth.saturating_add(2), size, 4)
+        }) {
             self.budget.refused.set(true);
             return Err(ser::Error::custom("payload resource allowance exceeded"));
         }
@@ -40,7 +41,7 @@ impl<T: Serialize + ?Sized> Serialize for Bounded<'_, T> {
 fn raw_u32<S: Serializer>(inner: S, mut value: u32) -> Result<S::Ok, S::Error> {
     let len = ((32 - value.leading_zeros()).max(1) as usize).div_ceil(7);
     let mut tuple = inner.serialize_tuple(len)?;
-    // The sole caller has already handled values below 128.
+    // Callers have already handled values below 128.
     ser::SerializeTuple::serialize_element(&mut tuple, &((value as u8) | 128))?;
     value >>= 7;
     if value >= 128 {
@@ -57,6 +58,18 @@ fn raw_u32<S: Serializer>(inner: S, mut value: u32) -> Result<S::Ok, S::Error> {
     }
     ser::SerializeTuple::serialize_element(&mut tuple, &(value as u8))?;
     ser::SerializeTuple::end(tuple)
+}
+
+struct VariantIndex(u32);
+
+impl Serialize for VariantIndex {
+    fn serialize<S: Serializer>(&self, inner: S) -> Result<S::Ok, S::Error> {
+        if self.0 < 128 {
+            inner.serialize_u8(self.0 as u8)
+        } else {
+            raw_u32(inner, self.0)
+        }
+    }
 }
 
 struct Checked<'a, S> {
@@ -198,11 +211,14 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     }
     fn serialize_unit_variant(
         self,
-        name: &'static str,
+        _name: &'static str,
         index: u32,
-        variant: &'static str,
+        _variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        self.inner.serialize_unit_variant(name, index, variant)
+        // Only Postcard output/sizing serializers are wrapped here. A unit
+        // variant is its u32 index: 0 -> 00, 128 -> 80 01. Retain original
+        // admission, bytes and acceptance through the existing integer writer.
+        self.serialize_u32(index)
     }
     fn serialize_some<T: Serialize + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
         self.inner.serialize_some(&Bounded {
@@ -227,21 +243,25 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     }
     fn serialize_newtype_variant<T: Serialize + ?Sized>(
         self,
-        name: &'static str,
+        _name: &'static str,
         index: u32,
-        variant: &'static str,
+        _variant: &'static str,
         value: &T,
     ) -> Result<Self::Ok, Self::Error> {
-        self.inner.serialize_newtype_variant(
-            name,
-            index,
-            variant,
+        // Postcard tuples have no prefix: retain the u32 tag followed by the
+        // bounded body (tag 128 with u8 body 7 remains 80 01 07). The raw tag
+        // adds no admission charge; the body retains its original depth/budget.
+        let mut tuple = self.inner.serialize_tuple(2)?;
+        ser::SerializeTuple::serialize_element(&mut tuple, &VariantIndex(index))?;
+        ser::SerializeTuple::serialize_element(
+            &mut tuple,
             &Bounded {
                 value,
                 budget: self.budget,
                 depth: self.depth + 1,
             },
-        )
+        )?;
+        ser::SerializeTuple::end(tuple)
     }
     fn is_human_readable(&self) -> bool {
         self.inner.is_human_readable()

@@ -80,7 +80,7 @@ Display changes `wire Malformed` to `wire malformed`; typed errors retain their
 meanings. Current Wire/Canic/Toko Rust/TS source searches found no exact old-text
 consumers; that is not a fleet-wide guarantee.
 
-[The design table](../design.md#host-schema-traversal) reviews all six allowance
+[The design table](../guides/design.md#host-schema-traversal) reviews all six allowance
 owners. Only rooted advice changes: 65,536 visits per root, 1,000,000 per report.
 Tests preserve exact use-site acknowledgements and deterministic source, and
 reject excessive per-root DAG expansion, aggregate work and reference depth.

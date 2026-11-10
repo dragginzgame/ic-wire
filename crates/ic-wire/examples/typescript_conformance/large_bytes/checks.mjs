@@ -10,7 +10,7 @@
     const wrong=expected.slice(); wrong[2]^=1; assert.throws(()=>decode(wrong),WireError);
     const direction=expected.slice(); direction[10]^=1; assert.throws(()=>decode(direction),WireError);
     const trailing=new Uint8Array(expected.length+1); trailing.set(expected); assert.throws(()=>decode(trailing),WireError);
-    const nonminimal=new Uint8Array([...expected.slice(0,11),128,0]); assert.throws(()=>decode(nonminimal),WireError);
+    const nonminimal=new Uint8Array([...expected.slice(0,11),128,0]); assert.deepEqual(decode(nonminimal),new Uint8Array());
     assert.throws(()=>encode(new Uint8Array(value.length+1)),WireError);
   }
   console.log('1 MiB Rust/TypeScript byte buffers: exact frames and boundary refusals passed');

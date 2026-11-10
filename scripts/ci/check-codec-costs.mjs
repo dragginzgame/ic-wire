@@ -5,13 +5,15 @@ import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 const profiles = ['evaluation', 'benchmark-speed'];
-const wireCodecs = ['wire-native','wire-bounded','wire-borrowed','wire-packed-i16'];
+const wireCodecs = ['wire-native','wire-bounded','wire-borrowed','wire-packed-i16',
+  'wire-borrowed-record','wire-with-nat-conversion'];
 const requiredOperations = ['encode-fresh','decode-owned-or-labelled-borrowed','reject-bad-header','reject-truncated','loop-control'];
 const operations = [...requiredOperations,'encode-reuse'];
-const matchedIdentityFields = ['compiler','workspace_manifest_sha256','build_environment','lock_sha256',
+const matchedIdentityFields = ['compiler','workspace_manifest_sha256','build_environment','lock_sha256','candid_decoder',
   'server_version','server_sha256','counter','samples','sample_caller','small_repetitions','large_repetitions',
   'fixture_sha256','hotspots_fixture_sha256','signed32_fixture_sha256','bulk_fixture_sha256','packed_i16_fixture_sha256',
   'toko_fixture_sha256','derive_fixture_sha256','byte_keys_fixture_sha256','cost_smoke_fixture_sha256','id16_fixture_sha256','shapes_fixture_sha256',
+  'followup_fixture_sha256','followup_words_sha256','container_fixture_sha256','container_transport_sha256','container_adapter_sha256',
   'driver_sha256','wasm_driver_sha256','evidence_helper_sha256','operations_sha256'];
 const groupKey = r => [r.profile,r.case,r.codec].join('|');
 const rowKey = r => [groupKey(r),r.operation].join('|');

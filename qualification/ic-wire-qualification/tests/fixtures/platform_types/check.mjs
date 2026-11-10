@@ -46,3 +46,12 @@ for (const { name, request, response } of invalidAccounts) {
   assert.throws(() => account.decodeResponse(Uint8Array.from(response)), name);
 }
 console.log('Account malformed request/response refusals agree with Rust');
+
+const normalized = JSON.parse(readFileSync(new URL('./accounts-normalized.json', import.meta.url)));
+for (const direction of ['Request', 'Response']) {
+  const bytes = Uint8Array.from(normalized[direction.toLowerCase()]);
+  const value = account['decode' + direction](bytes);
+  assert.deepEqual(value.account.subaccount.some, new Uint8Array(32));
+  assert.deepEqual([...account['encode' + direction](value)], normalized['normalized' + direction]);
+}
+console.log('Account redundant length acceptance and normalization agree with Rust');

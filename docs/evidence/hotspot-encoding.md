@@ -4,7 +4,7 @@
 > were retired from this tree. A summary/hash cannot verify missing payloads.
 > Use the maintained development commands for fresh measurements.
 
-The [report](../hotspot-encoding-0613.md) owns interpretation and tradeoffs.
+The [report](../history/hotspot-encoding-0613.md) owns interpretation and tradeoffs.
 `identity.json` hashes the artifacts; `checks.json` records validation. CSVs retain
 all IC variants, standard-corpus changes, native two-run medians and uncompressed
 Wasm total/code sizes. Counts include overlapping control cohorts.

@@ -24,4 +24,4 @@ requires ordinary Serde serialization and generates only metadata. See the
 [runtime guide](https://github.com/dragginzgame/ic-wire/blob/main/crates/ic-wire/README.md)
 for migration, host feature gating, bounds and consumer responsibilities.
 
-Licensed under the MIT License; see the packaged LICENSE.
+Licensed under the Toko Studios Network Licence 1.0; see the packaged LICENSE.md.

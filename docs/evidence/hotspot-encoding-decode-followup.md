@@ -27,7 +27,7 @@ untrusted counts from causing early allocation. No admission change is proposed.
 Candid's option/type-environment cloning fix does not apply to Wire's decoder.
 
 The remaining large owned-blob gap is principally exact canonical verification.
-The previous [ablation](../cost-breakdown-0611.md) measured its cost;
+The previous [ablation](../history/cost-breakdown-0611.md) measured its cost;
 removing it would change the custom-Serde acceptance contract. This experiment
 changes only the comparison loop's block size, retaining the exact comparison.
 

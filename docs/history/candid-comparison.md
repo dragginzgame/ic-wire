@@ -5,59 +5,59 @@
 > Use the maintained development commands for fresh measurements.
 
 Historical results below retain their original source identities. For current
-selection and results, start with the [comparison index](../candid-comparison.md).
+selection and results, start with the [comparison index](../benchmarks/candid-comparison.md).
 
-The [bulk-field study](../bulk-fields-0611.md) measures shared integer/hash fields,
+The [bulk-field study](bulk-fields-0611.md) measures shared integer/hash fields,
 selecting a runtime-limited prototype after rejecting const-bound Wasm growth.
-The selected design is now the [public Packed field](../packed-fields.md); its
+The selected design is now the [public Packed field](../guides/packed-fields.md); its
 opt-in representation does not replace the ordinary codec results. The
-[promotion qualification](../packed-promotion-0611.md) confirms IC/Wasm parity with
+[promotion qualification](packed-promotion-0611.md) confirms IC/Wasm parity with
 the prototype and retains native/TypeScript timing regressions.
 
-The [full 0.6.11 candidate matrix](../full-comparison-0611.md) is the latest complete
+The [full 0.6.11 candidate matrix](full-comparison-0611.md) is the latest complete
 comparison: thirteen cohorts, 597 case entries, both profiles, all performance
 and uncompressed Wasm metrics. Earlier studies below retain their own identities.
 
-The [0.6.11 packed-sharing study](../packed-sharing-0611.md) measures smaller
+The [0.6.11 packed-sharing study](packed-sharing-0611.md) measures smaller
 multi-bound Wasm alongside the single-bound and decode-instruction tradeoffs.
 
 
-The [0.6.10 scaling/blob study](../scaling-blob-0610.md) measures packed fields across
+The [0.6.10 scaling/blob study](scaling-blob-0610.md) measures packed fields across
 1/10/100 DTOs and rejects a larger owned-blob comparison loop after measuring its
 instruction, small-input and Wasm tradeoffs.
 
 
-The [production packed-i16 qualification](../packed-i16-production.md) measures the
+The [production packed-i16 qualification](packed-i16-production.md) measures the
 explicit `PackedI16<N>` field against ordinary lists and Candid.
 
 `ic-wire-benchmarks` is unpublished. All codecs and profilers are dev dependencies;
 Candid is consumed through IC Platform. Production IC Wire remains bounded
 Postcard, with no Candid dependency or protocol change.
 
-The unpublished [packed-i16 experiment](../packed-i16-study.md) demonstrates a bulk
+The unpublished [packed-i16 experiment](packed-i16-study.md) demonstrates a bulk
 field representation; it does not change the production comparisons below.
 
-The [full 0.6.7-candidate comparison](../full-comparison-067.md) is the current
+The [full 0.6.7-candidate comparison](full-comparison-067.md) is the current
 reference: 214 standard cases, ten Toko-shaped cases and 1/10/100-record cohorts,
 with native timing, allocations, peak heap, IC instructions, wire bytes and
 uncompressed total/code-section Wasm. Historical smaller-corpus results below
 retain their original source identities.
 
-The [0.6.7 i64 sharing refinement](../integer-shortcut-study.md#067-share-the-i64-writer)
+The [0.6.7 i64 sharing refinement](integer-shortcut-study.md#067-share-the-i64-writer)
 reduces duplicate serialization code: the standard opt-3 fixture shrinks by 988
 Wasm bytes while large small-i64 encode/decode instructions fall 48.78%/16.51%.
 Its opt-z small-u64 regression is recorded alongside the gains.
 
-The [0.6.6 integer study](../integer-shortcut-study.md) extends the selected shortcut
+The [0.6.6 integer study](integer-shortcut-study.md) extends the selected shortcut
 to u16/u32, cutting large small-value opt-3 encode instructions by 61–63% with
 601 extra Wasm bytes in its expanded corpus. It records wide-value regressions,
 unchanged 100-record controls and three rejected candidates.
 
-The selected [small-u64 specialization](../small-u64-study.md) preserves bytes and
+The selected [small-u64 specialization](small-u64-study.md) preserves bytes and
 admission, cuts large small-u64 opt-3 encoding by 40.6% and adds 146 Wasm bytes.
 The report includes opt-z regressions and the remaining Candid performance gap.
 
-The [0.6.5 Serde short-write study](../serde-short-write-study.md) records five
+The [0.6.5 Serde short-write study](serde-short-write-study.md) records five
 rejected current-codec candidates, including instruction gains and Wasm/regression
 tradeoffs. None changes the selected production implementation.
 
@@ -482,7 +482,7 @@ truncation, payload changes and zero/word/varint/4 KiB boundaries.
 
 This complete rerun includes shared header validation and symbol stripping for
 both codecs in all five cohorts. It supersedes the earlier five-cohort run for
-current measurements; that run remains in [Retired artifact: summary and retention status](../candid-comparison.md).
+current measurements; that run remains in [Retired artifact: summary and retention status](../benchmarks/candid-comparison.md).
 
 This is the full comparison before guarded finite verification, after shared finite output setup, shared
 header validation, symbol stripping and removal of per-type debug formatting
@@ -554,7 +554,7 @@ Both opt-z/opt-3 profiles have two native runs with eleven calibrated samples (m
 and DHAT heap passes, and three IC samples per operation through PocketIC 16.1.0.
 IC counts divide by four repetitions through 64 KiB or one above it, without
 subtracting counter/loop overhead. Input construction is outside timed loops.
-The [consumer study](../candid-consumer-comparison.md) owns Toko provenance, ULID
+The [consumer study](candid-consumer-comparison.md) owns Toko provenance, ULID
 representation, preformatted decimal and projection limitations.
 
 All 5,278 IC rows have three identical samples. Timing, allocation, heap and IC
@@ -565,10 +565,10 @@ released package.
 No runtime or protocol changes were made during this rerun. The benchmark itself
 checks roundtrips and malformed frames; full CI and macOS were not rerun.
 
-- [Retired artifact: summary and retention status](../candid-comparison.md).
-- [Retired artifact: summary and retention status](../candid-comparison.md).
-- [Retired artifact: summary and retention status](../candid-comparison.md).
-- [Retired artifact: summary and retention status](../candid-comparison.md).
+- [Retired artifact: summary and retention status](../benchmarks/candid-comparison.md).
+- [Retired artifact: summary and retention status](../benchmarks/candid-comparison.md).
+- [Retired artifact: summary and retention status](../benchmarks/candid-comparison.md).
+- [Retired artifact: summary and retention status](../benchmarks/candid-comparison.md).
 
 Build times are single dependency-warm observations, not isolated macro-expansion
 or clean-build benchmarks. The raw sample archive is compressed for storage;
@@ -878,10 +878,10 @@ decode instructions by 12–26%; it was rejected. A 32-byte candidate with a byt
 tail regressed small inputs, and sharing its word tail with the small-write branch
 also regressed small controls. The retained version keeps that branch separate.
 
-[Retired artifact: summary and retention status](../candid-comparison.md)
-retain absolute counts and all three samples. [Retired artifact: summary and retention status](../candid-comparison.md),
-[Retired artifact: summary and retention status](../candid-comparison.md) and the
-[Retired artifact: summary and retention status](../candid-comparison.md) identify the
+[Retired artifact: summary and retention status](../benchmarks/candid-comparison.md)
+retain absolute counts and all three samples. [Retired artifact: summary and retention status](../benchmarks/candid-comparison.md),
+[Retired artifact: summary and retention status](../benchmarks/candid-comparison.md) and the
+[Retired artifact: summary and retention status](../benchmarks/candid-comparison.md) identify the
 comparison. Full raw data and source snapshots remain in
 `target/codec-comparison-2026-10-22-v1/` and `target/wasm-compare-final-2026-10-22/`.
 The final Wasm binaries are byte-identical to the measured `wasm-compare-split`
@@ -1143,6 +1143,6 @@ schemas help some consumers but do not remove those comparison cases.
 
 ## Consumer-shaped and derive-scaling cohorts
 
-The [Toko-shaped and 1/10/100-type study](../candid-consumer-comparison.md) adds
+The [Toko-shaped and 1/10/100-type study](candid-consumer-comparison.md) adds
 separately selected corpora, preserving the standard suite and distinguishing
 actual DTO shapes, a token-card projection and synthetic derive scaling.

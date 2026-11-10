@@ -1,4 +1,4 @@
-//! Coverage-guided checks for bounded frames; see docs/development.md.
+//! Coverage-guided checks for bounded frames; see docs/guides/development.md.
 #![no_main]
 
 use ic_wire::{Bytes, FiniteF32, FiniteF64, Limits, List, Packed, Text, native};
@@ -8,7 +8,7 @@ use std::{
     fmt::Debug,
 };
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 enum Cell {
     Empty,
     Unsigned(u128),
@@ -39,7 +39,7 @@ const LIMITS: Limits = Limits {
 };
 
 // Decode no longer applies the encoder budget. Give re-encoding its own
-// allowance when checking representation-stable fuzz types.
+// allowance when checking normalized values; input bytes may be nonminimal.
 const ENCODE_LIMITS: Limits = Limits {
     // Zero-sized decoded elements can still become sized references during
     // Serde encoding. Leave headroom for that target-dependent visitor work.
@@ -51,28 +51,26 @@ const ENCODE_LIMITS: Limits = Limits {
 
 fn check_frame(bytes: &[u8], limits: Limits) {
     if let Ok(value) = native::decode_request::<Request>(ID, bytes, limits) {
+        let encoded = native::encode_request(ID, &value, ENCODE_LIMITS).unwrap();
         assert_eq!(
-            native::encode_request(ID, &value, ENCODE_LIMITS)
-                .unwrap()
-                .as_slice(),
-            bytes
+            native::decode_request::<Request>(ID, &encoded, ENCODE_LIMITS).unwrap(),
+            value
         );
         assert_eq!(
             native::encoded_frame_len(&value, ENCODE_LIMITS).unwrap(),
-            bytes.len()
+            encoded.len()
         );
         assert!(native::decode_response::<Response>(ID, bytes, LIMITS).is_err());
     }
     if let Ok(value) = native::decode_response::<Response>(ID, bytes, limits) {
+        let encoded = native::encode_response(ID, &value, ENCODE_LIMITS).unwrap();
         assert_eq!(
-            native::encode_response(ID, &value, ENCODE_LIMITS)
-                .unwrap()
-                .as_slice(),
-            bytes
+            native::decode_response::<Response>(ID, &encoded, ENCODE_LIMITS).unwrap(),
+            value
         );
         assert_eq!(
             native::encoded_frame_len(&value, ENCODE_LIMITS).unwrap(),
-            bytes.len()
+            encoded.len()
         );
         assert!(native::decode_request::<Request>(ID, bytes, LIMITS).is_err());
     }
@@ -85,7 +83,7 @@ enum Tree {
     Next(Box<Tree>),
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 struct Borrowed<'a> {
     #[serde(borrow)]
     label: ic_wire::TextRef<'a, 1024>,
@@ -141,7 +139,11 @@ fuzz_target!(|data: &[u8]| {
                     bytes.as_ptr() as usize + bytes.len() <= data.as_ptr() as usize + data.len()
                 );
             }
-            assert_eq!(native::encode(&view, ENCODE_LIMITS).unwrap(), data);
+            let encoded = native::encode(&view, ENCODE_LIMITS).unwrap();
+            assert_eq!(
+                native::decode::<Borrowed<'_>>(&encoded, ENCODE_LIMITS).unwrap(),
+                view
+            );
         }
     }
     if data.len() > 4096 - 11 {

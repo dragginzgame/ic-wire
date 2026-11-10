@@ -24,6 +24,127 @@ const LIMITS: Limits = Limits {
 };
 
 #[test]
+fn unit_variant_indices_match_postcard_at_varint_boundaries() {
+    struct UnitVariant(u32);
+    impl Serialize for UnitVariant {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            serializer.serialize_unit_variant("Probe", self.0, "Unit")
+        }
+    }
+    for index in [
+        0,
+        1,
+        127,
+        128,
+        16_383,
+        16_384,
+        2_097_151,
+        2_097_152,
+        268_435_455,
+        268_435_456,
+        u32::MAX,
+    ] {
+        let value = UnitVariant(index);
+        let expected = postcard::to_allocvec(&value).unwrap();
+        let exact = Limits {
+            bytes: expected.len(),
+            ..LIMITS
+        };
+        assert_eq!(native::encoded_len(&value, exact).unwrap(), expected.len());
+        assert_eq!(native::encode(&value, exact).unwrap(), expected);
+        let mut storage = [0; 5];
+        assert_eq!(
+            native::encode_to_slice(&value, exact, &mut storage).unwrap(),
+            expected
+        );
+        let short = Limits {
+            bytes: expected.len() - 1,
+            ..exact
+        };
+        assert_eq!(native::encode(&value, short), Err(Error::Limit));
+    }
+}
+
+#[test]
+fn newtype_variant_indices_match_postcard_and_preserve_admission() {
+    struct Variant(u32);
+    impl Serialize for Variant {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            serializer.serialize_newtype_variant("Probe", self.0, "Value", &7_u8)
+        }
+    }
+    for index in [
+        0,
+        1,
+        127,
+        128,
+        16_383,
+        16_384,
+        2_097_151,
+        2_097_152,
+        268_435_455,
+        268_435_456,
+        u32::MAX,
+    ] {
+        let value = Variant(index);
+        let expected = postcard::to_allocvec(&value).unwrap();
+        let exact = Limits {
+            bytes: expected.len(),
+            allocation: expected.len() + 80,
+            nodes: 8,
+            depth: 4,
+        };
+        assert_eq!(native::encoded_len(&value, exact).unwrap(), expected.len());
+        assert_eq!(native::encode(&value, exact).unwrap(), expected);
+        let mut storage = [0; 6];
+        assert_eq!(
+            native::encode_to_slice(&value, exact, &mut storage).unwrap(),
+            expected
+        );
+        for short in [
+            Limits {
+                bytes: expected.len() - 1,
+                ..exact
+            },
+            Limits {
+                allocation: exact.allocation - 1,
+                ..exact
+            },
+            Limits { nodes: 7, ..exact },
+            Limits { depth: 3, ..exact },
+        ] {
+            assert_eq!(native::encode(&value, short), Err(Error::Limit));
+        }
+    }
+}
+
+#[test]
+fn nested_encode_depth_refuses_before_visiting_the_leaf() {
+    use std::cell::Cell;
+    struct Leaf<'a>(&'a Cell<usize>);
+    impl Serialize for Leaf<'_> {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            self.0.set(self.0.get() + 1);
+            serializer.serialize_u8(7)
+        }
+    }
+    let visits = Cell::new(0);
+    let value = Some(Some(Leaf(&visits)));
+    for depth in 0..5 {
+        assert_eq!(
+            native::encode(&value, Limits { depth, ..LIMITS }),
+            Err(Error::Limit)
+        );
+        assert_eq!(visits.get(), 0);
+    }
+    assert_eq!(
+        native::encode(&value, Limits { depth: 5, ..LIMITS }).unwrap(),
+        [1, 1, 7]
+    );
+    assert_eq!(visits.get(), 2, "one sizing visit and one writing visit");
+}
+
+#[test]
 fn error_display_preserves_diagnostics_without_debug() {
     for (error, expected) in [
         (Error::Limit, "wire limit"),
@@ -254,7 +375,10 @@ fn borrowed_frames_match_owned_postcard_and_frozen_envelope() {
             let mut changed = frame.clone();
             changed[index] ^= mask;
             if let Ok(value) = native::decode_request::<Owned>(7, &changed, LIMITS) {
-                assert_eq!(native::encode_request(7, &value, LIMITS).unwrap(), changed);
+                assert_eq!(
+                    &native::encode_request(7, &value, LIMITS).unwrap()[11..],
+                    postcard::to_allocvec(&value).unwrap()
+                );
             }
         }
     }
@@ -264,10 +388,7 @@ fn borrowed_frames_match_owned_postcard_and_frozen_envelope() {
         native::decode_request::<Owned>(7, &trailing, LIMITS),
         Err(Error::Trailing)
     );
-    assert_eq!(
-        native::decode::<u64>(&[0x80, 0], LIMITS),
-        Err(Error::Malformed)
-    );
+    assert_eq!(native::decode::<u64>(&[0x80, 0], LIMITS), Ok(0));
     assert_eq!(
         native::decode::<String>(&[1, 0xff], LIMITS),
         Err(Error::Malformed)
@@ -313,13 +434,20 @@ fn decode_only_types_and_independent_decode_allowances() {
 }
 
 #[test]
-fn strict_integer_reads_reject_every_redundant_u16_encoding() {
+fn upstream_integer_reads_accept_redundant_groups_within_width() {
     for value in 0..=u16::MAX {
         let mut bytes = postcard::to_allocvec(&value).unwrap();
         assert_eq!(native::decode::<u16>(&bytes, LIMITS), Ok(value));
         *bytes.last_mut().unwrap() |= 128;
         bytes.push(0);
-        assert_eq!(native::decode::<u16>(&bytes, LIMITS), Err(Error::Malformed));
+        assert_eq!(
+            native::decode::<u16>(&bytes, LIMITS),
+            if bytes.len() <= 3 {
+                Ok(value)
+            } else {
+                Err(Error::Malformed)
+            }
+        );
     }
     for value in [0, 127, 128, u64::MAX as u128, u128::MAX] {
         let mut bytes = postcard::to_allocvec(&value).unwrap();
@@ -328,8 +456,72 @@ fn strict_integer_reads_reject_every_redundant_u16_encoding() {
         bytes.push(0);
         assert_eq!(
             native::decode::<u128>(&bytes, LIMITS),
-            Err(Error::Malformed)
+            if bytes.len() <= 19 {
+                Ok(value)
+            } else {
+                Err(Error::Malformed)
+            }
         );
+    }
+}
+
+#[test]
+fn upstream_acceptance_preserves_admission_and_char_consumption() {
+    // Upstream's collection length reader follows target usize width. Generated
+    // browser readers target Wasm32; valid encoder bytes do not change.
+    let redundant_length = [0x80, 0x80, 0x80, 0x80, 0x80, 0];
+    let length_result = native::decode::<Vec<u8>>(&redundant_length, LIMITS);
+    if usize::BITS == 64 {
+        assert_eq!(length_result, Ok(vec![]));
+    } else {
+        assert_eq!(length_result, Err(Error::Malformed));
+    }
+    assert_eq!(
+        native::decode::<Result<(), ()>>(&[0x80, 0], LIMITS),
+        Ok(Ok(()))
+    );
+    assert_eq!(
+        native::decode::<Result<(), ()>>(&[0x81, 0], LIMITS),
+        Ok(Err(()))
+    );
+    // Options and booleans use one-byte discriminants, not enum varints.
+    assert_eq!(
+        native::decode::<Option<()>>(&[0x80, 0], LIMITS),
+        Err(Error::Malformed)
+    );
+    assert_eq!(
+        native::decode::<bool>(&[0x80, 0], LIMITS),
+        Err(Error::Malformed)
+    );
+    for bytes in [&[0][..], &[0x80, 0][..]] {
+        assert_eq!(native::decode::<u64>(bytes, LIMITS), Ok(0));
+        for limits in [
+            Limits { nodes: 0, ..LIMITS },
+            Limits { depth: 0, ..LIMITS },
+            Limits {
+                allocation: 0,
+                ..LIMITS
+            },
+            Limits {
+                bytes: bytes.len() - 1,
+                ..LIMITS
+            },
+        ] {
+            assert_eq!(native::decode::<u64>(bytes, limits), Err(Error::Limit));
+        }
+    }
+    assert_eq!(
+        native::decode::<(char, u8)>(&[2, b'a', b'b', 7], LIMITS),
+        Ok(('a', 7))
+    );
+    for bytes in [
+        &[0][..],
+        &[1, 255],
+        &[2, 0xc0, 0x80],
+        &[5, b'a', b'b', b'c', b'd', b'e'],
+        &[2, b'a'],
+    ] {
+        assert_eq!(native::decode::<char>(bytes, LIMITS), Err(Error::Malformed));
     }
 }
 
@@ -339,15 +531,11 @@ fn wide_integer_endings_match_independent_postcard_oracle() {
     where
         T: serde::de::DeserializeOwned + Serialize + Copy + Eq + std::fmt::Debug,
     {
-        // Postcard supplies value/consumption; its encoder independently decides
-        // whether that prefix is shortest-form. Wire additionally rejects trailing data.
+        // Postcard owns value/consumption; Wire additionally rejects trailing data.
         let expected = postcard::take_from_bytes::<T>(bytes)
             .map_err(|_| Error::Malformed)
             .and_then(|(value, remaining)| {
-                let consumed = &bytes[..bytes.len() - remaining.len()];
-                if postcard::to_allocvec(&value).unwrap() != consumed {
-                    Err(Error::Malformed)
-                } else if !remaining.is_empty() {
+                if !remaining.is_empty() {
                     Err(Error::Trailing)
                 } else {
                     Ok(value)
@@ -386,7 +574,7 @@ fn wide_integer_endings_match_independent_postcard_oracle() {
 }
 
 #[test]
-fn strict_parsing_allows_consumer_normalization() {
+fn upstream_parsing_allows_consumer_normalization() {
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     #[serde(from = "u8")]
     struct Reduced(u8);
@@ -406,10 +594,7 @@ fn strict_parsing_allows_consumer_normalization() {
         );
     }
     // Upstream Postcard takes the first scalar from this multi-character string.
-    assert_eq!(
-        native::decode::<char>(&[2, b'a', b'b'], LIMITS),
-        Err(Error::Malformed)
-    );
+    assert_eq!(native::decode::<char>(&[2, b'a', b'b'], LIMITS), Ok('a'));
     for value in ['a', 'é', '界', '🦀'] {
         let bytes = native::encode(&value, LIMITS).unwrap();
         assert_eq!(native::decode::<char>(&bytes, LIMITS), Ok(value));
@@ -649,8 +834,8 @@ fn borrowed_decode_points_into_the_frame_and_preserves_rejections() {
     overlong.extend_from_slice(&[frame[11] | 0x80, 0]);
     overlong.extend_from_slice(&frame[12..]);
     assert_eq!(
-        native::decode_request::<View<'_>>(7, &overlong, LIMITS),
-        Err(Error::Malformed)
+        native::decode_request::<View<'_>>(7, &overlong, LIMITS).unwrap(),
+        value
     );
     let reply = native::encode_response(7, &value, LIMITS).unwrap();
     assert_eq!(
@@ -813,13 +998,7 @@ fn packed_i16_bytes_bounds_and_canonicality() {
             .as_slice(),
         &[] as &[i16]
     );
-    for bytes in [
-        &[1, 0][..],
-        &[4, 0, 0, 0, 0],
-        &[2, 0],
-        &[0x82, 0, 0, 0],
-        &[0, 0],
-    ] {
+    for bytes in [&[1, 0][..], &[4, 0, 0, 0, 0], &[2, 0], &[0, 0]] {
         assert!(native::decode::<PackedI16<1>>(bytes, LIMITS).is_err());
     }
     assert_eq!(
@@ -858,9 +1037,9 @@ fn packed_i16_bytes_bounds_and_canonicality() {
 }
 
 #[test]
-fn u16_three_group_decoder_matches_canonical_postcard_control() {
+fn u16_three_group_decoder_matches_upstream_postcard() {
     // Exhaust continuations for extreme low groups against an independent
-    // decode/re-encode oracle. All valid u16/i16 values are covered above too.
+    // Postcard oracle. All valid u16/i16 values are covered above too.
     for first in [128_u8, 255] {
         for second in 0_u8..=255 {
             for third in 0_u8..=255 {
@@ -868,10 +1047,7 @@ fn u16_three_group_decoder_matches_canonical_postcard_control() {
                 let expected = postcard::take_from_bytes::<u16>(&bytes)
                     .map_err(|_| Error::Malformed)
                     .and_then(|(value, remaining)| {
-                        let consumed = bytes.len() - remaining.len();
-                        if postcard::to_allocvec(&value).unwrap() != bytes[..consumed] {
-                            Err(Error::Malformed)
-                        } else if !remaining.is_empty() {
+                        if !remaining.is_empty() {
                             Err(Error::Trailing)
                         } else {
                             Ok(value)

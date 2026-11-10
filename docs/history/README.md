@@ -1,0 +1,36 @@
+# Historical reports
+
+These reports describe earlier releases, retired APIs and past experiments.
+Use the [current guides](../README.md) and [latest comparison](../benchmarks/candid-comparison.md)
+for supported behavior and recent results. Original raw artifacts may no longer
+exist; historical hashes do not substitute for available evidence.
+
+- [Borrowing, buffers and bounded layouts](allocation-comparison.md)
+- [Bounded allocation and borrowing study](bounded-allocation-study.md)
+- [Bulk integers and hash manifests: 0.6.11 research](bulk-fields-0611.md)
+- [Fresh-encoding bulk reservation experiments](bulk-reservation-study.md)
+- [Historical Candid comparison studies](candid-comparison.md)
+- [Consumer-shaped and derive-scaling comparisons](candid-consumer-comparison.md)
+- [Codec-cost breakdown: 0.6.11 candidate](cost-breakdown-0611.md)
+- [Historical codec experiments](evaluation.md)
+- [Full Wire/Candid matrix: 0.6.11 candidate](full-comparison-0611.md)
+- [Full Wire/Candid comparison: expanded 0.6.13 batch](full-comparison-0613.md)
+- [Full Wire/Candid comparison: 0.6.7 candidate](full-comparison-067.md)
+- [Full Wire/Candid comparison: released 0.7.10](full-comparison-0710.md)
+- [Ordinary-list encoding hot spots: 0.6.13](hotspot-encoding-0613.md)
+- [Integer shortcuts and canonical comparison (pending 0.6.6)](integer-shortcut-study.md)
+- [MessagePack versus Postcard: Blob-shaped codec experiment](messagepack-comparison.md)
+- [Native canonical-comparison experiments](native-comparison-study.md)
+- [Native borrowed-view qualification](native-views-study.md)
+- [Packed qualification and rejected optimization screens](packed-0612.md)
+- [Packed consolidation and consumer-boundary review](packed-consolidation-0611.md)
+- [Packed i16 production qualification (0.6.8)](packed-i16-production.md)
+- [Packed i16 field research (0.6.8)](packed-i16-study.md)
+- [Public Packed fields: promotion qualification](packed-promotion-0611.md)
+- [Sharing packed-i16 decoding across bounds (0.6.11)](packed-sharing-0611.md)
+- [Layout and canonical-decoding study](protocol-study.md)
+- [Wasm admission and canonical-comparison optimization](runtime-optimization.md)
+- [Scaffold validation](scaffold-validation.md)
+- [Generator names, packed-field scaling and owned blobs (0.6.10)](scaling-blob-0610.md)
+- [Serde short-write experiment (0.6.5 research)](serde-short-write-study.md)
+- [Small-u64 Serde specialization (pending 0.6.5)](small-u64-study.md)

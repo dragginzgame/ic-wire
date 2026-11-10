@@ -4,8 +4,27 @@ use std::collections::BinaryHeap;
 #[cfg(feature = "wire")]
 use std::num::NonZeroI64;
 
+#[cfg(all(test, feature = "wire", feature = "candid"))]
+mod tests;
 #[cfg(any(feature = "packed-containers", test))]
 mod transport;
+
+#[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+struct Page<T> {
+    cursor: Option<String>,
+    entries: Vec<(u64, String, T)>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "candid", derive(CandidType))]
+#[cfg_attr(feature = "candid", candid_path("candid"))]
+enum Change<T> {
+    Missing,
+    Delete(u64),
+    Replace { revision: u64, payload: T },
+}
 
 fn nonzero_case(n: usize) -> Case {
     let values = (0..n)
@@ -196,6 +215,104 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
         Some(None::<Blob>),
         b"[null]".to_vec()
     ));
+    // Append application compositions so existing native/IC indices stay fixed.
+    for n in [0, 1, 128, 4096] {
+        push!({
+            let external = Page {
+                cursor: (n > 0).then(|| "é水-next".to_owned()),
+                entries: (0..n)
+                    .map(|i| (i as u64, format!("item-{i}"), vec![0, 128, u64::MAX]))
+                    .collect(),
+            };
+            let input = serde_json::to_vec(&external).unwrap();
+            let wire = Page {
+                cursor: external.cursor.clone(),
+                entries: external
+                    .entries
+                    .iter()
+                    .map(|(id, label, words)| {
+                        (*id, label.clone(), ic_wire::Packed::new(words.clone()))
+                    })
+                    .collect(),
+            };
+            paired!(format!("page-packed-records-{n}"), wire, external, input)
+        });
+        push!({
+            let external = (0..n)
+                .map(|i| match i % 3 {
+                    0 => Change::Missing,
+                    1 => Change::Delete(u64::MAX - i as u64),
+                    _ => Change::Replace {
+                        revision: 128,
+                        payload: Blob(data(32)),
+                    },
+                })
+                .collect::<Vec<_>>();
+            let input = serde_json::to_vec(&external).unwrap();
+            let wire = external
+                .iter()
+                .map(|change| match change {
+                    Change::Missing => Change::Missing,
+                    Change::Delete(id) => Change::Delete(*id),
+                    Change::Replace { revision, payload } => Change::Replace {
+                        revision: *revision,
+                        payload: ic_wire::ByteBuf::from(payload.0.clone()),
+                    },
+                })
+                .collect::<Vec<_>>();
+            paired!(format!("mixed-change-batch-{n}"), wire, external, input)
+        });
+        push!({
+            let external = (0..n)
+                .map(|i| match i % 3 {
+                    0 => None,
+                    1 => Some(Blob(Vec::new())),
+                    _ => Some(Blob(data(32))),
+                })
+                .collect::<Vec<_>>();
+            let input = serde_json::to_vec(&external).unwrap();
+            let wire = external
+                .iter()
+                .map(|value| {
+                    value
+                        .as_ref()
+                        .map(|blob| ic_wire::ByteBuf::from(blob.0.clone()))
+                })
+                .collect::<Vec<_>>();
+            paired!(format!("sparse-optional-blobs-{n}"), wire, external, input)
+        });
+        push!({
+            let external = (0..n)
+                .map(|i| {
+                    (
+                        i as u32,
+                        if i % 2 == 0 {
+                            Ok(Blob(data(32)))
+                        } else {
+                            Err((429_u16, "try again".to_owned()))
+                        },
+                    )
+                })
+                .collect::<BTreeMap<_, _>>();
+            let input = serde_json::to_vec(&external).unwrap();
+            let wire = external
+                .iter()
+                .map(|(key, value)| {
+                    (
+                        *key,
+                        value.clone().map(|blob| ic_wire::ByteBuf::from(blob.0)),
+                    )
+                })
+                .collect::<BTreeMap<_, _>>();
+            paired!(format!("map-result-blobs-{n}"), wire, external, input)
+        });
+        push!(case(
+            &format!("mixed-width-tuples-{n}"),
+            (0..n)
+                .map(|i| (i % 2 == 0, i as u8, i16::MIN, u32::MAX, i64::MIN, u64::MAX,))
+                .collect::<Vec<_>>()
+        ));
+    }
     assert!(selected.is_none_or(|s| s < index), "unknown container case");
     out
 }

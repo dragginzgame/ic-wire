@@ -504,7 +504,7 @@ compile-fail diagnostics with the passing control also pass. Logs live under
 
 ## Earlier primitive-bulk study
 
-This supplements the frozen [Platform 0.21 full matrix](../candid-comparison.md).
+This supplements the frozen [Platform 0.21 full matrix](../benchmarks/candid-comparison.md).
 The production runtime remains one Serde/Postcard codec. Candid is used only by
 unpublished qualification through the Platform facade; owned Principal/Account
 values are measured on Wire's side and external DTO conversion stays outside
@@ -627,7 +627,7 @@ These are **proposals, not available APIs**. Reuse the existing byte-buffer code
 keep ordinary lists and integer/hash Packed unchanged. No new crate, codec,
 feature switch or automatic derive rewrite is needed.
 
-The [full matrix](../candid-comparison.md) measures raw IEEE-bit research fields,
+The [full matrix](../benchmarks/candid-comparison.md) measures raw IEEE-bit research fields,
 not these finite adapters. Its f32 input includes infinities, quiet/signalling
 NaNs, signed zero, subnormals and finite extremes
 (`benches/fixtures/followup/mod.rs`, `f32-bits-*`/`f64-bits-*`). A finite adapter
@@ -946,3 +946,85 @@ must coordinate identities/clients, preserve count/range constraints, retain
 retry/hash bytes and requalify buffer budgets. No dependent crate needs changing
 merely to retain an ordinary field. This is additive to Wire's public API; the
 pending Core patch records it, with no Endpoint change, commit or publication.
+
+## Paired f32 validation — 10 November 2026
+
+The retained scanner checks eight f32 values per chunk using four u64 loads.
+Each masked exponent independently carries into its sign bit only for exponent
+255. The f64 scanner and scalar remainder remain unchanged. This preserves
+finite-only acceptance, exact bytes, identities and budgets, including rejection
+before allocation. No consumer migration or per-consumer codec is introduced.
+
+A simple two-value loop regressed large encode costs and was rejected. A
+sixteen-value unrolled prototype improved large inputs but regressed 8/9-value
+controls. Its relocated Candid artifacts also differed; it was not accepted as
+a matched cost-screen result. The final eight-value study executes both lanes
+from the same checkout path with separate fresh Cargo targets and captured
+sources. Candid modules and all Candid instruction controls are identical.
+
+Raw evidence: `target/evidence/finite-pair-20261110/{live-baseline,live-chunk4}`.
+Both use Rust 1.99.1, the same qualification lock, Candid 0.10.40's direct oracle,
+19 inputs, two native runs of 11 batches (2 ms minimum), and three independent
+identical IC samples. `verify.mjs` verifies baked source identities, eight fresh
+guests, 772 IC rows and 2,480 native/frame comparisons across the pair.
+The final source adds only the exponent explanation and formatting to the
+measured scanner; the full follow-up corpus is restored after the study.
+
+| Measurement | Baseline | Retained candidate |
+| --- | ---: | ---: |
+| opt-z 1 MiB f32 encode instructions | 7,211,037 | 4,851,741 |
+| opt-z 1 MiB f32 decode instructions | 10,159,614 | 8,979,966 |
+| opt-3 1 MiB f32 encode instructions | 7,144,510 | 4,785,214 |
+| opt-3 1 MiB f32 decode instructions | 5,932,077 | 4,752,429 |
+| opt-z 8-value f32 encode / decode | 1,907.5 / 1,291.5 | 1,835.5 / 1,255.5 |
+| opt-z Wasm total / code bytes | 55,737 / 45,413 | 55,742 / 45,418 |
+| opt-3 Wasm total / code bytes | 62,303 / 52,731 | 62,306 / 52,734 |
+
+The 158-operation instruction screen passes its margins; the overall strict
+screen **fails** only for 5/3 bytes of opt-z/opt-3 total and code growth. This is
+an explicit small size tradeoff for instruction savings, not a passing no-growth
+screen. f64 instructions are unchanged. Finite validation still makes large f32
+encode about 2.29 times raw Candid; this does not establish universal parity.
+These are linked fixture sizes, not full application savings.
+All 620 paired native allocation/heap observations are unchanged; these do not
+measure Wasm heap use.
+
+Repeated native medians below are microseconds on a shared host, not IC counters:
+
+| Profile / 1 MiB f32 operation | Baseline runs 1 / 2 | Candidate runs 1 / 2 |
+| --- | ---: | ---: |
+| opt-z encode | 224.09 / 162.98 | 78.97 / 75.02 |
+| opt-z decode | 213.03 / 180.91 | 149.20 / 142.63 |
+| opt-3 encode | 55.18 / 57.55 | 49.15 / 48.34 |
+| opt-3 decode | 37.63 / 38.12 | 34.91 / 34.58 |
+
+Unchanged f64 native decode moved from 77.28/75.94 to 118.78/96.07 microseconds
+at opt-z despite identical IC instructions; host noise remains material.
+All-feature Core tests and doctests, 79 native tests and the full 134-case
+coverage corpus pass. A new scalar-reference test covers all 65,536 exponent
+pairs, distributed across chunk positions; existing tests cover bit preservation,
+non-finite inputs, truncation, offsets and exact limits. Native big-endian
+execution remains unqualified. The concurrently refreshed full matrix measures
+the frozen pre-optimization source; it is separate from this matched study.
+
+### Rejected f64 exponent-carry scan
+
+The follow-up `live-f64` lane tried eight masked u64 exponent additions in the
+f64 scanner, against `live-chunk4` with the same 19 cases, compiler, lock,
+checkout path, native parameters and fresh target. Both Candid modules and all
+Candid counters match. Baked sources, 386 new IC rows and 1,240 native/frame
+comparisons verify. Exhaustive f64 exponent/sign/mantissa controls passed, but
+correctness alone does not justify keeping the rewrite.
+
+| 1 MiB f64 / fixture metric | Retained baseline | Rejected probe |
+| --- | ---: | ---: |
+| opt-z encode / decode instructions | 4,130,838 / 5,080,572 | 4,360,214 / 5,195,260 |
+| opt-3 encode / decode instructions | 4,097,096 / 2,966,575 | 4,326,474 / 3,081,264 |
+| opt-z total / code Wasm bytes | 55,742 / 45,418 | 55,839 / 45,515 |
+| opt-3 total / code Wasm bytes | 62,306 / 52,734 | 62,410 / 52,838 |
+
+The strict screen rejects four large-encode instruction regressions and both
+profiles' total/code growth. Restore the scalar f64 scan; no production f64,
+protocol or acceptance change remains. The temporary 19-case corpus and
+probe-only test are removed from the working tree; captured sources, test and
+raw native/IC results remain under the existing paired-study evidence directory.

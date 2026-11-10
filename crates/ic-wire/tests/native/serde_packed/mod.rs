@@ -344,3 +344,28 @@ fn finite_adapters_preserve_bits_and_reject_nonfinite_partial_and_truncated_word
         ]
     );
 }
+
+#[test]
+fn finite_pair_exponents_match_scalar_reference() {
+    #[derive(Serialize, Deserialize)]
+    struct Values(#[serde(with = "ic_wire::serde_packed::finite_f32")] Vec<f32>);
+    for a in 0_u32..256 {
+        for b in 0_u32..256 {
+            let mut values = vec![1.0_f32; 16];
+            let pair = ((a ^ b) as usize % 8) * 2;
+            values[pair] = f32::from_bits((a << 23) | 0x807f_ffff);
+            values[pair + 1] = f32::from_bits(b << 23);
+            let valid = values.iter().all(|v| v.is_finite());
+            let raw: Vec<u8> = values.iter().flat_map(|v| v.to_le_bytes()).collect();
+            let bytes = ic_wire::native::encode(&ic_wire::ByteBuf::from(raw), LIMITS).unwrap();
+            assert_eq!(
+                ic_wire::native::encode(&Values(values), LIMITS).is_ok(),
+                valid
+            );
+            assert_eq!(
+                ic_wire::native::decode::<Values>(&bytes, LIMITS).is_ok(),
+                valid
+            );
+        }
+    }
+}

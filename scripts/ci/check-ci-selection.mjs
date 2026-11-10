@@ -80,7 +80,7 @@ assert.deepEqual(gate.env, {
 const policyPath = 'ci/docs-only-paths.txt';
 const policy = fs.readFileSync(path.join(root, policyPath), 'utf8');
 const allowed = policy.split('\n').filter(p => p && !p.startsWith('#'));
-assert.deepEqual(allowed, ['docs/design.md', 'docs/evaluation.md', 'docs/performance.md', 'docs/status/current.md']);
+assert.deepEqual(allowed, ['docs/guides/design.md', 'docs/benchmarks/evaluation.md', 'docs/benchmarks/performance.md', 'docs/status/current.md']);
 const snapshot = fs.readFileSync(path.join(root, '.toko-tooling.snapshot'), 'utf8');
 for (const p of allowed) {
   const info = fs.lstatSync(path.join(root, p));
@@ -134,13 +134,13 @@ function change(label, paths, expected) {
   git('add', ...paths); git('commit', '-qm', label);
   classify(label, expected);
 }
-change('allowed prose', ['docs/performance.md'], 'docs');
+change('allowed prose', ['docs/benchmarks/performance.md'], 'docs');
 run('bash', ['-e', '-o', 'pipefail', '-c', docs], repo);
-fs.appendFileSync(path.join(repo, 'docs/performance.md'), '\n[Broken](missing-ci-selection-target.md)\n');
+fs.appendFileSync(path.join(repo, 'docs/benchmarks/performance.md'), '\n[Broken](missing-ci-selection-target.md)\n');
 const broken = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', docs], { cwd: repo, env: environment, encoding: 'utf8' });
 assert.ifError(broken.error); assert.notEqual(broken.status, 0, 'real documentation check must reject a broken link');
-git('restore', 'docs/performance.md');
-const exportedDoc = 'docs/principles/rust-code-hygiene.md';
+git('restore', 'docs/benchmarks/performance.md');
+const exportedDoc = 'TOKO-TOOLING.md';
 fs.appendFileSync(path.join(repo, exportedDoc), '\n[Broken](missing-exported-target.md)\n');
 const brokenExport = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', docs], { cwd: repo, env: environment, encoding: 'utf8' });
 assert.ifError(brokenExport.error);
@@ -158,21 +158,21 @@ fs.writeFileSync(helper, 'print "unknown\\n";\n');
 classify('invalid classifier output', 'full');
 git('restore', 'scripts/ci/classify-ci-change.pl');
 change('source edit', ['crates/ic-wire/src/lib.rs'], 'full');
-change('mixed edit', ['docs/performance.md', 'crates/ic-wire/src/lib.rs'], 'full');
+change('mixed edit', ['docs/benchmarks/performance.md', 'crates/ic-wire/src/lib.rs'], 'full');
 change('policy edit', [policyPath], 'full');
 change('workflow edit', ['.github/workflows/ci.yml'], 'full');
 change('packaged doctest Markdown', ['crates/ic-wire/README.md'], 'full');
-change('shared companion Markdown', ['docs/ci-change-selection.md'], 'full');
-change('unknown Markdown', ['docs/development.md'], 'full');
+change('shared baseline Markdown', ['TOKO-TOOLING.md'], 'full');
+change('unknown Markdown', ['docs/guides/development.md'], 'full');
 git('switch', '-q', '-c', 'pr-base', base);
 modify('crates/ic-wire/src/lib.rs'); git('commit', '-qam', 'Base-only source edit');
 const advancedBase = git('rev-parse', 'HEAD');
 git('switch', '-q', '-c', 'pr-prose', base);
-modify('docs/design.md'); git('commit', '-qam', 'PR prose');
+modify('docs/guides/design.md'); git('commit', '-qam', 'PR prose');
 git('merge', '-q', '--no-edit', 'pr-base');
 classify('exact tested PR merge', 'docs', { CHANGE_EVENT: 'pull_request', CHANGE_BASE: advancedBase });
 git('switch', '-q', '-c', 'whitespace', base);
-fs.appendFileSync(path.join(repo, 'docs/performance.md'), '\nTrailing whitespace. \n');
+fs.appendFileSync(path.join(repo, 'docs/benchmarks/performance.md'), '\nTrailing whitespace. \n');
 git('commit', '-qam', 'Invalid prose whitespace');
 classify('documentation whitespace failure', '', {}, 1);
 

@@ -3,7 +3,7 @@ name = "ic-wire-benchmarks"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-license.workspace = true
+license-file.workspace = true
 publish = false
 autobenches = false
 
@@ -88,7 +88,7 @@ ic-platform-runtime = { workspace = true, features = ["ic0"] }
 ic-platform-types.workspace = true
 ic-wire.workspace = true
 # Candid Nat exposes a 0.4 BigUint; keep this approved exception dev-only.
-# See the root selection and docs/evaluation.md#candid-bigint-type-identity.
+# See the root selection and docs/benchmarks/evaluation.md#candid-bigint-type-identity.
 num-bigint.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_bytes.workspace = true

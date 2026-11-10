@@ -80,7 +80,13 @@ fn external_nat_evidence_preserves_overflow_and_rejects_nonminimal_magnitudes() 
         .unwrap(),
         [1, 0]
     );
-    for raw in [vec![0x80, 0], vec![1], [vec![65], vec![1; 65]].concat()] {
+    assert_eq!(
+        native::decode::<Magnitude>(&[0x80, 0], crate::fixtures::LIMITS)
+            .unwrap()
+            .as_slice(),
+        &[] as &[u8]
+    );
+    for raw in [vec![1], [vec![65], vec![1; 65]].concat()] {
         assert_eq!(
             native::decode::<Magnitude>(&raw, crate::fixtures::LIMITS),
             Err(Error::Malformed)

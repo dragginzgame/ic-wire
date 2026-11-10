@@ -4,6 +4,17 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.11.0]
+
+### ⚠️ Breaking
+
+- Adopt Core 0.20's upstream Postcard decoder. Encoded frames, method identities,
+  resource budgets, handler APIs and rollback behavior stay unchanged. Redundant
+  varints now decode successfully (`80 00` becomes zero); consumers must review
+  strict-rejection assumptions, regenerate browser clients and retain original
+  retry/hash bytes. Align Core and Endpoint to this supported release line; no
+  compatibility reader or stored-data rewrite is introduced.
+
 ## [0.10.0] - 2026-11-09
 
 ### 🔧 Tooling

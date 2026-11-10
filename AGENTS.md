@@ -1,16 +1,16 @@
 # IC Wire contributor instructions
 
-Apply the reviewed [Toko Tooling 0.38.2 policy](https://github.com/dragginzgame/toko-tooling/blob/9446ca1d18fe027f5fb89d989e0609f137184198/TOKO-TOOLING.md)
-and its revision-bound references. The installed [baseline](TOKO-TOOLING.md) and
-[manifest](.toko-tooling.snapshot) own executable snapshot provenance; refresh
-through the Cargo-selected registry installer, never by editing payloads or following a moving sibling.
-Toko Tooling owns action authority, delivery, compiler support, validation and reporting.
-Do not add local approval gates or duplicate those rules here.
+Apply the installed [Toko Tooling baseline](TOKO-TOOLING.md) and its
+revision-bound references. [.toko-tooling.snapshot](.toko-tooling.snapshot)
+records the adopted payload; do not edit it or follow a moving sibling baseline.
+This overlay owns product safeguards, local commands and approved exceptions.
+The baseline owns common action authority, validation, compiler and reporting rules,
+including scoped `git add -N` when validation requires new task-owned paths.
 
 Read [the current handoff](docs/status/current.md) and this overlay first.
-README.md provides orientation. Read docs/design.md for architecture changes,
-docs/runtime.md for runtime contracts, docs/evaluation.md for codec qualification
-and docs/development.md for local commands. These are task-specific references.
+README.md provides orientation. Read docs/guides/design.md for architecture changes,
+docs/guides/runtime.md for runtime contracts, docs/benchmarks/evaluation.md for codec qualification
+and docs/guides/development.md for local commands. These are task-specific references.
 
 ## Product boundaries
 
@@ -37,7 +37,7 @@ and docs/development.md for local commands. These are task-specific references.
   database storage/key encodings are outside this repository's initial scope.
 - Establish a reusable Rust experience and a substantial measured win before
   broad adoption. Postcard is selected for bounded Rust integration and controlled
-  RPC/owned endpoints; preserve the explicit docs/runtime.md contract.
+  RPC/owned endpoints; preserve the explicit docs/guides/runtime.md contract.
 
 ## Implementation
 
@@ -53,7 +53,7 @@ It isolates Build/Testkit/Platform-facade resolution from the four public root
 members under the tooling core/integration boundary. Native corpus/allocation
 checks do not enable `ic` or `diagnostics`; these features select Testkit and
 Build only when needed. Both workspaces retain the same compiler, formatting
-and tooling admission. Use the focused commands in docs/development.md; retain
+and tooling admission. Use the focused commands in docs/guides/development.md; retain
 explicit integration proofs and the existing release roster. No public package
 version or protocol change is implied by this private workspace split.
 
@@ -73,7 +73,7 @@ compile-fail and standalone Rust/TypeScript conformance owners.
 ## Protocol and performance
 
 - Keep limits checked before allocation and malformed-input errors typed. Custom
-  Serde work outside visited values remains trusted, per docs/runtime.md.
+  Serde work outside visited values remains trusted, per docs/guides/runtime.md.
 - Native metadata has no field IDs and follows Serde declaration order; changing
   it requires coordinated consumers. Preserve exact retained retry bytes and
   encoder hash inputs. Primitive Postcard validation is one pass; collection and
@@ -104,17 +104,18 @@ compile-fail and standalone Rust/TypeScript conformance owners.
 
 ## Local workflow
 
-Use focused checks from docs/development.md; ordinary work does not run make ci.
+Use focused checks from docs/guides/development.md; ordinary work does not run make ci.
 Select public release groups using the
-[local impact decision](docs/development.md#decide-whether-a-public-release-is-needed),
+[local impact decision](docs/guides/development.md#decide-whether-a-public-release-is-needed),
 not private qualification ownership or the presence of a pending changelog entry.
 The maintainer-operated direct delivery destination is origin/main through Toko
 Tooling. Core and Endpoint groups use literal versions and releases/<group>/
 ledgers. Pass RELEASE_GROUP explicitly for release/resume/publication and preserve
 qualification-only publication exclusions. Toko Tooling owns delegated effects.
 
-One roster in ci/release-validation.json owns CI and release plans. Core retains
-20 stages; qualified Endpoint-only Linux/default changes use 11. Toko Tooling/uncertain
-inputs and other hosts broaden to full. Stage reuse/final-candidate execution
+One roster in ci/release-validation.json owns CI and release plans. Qualified
+Endpoint-only Linux/default changes use the narrower roster; Toko
+Tooling/uncertain inputs and other hosts broaden to full. Read stage membership
+from that roster, not a duplicate count here. Stage reuse/final-candidate execution
 stay disabled until Wire qualifies those opt-ins. Local adapter fixtures use
 only disposable repositories and never invoke release effects in this checkout.

@@ -15,7 +15,7 @@ New experimental output belongs under `target/evidence/` and is removable by an
 explicit Cargo clean. Routine check results belong in the owning changelog,
 current handoff or CI result; they need no new report directory. Update an
 existing topic summary for useful new findings instead of preserving every run.
-The [Shared retention contract](../../rules/engineering-details.md#changelogs-and-artifact-preservation)
+The [Shared retention contract](https://github.com/dragginzgame/toko-tooling/blob/12459b6029115b830b8477879d3bea2f030b6e63/rules/engineering-details.md#changelogs-and-artifact-preservation)
 sets the normal ceiling: one summary and at most two small data files per topic,
 100 KiB combined per topic, 5 MiB for repository experimental evidence. A durable
 raw-data exception needs a named claim, minimal payload, measured size, owner,
@@ -23,10 +23,10 @@ destination and review/retention period.
 
 ## Current commands and measurements
 
-- [Maintained qualification and benchmark commands](../development.md)
-- [Latest recorded Candid comparison](../candid-comparison.md)
-- [Codec and resource contract](../runtime.md)
-- [Evaluation scope and limitations](../evaluation.md)
+- [Maintained qualification and benchmark commands](../guides/development.md)
+- [Latest recorded Candid comparison](../benchmarks/candid-comparison.md)
+- [Codec and resource contract](../guides/runtime.md)
+- [Evaluation scope and limitations](../benchmarks/evaluation.md)
 - [Current work and supplier selections](../status/current.md)
 
 Use those maintained runners for fresh measurements. Keep native time, IC

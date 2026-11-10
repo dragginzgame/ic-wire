@@ -10,7 +10,11 @@ fn main() {
                 {"name":"data","value":{"k":"list","item":{"k":"u","bits":8}}},
                 {"name":"words","value":{"k":"list","item":{"k":"u","bits":16}}},
                 {"name":"ids","value":{"k":"list","item":{"k":"array","max":16,"item":{"k":"u","bits":8}}}},
-                {"name":"flags","value":{"k":"list","item":{"k":"bool"}}}
+                {"name":"flags","value":{"k":"list","item":{"k":"bool"}}},
+                {"name":"signed","value":{"k":"list","item":{"k":"i","bits":32}}},
+                {"name":"hashes","value":{"k":"list","item":{"k":"array","max":32,"item":{"k":"u","bits":8}}}},
+                {"name":"samples32","value":{"k":"list","item":{"k":"float","bits":32}}},
+                {"name":"samples64","value":{"k":"list","item":{"k":"float","bits":64}}}
             ]
         }),
     )]);
@@ -22,6 +26,9 @@ fn main() {
         );
     }
     if case == "all" || case == "stale" {
+        for suffix in ["signed/list/i32", "hashes/list/hash32", "samples32/list/f32", "samples64/list/f64"] {
+            acknowledgements.insert(format!("/types/Payload/fields/{suffix}"), "Small bounded control; retain ordinary representation".into());
+        }
         acknowledgements.insert("/types/Payload/fields/ids/list/hash16".into(), "Small bounded ID list".into());
         acknowledgements.insert("/types/Payload/fields/flags/list/bool".into(), "Bounded admin flags".into());
         acknowledgements.insert(

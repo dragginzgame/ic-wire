@@ -5,10 +5,76 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
-## [0.19.1]
+## [0.20.0]
+
+### Changed
+
+- Hard cut to upstream Postcard decoding; delete the private parser. Rust and
+  generated browser readers now accept redundant varints within width bounds
+  (`80 00` becomes zero); Rust also accepts `02 61 62` as char `'a'`.
+  Browser Result tags also use u32 varints; collection lengths follow Wasm32
+  (five groups), while upstream on a 64-bit host admits ten.
+  Encoder bytes, framing, identities and budget rules stay unchanged. Regenerate
+  clients, review strict-rejection assumptions and retain original retry/hash
+  bytes. Existing stored encodings need no migration; no fallback reader remains.
+  The matched 154-case fixture saves 287/247 uncompressed opt-z/opt-3 Wasm bytes.
+  Retain measured opt-z decode regressions up to 11.1% (large byte-array batch:
+  9.2%); 19 rows exceed the instruction screen. See the
+  [hard-cut qualification](../../docs/benchmarks/candid-comparison.md#upstream-postcard-hard-cut--10-november-2026).
+
+### ⚡ Performance
+
+- Reuse the bounded u32 tag writer for newtype enum variants. The matched
+  opt-z fixture saves 326 total Wasm bytes and cuts large result-map / mixed-enum
+  encode instructions by 16.6% / 9.2%. Retain the explicit tradeoff: page encode
+  regresses 1.9% / 5.4% at opt-z / opt-3; opt-3 adds 232 Wasm bytes and tiny
+  result encoding adds 131 instructions. The strict opt-3 cost screen fails.
+  Bytes, identities, limits and acceptance remain unchanged; no migration.
+  See the [qualification](../../docs/evidence/encoder-followup.md#newtype-enum-tags--10-november-2026).
+- Consolidate the encoder's depth admission into one shared check, preserving
+  exact depth, node and allocation limits. The matched aggregate fixture saves
+  796 uncompressed Wasm bytes at opt-z and 16 at opt-3; large page/map encodes
+  improve modestly. Small instruction regressions remain below 0.6%.
+- Reuse the optimized integer writer for unit enum tags. The matched mixed-enum
+  batch uses 9.0% fewer opt-z encode instructions and saves 13 Wasm bytes;
+  opt-3 saves 11 bytes with unchanged counters. Bytes, admission and acceptance
+  remain unchanged; no consumer migration is needed.
+- Check finite-f32 values in pairs within the existing shared scanner. In the
+  matched 1 MiB fixture, opt-z encode/decode instructions fall 32.7%/11.6% for
+  5 extra uncompressed Wasm bytes. Small controls improve and f64 is unchanged.
+  Bytes, identities, limits and finite-only acceptance remain unchanged; no
+  consumer migration is needed. See the [measurement](../../docs/evidence/primitive-bulk.md#paired-f32-validation--10-november-2026).
+
+### 🧪 Testing
+
+- Expand the comparison matrix with 20 application-composition cases: paginated
+  Packed records, mixed enum batches, sparse optional blobs, maps of results and
+  mixed-width tuples. Preserve existing case indices and qualify malformed enum
+  tags, truncation and native/IC case-selection agreement. Product bytes,
+  identities, limits and acceptance are unchanged.
+- Repair qualification-workspace snapshots in all four measurement runners and
+  test their package layout before measurement. Extend real Cargo bulk-advice
+  checks to signed integers, 32-byte hashes and finite float adapters; update
+  the field-selection guide. These qualification changes preserve codec bytes,
+  identities, budgets and acceptance and alone require no public release.
+- Reject paired performance evidence with changed follow-up/container fixtures
+  or a changed Candid decoding policy, even when counters and frames match.
+  Admit the existing explicitly labelled borrowed-record and Nat-conversion
+  controls under the same checks; unknown lane labels remain rejected.
 
 ### 🔧 Tooling
 
+- Organize product documentation into guides, benchmarks and historical reports,
+  with a central index. Update links, CI path classification and release fixtures
+  together. Correct retired sizing APIs, old supplier combinations and public
+  release-group descriptions; remove stale issue status and obsolete benchmark
+  instructions from current guides. Codec behavior is unchanged.
+- Adopt Toko Tooling 0.39.7 in both workspaces and refresh its authenticated
+  snapshot. Explicitly enable Wire's shared release targets, migrate selected
+  guide paths and preserve independently versioned qualification packages.
+  Stage reuse remains disabled; codec bytes and admission are unchanged.
+  Retire installed shared reference docs through the exporter and link to the
+  reviewed upstream commit; retain the baseline and required executable helpers.
 - Adopt Toko Tooling 0.38.2 in both workspaces. Replace Wire’s custom release
   metadata renderer with the shared qualification transaction, preserving
   private versions and unrelated suppliers. Codec bytes, identities, limits
@@ -464,14 +530,14 @@ adopting the new field representation need coordinated schema/budget changes.
   with the original DTO conversion, large-case encode instructions roughly halve
   and fixture Wasm falls 198/579 uncompressed bytes at opt-z/3. Compared with
   already-packed records, adapters add 8,217/16,149 bytes in the 100-type stress
-  fixture; use selectively. [Matched results](../../docs/candid-comparison.md#borrowed-adapter-investigation).
+  fixture; use selectively. [Matched results](../../docs/benchmarks/candid-comparison.md#borrowed-adapter-investigation).
 - Append 30 container workloads to the Candid comparison: nested optional bytes,
   packed/blob results, byte-array versus Packed hash batches, nonzero integers
   and binary heaps, retaining empty/singleton controls and all existing indices.
   Check exact optional-state bytes, malformed inputs and nonzero admission.
   Record both profiles' native timing, allocations, heap, IC instructions,
   payload bytes and uncompressed Wasm in the
-  [expanded comparison](../../docs/candid-comparison.md#expanded-container-coverage),
+  [expanded comparison](../../docs/benchmarks/candid-comparison.md#expanded-container-coverage),
   including the remaining ordinary-list gaps and external DTO boundaries.
   Existing consumer bytes, schemas, identities, limits and acceptance are unchanged;
   no consumer migration is required.
@@ -729,7 +795,7 @@ adopting the new field representation need coordinated schema/budget changes.
   native timing, allocator probes, IC counters and frame bytes. Record remaining
   float/bool/vector hotspots and missing owned-type/Candid-adapter controls;
   no production type, encoding, budget or acceptance rule changes.
-  [Evidence](../../docs/candid-comparison.md).
+  [Evidence](../../docs/benchmarks/candid-comparison.md).
 
 ### 🩹 Fixed
 
@@ -1051,7 +1117,7 @@ adopting the new field representation need coordinated schema/budget changes.
   source and all 88 modules; strict pairing, coverage and provenance checks pass.
   Include ordinary-control losses and the 35 new cases. This is measured codec
   qualification, not a production optimization or protocol change.
-  [Full results](../../docs/candid-comparison.md).
+  [Full results](../../docs/benchmarks/candid-comparison.md).
 
 - Add 35 matched Wire/Candid workloads for zero-sized collections, binary-key
   maps, nested blob results, optional arrays, ownership wrappers and enum shapes.
@@ -1177,7 +1243,7 @@ adopting the new field representation need coordinated schema/budget changes.
 
 ### ⚠️ Breaking
 
-- Implement the approved [stable identity boundary](../../docs/stable-identities.md)
+- Implement the approved [stable identity boundary](../../docs/guides/stable-identities.md)
   for [#36](https://github.com/dragginzgame/ic-wire/issues/36): move endpoint
   helpers and attributes into independently versioned `ic-wire-endpoint` 0.1.0.
   Remove `ic-wire/endpoint`; migrate `ic_wire::endpoint` imports to

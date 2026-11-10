@@ -94,7 +94,7 @@ function selection(group, source, previous) {
   const endpointPath = p => /^crates\/ic-wire-endpoint(?:-macros)?\/src\/.+\.rs$/.test(p)
     || /^crates\/ic-wire-endpoint(?:-macros)?\/(README|CHANGELOG)\.md$/.test(p)
     || /^qualification\/ic-wire-endpoint-fixture\/(src|tests)\/.+\.rs$/.test(p)
-    || p === 'qualification/ic-wire-endpoint-fixture/README.md' || p === 'docs/endpoints.md' || p === 'docs/status/current.md'
+    || p === 'qualification/ic-wire-endpoint-fixture/README.md' || p === 'docs/guides/endpoints.md' || p === 'docs/status/current.md'
     || p === 'qualification/ic-wire-benchmarks/benches/input_borrowing/mod.rs'
     || /^releases\/endpoint\/[^/]+\.md$/.test(p);
   let reason = 'Core codec/derive identities and all reverse consumers require the complete roster';

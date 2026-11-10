@@ -1,7 +1,7 @@
 # Standalone endpoint qualification consumer
 
 This unpublished package depends on Wire and Platform, with no Canic dependency.
-The [endpoint guide](../../docs/endpoints.md) explains its supported API,
+The [endpoint guide](../../docs/guides/endpoints.md) explains its supported API,
 ownership and explicit PocketIC qualification commands. `src/lib.rs` is a small
 installable canister covering typed/unit handlers, sync/async execution, bounded
 replies, synchronous borrowed requests/replies and explicit composition around a

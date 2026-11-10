@@ -17,7 +17,7 @@ rejects(() => zero.decode(new Uint8Array([0])), 'limit');
 for (const invalid of [{bytes:-1},{bytes:0.5},{nodes:0},{depth:0},{bytes:Number.MAX_SAFE_INTEGER+1}]) {
   rejects(() => payloadProbe({k:'unit'}, invalid), 'value');
 }
-for (const [schema, malformed] of [[{k:'u',bits:16},[128,0]],[{k:'u',bits:16},[255,255,4]],[{k:'bool'},[2]],[{k:'text'},[1,255]],[{k:'option',item:{k:'unit'}},[2]]]) {
+for (const [schema, malformed] of [[{k:'u',bits:16},[255,255,4]],[{k:'bool'},[2]],[{k:'text'},[1,255]],[{k:'option',item:{k:'unit'}},[2]]]) {
   rejects(() => payloadProbe(schema).decode(Uint8Array.from(malformed)), 'malformed');
 }
 for (const limit of [{bytes:1},{nodes:1},{depth:1}]) {
@@ -39,3 +39,5 @@ assert.deepEqual(counter.encode(new Counter(7n)), new Uint8Array([7]));
 const {counter:typedCounter, Counter:TypedCounter} = await import('./compiled/payload-facade.js');
 assert.equal(typedCounter.decode(typedCounter.encode(new TypedCounter(7n))).value, 7n);
 assert.throws(() => new TypedCounter(-1n), RangeError);
+
+assert.equal(payloadProbe({k:'u',bits:16}).decode(new Uint8Array([128,0])),0);
