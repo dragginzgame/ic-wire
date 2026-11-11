@@ -129,7 +129,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "bytemuck",
  "clap",
@@ -144,7 +144,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "proc-macro2",
  "quote",
