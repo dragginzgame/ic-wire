@@ -21,22 +21,46 @@ fn main() {
     .iter()
     .map(|byte| format!("{byte:02x}"))
     .collect::<String>();
-    for (name, width, depth, invalid) in [
-        ("small", 1, 0, false),
-        ("large", 4096, 0, false),
-        ("nested", 128, 32, false),
-        ("invalid-unused", 4096, 0, true),
+    for (name, width, depth, invalid, shared) in [
+        ("small", 1, 0, false, false),
+        ("large", 4096, 0, false, false),
+        ("nested", 128, 32, false, false),
+        ("invalid-unused", 4096, 0, true, false),
+        ("shared-ref", 4096, 0, false, true),
+        ("escaped", 4096, 0, false, false),
+        ("many-types", 1, 0, false, false),
+        ("proto-key", 128, 0, false, false),
     ] {
         let mut item = json!({"k":"text"});
         for _ in 0..depth {
             item = json!({"k":"option","item":item});
         }
+        if shared {
+            item = json!({"k":"ref","name":"Leaf"});
+        }
         let mut types = BTreeMap::from([(
             "Record".into(),
             json!({"k":"record","fields":
-                (0..width).map(|n| json!({"name":format!("field{n}"),"value":item})).collect::<Vec<_>>()
+                (0..width).map(|n| json!({"name":if name == "escaped" { format!("field/{n}~") } else { format!("field{n}") },"value":item})).collect::<Vec<_>>()
             }),
         )]);
+        if shared {
+            types.insert(
+                "Leaf".into(),
+                json!({"k":"record","fields":[
+                    {"name":"values","value":{"k":"list","item":{"k":"u","bits":64}}},
+                    {"name":"next","value":{"k":"option","item":{"k":"ref","name":"Leaf"}}}
+                ]}),
+            );
+        }
+        if name == "many-types" {
+            for n in 0..256 {
+                types.insert(format!("Type{n}"), json!({"k":"text"}));
+            }
+        }
+        if name == "proto-key" {
+            types.insert("__proto__".into(), json!({"k":"text"}));
+        }
         if invalid {
             types.insert("ZInvalid".into(), json!({"k":"u","bits":7}));
         }

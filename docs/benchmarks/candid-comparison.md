@@ -1,5 +1,131 @@
 # Latest recorded Candid comparison
 
+## Core 0.21 checkout full matrix — 11 November 2026
+
+**39/39 cohorts complete and verified:** 2,314 overlapping case entries,
+9,256 primary encode/decode comparisons, 48,610 IC rows and 156,640 native/frame
+checks. All 156 guest builds were fresh; baked source/lock identities, retained
+input/frame hashes, native/IC coverage and three identical instruction samples per
+operation pass verification. No cohort was omitted or retried with weaker settings.
+
+The frozen checkout is HEAD ab5b4cc plus the retained source patch, including the
+pending host-generator improvements and Toko Tooling 0.39.10 adoption. Rust 1.99.1,
+Candid 0.10.40, prepared PocketIC 16.0.0; qualification selects Platform Types
+0.19.1. The frozen root lock retained the deferred 0.19.2 edit. During measurement,
+an external process advanced the normal root lock to 0.19.3; that edit is preserved,
+not adopted or qualified by these measurements. This is a fresh codec comparison, not a matched regression
+study or a full Toko application build. Host-generator changes do not explain
+runtime codec gains. Bytes, identities, budgets and acceptance are unchanged by
+this task. No publication or release occurred.
+
+Wire wins **4,157/4,628 opt-z** (89.8%) and **4,260/4,628 opt-3** (92.0%) primary
+instruction comparisons. These unweighted counts overlap across fixtures and
+representations; they are not traffic-weighted speedups or unique-type counts.
+There are still **126 opt-z and 91 opt-3** primary comparisons where Wire costs
+at least 10× Candid. Ordinary-list controls are intentionally visible. The
+research-bulk cohort is not uniformly a production recommendation.
+
+### Complete data and reproduction
+
+- [All 78 total/code Wasm pairs](current-wasm.csv).
+- [Application cases: instructions, frames, native time, allocations and peak heap](current-application-cases.csv).
+- Complete 48,610-row export: `target/evidence/codec-matrix-core021/full-matrix.csv`.
+- All 9,256 primary comparisons: `target/evidence/codec-matrix-core021/primary-comparisons.csv`.
+- Frozen sources, raw runs, Wasm artifacts, `summary.json` and verification/export
+  scripts remain under `target/evidence/codec-matrix-core021`; builds use the
+  distinct `target/codec-matrix-core021-build`. The source patch records dirty inputs.
+
+Run `POCKET_IC_BIN=/path/to/prepared/pocket-ic CARGO_TARGET_DIR=/fresh/target
+bash scripts/ci/evaluate-codec-matrix.sh NEW_OUTPUT` after fetching the locked
+qualification dependencies. Defaults are two native runs of eleven samples,
+minimum 2 ms batches, separate allocation/heap probes and three IC samples.
+Native times were measured on a shared host with other repositories compiling;
+do not interpret small native-time differences as regressions or improvements.
+IC instructions, native elapsed time, encoded bytes, allocation traffic, peak live
+heap, code-section bytes and total uncompressed Wasm are separate quantities.
+No gzip metric is used. Loop-control and Wire-only encode-reuse rows remain in
+the full export; they are excluded from the primary encode/decode win count.
+
+### Representative opt-z payloads
+
+Each cell is **Wire / Candid**. Instructions use performance_counter(0); fractional
+counts are per-operation means of the fixed repeated loop, with identical samples.
+Frames include each comparator's framing. Labels distinguish ordinary controls
+from explicit bulk representations; changing a consumer's representation requires
+its normal contract decision, not a silent Serde rewrite.
+
+| Cohort and case | Encoded bytes | Encode instructions | Decode instructions |
+| --- | ---: | ---: | ---: |
+| standard: blob-random-65536 | 65,550 / 65,548 | 67,655 / 155,662 | 66,807 / 90,783 |
+| toko: toko-funding | 45 / 83 | 6,188.5 / 67,494.5 | 3,924.5 / 70,019 |
+| toko: toko-filter-ids-1000 | 19,617 / 19,663 | 884,765.5 / 677,935.5 | 3,781,328.5 / 3,640,205.5 |
+| standard: platform-account-list-2-128 | 8,205 / 8,349 | 274,054.5 / 289,479 | 234,099.5 / 2,224,105.5 |
+| coverage-shapes: page-packed-records-4096 | 150,339 / 175,067 | 10,429,732 / 7,394,525 | 11,859,545 / 31,445,948 |
+| coverage-shapes: mixed-width-tuples-4096 | 122,893 / 98,329 | 13,956,856 / 5,300,546 | 13,091,998 / 25,681,498 |
+| id16-control: id16-list-owned-4096 | 65,549 / 65,548 | 10,098,519 / 155,582 | 11,609,213 / 90,553 |
+| id16: id16-list-owned-4096 | 65,550 / 65,548 | 67,613 / 155,582 | 67,109 / 90,553 |
+| bulk-control: u16-wide-16384 | 49,166 / 32,780 | 9,553,561.5 / 86,269.5 | 4,986,425.5 / 1,235,917.5 |
+| bulk: u16-wide-16384 | 32,782 / 32,780 | 34,689.5 / 86,269.5 | 378,283.5 / 1,235,917.5 |
+
+The ordinary ID16-list decode costs 128.2× Candid, while its explicit bulk form
+costs 0.74×. Ordinary wide-u16 encode costs 110.7× in bulk-control; its bulk form
+costs 0.40×. These are separate representations, not an automatic optimization of
+plain vectors. Preserve existing lint/adaptor guidance.
+
+The mixed-width tuple batch remains a substantive non-bulk encode hotspot:
+2.63× Candid at opt-z and 6.68× at opt-3, with 25% larger frames. Its decode costs
+0.51×/0.24× Candid. The 4,096-record packed page also loses opt-z encode at 1.41×
+while winning decode at 0.38× and using fewer bytes. These are better candidates
+for further bounded aggregate-encoding research than removing admission checks.
+
+### Complete linked-fixture Wasm table
+
+Wire is smaller in **both total and code-section bytes in all 78 pairs**. Table
+cells are **Wire / Candid total uncompressed bytes**; code sections are in the CSV.
+Type-scale fixtures measure linked stress artifacts, not full-application savings.
+
+| Cohort | opt-z total bytes | opt-3 total bytes |
+| --- | ---: | ---: |
+| standard | 592,202 / 1,426,878 | 889,806 / 2,074,806 |
+| toko | 80,011 / 375,576 | 102,955 / 593,903 |
+| derive-1 | 53,627 / 299,969 | 74,550 / 490,827 |
+| derive-10 | 99,146 / 438,941 | 131,817 / 681,950 |
+| derive-100 | 310,413 / 1,424,995 | 395,902 / 2,086,335 |
+| packed-i16 | 42,906 / 277,139 | 48,326 / 381,665 |
+| packed-control | 40,396 / 277,138 | 44,649 / 381,665 |
+| packed-shared-1 | 61,207 / 305,852 | 90,476 / 506,624 |
+| packed-shared-10 | 82,788 / 399,407 | 118,554 / 657,958 |
+| packed-shared-100 | 260,996 / 1,282,502 | 390,177 / 2,100,129 |
+| packed-varied-1 | 61,205 / 305,852 | 90,475 / 506,615 |
+| packed-varied-10 | 91,373 / 399,407 | 133,517 / 657,954 |
+| packed-varied-100 | 277,812 / 1,282,502 | 415,481 / 2,100,129 |
+| bulk | 97,235 / 449,399 | 123,255 / 681,876 |
+| bulk-control | 104,030 / 449,407 | 137,499 / 681,876 |
+| bulk-1 | 70,409 / 371,385 | 100,456 / 591,439 |
+| bulk-10 | 110,499 / 508,462 | 150,206 / 779,635 |
+| bulk-100 | 457,907 / 1,798,093 | 650,948 / 2,642,472 |
+| bulk-control-1 | 76,730 / 371,385 | 110,965 / 591,439 |
+| bulk-control-10 | 118,626 / 508,462 | 165,504 / 779,635 |
+| bulk-control-100 | 466,034 / 1,798,093 | 666,250 / 2,642,472 |
+| hotspots | 82,591 / 388,437 | 103,370 / 597,087 |
+| byte-keys | 61,334 / 308,226 | 73,400 / 483,609 |
+| byte-keys-control | 59,419 / 308,226 | 72,393 / 483,592 |
+| cost-smoke | 93,778 / 396,036 | 120,212 / 609,435 |
+| contract-shapes | 223,650 / 680,927 | 293,677 / 979,922 |
+| coverage-shapes | 263,829 / 806,235 | 348,674 / 1,196,005 |
+| packed-containers | 263,263 / 806,235 | 347,889 / 1,196,005 |
+| borrowed-containers | 262,833 / 806,235 | 347,219 / 1,196,005 |
+| research-bulk | 262,914 / 806,235 | 346,927 / 1,196,005 |
+| adapter-borrowed-1 | 58,764 / 314,421 | 86,639 / 516,684 |
+| adapter-borrowed-10 | 113,069 / 458,899 | 172,751 / 737,357 |
+| adapter-borrowed-100 | 345,747 / 1,495,696 | 567,344 / 2,421,226 |
+| adapter-dto-1 | 58,117 / 314,421 | 86,299 / 516,684 |
+| adapter-dto-10 | 109,226 / 458,899 | 163,823 / 737,357 |
+| adapter-dto-100 | 337,728 / 1,495,696 | 551,273 / 2,421,226 |
+| id16 | 50,148 / 269,410 | 55,673 / 441,491 |
+| id16-control | 51,643 / 269,410 | 56,127 / 441,501 |
+| signed32 | 75,376 / 337,546 | 92,815 / 524,124 |
+
 ## Core 0.20 full matrix — 10 November 2026
 
 **39/39 cohorts completed and verified:** **2,314 overlapping case

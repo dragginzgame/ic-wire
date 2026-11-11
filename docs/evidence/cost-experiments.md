@@ -239,3 +239,202 @@ CODEC_SOURCE_SNAPSHOT pointing to that source, a separate CARGO_TARGET_DIR per
 lane and an explicitly prepared POCKET_IC_BIN. Fresh qualification would require
 fresh build records and matching Candid controls. Nothing from this runtime
 prototype is applied to production; bytes, limits and identities stay unchanged.
+
+
+## Bulk-write inlining — rejected, 11 November 2026
+
+Do not add Wasm inline(always) or inline to contract::Output::try_extend.
+This shared bounded buffer-write method is used by Postcard buffers and wider
+integer writers. Both attributes reduce the linked coverage-shapes fixture but
+worsen important encoding operations. Both candidates remain only in isolated
+sources; normal production source was never edited.
+
+Whole uncompressed Wasm, total / code-section bytes:
+
+| Profile | Baseline | Forced inline | Inline hint |
+| --- | ---: | ---: | ---: |
+| opt-z | 263,824 / 228,710 | 263,633 / 228,516 | 263,596 / 228,483 |
+| opt-3 | 348,674 / 315,897 | 343,830 / 311,058 | 343,830 / 311,058 |
+
+Selected IC encode instructions/op:
+
+| Profile / case | Baseline | Forced inline | Inline hint |
+| --- | ---: | ---: | ---: |
+| opt-z / 128 Accounts (principal length 1) | 248,489.5 | 262,858.5 | 270,548.5 |
+| opt-z / 4,096 packed records | 10,226,206 | 10,788,215 | 11,101,471 |
+| opt-z / 4,096 mixed-width tuples | 13,874,950 | 14,087,975 | 14,227,249 |
+| opt-3 / 128 Accounts (principal length 1) | 72,166.25 | 90,211.25 | 90,211.25 |
+| opt-3 / 4,096 packed records | 5,126,831 | 4,762,386 | 4,762,386 |
+| opt-3 / 4,096 mixed-width tuples | 5,333,976 | 5,333,976 | 5,333,976 |
+
+The strict cost checker reaches numeric comparison: source/lock/fixture identities,
+fresh candidate library/guest builds, frame/input hashes, artifact hashes and
+Candid controls pass. It **fails** 61 forced-inline pairs (22 opt-z, 39 opt-3) and
+74 hinted pairs (35 opt-z, 39 opt-3) out of 1,338 Wire operation pairs each, using
+the unchanged baseline × 1.05 + 64 instruction screen. No size growth occurs.
+The opt-3 page improvement does not justify ~25% Account encode regression or
+the opt-z page losses of 5.5% / 8.6%. These are matched local comparisons, not
+regression claims against a different earlier matrix artifact.
+
+Rust 1.99.1, identical qualification locks (Types 0.19.1, Candid 0.10.40),
+wasm32-unknown-unknown, maintained evaluation/benchmark-speed profiles, 154
+coverage-shapes cases and three identical samples per IC operation on prepared
+PocketIC 16. Each lane has a separate source and Cargo target. The same retained
+Candid Wasm from the verified Core 0.21 matrix is used on every lane and is
+remeasured; its hashes and counters agree. Wire artifacts are freshly compiled
+from each lane. No alternative comparator, missing case or relaxed threshold.
+Native borrowed/native/runtime tests pass (6/87/16, four ignored probes). The
+attributes are Wasm-only; native timing and allocation studies were not run and
+no native improvement is claimed. Toko and hundred-type size expansion was not
+pursued after the instruction screen rejected both candidates. Bytes, identities,
+limits and acceptance stay unchanged; no consumer action or release is needed.
+
+Evidence: `target/evidence/extend-inline-20261111/` with before/after/hint sources,
+`screen.sh`, `instructions.sh`, `hint-instructions.sh`, raw builds/Wasms/IC rows,
+`sizes.csv`, both cost-screen logs and `analyze.mjs`. Reproduce size builds with
+`cargo build --locked --offline --manifest-path SOURCE/qualification/Cargo.toml
+-p ic-wire-benchmarks --example codec-wasm --features wire,coverage-shapes
+--target wasm32-unknown-unknown --profile evaluation` (then benchmark-speed),
+using a fresh target per lane. The retained drivers explicitly select the
+prepared server; `analyze.mjs after` / `analyze.mjs hint` validate source hashes
+and fresh builds before reporting failed thresholds. No cleanup is authorized.
+
+## Shared framed decode admission — not promoted, 11 November 2026
+
+An isolated candidate splits native::decode into its public payload-length check
+and a private decode_payload body. decode_frame already admits the whole frame,
+validates its header and subtracts the header from the byte allowance; it can
+therefore call that body without repeating the implied payload-length check.
+All allocation/node/depth admission and Postcard validation remain in the body.
+Bytes, identities, limits, acceptance and error precedence are unchanged.
+
+| Profile | Baseline total / code bytes | Candidate total / code bytes |
+| --- | ---: | ---: |
+| opt-z | 263,829 / 228,715 | 263,491 / 228,377 |
+| opt-3 | 348,674 / 315,897 | 348,983 / 316,205 |
+
+Of 669 Wire operation pairs per profile, opt-z changes 324 by only −4 to −6 IC
+instructions; the rest are identical. Opt-3 changes 335 by −14 to +24 instructions.
+For example, empty Principal decode is 625.5 → 621.5 instructions at opt-z and
+459.5 → 455.5 at opt-3. Encode costs are unchanged in the selected Account,
+4,096-record page and 4,096-tuple controls. All 1,338 instruction comparisons pass
+the unchanged baseline × 1.05 + 64 screen. The overall strict checker **fails**
+on opt-3 total/code growth (+309/+308 bytes); no threshold was relaxed.
+
+This is a small, credible opt-z fixture saving, not a substantial runtime win.
+It is not promoted: the secondary-profile growth and unmeasured application
+footprint do not yet justify changing production decoding. Toko/hundred-type
+sizes and native timing/allocation effects were not measured. A later decision
+would need those proofs; do not describe this fixture result as application savings.
+
+Qualification: Rust 1.99.1, wasm32-unknown-unknown, evaluation/benchmark-speed
+profiles, identical qualification locks (Types 0.19.1, Candid 0.10.40), 154 cases,
+three identical IC samples per operation on PocketIC 16. Separate paired sources
+and targets produced fresh library/guest records. Source, admission, contract,
+lock and artifact hashes are checked; exact frame/input and matching retained
+Candid artifacts/counters pass. Candidate borrowed/native/runtime tests pass
+6/87/16 active tests, with four ignored probes, including the existing frame-budget
+boundary and error-precedence test. Production runtime source remains untouched.
+
+Evidence: target/evidence/frame-admission-20261111 contains before/after sources,
+screen.sh, instructions.sh, sizes.csv, analyze.mjs, verification.json and the
+strict cost-screen.log. The scripts reproduce the fresh size/IC comparison with
+separate targets and the prepared PocketIC binary; analyze.mjs checks baked source
+hashes and fresh build records. Preserve these artifacts; no release is implied.
+
+## Fused nonzero packed decoding — rejected, 11 November 2026
+
+The current nonzero_i64 adapter decodes Packed<i64> and validates NonZeroI64
+through an owned iterator collection. An isolated candidate instead uses a byte
+visitor, validates whole 8-byte lengths, reserves once, then reads/checks/pushes
+each word. It avoids the second source-level traversal but loses important opt-3
+optimization. Keep the current implementation; do not promote the explicit loop.
+
+| Profile / elements | Baseline decode IC instructions | Candidate |
+| --- | ---: | ---: |
+| opt-z / 0 | 766.5 | 575.5 |
+| opt-z / 1 | 1,197.5 | 1,004.5 |
+| opt-z / 128 | 7,260.5 | 6,813.5 |
+| opt-z / 4,096 | 181,495.5 | 173,112.5 |
+| opt-3 / 0 | 355.5 | 328.5 |
+| opt-3 / 1 | 723.5 | 613.5 |
+| opt-3 / 128 | 4,064.5 | 6,621.5 |
+| opt-3 / 4,096 | 94,928.5 | 180,813.5 |
+
+Whole uncompressed Wasm total/code bytes: opt-z 262,828/227,715 →
+262,947/227,834 (+119/+119); opt-3 347,219/314,441 → 347,244/314,467
+(+25/+26). The large opt-z improvement is 4.6%, but opt-3 regresses 90.5%.
+The unchanged strict checker reaches numeric comparison and fails two instruction
+pairs plus four total/code size checks. All 1,338 operation pairs are compared;
+no screen threshold is relaxed. These are fixture results, not application savings.
+
+Matched Rust 1.99.1, wasm32-unknown-unknown, evaluation/benchmark-speed profiles,
+identical qualification locks (Types 0.19.1, Candid 0.10.40), 154 borrowed-containers
+cases, three identical IC samples per operation on PocketIC 16. Each source has
+its own fresh Cargo target. Baked adapter/admission/contract/lock hashes, fresh
+library/guest records, exact frames/inputs and matching retained Candid controls
+are verified. The initial coverage-shapes build was discarded from the comparison:
+it selects ordinary nonzero vectors, not this adapter. Its artifacts remain in
+unused-coverage directories; only borrowed-containers results support this finding.
+
+Candidate borrowed/native/runtime checks pass 6/87/16 active tests, four ignored,
+including adapter bytes/budgets, early/late zero rejection, truncation, trailing
+bytes and subsequent valid decoding. Accepted values, bytes, identities and
+admission limits remain unchanged. No native latency/allocation study or expanded
+application size study was run after the IC rejection. Production code is untouched.
+
+Evidence: target/evidence/nonzero-decode-20261111 contains paired sources,
+screen.sh, instructions.sh, analyze.mjs, sizes.csv, verification.json and
+cost-screen.log. The scripts select borrowed-containers, fresh separate targets,
+and the prepared PocketIC server. The analysis independently verifies the changed
+public_nonzero_adapter_sha256. No release or consumer action is needed.
+
+## Block validation for packed booleans — rejected, 11 November 2026
+
+The bool adapter currently uses bytemuck's checked byte-to-bool slice cast,
+then copies into owned storage. An isolated candidate validates eight bytes per
+u64 with mask 0xfefe_fefe_fefe_fefe, checks the remainder, then safely constructs
+the output with bytes.iter().map(|byte| *byte != 0). No unchecked conversion is
+introduced. Validation still precedes allocation; bytes, identities, budgets
+and malformed-input acceptance remain unchanged.
+
+| Profile / elements | Baseline decode IC instructions | Candidate |
+| --- | ---: | ---: |
+| opt-z / 0 | 597.5 | 612.5 |
+| opt-z / 1 | 1,111.5 | 1,041.5 |
+| opt-z / 128 | 3,720.5 | 4,220.5 |
+| opt-z / 16,384 | 329,154.5 | 404,838.5 |
+| opt-z / 1,048,576 | 20,973,155 | 25,822,727 |
+| opt-3 / 0 | 316.5 | 334.5 |
+| opt-3 / 1 | 655.5 | 592.5 |
+| opt-3 / 128 | 3,215.5 | 2,139.5 |
+| opt-3 / 16,384 | 328,594.5 | 199,502.5 |
+| opt-3 / 1,048,576 | 20,972,595 | 12,714,991 |
+
+Whole uncompressed Wasm total/code bytes: opt-z 262,914/227,800 →
+263,002/227,888 (+88/+88); opt-3 346,927/314,153 → 347,251/314,477
+(+324/+324). The large opt-3 gain is 39.4%, but primary opt-z loses 23.1%.
+Reject this candidate. The unchanged strict checker compares 1,338 operation
+pairs and fails three opt-z decode thresholds plus all four total/code size
+checks. Source brevity or fewer validation iterations does not establish a win
+for the complete validate-and-copy operation.
+
+Matched Rust 1.99.1, wasm32-unknown-unknown, evaluation/benchmark-speed profiles,
+identical qualification locks (Types 0.19.1, Candid 0.10.40), 154 research-bulk
+cases and three identical IC samples per operation on PocketIC 16. Separate
+paired source/target directories, fresh library/guest builds, baked bool-adapter,
+admission/contract/lock identities, exact frames/inputs and matching retained
+Candid artifacts/counters are verified. No threshold is relaxed.
+
+Candidate borrowed/native/runtime checks pass 6/87/16 active tests, four ignored.
+An additional isolated test checks all invalid byte values 2..=255 at every
+position in buffers of lengths 0..=33, plus valid alternating values; it passes.
+This covers all eight-byte lanes, block boundaries and remainders. No native
+latency/allocation or application-size study followed the primary-profile
+rejection. No production runtime changes, release or consumer action follow.
+
+Evidence: target/evidence/bool-blocks-20261111 contains before/after sources,
+screen.sh, instructions.sh, analyze.mjs, sizes.csv, verification.json and
+cost-screen.log. Scripts select research-bulk and separate fresh targets, with
+the prepared PocketIC server. The analyzer independently checks the changed
+public_bools_adapter_sha256. Keep the current safe checked-copy implementation.

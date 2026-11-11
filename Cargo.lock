@@ -116,9 +116,9 @@ checksum = "1dae8afb137bbe3ac6fd8b9e3010b3fa9e6a3a5dbc32438255402b9365bdf1c6"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.19.1"
+version = "0.19.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "298fd9c6c13af0651a875f87c43a003ee6d29fbc2f7ce0233dc1fb0c6d6a8ac4"
+checksum = "4ea8eeeb34b713c34e7160bf4c49f5c13225a6464ef6d82506236e2db143dfee"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -323,9 +323,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.39.9"
+version = "0.39.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1dd7bdb5bbb9bb8076dd35d8dc179c9e49196d9945c8e585990e40091b468b48"
+checksum = "ba1be08af9c51c083f7ec0ee5a13370d8eadee686db8c12da8b2cce08cfb0258"
 
 [[package]]
 name = "unicode-ident"

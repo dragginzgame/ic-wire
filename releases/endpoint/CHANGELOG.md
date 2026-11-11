@@ -4,6 +4,14 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.12.1]
+
+### Maintenance
+
+- Qualify the current Core 0.21 integration with Platform Types 0.19.3 and
+  Toko Tooling 0.39.11. Endpoint execution, frame bytes, identities and budgets
+  remain unchanged.
+
 ## [0.12.0] - 2026-11-11
 
 ### ⚠️ Breaking

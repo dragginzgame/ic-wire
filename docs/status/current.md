@@ -6,23 +6,32 @@ Both Core packages are published. Endpoint remains at published 0.12.0 (009f3eb)
 delivered in the earlier completed/reconciled batch-qfrz5NEG. Private qualification
 packages remain unpublished. No cleanup or batch retirement is authorized.
 
+## Pending Core 0.21.2 — host generator allocations
+Borrow ordinary escaped-path inputs and active recursion names. Matched synthetic
+plain/shared-reference fixtures remove 39%/65% of allocations; shared-reference
+latency improves, with escaped-name and noisy nested regressions recorded in
+[the paired study](../evidence/native-registry.md#borrowed-lint-names--11-november-2026).
+87 active native tests and strict Core/private-harness Clippy pass. Output,
+warning paths, codec bytes, identities, budgets and acceptance are unchanged.
+[Direct registry append](../evidence/native-registry.md#direct-registry-append--11-november-2026)
+also removes a full-registry temporary: 18%/20% less allocated traffic in plain/shared
+fixtures, with opt-3 timing regressions recorded. Rust/TypeScript conformance passes.
+[Direct declarations/conditional escaping](../evidence/native-registry.md#direct-declarations-and-conditional-key-escaping--11-november-2026) remove another 20.7%/17.2% allocated traffic; timing regressions are recorded. Exact outputs and conformance pass; no Wasm/IC claim.
+[Direct composite rendering](../evidence/native-registry.md#direct-composite-rendering--11-november-2026) removes 31.7% of large-record allocations, improving measured time in both profiles. Types 0.19.3 is now selected in both locks for the authorized Core 0.21.2 / Endpoint 0.12.1 frozen release; full qualification is pending.
+Rejected follow-ups: [empty acknowledgements](../evidence/native-registry.md#empty-acknowledgement-shortcut--rejected-11-november-2026) and
+[bulk-write inlining](../evidence/cost-experiments.md#bulk-write-inlining--rejected-11-november-2026). [Shared framed decode admission](../evidence/cost-experiments.md#shared-framed-decode-admission--not-promoted-11-november-2026) saves 338 opt-z bytes but grows opt-3; no runtime change is retained.
+[Fused nonzero decode](../evidence/cost-experiments.md#fused-nonzero-packed-decoding--rejected-11-november-2026) and [boolean block validation](../evidence/cost-experiments.md#block-validation-for-packed-booleans--rejected-11-november-2026) regress opt-3/opt-z respectively; both rejected.
+
 ## Released Core 0.21.1 — browser and host costs
 
-Constant-memory browser alias detection removes per-operation registry scans.
-Metadata mutations between calls and valid checks remain visible; callback counts
-on malformed cycles can differ. Large registries improve sharply, with explicit
-small-registry/long-chain regressions. The set-based precursor and Unicode-regex
-probe were rejected. See [browser evidence](../evidence/typescript-writer.md#alias-chain-scaling--11-november-2026).
-The host lint walker reuses paths; generated output/acknowledgements are unchanged.
-See [host evidence](../evidence/native-registry.md#reusable-lint-paths--11-november-2026).
-Rust/TypeScript conformance and strict Core Clippy pass; Unicode and cycle coverage
-are expanded. No runtime codec change or Wasm saving is claimed for these edits.
-The [budget-outlining probe](../evidence/cost-experiments.md#shared-budget-outlining--rejected-11-november-2026)
-is rejected: opt-z saves 2,012 Wasm bytes but observed instructions regress; opt-3
-grows. The strict cost gate fails provenance/control checks, not a qualified win.
-Consumers regenerate clients to adopt the browser changes; codec bytes, method
-identities and value budgets are unchanged. The separate root Types 0.19.2 lock
-edit is restored outside this release; both release locks retained Types 0.19.1.
+Browser alias detection and reusable host lint paths are released; see the
+[browser study](../evidence/typescript-writer.md#alias-chain-scaling--11-november-2026)
+and [host study](../evidence/native-registry.md#reusable-lint-paths--11-november-2026).
+Regenerate clients for browser changes; valid bytes/identities/budgets stay the
+same, malformed-cycle callback counts can differ. Small long-chain regressions
+are recorded. Set-based aliases, Unicode regex and
+[budget outlining](../evidence/cost-experiments.md#shared-budget-outlining--rejected-11-november-2026)
+were rejected. Release gates used Types 0.19.1; later root updates remain deferred.
 
 ## Toko feedback — released Core 0.21.0
 
@@ -45,14 +54,9 @@ Canic's host generator passes an empty acknowledgement map. Wire already support
 exact-path reasons and bounded report Display; downstream must pass reviewed
 acknowledgements consistently through producer and CLI. No sibling files changed.
 The [numeric Trailing experiment](../evidence/codec-cleanup.md#unread-byte-error-payload--rejected-11-november-2026)
-is rejected: +1,103/+1,022 codec Wasm bytes at opt-z/opt-3, +994 endpoint bytes,
-small instruction regressions and a failed Candid-control hash gate. Compact Error
-is restored; Result-wrapper mismatch coverage and diagnostic guidance remain.
-Generated public names required the minor Core release and aligned Endpoint adoption.
-Tooling 0.39.9 installation, snapshot/tools, boundary and roster checks pass.
-The maintainer approved including Runtime/macros/guard 0.21.1 and both locks
-now select that supplier with Types 0.19.1. Its transitive ic0 binding belongs
-to Runtime; Core/schema-only exclusion and direct-dependency admission remain.
+was rejected for Wasm growth/regressions; compact Error and mismatch tests remain.
+Tooling 0.39.9 and Runtime/macros/guard 0.21.1 passed the release boundary checks;
+transitive ic0 belongs to Runtime, not Core/schema-only hosts.
 Installed endpoint calls, limits and transaction qualification passed with the
 prepared PocketIC 16 server; both product/integration graph checks pass.
 Both complete release gates passed with these suppliers. During deployment,
@@ -88,41 +92,40 @@ opt-3 regressions. They preserve bytes, identities and admission. Do not repeat
 rejected tag-inlining, tuple-body or f64 probes. Opt-z remains primary; fixture
 Wasm changes are not application savings.
 
-The [current full matrix](../benchmarks/candid-comparison.md#core-020-full-matrix--10-november-2026)
-uses frozen released source 3c5176c under target/evidence/codec-matrix-core020.
-All 39 cohorts verify: 2,314 overlapping case entries, 48,610 IC rows and
-156,640 native/frame checks. All 156 guests were freshly built; Wire is smaller
-in total/code Wasm in all 78 profile/cohort pairs. The 20 new application cases
-win 34/40 opt-z and 32/40 opt-3 primary comparisons; all new decodes win.
-Mixed-width tuple encode remains 2.63×/6.68× Candid at opt-z/opt-3, with 25%
-larger frames. Investigate aggregate encoding/admission without removing limits.
-Ordinary integer/byte-vector controls still expose large gaps; preserve their
-explicit Packed/byte alternatives and lint guidance. This is a codec comparison,
-not a matched regression study or full application benchmark. The prior matrix
-and paired optimization studies remain historical evidence. No runtime changes
-or public release are needed for this report; no cleanup is authorized.
+The [Core 0.20 matrix](../benchmarks/candid-comparison.md#core-020-full-matrix--10-november-2026)
+is historical evidence from frozen source 3c5176c. The current refresh follows.
+
+## Complete full comparison — 11 November
+
+The [Core 0.21 checkout matrix](../benchmarks/candid-comparison.md#core-021-checkout-full-matrix--11-november-2026)
+verifies all 39 cohorts: 2,314 case entries, 48,610 IC rows and 156,640 native/frame
+checks. All 156 guest builds are fresh; all 78 total/code Wasm pairs favour Wire.
+Primary instruction wins: 4,157/4,628 opt-z and 4,260/4,628 opt-3. Ordinary-list
+controls still exceed 10× Candid; mixed-width tuple encode remains 2.63×/6.68×.
+Full exports and frozen sources: `target/evidence/codec-matrix-core021`; preserve
+`target/codec-matrix-core021-build`. Qualification uses Types 0.19.1, not the
+pending root-only 0.19.3 (externally advanced from 0.19.2 during the run).
+This is not a matched regression or application study.
+Native timings share the host with other builds. The current deployment is a separate qualification.
 
 ## Documentation and tooling
-
-The docs index separates guides, benchmarks, findings and historical reports.
-Both workspaces retain Toko Tooling 0.39.9, its reviewed upstream references and
-installed executable receipt; no vendored shared-doc tree remains. Prior snapshot,
-pin and caller checks pass. Stage reuse stays disabled.
+Both workspaces now select Toko Tooling 0.39.11, its reviewed upstream references and
+installed executable receipt; no vendored shared-doc tree remains. Installation,
+snapshot/tools, pin/boundary, documentation and disposable Make routing checks
+pass. LOC narrow/wide rendering preserves numeric columns across 133 rows; stage reuse stays disabled.
 
 ## Compiler, suppliers and release boundary
 
 Rust 1.99.1 is the minimum/pinned compiler; only the opt-in sanitizer fuzzer has
-a separately approved nightly. Both workspaces now select Toko Tooling 0.39.9.
+a separately approved nightly. Both workspaces now select Toko Tooling 0.39.11.
 Root owns four public packages; `qualification/` owns three private packages
 and its independent lock. Canonical Types 0.19, Runtime/guard 0.21 and Testkit
 0.96 composition is qualified. Manifests/locks own exact supplier selections.
 Candid 0.10.40 is a private dev-only oracle, with exact-one-result framing and
 quotas; the removed Platform depth pre-scan does not constrain this comparator.
-Its bigint 0.4.8 exception remains approved and documented; production Types
-use their own dependency. During the current matrix, an external edit changed
-the normal root lock to Types 0.19.1. Deployment now aligns both locks to it;
-the frozen performance matrix remains Types 0.19.0 evidence, not a new-supplier
-performance claim.
+Its bigint 0.4.8 exception remains approved; production Types own their dependency.
+The historical Core 0.20 matrix used Types 0.19.0; this refresh uses 0.19.1.
+Both locks now select Types 0.19.3 for the new release gates; earlier evidence remains tied to its recorded supplier.
 
 Core 0.21.1 and Endpoint 0.12.0 are published. Future delivery uses explicit
 release groups and qualification exclusions; do not re-upload those versions.

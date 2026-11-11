@@ -4,8 +4,8 @@ use alloc::{
     collections::{BTreeMap, BTreeSet},
     format,
     string::String,
-    vec::Vec,
 };
+use core::fmt::Write as _;
 use serde_json::{Value, json};
 
 pub(super) fn identifier(name: &str) -> Result<(), GenerationError> {
@@ -226,14 +226,28 @@ pub(super) fn ty(
             output!("globalThis.ReadonlyArray<{item}>")
         }
         "tuple" => {
-            let mut items = Vec::new();
-            for item in value["items"].as_array().ok_or(GenerationError::Schema)? {
+            let mut rendered = String::new();
+            if render {
+                rendered.push_str("readonly [");
+            }
+            for (index, item) in value["items"]
+                .as_array()
+                .ok_or(GenerationError::Schema)?
+                .iter()
+                .enumerate()
+            {
                 let item = child(item)?;
                 if render {
-                    items.push(item);
+                    if index != 0 {
+                        rendered.push_str(", ");
+                    }
+                    rendered.push_str(&item);
                 }
             }
-            output!("readonly [{}]", items.join(", "))
+            if render {
+                rendered.push(']');
+            }
+            rendered
         }
         "option" => {
             let item = child(&value["item"])?;
@@ -252,10 +266,13 @@ pub(super) fn ty(
             if is_enum && fields.is_empty() {
                 return Err(GenerationError::Schema);
             }
-            let mut rendered = Vec::new();
+            let mut rendered = String::new();
+            if render && !is_enum {
+                rendered.push_str("{ ");
+            }
             let mut names = BTreeSet::new();
             let mut ids = BTreeSet::new();
-            for field in fields {
+            for (index, field) in fields.iter().enumerate() {
                 let name = text(field, "name")?;
                 if !names.insert(name) {
                     return Err(GenerationError::Schema);
@@ -271,21 +288,26 @@ pub(super) fn ty(
                 }
                 let item = child(&field["value"])?;
                 if render {
-                    rendered.push(if is_enum {
-                        format!(
+                    if index != 0 {
+                        rendered.push_str(if is_enum { " | " } else { "; " });
+                    }
+                    if is_enum {
+                        write!(
+                            rendered,
                             "{{ readonly tag: {}; readonly value: {item} }}",
                             json!(name)
                         )
+                        .expect("writing to String cannot fail");
                     } else {
-                        format!("readonly {}: {item}", json!(name))
-                    });
+                        write!(rendered, "readonly {}: {item}", json!(name))
+                            .expect("writing to String cannot fail");
+                    }
                 }
             }
-            if is_enum {
-                output!("{}", rendered.join(" | "))
-            } else {
-                output!("{{ {} }}", rendered.join("; "))
+            if render && !is_enum {
+                rendered.push_str(" }");
             }
+            rendered
         }
         _ => return Err(GenerationError::Schema),
     })
@@ -383,10 +405,10 @@ pub fn generate_registry(
         super::limits::validate(method)?;
         let request = ty(&method["request"], types, 0, &mut remaining, true)?;
         let response = ty(&method["response"], types, 0, &mut remaining, true)?;
-        source.push_str(&format!(
-            "export const {name} = (() => {{ const codec = $createCodec({method}, $types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): globalThis.Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: globalThis.Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): globalThis.Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: globalThis.Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();\n",
+        writeln!(source,
+            "export const {name} = (() => {{ const codec = $createCodec({method}, $types); return {{ methodName: {name_json}, mode: {mode} as const, encodeRequest: (value: {request}): globalThis.Uint8Array => codec.encodeRequest(value), decodeRequest: (bytes: globalThis.Uint8Array): {request} => codec.decodeRequest(bytes) as {request}, encodeResponse: (value: {response}): globalThis.Uint8Array => codec.encodeResponse(value), decodeResponse: (bytes: globalThis.Uint8Array): {response} => codec.decodeResponse(bytes) as {response} }}; }})();",
             name_json = json!(name), mode = method["mode"],
-        ));
+        ).expect("writing to String cannot fail");
     }
     let report = super::bulk_lint::lint_generated(types, methods, acknowledgements)?;
     diagnostics(report);
@@ -420,9 +442,9 @@ pub fn generate_payload_registry(
         }
         super::limits::validate_payload(payload)?;
         let rendered = ty(&payload["schema"], types, 0, &mut remaining, true)?;
-        source.push_str(&format!(
-            "export const {name} = (() => {{ const codec = $createCodec({payload}, $types); return {{ encode: (value: {rendered}): globalThis.Uint8Array => codec.encode(value), decode: (bytes: globalThis.Uint8Array): {rendered} => codec.decode(bytes) as {rendered} }}; }})();\n"
-        ));
+        writeln!(source,
+            "export const {name} = (() => {{ const codec = $createCodec({payload}, $types); return {{ encode: (value: {rendered}): globalThis.Uint8Array => codec.encode(value), decode: (bytes: globalThis.Uint8Array): {rendered} => codec.decode(bytes) as {rendered} }}; }})();"
+        ).expect("writing to String cannot fail");
     }
     let report = if payloads.is_empty() {
         super::bulk_lint::lint_generated(types, &[], acknowledgements)?
@@ -496,7 +518,8 @@ fn registry_source(
         json!(runtime_module)
     );
     render_types(types, &mut remaining, true, |name, rendered| {
-        source.push_str(&format!("export type {name} = {rendered};\n"));
+        writeln!(source, "export type {name} = {rendered};")
+            .expect("writing to String cannot fail");
     })?;
     // `$` is outside consumer identifiers, so helpers cannot capture exports.
     // Computed __proto__ keys preserve the own properties JSON.parse previously
@@ -504,9 +527,15 @@ fn registry_source(
     // Registry meaning and wire schemas stay unchanged; no consumer migration.
     // Serialize the borrowed registry directly instead of constructing a second
     // Value tree. JSON bytes, validation and consumer contracts are unchanged.
-    let registry = serde_json::to_string(types)
-        .map_err(|_| GenerationError::Schema)?
-        .replace("\"__proto__\":", "[\"__proto__\"]:");
-    source.push_str(&format!("const $types = {registry};\n"));
+    let registry = serde_json::to_string(types).map_err(|_| GenerationError::Schema)?;
+    // Reuse the serialized buffer when no computed prototype key is needed.
+    let registry = if registry.contains("\"__proto__\":") {
+        registry.replace("\"__proto__\":", "[\"__proto__\"]:")
+    } else {
+        registry
+    };
+    source.push_str("const $types = ");
+    source.push_str(&registry);
+    source.push_str(";\n");
     Ok((source, remaining))
 }

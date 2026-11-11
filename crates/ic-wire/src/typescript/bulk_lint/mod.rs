@@ -1,6 +1,7 @@
 //! Host-side advice; never changes a schema or emitted bytes.
 use super::{GenerationError, SCHEMA_DEPTH, SCHEMA_WORK, metadata};
 use alloc::{
+    borrow::Cow,
     collections::{BTreeMap, BTreeSet},
     format,
     string::String,
@@ -147,7 +148,7 @@ pub(super) fn lint_generated(
 
 pub(super) fn lint_validated<'a>(
     roots: impl Iterator<Item = (String, &'a Value)>,
-    types: &BTreeMap<String, Value>,
+    types: &'a BTreeMap<String, Value>,
     acknowledgements: &BTreeMap<String, String>,
 ) -> Result<BulkLintReport, GenerationError> {
     if acknowledgements
@@ -181,8 +182,14 @@ pub(super) fn lint_validated<'a>(
     })
 }
 
-fn escape(name: &str) -> String {
-    name.replace('~', "~0").replace('/', "~1")
+fn escape(name: &str) -> Cow<'_, str> {
+    // Most field names need no JSON-pointer escaping. Borrow those names;
+    // preserve the existing escaping order and exact acknowledgement paths.
+    if name.contains(['~', '/']) {
+        Cow::Owned(name.replace('~', "~0").replace('/', "~1"))
+    } else {
+        Cow::Borrowed(name)
+    }
 }
 
 fn representation<'a>(
@@ -265,18 +272,18 @@ fn representation<'a>(
     Err(GenerationError::Complexity)
 }
 
-struct Traversal {
-    active: BTreeSet<String>,
+struct Traversal<'a> {
+    active: BTreeSet<&'a str>,
     remaining: usize,
     root_remaining: usize,
     path: String,
 }
 
-fn walk(
-    node: &Value,
-    types: &BTreeMap<String, Value>,
+fn walk<'a>(
+    node: &'a Value,
+    types: &'a BTreeMap<String, Value>,
     warnings: &mut Vec<BulkWarning>,
-    traversal: &mut Traversal,
+    traversal: &mut Traversal<'a>,
     depth: usize,
 ) -> Result<(), GenerationError> {
     if depth >= SCHEMA_DEPTH || traversal.remaining == 0 || traversal.root_remaining == 0 {
@@ -290,7 +297,7 @@ fn walk(
     match node["k"].as_str().unwrap() {
         "ref" => {
             let name = node["name"].as_str().unwrap();
-            if traversal.active.insert(name.into()) {
+            if traversal.active.insert(name) {
                 walk(&types[name], types, warnings, traversal, depth + 1)?;
                 traversal.active.remove(name);
             }

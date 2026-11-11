@@ -160,3 +160,217 @@ Reproduce from each frozen source with `cargo run --locked --offline
 schema-cost --features schema-cost --profile evaluation`, then benchmark-speed,
 selecting a distinct CARGO_TARGET_DIR for each source. Raw samples are retained
 beside the source directories as `<profile>-<run>.jsonl`.
+
+
+## Borrowed lint names — 11 November 2026
+
+The advisory traversal now borrows reference names in its active recursion set
+and ordinary field names during JSON-pointer escaping. Names containing slash or
+tilde retain the existing owned escaping path. This removes temporary strings;
+it does not memoize references or drop repeated use-site warnings. Generated
+source, warning/acknowledgement paths, codec bytes, identities, budgets and
+acceptance remain unchanged. No consumer action is required.
+
+Matched sources and raw samples are retained under
+`target/evidence/lint-borrows-20261111/{before,after}`. Reproduce with the same
+schema-cost commands above and separate targets. Rust 1.99.1, matching root and
+qualification locks, compiler pin and harness; two runs/profile, eleven calibrated
+batches/run of at least 10 ms, with stats_alloc instrumentation. Baked metadata +
+lint source hashes were independently checked against each source; all 48 paired
+input/output/validation comparisons match. The two new controls cover escaped
+names and a shared recursive definition. These are synthetic host measurements,
+not a full application registry or Candid comparison.
+
+Generation medians for runs 1 / 2 (allocations exclude reallocations):
+
+| Shape | opt-z before → after (µs) | Allocations before → after | opt-3 before → after (µs) |
+| --- | ---: | ---: | ---: |
+| One field | 2.253 / 2.274 → 2.205 / 2.226 | 23 → 20 | 1.533 / 1.545 → 1.509 / 1.519 |
+| 4,096 plain fields | 2,655 / 2,342 → 2,572 / 2,330 | 21,132 → 12,939 | 1,397 / 1,400 → 1,312 / 1,265 |
+| 128 fields × 32 options | 1,263 / 1,354 → 1,395 / 1,276 | 4,773 → 4,516 | 799 / 835 → 828 / 837 |
+| Invalid unused definition | 1,406 / 1,344 → 1,266 / 1,273 | 12,929 → 12,929 | 947 / 923 → 882 / 941 |
+| 4,096 shared recursive references | 4,711 / 4,696 → 4,462 / 4,215 | 50,196 → 17,427 | 2,965 / 3,018 → 2,626 / 2,616 |
+| 4,096 escaped fields | 2,685 / 2,541 → 2,691 / 2,579 | 21,123 → 21,122 | 1,514 / 1,474 → 1,554 / 1,531 |
+
+Retained for deterministic allocation reduction and shared-reference improvement.
+Plain-field allocated bytes fall 2,511,826 → 2,440,224; shared-reference bytes fall
+3,492,161 → 3,305,871. Nested timings vary in direction; escaped-field opt-3
+medians regress about 2.6–3.8%. No universal latency improvement is claimed.
+The invalid definition fails before linting and serves as a host-noise control.
+This code is host-only: IC instructions and uncompressed Wasm savings are not
+applicable and were not measured. Existing native tests cover recursive/shared
+references, escaped paths, acknowledgements and work/depth limits. All 87 active
+native tests and strict Core/private-harness Clippy pass.
+
+
+## Empty-acknowledgement shortcut — rejected 11 November 2026
+
+Tested returning the complete warning report immediately after the bounded walk
+when the acknowledgement map is empty, avoiding the temporary warning-path index.
+The existing nonempty acknowledgement path was unchanged. The shortcut is removed;
+the borrowed-name improvement above remains. No codec or generated-output change.
+
+Sources/samples: `target/evidence/lint-empty-20261111/{before,after}`; same
+schema-cost command and separate targets as above. Rust 1.99.1, matching compiler
+pin, locks and harness. Baked source hashes verified. Four runs/profile, eleven
+calibrated batches/run; runs 1–2 before then after, runs 3–4 reversed using the
+fresh binaries. All 96 input/output/validation comparisons match. Native tests
+(87 active) and strict Core Clippy passed for the candidate. Acknowledgement
+coverage includes empty, partial, complete, stale and invalid reasons.
+
+The 4,096 shared-reference fixture removes 377 allocations (17,427 → 17,050)
+and 107,704 allocated bytes (3,305,871 → 3,198,167), with no allocation change in
+the five controls. These are allocation traffic, not peak heap measurements.
+Shared-reference generation medians, before → after in milliseconds:
+
+| Run | opt-z | opt-3 |
+| --- | ---: | ---: |
+| 1 | 4.381 → 4.261 | 2.609 → 2.603 |
+| 2 | 4.236 → 4.617 | 2.645 → 2.621 |
+| 3 (reverse order) | 4.218 → 4.328 | 2.416 → 2.482 |
+| 4 (reverse order) | 4.087 → 4.124 | 2.405 → 2.445 |
+
+The escaped-name control regresses in all eight comparisons (about 2–19%);
+small-record opt-z medians regress about 1–4%. Even the unchanged invalid-definition
+control varies, so host noise prevents causal attribution of every timing loss.
+There is no repeatable latency win to justify retaining this branch for a 2.2%
+allocation-count reduction in the warning-heavy fixture. Reject rather than claim
+an across-the-board improvement. No IC or uncompressed Wasm measurement applies:
+this is host-only advisory generation. No runtime change or new release note.
+
+
+## Direct registry append — 11 November 2026
+
+Append the serialized registry and its fixed declaration prefix/suffix directly
+to the output module instead of formatting one temporary string containing the
+whole registry. JSON serialization and computed __proto__ escaping remain the
+same. No API, generated bytes, warning paths, identity, budget or acceptance
+change; no consumer migration. This removes a copy rather than adding a cache,
+new mode or specialization.
+
+Matched sources/samples are under
+`target/evidence/registry-append-20261111/{before,after}`, with aggregate checks
+in `verification.json`. Use the schema-cost reproduction command above. Rust
+1.99.1, identical compiler pin, both locks and harness, separate fresh targets;
+baked metadata/lint source hashes match their frozen files. Four runs/profile,
+eleven calibrated batches/run, at least 10 ms/batch; runs 3–4 reverse source
+order. All 96 input/output/validation comparisons match. Both lanes include the
+pending borrowed-name change; the rejected empty-acknowledgement branch is absent.
+
+Median of 44 batches; native generation time includes stats_alloc and output
+destruction. Allocated bytes are allocation traffic, not measured peak heap:
+
+| Shape | Allocated bytes before → after | opt-z µs before → after | opt-3 µs before → after |
+| --- | ---: | ---: | ---: |
+| small | 2,914 → 2,734 | 2.15 → 2.12 | 1.45 → 1.43 |
+| large | 2,440,224 → 2,000,178 | 2266.47 → 2230.92 | 1204.46 → 1247.03 |
+| nested | 4,845,668 → 4,655,066 | 1220.84 → 1206.53 | 768.33 → 759.76 |
+| invalid-unused | 1,200,057 → 1,200,057 | 1245.07 → 1210.68 | 852.23 → 873.39 |
+| shared-ref | 3,305,871 → 2,636,015 | 4204.41 → 4145.61 | 2450.86 → 2546.99 |
+| escaped | 2,728,488 → 2,272,058 | 2605.51 → 2503.72 | 1407.20 → 1424.92 |
+
+Successful generation removes one allocation; invalid unused definitions reject
+before this append and have unchanged allocation traffic. Retain for 18%/20%
+less allocated traffic in the plain/shared-reference fixtures and straightforward
+code. Opt-z timing differences are small; no universal speedup is claimed.
+Opt-3 large/shared-reference medians regress 3.5%/3.9%, and escaped names 1.3%.
+The unchanged invalid-input control also varies, demonstrating host noise.
+No runtime Wasm size or IC instruction result applies to this host-only change.
+87 active native tests, strict Core Clippy, strict generated TypeScript and the
+Rust/TypeScript exact-frame, malformed-input and admission checks pass, including
+computed __proto__ fixtures. Formatting and documentation links also pass.
+
+## Direct declarations and conditional key escaping — 11 November 2026
+
+Write type, method and payload declarations directly into the output String with
+writeln!, removing temporary formatted declarations. Reuse the serialized registry
+String when it contains no literal `"__proto__":` key; keep the existing computed-key
+replacement when it does. This changes neither the escaping algorithm nor generated
+bytes. Runtime codec bytes, identities, limits, acceptance and diagnostics remain
+unchanged; consumers need no migration. No cache or additional public API is added.
+
+Matched study: target/evidence/generator-output-20261111, with paired source trees,
+run.sh/final-run.sh, fresh build records and analyze.mjs/verification.json. Rust
+1.99.1; identical root/qualification locks and harness; separate targets. Source
+hashes baked into every row match metadata/lint files, and all 128 paired input,
+output and validation results agree. Final candidate uses writeln!; final timings
+were repeated after correctness builds finished. Four runs per profile, eleven
+batches of at least 10 ms/run; runs 3–4 reverse lane order. Times include allocator
+instrumentation and output destruction. Allocation traffic is not peak heap.
+The baseline already includes the earlier borrowed lint names/direct registry append.
+
+| Shape | Allocations before → after | Allocated bytes before → after | opt-z µs before → after | opt-3 µs before → after |
+| --- | ---: | ---: | ---: | ---: |
+| small | 19 → 16 | 2,734 → 2,163 | 2.10 → 2.07 | 1.40 → 1.29 |
+| large | 12,938 → 12,935 | 2,000,178 → 1,585,198 | 2227.18 → 2257.46 | 1187.59 → 1217.06 |
+| nested | 4,515 → 4,512 | 4,655,066 → 4,339,106 | 1208.96 → 1200.31 | 732.93 → 717.39 |
+| invalid-unused | 12,929 → 12,928 | 1,200,057 → 1,078,392 | 1187.28 → 1214.29 | 825.84 → 851.54 |
+| shared-ref | 17,426 → 17,422 | 2,636,015 → 2,183,754 | 4169.43 → 4159.66 | 2365.93 → 2417.32 |
+| escaped | 21,121 → 21,118 | 2,272,058 → 1,832,502 | 2471.05 → 2500.01 | 1370.50 → 1401.00 |
+| 256 additional types | 829 → 570 | 108,912 → 93,859 | 101.28 → 102.81 | 58.48 → 58.38 |
+| prototype key | 422 → 419 | 67,674 → 59,954 | 65.04 → 65.73 | 32.66 → 34.03 |
+
+Retain for straightforward removal of temporary allocations: 20.7%/17.2% less
+allocated traffic on large plain/shared-reference registries, and 31.2% fewer
+allocations in the many-type control. The prototype-key case exercises the fallback;
+invalid unused definitions still reject, but preceding declaration rendering now
+allocates less. Timing is mixed: opt-3 large/shared regress 2.5%/2.2%, prototype-key
+4.2%; opt-z large regresses 1.4%. Do not claim universal latency improvement or
+attribute all variation on this shared host to the candidate. These two changes
+were measured together; the table does not isolate their individual contributions.
+
+109 active borrowed/native/runtime tests pass (four ignored probes), strict Core
+Clippy passes, and generated TypeScript compiles with strict settings. Conformance
+passes 178 bidirectional vectors, 39,092 differential mutations, 1 MiB buffers,
+42 scalar vectors, payload codecs, admission and incremental writers. Simulated
+big-endian packed checks pass 78 cases. The maintained schema-cost harness adds
+many-type and prototype-key controls. This is host-only code; runtime Wasm size
+and IC instruction measurements are not applicable and no such saving is claimed.
+
+## Direct composite rendering — 11 November 2026
+
+Render tuple elements and record/enum fields into one String instead of collecting
+formatted fragments in a Vec, joining them, then formatting the wrapper. Child
+validation, duplicate-name/variant-ID checks, traversal order and work/depth
+allowances remain unchanged. Validation-only traversal still emits no strings.
+Exact generated bytes, diagnostics, runtime bytes, identities, limits and acceptance
+are unchanged; no consumer migration. No cache or second traversal is introduced.
+
+The baseline includes direct declarations and conditional prototype escaping above.
+Paired evidence: target/evidence/schema-joins-20261111, with frozen sources,
+run.sh, final-evaluation.sh, raw rows/build records, analyze.mjs and verification.json.
+Rust 1.99.1, identical root/qualification locks and harness, separate targets.
+Four runs/profile, eleven calibrated batches of at least 10 ms/run; reverse order
+for runs 3–4. Baked metadata/lint hashes match the final sources; all 128 paired
+input/output/validation comparisons pass. Fresh library records are verified.
+The first opt-z candidate captured an unused Vec import removed during compilation;
+the source verifier rejected that run. It remains under superseded-evaluation.
+Final opt-z results were rebuilt in a fresh target and remeasured on both lanes;
+no stale or identity-mismatched sample supports the retained result.
+
+Native generation medians over 44 batches, including stats_alloc and destruction:
+
+| Shape | Allocations before → after | Allocated bytes before → after | opt-z µs before → after | opt-3 µs before → after |
+| --- | ---: | ---: | ---: | ---: |
+| small | 16 → 13 | 2,163 → 1,976 | 2.07 → 1.98 | 1.36 → 1.17 |
+| large | 12,935 → 8,837 | 1,585,198 → 1,072,434 | 2233.34 → 2083.02 | 1239.73 → 1045.66 |
+| nested | 4,512 → 4,382 | 4,339,106 → 4,115,804 | 1181.38 → 1149.67 | 762.82 → 711.39 |
+| invalid-unused | 12,928 → 8,830 | 1,078,392 → 565,628 | 1216.89 → 1061.62 | 879.55 → 687.11 |
+| shared-ref | 17,422 → 13,320 | 2,183,754 → 1,695,196 | 4158.45 → 3909.43 | 2507.97 → 2266.28 |
+| escaped | 21,118 → 17,020 | 1,832,502 → 1,295,162 | 2510.68 → 2373.71 | 1443.57 → 1220.93 |
+| many-types | 570 → 567 | 93,859 → 93,672 | 103.25 → 99.61 | 55.93 → 54.71 |
+| prototype key | 419 → 289 | 59,954 → 44,542 | 65.41 → 59.58 | 34.36 → 28.01 |
+
+Retain: the large-record fixture removes 31.7% of allocations and 32.3% of allocated
+traffic, with 6.7%/15.7% lower measured opt-z/opt-3 time. Shared references remove
+23.5% of allocations and 22.4% of traffic, with 6.0%/9.6% lower measured time.
+No aggregate case median regresses; shared-host timings remain observational,
+not an application guarantee. Allocation traffic is not peak heap. These record-heavy
+fixtures do not isolate enum/tuple speedups; those shapes have conformance coverage.
+
+109 active borrowed/native/runtime tests and strict Core Clippy pass. Strict
+TypeScript compilation, 178 bidirectional vectors, 39,092 differential mutations,
+1 MiB byte buffers, 42 scalar vectors, payload/recursive-enum/tuple checks, admission
+and incremental writers pass. Simulated big-endian packed checks pass 78 cases.
+Host-only rendering does not enter the canister codec: IC instructions and runtime
+Wasm measurements are not applicable, and no Wasm saving is claimed.

@@ -760,7 +760,7 @@ Declare the same exact published tooling release once per workspace root
 
 ```toml
 [workspace.dependencies]
-toko-tooling = "=0.39.7"
+toko-tooling = "=0.39.11"
 ```
 
 Every real workspace package inherits `toko-tooling.workspace = true` in its
