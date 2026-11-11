@@ -3,7 +3,7 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.39.7",
+    "value": "=0.39.9",
     "reason": "Toko Tooling 0.36 requires one exact reviewed Cargo selection matching the installed snapshot; updates must remain explicit.",
     "evidence": "docs/guides/development.md#updating-the-tooling-bundle"
   },
@@ -11,7 +11,7 @@
     "rule": "cargo-exact",
     "file": "qualification/Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.39.7",
+    "value": "=0.39.9",
     "reason": "Toko Tooling 0.36 requires one exact reviewed Cargo selection matching the installed snapshot; updates must remain explicit.",
     "evidence": "docs/guides/development.md#updating-the-tooling-bundle"
   }

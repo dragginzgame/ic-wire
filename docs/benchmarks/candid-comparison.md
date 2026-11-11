@@ -1,5 +1,125 @@
 # Latest recorded Candid comparison
 
+## Core 0.20 full matrix — 10 November 2026
+
+**39/39 cohorts completed and verified:** **2,314 overlapping case
+entries**, **9,256 primary encode/decode comparisons**,
+**48,610 IC rows** and **156,640 native/frame checks**.
+All 156 guest builds, baked source/lock identities, exact retained frames,
+matching native/IC row inventories and three identical instruction samples per
+operation verify. No missing cohort remains.
+
+This refresh uses released source `3c5176c`, Rust 1.99.1, Candid 0.10.40 and
+prepared PocketIC 16.0.0. The source and both locks are frozen under
+`target/evidence/codec-matrix-core020/source`; builds use the independent
+`target/codec-matrix-core020-build`. Canonical Types is 0.19.0 in these
+measurements. A separate edit selected Types 0.19.1 in the normal root lock
+while the run was active; it was preserved and is not qualified by this matrix.
+No runtime code, protocol bytes, identities, budgets or acceptance rules changed
+in this benchmark task. No new public release is needed for the report.
+
+Wire wins **4,155/4,628 opt-z** and **4,260/4,628
+opt-3** primary instruction comparisons. Counts overlap across controlled
+representations and type scales; they are not unique types, traffic weights or
+an application-wide speedup. `research-bulk` includes private float prototypes,
+public adapters and ordinary controls; it is not uniformly production-ready.
+The copying-container and preconstructed DTO cohorts also remain labelled controls.
+
+### Uncompressed Wasm
+
+Wire is smaller in **both total module and code-section bytes in 78/78
+profile/cohort pairs**. Selected opt-z linked fixture sizes:
+
+| Fixture | Wire total / code bytes | Candid total / code bytes |
+| --- | ---: | ---: |
+| Standard | 592,245 / 545,637 | 1,426,944 / 1,352,295 |
+| Toko-shaped | 80,011 / 68,887 | 375,576 / 341,390 |
+| 100 derived types | 310,413 / 291,709 | 1,424,995 / 1,370,933 |
+| Expanded application shapes | 264,145 / 228,928 | 806,250 / 743,369 |
+| 100 domain-adapter types | 345,747 / 326,798 | 1,495,696 / 1,441,311 |
+| 100 Packed DTO types | 337,728 / 318,784 | 1,495,696 / 1,441,311 |
+
+[All 78 Wasm pairs](current-wasm.csv) retain both opt-z and opt-3 absolute sizes.
+These are compiler-linked benchmark modules, not full Toko applications or
+per-type savings. Both profiles use LTO, one codegen unit, aborting panics and
+symbol stripping; no additional post-link wasm-opt pass is applied. Code-section
+size is the independently checked section-10 payload of each retained raw module.
+No compressed-size metric is used.
+
+### New application shapes
+
+Twenty appended cases cover five shapes at 0, 1, 128 and 4,096 entries. Each runs
+in all four follow-up cohorts. In the ordinary production-shape cohort, Wire
+wins **34/40 opt-z** and **32/40 opt-3** encode/decode comparisons; every new
+case's decode beats Candid in both profiles. Opt-z absolute results at 4,096
+entries (each cell is **Wire / Candid**):
+
+| Shape | Frame bytes | Encode instructions | Decode instructions |
+| --- | ---: | ---: | ---: |
+| Paginated Packed records | 150,339 / 175,067 | 10,429,732 / 7,394,525 | 11,859,545 / 31,445,948 |
+| Mixed enum changes | 65,534 / 71,027 | 4,772,387.5 / 2,817,442 | 4,199,621.5 / 27,947,615 |
+| Sparse optional blobs | 50,519 / 50,521 | 3,041,617.5 / 2,538,982.5 | 2,551,626.5 / 13,957,945 |
+| Result maps with blobs | 104,333 / 112,676 | 7,814,676 / 5,320,770 | 13,393,927 / 44,501,864 |
+| Mixed-width tuples | 122,893 / 98,329 | 13,956,856 / 5,300,546 | 13,091,998 / 25,681,498 |
+
+The clearest new hotspot is mixed-width tuple encoding: **2.63× Candid at
+opt-z and 6.68× at opt-3**, with 122,893 versus 98,329 frame bytes (+25.0%).
+At opt-z the other four large encodes cost 1.20–1.69× Candid; their decodes use
+0.15–0.38× its instructions. The complete [80 application rows](current-application-cases.csv)
+include both profiles, all sizes, absolute IC costs, frame bytes, repeated native
+timing, allocation counts/bytes and peak live heap for both codecs.
+
+### Remaining gaps and supported representations
+
+Ordinary controls still expose large gaps. At opt-z, wide u16-list encode with
+16,384 elements costs 10,487,432.5 versus 86,364.5 instructions (121.43×);
+generic 1 MiB byte-vector encode costs 158,336,929 versus 2,117,967 (74.76×).
+Keep these visible alongside explicit Packed/byte-field alternatives and lint
+advice; do not silently rewrite consumer Serde or claim every payload wins.
+
+Supported representations materially change the outcome:
+
+- Packed i16, 16,384 wide values: 34,338.5 / 86,093.5 encode instructions and
+  33,932.5 / 1,219,098.5 decode instructions; 32,782 / 32,780 frame bytes.
+- Public nonzero-i64 adapter, 4,096 values: encode/decode cost 0.40× / 0.33×
+  Candid. Public heap-u64 adapter: 0.40× / 0.50×. Wire validates nonzero values
+  and reconstructs a heap; Candid controls are integer vectors.
+- Packed ID16 owned list, 4,096 IDs: 67,613 / 155,582 encode instructions and
+  67,109 / 90,553 decode instructions; 65,550 / 65,548 bytes. Candid's control
+  is an already-flattened blob. Borrowed-source Wire lanes include copying and
+  retain separate results; DTO construction is otherwise outside timing.
+
+These are explicit representation choices with compatibility and small-value
+size tradeoffs. They do not add a second production codec. The next useful
+experiment is mixed-width tuple and aggregate-record encoding/admission cost,
+with pre-allocation limits preserved. Do not revive the private parser or
+introduce generic per-type codec variants solely to improve this table.
+
+### Method and reproduction
+
+Each profile retains two native runs of eleven calibrated batches (2 ms minimum),
+plus separate allocation and peak-heap builds. CSV native nanoseconds are the
+median of 22 per-operation batch means; they are shared-host timing evidence,
+not IC instructions or request-tail latency. Memory metrics are native allocator
+observations, not IC heap measurements. IC counts include result destruction and
+loop overhead; loop controls are retained, not subtracted. Setup and reply
+transport are excluded. Wire budgets and Candid quotas have different semantics.
+Build times are operational records, not controlled cold-compilation comparisons.
+
+This is a current codec comparison, not a matched regression study against the
+historical source below, whose fixtures and locks differ. No before/after cost
+screen is claimed to pass. Prior accepted optimization tradeoffs remain recorded
+in their paired studies.
+
+Run the maintained matrix against a fresh output and target with the prepared
+server (never reuse this completed directory). Raw output, logs, manifests,
+server/artifact hashes, samples, frozen sources and verifiers are retained under
+`target/evidence/codec-matrix-core020`. Reproduce the compact data with:
+
+`node target/evidence/codec-matrix-core020/wire020-matrix-summary.mjs target/evidence/codec-matrix-core020`
+
+`node target/evidence/codec-matrix-core020/write-report-data.mjs target/evidence/codec-matrix-core020 docs/benchmarks`
+
 ## Completed full baseline — 10 November 2026
 
 The full frozen baseline now verifies **39/39 cohorts**, **2,234 overlapping

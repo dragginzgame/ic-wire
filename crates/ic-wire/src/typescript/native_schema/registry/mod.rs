@@ -25,7 +25,7 @@ pub(super) struct Names {
 ///
 /// Register each root once, reuse its returned reference for methods, then finish.
 /// Derived nested declarations receive generated names; generic instantiations
-/// remain distinct. Names depend on traversal/compiler type names and are not
+/// remain distinct. Names depend on compiler type names, not traversal, and are not
 /// stable contract identities. Manual Wire implementations still own their layout.
 /// Projection callbacks must be deterministic: finish rechecks encountered shapes
 /// so diagnostic type-name collisions cannot silently substitute a definition.
@@ -63,21 +63,18 @@ impl SchemaRegistry {
             return Err(GenerationError::Complexity);
         }
         let names = self.context.names.as_mut().unwrap();
-        let key = core::any::type_name::<T>();
         if !names.used.insert(name.into()) {
             return Err(GenerationError::Schema);
         }
-        if let Some(existing) = names.aliases.get(key) {
-            names.checks.push((key, T::native_schema));
-            names
-                .definitions
-                .insert(name.into(), json!({"k":"ref","name":existing}));
-            self.context.remaining -= 1;
-            self.failed = false;
-            return Ok(json!({"k":"ref","name":name}));
-        }
-        names.aliases.insert(key, name.into());
-        self.context.describe::<T>()?;
+        // Explicit roots are aliases too: registering a type as a root before
+        // or after another root discovers it must not rename its nested uses.
+        let reference = self.context.describe::<T>()?;
+        self.context
+            .names
+            .as_mut()
+            .unwrap()
+            .definitions
+            .insert(name.into(), reference);
         self.failed = false;
         Ok(json!({"k":"ref", "name":name}))
     }
@@ -139,14 +136,12 @@ impl SchemaContext {
         let name = if let Some(name) = names.aliases.get(key) {
             name.clone()
         } else {
-            let mut index = names.aliases.len();
-            let name = loop {
-                let name = format!("WireType{index}");
-                if names.used.insert(name.clone()) {
-                    break name;
-                }
-                index += 1;
-            };
+            let name = generated_name(key);
+            // Never resolve a collision by registration order. Fail closed,
+            // including collisions with explicit consumer root names.
+            if !names.used.insert(name.clone()) {
+                return Err(GenerationError::Schema);
+            }
             names.aliases.insert(key, name.clone());
             name
         };
@@ -158,4 +153,33 @@ impl SchemaContext {
         }
         Ok(json!({"k":"ref", "name":name}))
     }
+}
+
+// Host metadata only. Always suffix the complete Rust type spelling, including
+// namespace and generic arguments: adding a namesake cannot rename an old type.
+// This replaces WireType{index}; regenerate clients and migrate source imports.
+// Codec bytes, method identities, limits and acceptance are unchanged.
+fn generated_name(key: &str) -> String {
+    let base = key
+        .split('<')
+        .next()
+        .unwrap_or(key)
+        .rsplit("::")
+        .next()
+        .unwrap_or(key);
+    let stem: String = base
+        .chars()
+        .take(48)
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '_' {
+                ch
+            } else {
+                '_'
+            }
+        })
+        .collect();
+    let hash = key.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |hash, byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x100_0000_01b3)
+    });
+    format!("Wire_{stem}_{hash:016x}")
 }

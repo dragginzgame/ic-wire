@@ -158,6 +158,19 @@ fn error_display_preserves_diagnostics_without_debug() {
 }
 
 #[test]
+fn reply_type_mismatch_requires_the_result_wrapper() {
+    let reply: Result<[u8; 9], u8> = Ok([7; 9]);
+    let frame = native::encode_response(7, &reply, LIMITS).unwrap();
+    assert_eq!(
+        native::decode_response::<Result<[u8; 9], u8>>(7, &frame, LIMITS),
+        Ok(reply)
+    );
+    let error = native::decode_response::<u8>(7, &frame, LIMITS).unwrap_err();
+    assert_eq!(error, Error::Trailing);
+    assert_eq!(error.to_string(), "wire trailing");
+}
+
+#[test]
 #[ignore = "explicit matched error-formatting measurement"]
 fn measure_error_display() {
     use std::{fmt::Write, hint::black_box, time::Instant};

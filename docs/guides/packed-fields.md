@@ -194,6 +194,14 @@ codec calls cannot emit schema advice; include exported request/reply roots in
 the host generation step. Diagnostics display at most eight entries plus an
 omission count; the report retains every path for CI review.
 
+An ordinary `Vec<u8>` is compact on the wire but still visits every element.
+The byte-list advisory concerns encoding and malformed-input processing costs,
+not just byte size. Use `ByteBuf` or the qualified `serde_bytes` adapter for bulk
+processing, or acknowledge the exact field path after measuring its bounded use.
+Pass the same acknowledgement map to every producer/CLI that generates the
+registry; passing an empty map on one path repeats the advice there. No new
+per-type flag, wildcard suppression or alternate codec is required.
+
 `generate_registry` now always runs bulk advice. Its host API takes an
 acknowledgement map and a required diagnostic handler; the former silent
 three-argument call is removed. This is a host API cut only: generated TypeScript,

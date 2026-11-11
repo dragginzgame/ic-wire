@@ -5,6 +5,38 @@ use ic_wire::{
 use serde::Serialize;
 use serde_json::{Value, json};
 
+#[test]
+#[ignore = "explicit matched registry-generation measurement"]
+fn measure_named_registry_generation() {
+    // Many consumer roots sharing recursive definitions; not 1,657 distinct
+    // application types and not a measurement of Toko's unavailable schema.
+    for roots in [1, 298, 1657] {
+        for sample in 0..11 {
+            let start = std::time::Instant::now();
+            let mut registry = SchemaRegistry::new();
+            for index in 0..roots {
+                registry.register::<Roots>(&format!("Root{index}")).unwrap();
+            }
+            let types = registry.finish().unwrap();
+            let source = typescript::generate_registry(
+                &types,
+                &[],
+                "./runtime.js",
+                &Default::default(),
+                |_| {},
+            )
+            .unwrap();
+            println!(
+                "registry,{roots},{sample},{},{},{}",
+                start.elapsed().as_nanos(),
+                types.len(),
+                source.len()
+            );
+            std::hint::black_box(source);
+        }
+    }
+}
+
 #[derive(Serialize, Wire)]
 enum Tree<T = u8> {
     Empty,
@@ -52,7 +84,8 @@ fn finite_recursive_registries_preserve_inline_behavior_and_generic_shapes() {
         eprint!("{report}")
     })
     .unwrap();
-    let fields = types["Roots"]["fields"].as_array().unwrap();
+    let root = types["Roots"]["name"].as_str().unwrap();
+    let fields = types[root]["fields"].as_array().unwrap();
     let a = fields[0]["value"]["name"].as_str().unwrap();
     let b = fields[1]["value"]["name"].as_str().unwrap();
     assert_ne!(a, b);
@@ -283,12 +316,81 @@ fn renamed_recursive_variants_keep_declaration_ordinals() {
     let mut registry = SchemaRegistry::new();
     registry.register::<RenamedValue>("Value").unwrap();
     let types = registry.finish().unwrap();
-    assert_eq!(types["Value"]["variants"][0]["name"], "Int");
-    assert_eq!(types["Value"]["variants"][0]["id"], 0);
+    let value = types["Value"]["name"].as_str().unwrap();
+    assert_eq!(types[value]["variants"][0]["name"], "Int");
+    assert_eq!(types[value]["variants"][0]["id"], 0);
     typescript::generate_registry(&types, &[], "./runtime.js", &Default::default(), |report| {
         eprint!("{report}")
     })
     .unwrap();
+}
+
+#[test]
+fn generated_names_survive_root_reordering_and_unrelated_types() {
+    let collect = |reverse, extra| {
+        let mut registry = SchemaRegistry::new();
+        if extra {
+            registry.register::<Option<String>>("Unrelated").unwrap();
+        }
+        if reverse {
+            registry.register::<Pair<u8>>("SmallPage").unwrap();
+        }
+        registry.register::<Roots>("Roots").unwrap();
+        if !reverse {
+            registry.register::<Pair<u8>>("SmallPage").unwrap();
+        }
+        registry.finish().unwrap()
+    };
+    let baseline = collect(false, false);
+    assert_eq!(baseline, collect(true, false));
+    let expanded = collect(true, true);
+    for (name, shape) in &baseline {
+        assert_eq!(expanded.get(name), Some(shape), "{name}");
+    }
+    assert!(
+        baseline["SmallPage"]["name"]
+            .as_str()
+            .unwrap()
+            .starts_with("Wire_Pair_")
+    );
+    let mut registry = SchemaRegistry::new();
+    registry.register::<Roots>("Roots").unwrap();
+    let generated = baseline["Roots"]["name"].as_str().unwrap();
+    assert_eq!(
+        registry.register::<u8>(generated),
+        Err(GenerationError::Schema)
+    );
+    assert_eq!(registry.finish(), Err(GenerationError::Schema));
+}
+
+#[test]
+fn same_short_names_from_different_namespaces_remain_distinct() {
+    mod first {
+        #[derive(serde::Serialize, ic_wire::Wire)]
+        pub struct Entry {
+            pub value: u8,
+        }
+    }
+    mod second {
+        #[derive(serde::Serialize, ic_wire::Wire)]
+        pub struct Entry {
+            pub value: u64,
+        }
+    }
+    let collect = |reverse| {
+        let mut registry = SchemaRegistry::new();
+        if reverse {
+            registry.register::<second::Entry>("Second").unwrap();
+        }
+        registry.register::<first::Entry>("First").unwrap();
+        if !reverse {
+            registry.register::<second::Entry>("Second").unwrap();
+        }
+        registry.finish().unwrap()
+    };
+    let types = collect(false);
+    assert_eq!(types, collect(true));
+    assert_ne!(types["First"], types["Second"]);
 }
 
 #[test]

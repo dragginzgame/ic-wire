@@ -57,14 +57,15 @@ for selection in types combined; do
         if [[ -z "$identities" || "$(printf '%s\n' "$identities" | wc -l | tr -d ' ')" != 1 ]]; then
             printf 'Expected one canonical Types identity, found:\n%s\n' "$identities" >&2; exit 1
         fi
-        if grep -Eq '^(candid|candid_parser|pocket-ic|ic-platform-pocket-ic|ic-testkit|ic-cdk|ic-cdk-executor|ic0) v' "$graph"; then
+        if grep -Eq '^(candid|candid_parser|pocket-ic|ic-platform-pocket-ic|ic-testkit|ic-cdk|ic-cdk-executor) v' "$graph"; then
             echo 'External codec/runtime dependency leaked into platform types' >&2; exit 1
         fi
         if [[ "$selection" == types ]]; then
-            if grep -Eq '^ic-platform-(macros|runtime|runtime-guard) v|^ic-platform v' "$graph"; then
+            if grep -Eq '^ic-platform-(macros|runtime|runtime-guard) v|^(ic-platform|ic0) v' "$graph"; then
                 echo 'Schema-only consumer selected endpoint/runtime machinery' >&2; exit 1
             fi
         else
+            # Runtime owns its transitive ic0 dependency; schema-only stays free.
             grep -Eq '^ic-platform-runtime-guard v' "$graph"
             grep -Eq '^ic-platform-macros v' "$graph"
         fi

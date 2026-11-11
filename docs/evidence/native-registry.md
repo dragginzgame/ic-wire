@@ -1,4 +1,46 @@
-# Native recursive registries and projected budgets (0.7.7)
+# Native recursive registries and projected budgets
+
+## Registration-independent names — 11 November 2026
+
+Generated definitions now use `Wire_TypeName_<16-hex-suffix>` from the complete
+Rust type spelling rather than `WireType{index}`. The suffix includes namespace
+and generic arguments and is always present: adding a namesake must not rename
+an existing export. A collision rejects rather than allocating another number.
+Explicit roots consistently alias these definitions, including when registered
+before another root encounters the type. Projection-collision checks remain.
+
+Consumers regenerate schemas/clients and update old positional imports once.
+Names are stable under root reordering and unrelated additions, not Rust module
+renames or changes to compiler type spellings. They are metadata labels, not
+contract fingerprints. Bytes, method identities, limits and runtime acceptance
+are unchanged. The implementation is host-only; no runtime Wasm saving is claimed.
+
+Matched opt-z host study: Rust 1.99.1, identical locks, isolated baseline/candidate
+sources and targets, eleven samples per run, two runs each. The synthetic fixture
+registers many roots sharing recursive definitions; it is **not** Toko's unavailable
+1,657-distinct-type schema. Generation includes collection, validation, advice and
+TypeScript rendering. Median milliseconds (first run / serial repeat):
+
+| Roots | Before ms | After ms | Generated TS bytes before → after |
+| --- | ---: | ---: | ---: |
+| 1 | 0.074 / 0.067 | 0.080 / 0.078 | 2,442 → 3,580 |
+| 298 | 2.280 / 2.215 | 2.520 / 2.569 | 21,828 → 36,034 |
+| 1,657 | 14.616 / 14.157 | 15.158 / 16.568 | 112,836 → 186,838 |
+
+This accepts extra host generation time and longer TypeScript identifiers for
+stable imports. Native timings are shared-host observations, not IC instructions;
+the initial runs could overlap and the serial repeat is the stronger timing check.
+The full Toko build and its generated JavaScript bundle have not been measured.
+Raw sources, compiler/lock/source hashes and logs are retained under
+`target/evidence/toko-feedback-20261111/`. Reproduce with the ignored native test
+`measure_named_registry_generation` using separate source/target directories.
+
+Regression coverage includes root order, unrelated insertion, namespace clashes,
+generic instantiations, explicit-name collisions, recursive schemas, projection
+conflicts and unchanged rooted acknowledgement paths. Rust/TypeScript byte and
+malformed-input conformance passes after regeneration.
+
+## Historical 0.7.7 qualification
 
 > Historical findings only. Raw measurements, snapshots, logs and build artifacts
 > were retired from this tree. A summary/hash cannot verify missing payloads.

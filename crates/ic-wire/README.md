@@ -502,6 +502,15 @@ while 1,024 admits both. Setting `bytes: 22` lowers those thresholds to 790 and
 662. Qualify limits with the actual types, Serde implementations and target;
 frame length alone does not determine admission or peak memory use.
 
+Nested records can therefore need an allowance many times their encoded size.
+Struct storage and its fields are both visited; fixed arrays visit their elements;
+strings add a buffer charge. Serde may encode vector elements through references
+while decoding owned values, so even the two directions can have different costs.
+Do not choose `allocation` as a fixed multiple of an observed small frame. Qualify
+representative maximum values in both directions on the deployment target, retain
+separate byte/node/depth limits, and test just below the accepted allowance.
+The configured byte ceiling is reserved even when the current value is small.
+
 Custom Serde code is trusted: work and allocations outside these visited boundaries
 must be bounded by its owner. Standard/custom Deserialize allocations may abort on
 allocator exhaustion; the adapter does not make arbitrary Serde allocation fallible.
@@ -514,6 +523,16 @@ Match the typed `Error` variants for programmatic decisions. Their Display
 messages use explicit lowercase text, such as `wire malformed`, and remain useful
 when compiler settings strip derived Debug output. Compared with earlier releases,
 text comparisons must account for the former capitalization (`wire Malformed`).
+
+`Trailing` means the expected type consumed a valid prefix but did not consume
+the whole payload. Check the endpoint's exact response type, including wrappers:
+a reply declared `Result<T, E>` must be decoded as `Result<T, E>`, not `T`.
+For example, `Ok([7_u8; 9])` starts with the Result tag `00`; decoding it as
+`u8` reads that tag and leaves nine bytes. Extra appended data can cause the same
+error, so it is not proof of a particular type mismatch. Wire is not self-describing;
+some wrong types can consume all bytes and therefore do not produce `Trailing`.
+At the transport boundary, attach the method/direction and expected response
+contract to logs. Keep application type-name strings out of the core codec.
 
 The traversal adapters are adapted from IcyDB's native admission implementation.
 IcyDB's numeric policies,
@@ -737,18 +756,28 @@ let module = generate_registry(&types, &[method], "./wire-runtime.js",
 Register explicit roots once and reuse their returned references for methods.
 Generation always computes bulk-field advice and calls the required diagnostic
 handler before returning source. CLI tools can print the report as above. In
-`build.rs`, emit each warning with `println!("cargo::warning={warning}")` and
-report stale acknowledgements too. CI can reject a non-clean report with
+`build.rs`, emit `report.to_string().lines()` with `println!("cargo::warning={line}")`
+to retain the bounded summary and stale acknowledgements. CI can reject a non-clean report with
 `assert!(report.is_clean())`. Exact diagnostic paths map to nonempty suppression
 reasons; no optional warning feature or separate lint call is needed. See the
 [bulk advice guide](../../docs/guides/packed-fields.md#host-side-bulk-advice-and-ci).
 Nested derived declarations are collected automatically, including mutual recursion
-and distinct generic instantiations. Registering an already collected type under
-a new root name produces an alias; duplicate names reject without overwriting.
+and distinct generic instantiations. Explicit roots are aliases to generated
+definitions, even when registered first; duplicate names reject without overwriting.
 Any registration error invalidates the collector. `finish` checks shapes, references,
 alias cycles and complexity before returning the map. Generated nested names use
-compiler type names and traversal order for host-local interning; they are not
-stable schema hashes or method identities. Regenerate the complete registry together.
+the form `Wire_TypeName_<16-hex-suffix>`, derived from the complete Rust type name,
+including namespace and generic arguments. Reordering roots or adding unrelated
+types does not rename existing definitions. The suffix is always present so adding
+a namesake cannot rename an earlier type; collisions reject rather than renumber.
+Rust type/module renames or compiler type-name changes can still change these
+labels. They are not stable schema hashes or method identities.
+This replaces positional `WireType123` names: regenerate the complete registry and
+update TypeScript imports once. Wire bytes, identities, limits and acceptance stay
+unchanged; generated schema artifacts and their hashes change. Method-rooted
+warning paths stay stable, while acknowledgements under generated `/types/` names
+must be regenerated too. For deliberately named consumer imports, register that Rust type under
+an explicit root name such as `registry.register::<User>("User")`.
 Projection callbacks must be deterministic and can run more than once: collection
 rechecks encountered shapes, rejecting conflicting projections of the same label.
 Inline projection remains available with its existing output and limits.

@@ -4,6 +4,21 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.12.0]
+
+### ⚠️ Breaking
+
+- Align Endpoint with Core 0.21's generated TypeScript naming contract. Update
+  Core and Endpoint together, regenerate schemas/clients and replace positional
+  type imports. Endpoint execution, encoded frames, method IDs, budgets and
+  rollback behavior remain unchanged.
+
+### 🔧 Changed
+
+- Qualify Platform Runtime 0.21.1 with its matching macros/guard and Types
+  0.19.1. Runtime owns the transitive IC system binding; Core and schema-only
+  consumers remain independent of execution machinery.
+
 ## [0.11.0] - 2026-11-10
 
 ### ⚠️ Breaking

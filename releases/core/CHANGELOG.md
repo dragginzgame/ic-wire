@@ -5,6 +5,28 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.21.0]
+
+### ⚠️ Breaking
+
+- Generated TypeScript definitions use readable type-derived names instead of
+  positional `WireType123` names. Root order and unrelated additions no longer
+  rename existing definitions; explicit roots consistently reference them.
+  Regenerate schemas/clients and update positional imports once. Codec bytes,
+  method identities, budgets and runtime acceptance remain unchanged.
+
+### 📚 Documentation
+
+- Explain nested-record allocation charges and the encode/reference versus
+  decode/owned distinction, with exact admission-boundary tests. Clarify how
+  producers and CLIs share bulk-warning acknowledgements and bounded output,
+  and how decoding `Result<T, E>` as `T` can cause `Trailing`.
+
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.39.9 and its reviewed native simulator dependency checks.
+  Existing Wire production and Testkit dependency boundaries remain unchanged.
+
 ## [0.20.0] - 2026-11-10
 
 ### Changed

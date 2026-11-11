@@ -1,8 +1,8 @@
 # Toko Tooling snapshot v1
-# version	0.39.7
+# version	0.39.9
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	fd795f6ef878496ac27a990a9208b87fa786a9148c18580338ef8ac79df501d7
+revision	1dd7bdb5bbb9bb8076dd35d8dc179c9e49196d9945c8e585990e40091b468b48
 # entrypoint	make/consumer.mk
 # entrypoint	.githooks/pre-commit
 # entrypoint	scripts/ci/check-documentation-links.pl
@@ -42,7 +42,7 @@ file	476e5bd1acf2033b75eed5eed080e4d306fa81bc3519eef7b79239294ab637e2	x	scripts/
 file	40f31a19d6115411ebffe7c26e3ed30b8af7eead10dd4830de8d5a9312291222	x	scripts/ci/read-cargo-workspace-version.sh
 file	b9406061ebc1765ab9552b8e5d1bbd43e3d468fde11063f2046867a58ce77254	-	.github/actions/prepare-rust-toolchains/action.yml
 file	26a269c0e63125e8bd939578a64a6a67dbc5280cd3fbfd7da8b9c8e4d44cc6d5	-	.github/actions/retain-failure-evidence/action.yml
-file	c04bf9274df49fc32b450834ba1aec0d1efb2f7d11f9c9d88a8010a8dc924a63	-	TOKO-TOOLING.md
+file	cfed3d5ae20733a798849caa2656fde5195e1188af45109c40850f4cd62a93d8	-	TOKO-TOOLING.md
 file	d4d73d12601ca093878f8206a41185e383ad30484fa9206d60bfcf78248b865c	x	scripts/ci/run-release.sh
 file	07ff21bc90ad9d9882be78d38af9f659d2e13d1a1e5e5208ed540f93bcfcdfaf	-	scripts/ci/release-pr.sh
 file	3bbcd3458afbeee5803bf4f51e624afd2b11578ee961250522c9332ed0fc7b4f	x	scripts/ci/check-make-execution.sh
@@ -58,7 +58,7 @@ file	578a5f7217e378280fe378328d39e4b7dcea653bd868159b57362461bd4e8555	x	scripts/
 file	be03eb1b1ed6834b4a93a35cea81d2b8e677311a094e851619de8c393b1800e0	x	scripts/ci/verify-toko-tooling-snapshot.sh
 file	8fb2e21888c67507645b0dd0d98c4bf8476f1e443e8ec8a6b3bfd803064ba856	x	scripts/ci/cargo-release-metadata.sh
 file	1d69a4a04dbf19db8a54a070d820ee89ffea457ded2ca666108777c310b0e9ac	-	scripts/ci/cargo-release-preflight.sh
-file	1782eec112f61159382411038c658ba964cd70b6b80e0d0e14cadabe98dcc71b	x	scripts/ci/check-cargo-dependency-boundaries.sh
+file	7e38c947d6d66c75a83ac45a6d49d11e602153d7906893436ec5083ff0c55cf0	x	scripts/ci/check-cargo-dependency-boundaries.sh
 file	efdb27607dff8a634f78e1fd8268192120e09cbb3f154e58c4fd1acfccfece34	-	scripts/ci/release-receipts.sh
 file	57a0d0ff82abe26422adb86b8c5f2474b019202e031bedcaf780910d6757f7e0	-	scripts/ci/classify-ci-change.pl
 file	e0f1b194ddbe5e5ae35864edc67727993511e093cff07506b4ffa503681edd52	x	scripts/ci/install-ci-tool.sh

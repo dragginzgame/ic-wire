@@ -22,7 +22,9 @@ cargo build --locked --manifest-path qualification/Cargo.toml -p ic-wire-endpoin
 cargo tree --locked -p ic-wire --no-default-features --edges normal,build --prefix none > "$output/core-graph.txt"
 cargo tree --locked --manifest-path qualification/Cargo.toml -p ic-wire-endpoint-fixture --target wasm32-unknown-unknown --edges normal,build --prefix none > "$output/endpoint-graph.txt"
 # Match package names, not local source paths (for example, a "candidate" copy).
-if grep -Eq '^(ic-wire-endpoint|ic-wire-endpoint-macros|ic-platform|ic-platform-runtime|ic-platform-pocket-ic|ic-testkit|canic|candid|pocket-ic) v' "$output/core-graph.txt" || grep -Eq '^(ic-platform|ic-platform-pocket-ic|ic-testkit|canic|candid|pocket-ic|ic-cdk-executor|ic0) v' "$output/endpoint-graph.txt"; then
+# Runtime 0.21.1 owns the transitive ic0 binding; direct consumer edges remain
+# forbidden by the Cargo boundary checker, and Core must stay independent.
+if grep -Eq '^(ic-wire-endpoint|ic-wire-endpoint-macros|ic-platform|ic-platform-runtime|ic-platform-pocket-ic|ic-testkit|canic|candid|pocket-ic|ic0) v' "$output/core-graph.txt" || grep -Eq '^(ic-platform|ic-platform-pocket-ic|ic-testkit|canic|candid|pocket-ic|ic-cdk-executor) v' "$output/endpoint-graph.txt"; then
     echo 'unexpected runtime dependency' >&2
     exit 1
 fi

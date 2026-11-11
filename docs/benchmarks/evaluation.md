@@ -106,8 +106,9 @@ mixed values; `VecDeque`, `BTreeSet`, tuple/option/result combinations; and Pack
 controls at 0/1/128/4,096 values. Set names denote actual cardinality. Packed and
 ordinary wide lists retain identical logical inputs and Candid frames; their
 Wire layouts intentionally differ. Names and order have a frozen digest.
-Tests reject every truncated scalar prefix, overlong zero and overflowing
-varints, including the four-/five-byte transition beyond the timed scalar set.
+Tests reject every truncated scalar prefix and overflowing varint, including
+the four-/five-byte transition beyond the timed scalar set. Redundant zero is
+accepted under Core 0.20's upstream Postcard rule; encoding remains minimal.
 Deque tests hold logical input fixed across every physical split at 128 values,
 plus empty/singleton controls, and check exact encoder allowances and one-short
 allocation/node/depth refusal while preserving list bytes in both codecs.
@@ -154,7 +155,8 @@ mixed-width integer tuples. Each uses 0, 1, 128 and 4,096 entries. Matched exter
 Candid values preserve the same logical inputs; DTO construction is untimed.
 The existing 134 indices remain unchanged, and selected IC cases must match the
 native inventory byte for byte. These additions enter all four follow-up cohorts;
-the running frozen 10 November matrix still contains the preceding 134 cases.
+the historical pre-optimization matrix contains the preceding 134 cases. The
+Core 0.20 refresh includes all 154 in each of those four cohorts.
 
 Ten finite-only
 f32/f64 cases exercise the public field adapters (empty/singleton through 1 MiB)
@@ -173,7 +175,7 @@ admission and heap reconstruction are additional Wire-side semantics, not
 identical invalid-value or reconstruction policies. These native Serde cases
 do not add schema support or change production bytes, limits or acceptance.
 
-The `borrowed-containers` selection uses the same 134 logical inputs with public
+The `borrowed-containers` selection uses the same 154 logical inputs with public
 `serde_packed` field adapters for the nonzero-list and heap cases. The private
 `packed-containers` control copies into Packed inside serialization; the original
 one-copy DTO is also preserved in paired study snapshots. Candid's external

@@ -186,8 +186,9 @@ fn rooted_review_distinguishes_shared_fields_and_ignores_intern_names() {
         lint_bulk_roots(&other_roots, &other_types, &acknowledged).unwrap(),
         report
     );
+    let reply = types["Reply"]["name"].as_str().unwrap();
     let mut removed = types.clone();
-    removed.get_mut("Reply").unwrap()["fields"]
+    removed.get_mut(reply).unwrap()["fields"]
         .as_array_mut()
         .unwrap()
         .remove(0);
@@ -202,7 +203,7 @@ fn rooted_review_distinguishes_shared_fields_and_ignores_intern_names() {
         json!({"k":"list","item":{"k":"u","bits":64}}),
     ] {
         let mut changed = types.clone();
-        changed.get_mut("Reply").unwrap()["fields"][0]["value"] = replacement;
+        changed.get_mut(reply).unwrap()["fields"][0]["value"] = replacement;
         let report = lint_bulk_roots(&roots, &changed, &acknowledged).unwrap();
         assert_eq!(
             report.stale_acknowledgements,

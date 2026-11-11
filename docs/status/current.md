@@ -8,6 +8,40 @@ The earlier failed batches remain retained. Release qualification corrected two
 private Candid DTO declarations, unchanged qualification-manifest custody, the
 frozen redundant-varint assertion and identity-fixture lock ownership.
 
+## Toko feedback — pending Core 0.21.0
+
+Stable host names replace positional WireType indices. Generated definitions use
+readable Rust type stems and deterministic full-type suffixes; explicit roots
+alias them independently of registration order. Regenerate schemas/clients and
+migrate positional imports once. Schema artifact hashes change; runtime bytes,
+method identities, budgets and acceptance do not. See the [host study](../evidence/native-registry.md#registration-independent-names--11-november-2026)
+for the generation-time and TypeScript-text growth tradeoff. Root/generic/namespace/
+collision/recursive tests and regenerated Rust/TypeScript conformance pass.
+
+Nested allocation accounting now has exact empty/single/batch boundary tests and
+clearer documentation. Local Canic selects Wire 0.18.0 in both locks: no 0.16
+backport is prepared. Its runtime-configuration limits reserve 16,384 bytes and
+allow 262,144 allocation units, 16,384 nodes, depth 32. Toko's actual value is
+unavailable, so its exact reported thresholds are not reproduced. Do not weaken
+admission or infer physical heap use from this weighted traversal allowance.
+
+Canic's host generator passes an empty acknowledgement map. Wire already supports
+exact-path reasons and bounded report Display; downstream must pass reviewed
+acknowledgements consistently through producer and CLI. No sibling files changed.
+The [numeric Trailing experiment](../evidence/codec-cleanup.md#unread-byte-error-payload--rejected-11-november-2026)
+is rejected: +1,103/+1,022 codec Wasm bytes at opt-z/opt-3, +994 endpoint bytes,
+small instruction regressions and a failed Candid-control hash gate. Compact Error
+is restored; Result-wrapper mismatch coverage and diagnostic guidance remain.
+Deployment is authorized: Core 0.21.0 then Endpoint 0.12.0, including crates.io.
+Generated public names require a minor Core release and aligned Endpoint adoption.
+Tooling 0.39.9 installation, snapshot/tools, boundary and roster checks pass.
+The maintainer approved including Runtime/macros/guard 0.21.1 and both locks
+now select that supplier with Types 0.19.1. Its transitive ic0 binding belongs
+to Runtime; Core/schema-only exclusion and direct-dependency admission remain.
+Installed endpoint calls, limits and transaction qualification passed with the
+prepared PocketIC 16 server; both product/integration graph checks pass.
+The supplier-first frozen batch will run both complete release gates.
+
 ## Upstream decoder hard cut — released in Core 0.20.0
 
 Core 0.20.0 uses upstream Postcard in place of the private parser.
@@ -23,8 +57,8 @@ opt-z. Nineteen opt-z rows exceed the instruction screen; none do at opt-3.
 The automated checker stops on provenance identity differences; independent
 verification checks all frame/input, allocation, source and counter evidence.
 Core/Clippy/browser/Platform/corpus checks and 10,000 sanitizer fuzz inputs pass.
-Both full release gates passed. The whole 39-cohort performance matrix has not
-run for this cut.
+Both full release gates passed. The released-source 39-cohort matrix is now
+complete; see the current comparison below.
 Prior parser measurements below are historical for this decoder change.
 
 ## Optimization and matrix refresh — 10 November
@@ -49,85 +83,52 @@ limits or acceptance change; no consumer migration is required:
   The strict screen fails four opt-3 instruction rows and both size checks.
   Tag 128 with u8 body 7 remains `80 01 07`; decode/rejection are unchanged.
 
-The latest matched 154-case candidate is
-`target/evidence/newtype-tags-20261110/candidate/`, against the prior depth
-candidate. Fresh guests/source identities, 3,202 IC rows, 10,280 native/frame
-checks and 5,140 unchanged allocation/heap observations verify. Candid artifacts
-and counters are identical. All 82 active native tests and Clippy pass; newtype
-tag boundary/admission tests pass on both original and candidate implementations.
-Prior Core doctests and follow-up configurations remain qualified. Native times
-are noisy shared-host evidence; Wasm measurements are uncompressed fixture
-modules, not projected application savings. Opt-z is primary; retain opt-3 losses.
+The paired studies retain provenance, absolute counters and accepted regressions.
+Rejected tag-inlining and tuple-body probes remain recorded in encoder-followup;
+keep both admission passes. The expanded sweep adds 20 application cases without
+changing old indices. Native times are shared-host observations, and fixture
+Wasm gains are not projected application savings. Opt-z remains primary.
 
-[Preflight attribution](../evidence/encoder-followup.md#aggregate-preflight-attribution--10-november-2026)
-measured separate calls, not an additive phase decomposition. The first tuple
-probe was invalid and marked superseded; only the corrected study is valid.
-All temporary harness changes are restored. Keep both admission passes.
-Forcing the private tag helper inline produced identical Wasm in both profiles;
-that annotation was removed. See the [rejected probe](../evidence/encoder-followup.md#newtype-tag-inlining-probe--10-november-2026).
-The [ordinary tuple body probe](../evidence/encoder-followup.md#newtype-body-tuple-simplification--10-november-2026)
-adds 52/16 opt-z/opt-3 Wasm bytes and is also rejected. Runtime effects were not
-measured for that size-screen failure. The qualified encoder is restored exactly;
-its all-feature tests/doctests pass. Stop this experiment line for the patch.
+The [current full matrix](../benchmarks/candid-comparison.md#core-020-full-matrix--10-november-2026)
+uses frozen released source 3c5176c under target/evidence/codec-matrix-core020.
+All 39 cohorts verify: 2,314 overlapping case entries, 48,610 IC rows and
+156,640 native/frame checks. All 156 guests were freshly built; Wire is smaller
+in total/code Wasm in all 78 profile/cohort pairs. The 20 new application cases
+win 34/40 opt-z and 32/40 opt-3 primary comparisons; all new decodes win.
+Mixed-width tuple encode remains 2.63×/6.68× Candid at opt-z/opt-3, with 25%
+larger frames. Investigate aggregate encoding/admission without removing limits.
+Ordinary integer/byte-vector controls still expose large gaps; preserve their
+explicit Packed/byte alternatives and lint guidance. This is a codec comparison,
+not a matched regression study or full application benchmark. The prior matrix
+and paired optimization studies remain historical evidence. No runtime changes
+or public release are needed for this report; no cleanup is authorized.
 
-The [expanded hotspot sweep](../benchmarks/candid-comparison.md#expanded-hotspot-sweep--10-november-2026)
-adds 20 application cases, preserving old indices. Snapshot runners now copy
-qualification correctly; 58 CLI and 44 cost-checker tests pass. Cargo advice
-covers signed integers, hashes and finite adapters. Fixture/oracle drift is
-rejected, and maintained borrowed/Nat lane labels are explicit.
+## Documentation and tooling
 
-The separate 39-cohort baseline uses frozen pre-optimization/pre-expansion source
-at `target/evidence/codec-matrix-20261110/source`, with direct Candid 0.10.40.
-All 39 cohorts now verify: 2,234 overlapping cases, 46,978 IC rows and 151,392
-native/frame checks. Wire is smaller in total/code Wasm in all 78 pairs. See the
-[completed report](../benchmarks/candid-comparison.md#completed-full-baseline--10-november-2026).
-It is not the new runtime's full matrix. No cleanup is authorized.
-
-## Documentation and Toko Tooling 0.39.7
-
-The [docs index](../README.md) separates guides, benchmarks, topic findings and
-historical reports. Forty product files moved with links, selectors and fixtures.
-Current guides now use native sizing APIs and the independent qualification
-workspace, without old supplier matrices, issue-status tables or retired probe
-instructions. Link checks pass; no runtime or protocol change is implied.
-Tooling 0.39.5 now keeps reference documentation upstream: the exporter retired
-66 managed Markdown files and unneeded derived helpers. One root baseline and
-92 executable/support files remain. Product links use reviewed commit 12459b6;
-no docs/toko-tooling directory or shared-doc migration remains outstanding.
-The directly called validation-evidence.pl is an explicit retained entrypoint.
-
-Both exact pins, locks and pin exceptions select 0.39.7. Installation/tool,
-snapshot, pin and documentation checks pass. CI selection checks the retained
-baseline rather than a removed guide; release validation retains its helper.
-Current adoption evidence: /tmp/wire0397-*.log; doc-retirement and caller
-qualification: /tmp/wire0395-*.log. Earlier routing and private-metadata proofs
-remain in /tmp/wire0392-*.log. Stage reuse stays disabled. Codec work and the
-incoming crc32fast update are preserved. The moved development guide has an
-intent-to-add entry only for pin-check evidence; no contents are staged.
+The docs index separates guides, benchmarks, findings and historical reports.
+Both workspaces retain Toko Tooling 0.39.9, its reviewed upstream references and
+installed executable receipt; no vendored shared-doc tree remains. Prior snapshot,
+pin and caller checks pass. Stage reuse stays disabled.
 
 ## Compiler, suppliers and release boundary
 
 Rust 1.99.1 is the minimum/pinned compiler; only the opt-in sanitizer fuzzer has
-a separately approved nightly. Both workspaces now select Toko Tooling 0.39.7.
+a separately approved nightly. Both workspaces now select Toko Tooling 0.39.9.
 Root owns four public packages; `qualification/` owns three private packages
 and its independent lock. Canonical Types 0.19, Runtime/guard 0.21 and Testkit
 0.96 composition is qualified. Manifests/locks own exact supplier selections.
 Candid 0.10.40 is a private dev-only oracle, with exact-one-result framing and
 quotas; the removed Platform depth pre-scan does not constrain this comparator.
 Its bigint 0.4.8 exception remains approved and documented; production Types
-use their own dependency. The incoming root crc32fast update is user-owned.
+use their own dependency. During the current matrix, an external edit changed
+the normal root lock to Types 0.19.1. Deployment now aligns both locks to it;
+the frozen performance matrix remains Types 0.19.0 evidence, not a new-supplier
+performance claim.
 
-Tooling 0.38.2 delivery is repository maintenance only: fresh archive comparisons
-show no product source/production-requirement change from published versions.
-No public bump was needed for that adoption. Current runtime changes do affect
-Core; 0.20.0 is the prepared hard-cut scope, with its pending changelog and explicit
-regression tradeoffs. Endpoint runtime and its compatible ^0.19.0 requirement are unchanged. Current
-package metadata changes affect both public groups; assess both at delivery. Manifest versions remain at the
-published values for the tooling-owned release transaction. Full release gates,
-commit/tag/push and publication have not run. Release groups and qualification
-exclusions remain mandatory; this handoff is not a delivery. Historical completed
-supplier/qualification narratives are retained in Git at 1e701b8 and existing
-[delivery receipts](../../releases/receipts/README.md), not duplicated here.
+Core 0.20.0 and Endpoint 0.11.0 are published. Future delivery uses explicit
+release groups and qualification exclusions; do not re-upload those versions.
+Historical delivery narratives remain in Git at 1e701b8 and existing
+[delivery receipts](../../releases/receipts/README.md).
 
 ## Remaining boundaries and custody
 

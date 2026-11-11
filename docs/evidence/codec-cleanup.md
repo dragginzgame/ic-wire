@@ -1,4 +1,6 @@
-# Codec cleanup, pending Core 0.17.1
+# Codec cleanup and diagnostics
+
+## Historical Core 0.17.1 qualification
 
 > Historical findings only. Raw measurements, snapshots, logs and build artifacts
 > were retired from this tree. A summary/hash cannot verify missing payloads.
@@ -85,3 +87,43 @@ Final Rust tests/lint, JS golden/malformed/endian conformance, standalone
 host/Wasm feature/Platform schema and stable identity checks pass. Endpoint
 native/diagnostic/Wasm and installed admission/reply/rollback qualification pass.
 No full CI, dependency update, staging, commit, version preparation or release.
+
+## Unread-byte error payload — rejected, 11 November 2026
+
+Toko's reply mismatch motivated an experiment changing `Error::Trailing` to
+`Trailing { remaining: usize }`, with decimal Display output and no Rust type-name
+strings. A framed `Result<[u8; 9], u8>` decoded as `u8` correctly reported nine
+unread bytes. Bytes, identities, budgets and rejection rules were unchanged.
+
+Rejected: the error payload affects generic Result layouts beyond the failure
+branch. Ten Toko-shaped cases were built from isolated before/after sources and
+separate targets, Rust 1.99.1, identical locks, opt-z/opt-3, two native runs of
+11 batches, and three identical IC samples per operation. Retained uncompressed
+module / code-section sizes:
+
+| Fixture | Before bytes | Candidate bytes |
+| --- | ---: | ---: |
+| Toko codec opt-z | 80,011 / 68,887 | 81,114 / 69,961 |
+| Toko codec opt-3 | 102,955 / 92,579 | 103,977 / 93,568 |
+| Endpoint fixture opt-z (total) | 100,756 | 101,750 |
+
+The small token-card decode rose from 1,534.5 to 1,555.5 instructions at opt-z
+and 758.5 to 780.5 at opt-3. Largest measured percentage regressions were on
+bad-header rejection: 274.5 → 279.5 opt-z and 246.25 → 256.25 opt-3.
+This is not a full application or a measurement of rendering the error on IC.
+The endpoint fixture links actual trap formatting; its size is not projected
+across hundreds of production endpoints.
+
+The strict cost checker **failed** on changed Candid control artifact hashes.
+Independent verification admitted all 220 IC rows per side, matching inputs and
+frames, identical Candid counters, and fresh guest artifacts. Candid total/code
+sizes were unchanged, but its binary sections were not identical; no passing
+matched-control or no-growth qualification is claimed. This limitation reinforces
+rejecting the candidate rather than accepting a diagnostic-only size regression.
+Sources, native/heap samples, Wasm artifacts, IC results and checker output remain
+under `target/evidence/trailing-count-20261111/`.
+
+The candidate was removed completely. Production retains the compact error API;
+a regression test and runtime guide explain the Result-wrapper mismatch. Transport
+owners can attach their existing method/direction/expected-contract context.
+No new error wrapper, alternate decoder or type-name strings are introduced.
