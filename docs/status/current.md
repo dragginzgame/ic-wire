@@ -1,14 +1,12 @@
 # Current handoff
 
-Core 0.21.0 (5970911) and Endpoint 0.12.0 (009f3eb) were delivered to
-origin/main and crates.io on 2026-11-11. Both complete 20-stage release gates
-passed; supplier-first batch-qfrz5NEG is complete and reconciled. All four public
-packages are published; the three private qualification packages stay unpublished.
-The first gate attempt lacked cached published Endpoint 0.11.0 packages for an
-offline fixture. Fetching its locked dependencies resolved that failure; the
-same frozen batch resumed and reran the full gate without stage reuse.
+Core 0.21.1 (db58463) was delivered to origin/main and crates.io on 2026-11-11.
+Its complete 20-stage gate passed; batch-CaPBWJVP is complete and reconciled.
+Both Core packages are published. Endpoint remains at published 0.12.0 (009f3eb),
+delivered in the earlier completed/reconciled batch-qfrz5NEG. Private qualification
+packages remain unpublished. No cleanup or batch retirement is authorized.
 
-## Pending Core 0.21.1 — browser and host costs
+## Released Core 0.21.1 — browser and host costs
 
 Constant-memory browser alias detection removes per-operation registry scans.
 Metadata mutations between calls and valid checks remain visible; callback counts
@@ -22,9 +20,9 @@ are expanded. No runtime codec change or Wasm saving is claimed for these edits.
 The [budget-outlining probe](../evidence/cost-experiments.md#shared-budget-outlining--rejected-11-november-2026)
 is rejected: opt-z saves 2,012 Wasm bytes but observed instructions regress; opt-3
 grows. The strict cost gate fails provenance/control checks, not a qualified win.
-Core 0.21.1 publication is now authorized, including origin/main and crates.io.
-Endpoint remains 0.12.0. Preserve the separate root Types 0.19.2 lock edit outside
-the frozen release; both release locks retain the qualified Types 0.19.1 selection.
+Consumers regenerate clients to adopt the browser changes; codec bytes, method
+identities and value budgets are unchanged. The separate root Types 0.19.2 lock
+edit is restored outside this release; both release locks retained Types 0.19.1.
 
 ## Toko feedback — released Core 0.21.0
 
@@ -126,7 +124,7 @@ the normal root lock to Types 0.19.1. Deployment now aligns both locks to it;
 the frozen performance matrix remains Types 0.19.0 evidence, not a new-supplier
 performance claim.
 
-Core 0.21.0 and Endpoint 0.12.0 are published. Future delivery uses explicit
+Core 0.21.1 and Endpoint 0.12.0 are published. Future delivery uses explicit
 release groups and qualification exclusions; do not re-upload those versions.
 Historical delivery narratives remain in Git at 1e701b8 and existing
 [delivery receipts](../../releases/receipts/README.md).
