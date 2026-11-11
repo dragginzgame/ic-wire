@@ -5,7 +5,7 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
-## [0.21.2]
+## [0.21.2] - 2026-11-11
 
 ### Performance
 
