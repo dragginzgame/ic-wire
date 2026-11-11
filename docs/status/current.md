@@ -1,14 +1,14 @@
 # Current handoff
 
-Core 0.20.0 (efdc034) and Endpoint 0.11.0 (b556f09) were delivered to
-origin/main and crates.io on 2026-11-10. Both complete 20-stage release gates
-passed; supplier-first batch-aZjXt3P2 is complete and reconciled. All four public
+Core 0.21.0 (5970911) and Endpoint 0.12.0 (009f3eb) were delivered to
+origin/main and crates.io on 2026-11-11. Both complete 20-stage release gates
+passed; supplier-first batch-qfrz5NEG is complete and reconciled. All four public
 packages are published; the three private qualification packages stay unpublished.
-The earlier failed batches remain retained. Release qualification corrected two
-private Candid DTO declarations, unchanged qualification-manifest custody, the
-frozen redundant-varint assertion and identity-fixture lock ownership.
+The first gate attempt lacked cached published Endpoint 0.11.0 packages for an
+offline fixture. Fetching its locked dependencies resolved that failure; the
+same frozen batch resumed and reran the full gate without stage reuse.
 
-## Toko feedback — pending Core 0.21.0
+## Toko feedback — released Core 0.21.0
 
 Stable host names replace positional WireType indices. Generated definitions use
 readable Rust type stems and deterministic full-type suffixes; explicit roots
@@ -32,15 +32,17 @@ The [numeric Trailing experiment](../evidence/codec-cleanup.md#unread-byte-error
 is rejected: +1,103/+1,022 codec Wasm bytes at opt-z/opt-3, +994 endpoint bytes,
 small instruction regressions and a failed Candid-control hash gate. Compact Error
 is restored; Result-wrapper mismatch coverage and diagnostic guidance remain.
-Deployment is authorized: Core 0.21.0 then Endpoint 0.12.0, including crates.io.
-Generated public names require a minor Core release and aligned Endpoint adoption.
+Generated public names required the minor Core release and aligned Endpoint adoption.
 Tooling 0.39.9 installation, snapshot/tools, boundary and roster checks pass.
 The maintainer approved including Runtime/macros/guard 0.21.1 and both locks
 now select that supplier with Types 0.19.1. Its transitive ic0 binding belongs
 to Runtime; Core/schema-only exclusion and direct-dependency admission remain.
 Installed endpoint calls, limits and transaction qualification passed with the
 prepared PocketIC 16 server; both product/integration graph checks pass.
-The supplier-first frozen batch will run both complete release gates.
+Both complete release gates passed with these suppliers. During deployment,
+another process changed the normal root lock to Types 0.19.2. That edit is
+preserved for the next candidate, outside this release; qualification still
+selects 0.19.1. Do not treat 0.19.2 as qualified by these release gates.
 
 ## Upstream decoder hard cut — released in Core 0.20.0
 
@@ -125,7 +127,7 @@ the normal root lock to Types 0.19.1. Deployment now aligns both locks to it;
 the frozen performance matrix remains Types 0.19.0 evidence, not a new-supplier
 performance claim.
 
-Core 0.20.0 and Endpoint 0.11.0 are published. Future delivery uses explicit
+Core 0.21.0 and Endpoint 0.12.0 are published. Future delivery uses explicit
 release groups and qualification exclusions; do not re-upload those versions.
 Historical delivery narratives remain in Git at 1e701b8 and existing
 [delivery receipts](../../releases/receipts/README.md).
