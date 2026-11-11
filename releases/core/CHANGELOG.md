@@ -5,6 +5,26 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.21.1]
+
+### Performance
+
+- Resolve browser aliases with constant-memory cycle detection instead of
+  scanning the entire service registry per operation. Preserve metadata changes
+  between calls and valid callback order; malformed cycles may invoke callbacks
+  a different number of times before refusal. Retain the measured long-chain,
+  small-registry tradeoff. Regenerate clients; bytes, identities and value
+  budgets remain unchanged.
+- Reuse the host bulk-lint traversal path instead of allocating it at every
+  edge. Warning paths, acknowledgements, generation output and ceilings remain
+  unchanged; nested-schema generation uses fewer allocations.
+
+### Tests
+
+- Cover every single UTF-16 code unit, boundary surrogate pairs, long alias
+  chains, tail/cycle combinations and fresh-object reference accessors.
+- Include bulk-lint source identity in the existing schema cost harness.
+
 ## [0.21.0] - 2026-11-11
 
 ### ⚠️ Breaking

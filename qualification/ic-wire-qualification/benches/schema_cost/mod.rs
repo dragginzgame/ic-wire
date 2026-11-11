@@ -8,10 +8,16 @@ use std::{collections::BTreeMap, hint::black_box, time::Instant};
 static ALLOCATOR: &stats_alloc::StatsAlloc<std::alloc::System> = &stats_alloc::INSTRUMENTED_SYSTEM;
 
 fn main() {
-    let source = Sha256::digest(include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../crates/ic-wire/src/typescript/metadata/mod.rs"
-    )))
+    let source = Sha256::digest(concat!(
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../crates/ic-wire/src/typescript/metadata/mod.rs"
+        )),
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../crates/ic-wire/src/typescript/bulk_lint/mod.rs"
+        ))
+    ))
     .iter()
     .map(|byte| format!("{byte:02x}"))
     .collect::<String>();

@@ -8,6 +8,24 @@ The first gate attempt lacked cached published Endpoint 0.11.0 packages for an
 offline fixture. Fetching its locked dependencies resolved that failure; the
 same frozen batch resumed and reran the full gate without stage reuse.
 
+## Pending Core 0.21.1 — browser and host costs
+
+Constant-memory browser alias detection removes per-operation registry scans.
+Metadata mutations between calls and valid checks remain visible; callback counts
+on malformed cycles can differ. Large registries improve sharply, with explicit
+small-registry/long-chain regressions. The set-based precursor and Unicode-regex
+probe were rejected. See [browser evidence](../evidence/typescript-writer.md#alias-chain-scaling--11-november-2026).
+The host lint walker reuses paths; generated output/acknowledgements are unchanged.
+See [host evidence](../evidence/native-registry.md#reusable-lint-paths--11-november-2026).
+Rust/TypeScript conformance and strict Core Clippy pass; Unicode and cycle coverage
+are expanded. No runtime codec change or Wasm saving is claimed for these edits.
+The [budget-outlining probe](../evidence/cost-experiments.md#shared-budget-outlining--rejected-11-november-2026)
+is rejected: opt-z saves 2,012 Wasm bytes but observed instructions regress; opt-3
+grows. The strict cost gate fails provenance/control checks, not a qualified win.
+Core 0.21.1 publication is now authorized, including origin/main and crates.io.
+Endpoint remains 0.12.0. Preserve the separate root Types 0.19.2 lock edit outside
+the frozen release; both release locks retain the qualified Types 0.19.1 selection.
+
 ## Toko feedback — released Core 0.21.0
 
 Stable host names replace positional WireType indices. Generated definitions use
@@ -65,31 +83,12 @@ Prior parser measurements below are historical for this decoder change.
 
 ## Optimization and matrix refresh — 10 November
 
-Four qualified runtime changes are retained. No new codec, API, bytes, identity,
-limits or acceptance change; no consumer migration is required:
-
-- [Finite f32 scanning](../evidence/primitive-bulk.md#paired-f32-validation--10-november-2026):
-  large opt-z encode/decode saves 32.7%/11.6% instructions for five extra Wasm
-  bytes. The strict no-growth screen fails; this tradeoff is recorded. f64's
-  follow-up was rejected and restored. Singleton f32 remains `04 00 00 80 3f`.
-- [Unit enum tags](../evidence/encoder-followup.md#unit-enum-tags--10-november-2026):
-  saves 9.0% large opt-z enum encode and 13/11 opt-z/opt-3 Wasm bytes.
-  Tag 128 remains `80 01`; opt-3 counters are unchanged.
-- [Consolidated depth admission](../evidence/encoder-followup.md#consolidated-encoding-depth-admission--10-november-2026):
-  saves 796/16 opt-z/opt-3 Wasm bytes; small instruction regressions stay below
-  0.6%. Unit-tag and depth studies pass the strict paired cost screen.
-- [Newtype enum tags](../evidence/encoder-followup.md#newtype-enum-tags--10-november-2026):
-  saves 326 opt-z Wasm bytes and 16.6%/9.2% large result-map/mixed-enum encode
-  instructions. Explicit tradeoff: page encode adds 1.9%/5.4% at opt-z/opt-3;
-  opt-3 adds 232 Wasm bytes and a tiny result adds 131 instructions (20.8%).
-  The strict screen fails four opt-3 instruction rows and both size checks.
-  Tag 128 with u8 body 7 remains `80 01 07`; decode/rejection are unchanged.
-
-The paired studies retain provenance, absolute counters and accepted regressions.
-Rejected tag-inlining and tuple-body probes remain recorded in encoder-followup;
-keep both admission passes. The expanded sweep adds 20 application cases without
-changing old indices. Native times are shared-host observations, and fixture
-Wasm gains are not projected application savings. Opt-z remains primary.
+Earlier qualified finite-f32, unit/newtype-tag and consolidated depth-admission
+changes remain documented in [primitive bulk](../evidence/primitive-bulk.md)
+and [encoder follow-up](../evidence/encoder-followup.md), including their accepted
+opt-3 regressions. They preserve bytes, identities and admission. Do not repeat
+rejected tag-inlining, tuple-body or f64 probes. Opt-z remains primary; fixture
+Wasm changes are not application savings.
 
 The [current full matrix](../benchmarks/candid-comparison.md#core-020-full-matrix--10-november-2026)
 uses frozen released source 3c5176c under target/evidence/codec-matrix-core020.

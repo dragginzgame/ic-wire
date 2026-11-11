@@ -91,6 +91,20 @@ for (const bits of [8,16,32]) for (const value of [-1,2**bits,0.5,NaN,Infinity])
 rejects(() => probe({k:'u',bits:64}).encodeRequest(9007199254740992), 'value');
 rejects(() => probe({k:'i',bits:128}).encodeRequest(-(1n<<127n)-1n), 'limit');
 rejects(() => probe({k:'text',max:8}).encodeRequest('\ud800'), 'value');
+// Every UTF-16 code unit, plus boundary surrogate pairs: the optimized check
+// must agree with UTF-8 roundtripping without replacing lone surrogates.
+{
+  const codec = probe({k:'text',max:8});
+  for (let unit = 0; unit <= 0xffff; unit++) {
+    const text = String.fromCharCode(unit);
+    if (unit >= 0xd800 && unit <= 0xdfff) rejects(()=>codec.encodeRequest(text),'value');
+    else assert.equal(codec.decodeRequest(codec.encodeRequest(text)),text);
+  }
+  for (const high of [0xd800,0xdbff]) for (const low of [0xdc00,0xdfff]) {
+    const text = String.fromCharCode(high,low);
+    assert.equal(codec.decodeRequest(codec.encodeRequest(text)),text);
+  }
+}
 rejects(() => probe({k:'text',max:3}).encodeRequest('🦀'), 'limit');
 rejects(() => probe({k:'bytes',max:4}).encodeRequest(new Uint8Array(5)), 'limit');
 rejects(() => probe({k:'array',max:2,item:{k:'unit'}}).encodeRequest([null]), 'limit');
@@ -322,7 +336,7 @@ for (const location of ['request', 'alias', 'concrete']) {
   rejects(()=>createCodec({...nativeMeta,request},types).encodeRequest('ok'),'value');
   rejects(()=>createCodec({...nativeMeta,request},types).decodeRequest(frame(2,111,107)),'value');
 }
-// Registry size is computed once per operation, not once per referenced value.
+// Unrelated registry definitions are never enumerated to resolve aliases.
 // Changes between operations remain visible; cyclic aliases still fail.
 {
   const types = Object.fromEntries(Array.from({length: 1000}, (_, i) => [`T${i}`, {k:'u',bits:8}]));
@@ -334,9 +348,9 @@ for (const location of ['request', 'alias', 'concrete']) {
     Object.keys = value => { if (value === types) scans++; return originalKeys(value); };
     const values = Array(100).fill(7);
     const bytes = codec.encodeRequest(values);
-    assert.equal(scans,1);
+    assert.equal(scans,0);
     assert.deepEqual(codec.decodeRequest(bytes),values);
-    assert.equal(scans,2);
+    assert.equal(scans,0);
     types.T0 = {k:'ref',name:'Added'};
     types.Added = {k:'u',bits:8};
     assert.deepEqual(codec.encodeRequest(values),bytes);
@@ -348,6 +362,33 @@ for (const location of ['request', 'alias', 'concrete']) {
     Object.keys = originalKeys;
   }
 }
+// Alias work follows the selected chain, including chains longer than value depth.
+{
+  const types = Object.fromEntries(Array.from({length: 512}, (_, i) =>
+    [`T${i}`, i === 511 ? {k:'u',bits:8} : {k:'ref',name:`T${i + 1}`} ]));
+  const schema = {k:'ref',name:'T0'};
+  const codec = createCodec({...nativeMeta,request:schema,response:schema},types);
+  assert.equal(codec.decodeRequest(codec.encodeRequest(7)),7);
+  types.T511 = {k:'ref',name:'T256'};
+  rejects(()=>codec.encodeRequest(7),'value');
+  types.T511 = {k:'ref',name:'Missing'};
+  rejects(()=>codec.encodeRequest(7),'value');
+}
+// Tail/cycle combinations exercise checkpoints before and inside each cycle.
+for (const tail of [0,1,2,3,7,8,15,16,31,32,63]) {
+  for (const length of [1,2,3,7,8,15,16,31,32]) {
+    const types = Object.fromEntries(Array.from({length:tail + length}, (_, i) =>
+      [`T${i}`, {k:'ref',name:`T${i + 1 === tail + length ? tail : i + 1}`} ]));
+    const codec = probeWithAliases(types);
+    rejects(()=>codec.encodeRequest(7),'value');
+    rejects(()=>codec.decodeRequest(frame(7)),'value');
+  }
+}
+function probeWithAliases(types) {
+  return createCodec({...nativeMeta,request:{k:'ref',name:'T0'}},types);
+}
+// Detection follows names, not object identity: accessors can return fresh nodes.
+rejects(()=>probeWithAliases({get T0(){return {k:'ref',name:'T0'};}}).encodeRequest(7),'value');
 // Short strings must not allocate a frame-sized UTF-8 scratch buffer per item.
 const encodeInto = TextEncoder.prototype.encodeInto;
 try {

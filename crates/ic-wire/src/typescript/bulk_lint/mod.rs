@@ -6,6 +6,7 @@ use alloc::{
     string::String,
     vec::Vec,
 };
+use core::fmt::Write as _;
 use serde_json::Value;
 
 // Previously one 65,536-visit counter covered all expanded roots, refusing
@@ -160,10 +161,12 @@ pub(super) fn lint_validated<'a>(
         active: BTreeSet::new(),
         remaining: ROOTED_WORK,
         root_remaining: SCHEMA_WORK,
+        path: String::new(),
     };
     for (path, node) in roots {
         traversal.root_remaining = SCHEMA_WORK;
-        walk(node, &path, types, &mut warnings, &mut traversal, 0)?;
+        traversal.path = path;
+        walk(node, types, &mut warnings, &mut traversal, 0)?;
     }
     let paths: BTreeSet<_> = warnings.iter().map(|warning| &warning.path).collect();
     let stale_acknowledgements = acknowledgements
@@ -266,11 +269,11 @@ struct Traversal {
     active: BTreeSet<String>,
     remaining: usize,
     root_remaining: usize,
+    path: String,
 }
 
 fn walk(
     node: &Value,
-    path: &str,
     types: &BTreeMap<String, Value>,
     warnings: &mut Vec<BulkWarning>,
     traversal: &mut Traversal,
@@ -281,38 +284,31 @@ fn walk(
     }
     traversal.remaining -= 1;
     traversal.root_remaining -= 1;
+    // Reuse one path while descending; only emitted warnings retain a copy.
+    // Exact acknowledgement paths, traversal ceilings and output are unchanged.
+    let path_len = traversal.path.len();
     match node["k"].as_str().unwrap() {
         "ref" => {
             let name = node["name"].as_str().unwrap();
             if traversal.active.insert(name.into()) {
-                walk(&types[name], path, types, warnings, traversal, depth + 1)?;
+                walk(&types[name], types, warnings, traversal, depth + 1)?;
                 traversal.active.remove(name);
             }
         }
         "list" => {
             if let Some((word, representation)) = representation(&node["item"], types)? {
                 warnings.push(BulkWarning {
-                    path: format!("{path}/list/{word}"),
+                    path: format!("{}/list/{word}", traversal.path),
                     representation,
                 });
             }
-            walk(
-                &node["item"],
-                &format!("{path}/item"),
-                types,
-                warnings,
-                traversal,
-                depth + 1,
-            )?;
+            traversal.path.push_str("/item");
+            walk(&node["item"], types, warnings, traversal, depth + 1)?;
         }
-        "array" | "option" | "newtype" => walk(
-            &node["item"],
-            &format!("{path}/item"),
-            types,
-            warnings,
-            traversal,
-            depth + 1,
-        )?,
+        "array" | "option" | "newtype" => {
+            traversal.path.push_str("/item");
+            walk(&node["item"], types, warnings, traversal, depth + 1)?;
+        }
         "record" | "enum" => {
             let key = if node["k"] == "record" {
                 "fields"
@@ -320,41 +316,32 @@ fn walk(
                 "variants"
             };
             for field in node[key].as_array().unwrap() {
-                walk(
-                    &field["value"],
-                    &format!("{path}/{key}/{}", escape(field["name"].as_str().unwrap())),
-                    types,
-                    warnings,
-                    traversal,
-                    depth + 1,
-                )?;
+                write!(
+                    traversal.path,
+                    "/{key}/{}",
+                    escape(field["name"].as_str().unwrap())
+                )
+                .unwrap();
+                walk(&field["value"], types, warnings, traversal, depth + 1)?;
+                traversal.path.truncate(path_len);
             }
         }
         "tuple" => {
             for (index, item) in node["items"].as_array().unwrap().iter().enumerate() {
-                walk(
-                    item,
-                    &format!("{path}/items/{index}"),
-                    types,
-                    warnings,
-                    traversal,
-                    depth + 1,
-                )?;
+                write!(traversal.path, "/items/{index}").unwrap();
+                walk(item, types, warnings, traversal, depth + 1)?;
+                traversal.path.truncate(path_len);
             }
         }
         "result" => {
             for key in ["ok", "err"] {
-                walk(
-                    &node[key],
-                    &format!("{path}/{key}"),
-                    types,
-                    warnings,
-                    traversal,
-                    depth + 1,
-                )?;
+                write!(traversal.path, "/{key}").unwrap();
+                walk(&node[key], types, warnings, traversal, depth + 1)?;
+                traversal.path.truncate(path_len);
             }
         }
         _ => {} // Scalars and bulk fields.
     }
+    traversal.path.truncate(path_len);
     Ok(())
 }

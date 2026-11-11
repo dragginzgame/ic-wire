@@ -186,3 +186,56 @@ corrected runs use one fixed worktree, copy changed files immediately before
 building, and require observed library/guest compilation. The final paired gate
 also refuses a cached candidate. Retired raw output (see retention notice) covers
 both sides, both profiles and both fixtures.
+
+## Shared budget outlining — rejected, 11 November 2026
+
+Do not promote the isolated change from Wasm inline(always) to inline(never) on
+Budget::enter_many. It preserves the source-level checks and two-pass encoding,
+but the observed instruction/size tradeoff does not justify replacing production.
+The normal checkout's codec/admission source is unchanged.
+
+Both frozen sources use Rust 1.99.1, identical locks and the maintained 154-case
+coverage-shapes suite. Separate targets retain opt-z/opt-3 LTO modules, two native
+runs/profile with 11 batches at a 2 ms minimum, allocation/heap probes, and three
+identical IC samples per operation. The existing explicitly prepared PocketIC 16
+server supplies execution. Native code is unchanged by this Wasm-only attribute;
+its timings are controls, not evidence of a native optimization.
+
+| Wire fixture | Before total / code bytes | Candidate total / code bytes |
+| --- | ---: | ---: |
+| opt-z | 263,829 / 228,715 | 261,817 / 226,700 |
+| opt-3 | 348,674 / 315,897 | 351,256 / 318,334 |
+
+Observed IC instructions/op (not a passing paired-cost qualification):
+
+| Profile / 4,096-entry operation | Before | Candidate |
+| --- | ---: | ---: |
+| opt-z tuple encode | 13,956,856 | 15,046,523 |
+| opt-z tuple decode | 13,091,998 | 14,607,571 |
+| opt-z page encode | 10,429,732 | 11,051,219 |
+| opt-z mixed enum decode | 4,199,621.5 | 4,874,105.5 |
+| opt-3 tuple encode | 5,333,976 | 8,279,131 |
+| opt-3 tuple decode | 3,870,359 | 6,962,898 |
+| opt-3 page encode | 5,126,831 | 5,626,973 |
+
+Qualification limits are explicit: the strict cost checker stops on cached-build
+records because the exact sources/targets were first compiled for the size
+screen. No input changed between those builds, but this is not a passing fresh-
+build gate. Candid modules also differ (opt-z +11 total/+10 code bytes, opt-3
+same sizes but changed hash), and 40 Candid counter rows differ. Do not label
+this a controlled oracle/no-growth pass or use it as a published speedup claim.
+Independent verification checks recorded admission hashes against source, all
+IC artifact hashes, 6,404 repeated-sample rows, 10,280 matched native input/frame
+rows and 5,140 identical allocation/heap observations. Simple threshold arithmetic
+finds 609 Wire rows above baseline × 1.05 + 64; it does not override the failed
+provenance/control gate. The evidence warrants rejecting this candidate, not
+spending more qualification effort to ship a 2 KB opt-z saving with these losses.
+
+Evidence and executable verification: target/evidence/admission-outline-20261111/,
+including before/after/source, results, analyze.mjs, verification.json and
+cost-screen.log. The source delta is solely the named attribute. Reproduction
+uses each frozen source's evaluate-codecs.sh with CORPUS_FEATURE=coverage-shapes,
+CODEC_SOURCE_SNAPSHOT pointing to that source, a separate CARGO_TARGET_DIR per
+lane and an explicitly prepared POCKET_IC_BIN. Fresh qualification would require
+fresh build records and matching Candid controls. Nothing from this runtime
+prototype is applied to production; bytes, limits and identities stay unchanged.

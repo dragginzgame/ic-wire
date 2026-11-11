@@ -96,3 +96,70 @@ An initial candidate routed every byte through a capacity helper and regressed
 the tight integer control by 33.9% in its screening run. Moving growth out of
 the ordinary byte-write path reduced that regression; the archived first-candidate
 and focused-probe results are screening evidence, not the retained final timings.
+
+## Alias-chain scaling — 11 November 2026
+
+Retain constant-memory cycle detection instead of enumerating every registry key
+once per operation. Checkpoints spaced 1, 2, 4, ... hops apart eventually span
+any cycle, which repeats a checkpoint name. Names, not object identity, detect
+cycles even when accessors return fresh reference objects. There is no chain set
+or cross-call cache: additions and changed definitions remain visible.
+Valid reference/concrete checks retain their order and count. Malformed cycles
+can stop after a different number of callbacks than the former registry-sized
+hop allowance. Payload bytes, identities, value budgets and valid-schema
+acceptance are unchanged. Regenerate clients; no contract/storage migration.
+
+Matched current-runtime probe: Node 24.21.0 transforms TypeScript to ES2022 in
+memory using node:module.stripTypeScriptTypes. Two runs reverse lane order,
+11 batches/run, 2,000 calls/batch for scalars and 50 for batches/large strings,
+200 warm-up calls. Both lanes check identical payload bytes and decoded values.
+This is shared-host Node timing, not browser fleet, IC instruction or Wasm
+qualification. Other native qualification was active: small timing differences
+are noisy. Inputs include u8 7 (07), lists of 128/4,096 sevens, strings, registries
+of 1/298/1,657 definitions, and chains of 1/2/8 aliases. Registries always contain
+at least as many definitions as their chain length.
+
+Per-run medians, microseconds/op (first / second run):
+
+| Registry / chain / operation | Before | After |
+| --- | ---: | ---: |
+| 1 / 1 / encode scalar | 0.576 / 0.366 | 0.560 / 0.295 |
+| 1 / 1 / decode scalar | 0.132 / 0.106 | 0.173 / 0.114 |
+| 1,657 / 1 / encode scalar | 29.753 / 29.525 | 0.237 / 0.273 |
+| 1,657 / 2 / decode scalar | 28.579 / 29.517 | 0.123 / 0.124 |
+| 1,657 / 2 / decode 4,096 values | 316.273 / 313.350 | 288.766 / 285.965 |
+| 8 / 8 / encode 4,096 values | 554.447 / 545.137 | 742.860 / 661.210 |
+| 8 / 8 / decode 4,096 values | 919.933 / 904.781 | 1,074.730 / 1,066.220 |
+
+The small-registry long-chain regression is retained explicitly: repeated chain
+checks cost more than a once-per-operation scan of eight keys. This synthetic
+control adds about 0.12–0.19 ms encode and 0.15–0.16 ms decode. Accept that host
+tradeoff to remove service-wide scaling without caches or per-value allocations;
+this is not a universal throughput win. No canister runtime source changes,
+IC instruction gains or Wasm savings are claimed.
+
+The initial set-based candidate is rejected: 4,096 values through two aliases
+in a small registry decoded in 504/557 µs versus 326/347 µs before. An
+object-identity checkpoint probe avoided that allocation but is superseded by
+name checkpoints so fresh-object accessors cannot conceal cycles. Tests cover
+512-link chains, 99 tail/cycle combinations, fresh-object accessors, mutable
+registries, valid callbacks and zero enumeration. Existing exact frames, budgets,
+recursive types and malformed-input conformance remain mandatory.
+
+Raw source pairs, source hashes, all samples and executable measure.mjs:
+`target/evidence/browser-followup-20261111/`. Reproduce with
+`node target/evidence/browser-followup-20261111/measure.mjs before constant`.
+The final resolver differs from timed constant.ts only in explanatory comments.
+No gzip or production bundle-size saving is claimed.
+
+### Rejected Unicode validation probe
+
+Replace the post-encoding UTF-8 roundtrip check with a Unicode-mode lone-surrogate
+regular expression, retaining the prior length-error precedence. Compare `aliases`
+and `text` sources with the same runner (large strings use 50 calls/batch).
+Short Unicode encoding improves from 0.972/0.926 to 0.738/0.708 microseconds,
+but 16,384 astral characters regress from 97.305/95.732 to
+195.323/186.134 microseconds. ASCII-large timings are noisy and mixed.
+Reject the change; the existing TextEncoder/TextDecoder path remains authoritative.
+Retain exhaustive single-UTF-16-code-unit roundtrip/refusal coverage and boundary
+surrogate pairs. No new string API, encoding, browser requirement or fallback.

@@ -122,3 +122,41 @@ inputs. Extract and run `bash replay.sh` with prepared Rust/dependencies; it use
 an isolated temporary tree and offline Cargo. Maintained `make check-typescript`
 reproduces cross-runtime qualification with the documented Node/TypeScript setup.
 Original artifacts/logs remain under `/tmp/wire-issues-20-21`.
+
+## Reusable lint paths — 11 November 2026
+
+The rooted advisory walker now appends to one traversal-owned path and truncates
+it when returning from each child. Only warnings retain full path copies. This
+removes per-edge path allocation without memoizing use sites, dropping warnings,
+changing acknowledgement escaping or increasing work/depth allowances. Early
+errors still discard the whole report. Codec bytes, schema output, names,
+identities, limits and acceptance are unchanged; no consumer migration is needed.
+
+Matched sources under `target/evidence/lint-paths-20261111/{before,after}/source`
+use Rust 1.99.1, identical locks and separate Cargo targets. The existing
+`schema-cost` example now hashes both metadata and bulk-lint sources into its
+identity. Two runs/profile, 11 calibrated batches/run (at least 10 ms/batch),
+opt-z evaluation and opt-3 benchmark-speed. Timing includes stats_alloc and
+output destruction on a shared host. Input and generated-output hashes match.
+
+Generation medians across 22 batches; allocations exclude reallocations:
+
+| Shape | opt-z before → after | Allocations before → after | opt-3 before → after |
+| --- | ---: | ---: | ---: |
+| One-field record | 2.174 → 2.173 µs | 24 → 23 | 1.535 → 1.539 µs |
+| 4,096-field record | 2.400 → 2.268 ms | 25,228 → 21,132 | 1.505 → 1.362 ms |
+| 128 fields × 32 options | 1.413 → 1.211 ms | 8,997 → 4,773 | 1.024 → 0.751 ms |
+| Invalid unused definition | 1.191 → 1.208 ms | 12,929 → 12,929 | 0.867 → 0.883 ms |
+
+Large-record reallocations fall 12,218 → 4,127; nested reallocations fall
+12,083 → 7,835. The invalid-definition path fails before linting and has unchanged
+allocation counts; its small timing regression is recorded, not erased.
+Small-input timing is essentially flat. Host-only code is excluded on Wasm:
+there is no canister size or IC instruction saving claim. Existing recursive,
+shared-use-site, escaped-name, tuple/result/enum and budget-boundary tests pass.
+
+Reproduce from each frozen source with `cargo run --locked --offline
+--manifest-path qualification/Cargo.toml -p ic-wire-qualification --example
+schema-cost --features schema-cost --profile evaluation`, then benchmark-speed,
+selecting a distinct CARGO_TARGET_DIR for each source. Raw samples are retained
+beside the source directories as `<profile>-<run>.jsonl`.
