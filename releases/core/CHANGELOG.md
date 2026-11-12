@@ -5,6 +5,28 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.21.4]
+
+### Performance
+
+- Build decoded browser packed-boolean arrays with indexed writes after complete
+  validation. Large-buffer Node decode improves 64–80% in repeated measurements,
+  with control regressions documented. Regenerate clients; exact bytes, limits,
+  malformed-input rejection and owned results are unchanged. No Wasm change.
+
+- Decode browser collection lengths with the existing numeric u32 reader,
+  avoiding BigInt conversions. Nested-list decoding improves in repeated Node
+  measurements; flat-list and small-control regressions are recorded in the
+  paired study. Regenerate clients; bytes, identities, limits and malformed-input
+  acceptance remain unchanged. Rust runtime and Wasm are unchanged.
+
+### Maintenance
+
+- Deferred repository maintenance: fetch both root and qualification locks before
+  offline hosted CI checks. Clean runners can now resolve the private benchmark
+  dependencies during Core pin admission and benchmark validation. No public
+  package or codec change is required.
+
 ## [0.21.3] - 2026-11-12
 
 ### Maintenance

@@ -163,3 +163,116 @@ but 16,384 astral characters regress from 97.305/95.732 to
 Reject the change; the existing TextEncoder/TextDecoder path remains authoritative.
 Retain exhaustive single-UTF-16-code-unit roundtrip/refusal coverage and boundary
 surrogate pairs. No new string API, encoding, browser requirement or fallback.
+
+## Numeric collection-length decoding — 12 November 2026
+
+Retain only Reader.length's use of the existing numeric u32 varint reader.
+Previously it decoded through BigInt, converted the maximum to BigInt, compared,
+then converted back to Number. All u32 results are exactly representable as
+Number. Existing bytes and acceptance stay unchanged: 80 00 still decodes as
+zero; fifth-byte overflow and unterminated prefixes remain malformed, and an
+otherwise valid length above the field allowance remains a limit error before
+payload reads. Regenerate clients; no schema, identity, storage or retry-byte
+migration. Rust/Wasm runtime and allocation budgets are unchanged.
+
+Matched before/combined/decode-only runtime sources, Node 24.21.0, transformed
+in memory using node:module.stripTypeScriptTypes. Three runs alternate lane order;
+30 shapes cover scalar controls, bytes/text/lists/packed u16 at lengths
+0/1/127/128/16383/16384/65536, plus 128 nested three-element lists. Every lane
+checks exact payload bytes and decoded values. Each operation warms 2,000 calls,
+then records 11 calibrated batches (5–10,000 calls); raw samples, iteration counts
+and frame/source hashes are retained. The repeat is pinned to CPU 0 on the
+shared Linux host; concurrent Rust qualification and GC remain noise sources.
+This is Node latency, not browser-fleet, IC-instruction or Wasm qualification.
+
+Decode medians in microseconds/op, three independent runs:
+
+| Case | Before | Retained decoder |
+| --- | --- | --- |
+| Scalar u32 control | 0.088 / 0.092 / 0.089 | 0.089 / 0.101 / 0.104 |
+| Empty bytes | 0.146 / 0.193 / 0.227 | 0.107 / 0.162 / 0.173 |
+| 128-byte text | 0.295 / 0.593 / 0.600 | 0.212 / 0.513 / 0.522 |
+| List of 128 u8 | 2.712 / 3.257 / 3.157 | 2.926 / 3.266 / 3.405 |
+| Packed 128 u16 | 0.483 / 1.221 / 1.032 | 0.456 / 0.789 / 0.794 |
+| 128 nested three-byte lists | 23.377 / 19.098 / 17.505 | 14.887 / 13.773 / 14.869 |
+| 64 KiB bytes | 15.368 / 10.519 / 11.919 | 13.201 / 11.762 / 12.057 |
+
+Nested-list decoding improves in all runs (15–36%). Flat-list control regresses
+up to 8%; the unchanged scalar control varies by 1–15 ns. Large-buffer results
+are mixed; do not claim universal throughput improvement. Retain the smaller
+implementation for its repeated nested-length gain and simpler exact-domain
+arithmetic, with these regressions visible. Transformed unminified JS decreases
+22,449 → 22,439 bytes before explanatory comments; no production bundle claim.
+
+The combined numeric-encoding candidate needs a wide-host-buffer fallback to
+preserve old encoding behavior and increases transformed JS to 22,525 bytes.
+Its encode timings are inconsistent in allocation-heavy cases; do not retain the
+extra writer method or its call-site changes. Original encoding stays unchanged.
+
+Final-source Rust/TypeScript conformance passes, including exact frames,
+malformed mutations, 1 MiB buffers, 16 admission shapes, custom scalars and 78
+simulated-endian cases. Added browser cases check length-prefix boundaries,
+u32::MAX against zero field limits, 2^32 overflow, truncated/unterminated prefixes
+and redundant zero for bytes, text and lists. These use an independent BigInt
+prefix oracle in tests only.
+
+Evidence and reproduction: `target/evidence/lengths-f64-20261112/browser/`.
+Run `taskset -c 0 node target/evidence/lengths-f64-20261112/browser/repeat.mjs`;
+before.ts, after.ts (combined), decode.ts, repeat.jsonl and the initial screening
+results are retained. Final production source differs from timed decode.ts only
+by explanatory comments. Final generated conformance artifacts are under
+`target/typescript-lengths-final-20261112/`. No full comparison matrix was rerun.
+
+## Packed-boolean result construction — 12 November 2026
+
+Retain a single exactly sized boolean array followed by indexed writes, replacing
+Array.from's iterator and mapping callback. The complete byte span is still
+validated before result allocation. No packed representation, admission, callback
+or ownership change: 02 00 01 still decodes to [false, true], invalid byte values
+remain malformed, and results never alias the input. Regenerate browser clients;
+Rust runtime, Wasm, method identities and retry/hash bytes are unchanged.
+
+Matched current runtime (including numeric length decoding) versus this one
+change, Node 24.21.0 transformed in memory with stripTypeScriptTypes, Linux CPU 0.
+Three runs alternate lane order. Each of 12 shapes checks exact encode bytes
+and decoded values before timing. Small shapes warm 1,000 operations; large
+shapes warm 20. Eleven calibrated batches per operation/run use 2–10,000 calls.
+Shapes cover packed bool lengths 0/1/8/128/16384/1048576, matching ordinary-list
+controls through 16384 and a u32 scalar. Shared-host timing includes GC; no
+browser-fleet or IC performance claim.
+
+Decode medians, microseconds/op, three runs:
+
+| Case | Before | After |
+| --- | --- | --- |
+| Packed empty | 0.338 / 0.313 / 0.257 | 0.157 / 0.137 / 0.102 |
+| Packed singleton | 0.478 / 0.400 / 0.425 | 0.135 / 0.101 / 0.105 |
+| Packed 128 | 2.749 / 4.527 / 2.839 | 0.621 / 0.609 / 0.614 |
+| Packed 16,384 | 372.891 / 359.777 / 363.182 | 126.631 / 129.988 / 128.167 |
+| Packed 1,048,576 | 37,065.364 / 35,503.263 / 36,627.836 | 7,583.724 / 7,671.527 / 7,890.847 |
+| Ordinary 128 control | 2.529 / 2.817 / 2.760 | 2.391 / 2.757 / 2.603 |
+| Ordinary 16,384 control | 458.265 / 447.852 / 420.456 | 480.705 / 444.675 / 454.357 |
+| Scalar control | 0.117 / 0.085 / 0.090 | 0.095 / 0.093 / 0.087 |
+
+Large packed decode improves 64–80% across runs. Ordinary 16,384 decode varies
+from 0.7% faster to 8.1% slower. Unchanged encode controls vary too: packed-128
+1.412/1.588/1.247 → 1.585/1.521/1.420 us, and packed-1MiB
+3846.925/3692.953/3613.679 → 3552.237/3641.971/3968.994 us.
+Do not attribute an encode saving or universal improvement to this decode-only
+change. The large decode effect is substantially larger than those controls.
+Transformed unminified JS grows 22,439 → 22,553 bytes (+114), excluding added
+explanatory comments; no Wasm or production bundle saving is claimed.
+
+Final generated-runtime conformance passes, including 1 MiB byte buffers,
+16 admission shapes, exact frames/mutations and 78 simulated-endian cases.
+New tests cover empty/singleton/block-boundary bool arrays in both directions,
+owned results, and all 254 invalid byte values at five positions spanning a
+129-element input. Instrumented Array construction proves those invalid inputs
+fail before allocating the boolean result. Existing partial/trailing-input
+checks remain active. No new full Candid matrix was run.
+
+Evidence: `target/evidence/browser-bools-20261112/` retains before.ts, after.ts,
+measure.mjs, results.jsonl and source/frame hashes. Reproduce with
+`taskset -c 0 node target/evidence/browser-bools-20261112/measure.mjs`.
+Final source differs from after.ts only by explanatory comments. Generated test
+artifacts are under `target/typescript-bools-20261112/`.

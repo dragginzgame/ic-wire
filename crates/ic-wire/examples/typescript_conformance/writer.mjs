@@ -72,3 +72,64 @@
   assert.throws(()=>codec({k:'text'}).encodeRequest('\ud800'),e=>e instanceof WireError && e.code==='value');
   console.log('Incremental writer: bounded allocations, exact bytes, ownership, callbacks and directional limits passed');
 }
+
+// Collection-length fast paths retain u32 overflow and error precedence.
+{
+  const descriptor = schema => ({id:'1',request:schema,response:schema,
+    requestBytes:1048576,responseBytes:1048576,requestNodes:1048576,
+    responseNodes:1048576,requestDepth:32,responseDepth:32});
+  const header = [73,87,1,0,0,0,0,0,0,0,0];
+  const varint = n => {
+    const bytes=[];
+    do { const byte=Number(n & 127n); n >>= 7n; bytes.push(n ? byte | 128 : byte); } while(n);
+    return bytes;
+  };
+  for (const n of [0,1,127,128,16383,16384,65536]) {
+    const bytes = new Uint8Array(n).fill(42), codec=createCodec(descriptor({k:'bytes'}));
+    const encoded=codec.encodeRequest(bytes), prefix=varint(BigInt(n));
+    assert.deepEqual([...encoded.subarray(11,11+prefix.length)],prefix);
+    assert.deepEqual(codec.decodeRequest(encoded),bytes);
+  }
+  for (const schema of [{k:'bytes',max:0},{k:'text',max:0},{k:'list',max:0,item:{k:'u',bits:8}}]) {
+    const codec=createCodec(descriptor(schema));
+    assert.throws(()=>codec.decodeRequest(Uint8Array.from([...header,...varint(0xffffffffn)])),e=>e instanceof WireError && e.code==='limit');
+    for (const prefix of [[128],[128,128,128,128,128],varint(0x100000000n),[255,255,255,255,127]]) {
+      assert.throws(()=>codec.decodeRequest(Uint8Array.from([...header,...prefix])),e=>e instanceof WireError && e.code==='malformed');
+    }
+    const empty=codec.decodeRequest(Uint8Array.from([...header,128,0]));
+    assert.equal(empty.length,0); // Upstream Postcard permits redundant zero groups.
+  }
+}
+
+// Packed bool conversion validates the entire span before allocating its result.
+{
+  const codec=createCodec({id:'1',request:{k:'packed',word:'bool'},response:{k:'packed',word:'bool'},
+    requestBytes:1048576,responseBytes:1048576,requestNodes:32,responseNodes:32,
+    requestDepth:8,responseDepth:8});
+  const OriginalArray=globalThis.Array;
+  let allocations=0;
+  class ObservedArray extends OriginalArray {
+    constructor(...args) { super(...args); allocations++; }
+  }
+  for(const n of [0,1,7,8,9,127,128,129]) {
+    const values=OriginalArray.from({length:n},(_,i)=>i%2===0);
+    for(const direction of ['Request','Response']) {
+      const frame=codec['encode'+direction](values);
+      const decoded=codec['decode'+direction](frame);
+      assert.deepEqual(decoded,values);
+      frame.fill(255);
+      assert.deepEqual(decoded,values); // Owned, not a view into the input.
+    }
+  }
+  const frame=codec.encodeRequest(OriginalArray(129).fill(false));
+  for(const position of [0,7,8,127,128]) for(let byte=2;byte<256;byte++) {
+    const malformed=frame.slice(); malformed[13+position]=byte; // 11-byte header + two-byte length.
+    allocations=0;
+    let error;
+    globalThis.Array=ObservedArray;
+    try { codec.decodeRequest(malformed); } catch (caught) { error=caught; }
+    finally { globalThis.Array=OriginalArray; }
+    assert.ok(error instanceof WireError && error.code==='malformed');
+    assert.equal(allocations,0);
+  }
+}

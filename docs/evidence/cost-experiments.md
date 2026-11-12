@@ -438,3 +438,44 @@ screen.sh, instructions.sh, analyze.mjs, sizes.csv, verification.json and
 cost-screen.log. Scripts select research-bulk and separate fresh targets, with
 the prepared PocketIC server. The analyzer independently checks the changed
 public_bools_adapter_sha256. Keep the current safe checked-copy implementation.
+
+## Packed finite-f64 exponent masks — rejected, 12 November 2026
+
+Tested eight exponent-mask additions followed by one sign-bit test, replacing
+individual `is_finite` calls in the existing shared validator. This mirrors the
+retained f32 idea but does not improve f64. Validation still precedes allocation;
+exact float bits, finite-only acceptance, limits and framing are unchanged.
+No production Rust change is retained.
+
+| Profile / 131,072 f64 values | Before instructions | Candidate | Change |
+| --- | ---: | ---: | ---: |
+| opt-z encode | 4,130,880 | 4,360,289 | +5.55% |
+| opt-z decode | 5,080,618 | 5,195,306 | +2.26% |
+| opt-3 encode | 4,097,092 | 4,326,470 | +5.60% |
+| opt-3 decode | 2,966,558 | 3,081,247 | +3.87% |
+
+Total/code-section uncompressed Wasm: opt-z 262,938/227,824 →
+263,014/227,899 (+76/+75); opt-3 346,927/314,153 → 347,031/314,257
+(+104/+104). Empty/singleton encode also regresses slightly. The unchanged cost
+screen checks 1,338 operation pairs and reports eight failures: four size checks
+and two encode thresholds in each profile. No threshold was relaxed.
+
+Matched Rust 1.99.1, wasm32-unknown-unknown, evaluation/benchmark-speed profiles,
+154 research-bulk cases, identical frozen locks and separate fresh Cargo targets.
+The current qualification lock includes Testkit 0.101.0 and Build 0.83.0.
+Three identical IC samples per operation, exact frames and inputs, source hashes
+(including public_finite_adapter_sha256), fresh library/guest artifacts and
+unchanged retained Candid controls are checked by the existing paired verifier.
+Candid guests are reused controls from the prior matrix, not newly built supplier
+qualification. The prepared PocketIC 16.0.0 server is used for both lanes.
+Five finite-related native tests pass, including a new isolated reference test
+covering all 2,048 exponents in each of 17 positions (two blocks and remainder).
+No native latency or application Wasm saving is claimed.
+
+Reproduction/evidence: `target/evidence/lengths-f64-20261112/` contains paired
+sources, screen.sh, instructions.sh, analyze.mjs, sizes.csv, per-lane build logs,
+raw instruction samples and after-verification.json. Run the two shell scripts
+from the repository root, followed by `node` on analyze.mjs; use fresh source and
+target/output locations for another measurement. Initial instruction startup
+stopped on a missing cached errno package; locked fetch prepared it before any
+measurements. The completed retry retains identical locks.

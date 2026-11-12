@@ -177,7 +177,9 @@ class Reader {
     return fail('malformed');
   }
   // Collection lengths follow the Wasm32 endpoint usize width, not host usize.
-  length(max: number): number { const n = this.varint(32); if (n > BigInt(max)) return fail('limit'); return Number(n); }
+  // Use Number for the exact u32 domain instead of BigInt conversion. Preserve
+  // redundant groups (80 00 -> 0), overflow rejection and limit-error ordering.
+  length(max: number): number { const n = this.numberVarint(32); if (n > max) return fail('limit'); return n; }
   raw(length: number): Uint8Array {
     if (length > this.bytes.length - this.offset) return fail('malformed');
     const value = this.bytes.subarray(this.offset, this.offset + length); this.offset += length; return value;
@@ -333,7 +335,12 @@ function readValue(s: Schema, input: Reader, budget: Budget, depth: number, type
         const bytes = input.raw(input.length(input.bytes.length - input.offset));
         // Validate the whole span before allocating the owned browser array.
         for (const byte of bytes) if (byte > 1) fail('malformed');
-        return Array.from(bytes, byte => byte === 1);
+        // Allocate once after validation, avoiding Array.from's iterator/map
+        // machinery. 02 00 01 still decodes to [false, true]; ownership,
+        // malformed-input acceptance and admission limits are unchanged.
+        const values = new Array<boolean>(bytes.length);
+        for (let i = 0; i < bytes.length; i++) values[i] = bytes[i] === 1;
+        return values;
       }
       const kind = s.k === 'packed-i16' ? 'i16' : s.word, ctor = packedArrays[kind];
       const width = kind === 'hash16' ? 16 : kind === 'hash32' ? 32 : ctor.BYTES_PER_ELEMENT;

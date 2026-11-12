@@ -7,6 +7,20 @@ updates and CI/tooling/qualification maintenance. Source, codec bytes, identitie
 limits and acceptance rules are unchanged.
 CI uses compiler-free snapshot verification before Rust setup, with full
 Cargo/tooling admission retained in ci-* afterward. No cleanup is authorized.
+Pending CI-only fix: run 43194035367 exposed a root-only dependency fetch before
+offline qualification graph checks. Fetch both locked workspaces in every native
+job; local warm caches had masked the missing preparation. No crate release needed.
+Pending Core 0.21.4: retain browser numeric length decoding; nested-list latency
+improves in three runs, with flat-list/small-control regressions recorded in
+[the study](../evidence/typescript-writer.md#numeric-collection-length-decoding--12-november-2026).
+Regenerate clients; 80 00 still accepts zero, overflow remains malformed, and
+bytes/identities/budgets are unchanged. Final browser conformance passes.
+Reject the [f64 block-mask experiment](../evidence/cost-experiments.md#packed-finite-f64-exponent-masks--rejected-12-november-2026):
+more instructions and larger Wasm in both profiles. No Rust runtime change.
+Also retain [indexed packed-boolean result construction](../evidence/typescript-writer.md#packed-boolean-result-construction--12-november-2026):
+large Node decode improves 64–80% across three runs, with control variation and
+114 additional transformed JavaScript bytes recorded. Validation precedes result
+allocation; 02 00 01 still means [false, true]. Regenerate clients; no Wasm change.
 ## Released Core 0.21.2 — host generator allocations
 Borrow ordinary escaped-path inputs and active recursion names. Matched synthetic
 plain/shared-reference fixtures remove 39%/65% of allocations; shared-reference

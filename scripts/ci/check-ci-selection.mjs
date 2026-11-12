@@ -67,6 +67,15 @@ const native = jobs.validate.steps.find(s => s.name === 'Validate selected CI gr
 assert.equal(native.if, undefined);
 assert.equal(native.env.CI_GROUP, '${{ matrix.suite }}');
 assert.equal(native.run, 'make "ci-$CI_GROUP"');
+// Offline pin/boundary admission reads both independent workspaces, including
+// in the Core job. A root-only fetch leaves clean runners missing the oracle.
+const dependencies = jobs.validate.steps.find(s => s.name === 'Prepare locked workspace dependencies');
+assert.equal(dependencies.if, undefined);
+assert.deepEqual(dependencies.run.trim().split('\n'), [
+  'cargo fetch --locked',
+  'cargo fetch --locked --manifest-path qualification/Cargo.toml',
+]);
+assert.ok(jobs.validate.steps.indexOf(dependencies) < jobs.validate.steps.indexOf(native));
 assert.ok(jobs.validate.steps.findIndex(s => s.name === 'Prepare the compiler from local policy') < jobs.validate.steps.indexOf(native));
 assert.match(fs.readFileSync(path.join(root, 'Makefile'), 'utf8'), /^ci-core ci-typescript ci-benchmarks .*: toko-tooling-check$/m);
 const retention = jobs.validate.steps.find(s => s.uses === './.github/actions/retain-failure-evidence');

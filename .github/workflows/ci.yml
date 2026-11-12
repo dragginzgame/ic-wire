@@ -118,7 +118,9 @@ jobs:
           npm install --global "$(node -p 'require("./examples/browser/package.json").packageManager')"
           bash scripts/ci/prepare-browser-tools.sh prepare
       - name: Prepare locked workspace dependencies
-        run: cargo fetch --locked
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qualification/Cargo.toml
       - name: Validate selected CI group
         env:
           VALIDATION_LOG_DIR: ${{ runner.temp }}/ic-wire-validation
