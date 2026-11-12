@@ -23,8 +23,8 @@ ic-wire-derive = { path = "crates/ic-wire-derive", version = "0.21.3" }
 
 # Endpoint
 # Changelog : releases/endpoint/CHANGELOG.md
-ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.12.1" }
-ic-wire-endpoint-macros = { path = "crates/ic-wire-endpoint-macros", version = "0.12.1" }
+ic-wire-endpoint = { path = "crates/ic-wire-endpoint", version = "0.12.2" }
+ic-wire-endpoint-macros = { path = "crates/ic-wire-endpoint-macros", version = "0.12.2" }
 
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }

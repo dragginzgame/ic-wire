@@ -4,7 +4,7 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
-## [0.12.2]
+## [0.12.2] - 2026-11-12
 
 ### Maintenance
 
