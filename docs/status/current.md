@@ -1,16 +1,18 @@
 # Current handoff
 
-Core 0.21.3 (b54ef7b) and Endpoint 0.12.2 (2a51973) are published on GitHub and
-crates.io; both full 20-stage gates passed. Batch-7ND70NND completed and the normal
-checkout was reconciled. Delivery includes the locked Types/Runtime supplier
-updates and CI/tooling/qualification maintenance. Source, codec bytes, identities,
-limits and acceptance rules are unchanged.
+Core 0.21.4 (a7e9f63, core-v0.21.4) is published on GitHub and crates.io;
+all 20 release stages passed. Batch-vqoxjSBF completed and the normal checkout
+was reconciled. Both Core packages were independently downloaded from crates.io.
+Endpoint remains 0.12.2 (2a51973), delivered in completed batch-7ND70NND.
+This release includes the browser improvements below, the CI fetch fix and the
+qualification-only errno 0.3.15 lock update. Codec bytes, identities, limits and
+acceptance rules are unchanged; regenerate browser clients for the improvements.
 CI uses compiler-free snapshot verification before Rust setup, with full
 Cargo/tooling admission retained in ci-* afterward. No cleanup is authorized.
-Pending CI-only fix: run 43194035367 exposed a root-only dependency fetch before
+Delivered CI-only fix: run 43194035367 exposed a root-only dependency fetch before
 offline qualification graph checks. Fetch both locked workspaces in every native
 job; local warm caches had masked the missing preparation. No crate release needed.
-Pending Core 0.21.4: retain browser numeric length decoding; nested-list latency
+Released Core 0.21.4: retain browser numeric length decoding; nested-list latency
 improves in three runs, with flat-list/small-control regressions recorded in
 [the study](../evidence/typescript-writer.md#numeric-collection-length-decoding--12-november-2026).
 Regenerate clients; 80 00 still accepts zero, overflow remains malformed, and
