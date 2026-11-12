@@ -4,6 +4,14 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.12.2]
+
+### Maintenance
+
+- Qualify Platform Runtime/macros/guard 0.21.2 and Types 0.19.4 with Core 0.21.3,
+  using Testkit 0.101.0 for installed calls, limits and rollback checks.
+  Endpoint source, frame bytes, identities and budgets remain unchanged.
+
 ## [0.12.1] - 2026-11-11
 
 ### Maintenance

@@ -9,6 +9,9 @@ in [shared history](../history.md).
 
 ### Maintenance
 
+- Qualify Platform Types 0.19.4 in the locked Core/schema graph. Public source,
+  codec bytes, identities, limits and acceptance rules remain unchanged.
+
 - Deferred repository maintenance: expose `make deps-update` through the upstream
   tooling entrypoint for sequential root and qualification dependency updates.
 
