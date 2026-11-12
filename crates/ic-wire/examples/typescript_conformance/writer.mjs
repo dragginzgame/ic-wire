@@ -133,3 +133,72 @@
     assert.equal(allocations,0);
   }
 }
+
+// Record validation keeps own-key semantics and rejects shape errors before getters.
+{
+  const schema={k:'record',fields:[{name:'x',value:{k:'u',bits:8}},{name:'y',value:{k:'u',bits:8}}]};
+  const codec=createCodec({id:'1',request:schema,response:schema,requestBytes:64,responseBytes:64,
+    requestNodes:32,responseNodes:32,requestDepth:8,responseDepth:8});
+  for(const direction of ['Request','Response']) {
+    const encode=value=>codec['encode'+direction](value);
+    for(const value of [{x:7,y:9},Object.assign(Object.create(null),{x:7,y:9}),
+      Object.defineProperties({},{x:{value:7},y:{value:9}})]) {
+      assert.deepEqual([...encode(value).subarray(11)],[7,9]);
+    }
+    for(const value of [null,[],{x:7},{x:7,y:9,z:1},Object.assign({x:7,y:9},{[Symbol('extra')]:1}),
+      Object.assign(Object.create({y:9}),{x:7})]) {
+      assert.throws(()=>encode(value),e=>e instanceof WireError && e.code==='value');
+    }
+    let reads=0;
+    const invalid={get x(){reads++;return 7;},z:9};
+    assert.throws(()=>encode(invalid),e=>e instanceof WireError && e.code==='value');
+    assert.equal(reads,0);
+  }
+}
+
+// Numeric varints agree with an independent BigInt oracle at byte/width boundaries.
+{
+  const prefixes=[[]];
+  for(let byte=0;byte<256;byte++) {
+    prefixes.push([byte],[128,byte],[255,byte],[byte,0]);
+    for(let groups=2;groups<=5;groups++) prefixes.push([...Array(groups).fill(128),byte]);
+  }
+  for(const bits of [16,32]) for(const kind of ['u','i']) {
+    const schema={k:kind,bits};
+    const codec=createCodec({id:'1',request:schema,response:schema,requestBytes:64,responseBytes:64,
+      requestNodes:32,responseNodes:32,requestDepth:8,responseDepth:8});
+    for(const prefix of prefixes) {
+      let expected, total=0n;
+      for(let i=0;i<Math.ceil(bits/7)&&i<prefix.length;i++) {
+        const byte=prefix[i]; total|=BigInt(byte&127)<<BigInt(7*i);
+        if(byte<128) {
+          if(i+1===prefix.length && total<(1n<<BigInt(bits))) expected=Number(kind==='i'?(total>>1n)^-(total&1n):total);
+          break;
+        }
+      }
+      const frame=Uint8Array.from([73,87,1,0,0,0,0,0,0,0,0,...prefix]);
+      if(expected===undefined) assert.throws(()=>codec.decodeRequest(frame),e=>e instanceof WireError&&e.code==='malformed');
+      else assert.equal(codec.decodeRequest(frame),expected);
+    }
+  }
+}
+
+// Array-length optimization must not truncate Proxy-reported values to u32.
+{
+  const schema={k:'packed',word:'bool'};
+  const codec=createCodec({id:'1',request:schema,response:schema,requestBytes:4294967360,responseBytes:4294967360,
+    requestNodes:8,responseNodes:8,requestDepth:8,responseDepth:8});
+  const target=[];
+  const exotic=new Proxy(target,{get(value,key){
+    if(key==='length') return 4294967296;
+    if(key===Symbol.iterator) return value[Symbol.iterator].bind(value);
+    return Reflect.get(value,key);
+  }});
+  // The inconsistent iterator is not roundtrippable; preserve the observed
+  // prefix rather than silently producing a valid empty-list encoding.
+  assert.deepEqual([...codec.encodeRequest(exotic).subarray(11)],[128,128,128,128,16]);
+  for(const n of [0,1,127,128,16383,16384]) {
+    const values=Array(n).fill(true), encoded=codec.encodeRequest(values);
+    assert.deepEqual(codec.decodeRequest(encoded),values);
+  }
+}

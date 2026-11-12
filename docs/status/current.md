@@ -1,5 +1,51 @@
 # Current handoff
 
+Core 0.21.5 deployment is authorized. The candidate includes preserved Types
+0.19.5, Runtime/macros/guard 0.21.3, native Platform 0.31.3 and Host 0.76.5
+lock selections. Installed Endpoint calls, limits and rollback pass with the
+prepared PocketIC 16 server. Endpoint source/requirements are unchanged; only
+Core is selected for publication. Full frozen release qualification follows.
+
+Toko Tooling 0.39.17 is adopted from its authenticated crates.io package in both
+workspaces. All 95 recorded entrypoints/payload files are retained; only the
+baseline document changes. The new no-sibling-foo.rs/foo-directory rule already
+holds across tracked Rust sources. Installation, tool/snapshot admission, dependency
+pins and CI caller checks pass. Existing exact-pin exceptions now match 0.39.17; no
+product/runtime change or new release is implied. Existing lock updates remain
+preserved; Cargo changed only the tooling selection during this adoption.
+
+Pending Core 0.21.5: [reuse browser record field declarations](../evidence/typescript-writer.md#record-keys-and-direct-utf-8-experiments--12-november-2026)
+instead of allocating a field-name array per encoded record. Five-run medium-record
+improvements and noisy batch/control regressions are recorded; +16 transformed JS
+bytes, no Wasm change. Strict TypeScript, full Rust/browser conformance, own-key
+rejection/getter-order tests and simulated endian checks pass. Regenerate clients;
+bytes, identities, limits and acceptance stay unchanged. Direct UTF-8 writing is
+rejected for large-text regressions. Rust mixed-record review reuses existing
+preflight attribution; no additional runtime candidate is retained. Both external
+lockfile updates remain untouched and are not qualified by the historical study.
+Also retain the [numeric first-byte shortcut](../evidence/typescript-writer.md#numeric-first-byte-decoding--12-november-2026):
+small integer-list browser decode improves 44–56% across five runs; wide-list
+gains and mixed byte-buffer regressions are recorded. +84 transformed JS bytes,
+no Wasm change. Differential checks (403,974 cases), independent BigInt oracle,
+strict TypeScript and full Rust/browser conformance pass. Regenerate clients;
+7f stays 127 and 80 00 still accepts zero. Limits/acceptance/bytes stay unchanged.
+The separate direct key-loop candidate is rejected for inconsistent speed and
+Result regressions; do not reintroduce it based on source-level simplification.
+Two [BigInt first-byte candidates](../evidence/typescript-writer.md#bigint-first-byte-shortcuts--not-retained-12-november-2026)
+remain research: small-u64 lists improve strongly, but repeated maximum-u128
+regressions and +99/+168 JavaScript bytes prevent promotion in this batch.
+Both pass 283,652 differential cases; no BigInt product change is retained.
+The [unguarded numeric Array-length writer](../evidence/typescript-writer.md#array-length-encoding--not-retained-12-november-2026)
+is also not retained: nested normal lists improve 9–17%, but Proxy-reported
+lengths above u32 silently wrap. A future checked fallback needs its own measured
+case; no encoder acceptance change is made by this experiment.
+That follow-up is now [qualified and retained](../evidence/typescript-writer.md#checked-array-length-writing--retained-12-november-2026):
+check integer/u32 range before numeric emission, otherwise retain the original
+BigInt path. Nested-list encoding improves 7–17% in seven focused runs; mixed
+small controls and +151 transformed JS bytes are recorded. No Wasm change.
+390 ordinary/65 exotic-value comparisons and full Rust/browser conformance pass.
+Regenerate clients; Proxy-reported 2^32 stays 80 80 80 80 10, never 00.
+
 Core 0.21.4 (a7e9f63, core-v0.21.4) is published on GitHub and crates.io;
 all 20 release stages passed. Batch-vqoxjSBF completed and the normal checkout
 was reconciled. Both Core packages were independently downloaded from crates.io.
@@ -123,7 +169,7 @@ This is not a matched regression or application study.
 Native timings share the host with other builds. The current deployment is a separate qualification.
 
 ## Documentation and tooling
-Both workspaces now select Toko Tooling 0.39.15, its reviewed upstream references and
+Both workspaces now select Toko Tooling 0.39.17, its reviewed upstream references and
 installed executable receipt; no vendored shared-doc tree remains. Installation,
 snapshot/tools, pin/boundary, documentation and disposable Make routing checks
 pass. LOC narrow/wide rendering preserves numeric columns across 133 rows; stage reuse stays disabled.
@@ -131,13 +177,13 @@ pass. LOC narrow/wide rendering preserves numeric columns across 133 rows; stage
 ## Compiler, suppliers and release boundary
 
 Rust 1.99.1 is the minimum/pinned compiler; only the opt-in sanitizer fuzzer has
-a separately approved nightly. Both workspaces now select Toko Tooling 0.39.15.
+a separately approved nightly. Both workspaces now select Toko Tooling 0.39.17.
 Root owns four public packages; qualification owns three private packages and
 its own lock. Published Testkit 0.101.0 replaces the old Platform simulator facade
 with upstream PocketIC 16.1.0; native drivers use its handles/rejection types.
 Both locks now select canonical Types 0.19.4 and Runtime/guard 0.21.2 from an
 external update preserved during qualification. No product source changes were made.
-Tooling 0.39.15 was verified latest on crates.io on 2026-11-12;
+Tooling 0.39.17 was verified latest on crates.io on 2026-11-12;
 Qualification Build 0.83.0 and Testkit 0.101.0 were verified latest on 2026-11-12.
 Build's actual diagnostic caller passes 9 Core and 13 Endpoint rejection cases
 and their passing controls. Testkit adds native Platform 0.31.2 codec/management

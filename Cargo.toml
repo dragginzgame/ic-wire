@@ -45,7 +45,7 @@ syn = "3.0.9"
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 
-toko-tooling = "=0.39.15"
+toko-tooling = "=0.39.17"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

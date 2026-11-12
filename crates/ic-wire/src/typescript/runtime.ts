@@ -59,10 +59,10 @@ function swapWords(bytes: Uint8Array, width: number): void {
     }
   }
 }
-function object(value: unknown, keys: readonly string[]): Record<string, unknown> {
+function object(value: unknown, keys: readonly (string | Field)[]): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return fail('value');
   const own = Reflect.ownKeys(value);
-  if (own.length !== keys.length || keys.some(k => !Object.hasOwn(value, k))) return fail('value');
+  if (own.length !== keys.length || keys.some(k => !Object.hasOwn(value, typeof k === 'string' ? k : k.name))) return fail('value');
   return value as Record<string, unknown>;
 }
 class Budget {
@@ -128,6 +128,13 @@ class Writer {
   numberVarint(value: number) {
     do { const byte = value & 127; value >>>= 7; this.byte(value ? byte | 128 : byte); } while (value);
   }
+  length(value: number) {
+    // Ordinary Array lengths fit u32, but Proxy getters can report other values.
+    // Preserve their original BigInt conversion/errors instead of truncating:
+    // 128 stays 80 01; a reported 2^32 stays 80 80 80 80 10, never 00.
+    if (Number.isInteger(value) && value >= 0 && value <= 0xffffffff) this.numberVarint(value);
+    else this.varint(BigInt(value));
+  }
   float(value: number, bits: number) {
     const length = bits / 8;
     if (length > this.bytes.length - this.offset) this.grow(this.offset + length);
@@ -166,8 +173,13 @@ class Reader {
     return fail('malformed');
   }
   numberVarint(bits: number): number {
-    let value = 0;
-    for (let i = 0; i < Math.ceil(bits / 7); i++) {
+    // Callers use u16/u32 widths. A terminal first byte needs no shift or
+    // width check: 7f stays 127; 80 00 still accepts zero through the loop.
+    // Overflow, truncation, budgets and encoder bytes remain unchanged.
+    const first = this.byte();
+    if (first < 128) return first;
+    let value = first & 127;
+    for (let i = 1; i < Math.ceil(bits / 7); i++) {
       const byte = this.byte(); value += (byte & 127) * 2 ** (i * 7);
       if (!(byte & 128)) {
         if (value >= 2 ** bits) return fail('malformed');
@@ -229,7 +241,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       // but one buffer replaces per-element visits. Regenerate adopted clients.
       if (s.k === 'packed' && s.word === 'bool') {
         if (!Array.isArray(value)) return fail('value');
-        out.varint(BigInt(value.length));
+        out.length(value.length);
         if (value.length > out.limit - out.offset) fail('limit');
         for (const item of value) {
           if (typeof item !== 'boolean') fail('value');
@@ -269,7 +281,7 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       if (s.k === 'array' && values.length !== s.max || s.k === 'list' && values.length > (s.max ?? budget.remaining)) fail('limit');
       if (s.k === 'tuple' && values.length !== s.items.length) fail('value');
       budget.length(values.length);
-      if (s.k === 'list') out.varint(BigInt(values.length));
+      if (s.k === 'list') out.length(values.length);
       for (let i = 0; i < values.length; i++) {
         if (!Object.hasOwn(values, i)) fail('value');
         const item = s.k === 'tuple' ? s.items[i] : s.item;
@@ -287,7 +299,10 @@ function write(s: Schema, value: unknown, out: Writer, budget: Budget, depth: nu
       const record = object(value, [key]); out.byte(key === 'ok' ? 0 : 1); child(s[key], record[key]); return;
     }
     case 'record': {
-      const record = object(value, s.fields.map(f => f.name));
+      // Reuse field declarations without allocating a names array per record.
+      // Own-key checks still precede reading values; {x: 7} stays 07 for u8 x.
+      // Bytes, limits, callbacks and extra/missing-key rejection are unchanged.
+      const record = object(value, s.fields);
       for (const field of s.fields) child(field.value, record[field.name]); return;
     }
     case 'enum': {

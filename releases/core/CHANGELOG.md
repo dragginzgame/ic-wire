@@ -5,6 +5,32 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.21.5]
+
+### Performance
+
+- Write ordinary-list and packed-boolean Array lengths through a checked numeric
+  path, retaining BigInt conversion for exotic reported lengths. Nested-list
+  browser encoding improves 7–17% in a focused seven-run study, with small-control
+  regressions recorded. Regenerate clients; bytes, limits and acceptance remain
+  unchanged. No Rust/Wasm change.
+
+- Decode terminal first-byte u16/u32 varints without loop setup in generated
+  browser clients. Small-integer lists improve 44–56% in repeated Node runs;
+  byte-buffer regressions are recorded. Regenerate clients; bytes, limits,
+  redundant-group acceptance and malformed-input rejection remain unchanged.
+
+- Avoid allocating a temporary field-name array for every encoded browser record.
+  Medium-record encoding improves in repeated Node measurements, with noisy batch
+  and scalar regressions recorded. Regenerate clients; codec bytes, identities,
+  limits and own-key rejection remain unchanged. No Rust/Wasm change.
+
+### Maintenance
+
+- Adopt Toko Tooling 0.39.17 and qualify the preserved Platform Types 0.19.5,
+  Runtime 0.21.3, Platform 0.31.3 and Host 0.76.5 lock selections. Public
+  dependency requirements and codec contracts remain unchanged.
+
 ## [0.21.4] - 2026-11-12
 
 ### Performance
