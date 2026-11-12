@@ -1,5 +1,9 @@
 # Latest recorded Candid comparison
 
+The historical `target/evidence/codec-matrix-core021` artifacts were removed by
+external cleanup on 12 November 2026. Recorded results below remain historical;
+their summaries/hashes do not substitute for the missing raw inputs and samples.
+
 ## Core 0.21 checkout full matrix — 11 November 2026
 
 **39/39 cohorts complete and verified:** 2,314 overlapping case entries,

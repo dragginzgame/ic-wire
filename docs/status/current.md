@@ -1,226 +1,96 @@
 # Current handoff
 
-Core 0.21.5 deployment is authorized. The candidate includes preserved Types
-0.19.5, Runtime/macros/guard 0.21.3, native Platform 0.31.3 and Host 0.76.5
-lock selections. Installed Endpoint calls, limits and rollback pass with the
-prepared PocketIC 16 server. Endpoint source/requirements are unchanged; only
-Core is selected for publication. Full frozen release qualification follows.
+Core **0.21.5** (`e249cdf`, tag `core-v0.21.5`) is delivered to origin/main and
+crates.io. Both Core packages were independently downloaded from the registry.
+All 20 release stages passed in recovered batch-W7zKUDXE; normal main is
+reconciled. Endpoint remains **0.12.2** (`2a51973`); its source and dependency
+requirements were unchanged. No additional release is pending from this work.
 
-Toko Tooling 0.39.17 is adopted from its authenticated crates.io package in both
-workspaces. All 95 recorded entrypoints/payload files are retained; only the
-baseline document changes. The new no-sibling-foo.rs/foo-directory rule already
-holds across tracked Rust sources. Installation, tool/snapshot admission, dependency
-pins and CI caller checks pass. Existing exact-pin exceptions now match 0.39.17; no
-product/runtime change or new release is implied. Existing lock updates remain
-preserved; Cargo changed only the tooling selection during this adoption.
+## Delivered behavior
 
-Pending Core 0.21.5: [reuse browser record field declarations](../evidence/typescript-writer.md#record-keys-and-direct-utf-8-experiments--12-november-2026)
-instead of allocating a field-name array per encoded record. Five-run medium-record
-improvements and noisy batch/control regressions are recorded; +16 transformed JS
-bytes, no Wasm change. Strict TypeScript, full Rust/browser conformance, own-key
-rejection/getter-order tests and simulated endian checks pass. Regenerate clients;
-bytes, identities, limits and acceptance stay unchanged. Direct UTF-8 writing is
-rejected for large-text regressions. Rust mixed-record review reuses existing
-preflight attribution; no additional runtime candidate is retained. Both external
-lockfile updates remain untouched and are not qualified by the historical study.
-Also retain the [numeric first-byte shortcut](../evidence/typescript-writer.md#numeric-first-byte-decoding--12-november-2026):
-small integer-list browser decode improves 44–56% across five runs; wide-list
-gains and mixed byte-buffer regressions are recorded. +84 transformed JS bytes,
-no Wasm change. Differential checks (403,974 cases), independent BigInt oracle,
-strict TypeScript and full Rust/browser conformance pass. Regenerate clients;
-7f stays 127 and 80 00 still accepts zero. Limits/acceptance/bytes stay unchanged.
-The separate direct key-loop candidate is rejected for inconsistent speed and
-Result regressions; do not reintroduce it based on source-level simplification.
-Two [BigInt first-byte candidates](../evidence/typescript-writer.md#bigint-first-byte-shortcuts--not-retained-12-november-2026)
-remain research: small-u64 lists improve strongly, but repeated maximum-u128
-regressions and +99/+168 JavaScript bytes prevent promotion in this batch.
-Both pass 283,652 differential cases; no BigInt product change is retained.
-The [unguarded numeric Array-length writer](../evidence/typescript-writer.md#array-length-encoding--not-retained-12-november-2026)
-is also not retained: nested normal lists improve 9–17%, but Proxy-reported
-lengths above u32 silently wrap. A future checked fallback needs its own measured
-case; no encoder acceptance change is made by this experiment.
-That follow-up is now [qualified and retained](../evidence/typescript-writer.md#checked-array-length-writing--retained-12-november-2026):
-check integer/u32 range before numeric emission, otherwise retain the original
-BigInt path. Nested-list encoding improves 7–17% in seven focused runs; mixed
-small controls and +151 transformed JS bytes are recorded. No Wasm change.
-390 ordinary/65 exotic-value comparisons and full Rust/browser conformance pass.
-Regenerate clients; Proxy-reported 2^32 stays 80 80 80 80 10, never 00.
+Core 0.21.5 includes browser record-field reuse, terminal first-byte numeric
+varint decoding and checked Array-length writing. Regenerate browser clients.
+Exact codec bytes, identities, limits, callback rules and acceptance are unchanged:
+`7f` stays 127; `80 00` still accepts zero; a Proxy-reported 2^32 Array length
+retains `80 80 80 80 10` instead of silently truncating to `00`.
+The Rust codec and Wasm runtime are unchanged by these JavaScript optimizations.
 
-Core 0.21.4 (a7e9f63, core-v0.21.4) is published on GitHub and crates.io;
-all 20 release stages passed. Batch-vqoxjSBF completed and the normal checkout
-was reconciled. Both Core packages were independently downloaded from crates.io.
-Endpoint remains 0.12.2 (2a51973), delivered in completed batch-7ND70NND.
-This release includes the browser improvements below, the CI fetch fix and the
-qualification-only errno 0.3.15 lock update. Codec bytes, identities, limits and
-acceptance rules are unchanged; regenerate browser clients for the improvements.
-CI uses compiler-free snapshot verification before Rust setup, with full
-Cargo/tooling admission retained in ci-* afterward. No cleanup is authorized.
-Delivered CI-only fix: run 43194035367 exposed a root-only dependency fetch before
-offline qualification graph checks. Fetch both locked workspaces in every native
-job; local warm caches had masked the missing preparation. No crate release needed.
-Released Core 0.21.4: retain browser numeric length decoding; nested-list latency
-improves in three runs, with flat-list/small-control regressions recorded in
-[the study](../evidence/typescript-writer.md#numeric-collection-length-decoding--12-november-2026).
-Regenerate clients; 80 00 still accepts zero, overflow remains malformed, and
-bytes/identities/budgets are unchanged. Final browser conformance passes.
-Reject the [f64 block-mask experiment](../evidence/cost-experiments.md#packed-finite-f64-exponent-masks--rejected-12-november-2026):
-more instructions and larger Wasm in both profiles. No Rust runtime change.
-Also retain [indexed packed-boolean result construction](../evidence/typescript-writer.md#packed-boolean-result-construction--12-november-2026):
-large Node decode improves 64–80% across three runs, with control variation and
-114 additional transformed JavaScript bytes recorded. Validation precedes result
-allocation; 02 00 01 still means [false, true]. Regenerate clients; no Wasm change.
-## Released Core 0.21.2 — host generator allocations
-Borrow ordinary escaped-path inputs and active recursion names. Matched synthetic
-plain/shared-reference fixtures remove 39%/65% of allocations; shared-reference
-latency improves, with escaped-name and noisy nested regressions recorded in
-[the paired study](../evidence/native-registry.md#borrowed-lint-names--11-november-2026).
-87 active native tests and strict Core/private-harness Clippy pass. Output,
-warning paths, codec bytes, identities, budgets and acceptance are unchanged.
-[Direct registry append](../evidence/native-registry.md#direct-registry-append--11-november-2026)
-also removes a full-registry temporary: 18%/20% less allocated traffic in plain/shared
-fixtures, with opt-3 timing regressions recorded. Rust/TypeScript conformance passes.
-[Direct declarations/conditional escaping](../evidence/native-registry.md#direct-declarations-and-conditional-key-escaping--11-november-2026) remove another 20.7%/17.2% allocated traffic; timing regressions are recorded. Exact outputs and conformance pass; no Wasm/IC claim.
-[Direct composite rendering](../evidence/native-registry.md#direct-composite-rendering--11-november-2026) removes 31.7% of large-record allocations, improving measured time in both profiles. Types 0.19.3 is now selected in both locks for the authorized Core 0.21.2 / Endpoint 0.12.1 frozen release; full qualification is pending.
-Rejected follow-ups: [empty acknowledgements](../evidence/native-registry.md#empty-acknowledgement-shortcut--rejected-11-november-2026) and
-[bulk-write inlining](../evidence/cost-experiments.md#bulk-write-inlining--rejected-11-november-2026). [Shared framed decode admission](../evidence/cost-experiments.md#shared-framed-decode-admission--not-promoted-11-november-2026) saves 338 opt-z bytes but grows opt-3; no runtime change is retained.
-[Fused nonzero decode](../evidence/cost-experiments.md#fused-nonzero-packed-decoding--rejected-11-november-2026) and [boolean block validation](../evidence/cost-experiments.md#block-validation-for-packed-booleans--rejected-11-november-2026) regress opt-3/opt-z respectively; both rejected.
-## Released Core 0.21.1 — browser and host costs
+The [browser studies](../evidence/typescript-writer.md) record matched measurements,
+small-control regressions and transformed-JavaScript size tradeoffs. Strict
+TypeScript, Rust/browser vectors, mutation/admission checks, ownership and
+simulated-endian tests passed again in the fresh release gate. Simulated endian
+coverage is not native big-endian execution.
+Rejected direct text writing, key-loop, BigInt shortcuts and unguarded length
+writing remain research; do not promote their best-case results in isolation.
+The checked length helper is the qualified successor to the unguarded experiment.
+Other rejected Rust experiments remain at [cost experiments](../evidence/cost-experiments.md)
+and [encoder follow-up](../evidence/encoder-followup.md).
 
-Browser alias detection and reusable host lint paths are released; see the
-[browser study](../evidence/typescript-writer.md#alias-chain-scaling--11-november-2026)
-and [host study](../evidence/native-registry.md#reusable-lint-paths--11-november-2026).
-Regenerate clients for browser changes; valid bytes/identities/budgets stay the
-same, malformed-cycle callback counts can differ. Small long-chain regressions
-are recorded. Set-based aliases, Unicode regex and
-[budget outlining](../evidence/cost-experiments.md#shared-budget-outlining--rejected-11-november-2026)
-were rejected. Release gates used Types 0.19.1; later root updates remain deferred.
-## Toko feedback — released Core 0.21.0
+## Tooling and suppliers
 
-Stable host names replace positional WireType indices. Generated definitions use
-readable Rust type stems and deterministic full-type suffixes; explicit roots
-alias them independently of registration order. Regenerate schemas/clients and
-migrate positional imports once. Schema artifact hashes change; runtime bytes,
-method identities, budgets and acceptance do not. See the [host study](../evidence/native-registry.md#registration-independent-names--11-november-2026)
-for the generation-time and TypeScript-text growth tradeoff. Root/generic/namespace/
-collision/recursive tests and regenerated Rust/TypeScript conformance pass.
+Both workspaces select Toko Tooling 0.39.17. Its authenticated crates.io snapshot
+retains 95 payload files and updates the baseline document. Tracked Rust sources
+already satisfy the no-sibling-foo.rs/foo-directory rule. Installation, tool and
+snapshot admission, pins and CI callers passed. Exact-pin exceptions match.
+Rust 1.99.1 remains minimum and pinned; only the opt-in sanitizer fuzzer has its
+separately approved nightly. Stage reuse and final-candidate opt-ins stay disabled.
 
-Nested allocation accounting now has exact empty/single/batch boundary tests and
-clearer documentation. Local Canic selects Wire 0.18.0 in both locks: no 0.16
-backport is prepared. Its runtime-configuration limits reserve 16,384 bytes and
-allow 262,144 allocation units, 16,384 nodes, depth 32. Toko's actual value is
-unavailable, so its exact reported thresholds are not reproduced. Do not weaken
-admission or infer physical heap use from this weighted traversal allowance.
+The release qualifies Types 0.19.5, Runtime/macros/guard 0.21.3, native Platform
+0.31.3 and Host 0.76.5 lock selections. Qualification selects Build 0.83.0 and
+Testkit 0.101.0; the release editor remains independently selected at Build 0.81.0.
+Testkit owns PocketIC setup/lifecycle and exposes native client 16.1.0 handles.
+Installed Endpoint calls, limits and rollback passed with prepared server 16.0.0
+before capture. The resumed full gate requalified the frozen supplier graph.
+Candid 0.10.40 is a private comparison oracle; its bigint 0.4.8 exception remains.
+No published package selects Candid. Public dependency requirements are unchanged.
 
-Canic's host generator passes an empty acknowledgement map. Wire already supports
-exact-path reasons and bounded report Display; downstream must pass reviewed
-acknowledgements consistently through producer and CLI. No sibling files changed.
-The [numeric Trailing experiment](../evidence/codec-cleanup.md#unread-byte-error-payload--rejected-11-november-2026)
-was rejected for Wasm growth/regressions; compact Error and mismatch tests remain.
-Tooling 0.39.9 and Runtime/macros/guard 0.21.1 passed the release boundary checks;
-transitive ic0 belongs to Runtime, not Core/schema-only hosts.
-Installed endpoint calls, limits and transaction qualification passed with the
-prepared PocketIC 16 server; both product/integration graph checks pass.
-Both complete release gates passed with these suppliers. During deployment,
-another process changed the normal root lock to Types 0.19.2. That edit is
-preserved for the next candidate, outside this release; qualification still
-selects 0.19.1. Do not treat 0.19.2 as qualified by these release gates.
-## Upstream decoder hard cut — released in Core 0.20.0
+Root owns four public packages; qualification owns three unpublished packages
+and its own lock. `make deps-update` updates the two locks sequentially.
+Hosted CI fetches both locks before offline checks; the compiler-free snapshot
+check runs before Rust setup, with full admission in the native CI routes.
+Optional supplier refreshes do not automatically require public releases.
 
-Core 0.20.0 uses upstream Postcard in place of the private parser.
-`80 00` now accepts integer zero; `02 61 62` accepts Rust char `'a'` instead of
-Malformed. Browser varints/Result tags follow the same rule; collection lengths
-use the Wasm32 five-group width (64-bit Rust hosts admit ten). Rust char has no browser schema.
-Encoder bytes, identities and budget rules remain unchanged. Consumers regenerate
-clients, review rejection assumptions and retain original retry/hash bytes.
-No storage rewrite or fallback reader is introduced. The [paired study](../benchmarks/candid-comparison.md#upstream-postcard-hard-cut--10-november-2026)
-saves 287/247 uncompressed opt-z/opt-3 Wasm bytes, with explicit decode/rejection
-regressions: worst +11.1% on a tiny u16 and +9.2% on a large byte-array batch at
-opt-z. Nineteen opt-z rows exceed the instruction screen; none do at opt-3.
-The automated checker stops on provenance identity differences; independent
-verification checks all frame/input, allocation, source and counter evidence.
-Core/Clippy/browser/Platform/corpus checks and 10,000 sanitizer fuzz inputs pass.
-Both full release gates passed. The released-source 39-cohort matrix is now
-complete; see the current comparison below.
-Prior parser measurements below are historical for this decoder change.
+## Evidence and cleanup recovery
 
-## Optimization and matrix refresh — 10 November
+External cleanup interrupted the first 0.21.5 gate by deleting its active frozen
+checkout and validation output. No push/tag/publication had occurred. Durable
+Git state retained the clean captured source `ca2ede9`. After the maintainer
+confirmed cleanup stopped, the same checkout was restored from that index,
+tools were prepared again and all 20 stages reran successfully. No failed-stage
+reuse or validation bypass was used.
 
-Earlier qualified finite-f32, unit/newtype-tag and consolidated depth-admission
-changes remain documented in [primitive bulk](../evidence/primitive-bulk.md)
-and [encoder follow-up](../evidence/encoder-followup.md), including their accepted
-opt-3 regressions. They preserve bytes, identities and admission. Do not repeat
-rejected tag-inlining, tuple-body or f64 probes. Opt-z remains primary; fixture
-Wasm changes are not application savings.
+Preserve `target/release-frozen/batch-W7zKUDXE` and
+`.git/release-state/frozen/batch-W7zKUDXE`. The latter retains release journals,
+Git objects and the completed intent. The resumed log is
+`/tmp/wire-0215-recovery-release.log`; the interrupted log is
+`/tmp/wire-deploy-0215.log`. No cleanup by this agent is authorized.
 
-The [Core 0.20 matrix](../benchmarks/candid-comparison.md#core-020-full-matrix--10-november-2026)
-is historical evidence from frozen source 3c5176c. The current refresh follows.
+Cleanup also removed historical raw artifacts: the checked-length and numeric
+varint evidence directories, and `target/evidence/codec-matrix-core021`, were
+confirmed absent. Committed topic reports preserve the measured results, but
+missing sources/samples cannot be reconstructed or verified from summaries alone.
+Do not describe those target paths as currently available. New performance work
+must prepare fresh matched inputs; the fresh release gate is correctness evidence,
+not a rerun of those historical performance studies.
 
-## Complete full comparison — 11 November
+The [latest full-matrix report](../benchmarks/candid-comparison.md#core-021-checkout-full-matrix--11-november-2026)
+remains historical: 39 cohorts, 2,314 case entries, 48,610 IC rows; all 78 linked
+Wasm size pairs favour Wire. It used Types 0.19.1, not this release's suppliers.
+Ordinary-list controls retain large Candid gaps; no current full-matrix claim.
 
-The [Core 0.21 checkout matrix](../benchmarks/candid-comparison.md#core-021-checkout-full-matrix--11-november-2026)
-verifies all 39 cohorts: 2,314 case entries, 48,610 IC rows and 156,640 native/frame
-checks. All 156 guest builds are fresh; all 78 total/code Wasm pairs favour Wire.
-Primary instruction wins: 4,157/4,628 opt-z and 4,260/4,628 opt-3. Ordinary-list
-controls still exceed 10× Candid; mixed-width tuple encode remains 2.63×/6.68×.
-Full exports and frozen sources: `target/evidence/codec-matrix-core021`; preserve
-`target/codec-matrix-core021-build`. Qualification uses Types 0.19.1, not the
-pending root-only 0.19.3 (externally advanced from 0.19.2 during the run).
-This is not a matched regression or application study.
-Native timings share the host with other builds. The current deployment is a separate qualification.
+## Remaining contracts and recovery boundaries
 
-## Documentation and tooling
-Both workspaces now select Toko Tooling 0.39.17, its reviewed upstream references and
-installed executable receipt; no vendored shared-doc tree remains. Installation,
-snapshot/tools, pin/boundary, documentation and disposable Make routing checks
-pass. LOC narrow/wide rendering preserves numeric columns across 133 rows; stage reuse stays disabled.
+Postcard's derive-feature removal was last tracked in issue 56 as unreleased;
+verify its owner before new action rather than repeating the unchanged study.
+Core 0.20 uses upstream Postcard, with consumer-owned collection normalization.
+Retain original retry/hash bytes. Account present/absent bytes stay
+`01 20 + 32 bytes` / `00`. Method IDs remain production; fingerprint macros
+remain research. Schema naming is registration-independent since Core 0.21.0.
+IcyDB storage/key encodings and downstream orchestration remain out of scope.
 
-## Compiler, suppliers and release boundary
-
-Rust 1.99.1 is the minimum/pinned compiler; only the opt-in sanitizer fuzzer has
-a separately approved nightly. Both workspaces now select Toko Tooling 0.39.17.
-Root owns four public packages; qualification owns three private packages and
-its own lock. Published Testkit 0.101.0 replaces the old Platform simulator facade
-with upstream PocketIC 16.1.0; native drivers use its handles/rejection types.
-Both locks now select canonical Types 0.19.4 and Runtime/guard 0.21.2 from an
-external update preserved during qualification. No product source changes were made.
-Tooling 0.39.17 was verified latest on crates.io on 2026-11-12;
-Qualification Build 0.83.0 and Testkit 0.101.0 were verified latest on 2026-11-12.
-Build's actual diagnostic caller passes 9 Core and 13 Endpoint rejection cases
-and their passing controls. Testkit adds native Platform 0.31.2 codec/management
-support and its transitive num-bigint 0.5.1; the direct Candid comparator retains
-its approved 0.4.8 identity. The release editor remains independently selected
-by Makefile; this request updates qualification only. The exporter retained all
-existing entrypoints and added the dependency-update helper (95 installed files).
-`make deps-update` updates root and qualification locks sequentially; package and
-precise selectors are available. Codec bytes, identities, limits and acceptance
-are unchanged.
-Required Host dependencies move to 0.76.4; upstream PocketIC pins transitive
-thiserror to 2.0.18. Other supplier refreshes are outside this request; review
-at the next dependency-maintenance/release boundary rather than infer freshness.
-Strict native Clippy, caller-storage/input driver compilation, 20 graph checks
-and installed endpoint calls/limits/rollback pass with the new suppliers.
-Historical Testkit 0.100.2 driver smoke uses retained
-cost-smoke guests: 20 cases, both codecs/profiles, 432 rows with three identical
-samples and exact frames (target/evidence/testkit-01002-smoke). Prepared server
-16.0.0 is supported; this is compatibility evidence, not a new performance matrix.
-Candid 0.10.40 stays a private comparator; its bigint 0.4.8 exception remains.
-Core 0.21.3 and Endpoint 0.12.2 include these updates. Both full release gates
-passed in batch-7ND70NND; the delivered commits are reconciled locally.
-Historical [delivery receipts](../../releases/receipts/README.md) remain intact.
-
-## Remaining boundaries and custody
-
-Postcard's derive-feature removal remains an unreleased supplier follow-up
-(issue 56); do not repeat the unchanged experiment. Native big-endian execution
-remains unqualified. Preserve original retry/hash bytes and consumer-owned
-normalization. Account present/absent bytes remain `01 20 + 32 bytes` / `00`;
-method IDs remain production behavior and fingerprint macros remain research.
-
-No cleanup is authorized. Preserve all evidence, active targets, journals and
-release state. Missing externally removed artifacts cannot be proved by receipts.
-Failed batches batch-mzOGyRZA, batch-Oup1NG9b and batch-1afAufRB are superseded;
-do not resume them. Completed batch-1i9z2IIG was reconciled, its checkout removed
-and deferred lock 7fd813f reapplied. Never resume schema-1 0.17.5 with schema 2.
-History was intentionally replaced: do not re-upload published versions to repair
-Git. Future delivery uses explicit groups and the current roster; stage reuse
-and final-candidate opt-ins remain disabled.
+Historical [delivery receipts](../../releases/receipts/README.md) and Git history
+own completed narratives. Failed batches batch-mzOGyRZA, batch-Oup1NG9b and
+batch-1afAufRB are superseded; do not resume them. Completed batch-1i9z2IIG was
+reconciled and its deferred lock reapplied. Never resume schema-1 0.17.5 with
+schema-2 tooling. History was intentionally replaced; never re-upload published
+versions to repair Git. Do not infer retained artifact availability from receipts.
