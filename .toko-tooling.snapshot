@@ -36,6 +36,7 @@ revision	aaeab49adb84ea0d66cf86ecc48d826125f9c3ac6eafaf2a362bccfeba7acbfd
 # entrypoint	scripts/ci/check-candid-boundary.pl
 # entrypoint	scripts/ci/validation-evidence.pl
 # entrypoint	make/cargo-dependencies.mk
+# entrypoint	scripts/ci/cargo-tool-cache-key.sh
 file	91a8c4e1dc4ddb8fbba5825b1190716ddf29eb3cb49784067620b9a86b45c784	-	make/consumer.mk
 file	0211c9124882f1e59ab6a11a7e341e6d030020b4b577d9bfbf9d1445d02322d7	x	.githooks/pre-commit
 file	468ff88c6e6fca8c79447ceaa8d04d11f2e1c668664bb9732da708b696a6041b	x	scripts/ci/check-documentation-links.pl
@@ -69,6 +70,7 @@ file	12bb1ba3ce34f267118ae34c52b514e8390e9fa0c240313918b3dd5bc9e7964d	-	.github/
 file	4ba3a93e5ba61d532fa368d0f264a23f601693a8289e83e82749b09da53cf0e9	-	scripts/ci/check-candid-boundary.pl
 file	3a3df3b5cb0147ca2a532d963e97b186920a4fa261d1aacc5fa6989f253fb323	-	scripts/ci/validation-evidence.pl
 file	701efc37079afa34e41b490582f20bc3e8419d2dd0f5eca33041a2d333a50354	-	make/cargo-dependencies.mk
+file	4c2ee09c8e87b43397d2df28bdbc1b5fc0197a10ebe0a94d89cb46916b93a9ca	x	scripts/ci/cargo-tool-cache-key.sh
 file	da86464696f4f600f034566cef732aa680dc9c577e534519c71ee3d07172a875	-	scripts/dev/toko-tooling.sh
 file	21cdb5dbdbe3ccd0aeb0762dcde0647ed007f34121d1ef63057af61414e77a00	-	make/tools.mk
 file	679668278d85532c69005acd2c7289bb44ff5096184478f8e4564f973f3989ed	-	make/release.mk
@@ -100,13 +102,14 @@ file	ce27820fc6256fc417d3606dfcc8b850256c3f36a1a29132be587d49aceb82d4	-	scripts/
 file	6c094eb6af59e9071c7fa5e87c917202f866b220a94e59f1b4fffe154ed5f92e	-	scripts/ci/ValidationPlan.pm
 file	f6ecd07a9577b0b307d2bef6c8185125c611e05732c119c63bb474cbf50e18d5	-	make/execution.mk
 file	4a177c60fbf09eccb6a9a70ce9ac7289cb1c25c3595098ac64b141d1325a4dc7	-	scripts/dev/cargo-dependencies.pl
+file	2dd5d5da3a78a6b982f7eadb2c175cef9270d6e17753990817e5759f34fa1b7d	-	scripts/dev/cargo-tool-build.sh
+file	5f3297399300ab0bd6e486deffbb5b87205e2190db12f9cc40c39e9cfd38e1f7	x	scripts/dev/install-rust-tools.sh
 file	0e8e5f0eaa605ea97713595d568f420f051458f269eef287bb4756c9592eb387	-	scripts/ci/check-tooling-prerequisites.sh
 file	68e88225adfb40ff0807516b682c4882825ebbeaf3b5245ae4642db600a45ea1	-	scripts/dev/tooling-lock.pl
 file	5bb62496317accb40a1bf875dc96c15f47de6b10c2f272bc924f44adf16d0018	-	scripts/distribution/registry-package.pl
 file	881c7093141527d907dbea4e2a050e1d37ebec9aedd576b6aad6d5c065eae4ab	x	scripts/distribution/refresh-consumer.sh
 file	86036e9aa03456ed624d3b890c1917685883421a6098a01193a9637bee427346	x	scripts/dev/install-host-tools.sh
 file	c913280d89dbb1c4a2c324c58448354697dff08d570ca845c7ad36ad78a321a3	x	scripts/dev/install-ic-tools.sh
-file	5f3297399300ab0bd6e486deffbb5b87205e2190db12f9cc40c39e9cfd38e1f7	x	scripts/dev/install-rust-tools.sh
 file	c75f2312273eabc31a5b287673b45fa73b0fb0edb76b018b2967a13145375a49	x	scripts/ci/run-release-batch.pl
 file	1b01f4b482fb85986d1ffab592626ccbfec187ac7a5133ab946b0acd51a18381	-	scripts/ci/check-release-delivery.sh
 file	a1ed6b41c20ec62404a127fa3432a56beb1e76541c08fa7231adc8e0409047e1	-	scripts/dev/clean-empty-source-dirs.pl
@@ -120,14 +123,13 @@ file	5be336cb3e8045b2d2d536542a94944b376ee812b03f786a90b9d962ab697f13	x	scripts/
 file	d50eec860f7e4c1f4b44c3414f1f960559e80378ba65aabd268b85ac5f8d5748	-	scripts/ci/cargo-release-groups.jq
 file	b0f12a5031ecb6f4e10c1f6f79989ed9b32e110eec824f83c423d4dc41254def	-	scripts/ci/cargo-qualification-release.sh
 file	6d99677e86759273a88fb4149cbd4c14f2aacc99e1838a0db343d76c776f1aba	-	scripts/ci/ic-tool-pins.awk
-file	4eeaca14cfce7f551f4b9a66ebecc49a9208a861f56dced344709158dee36736	-	scripts/ci/shared-companions.sh
-file	4cfa90a020aefc5115fe5f7103eb5857f837acb9e0cf91f6362947a4abea211c	x	scripts/ci/describe-tool-selection.pl
-file	ebf236f1db579744a13bc995ec1c58c2ee87e34caed23088a6d9b75e638dd27f	x	scripts/ci/verify-evidence-checksums.sh
-file	2dd5d5da3a78a6b982f7eadb2c175cef9270d6e17753990817e5759f34fa1b7d	-	scripts/dev/cargo-tool-build.sh
+file	ee9ec8f9f45ff2e61ed0287fcac6b2b3c151e802565cacd29c6eeacf32c3b97f	-	scripts/dev/native-package-inputs.pl
 file	f06fab74d51ec386133feeda6cd26509e8a9797ae14d93afdf5fb7369b0141a0	-	scripts/dev/tool-store-maintenance.pl
+file	4cfa90a020aefc5115fe5f7103eb5857f837acb9e0cf91f6362947a4abea211c	x	scripts/ci/describe-tool-selection.pl
+file	4eeaca14cfce7f551f4b9a66ebecc49a9208a861f56dced344709158dee36736	-	scripts/ci/shared-companions.sh
+file	ebf236f1db579744a13bc995ec1c58c2ee87e34caed23088a6d9b75e638dd27f	x	scripts/ci/verify-evidence-checksums.sh
 file	ec46c51af7fc2b7ef2959343331e6aa9efb40904d55f5c5b5a43cb446736f9a8	-	scripts/ci/cargo-publication-selection.pl
 file	a38b6c7690bf00d9de14f2a76ec6f56a65c4694dc5d5d7d18533feac2d15780a	-	scripts/ci/cargo-publication-paths.sh
 file	ebb267fa5bf0b326b6b96ed6a4c362f5f3dbcfc5805d30c20e880288ec3001d0	x	scripts/ci/run-cargo-publication.sh
 file	0a69975366b073edadc1b8999ee8e9c9411e67a19f9aad74d7625da6c6004d66	-	scripts/ci/cargo-qualification-release.jq
-file	ee9ec8f9f45ff2e61ed0287fcac6b2b3c151e802565cacd29c6eeacf32c3b97f	-	scripts/dev/native-package-inputs.pl
 file	efe6acefb807e41e7f2bc3bfe3314deba5647d694ccfd48c3beac4e7956bfb49	-	scripts/dev/OwnedTree.pm

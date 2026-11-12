@@ -206,8 +206,19 @@ bytes independently of any normalized decode/re-encode result.
 For code changes, hosted CI runs those three groups independently on Linux x86_64,
 macOS ARM64 and macOS Intel. Each matrix job owns its checkout, `target/`, tool
 preparation and failure artifacts. Only the TypeScript group prepares Node/npm.
-The existing `scaffold (OS)` status names remain final gates for the selected
-qualification, rejecting failed, cancelled or incomplete work.
+Only Core installs the release editor. All groups retain complete common-tool
+admission and fetch both workspace locks for offline qualification.
+The aggregate `qualification` gate rejects failed, cancelled or incomplete work.
+
+Hosted jobs restore compiled Cargo tools through Toko Tooling's installed
+`cargo-tool-cache-key.sh` and the existing installer store. Keys bind the native
+build identity, runner image, catalog, tooling inputs, suite and Makefile.
+Only default-branch pushes save after successful setup and `tools-check`;
+PR jobs may read. There are no prefix restore keys. Cache misses or transport
+failures use ordinary setup; hits still run installation and byte admission.
+The cache contains tool generations and their Cargo source cache, not product
+builds or validation proofs. Native macOS and hosted cold/hit timings still
+require CI execution; no end-to-end saving is claimed from local fixtures.
 
 The exact [prose allowlist](../../ci/docs-only-paths.txt) covers design, evaluation,
 performance and the current handoff. Reviewed readers use these files as human

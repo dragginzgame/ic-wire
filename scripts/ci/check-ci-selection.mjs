@@ -41,7 +41,36 @@ assert.equal(jobs.qualification.name, undefined);
 assert.equal(jobs['change-scope'].outputs.scope, '${{ steps.classify.outputs.scope }}');
 for (const job of Object.values(jobs)) {
   assert.ok(!job['continue-on-error']);
-  for (const step of job.steps) assert.ok(!step['continue-on-error']);
+  for (const step of job.steps) {
+    // Cache transport is optional; installers and every admission remain fatal.
+    if (['Restore Cargo tool builds', 'Save Cargo tool builds'].includes(step.name)) {
+      assert.equal(step['continue-on-error'], true);
+      assert.equal(step['timeout-minutes'], 3);
+    } else assert.ok(!step['continue-on-error']);
+  }
+}
+const nativeSteps = jobs.validate.steps;
+const cacheKey = nativeSteps.find(s => s.id === 'tool-cache-key');
+assert.match(cacheKey.run, /cargo-tool-cache-key\.sh ci\/tool-versions\.env >> "\$GITHUB_OUTPUT"/);
+const cacheRestore = nativeSteps.find(s => s.id === 'tool-cache');
+const cacheSave = nativeSteps.find(s => s.name === 'Save Cargo tool builds');
+assert.equal(cacheRestore.uses, 'actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9');
+assert.equal(cacheSave.uses, 'actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9');
+assert.deepEqual(cacheRestore.with, cacheSave.with);
+assert.equal(cacheRestore.with.key, "cargo-tools-${{ runner.os }}-${{ runner.arch }}-${{ matrix.suite }}-${{ steps.tool-cache-key.outputs.key }}-${{ hashFiles('Makefile') }}");
+assert.equal(cacheRestore.with.path.trim(), '${{ steps.tool-cache-key.outputs.root }}/cargo-cache\n${{ steps.tool-cache-key.outputs.root }}/rust-*');
+assert.equal(cacheRestore.if, undefined);
+assert.equal(cacheRestore.with['restore-keys'], undefined);
+assert.equal(cacheSave.if, "github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.tool-cache.outputs.cache-hit != 'true'");
+const install = nativeSteps.find(s => s.name === 'Install reviewed common tools');
+assert.equal(install.if, undefined); // A cache hit never skips setup or checking.
+const editor = nativeSteps.find(s => s.name === 'Prepare editor for release-adapter fixtures');
+assert.equal(editor.if, "matrix.suite == 'core'");
+const toolAdmission = nativeSteps.find(s => s.name === 'Admit prepared tools before caching');
+assert.equal(toolAdmission.run, 'make tools-check');
+assert.equal(toolAdmission.if, undefined);
+for (const [before, after] of [[cacheKey, cacheRestore], [cacheRestore, install], [install, editor], [editor, toolAdmission], [toolAdmission, cacheSave]]) {
+  assert.ok(nativeSteps.indexOf(before) < nativeSteps.indexOf(after));
 }
 const classifier = jobs['change-scope'].steps.find(s => s.id === 'classify');
 assert.deepEqual(classifier.env, {
@@ -103,6 +132,18 @@ for (const p of allowed) {
 
 fs.mkdirSync(path.join(root, 'target'), { recursive: true });
 const evidence = fs.mkdtempSync(path.join(root, 'target/ci-selection.'));
+// Exercise the installed key owner: stable inputs match, runner-image drift
+// invalidates, and an unavailable catalog cannot yield a usable cache key.
+const keyArgs = ['scripts/ci/cargo-tool-cache-key.sh', 'ci/tool-versions.env'];
+const keyEnv = { PATH: `${root}/.tools/host/bin:${environment.PATH}`, ImageOS: 'wire-fixture', ImageVersion: 'one' };
+const firstKey = run('bash', keyArgs, root, keyEnv);
+assert.match(firstKey, /^key=[a-f0-9]{64}\nroot=\//);
+assert.equal(run('bash', keyArgs, root, keyEnv), firstKey);
+assert.notEqual(run('bash', keyArgs, root, { ...keyEnv, ImageVersion: 'two' }), firstKey);
+const missingCatalog = spawnSync('bash', [keyArgs[0], path.join(evidence, 'missing-catalog')], { cwd: root, env: { ...environment, ...keyEnv }, encoding: 'utf8' });
+assert.ifError(missingCatalog.error);
+assert.notEqual(missingCatalog.status, 0);
+assert.ok(!missingCatalog.stdout.includes('key='));
 const repo = path.join(evidence, 'repo');
 fs.mkdirSync(repo);
 // Include new candidate inputs before staging, including linked evidence and

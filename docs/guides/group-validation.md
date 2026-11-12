@@ -73,6 +73,54 @@ receipt refuse. Existing source/index, metadata, unrelated-group, archive,
 publication and protection checks remain with their prior owners. No version
 projection, another executor or release authority is introduced.
 
+## Release cost review (12 November 2026)
+
+[Issue 59](https://github.com/dragginzgame/ic-wire/issues/59) was traced against
+the authorized Core 0.21.5 recovery deployment, captured source `ca2ede9`, delivered
+commit `e249cdf`. The retained `/tmp/wire-0215-recovery-release.log` reports all
+20 stages executed, none reused. Rounded stage times total 1,187 seconds:
+release-adapter fixtures 619, benchmarks 306, Endpoint 51, TypeScript 45,
+and initial lint 9. This is a prepared recovery run, not a cold deployment or
+an end-to-end stopwatch measurement. The earlier interrupted run is not a
+matching cold baseline. Setup reused the shared compiled tool generations;
+source preparation reported about two seconds per Cargo tool.
+
+`ic-wire-release.sh verify` lints the original versions before `metadata prepare`.
+Publication's `cargo-publication-adapter.sh` then invokes the selected lint target
+once for the entire package selection, followed by fresh Cargo archive verification,
+upload and registry availability checks. It does not lint once per package.
+The second lint's Cargo compilation took 1.39 seconds on final 0.21.5 source;
+that excludes policy/dispatch overhead. Archive verification reported 2.82 and
+3.45 seconds, excluding packaging, index access, lock waits and registry latency.
+Those phases lack complete timestamped boundaries, so their total durations and
+a before/after deployment saving are unknown. No extra release was made to time them.
+
+Keep ordinary final-source lint: the nine-second pre-preparation proof does not
+cover changed package identities. Introducing prospective-candidate rendering,
+complete Cargo closure observation and proof custody solely to avoid the observed
+1.39-second compilation is not justified by this sample. Stage reuse and final
+candidate opt-ins remain disabled. Source, features, targets or lock changes must
+continue to execute current-source lint; old whole-gate receipts cannot substitute.
+All archive, registry and interrupted-recovery admission remains unchanged.
+
+The separate hosted CI improvement caches compiled tool generations using the
+existing supplier key/installer. Complete tools-check and both locked workspace
+fetches remain required; removing them is not suite narrowing. Focused workflow
+tests cover ordering, save restrictions, mandatory post-hit admission, stable
+keys, changed runner-image keys and missing-catalog refusal. Hosted cache-hit,
+cache-miss and native macOS timing remain unmeasured; this does not establish a
+local deployment speedup or close the issue's timing acceptance criteria.
+
+Delivery impact was checked against `6d9294d` using Rust 1.99.1 and separate
+before/after targets with `cargo package --allow-dirty --locked --offline
+--no-verify --all-features -p PACKAGE` for each of the four public packages.
+Every extracted product file, including normalized manifests and packaged locks,
+matches. Git provenance is excluded explicitly. Packages were compared individually:
+multi-package packaging propagates temporary supplier-archive provenance into
+dependent lock checksums. This CI-only delivery needs no Core/Endpoint publication.
+The archives remain under `target/issue59-single-before` and
+`target/issue59-single-after`; uncompiled archive equality is not runtime validation.
+
 ## Focused qualification lifecycle
 
 `make check-release-validation` exercises actual product selection, Shared

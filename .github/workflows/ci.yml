@@ -92,16 +92,42 @@ jobs:
       - name: Prepare reviewed bootstrap tools
         run: make install-host-tools
       - name: Prepare the compiler from local policy
+        id: tool-cache-key
         run: |
           export PATH="$PWD/.tools/host/bin:$PATH"
           bash scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
           bash scripts/ci/rust-policy.sh
           echo "RUSTUP_TOOLCHAIN=$(bash scripts/ci/read-cargo-workspace-rust-version.sh Cargo.toml)" >> "$GITHUB_ENV"
+          bash scripts/ci/cargo-tool-cache-key.sh ci/tool-versions.env >> "$GITHUB_OUTPUT"
+      - name: Restore Cargo tool builds
+        id: tool-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        continue-on-error: true
+        timeout-minutes: 3
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2
+        with:
+          path: |
+            ${{ steps.tool-cache-key.outputs.root }}/cargo-cache
+            ${{ steps.tool-cache-key.outputs.root }}/rust-*
+          key: cargo-tools-${{ runner.os }}-${{ runner.arch }}-${{ matrix.suite }}-${{ steps.tool-cache-key.outputs.key }}-${{ hashFiles('Makefile') }}
       - name: Install reviewed common tools
         run: make install-tools 2>&1 | tee "$RUNNER_TEMP/tools-install.log"
       - name: Prepare editor for release-adapter fixtures
         if: matrix.suite == 'core'
         run: make install-release-editor
+      - name: Admit prepared tools before caching
+        run: make tools-check
+      - name: Save Cargo tool builds
+        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && steps.tool-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        continue-on-error: true
+        timeout-minutes: 3
+        with:
+          path: |
+            ${{ steps.tool-cache-key.outputs.root }}/cargo-cache
+            ${{ steps.tool-cache-key.outputs.root }}/rust-*
+          key: cargo-tools-${{ runner.os }}-${{ runner.arch }}-${{ matrix.suite }}-${{ steps.tool-cache-key.outputs.key }}-${{ hashFiles('Makefile') }}
       - name: Save pinned tool downloads
         uses: ./.github/actions/cache-tool-downloads
         with:

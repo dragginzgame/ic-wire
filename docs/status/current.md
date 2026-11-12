@@ -4,7 +4,10 @@ Core **0.21.5** (`e249cdf`, tag `core-v0.21.5`) is delivered to origin/main and
 crates.io. Both Core packages were independently downloaded from the registry.
 All 20 release stages passed in recovered batch-W7zKUDXE; normal main is
 reconciled. Endpoint remains **0.12.2** (`2a51973`); its source and dependency
-requirements were unchanged. No additional release is pending from this work.
+requirements were unchanged. Pending issue 59 changes add hosted compiled-tool
+caching; no product release is required solely for this CI change. See the
+[release cost review](../guides/group-validation.md#release-cost-review-12-november-2026)
+for the no-go on candidate lint reuse and outstanding hosted timing qualification.
 
 ## Delivered behavior
 
@@ -29,7 +32,7 @@ and [encoder follow-up](../evidence/encoder-followup.md).
 ## Tooling and suppliers
 
 Both workspaces select Toko Tooling 0.39.17. Its authenticated crates.io snapshot
-retains 95 payload files and updates the baseline document. Tracked Rust sources
+retains 96 payload files, including the newly exported Cargo-tool cache key. Tracked Rust sources
 already satisfy the no-sibling-foo.rs/foo-directory rule. Installation, tool and
 snapshot admission, pins and CI callers passed. Exact-pin exceptions match.
 Rust 1.99.1 remains minimum and pinned; only the opt-in sanitizer fuzzer has its
@@ -80,8 +83,8 @@ Ordinary-list controls retain large Candid gaps; no current full-matrix claim.
 
 ## Remaining contracts and recovery boundaries
 
-Postcard's derive-feature removal was last tracked in issue 56 as unreleased;
-verify its owner before new action rather than repeating the unchanged study.
+Postcard issue 56 remains supplier-blocked: the live sparse index checked on
+12 November still ends at 1.1.3 with normal Serde `derive` enabled.
 Core 0.20 uses upstream Postcard, with consumer-owned collection normalization.
 Retain original retry/hash bytes. Account present/absent bytes stay
 `01 20 + 32 bytes` / `00`. Method IDs remain production; fingerprint macros

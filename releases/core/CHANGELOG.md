@@ -5,6 +5,15 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.21.6]
+
+### Maintenance
+
+- Cache admitted compiled Cargo tools in hosted CI using Toko Tooling's native
+  build identity, retaining complete setup checks and both workspace fetches
+  ([#59](https://github.com/dragginzgame/ic-wire/issues/59)). Product code and
+  release/publication gates are unchanged; hosted timing qualification is pending.
+
 ## [0.21.5] - 2026-11-12
 
 ### Performance
