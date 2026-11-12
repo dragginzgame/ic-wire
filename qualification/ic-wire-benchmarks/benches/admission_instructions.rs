@@ -1,7 +1,7 @@
 //! Explicit PocketIC admission study; does not alter the production limits.
 mod admission;
-use ic_platform_types::Principal;
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::pocket_ic::CanisterId;
 use ic_testkit::pocket_ic::PocketIcBuilder;
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -29,7 +29,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server =
         PathBuf::from(std::env::var_os("POCKET_IC_BIN").expect("prepared PocketIC server"));
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
-        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
+        .build_instance(
+            PocketIcBuilder::new()
+                .with_max_request_time_ms(Some(300_000))
+                .with_application_subnet(),
+        )
         .await?;
     let pic = owned.instance();
     let wasm = fs::read(wasm_path)?;
@@ -45,9 +49,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "notes":"Warm decode, including destruction; setup/transport excluded. Budgets are illustrative, not equivalent to Candid quotas."
         }))?,
     )?;
-    let canister = pic.create_canister().await?;
-    pic.add_cycles(canister, 100_000_000_000_000).await?;
-    pic.install_canister(canister, wasm, vec![], None).await?;
+    let canister = pic.create_canister().await;
+    pic.add_cycles(canister, 100_000_000_000_000).await;
+    pic.install_canister(canister, wasm, vec![], None).await;
     let mut file = fs::File::create(output.join("samples.jsonl"))?;
     let mut sample_caller = 0_u64;
     for (kind, name) in admission::KINDS.iter().enumerate() {
@@ -72,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let reply = pic
                             .query_call(
                                 canister,
-                                Principal::from_slice(&sample_caller.to_le_bytes()),
+                                CanisterId::from_slice(&sample_caller.to_le_bytes()),
                                 "benchmark",
                                 vec![kind as u8, index as u8, policy as u8, u8::from(truncated)],
                             )
@@ -97,6 +101,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     pic.stop_canister(canister, None).await.unwrap();
     pic.delete_canister(canister, None).await.unwrap();
-    owned.close().await?;
+    owned.close().await;
     Ok(())
 }

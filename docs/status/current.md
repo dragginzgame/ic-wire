@@ -1,12 +1,11 @@
 # Current handoff
 
-Core 0.21.1 (db58463) was delivered to origin/main and crates.io on 2026-11-11.
-Its complete 20-stage gate passed; batch-CaPBWJVP is complete and reconciled.
-Both Core packages are published. Endpoint remains at published 0.12.0 (009f3eb),
-delivered in the earlier completed/reconciled batch-qfrz5NEG. Private qualification
-packages remain unpublished. No cleanup or batch retirement is authorized.
-
-## Pending Core 0.21.2 — host generator allocations
+Core 0.21.2 (aa3d923) and Endpoint 0.12.1 (aa66e18) are published on GitHub and
+crates.io; both full 20-stage gates passed. Batch-kHCkigFQ completed, but normal
+checkout reconciliation stopped on another session's AGENTS.md edit; preserve it.
+Pending CI fix: use compiler-free snapshot verification before Rust setup, with
+full Cargo/tooling admission retained in ci-* afterward. No cleanup is authorized.
+## Released Core 0.21.2 — host generator allocations
 Borrow ordinary escaped-path inputs and active recursion names. Matched synthetic
 plain/shared-reference fixtures remove 39%/65% of allocations; shared-reference
 latency improves, with escaped-name and noisy nested regressions recorded in
@@ -21,7 +20,6 @@ fixtures, with opt-3 timing regressions recorded. Rust/TypeScript conformance pa
 Rejected follow-ups: [empty acknowledgements](../evidence/native-registry.md#empty-acknowledgement-shortcut--rejected-11-november-2026) and
 [bulk-write inlining](../evidence/cost-experiments.md#bulk-write-inlining--rejected-11-november-2026). [Shared framed decode admission](../evidence/cost-experiments.md#shared-framed-decode-admission--not-promoted-11-november-2026) saves 338 opt-z bytes but grows opt-3; no runtime change is retained.
 [Fused nonzero decode](../evidence/cost-experiments.md#fused-nonzero-packed-decoding--rejected-11-november-2026) and [boolean block validation](../evidence/cost-experiments.md#block-validation-for-packed-booleans--rejected-11-november-2026) regress opt-3/opt-z respectively; both rejected.
-
 ## Released Core 0.21.1 — browser and host costs
 
 Browser alias detection and reusable host lint paths are released; see the
@@ -32,7 +30,6 @@ same, malformed-cycle callback counts can differ. Small long-chain regressions
 are recorded. Set-based aliases, Unicode regex and
 [budget outlining](../evidence/cost-experiments.md#shared-budget-outlining--rejected-11-november-2026)
 were rejected. Release gates used Types 0.19.1; later root updates remain deferred.
-
 ## Toko feedback — released Core 0.21.0
 
 Stable host names replace positional WireType indices. Generated definitions use
@@ -63,7 +60,6 @@ Both complete release gates passed with these suppliers. During deployment,
 another process changed the normal root lock to Types 0.19.2. That edit is
 preserved for the next candidate, outside this release; qualification still
 selects 0.19.1. Do not treat 0.19.2 as qualified by these release gates.
-
 ## Upstream decoder hard cut — released in Core 0.20.0
 
 Core 0.20.0 uses upstream Postcard in place of the private parser.
@@ -109,7 +105,7 @@ This is not a matched regression or application study.
 Native timings share the host with other builds. The current deployment is a separate qualification.
 
 ## Documentation and tooling
-Both workspaces now select Toko Tooling 0.39.11, its reviewed upstream references and
+Both workspaces now select Toko Tooling 0.39.15, its reviewed upstream references and
 installed executable receipt; no vendored shared-doc tree remains. Installation,
 snapshot/tools, pin/boundary, documentation and disposable Make routing checks
 pass. LOC narrow/wide rendering preserves numeric columns across 133 rows; stage reuse stays disabled.
@@ -117,20 +113,36 @@ pass. LOC narrow/wide rendering preserves numeric columns across 133 rows; stage
 ## Compiler, suppliers and release boundary
 
 Rust 1.99.1 is the minimum/pinned compiler; only the opt-in sanitizer fuzzer has
-a separately approved nightly. Both workspaces now select Toko Tooling 0.39.11.
-Root owns four public packages; `qualification/` owns three private packages
-and its independent lock. Canonical Types 0.19, Runtime/guard 0.21 and Testkit
-0.96 composition is qualified. Manifests/locks own exact supplier selections.
-Candid 0.10.40 is a private dev-only oracle, with exact-one-result framing and
-quotas; the removed Platform depth pre-scan does not constrain this comparator.
-Its bigint 0.4.8 exception remains approved; production Types own their dependency.
-The historical Core 0.20 matrix used Types 0.19.0; this refresh uses 0.19.1.
-Both locks now select Types 0.19.3 for the new release gates; earlier evidence remains tied to its recorded supplier.
-
-Core 0.21.1 and Endpoint 0.12.0 are published. Future delivery uses explicit
-release groups and qualification exclusions; do not re-upload those versions.
-Historical delivery narratives remain in Git at 1e701b8 and existing
-[delivery receipts](../../releases/receipts/README.md).
+a separately approved nightly. Both workspaces now select Toko Tooling 0.39.15.
+Root owns four public packages; qualification owns three private packages and
+its own lock. Published Testkit 0.101.0 replaces the old Platform simulator facade
+with upstream PocketIC 16.1.0; native drivers use its handles/rejection types.
+Both locks now select canonical Types 0.19.4 and Runtime/guard 0.21.2 from an
+external update preserved during qualification. No product source changes were made.
+Tooling 0.39.15 was verified latest on crates.io on 2026-11-12;
+Qualification Build 0.83.0 and Testkit 0.101.0 were verified latest on 2026-11-12.
+Build's actual diagnostic caller passes 9 Core and 13 Endpoint rejection cases
+and their passing controls. Testkit adds native Platform 0.31.2 codec/management
+support and its transitive num-bigint 0.5.1; the direct Candid comparator retains
+its approved 0.4.8 identity. The release editor remains independently selected
+by Makefile; this request updates qualification only. The exporter retained all
+existing entrypoints and added the dependency-update helper (95 installed files).
+`make deps-update` updates root and qualification locks sequentially; package and
+precise selectors are available. Codec bytes, identities, limits and acceptance
+are unchanged.
+Required Host dependencies move to 0.76.4; upstream PocketIC pins transitive
+thiserror to 2.0.18. Other supplier refreshes are outside this request; review
+at the next dependency-maintenance/release boundary rather than infer freshness.
+Strict native Clippy, caller-storage/input driver compilation, 20 graph checks
+and installed endpoint calls/limits/rollback pass with the new suppliers.
+Historical Testkit 0.100.2 driver smoke uses retained
+cost-smoke guests: 20 cases, both codecs/profiles, 432 rows with three identical
+samples and exact frames (target/evidence/testkit-01002-smoke). Prepared server
+16.0.0 is supported; this is compatibility evidence, not a new performance matrix.
+Candid 0.10.40 stays a private comparator; its bigint 0.4.8 exception remains.
+Core 0.21.2 and Endpoint 0.12.1 are published; these new updates are uncommitted.
+Normal checkout still needs release reconciliation after preserving pending work.
+Historical [delivery receipts](../../releases/receipts/README.md) remain intact.
 
 ## Remaining boundaries and custody
 

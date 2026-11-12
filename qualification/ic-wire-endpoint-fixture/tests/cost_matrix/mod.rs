@@ -1,7 +1,7 @@
 //! Complete exported-endpoint costs; no instrumentation in the measured canister.
 use super::cases::cases;
-use ic_platform_types::principal::Principal;
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::pocket_ic::CanisterId;
 use ic_testkit::pocket_ic::PocketIcBuilder;
 use ic_wire::native;
 use ic_wire_endpoint_fixture::LIMITS;
@@ -51,18 +51,20 @@ async fn all_endpoint_costs() {
     );
     let session = PocketIcStartupConfig::from_env(Duration::from_secs(90))
         .unwrap()
-        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
+        .build_instance(
+            PocketIcBuilder::new()
+                .with_max_request_time_ms(Some(300_000))
+                .with_application_subnet(),
+        )
         .await
         .unwrap();
     let pic = session.instance();
-    let canister = pic.create_canister().await.unwrap();
-    pic.add_cycles(canister, 100_000_000_000_000).await.unwrap();
+    let canister = pic.create_canister().await;
+    pic.add_cycles(canister, 100_000_000_000_000).await;
     let wasm = fs::read(out.join("endpoint.wasm")).unwrap();
     let module_hash = digest(&wasm);
-    pic.install_canister(canister, wasm, vec![], None)
-        .await
-        .unwrap();
-    let caller = Principal::anonymous();
+    pic.install_canister(canister, wasm, vec![], None).await;
+    let caller = CanisterId::anonymous();
     let count = || async {
         native::decode_response::<u64>(
             8,
@@ -100,10 +102,10 @@ async fn all_endpoint_costs() {
             http(&format!("{path}/start"), true);
             // Publish a round before sampling. Each call uses a distinct caller
             // so query-result caching cannot replace actual Wasm execution.
-            pic.tick().await.unwrap();
-            let balance = pic.cycle_balance(canister).await.unwrap();
+            pic.tick().await;
+            let balance = pic.cycle_balance(canister).await;
             let measured_caller =
-                Principal::from_slice(&((case_index * 9 + repetition) as u64).to_le_bytes());
+                CanisterId::from_slice(&((case_index * 9 + repetition) as u64).to_le_bytes());
             let result = if case.mode == "update" {
                 pic.update_call(canister, measured_caller, case.method, case.frame.clone())
                     .await
@@ -112,7 +114,7 @@ async fn all_endpoint_costs() {
                     .await
             };
             let cycles = balance
-                .checked_sub(pic.cycle_balance(canister).await.unwrap())
+                .checked_sub(pic.cycle_balance(canister).await)
                 .unwrap();
             http(&format!("{path}/stop"), true);
             let trace = http(&format!("{path}/executions?limit=1000"), false);
@@ -173,5 +175,5 @@ async fn all_endpoint_costs() {
     }
     pic.stop_canister(canister, None).await.unwrap();
     pic.delete_canister(canister, None).await.unwrap();
-    session.close().await.unwrap();
+    session.close().await;
 }

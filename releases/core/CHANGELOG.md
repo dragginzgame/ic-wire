@@ -5,6 +5,24 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.21.3]
+
+### Maintenance
+
+- Deferred repository maintenance: expose `make deps-update` through the upstream
+  tooling entrypoint for sequential root and qualification dependency updates.
+
+- Deferred repository maintenance: adopt published Toko Tooling 0.39.15 and
+  qualification Build 0.83.0 and Testkit 0.101.0. Migrate private simulator fixtures to Testkit's upstream
+  PocketIC client, preserving canister rejection checks and managed lifecycle.
+  This tooling/qualification adoption changes no public codec bytes or limits.
+
+- Deferred repository maintenance: verify snapshot integrity without Cargo in
+  the CI change-scope job, before the pinned compiler is installed. Preserve
+  full tooling admission after compiler setup; regression coverage checks a
+  compiler-free bootstrap and rejection of modified snapshot files. No public
+  package release is required for this workflow-only fix.
+
 ## [0.21.2] - 2026-11-11
 
 ### Performance

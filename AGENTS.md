@@ -26,9 +26,12 @@ and docs/guides/development.md for local commands. These are task-specific refer
   selects CDK; require one Runtime guard where execution is selected.
 - Candid remains outside published packages. The unpublished benchmark package
   may select Candid directly as an unconditional dev-only comparison oracle
-  under the reviewed tooling exception and use Testkit's maintained
-  PocketIC client, types and lifecycle behind native-only `ic` features. The unpublished
-  endpoint fixture qualifies integration through those same owners.
+  under the reviewed tooling exception. Native-only `ic` fixtures consume the
+  upstream client and simulator handles through `ic_testkit::pocket_ic`; Testkit
+  owns managed server setup and lifecycle. Application/Wire identities remain
+  canonical Platform Types; explicit validated-byte conversions at the native
+  simulator boundary are permitted without restoring product aliases or wrappers.
+  The unpublished endpoint fixture qualifies integration through those same owners.
 - Keep qualification packages `publish = false`; their publication needs its own
   explicit scope. Keep current supplier selections/publication state in the
   handoff and the owning workspace manifests/locks, not a second catalog here. No supplier patches
@@ -49,7 +52,7 @@ conventions and ordinary module discovery. Declare private package LOC roles.
 
 The independent virtual workspace `qualification/Cargo.toml` owns the three
 unpublished packages in `qualification/` and `qualification/Cargo.lock`.
-It isolates Build/Testkit/Platform-facade resolution from the four public root
+It isolates Build/Testkit/upstream-PocketIC resolution from the four public root
 members under the tooling core/integration boundary. Native corpus/allocation
 checks do not enable `ic` or `diagnostics`; these features select Testkit and
 Build only when needed. Both workspaces retain the same compiler, formatting

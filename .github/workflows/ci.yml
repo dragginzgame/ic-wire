@@ -27,7 +27,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Check reviewed snapshot integrity
-        run: make toko-tooling-check
+        # Full Cargo/tooling admission runs in ci-* after compiler setup.
+        run: bash scripts/ci/verify-toko-tooling-snapshot.sh --consumer "$PWD" --require-annotations
       - name: Restore pinned tool downloads
         uses: ./.github/actions/cache-tool-downloads
       - name: Prepare pinned security scanner

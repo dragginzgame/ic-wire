@@ -1,5 +1,5 @@
 //! One endpoint scenario catalogue for installed and instrumented qualification.
-use ic_testkit::pocket_ic::{ClientError, RejectCode};
+use ic_testkit::pocket_ic::{RejectCode, RejectResponse};
 use ic_wire::{ByteBuf, Limits, native};
 use ic_wire_endpoint_fixture::{
     DEFAULT_BLOB, DEFAULT_MUTATE, LIMITS, NAMED, RESPONSE_ONLY, Request,
@@ -273,7 +273,7 @@ impl Case {
     // Transport/setup errors must never count as observed canister refusals.
     pub(super) fn verify(
         &self,
-        result: Result<Vec<u8>, ClientError>,
+        result: Result<Vec<u8>, RejectResponse>,
         state: u64,
     ) -> (&'static str, Option<Vec<u8>>) {
         match (&self.expected, result) {
@@ -288,7 +288,7 @@ impl Case {
                 );
                 ("reply", Some(reply))
             }
-            (Expected::Trap, Err(ClientError::Canister(error))) => {
+            (Expected::Trap, Err(error)) => {
                 assert_eq!(
                     error.reject_code,
                     RejectCode::CanisterError,
@@ -298,7 +298,7 @@ impl Case {
                 );
                 ("trap", None)
             }
-            (Expected::Reject, Err(ClientError::Canister(error))) => {
+            (Expected::Reject, Err(error)) => {
                 assert_eq!(error.reject_code, RejectCode::CanisterReject);
                 ("reject", None)
             }

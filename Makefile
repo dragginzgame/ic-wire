@@ -52,6 +52,7 @@ $(error PUBLISH_PACKAGES was replaced by PACKAGE; use PACKAGE=ic-wire for a sele
 endif
 endif
 include make/consumer.mk
+include make/cargo-dependencies.mk
 
 # These custom routes bypass the generic CI/release entrypoint admission.
 ci-core ci-typescript ci-benchmarks publish publish-check release-batch-resume release-batch-reconcile: toko-tooling-check
@@ -216,6 +217,7 @@ help:
 		'Qualification graph: check-integration-boundary (independent qualification/Cargo.lock)' \
 		'Evaluation: evaluate-endpoints EVIDENCE_DIR=/absolute/new/path (instrumented POCKET_IC_BIN)' \
 		'Registry: publish (uploads); publish-check (dry run); PACKAGE selects a subset; check-package (archives)' \
+		'Dependencies: deps-update (root and qualification Cargo locks)' \
 		'Focused tooling: toko-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
 		'Workspace counts: cloc; workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \

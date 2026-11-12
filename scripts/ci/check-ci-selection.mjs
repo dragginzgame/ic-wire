@@ -52,7 +52,8 @@ assert.deepEqual(classifier.env, {
 });
 assert.equal(jobs['change-scope'].steps[0].with['fetch-depth'], 0);
 assert.equal(jobs['change-scope'].steps[0].with['persist-credentials'], false);
-assert.equal(jobs['change-scope'].steps.find(s => s.name === 'Check reviewed snapshot integrity').run, 'make toko-tooling-check');
+const snapshotCheck = jobs['change-scope'].steps.find(s => s.name === 'Check reviewed snapshot integrity');
+assert.equal(snapshotCheck.run, 'bash scripts/ci/verify-toko-tooling-snapshot.sh --consumer "$PWD" --require-annotations');
 const scan = jobs['change-scope'].steps.find(s => s.name === 'Scan repository history for secrets');
 assert.equal(scan.env.GITLEAKS_BIN, '${{ steps.security-tool.outputs.gitleaks }}');
 assert.match(scan.run, /"\$GITLEAKS_BIN" git --redact=100/);
@@ -66,6 +67,8 @@ const native = jobs.validate.steps.find(s => s.name === 'Validate selected CI gr
 assert.equal(native.if, undefined);
 assert.equal(native.env.CI_GROUP, '${{ matrix.suite }}');
 assert.equal(native.run, 'make "ci-$CI_GROUP"');
+assert.ok(jobs.validate.steps.findIndex(s => s.name === 'Prepare the compiler from local policy') < jobs.validate.steps.indexOf(native));
+assert.match(fs.readFileSync(path.join(root, 'Makefile'), 'utf8'), /^ci-core ci-typescript ci-benchmarks .*: toko-tooling-check$/m);
 const retention = jobs.validate.steps.find(s => s.uses === './.github/actions/retain-failure-evidence');
 assert.equal(retention.if, '${{ failure() }}');
 assert.ok(retention.with.name.includes('matrix.suite') && retention.with.name.includes('matrix.os'));
@@ -108,6 +111,17 @@ for (const p of new Set(files)) {
   fs.chmodSync(dest, fs.statSync(source).mode & 0o777);
 }
 const git = (...args) => run('git', args, repo);
+// A clean hosted runner has no pinned compiler yet. Execute the real bootstrap
+// command with an empty Rustup home, then prove that payload drift still fails.
+const emptyRustup = path.join(evidence, 'empty-rustup');
+fs.mkdirSync(emptyRustup);
+const bootstrapEnv = { RUSTUP_HOME: emptyRustup, RUSTUP_AUTO_INSTALL: '0', RUSTUP_TOOLCHAIN: 'wire-ci-no-installed-toolchain' };
+run('bash', ['-e', '-o', 'pipefail', '-c', snapshotCheck.run], repo, bootstrapEnv);
+const managedFile = path.join(repo, 'scripts/dev/cloc.sh');
+const managedBytes = fs.readFileSync(managedFile);
+fs.appendFileSync(managedFile, '\n# Injected snapshot drift\n');
+run('bash', ['-e', '-o', 'pipefail', '-c', snapshotCheck.run], repo, bootstrapEnv, 1);
+fs.writeFileSync(managedFile, managedBytes);
 git('init', '-q', '-b', 'main');
 git('config', 'user.name', 'Fixture');
 git('config', 'user.email', 'fixture@example.invalid');

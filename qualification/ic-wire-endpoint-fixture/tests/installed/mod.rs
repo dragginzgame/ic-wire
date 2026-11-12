@@ -1,7 +1,7 @@
 //! Owning installed endpoint/transaction checks; explicit prepared PocketIC only.
-use ic_platform_types::principal::Principal;
 use ic_testkit::pic::PocketIcStartupConfig;
-use ic_testkit::pocket_ic::{ClientError, PocketIcBuilder, RejectCode};
+use ic_testkit::pocket_ic::CanisterId;
+use ic_testkit::pocket_ic::{PocketIcBuilder, RejectCode, RejectResponse};
 use ic_wire::{ByteBuf, native};
 use ic_wire_endpoint_fixture::{LIMITS, Request};
 use std::time::Duration;
@@ -11,21 +11,24 @@ use std::time::Duration;
 async fn typed_calls_limits_and_transactions() {
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))
         .unwrap()
-        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
+        .build_instance(
+            PocketIcBuilder::new()
+                .with_max_request_time_ms(Some(300_000))
+                .with_application_subnet(),
+        )
         .await
         .unwrap();
     let pic = owned.instance();
-    let canister = pic.create_canister().await.unwrap();
-    pic.add_cycles(canister, 100_000_000_000_000).await.unwrap();
+    let canister = pic.create_canister().await;
+    pic.add_cycles(canister, 100_000_000_000_000).await;
     pic.install_canister(
         canister,
         std::fs::read(std::env::var_os("ENDPOINT_WASM").unwrap()).unwrap(),
         vec![],
         None,
     )
-    .await
-    .unwrap();
-    let caller = Principal::anonymous();
+    .await;
+    let caller = CanisterId::anonymous();
     #[cfg(feature = "admission-contract")]
     {
         let id = native::method_id("admission_contract");
@@ -191,9 +194,6 @@ async fn typed_calls_limits_and_transactions() {
         )
         .await
         .unwrap_err();
-    let ClientError::Canister(refusal) = refusal else {
-        panic!("expected canister guard rejection, got {refusal:?}")
-    };
     assert_eq!(
         refusal.reject_code,
         ic_testkit::pocket_ic::RejectCode::CanisterReject
@@ -277,7 +277,7 @@ async fn typed_calls_limits_and_transactions() {
     // checks preserve each case's rollback proof after the ordered sequence.
     for (index, case) in super::cases::cases().into_iter().enumerate() {
         let state = count().await;
-        let scenario_caller = Principal::from_slice(&(index as u64).to_le_bytes());
+        let scenario_caller = CanisterId::from_slice(&(index as u64).to_le_bytes());
         let result = if case.mode == "update" {
             pic.update_call(canister, scenario_caller, case.method, case.frame.clone())
                 .await
@@ -294,15 +294,14 @@ async fn typed_calls_limits_and_transactions() {
             case.label
         );
     }
-    owned.close().await.unwrap();
+    owned.close().await;
 }
 
-// The client reports transport/protocol failures as Err too. Only an observed
-// canister error proves malformed-input refusal or rollback; fail setup/I/O
-// errors instead of counting them as successful negative cases. No retry.
-fn expect_trap(result: Result<Vec<u8>, ClientError>) {
+// Upstream PocketIC returns canister rejections and panics on transport/setup
+// failures. Only the expected reject code proves refusal or rollback. No retry.
+fn expect_trap(result: Result<Vec<u8>, RejectResponse>) {
     match result {
-        Err(ClientError::Canister(reject)) => {
+        Err(reject) => {
             assert_eq!(reject.reject_code, RejectCode::CanisterError)
         }
         other => panic!("expected a canister trap, got {other:?}"),

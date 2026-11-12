@@ -87,14 +87,16 @@ fn native_measurement() {
 #[tokio::test(flavor = "current_thread")]
 #[ignore = "requires an explicitly prepared PocketIC server and Wasm artifacts"]
 async fn ic_measurement() {
-    use ic_platform_types::Principal;
     use ic_testkit::pic::PocketIcStartupConfig;
+    use ic_testkit::pocket_ic::CanisterId;
     use ic_testkit::pocket_ic::PocketIcBuilder;
     let output = PathBuf::from(std::env::var_os("IC_WIRE_STORAGE_EVIDENCE").unwrap());
     let owned = PocketIcStartupConfig::from_env(std::time::Duration::from_secs(60))
         .unwrap()
         .build_instance(
-            PocketIcBuilder::new(std::time::Duration::from_secs(300)).with_application_subnet(),
+            PocketIcBuilder::new()
+                .with_max_request_time_ms(Some(300_000))
+                .with_application_subnet(),
         )
         .await
         .unwrap();
@@ -103,16 +105,15 @@ async fn ic_measurement() {
     let mut sample_caller = 0_u64;
     for profile in ["evaluation", "benchmark-speed"] {
         for lane in ["before-vec", "after-vec", "after-slice", "after-scoped"] {
-            let canister = pic.create_canister().await.unwrap();
-            pic.add_cycles(canister, 100_000_000_000_000).await.unwrap();
+            let canister = pic.create_canister().await;
+            pic.add_cycles(canister, 100_000_000_000_000).await;
             pic.install_canister(
                 canister,
                 fs::read(output.join(format!("{profile}-{lane}.wasm"))).unwrap(),
                 vec![],
                 None,
             )
-            .await
-            .unwrap();
+            .await;
             for (case, label) in CASES.iter().enumerate() {
                 let mut samples = Vec::new();
                 let mut length = 0;
@@ -124,7 +125,7 @@ async fn ic_measurement() {
                     let reply = pic
                         .query_call(
                             canister,
-                            Principal::from_slice(&sample_caller.to_le_bytes()),
+                            CanisterId::from_slice(&sample_caller.to_le_bytes()),
                             "benchmark",
                             vec![case as u8],
                         )
@@ -145,5 +146,5 @@ async fn ic_measurement() {
         serde_json::to_vec_pretty(&rows).unwrap(),
     )
     .unwrap();
-    owned.close().await.unwrap();
+    owned.close().await;
 }

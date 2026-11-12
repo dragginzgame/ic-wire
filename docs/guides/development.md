@@ -421,9 +421,12 @@ The default codec graph has no Platform or simulator dependencies. The independe
 TypeScript support; its standalone consumer check also qualifies the combined
 Runtime 0.21 endpoint graph. Old published Endpoint 0.9's Runtime 0.20 composition
 is not a supported mixed pair for the new canonical Types generation.
-The unpublished benchmark and endpoint fixture packages use Testkit's async
-PocketIC client and lifecycle for qualification; upstream Candid supplies the
-independent benchmark oracle. Platform 0.28 is selected by native Testkit. The historical inline/extracted Endpoint comparison
+The unpublished benchmark and endpoint fixture packages use the upstream async
+client through `ic_testkit::pocket_ic`; Testkit owns managed server lifecycle.
+Native simulator handles use the client's types; product identities stay in
+Platform Types. Upstream Candid supplies the independent benchmark oracle.
+The qualification graph no longer selects the old Platform simulator facade.
+The historical inline/extracted Endpoint comparison
 has been retired; its [results](../evidence/endpoints.md) remain historical.
 
 For the complete exported-endpoint matrix, run
@@ -755,12 +758,18 @@ expander source, building the current Endpoint macro owner.
 
 ## Updating the tooling bundle
 
+`make deps-update` runs sequential `cargo update -v` calls for the root and
+qualification workspaces. To update one dependency, pass
+`DEPENDENCY_PACKAGE=name` and optionally `DEPENDENCY_PRECISE=version`.
+It updates locks within manifest requirements; review the changes before adoption.
+It does not install a newly selected tooling snapshot.
+
 Declare the same exact published tooling release once per workspace root
 (`Cargo.toml` and `qualification/Cargo.toml`):
 
 ```toml
 [workspace.dependencies]
-toko-tooling = "=0.39.11"
+toko-tooling = "=0.39.15"
 ```
 
 Every real workspace package inherits `toko-tooling.workspace = true` in its

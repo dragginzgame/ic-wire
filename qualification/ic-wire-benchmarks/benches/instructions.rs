@@ -11,8 +11,8 @@ mod fixtures;
 mod operations;
 #[cfg(all(feature = "coverage-shapes", feature = "wire"))]
 mod unsigned_magnitude;
-use ic_platform_types::Principal;
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::pocket_ic::CanisterId;
 use ic_testkit::pocket_ic::PocketIcBuilder;
 use operations::{COUNTS_BYTES, FRAME_OFFSET, OPERATIONS};
 use serde_json::json;
@@ -47,7 +47,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert!(compiler.status.success());
     let compiler = String::from_utf8(compiler.stdout)?;
     let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
-        .build_instance(PocketIcBuilder::new(Duration::from_secs(300)).with_application_subnet())
+        .build_instance(
+            PocketIcBuilder::new()
+                .with_max_request_time_ms(Some(300_000))
+                .with_application_subnet(),
+        )
         .await?;
     let pic = owned.instance();
     let cases = fixtures::cases();
@@ -64,9 +68,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for codec in ["wire", "candid"] {
             let wasm = fs::read(root.join(format!("{profile}-{codec}.wasm")))?;
             artifacts.push(json!({"profile":profile,"codec":codec,"sha256":hash(&wasm)}));
-            let canister = pic.create_canister().await?;
-            pic.add_cycles(canister, 100_000_000_000_000).await?;
-            pic.install_canister(canister, wasm, vec![], None).await?;
+            let canister = pic.create_canister().await;
+            pic.add_cycles(canister, 100_000_000_000_000).await;
+            pic.install_canister(canister, wasm, vec![], None).await;
             for (case_id, case) in cases.iter().enumerate() {
                 let lanes = case.lanes.iter().filter(|lane| {
                     if codec == "wire" {
@@ -89,7 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         // the measured fixture does not read the caller identity.
                         sample_caller += 1;
                         sample_caller_ids.push(sample_caller);
-                        let caller = Principal::from_slice(&sample_caller.to_le_bytes());
+                        let caller = CanisterId::from_slice(&sample_caller.to_le_bytes());
                         let args = [case_id as u32, lane_id as u32, repetitions]
                             .into_iter()
                             .flat_map(u32::to_le_bytes)
@@ -169,6 +173,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "lock_sha256":hash(include_bytes!("../../Cargo.lock")),"notes":"Warm operations; result destruction and loop overhead included. Loop control reported, not subtracted. Setup/reply transport excluded. Exact frames checked against native fixtures."}),
         ))?,
     )?;
-    owned.close().await?;
+    owned.close().await;
     Ok(())
 }
