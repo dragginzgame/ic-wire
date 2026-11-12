@@ -1,10 +1,10 @@
 # Current handoff
 
-Core 0.21.2 (aa3d923) and Endpoint 0.12.1 (aa66e18) are published on GitHub and
-crates.io; both full 20-stage gates passed. The normal checkout now includes both
-release commits and preserves the subsequent work in a source commit.
-Preparing Core 0.21.3 and Endpoint 0.12.2 for the updated locked Types/Runtime
-suppliers and CI/tooling/qualification maintenance. Full release gates are pending.
+Core 0.21.3 (b54ef7b) and Endpoint 0.12.2 (2a51973) are published on GitHub and
+crates.io; both full 20-stage gates passed. Batch-7ND70NND completed and the normal
+checkout was reconciled. Delivery includes the locked Types/Runtime supplier
+updates and CI/tooling/qualification maintenance. Source, codec bytes, identities,
+limits and acceptance rules are unchanged.
 CI uses compiler-free snapshot verification before Rust setup, with full
 Cargo/tooling admission retained in ci-* afterward. No cleanup is authorized.
 ## Released Core 0.21.2 — host generator allocations
@@ -142,8 +142,8 @@ cost-smoke guests: 20 cases, both codecs/profiles, 432 rows with three identical
 samples and exact frames (target/evidence/testkit-01002-smoke). Prepared server
 16.0.0 is supported; this is compatibility evidence, not a new performance matrix.
 Candid 0.10.40 stays a private comparator; its bigint 0.4.8 exception remains.
-Core 0.21.2 and Endpoint 0.12.1 are published; the new updates are committed
-for the next authorized deployment. The prior release commits are reconciled.
+Core 0.21.3 and Endpoint 0.12.2 include these updates. Both full release gates
+passed in batch-7ND70NND; the delivered commits are reconciled locally.
 Historical [delivery receipts](../../releases/receipts/README.md) remain intact.
 
 ## Remaining boundaries and custody
