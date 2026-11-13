@@ -1,15 +1,28 @@
 # Current handoff
 
-Core **0.21.5** (`e249cdf`, tag `core-v0.21.5`) is delivered to origin/main and
-crates.io. Both Core packages were independently downloaded from the registry.
-All 20 release stages passed in recovered batch-W7zKUDXE; normal main is
-reconciled. Endpoint remains **0.12.2** (`2a51973`); its source and dependency
-requirements were unchanged. Issue 59's hosted compiled-tool caching was pushed
-in `29d9778`; no product release is required solely for this CI change. See the
+Core **0.22.0** (`468d81f`, tag `core-v0.22.0`) and Endpoint **0.13.0**
+(`aa400b3`, tag `endpoint-v0.13.0`) are delivered to origin/main and crates.io.
+Both full 20-stage gates passed in `batch-0wZOXntn`; all four published archives
+were independently downloaded and verified against registry checksums. Normal
+main is reconciled. Consumers need Rust 1.100.0 and aligned Types 0.20 / Runtime
+0.22 dependencies; codec bytes, method identities, limits and acceptance remain
+unchanged. Account absent/present subaccounts stay `00` / `01 20 + 32 bytes`.
+
+Preserve `target/release-frozen/batch-0wZOXntn`, its matching
+`.git/release-state/frozen/` directory and `/tmp/wire022-qualified-deploy.log`.
+The concurrent `cc` 1.11.2 qualification-lock update was excluded from delivery
+and restored afterward as an uncommitted next-candidate change; its recovery
+stash is `b8f16b92bc31602199410a1c9c2457c697b1d3f7`. This release qualified 1.11.1.
+Native macOS acceptance for issue 60 remains pending; both release gates ran on
+Linux. No new full performance-matrix claim is made.
+
+Issue 59's hosted compiled-tool caching was pushed in `29d9778`. See the
 [release cost review](../guides/group-validation.md#release-cost-review-12-november-2026)
 for the no-go on candidate lint reuse and outstanding hosted timing qualification.
-Pending issue 60 work adopts Tooling 0.41.0 and Rust 1.100.0; Core 0.22.0 and
-Endpoint 0.13.0 notes record the compiler-floor change. Nothing is published.
+Delivered issue 60 work adopts Tooling 0.41.0 and Rust 1.100.0; Core 0.22.0 and
+Endpoint 0.13.0 notes record the compiler-floor change.
+
+## Superseded deployment attempts
 
 Deployment batch `batch-5W4C7_rt` captured source `8e3dd70` and stopped at
 `check-benchmarks` integration admission: Testkit 0.101.0 selects Types 0.19.5
@@ -58,7 +71,7 @@ The checked length helper is the qualified successor to the unguarded experiment
 Other rejected Rust experiments remain at [cost experiments](../evidence/cost-experiments.md)
 and [encoder follow-up](../evidence/encoder-followup.md).
 
-## Tooling and suppliers
+## Tooling and suppliers: qualification record
 
 Both workspaces select Toko Tooling 0.41.0; its authenticated snapshot retains
 96 files. Rust 1.100.0 is the minimum and pin (rustc `0ef1bc386`, Cargo `3acc79c0c`,
@@ -84,8 +97,8 @@ Native macOS proof remains pending; historical 1.99 performance is not remeasure
 Codec bytes, identities, budgets and acceptance remain unchanged. No performance
 or Wasm-size saving is claimed from this compiler/lint migration.
 
-The delivered release qualified Types 0.19.5, Runtime/macros/guard 0.21.3, native Platform
-0.31.3 and Host 0.76.5 lock selections. Pending qualification now selects Build 0.84.0 and
+The prior Core 0.21.5 release qualified Types 0.19.5, Runtime/macros/guard 0.21.3, native Platform
+0.31.3 and Host 0.76.5 lock selections. Current qualification selects Build 0.84.0 and
 Testkit 0.102.0, with the release editor aligned at Build 0.84.0. Their required
 Host 0.77.0 and native Platform 0.32.0 replace the prior private suppliers;
 the qualification lock now has only canonical Types 0.20.0.
@@ -95,7 +108,7 @@ before capture. The resumed full gate requalified the frozen supplier graph.
 Candid 0.10.40 is a private comparison oracle; its bigint 0.4.8 exception remains.
 No published package selects Candid.
 
-Pending adoption selects published Types 0.20.0 and Runtime/macros/guard 0.22.0
+The delivered adoption selects published Types 0.20.0 and Runtime/macros/guard 0.22.0
 in both workspaces. Align consumer Types/Runtime requirements together; these
 versions require Rust 1.100.0. Core 0.22.0 and Endpoint 0.13.0 notes cover this
 Rust identity cut. Schema and codec bytes, limits and admission remain unchanged:
@@ -132,7 +145,7 @@ group plans and both locks into disposable candidates; parsed changes matched
 selected version/dependency edits and preserved registry packages. No release
 versions were changed.
 
-Rust 1.100 follow-up is implemented locally: the public Clippy adapter uses
+The delivered Rust 1.100 follow-up's public Clippy adapter uses
 `CARGO_BUILD_WARNINGS=deny` without adding compiler warning flags. The existing
 policy fixture rejects a real warning on fresh and cached artifacts and accepts
 a clean control. Plain-JSON collectors and other strict callers are unchanged;
