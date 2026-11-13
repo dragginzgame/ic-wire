@@ -31,6 +31,13 @@ publication callers; the disposable routing/formatting suite passed. Preserve
 `/tmp/wire022-fresh-deploy.log` and that failed batch. A fresh source capture is
 required; neither failed batch may be resumed to deliver the corrected source.
 
+Batch `batch-akRasIRQ` captured `62c5f8b`. After a transient shared tool-store
+lock cleared, its resumed gate passed release recovery and public tests, then
+stopped at an obsolete qualification-tool assertion that rejected native dev
+dependencies. The assertion now distinguishes library edges from native dev
+edges and still rejects all native tools on Wasm. Preserve that batch and
+`/tmp/wire022-final-resume.log`; corrected source needs a new capture.
+
 ## Delivered behavior
 
 Core 0.21.5 includes browser record-field reuse, terminal first-byte numeric
