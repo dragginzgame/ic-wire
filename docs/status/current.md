@@ -1,18 +1,19 @@
 # Current handoff
 
-Core **0.22.0** (`468d81f`, tag `core-v0.22.0`) and Endpoint **0.13.0**
-(`aa400b3`, tag `endpoint-v0.13.0`) are delivered to origin/main and crates.io.
-Both full 20-stage gates passed in `batch-0wZOXntn`; all four published archives
+Core **0.22.1** (`24ade8f`, tag `core-v0.22.1`) and Endpoint **0.13.1**
+(`285330f`, tag `endpoint-v0.13.1`) are delivered to origin/main and crates.io.
+Both full 20-stage gates passed in `batch-hRrjJIGh`; all four published archives
 were independently downloaded and verified against registry checksums. Normal
 main is reconciled. Consumers need Rust 1.100.0 and aligned Types 0.20 / Runtime
 0.22 dependencies; codec bytes, method identities, limits and acceptance remain
 unchanged. Account absent/present subaccounts stay `00` / `01 20 + 32 bytes`.
 
-Preserve `target/release-frozen/batch-0wZOXntn`, its matching
-`.git/release-state/frozen/` directory and `/tmp/wire022-qualified-deploy.log`.
-The concurrent `cc` 1.11.2 qualification-lock update was excluded from delivery
-and restored afterward as an uncommitted next-candidate change; its recovery
-stash is `b8f16b92bc31602199410a1c9c2457c697b1d3f7`. This release qualified 1.11.1.
+Preserve `target/release-frozen/batch-hRrjJIGh`, its matching
+`.git/release-state/frozen/` directory and `/tmp/wire0221-deploy.log`.
+The previously deferred `cc` 1.11.2 qualification-lock update is included and
+qualified in this delivery. Its historical recovery stash is
+`b8f16b92bc31602199410a1c9c2457c697b1d3f7`; do not reapply it. The prior completed
+batch `batch-0wZOXntn` and its evidence remain preserved.
 Native macOS acceptance for issue 60 remains pending; both release gates ran on
 Linux. No new full performance-matrix claim is made.
 
@@ -22,14 +23,14 @@ for the no-go on candidate lint reuse and outstanding hosted timing qualificatio
 Delivered issue 60 work adopts Tooling 0.41.0 and Rust 1.100.0; Core 0.22.0 and
 Endpoint 0.13.0 notes record the compiler-floor change.
 
-## Pending supplier adoption
+## Delivered supplier and tooling adoption
 
 Both workspaces select Toko Tooling **0.42.1**, Platform Types **0.20.1** and
 Runtime/macros/guard **0.22.1**. Private qualification selects Build **0.84.1**,
 Host artifacts/fs/process **0.77.1** and native Platform **0.32.1**; Testkit
 remains **0.102.0**. The release editor is aligned at Build 0.84.1. Existing
 supplier lock updates and the deferred `cc` 1.11.2 selection were preserved.
-No product versions were bumped and nothing from this adoption is deployed.
+Core 0.22.1 and Endpoint 0.13.1 include this adoption.
 
 The supplier qualification below used Tooling 0.41.1 before the filesystem
 migration. The authenticated 96-file snapshot, installed tools, `deps-list`, dependency
@@ -55,13 +56,14 @@ use the vendor paths. Validation callers explicitly select the Wire repository
 root. Installed tools/snapshot, formatting, pins, documentation, package/LOC
 inventory, product boundaries, CI classification, disposable Make/hook routing,
 both groups' metadata transactions and the release-plan fixture passed. Logs
-are `/tmp/wire042-*.log`; no broad release gate or publication ran. The receipt
+are `/tmp/wire042-*.log`; subsequent frozen deployment passed both full gates
+and published all four packages. The receipt
 retains 96 authenticated files. Existing unconditional tooling declarations
 remain valid and unchanged; frozen delivery, group ownership and stage-reuse
-policy remain unchanged. Pending Core 0.22.1 / Endpoint 0.13.1 notes cover the public supplier
+policy remain unchanged. Core 0.22.1 / Endpoint 0.13.1 notes cover the public supplier
 requirements; compiler floor remains 1.100.0. Bytes, identities, limits and
 acceptance remain unchanged (`None`: `00`; `Some`: `01 20 + 32 bytes`). No fresh
-performance matrix or size saving is claimed; full release gates were not run.
+performance matrix or size saving is claimed.
 
 ## Superseded deployment attempts
 
