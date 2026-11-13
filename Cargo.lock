@@ -154,7 +154,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-endpoint"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "ic-platform-runtime",
  "ic-wire",
@@ -166,7 +166,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-endpoint-macros"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "proc-macro2",
  "quote",
