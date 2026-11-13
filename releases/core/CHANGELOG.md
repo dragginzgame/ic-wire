@@ -9,8 +9,10 @@ in [shared history](../history.md).
 
 ### 🧪 Testing
 
-- Adopt Toko Tooling 0.42.5 for installed-tool recovery and vendor-layout fixes;
-  repository maintenance only, with no production dependency change.
+- Adopt Toko Tooling 0.42.8 for installed-tool recovery, vendor-layout fixes and
+  CDPATH-independent hook setup/execution. Exercise repeated installation and
+  staged-only formatting with CDPATH set; repository maintenance only, with no
+  production dependency change from this tooling adoption.
 - Make benchmark snapshot qualification portable to macOS by owning its dummy
   simulator executable instead of assuming `/bin/true` exists
   ([#60](https://github.com/dragginzgame/ic-wire/issues/60)). Codec bytes, identities,

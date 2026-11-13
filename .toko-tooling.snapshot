@@ -1,9 +1,9 @@
 # Toko Tooling snapshot v1
-# version	0.42.5
+# version	0.42.8
 # layout	vendor
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	071631f382cbdb682ab04242bb8022bea9f1fa237eaa273456433b95ad6f2aec
+revision	10dde4572301be0c5540b54a04ddeb71d3cee0fab68e6700e5c6866b6cb877e2
 # entrypoint	vendor/toko-tooling/make/consumer.mk
 # entrypoint	vendor/toko-tooling/.githooks/pre-commit
 # entrypoint	vendor/toko-tooling/scripts/ci/check-documentation-links.pl
@@ -41,7 +41,7 @@ revision	071631f382cbdb682ab04242bb8022bea9f1fa237eaa273456433b95ad6f2aec
 # entrypoint	vendor/toko-tooling/make/release.mk
 # entrypoint	vendor/toko-tooling/make/cargo-publication.mk
 file	e5be6f538ee619be119aef9b3fca9d156f35c08732d9775e4e2efd698db8cbd7	-	vendor/toko-tooling/make/consumer.mk
-file	84b06550c38b69342c283a5fda016d50c08b4f9a79a11ae6ac424bc6601c6de7	x	vendor/toko-tooling/.githooks/pre-commit
+file	1085e5521dfacb38aed065b70f905aab666ab73ef49dd5a25270c2ec2cf63710	x	vendor/toko-tooling/.githooks/pre-commit
 file	468ff88c6e6fca8c79447ceaa8d04d11f2e1c668664bb9732da708b696a6041b	x	vendor/toko-tooling/scripts/ci/check-documentation-links.pl
 file	476e5bd1acf2033b75eed5eed080e4d306fa81bc3519eef7b79239294ab637e2	x	vendor/toko-tooling/scripts/ci/run-validation-targets.sh
 file	40f31a19d6115411ebffe7c26e3ed30b8af7eead10dd4830de8d5a9312291222	x	vendor/toko-tooling/scripts/ci/read-cargo-workspace-version.sh
@@ -79,7 +79,7 @@ file	f83e4bd3143a04e954f77eb23d38b1924658aa298b0c1d3486748197861d696d	-	vendor/t
 file	da86464696f4f600f034566cef732aa680dc9c577e534519c71ee3d07172a875	-	vendor/toko-tooling/scripts/dev/toko-tooling.sh
 file	37ac0feae114a24b837dc3ac0a15298698145e982fadad5d11281cae3efebed2	-	vendor/toko-tooling/make/tools.mk
 file	186a718c118bfb011ae8ed31d8683a9fd90a231827215ec9be973ef76fb36938	-	vendor/toko-tooling/make/rust-format.mk
-file	94f9af238ab42dbf016b2294008cba8ea1af946487a8f90cc1f272d77dcc7e2f	x	vendor/toko-tooling/scripts/dev/install-git-hooks.sh
+file	46077e4508b98e086e9772ac107b759bb251b3671aa965311c51b35dd71aef8d	x	vendor/toko-tooling/scripts/dev/install-git-hooks.sh
 file	c8693a4bc058f31c1592c86e7037f0ed02a9719a8a0269038e0a45e16ca93c0b	-	vendor/toko-tooling/scripts/ci/validation-input-checkpoint.pl
 file	1fd11f64f7698c1b5b17049d2b1551daba3af33bbdaba92228d7fc1f743e9055	-	vendor/toko-tooling/scripts/ci/release-validation-plan.pl
 file	31c47b675fba90850681c6fac0d685def34b08a68e7e05bc55ae0403419fdf82	x	vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh

@@ -383,7 +383,8 @@ check_ci_routing
 cp -p "$root/vendor/toko-tooling/scripts/ci/run-release.sh" "$fixture/repo/vendor/toko-tooling/scripts/ci/run-release.sh"
 git -C "$fixture/repo" init -q
 git -C "$fixture/repo" add -- "${paths[@]}"
-make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-hooks.log"
+CDPATH=.:.. make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-hooks.log"
+CDPATH=.:.. make --no-print-directory -C "$fixture/repo" install-hooks >> "$fixture/install-hooks.log"
 [[ "$(git -C "$fixture/repo" config --local core.hooksPath)" == vendor/toko-tooling/.githooks ]]
 (
     cd "$fixture/repo"
@@ -403,7 +404,7 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
     git add -- crates/ic-wire/src/lib.rs
     printf '\nUnrelated fixture edit.\n' >> TOKO-TOOLING.md
     cp TOKO-TOOLING.md "$fixture/unrelated-before"
-    bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/selected-hook.log" 2>&1
+    CDPATH=.:.. bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/selected-hook.log" 2>&1
     grep -F 'const _: u8 = 1;' crates/ic-wire/src/lib.rs >/dev/null
     cmp "$fixture/unrelated-before" TOKO-TOOLING.md
     [[ "$(git diff --cached --name-only)" == crates/ic-wire/src/lib.rs ]]
@@ -411,7 +412,7 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
     git diff --binary > "$fixture/unstaged-before"
     git diff --cached --binary > "$fixture/staged-before"
     status=0
-    bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/partial-hook.log" 2>&1 || status=$?
+    CDPATH=.:.. bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/partial-hook.log" 2>&1 || status=$?
     [[ "$status" != 0 ]]
     grep -F 'partially staged file' "$fixture/partial-hook.log" >/dev/null
     git diff --binary > "$fixture/unstaged-after"

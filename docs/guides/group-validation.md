@@ -150,8 +150,12 @@ Both native macOS benchmark jobs then exposed an independent fixture defect:
 creates its own dummy executable with exit code 94; the existing Cargo stub
 returns 93, so accidentally starting the simulator cannot satisfy the expected
 result. All 58 focused CLI checks pass on Linux after this change, without
-measurements or servers. Native macOS acceptance still requires running the
-fixed source; the failed hosted jobs are not passing Rust 1.100 qualification.
+measurements or servers. The subsequent [full run at fa56c2f](https://github.com/dragginzgame/ic-wire/actions/runs/43465897242)
+passed all nine core/TypeScript/benchmark jobs on Linux, macOS ARM64 and macOS
+Intel, including the corrected fixture. This completes the native-host proof
+for [issue 60](https://github.com/dragginzgame/ic-wire/issues/60); the earlier
+failed jobs remain failures. It does not qualify later working-tree supplier
+updates or establish new runtime performance measurements.
 
 ## Focused qualification lifecycle
 

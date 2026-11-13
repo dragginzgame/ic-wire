@@ -8,21 +8,32 @@ the current tooling/fixture maintenance.
 
 ## Current delivery
 
-Toko Tooling **0.42.5** is adopted through the crates.io exporter in both
+Toko Tooling **0.42.8** is adopted through the crates.io exporter in both
 workspaces. The 96-file receipt selects checksum
-`071631f382cbdb682ab04242bb8022bea9f1fa237eaa273456433b95ad6f2aec`.
-Only the baseline, Rust-tool installer and owned-tree helper payloads changed.
-The exact-pin exceptions are aligned. No unrelated dependency selection changed.
-All four before/after public archives differ only in the tooling dev-dependency
-pin/lock and Git provenance; product sources and runtime contracts are unchanged.
-Archives are under `target/issue5960-before` and `target/issue5960-after`.
+`10dde4572301be0c5540b54a04ddeb71d3cee0fab68e6700e5c6866b6cb877e2`.
+Only the pre-commit hook and hook installer payloads changed from 0.42.5.
+Installation/tool checks, snapshot verification, pins, CI selection, disposable
+Make/hook checks with CDPATH set, formatting and documentation links pass.
+This Git-only delivery preserves the published Core/Endpoint versions.
+The exact-pin exceptions are aligned. Deferred local lock edits select Types
+0.20.2, Runtime/macros/guard 0.22.2, Host 0.77.2, Platform 0.32.2 and mio 1.2.5;
+they are excluded from this delivery, preserved in the normal checkout after
+delivery, and backed up under `target/deferred-locks-0428/`. They are not newly
+adopted or fully qualified by this tooling task.
+The 0.42.8 delivery archives differ from the prior 0.42.5 archives only in the
+tooling dev-dependency pin/lock and Git provenance; product sources and runtime
+contracts are unchanged. Compared archives are under `target/issue5960-after`
+and `target/tooling0428-package`.
 
-Issue [60](https://github.com/dragginzgame/ic-wire/issues/60) still needs native
-macOS qualification. Full run 43463094098 attempt 2 exposed the benchmark CLI
+Issue [60](https://github.com/dragginzgame/ic-wire/issues/60) is closed with complete native
+qualification at delivered source `fa56c2f`. Full run 43463094098 attempt 2 exposed the benchmark CLI
 fixture's nonportable `/bin/true` assumption on both macOS architectures.
-The local fix owns an executable stub with a distinct exit code; all 58 focused
-CLI checks pass on Linux without measurements or simulator servers. Deliver this
-fix with the tooling update and let the full native matrix finish before closing.
+The delivered fix owns an executable stub with a distinct exit code; all 58 focused
+CLI checks pass on Linux without measurements or simulator servers. Subsequent
+[run 43465897242](https://github.com/dragginzgame/ic-wire/actions/runs/43465897242)
+passed all nine Linux/macOS core, TypeScript and benchmark jobs. Native logs
+confirm Rust 1.100.0 on aarch64-apple-darwin and x86_64-apple-darwin. This proof
+does not cover the later working-tree supplier changes.
 
 Issue [59](https://github.com/dragginzgame/ic-wire/issues/59) now has verified
 hosted cache-miss/hit observations on both macOS architectures. Installation
