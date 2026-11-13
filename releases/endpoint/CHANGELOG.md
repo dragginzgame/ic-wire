@@ -4,6 +4,19 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.13.0]
+
+### ⚠️ Breaking
+
+- Adopt Platform Runtime/macros/guard 0.22 and canonical Types 0.20. Align
+  downstream Runtime/Types dependencies together; frame bytes, identities,
+  limits and transaction semantics remain unchanged.
+
+- Require Rust 1.100.0 for Endpoint and its macros and apply the common lint
+  policy ([#60](https://github.com/dragginzgame/ic-wire/issues/60)). Upgrade the
+  consumer compiler; frame bytes, method identities, budgets, dispatch and
+  rollback semantics remain unchanged.
+
 ## [0.12.2] - 2026-11-12
 
 ### Maintenance

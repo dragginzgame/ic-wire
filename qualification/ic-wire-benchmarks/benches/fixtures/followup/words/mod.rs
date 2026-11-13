@@ -1,6 +1,9 @@
 //! Private research fields: byte-buffer admission through the production codec.
 //! No published Packed implementation, schema word or consumer rewrite is added.
-use super::*;
+use super::{
+    Case, Compared, Debug, DeserializeOwned, LIMITS, METHOD, Serialize, measured_lane,
+    paired_values,
+};
 
 pub(super) trait Word:
     bytemuck::NoUninit + Copy + Debug + Serialize + DeserializeOwned + Compared

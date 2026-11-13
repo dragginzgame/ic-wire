@@ -5,9 +5,24 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
-## [0.21.6]
+## [0.22.0]
 
-### Maintenance
+### ⚠️ Breaking
+
+- Adopt canonical Platform Types 0.20 for `platform-types`. Consumers must align
+  their direct Types dependency to 0.20; Principal/Account bytes, schema, limits
+  and acceptance remain unchanged (`None`: `00`; `Some`: `01 20 + 32 bytes`).
+
+- Require Rust 1.100.0 for Core and derive consumers; adopt Toko Tooling 0.40.1
+  and the common Rust/Clippy/Rustdoc policy ([#60](https://github.com/dragginzgame/ic-wire/issues/60)).
+  Pure accessors and constructors now warn when their results are ignored.
+  Upgrade the consumer compiler; codec bytes, identities, limits and acceptance
+  remain unchanged. No payload or persisted-state migration is needed.
+
+### 🔧 Changed
+
+- Adopt Tooling 0.40.1's deployment sequencing and failure-specific recovery
+  guidance; retain existing validation and compiled-tool cache admission.
 
 - Cache admitted compiled Cargo tools in hosted CI using Toko Tooling's native
   build identity, retaining complete setup checks and both workspace fetches

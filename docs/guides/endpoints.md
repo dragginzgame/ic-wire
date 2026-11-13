@@ -18,7 +18,7 @@ Consumers crossing the [0.16 Account layout cut](../../releases/core/0.16.md)
 must coordinate contract keys, clients and retained data. A compatible supplier
 patch alone does not change frame bytes or method identities. The
 [standalone fixture](../../qualification/ic-wire-endpoint-fixture/Cargo.toml)
-qualifies registry suppliers without Cargo patches. Rust 1.99.1 is required.
+qualifies registry suppliers without Cargo patches. Rust 1.100.0 is required.
 
 ```rust,ignore
 use ic_wire_endpoint::query;
@@ -203,7 +203,7 @@ This qualifies Wire's fixture endpoints; consumer application endpoints still
 need their own workload and authentication measurements.
 
 Run `make check-endpoint` for native metadata, compile-fail diagnostics, Clippy,
-Wasm compilation, the Rust 1.99.1 floor and runtime dependency boundaries. It is
+Wasm compilation, the Rust 1.100.0 floor and runtime dependency boundaries. It is
 included in the ordinary core CI roster. With an explicitly prepared server,
 run `POCKET_IC_BIN=/path/to/pocket-ic make check-endpoint-ic` for successful,
 malformed/wrong-identity, request/reply boundary, synchronous rollback, async and

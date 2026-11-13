@@ -1,6 +1,8 @@
 //! Toko-shaped inputs, copied from Toko 44d4e2c6d; no application dependency.
 //! TokenCard is a synthetic projection, not Toko's complete TokenSummary.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{Case, Debug, Serialize, case};
 #[derive(Debug, PartialEq, serde::Deserialize, Serialize)]
 #[cfg_attr(feature = "candid", derive(CandidType))]
 #[cfg_attr(feature = "candid", candid_path("candid"))]

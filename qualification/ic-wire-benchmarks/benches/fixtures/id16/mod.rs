@@ -1,5 +1,7 @@
 //! Fixed-width IDs against equally flattened Candid blobs, with explicit width checks.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{Blob, Case, Debug, LIMITS, Lane, METHOD, Rc, Serialize, lane};
 type Id = [u8; 16];
 #[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
 struct Filter<I> {
@@ -30,7 +32,7 @@ fn decode_filter(bytes: &[u8]) -> Option<ExternalFilter> {
 }
 #[cfg(feature = "wire")]
 mod wire {
-    use super::*;
+    use super::{Filter, Id, LIMITS, Lane, METHOD, Rc, lane};
     #[cfg(feature = "id16-control")]
     type Ids = Vec<Id>;
     #[cfg(not(feature = "id16-control"))]

@@ -425,6 +425,10 @@ pub fn generate_registry(
 /// Bulk advice is mandatory and uses `/payloads/NAME/...` acknowledgement paths.
 /// Consumers explicitly choose payload APIs; framed bytes and identities are
 /// unchanged. For example u64 7 encodes as `07`, with no synthetic method ID.
+#[expect(
+    clippy::missing_panics_doc,
+    reason = "Payload names are validated before the immutable lint walk; writing to String is infallible."
+)]
 pub fn generate_payload_registry(
     types: &BTreeMap<String, Value>,
     payloads: &[Value],

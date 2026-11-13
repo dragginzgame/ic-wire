@@ -49,6 +49,10 @@ struct Cursor {
     cursor: Option<Vec<u8>>,
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Each fixture transfers its JSON value to this case builder; no caller reuses it."
+)]
 fn case<T: typescript::Wire + for<'de> Deserialize<'de>>(name: &str, value: T, js: Value) -> Value {
     let mut registry = SchemaRegistry::new();
     let root = registry.register::<T>("Root").unwrap();

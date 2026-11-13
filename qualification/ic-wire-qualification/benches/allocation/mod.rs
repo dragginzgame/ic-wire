@@ -168,6 +168,7 @@ fn measure<T: Serialize, const ID: u64>(
 ///
 /// # Panics
 /// Panics for an unknown case.
+#[must_use]
 pub fn name(case: usize) -> String {
     if case < 28 {
         format!(

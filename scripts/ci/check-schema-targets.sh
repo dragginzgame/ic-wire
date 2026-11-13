@@ -14,6 +14,7 @@ cat > "$fixture/codec-only/Cargo.toml" <<EOF_CODEC
 name = "wire-codec-only"
 version = "0.0.0"
 edition = "2024"
+rust-version = "$RUSTUP_TOOLCHAIN"
 [lib]
 path = "lib.rs"
 [dependencies]

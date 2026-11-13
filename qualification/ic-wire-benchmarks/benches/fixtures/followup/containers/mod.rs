@@ -1,5 +1,10 @@
 //! Application container compositions and standard-library admission controls.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{
+    BTreeMap, Blob, Case, Debug, ExternalBytes32, LIMITS, METHOD, Serialize, case, data,
+    measured_lane, paired_values,
+};
 use std::collections::BinaryHeap;
 #[cfg(feature = "wire")]
 use std::num::NonZeroI64;

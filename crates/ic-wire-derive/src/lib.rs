@@ -9,7 +9,7 @@ mod native_schema;
 /// Emits metadata implementations on native targets only; Serde owns runtime codecs.
 #[proc_macro_derive(Wire, attributes(serde, wire))]
 pub fn derive_wire(input: TokenStream) -> TokenStream {
-    native_schema::expand(parse_macro_input!(input as DeriveInput))
+    native_schema::expand(&parse_macro_input!(input as DeriveInput))
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
 }

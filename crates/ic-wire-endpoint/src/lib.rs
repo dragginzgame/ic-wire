@@ -82,6 +82,7 @@ impl<Request, Response> Contract<Request, Response> {
 
     /// Construct the declaration used by the endpoint attribute.
     #[doc(hidden)]
+    #[must_use]
     pub const fn new(
         name: &'static str,
         mode: &'static str,
@@ -163,6 +164,7 @@ fn admit_frame(id: u64, limits: Limits) {
 /// Call [`admit_request`] before obtaining the argument buffer. This function
 /// preserves native identity, traversal, primitive and complete-input validation.
 /// Borrowed fields refer to `bytes`; the caller must retain it through their use.
+#[must_use]
 pub fn decode_request<'de, T: Deserialize<'de>>(bytes: &'de [u8], id: u64, limits: Limits) -> T {
     native::decode_request(id, bytes, limits).unwrap_or_else(|error| trap_error(error))
 }

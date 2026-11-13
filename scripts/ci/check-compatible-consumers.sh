@@ -37,7 +37,7 @@ publish = false
 [dependencies]
 ic-wire = { ${core}, features = ["platform-types"] }
 ic-wire-endpoint = { ${endpoint}, features = ["typescript"] }
-ic-platform-types = { version = "0.19.0", default-features = false }
+ic-platform-types = { version = "0.20.0", default-features = false }
 serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
 [patch.crates-io]
 ${patches.join('\n')}
@@ -61,13 +61,13 @@ assert.ok(!m.packages.some(p => ['candid','ic-testkit','tokio'].includes(p.name)
 if (lane === 'published-endpoint') {
  const runtime = endpoint.dependencies.find(d => d.name === 'ic-platform-runtime');
  const selectedRuntime = m.packages.find(p => p.id === m.resolve.nodes.find(n => n.id === endpoint.id).deps.find(d => d.name === 'ic_platform_runtime').pkg);
- if (line(selectedRuntime.version) !== '0.21') {
-  // The canonical Types 0.19 hard cut requires the matching Runtime generation.
+ if (line(selectedRuntime.version) !== '0.22') {
+  // The canonical Types 0.20 hard cut requires the matching Runtime generation.
   // An older published Endpoint is not a supported mixed pair. The current pair
   // below remains mandatory; publication will make that pair registry-installable.
   assert.notEqual(endpoint.source, null);
-  assert.equal(line(selectedRuntime.version), '0.20', 'unreviewed published Runtime generation');
-  console.log(`Published Endpoint ${endpoint.version} selects Runtime ${runtime.req}; Types 0.19 requires the current Runtime 0.21 pair.`);
+  assert.equal(line(selectedRuntime.version), '0.21', 'unreviewed published Runtime generation');
+  console.log(`Published Endpoint ${endpoint.version} selects Runtime ${runtime.req}; Types 0.20 requires the current Runtime 0.22 pair.`);
   fs.writeFileSync(file + '.unsupported-core-line', selectedRuntime.version + '\n');
   process.exit(0);
  }

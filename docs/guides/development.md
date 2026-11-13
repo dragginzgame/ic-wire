@@ -25,7 +25,7 @@ On macOS, install Xcode Command Line Tools and xz; on Linux, prepare a C compile
 linker and the development packages needed by Cargo-installed tools.
 
 ```sh
-rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+rustup toolchain install 1.100.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
 make install-tools
 make tools-check
 make install-hooks
@@ -99,10 +99,23 @@ Both workspaces remain covered by formatting and dependency-pin checks.
 ## Focused commands
 
 Check for active builds sharing `target/` before compilation or source edits.
-Rust 1.99.1 is both the minimum supported and pinned development/release compiler.
+Rust 1.100.0 is both the minimum supported and pinned development/release compiler.
 `make check-rust-policy` reads the workspace floor, verifies the pin and records
 actual Cargo/rustc identities. `make check` and `make check-wasm` qualify the
 host and Wasm targets under that same compiler. There is no separate MSRV lane.
+The policy check also verifies every member's lint inheritance, the benchmark's
+reviewed unsafe-export exception, and actual Cargo rejection of unsafe code and
+ignored must-use results in a disposable fixture. Both roots select the common
+Rust/Clippy/Rustdoc policy; safe-only packages retain `unsafe_code = "forbid"`.
+
+The Rust 1.100 migration was qualified on Linux with rustc `0ef1bc386`, Cargo
+`3acc79c0c` and LLVM 23.1.5. Public host tests, strict Clippy/Rustdoc, Wasm,
+installed/current consumers, Principal/Account byte conformance, macro diagnostic
+controls and Endpoint compile qualification passed. The diagnostic driver uses
+Cargo artifact paths because dependencies no longer live only in `debug/deps`.
+Benchmark modes are qualified separately: `--all-features` intentionally selects
+incompatible allocation and corpus controls. Native macOS remains a hosted proof;
+no historical performance result is relabelled as Rust 1.100 evidence.
 
 | Target | Scope |
 | --- | --- |
@@ -111,12 +124,12 @@ host and Wasm targets under that same compiler. There is no separate MSRV lane.
 | `check-wasm` | Runtime compilation for Wasm under the pinned compiler |
 | `check-typed-diagnostics` | Offline compile-fail subjects plus a passing control |
 | `check-qualification` | Allocation/borrowing, frozen bytes/admission and contract-diff tests |
-| `check-compatible-consumers` | Published/current Core, derive and Endpoint combinations; standalone Rust 1.99.1 host/Wasm checks; included in `check-endpoint` |
+| `check-compatible-consumers` | Published/current Core, derive and Endpoint combinations; standalone Rust 1.100.0 host/Wasm checks; included in `check-endpoint` |
 | `check-endpoint` | Standalone typed endpoint/native metadata, compiler diagnostics, lint, Wasm/MSRV and dependency isolation |
 | `check-endpoint-ic` | Installed endpoint/rollback cases; explicitly prepared `POCKET_IC_BIN` required |
 | `evaluate-endpoints` | All exported endpoint costs and rejection paths; fresh absolute `EVIDENCE_DIR` and instrumented `POCKET_IC_BIN` required |
 | `check-typescript` | Feature-enabled Rust tests, generated vectors and differential mutations; public lint belongs to `lint` |
-| `check-platform-types` | Standalone Principal/Account derives, exact Rust/TS bytes and malformed inputs, Rust 1.99.1 host/Wasm, schema-only/combined endpoint graphs; included in `check-typescript` |
+| `check-platform-types` | Standalone Principal/Account derives, exact Rust/TS bytes and malformed inputs, Rust 1.100.0 host/Wasm, schema-only/combined endpoint graphs; included in `check-typescript` |
 | `check-stable-identities` | Current and simulated next endpoint/runtime consumers retain identical codec/derive/Principal/Account package IDs; included in `check-benchmarks` |
 | `evaluate-codec-matrix` | Full Wire/Candid cohort roster; requires explicit prepared PocketIC |
 | `evaluate-allocation` | Explicit allocation/borrowing [native timing experiment](../benchmarks/performance.md) |
@@ -337,7 +350,7 @@ Wire directly selects only Serde alloc. Postcard currently selects Serde derive
 transitively, so this does not remove that compiler dependency. Consumers needing
 Serde derives explicitly select them. The check
 requires serde_bytes with only its `alloc` feature in the Wasm runtime graph.
-The forwarded Wasm build is checked on Rust 1.99.1 too. Run only this boundary check
+The forwarded Wasm build is checked on Rust 1.100.0 too. Run only this boundary check
 with `bash scripts/ci/check-schema-targets.sh`; evidence remains under
 `target/schema-targets/`. These graph checks do not measure installed Wasm size.
 
@@ -381,7 +394,7 @@ does not require byte-identical re-encoding. Inputs are capped at 4,096 bytes.
 
 The runner selects a separately pinned nightly in
 [`fuzz-runtime.sh`](../../scripts/ci/fuzz-runtime.sh), solely for sanitizer/coverage
-instrumentation. This is an approved exception to the normal Rust 1.99.1 lane;
+instrumentation. This is an approved exception to the normal Rust 1.100.0 lane;
 the package floor and development/release pin stay unchanged. Prepare that
 toolchain and a C++ compiler explicitly; the runner installs nothing.
 To inspect only the seed corpus, create an empty directory
@@ -428,9 +441,9 @@ IC Build is restricted to that unpublished package. Alternative-codec dependenci
 are retired.
 The default codec graph has no Platform or simulator dependencies. The independent
 `ic-wire-endpoint` package selects Runtime's Candid-free `cdk` surface. The optional
-`platform-types` integration independently selects canonical Types 0.19 and host
+`platform-types` integration independently selects canonical Types 0.20 and host
 TypeScript support; its standalone consumer check also qualifies the combined
-Runtime 0.21 endpoint graph. Old published Endpoint 0.9's Runtime 0.20 composition
+Runtime 0.22 endpoint graph. Old published Endpoint 0.9's Runtime 0.20 composition
 is not a supported mixed pair for the new canonical Types generation.
 The unpublished benchmark and endpoint fixture packages use the upstream async
 client through `ic_testkit::pocket_ic`; Testkit owns managed server lifecycle.
@@ -534,7 +547,7 @@ canonical root LICENSE.md through inherited Cargo license-file metadata,
 plus required prior and imported-source notices. This command uploads nothing.
 
 After committing and releasing the reviewed source, the maintainer may rehearse
-or execute the separately authorized publication with Cargo 1.99:
+or execute the separately authorized publication with Cargo 1.100:
 
 ```sh
 make publish-check RELEASE_GROUP=core
@@ -576,7 +589,7 @@ For a direct Cargo retry, use
 `cargo publish --locked -p ic-wire`. Check that the existing derive upload is the
 intended release; published versions cannot be replaced.
 
-Consumers retain Rust 1.99.1. Registry identity, credentials, publication status and
+Consumers retain Rust 1.100.0. Registry identity, credentials, publication status and
 repository visibility remain maintainer concerns. The qualification package remains
 `publish = false`.
 
@@ -599,7 +612,7 @@ remain create-only. Paths use native OS values; parsing happens before
 measurement and server setup.
 
 Run the aggregate `make check-benchmarks` for CLI/corpus correctness, lint and
-Rust 1.99.1 checks.
+Rust 1.100.0 checks.
 This is not a performance regression gate. A full measured comparison is a
 separate run; the [current report](../benchmarks/candid-comparison.md)
 records the latest full matrix. The [0.7.10 report](../history/full-comparison-0710.md)

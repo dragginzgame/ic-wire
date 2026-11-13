@@ -60,7 +60,7 @@ and tooling admission. Use the focused commands in docs/guides/development.md; r
 explicit integration proofs and the existing release roster. No public package
 version or protocol change is implied by this private workspace split.
 
-Rust **1.99.1** is both minimum and pinned compiler (maintainer decision #42).
+Rust **1.100.0** is both minimum and pinned compiler (maintainer decision #60).
 Admit the exact workspace floor through the Toko Tooling reader and require equality
 with rust-toolchain.toml and Cargo/rustc identities. Preserve one-compiler host,
 Wasm, macro, schema and Endpoint proofs; 1.91 evidence is historical. The

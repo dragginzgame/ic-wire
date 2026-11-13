@@ -20,10 +20,12 @@ impl<const N: usize> PackedI16<N> {
         }
     }
     /// Borrow the admitted words.
+    #[must_use]
     pub fn as_slice(&self) -> &[i16] {
         &self.0
     }
     /// Recover the admitted sequence without copying.
+    #[must_use]
     pub fn into_vec(self) -> Vec<i16> {
         self.0
     }

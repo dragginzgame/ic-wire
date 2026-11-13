@@ -1,12 +1,13 @@
 //! IC Wire cases and compiler recipe for IC Build's diagnostic gate.
 use ic_build::cargo::{
     diagnostics::{check_suite, library_artifact},
-    observation::schema::TargetKind,
+    observation::schema::{Message, TargetKind},
 };
 use std::{
+    collections::BTreeSet,
     env,
     fs::{self, File},
-    io,
+    io::{self, BufReader, Read},
     path::{Path, PathBuf},
     process::Command,
 };
@@ -47,6 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         None
     };
+    let dependencies = dependency_directories(File::open(run.join("artifacts.jsonl"))?)?;
     let (names, expected): (Vec<_>, Vec<_>) = diagnostic_cases(&source)?.into_iter().unzip();
     fs::write(run.join("cases.txt"), names.join("\n") + "\n")?;
     check_suite(&expected, run, 1024 * 1024, |case| {
@@ -65,21 +67,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ])
             .arg("--extern")
             .arg(format!("ic_wire={}", wire.display()))
-            .arg("-L")
-            .arg(format!(
-                "dependency={}/deps",
-                wire.parent()
-                    .unwrap()
-                    .parent()
-                    .filter(|_| wire.parent().unwrap().ends_with("deps"))
-                    .unwrap_or(wire.parent().unwrap())
-                    .display()
-            ))
             .arg("--cfg")
             .arg(format!("ui_case=\"{name}\""))
             .arg(source.join("mod.rs"))
             .arg("-o")
             .arg(run.join(format!("{name}.rmeta")));
+        // Rust 1.100 stores dependencies in per-package output directories.
+        // Cargo's current artifact stream owns paths; never scan stale deps/.
+        for directory in &dependencies {
+            command
+                .arg("-L")
+                .arg(format!("dependency={}", directory.display()));
+        }
         if let Some(endpoint) = &endpoint {
             command
                 .arg("--extern")
@@ -92,6 +91,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         names.len()
     );
     Ok(())
+}
+
+// Called only after library_artifact admitted the complete, bounded Cargo stream.
+fn dependency_directories(input: impl Read) -> io::Result<BTreeSet<PathBuf>> {
+    let mut directories = BTreeSet::new();
+    for message in Message::parse_stream(BufReader::new(input)) {
+        if let Message::CompilerArtifact(artifact) = message? {
+            for file in artifact.filenames {
+                if matches!(
+                    file.extension(),
+                    Some("rlib" | "rmeta" | "so" | "dylib" | "dll")
+                ) {
+                    let parent = file
+                        .parent()
+                        .ok_or_else(|| io::Error::other("artifact has no parent"))?;
+                    directories.insert(parent.to_path_buf().into_std_path_buf());
+                }
+            }
+        }
+    }
+    Ok(directories)
 }
 
 // Only module wiring and the explicit pass/support inputs lack expected.txt.

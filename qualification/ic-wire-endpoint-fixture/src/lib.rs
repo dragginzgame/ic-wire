@@ -31,18 +31,21 @@ pub struct Request {
 
 /// Record query, preserving a single typed value.
 #[ic_wire_endpoint::query(contract = ECHO, id = 7, request = LIMITS, response = LIMITS)]
+#[must_use]
 pub fn echo(request: Request) -> Request {
     request
 }
 
 /// Unit requests still require a complete identity-checked Wire frame.
 #[ic_wire_endpoint::query(contract = COUNT_CONTRACT, id = 8, request = LIMITS, response = LIMITS)]
+#[must_use]
 pub fn count() -> u64 {
     COUNT.get()
 }
 
 /// Synchronous mutation followed by bounded reply encoding.
 #[ic_wire_endpoint::update(contract = MUTATE, id = 9, request = LIMITS, response = LIMITS)]
+#[must_use]
 pub fn mutate(size: u32) -> ByteBuf {
     COUNT.set(COUNT.get() + 1);
     ByteBuf::from(vec![42; size as usize])
@@ -93,12 +96,18 @@ pub async fn async_ready(size: u32) -> ByteBuf {
 
 /// A deliberately tight traversal budget, independent of frame bytes.
 #[ic_wire_endpoint::query(contract = NODES, id = 15, request = Limits { nodes: 3, ..LIMITS }, response = LIMITS)]
+#[must_use]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The generated endpoint or Platform decode hook requires this owned input signature."
+)]
 pub fn nodes(values: Vec<u8>) -> u64 {
     values.len() as u64
 }
 
 /// Fully automatic identity and request/reply defaults.
 #[ic_wire_endpoint::query(contract = DEFAULT_BLOB)]
+#[must_use]
 pub fn default_blob(value: ByteBuf) -> ByteBuf {
     value
 }
@@ -109,18 +118,21 @@ pub fn default_unit() {}
 
 /// A stable export name determines identity, independently of the Rust name.
 #[ic_wire_endpoint::query(name = "stable-name", contract = NAMED, request = LIMITS)]
+#[must_use]
 pub fn renamed(value: u64) -> u64 {
     value
 }
 
 /// A response-only override leaves request admission at its default.
 #[ic_wire_endpoint::query(contract = RESPONSE_ONLY, response = LIMITS)]
+#[must_use]
 pub fn response_only(value: u64) -> u64 {
     value
 }
 
 /// Default reply encoding retains synchronous transaction rollback.
 #[ic_wire_endpoint::update(contract = DEFAULT_MUTATE)]
+#[must_use]
 pub fn default_mutate(size: u32) -> ByteBuf {
     mutate(size)
 }
@@ -131,6 +143,10 @@ fn composed_admit() -> Result<(), String> {
     ic_wire_endpoint::admit_request(LIMITS);
     Ok(())
 }
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The generated endpoint or Platform decode hook requires this owned input signature."
+)]
 fn composed_decode(bytes: Vec<u8>) -> bool {
     ic_wire_endpoint::decode_request(&bytes, 16, LIMITS)
 }
@@ -171,12 +187,18 @@ pub struct RequestRef<'a> {
 
 /// A borrowed reply is encoded while the request buffer is still alive.
 #[ic_wire_endpoint::query(borrow, contract = BORROWED, id = 17, request = LIMITS, response = LIMITS)]
+#[must_use]
 pub fn borrowed_echo(value: RequestRef<'_>) -> RequestRef<'_> {
     value
 }
 
 /// Mutate only after borrowed request validation; an oversized reply traps.
 #[ic_wire_endpoint::update(borrow, id = 18, request = LIMITS, response = LIMITS)]
+#[must_use]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The generated endpoint or Platform decode hook requires this owned input signature."
+)]
 pub fn borrowed_mutate(value: RequestRef<'_>) -> ByteBuf {
     COUNT.set(COUNT.get() + 1);
     ByteBuf::from(vec![42; value.value as usize])

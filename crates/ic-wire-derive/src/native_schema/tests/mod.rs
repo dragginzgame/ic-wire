@@ -33,7 +33,7 @@ fn rejects_unsupported_attributes_and_shapes() {
         "enum E {}",
     ] {
         assert!(
-            super::expand(syn::parse_str(source).unwrap()).is_err(),
+            super::expand(&syn::parse_str(source).unwrap()).is_err(),
             "{source}"
         );
     }
@@ -47,10 +47,10 @@ fn crate_paths_emit_the_same_metadata_implementation() {
         "struct A(u16);",
         "enum A<T> { Empty, Value(T) }",
     ] {
-        let plain = super::expand(syn::parse_str(source).unwrap()).unwrap();
+        let plain = super::expand(&syn::parse_str(source).unwrap()).unwrap();
         for path in ["serde", "::owner::reexport::serde"] {
             let attributed = format!("#[serde(crate = {path:?})] {source}");
-            let projected = super::expand(syn::parse_str(&attributed).unwrap()).unwrap();
+            let projected = super::expand(&syn::parse_str(&attributed).unwrap()).unwrap();
             assert_eq!(plain.to_string(), projected.to_string());
         }
     }

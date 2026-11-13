@@ -82,7 +82,7 @@ function selection(group, source, previous) {
   const observed = JSON.parse(shared('baseline', source, baselineRef));
   const baseline = observed.baseline ?? null, tagObject = observed.object ?? null, changes = observed.changes;
   const config = environment();
-  const controlled = Object.entries(config.controls).every(([k, v]) => k === 'RUSTUP_TOOLCHAIN' && v === '1.99.1');
+  const controlled = Object.entries(config.controls).every(([k, v]) => k === 'RUSTUP_TOOLCHAIN' && v === '1.100.0');
   const cargoHome = process.env.CARGO_HOME || path.join(os.homedir(), '.cargo');
   let parent = root;
   const configurationRoots = [cargoHome];

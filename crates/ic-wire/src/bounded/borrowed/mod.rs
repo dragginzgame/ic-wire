@@ -18,6 +18,7 @@ impl<'a, const N: usize> BytesRef<'a, N> {
         }
     }
     /// Borrow the admitted bytes for their original storage lifetime.
+    #[must_use]
     pub fn as_slice(&self) -> &'a [u8] {
         self.0
     }
@@ -63,6 +64,7 @@ impl<'a, const N: usize> TextRef<'a, N> {
         }
     }
     /// Borrow the admitted text for its original storage lifetime.
+    #[must_use]
     pub fn as_str(&self) -> &'a str {
         self.0
     }

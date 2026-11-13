@@ -27,6 +27,7 @@ use serde::{Deserialize, Serialize};
 /// changes its ID; `name = "stable-name"` decouples it from a Rust function rename.
 /// Explicit IDs remain valid. Replacing one with this default requires coordinated
 /// clients unless the values match. The frame format itself remains unchanged.
+#[must_use]
 pub const fn method_id(name: &str) -> u64 {
     let mut hash = 14_695_981_039_346_656_037u64;
     let domain = b"ic-wire:method:";

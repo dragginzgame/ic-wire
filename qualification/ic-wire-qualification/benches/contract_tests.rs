@@ -10,6 +10,10 @@ const LIMITS: Limits = Limits {
     depth: 64,
 };
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The fixture owns each sample for the complete encode/decode comparison."
+)]
 fn frozen<T: Serialize + DeserializeOwned + Debug + PartialEq>(value: T, payload: &[u8]) {
     assert_eq!(native::encode(&value, LIMITS).unwrap(), payload);
     assert_eq!(native::decode::<T>(payload, LIMITS).unwrap(), value);
@@ -58,6 +62,9 @@ enum Choice {
 }
 
 /// Exact bytes independent of the current Postcard encoder or generated output.
+///
+/// # Panics
+/// Panics if a frozen encoding or decoding contract changes.
 pub fn frozen_contracts() {
     frozen(128_u16, &[128, 1]);
     frozen(-65_i16, &[129, 1]);
@@ -111,6 +118,10 @@ pub fn frozen_contracts() {
     );
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The fixture owns its input while checking independent allocation boundaries."
+)]
 fn allocation_boundary<T: Serialize + DeserializeOwned + Debug>(
     value: T,
     encode_units: usize,
@@ -141,6 +152,9 @@ fn allocation_boundary<T: Serialize + DeserializeOwned + Debug>(
 }
 
 /// Independent visitor-charge expectations, executed on each actual target.
+///
+/// # Panics
+/// Panics if an admission boundary changes or the host pointer width is unsupported.
 pub fn admission_boundaries() {
     // Vec/String headers are three machine words. Freeze both targets explicitly,
     // rather than deriving expected charges from the codec's implementation.

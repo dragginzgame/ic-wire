@@ -4,10 +4,12 @@ Core **0.21.5** (`e249cdf`, tag `core-v0.21.5`) is delivered to origin/main and
 crates.io. Both Core packages were independently downloaded from the registry.
 All 20 release stages passed in recovered batch-W7zKUDXE; normal main is
 reconciled. Endpoint remains **0.12.2** (`2a51973`); its source and dependency
-requirements were unchanged. Pending issue 59 changes add hosted compiled-tool
-caching; no product release is required solely for this CI change. See the
+requirements were unchanged. Issue 59's hosted compiled-tool caching was pushed
+in `29d9778`; no product release is required solely for this CI change. See the
 [release cost review](../guides/group-validation.md#release-cost-review-12-november-2026)
 for the no-go on candidate lint reuse and outstanding hosted timing qualification.
+Pending issue 60 work adopts Tooling 0.40.1 and Rust 1.100.0; Core 0.22.0 and
+Endpoint 0.13.0 notes record the compiler-floor change. Nothing is published.
 
 ## Delivered behavior
 
@@ -31,21 +33,52 @@ and [encoder follow-up](../evidence/encoder-followup.md).
 
 ## Tooling and suppliers
 
-Both workspaces select Toko Tooling 0.39.17. Its authenticated crates.io snapshot
-retains 96 payload files, including the newly exported Cargo-tool cache key. Tracked Rust sources
-already satisfy the no-sibling-foo.rs/foo-directory rule. Installation, tool and
-snapshot admission, pins and CI callers passed. Exact-pin exceptions match.
-Rust 1.99.1 remains minimum and pinned; only the opt-in sanitizer fuzzer has its
-separately approved nightly. Stage reuse and final-candidate opt-ins stay disabled.
+Both workspaces select Toko Tooling 0.40.1; its authenticated snapshot retains
+96 files. Rust 1.100.0 is the minimum and pin (rustc `0ef1bc386`, Cargo `3acc79c0c`,
+LLVM 23.1.5). Both roots inherit the common lint policy; the benchmark's local
+unsafe-export exception retains equivalent checks. The dated sanitizer-only
+nightly is unchanged. Stage reuse and final-candidate opt-ins stay disabled.
+The 0.40.1 adoption changes deployment guidance only. Before delivery, inspect
+nested gates and retain the existing focused wiring proofs. On failure, identify
+invalidated inputs and disclose unsupported recovery/full-rerun scope explicitly;
+use the retained timings in the release cost review, not an assumed cache saving.
+Installer/tool admission, snapshot verification, pins and documentation links pass
+for 0.40.1. An unrelated qualification-lock change to rustls-webpki 0.103.17 was
+observed and preserved during adoption; the Platform adoption below subsequently
+compiled that selection and ran the installed Endpoint smoke check. This is not
+a separate TLS behavior qualification.
+Linux public tests, strict Clippy/Rustdoc, host/Wasm and isolated consumers pass.
+The 26 native and 20 Wasm benchmark cohorts pass strict linting, with allocation
+and heap modes checked separately; no performance measurements were run.
+Policy fixtures reject unsafe code and ignored must-use results. Direct-rustc
+diagnostics now read Cargo's artifact directories instead of assuming `deps/`;
+Core and Endpoint compile-fail controls pass with Rust 1.100's output layout.
+Native macOS proof remains pending; historical 1.99 performance is not remeasured.
+Codec bytes, identities, budgets and acceptance remain unchanged. No performance
+or Wasm-size saving is claimed from this compiler/lint migration.
 
-The release qualifies Types 0.19.5, Runtime/macros/guard 0.21.3, native Platform
+The delivered release qualified Types 0.19.5, Runtime/macros/guard 0.21.3, native Platform
 0.31.3 and Host 0.76.5 lock selections. Qualification selects Build 0.83.0 and
 Testkit 0.101.0; the release editor remains independently selected at Build 0.81.0.
 Testkit owns PocketIC setup/lifecycle and exposes native client 16.1.0 handles.
 Installed Endpoint calls, limits and rollback passed with prepared server 16.0.0
 before capture. The resumed full gate requalified the frozen supplier graph.
 Candid 0.10.40 is a private comparison oracle; its bigint 0.4.8 exception remains.
-No published package selects Candid. Public dependency requirements are unchanged.
+No published package selects Candid.
+
+Pending adoption selects published Types 0.20.0 and Runtime/macros/guard 0.22.0
+in both workspaces. Align consumer Types/Runtime requirements together; these
+versions require Rust 1.100.0. Core 0.22.0 and Endpoint 0.13.0 notes cover this
+Rust identity cut. Schema and codec bytes, limits and admission remain unchanged:
+Account absent/present subaccounts stay `00` / `01 20 + 32 bytes`. Testkit
+0.101.0 still selects Types 0.19.5 through its native Platform 0.31.3 boundary;
+product/schema/Endpoint graphs select only Types 0.20.0. No supplier patches or
+new compatibility wrappers are introduced. Standalone Rust/TypeScript byte and
+malformed-input checks, host/Wasm feature isolation, compatible current consumers,
+Endpoint diagnostics/lints and opt-z Wasm build passed. Installed calls, limits
+and rollback passed with prepared PocketIC 16.0.0; boundary and pin checks passed.
+Published Endpoint 0.12.2 remains on Runtime 0.21 and is not a supported mixed
+pair with the new Types generation. No performance/size comparison was run.
 
 Root owns four public packages; qualification owns three unpublished packages
 and its own lock. `make deps-update` updates the two locks sequentially.

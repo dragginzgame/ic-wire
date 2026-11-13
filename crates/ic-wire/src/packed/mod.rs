@@ -10,7 +10,9 @@ use serde::Serialize;
 /// Custom types, floats and platform-sized integers are deliberately excluded.
 pub trait PackedElement: sealed::Word {}
 mod sealed {
-    use super::*;
+    use super::Debug;
+    #[cfg(any(target_endian = "big", test))]
+    use alloc::vec::Vec;
     pub trait Word: bytemuck::Pod + Debug + Eq {
         #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
         const SCHEMA: &'static str;
@@ -87,14 +89,17 @@ mod sealed {
 pub struct Packed<T>(Vec<T>);
 impl<T> Packed<T> {
     /// Wrap owned words without copying. Admission happens at the codec boundary.
+    #[must_use]
     pub fn new(values: Vec<T>) -> Self {
         Self(values)
     }
     /// Borrow the words.
+    #[must_use]
     pub fn as_slice(&self) -> &[T] {
         &self.0
     }
     /// Recover the owned words without copying.
+    #[must_use]
     pub fn into_vec(self) -> Vec<T> {
         self.0
     }

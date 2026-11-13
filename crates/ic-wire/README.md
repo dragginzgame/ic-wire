@@ -33,9 +33,9 @@ implementations and JSON stay out of the Wasm runtime.
 Enable `ic-wire/platform-types` for `ic_wire::Wire` metadata on the canonical
 `ic-platform-types` Principal and Account. This selects host TypeScript support
 without CDK, executor, Candid or the runtime facade. This integration selects
-Types 0.19; Platform 0.28 re-exports those same identities. Direct
-`ic_platform_types` imports work too. Types 0.18 values are distinct Rust types
-and are not supported by this schema implementation.
+Types 0.20. Import these identities directly from `ic_platform_types`, or use
+a facade that re-exports that same generation. Types 0.19 values are distinct
+Rust types and are not supported by this schema implementation.
 
 Consumers remove Platform's retired `wire-schema` selection and enable Wire's
 `platform-types`. Keep ordinary Serde derives alongside native `ic_wire::Wire`.
@@ -702,7 +702,7 @@ There is no Candid-style schema evolution or compatibility fallback.
 
 Supported shapes are named/unit/tuple structs, externally tagged enums (unit,
 newtype, tuple and named variants), single-field `#[serde(transparent)]` structs,
-generic types/where clauses, fixed-width integers, bool, unit, String/str/Cow<str>,
+generic types/where clauses, fixed-width integers, bool, unit, `String`/`str`/`Cow<str>`,
 Vec, slices, Option, Result, Box (including boxed slices), references, serializable fixed arrays and tuples of
 one through four elements, bounded byte/text/list wrappers and finite float
 wrappers. Raw floats, pointer-sized integers, maps and other

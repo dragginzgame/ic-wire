@@ -1,5 +1,5 @@
 //! Matched binary-key maps; only the Wire key representation changes.
-use super::*;
+use super::{Blob, Case, LIMITS, METHOD, Rc, data, lane};
 
 pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
     let sizes = [0, 1, 16, 128];

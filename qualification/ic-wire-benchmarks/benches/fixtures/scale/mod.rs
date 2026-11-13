@@ -1,5 +1,9 @@
 //! Nominally distinct records with byte-array, packed-i16 or mixed bulk-field cohorts.
 //! Each enabled type has a runtime-selectable codec path. All Wire records use the production Serde codec.
+#[expect(
+    clippy::wildcard_imports,
+    reason = "This private fixture namespace changes with the selected codec/control feature; keep those imports tied to its owner."
+)]
 use super::*;
 // These aliases also exercise exact-type metadata checking without name guessing.
 #[cfg(all(

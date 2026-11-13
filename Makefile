@@ -243,6 +243,7 @@ check-wasm:
 .PHONY: check-rust-policy
 check-rust-policy: host-tools-check
 	+@$(RUST_POLICY)
+	+@$(RUST_POLICY) node scripts/ci/check-rust-lints.mjs
 
 check-doc-links:
 	@bash scripts/ci/check-repository-documentation.sh

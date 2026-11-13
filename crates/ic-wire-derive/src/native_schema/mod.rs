@@ -216,7 +216,7 @@ fn fields<'a>(
     })
 }
 
-pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
+pub(super) fn expand(input: &DeriveInput) -> syn::Result<TokenStream> {
     let transparent = attributes(&input.attrs, AttributeSite::Container)?.transparent;
     let context = super::fresh_ident(&quote!(#input).to_string(), "__ic_wire_schema");
     // The retired finite Wire IDs sorted fields and determined enum tags. This
@@ -267,7 +267,7 @@ pub(super) fn expand(input: DeriveInput) -> syn::Result<TokenStream> {
         }
         _ => {
             return Err(syn::Error::new_spanned(
-                &input,
+                input,
                 "Wire supports structs and nonempty externally tagged enums",
             ));
         }

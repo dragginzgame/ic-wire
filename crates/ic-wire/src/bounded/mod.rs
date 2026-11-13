@@ -21,10 +21,12 @@ impl<T, const N: usize> List<T, N> {
         }
     }
     /// Borrow the elements.
+    #[must_use]
     pub fn as_slice(&self) -> &[T] {
         &self.0
     }
     /// Recover the admitted sequence.
+    #[must_use]
     pub fn into_vec(self) -> Vec<T> {
         self.0
     }
@@ -123,14 +125,17 @@ impl<const N: usize> Bytes<N> {
         }
     }
     /// Borrow the bytes.
+    #[must_use]
     pub fn as_slice(&self) -> &[u8] {
         &self.0
     }
     /// Borrow this bounded value without copying or repeating admission.
+    #[must_use]
     pub fn as_borrowed(&self) -> BytesRef<'_, N> {
         BytesRef::from_owned(self)
     }
     /// Recover the admitted bytes without copying or allocating.
+    #[must_use]
     pub fn into_vec(self) -> Vec<u8> {
         self.0
     }
@@ -183,14 +188,17 @@ impl<const N: usize> Text<N> {
         }
     }
     /// Borrow the text.
+    #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
     }
     /// Borrow this bounded value without copying or repeating admission.
+    #[must_use]
     pub fn as_borrowed(&self) -> TextRef<'_, N> {
         TextRef::from_owned(self)
     }
     /// Recover the admitted text without copying or allocating.
+    #[must_use]
     pub fn into_string(self) -> String {
         self.0
     }

@@ -1,4 +1,8 @@
 //! Explicit packed i16 fields compared with ordinary lists and Candid.
+#[expect(
+    clippy::wildcard_imports,
+    reason = "This private fixture namespace changes with the selected codec/control feature; keep those imports tied to its owner."
+)]
 use super::*;
 
 const MAX_ITEMS: usize = 16_384;
@@ -21,6 +25,13 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
                 #[cfg_attr(
                     not(all(feature = "wire", not(feature = "packed-i16-baseline"))),
                     expect(unused_mut, reason = "Only the packed Wire control adds a lane.")
+                )]
+                #[cfg_attr(
+                    feature = "packed-i16-baseline",
+                    expect(
+                        clippy::redundant_clone,
+                        reason = "The paired packed lane consumes values when the baseline-only feature is disabled."
+                    )
                 )]
                 let mut case = case(&format!("i16-{distribution}-{n}"), values.clone());
                 #[cfg(all(feature = "wire", not(feature = "packed-i16-baseline")))]

@@ -54,7 +54,7 @@ for (let p = repo;; p = path.dirname(p)) {
   configRoots.push(path.join(p, '.cargo')); if (path.dirname(p) === p) break;
 }
 const qualified = process.platform === 'linux' && process.arch === 'x64' && process.version === 'v24.21.0'
-  && Object.entries(env).filter(([k]) => /^(RUSTFLAGS|RUSTDOCFLAGS|RUSTC|RUSTC_WRAPPER|RUSTC_WORKSPACE_WRAPPER|RUSTUP_TOOLCHAIN|CARGO_ENCODED_RUSTFLAGS|CARGO_BUILD_|CARGO_PROFILE_|CARGO_TARGET_[A-Z0-9_]+_(RUSTFLAGS|LINKER|RUNNER)|BASH_ENV|MAKEFILES)/.test(k)).every(([k, v]) => k === 'RUSTUP_TOOLCHAIN' && v === '1.99.1')
+  && Object.entries(env).filter(([k]) => /^(RUSTFLAGS|RUSTDOCFLAGS|RUSTC|RUSTC_WRAPPER|RUSTC_WORKSPACE_WRAPPER|RUSTUP_TOOLCHAIN|CARGO_ENCODED_RUSTFLAGS|CARGO_BUILD_|CARGO_PROFILE_|CARGO_TARGET_[A-Z0-9_]+_(RUSTFLAGS|LINKER|RUNNER)|BASH_ENV|MAKEFILES)/.test(k)).every(([k, v]) => k === 'RUSTUP_TOOLCHAIN' && v === '1.100.0')
   && !configRoots.some(p => ['config', 'config.toml'].some(f => fs.existsSync(path.join(p, f))));
 assert.equal(narrow.plan.scope, qualified ? 'group' : 'workspace');
 assert.equal(narrow.plan.stages.filter(s => !s.required).length, qualified ? 9 : 0);

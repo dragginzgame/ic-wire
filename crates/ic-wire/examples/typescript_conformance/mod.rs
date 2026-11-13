@@ -111,6 +111,10 @@ impl Fixture {
         assert_eq!(generate::<T>(), generate::<Box<T>>(),);
         self.add(boxed, javascript);
     }
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The fixture owns each sample through generation and mutation qualification."
+    )]
     fn add<T: ic_wire::typescript::Wire + serde::de::DeserializeOwned>(
         &mut self,
         value: T,

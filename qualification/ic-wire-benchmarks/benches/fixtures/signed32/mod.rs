@@ -1,5 +1,5 @@
 //! Zigzag boundaries and std containers; Candid stays an external comparator.
-use super::*;
+use super::{Case, LIMITS, METHOD, Rc, case, lane};
 use std::collections::{BTreeSet, VecDeque};
 
 const BOUNDARIES: [i32; 17] = [

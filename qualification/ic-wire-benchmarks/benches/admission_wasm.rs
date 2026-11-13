@@ -13,6 +13,9 @@ mod admission;
     unsafe(export_name = "canister_query benchmark")
 )]
 /// Measure one decode; setup and reply transport are outside the counter.
+///
+/// # Panics
+/// Traps when the request size or selected benchmark parameters are invalid.
 pub extern "C" fn benchmark() {
     let mut args = [0_u8; 4];
     assert_eq!(ic_platform_runtime::ic0::msg_arg_data_size(), args.len());

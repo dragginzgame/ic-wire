@@ -1,5 +1,7 @@
 //! Ordinary-list hot spots, with empty/singleton and byte-oriented controls.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{Blob, Case, Debug, LIMITS, METHOD, Rc, Serialize, case, data, lane};
 
 #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "candid", derive(CandidType))]

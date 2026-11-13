@@ -1,5 +1,9 @@
 //! Real owned IC identities and individual contract shapes, not production modes.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{
+    Blob, Case, Compared, Debug, DeserializeOwned, LIMITS, METHOD, Rc, Serialize, case, data, lane,
+};
 use std::collections::{BTreeMap, BTreeSet};
 
 // Platform owns these application identities and intentionally does not implement

@@ -47,6 +47,7 @@ pub struct BulkLintReport {
 impl BulkLintReport {
     /// True when every candidate is acknowledged and no acknowledgement is stale.
     /// A consumer may assert this in CI; linting itself never fails on warnings.
+    #[must_use]
     pub fn is_clean(&self) -> bool {
         self.warnings.is_empty() && self.stale_acknowledgements.is_empty()
     }

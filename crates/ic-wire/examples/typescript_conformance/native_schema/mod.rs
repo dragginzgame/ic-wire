@@ -172,6 +172,10 @@ const LIMITS: Limits = Limits {
     nodes: 512,
     depth: 32,
 };
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The fixture owns each sample through generation and roundtrip qualification."
+)]
 fn add<T: typescript::Wire + serde::de::DeserializeOwned + PartialEq + std::fmt::Debug>(
     directory: &Path,
     checks: &mut String,

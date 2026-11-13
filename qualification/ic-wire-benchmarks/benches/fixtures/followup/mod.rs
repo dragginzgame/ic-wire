@@ -1,5 +1,10 @@
 //! Missing boundary/Serde shapes and opt-in PRIVATE bulk-field research.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{
+    Blob, Case, Compared, Debug, DeserializeOwned, LIMITS, Lane, METHOD, Serialize, black_box,
+    case, case_with_input_json, data, shapes,
+};
 use std::collections::{BTreeMap, HashMap, HashSet};
 mod words;
 
@@ -334,7 +339,7 @@ pub(super) fn cases_selected(selected: Option<usize>) -> Vec<Case> {
                 .iter()
                 .map(|(k, v)| (ExternalBytes32(*k), v.clone()))
                 .collect::<BTreeMap<_, _>>();
-            paired!(format!("hash-key-bytes-{n}"), wire, candid, input.clone())
+            paired!(format!("hash-key-bytes-{n}"), wire, candid, input)
         });
     }
     for n in [0, 1, 128, 16384] {

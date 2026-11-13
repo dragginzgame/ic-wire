@@ -5,7 +5,7 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 cd "$root"
 export RUSTUP_AUTO_INSTALL=0
-# Approved fuzz-only sanitizer compiler; ordinary builds stay on Rust 1.99.1.
+# Approved fuzz-only sanitizer compiler; ordinary builds stay on Rust 1.100.0.
 toolchain=nightly-2026-11-05
 runs="${FUZZ_RUNS:-100000}"
 [[ "$runs" =~ ^[1-9][0-9]*$ ]] || { printf 'FUZZ_RUNS must be a positive integer\n' >&2; exit 1; }

@@ -11,7 +11,7 @@ mod fixtures;
 mod operations;
 #[cfg(all(feature = "wire", any(test, feature = "coverage-shapes")))]
 mod unsigned_magnitude;
-use operations::*;
+use operations::{BAD_HEADER, DECODE, ENCODE, LOOP, OPERATIONS, REUSE, TRUNCATED};
 use std::hint::black_box;
 
 // This fixture owns this export; all IC calls use safe wrappers.
@@ -27,6 +27,9 @@ use std::hint::black_box;
     unsafe(export_name = "canister_query benchmark")
 )]
 /// Measure all operations for one workload using the IC instruction counter.
+///
+/// # Panics
+/// Traps when the benchmark request or selected case/lane is invalid.
 pub extern "C" fn benchmark() {
     let mut args = [0_u8; 12];
     assert_eq!(ic_platform_runtime::ic0::msg_arg_data_size(), args.len());

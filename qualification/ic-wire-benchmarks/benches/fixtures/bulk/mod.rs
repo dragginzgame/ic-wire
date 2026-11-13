@@ -1,5 +1,10 @@
 //! Qualification of public packed fields against ordinary vectors and Candid.
-use super::*;
+#[cfg(feature = "candid")]
+use super::CandidType;
+use super::{
+    Case, Compared, Debug, DeserializeOwned, GenericEvent, LIMITS, METHOD, Manifest, Rc, Serialize,
+    lane,
+};
 #[cfg(not(feature = "bulk-baseline"))]
 use ic_wire::Packed;
 

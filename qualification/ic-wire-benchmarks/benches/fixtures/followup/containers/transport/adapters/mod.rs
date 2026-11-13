@@ -1,6 +1,10 @@
 //! Public borrowed adapters versus a private copying encoder control.
 //! Copy and borrowed encoders have the same packed bytes and owned field sizes;
 //! both decoders validate domain values through the existing Packed reader.
+#[expect(
+    clippy::wildcard_imports,
+    reason = "This private fixture namespace changes with the selected codec/control feature; keep those imports tied to its owner."
+)]
 use super::*;
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +17,10 @@ pub(crate) struct NonzeroValue(#[serde(with = "nonzero")] pub Vec<NonZeroI64>);
 pub(crate) struct HeapValue(#[serde(with = "heap")] pub BinaryHeap<u64>);
 
 mod nonzero {
+    #[expect(
+        clippy::wildcard_imports,
+        reason = "This private fixture namespace changes with the selected codec/control feature; keep those imports tied to its owner."
+    )]
     use super::*;
     pub(super) fn serialize<S: serde::Serializer>(
         values: &[NonZeroI64],
@@ -35,6 +43,10 @@ mod nonzero {
 }
 
 mod heap {
+    #[expect(
+        clippy::wildcard_imports,
+        reason = "This private fixture namespace changes with the selected codec/control feature; keep those imports tied to its owner."
+    )]
     use super::*;
     pub(super) fn serialize<S: serde::Serializer>(
         values: &BinaryHeap<u64>,

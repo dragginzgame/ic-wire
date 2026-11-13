@@ -41,6 +41,7 @@ impl Default for SchemaRegistry {
 }
 impl SchemaRegistry {
     /// Start one bounded collection, with the same ceilings as inline projection.
+    #[must_use]
     pub fn new() -> Self {
         Self {
             context: SchemaContext {
@@ -53,6 +54,10 @@ impl SchemaRegistry {
     }
     /// Register a root under a valid TypeScript name, returning its ref node.
     /// Duplicate names reject, even if equal. Already collected types get aliases.
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "Registry construction always initializes names; callers cannot remove this private state."
+    )]
     pub fn register<T: Wire + ?Sized>(&mut self, name: &str) -> Result<Value, GenerationError> {
         if self.failed {
             return Err(GenerationError::Schema);
@@ -79,6 +84,10 @@ impl SchemaRegistry {
         Ok(json!({"k":"ref", "name":name}))
     }
     /// Validate all shapes/references and return the registry for generate_registry.
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "Registry construction always initializes names; callers cannot remove this private state."
+    )]
     pub fn finish(mut self) -> Result<BTreeMap<String, Value>, GenerationError> {
         if self.failed {
             return Err(GenerationError::Schema);
