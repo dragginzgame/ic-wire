@@ -252,6 +252,7 @@ cat > "$fixture/bin/cargo" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 if [[ "${1:-}" == -V ]]; then printf 'cargo %s (fixture)\n' "${FIXTURE_CARGO_VERSION:-$WIRE_FIXTURE_COMPILER}"; exit; fi
+if [[ "${1:-}" == clippy ]]; then [[ "${CARGO_BUILD_WARNINGS:-}" == deny ]]; fi
 printf '%s|%s|%s\n' "${RUSTUP_TOOLCHAIN:-development}" "${CARGO_TARGET_DIR:-}" "$*" >> "$CARGO_CALLS"
 STUB
 chmod +x "$fixture/bin/cargo"
@@ -263,7 +264,7 @@ cat > "$fixture/expected-calls" <<EOF
 $compiler|$fixture/repo/target|build --locked -p ic-wire
 $compiler|$fixture/repo/target|check --locked -p ic-wire --all-targets
 $compiler|$fixture/repo/target|test --locked -p ic-wire
-$compiler|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint-macros -p ic-wire-endpoint --all-targets --features ic-wire-endpoint/typescript -- -D warnings
+$compiler|$fixture/repo/target|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint-macros -p ic-wire-endpoint --all-targets --features ic-wire-endpoint/typescript
 $compiler|$fixture/repo/target|check --locked -p ic-wire --lib --target wasm32-unknown-unknown
 EOF
 # Policy selection overrides the caller's ambient compiler lane.
@@ -277,11 +278,11 @@ for group in core endpoint; do
     else
         expected='-p ic-wire-endpoint-macros -p ic-wire-endpoint --all-targets --features ic-wire-endpoint/typescript'
     fi
-    grep -Fx "$compiler|$fixture/repo/target|clippy --locked $expected -- -D warnings" "$CARGO_CALLS"
+    grep -Fx "$compiler|$fixture/repo/target|clippy --locked $expected" "$CARGO_CALLS"
 done
 : > "$CARGO_CALLS"
 WIRE_LINT_GROUP= PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" lint RELEASE_GROUP=endpoint
-grep -F '|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint-macros -p ic-wire-endpoint --all-targets --features ic-wire-endpoint/typescript -- -D warnings' "$CARGO_CALLS"
+grep -F '|clippy --locked -p ic-wire -p ic-wire-derive -p ic-wire-endpoint-macros -p ic-wire-endpoint --all-targets --features ic-wire-endpoint/typescript' "$CARGO_CALLS"
 if WIRE_LINT_GROUP=unknown PATH="$fixture/bin:$PATH" make --no-print-directory -C "$fixture/repo" lint > "$fixture/invalid-lint-group.log" 2>&1; then exit 1; fi
 if PATH="$fixture/bin:$PATH" FIXTURE_CARGO_VERSION=0.0.0 bash "$fixture/repo/scripts/ci/rust-policy.sh" > "$fixture/invalid-compiler.log" 2>&1; then exit 1; fi
 grep -F 'do not match Wire compiler policy' "$fixture/invalid-compiler.log" >/dev/null
@@ -301,6 +302,7 @@ cat > "$fixture/bin/cargo" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 if [[ "${1:-}" == -V ]]; then printf 'cargo %s (fixture)\n' "${FIXTURE_CARGO_VERSION:-$WIRE_FIXTURE_COMPILER}"; exit; fi
+if [[ "${1:-}" == clippy ]]; then [[ "${CARGO_BUILD_WARNINGS:-}" == deny ]]; fi
 printf '%s|%s|%s\n' "${RUSTUP_TOOLCHAIN:-development}" "${CARGO_TARGET_DIR:-}" "$*" >> "$CARGO_CALLS"
 case "$1" in
     metadata) cat "$FIXTURE_CARGO_METADATA" ;;
@@ -314,7 +316,7 @@ STUB
 for target in publish publish-check check-package; do
     : > "$CARGO_CALLS"
     if FIXTURE_LINT_STATUS=41 PATH="$fixture/bin:$PATH" make -j4 --no-print-directory -C "$fixture/repo" "$target" RELEASE_GROUP=core > "$fixture/$target-lint.log" 2>&1; then exit 1; fi
-    grep -F '|clippy --locked -p ic-wire -p ic-wire-derive --all-targets --features ic-wire/typescript -- -D warnings' "$CARGO_CALLS" >/dev/null
+    grep -F '|clippy --locked -p ic-wire -p ic-wire-derive --all-targets --features ic-wire/typescript' "$CARGO_CALLS" >/dev/null
     if grep -Eq '\|(publish|package) ' "$CARGO_CALLS"; then exit 1; fi
 done
 

@@ -24,6 +24,13 @@ The initial setup-only npm mismatch was resolved using pinned npm 12.2.0 under
 `target/release-tools/npm-12.2.0`; the shell default is 12.2.1. Changed supplier
 inputs will need a fresh gate because stage reuse is not qualified.
 
+Batch `batch-ioqO0BTf` captured `4e1c4cd` and stopped before release effects at
+`check-tooling`: the local Make fixture still expected the retired Clippy warning
+flags. The fixture now verifies Cargo warning denial for both groups and
+publication callers; the disposable routing/formatting suite passed. Preserve
+`/tmp/wire022-fresh-deploy.log` and that failed batch. A fresh source capture is
+required; neither failed batch may be resumed to deliver the corrected source.
+
 ## Delivered behavior
 
 Core 0.21.5 includes browser record-field reuse, terminal first-byte numeric
