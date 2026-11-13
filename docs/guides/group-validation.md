@@ -107,9 +107,9 @@ The separate hosted CI improvement caches compiled tool generations using the
 existing supplier key/installer. Complete tools-check and both locked workspace
 fetches remain required; removing them is not suite narrowing. Focused workflow
 tests cover ordering, save restrictions, mandatory post-hit admission, stable
-keys, changed runner-image keys and missing-catalog refusal. Hosted cache-hit,
-cache-miss and native macOS timing remain unmeasured; this does not establish a
-local deployment speedup or close the issue's timing acceptance criteria.
+keys, changed runner-image keys and missing-catalog refusal. Hosted cache-hit
+and cache-miss setup timings are now recorded below. They do not establish a
+local deployment speedup or supply missing end-to-end deployment boundaries.
 
 Delivery impact was checked against `6d9294d` using Rust 1.99.1 and separate
 before/after targets with `cargo package --allow-dirty --locked --offline
@@ -120,6 +120,38 @@ multi-package packaging propagates temporary supplier-archive provenance into
 dependent lock checksums. This CI-only delivery needs no Core/Endpoint publication.
 The archives remain under `target/issue59-single-before` and
 `target/issue59-single-after`; uncompiled archive equality is not runtime validation.
+
+### Hosted setup qualification (13 November 2026)
+
+The cache-miss [Core release run](https://github.com/dragginzgame/ic-wire/actions/runs/43459481541)
+at `24ade8f` and cache-hit [Endpoint release run, attempt 2](https://github.com/dragginzgame/ic-wire/actions/runs/43463094098/attempts/2)
+at `285330f` used Rust 1.100.0 and Toko Tooling 0.42.1. The benchmark jobs'
+logs show the same exact compiled-tool key within each host pair, including
+runner/tool identity and Makefile hash. These are single hosted observations,
+not repeated matched product benchmarks; product release metadata differs.
+
+| Benchmark runner | Miss: install common tools | Hit: restore cache | Hit: install common tools | Hit: tools admission |
+| --- | --- | --- | --- | --- |
+| macOS 15 ARM64 | 81 s | 2 s | 3 s | 4 s |
+| macOS 15 Intel | 248 s | 5 s | 8 s | 7 s |
+
+Durations come from GitHub's second-resolution step timestamps. Both cold
+jobs saved the cache after successful admission; both warm jobs report exact
+key hits, run installation and complete tools-check, and skip cache saving.
+The focused local workflow fixture also passes (16 classifications and 256
+gate combinations), including key invalidation and missing-input refusal.
+Cache hits therefore reduce observed hosted setup without bypassing admission.
+This is not a measurement of cold/prepared local deployment or full CI duration.
+Complete before/after deployment phase timing remains unavailable; the no-go on
+candidate lint reuse above stands, and no additional release was made to time it.
+
+Both native macOS benchmark jobs then exposed an independent fixture defect:
+`check-benchmark-cli.mjs` assumed `/bin/true` was executable. The local fix
+creates its own dummy executable with exit code 94; the existing Cargo stub
+returns 93, so accidentally starting the simulator cannot satisfy the expected
+result. All 58 focused CLI checks pass on Linux after this change, without
+measurements or servers. Native macOS acceptance still requires running the
+fixed source; the failed hosted jobs are not passing Rust 1.100 qualification.
 
 ## Focused qualification lifecycle
 

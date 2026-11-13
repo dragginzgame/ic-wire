@@ -30,10 +30,14 @@ try {
   const stub = path.join(temporary, "snapshot-bin");
   fs.mkdirSync(stub);
   fs.writeFileSync(path.join(stub, "cargo"), "#!/bin/sh\nexit 93\n", { mode: 0o755 });
+  // Own the executable fixture: /bin/true is not available on every host.
+  // A distinct exit code also catches accidentally starting the simulator.
+  const pocketIc = path.join(stub, "pocket-ic");
+  fs.writeFileSync(pocketIc, "#!/bin/sh\nexit 94\n", { mode: 0o755 });
   for (const script of ["evaluate-codecs.sh", "evaluate-codec-matrix.sh", "evaluate-endpoint-matrix.sh", "evaluate-input-borrowing.sh"]) {
     const output = path.join(temporary, script);
     run("bash", [path.join(root, "scripts/ci", script), output], 93, root, {
-      ...process.env, PATH: `${stub}:${process.env.PATH}`, POCKET_IC_BIN: "/bin/true",
+      ...process.env, PATH: `${stub}:${process.env.PATH}`, POCKET_IC_BIN: pocketIc,
       CORPUS_FEATURE: "", CODEC_SOURCE_SNAPSHOT: "",
     });
     const source = path.join(output, "source");

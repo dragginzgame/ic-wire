@@ -5,6 +5,18 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.22.2]
+
+### 🧪 Testing
+
+- Adopt Toko Tooling 0.42.5 for installed-tool recovery and vendor-layout fixes;
+  repository maintenance only, with no production dependency change.
+- Make benchmark snapshot qualification portable to macOS by owning its dummy
+  simulator executable instead of assuming `/bin/true` exists
+  ([#60](https://github.com/dragginzgame/ic-wire/issues/60)). Codec bytes, identities,
+  limits and acceptance remain unchanged; this private fixture fix does not
+  require publishing the product crates.
+
 ## [0.22.1] - 2026-11-13
 
 ### 🔧 Changed
