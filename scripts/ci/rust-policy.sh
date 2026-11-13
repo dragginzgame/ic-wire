@@ -4,7 +4,7 @@
 set -euo pipefail
 _wire_rust_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 export PATH="$_wire_rust_root/.tools/host/bin:$PATH"
-_wire_rust_floor="$(bash "$_wire_rust_root/scripts/ci/read-cargo-workspace-rust-version.sh" "$_wire_rust_root/Cargo.toml")"
+_wire_rust_floor="$(bash "$_wire_rust_root/vendor/toko-tooling/scripts/ci/read-cargo-workspace-rust-version.sh" "$_wire_rust_root/Cargo.toml")"
 _wire_rust_pin="$(yq -p toml -o yaml -r '.toolchain.channel' "$_wire_rust_root/rust-toolchain.toml")"
 [[ "$_wire_rust_floor" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$_wire_rust_floor" == "$_wire_rust_pin" ]] || {
     echo 'Wire requires the same exact Rust floor and pinned toolchain' >&2; exit 1;

@@ -21,9 +21,9 @@ const git = (...args) => exec('git', args).stdout.trim();
 const put = (p, value) => { fs.mkdirSync(path.dirname(path.join(repo, p)), { recursive: true }); fs.writeFileSync(path.join(repo, p), value); };
 const copy = p => put(p, fs.readFileSync(path.join(root, p)));
 for (const p of ['ci/release-validation.json', 'ci/cargo-release-groups.json', 'scripts/ci/wire-release-validation.mjs',
-  'scripts/ci/check-release-source.sh', 'scripts/ci/run-validation-targets.sh', 'scripts/ci/check-make-execution.sh',
-  'scripts/ci/verify-file-checksum.sh', 'scripts/ci/validation-input-checkpoint.pl', 'scripts/ci/release-validation-plan.pl',
-  'scripts/ci/ValidationPlan.pm', 'scripts/ci/validation-evidence.pl', 'scripts/ci/wire-validation-roster.pl']) copy(p);
+  'vendor/toko-tooling/scripts/ci/check-release-source.sh', 'vendor/toko-tooling/scripts/ci/run-validation-targets.sh', 'vendor/toko-tooling/scripts/ci/check-make-execution.sh',
+  'vendor/toko-tooling/scripts/ci/verify-file-checksum.sh', 'vendor/toko-tooling/scripts/ci/validation-input-checkpoint.pl', 'vendor/toko-tooling/scripts/ci/release-validation-plan.pl',
+  'vendor/toko-tooling/scripts/ci/ValidationPlan.pm', 'vendor/toko-tooling/scripts/ci/validation-evidence.pl', 'scripts/ci/wire-validation-roster.pl']) copy(p);
 const stages = JSON.parse(fs.readFileSync(path.join(repo, 'ci/release-validation.json'))).stages;
 const actual = execFileSync('make', ['--no-print-directory', '-s', 'validation-targets'], { cwd: root, encoding: 'utf8' }).trim().split(/\s+/);
 assert.deepEqual(stages, actual);
@@ -42,8 +42,8 @@ const select = (name, group = 'endpoint', extra = {}, expected = 0) => {
   exec(process.execPath, ['scripts/ci/wire-release-validation.mjs', 'select', group, git('rev-parse', 'HEAD'), target], { RELEASE_PREVIOUS: '0.5.0', ...extra }, expected);
   return expected === 0 ? { target, plan: JSON.parse(fs.readFileSync(path.join(repo, target, 'plan.json'))) } : null;
 };
-const run = (selected, expected = 0) => exec('bash', ['scripts/ci/run-validation-targets.sh', '--plan', `${selected.target}/plan.json`],
-  { RELEASE_SOURCE: git('rev-parse', 'HEAD'), RELEASE_GROUP: selected.plan.group, VALIDATION_LOG_DIR: path.join(repo, selected.target, 'logs') }, expected);
+const run = (selected, expected = 0) => exec('bash', ['vendor/toko-tooling/scripts/ci/run-validation-targets.sh', '--plan', `${selected.target}/plan.json`],
+  { VALIDATION_REPOSITORY_ROOT: repo, RELEASE_SOURCE: git('rev-parse', 'HEAD'), RELEASE_GROUP: selected.plan.group, VALIDATION_LOG_DIR: path.join(repo, selected.target, 'logs') }, expected);
 const seal = (selected, name, expected = 0) => exec(process.execPath, ['scripts/ci/wire-release-validation.mjs', 'seal', selected.plan.group,
   git('rev-parse', 'HEAD'), selected.target, `.git/${name}`], {}, expected);
 const check = (name, group = 'endpoint', expected = 0) => exec(process.execPath, ['scripts/ci/wire-release-validation.mjs', 'check', group, source, `.git/${name}`], {}, expected);

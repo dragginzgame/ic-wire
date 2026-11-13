@@ -17,7 +17,7 @@ unset CARGO_TARGET_DIR RELEASE_GROUPS RELEASE_PUBLISH_TARGET RELEASE_BATCH_ACTIV
 unset FIXTURE_NORMAL_SOURCE FIXTURE_PUBLISH_CALLS FIXTURE_HOLD_PUBLICATION
 unset RELEASE_MAKE RELEASE_RESUME_CHECK_COMMAND CARGO_RELEASE_METADATA_EDITOR
 export RELEASE_GROUP="${1:?select the real fixture group}"
-plan="$(bash "$root/scripts/ci/cargo-release-group.sh" plan "$RELEASE_GROUP")"
+plan="$(bash "$root/vendor/toko-tooling/scripts/ci/cargo-release-group.sh" plan "$RELEASE_GROUP")"
 primary="$(printf '%s' "$plan" | jq -er .primary)"
 changelog_path="$(printf '%s' "$plan" | jq -er .changelog)"
 # Reuse the offline-admitted real editor; fixture tool setup is substituted.
@@ -111,11 +111,11 @@ export PATH="$PWD/fixture-bin:$PATH"
 # patch/minor/major notes. Only the disposable copy receives synthetic notes;
 # the real release preflight still checks the real changelog against its candidate.
 previous="$(make --no-print-directory -s release-version)"
-candidate="$(bash scripts/ci/next-release-version.sh "$previous" patch)"
+candidate="$(bash vendor/toko-tooling/scripts/ci/next-release-version.sh "$previous" patch)"
 printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$candidate" "$previous" > "$changelog_path"
 if [[ "$batch_mode" == true ]]; then
     endpoint_previous="$(make --no-print-directory -s release-version RELEASE_GROUP=endpoint)"
-    endpoint_candidate="$(bash scripts/ci/next-release-version.sh "$endpoint_previous" patch)"
+    endpoint_candidate="$(bash vendor/toko-tooling/scripts/ci/next-release-version.sh "$endpoint_previous" patch)"
     printf '# Changelog\n\n## [%s]\n\n- Disposable release fixture.\n\n## [%s] - 2000-01-01\n\n- Fixture baseline.\n' "$endpoint_candidate" "$endpoint_previous" > releases/endpoint/CHANGELOG.md
     # Keep real publication admission, selection and receipts; substitute only
     # the registry-effect command. This is not archive/build qualification.
@@ -142,7 +142,7 @@ git config core.hooksPath /dev/null
 git add -- .
 git commit -qm 'Disposable release baseline'
 if [[ "$metadata_only" == true ]]; then
-    bash scripts/ci/check-dependency-pins.sh --consumer "$PWD" --cargo-inheritance > "$fixture/metadata-pins.log" 2>&1
+    bash vendor/toko-tooling/scripts/ci/check-dependency-pins.sh --consumer "$PWD" --cargo-inheritance > "$fixture/metadata-pins.log" 2>&1
     export RELEASE_PREVIOUS="$previous" RELEASE_VERSION="$candidate" RELEASE_DATE=2026-11-09
     export CARGO_RELEASE_METADATA_EDITOR="$FIXTURE_RELEASE_EDITOR" CARGO_RELEASE_METADATA_MAX_BYTES=8388608
     private_version="$(yq -p toml -o json '.' qualification/Cargo.toml | jq -r .workspace.package.version)"
@@ -152,14 +152,14 @@ if [[ "$metadata_only" == true ]]; then
     # Broken integration resolution must leave both product and private locks
     # unchanged. Only the deliberately broken input may remain.
     perl -0pi -e 's/ic-testkit = \{ version = "[^"]+"/ic-testkit = { version = "=0.0.0"/' qualification/Cargo.toml
-    if bash scripts/ci/cargo-release-group.sh prepare "$RELEASE_GROUP" > "$fixture/metadata-refused.log" 2>&1; then exit 1; fi
+    if bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh prepare "$RELEASE_GROUP" > "$fixture/metadata-refused.log" 2>&1; then exit 1; fi
     [[ "$(git diff --name-only)" == qualification/Cargo.toml ]]
     git restore qualification/Cargo.toml
-    bash scripts/ci/cargo-release-group.sh prepare "$RELEASE_GROUP" > "$fixture/metadata-prepared.log" 2>&1
+    bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh prepare "$RELEASE_GROUP" > "$fixture/metadata-prepared.log" 2>&1
     cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --format-version 1 > "$fixture/qualification-prepared.json"
     [[ "$(yq -p toml -o json '.' qualification/Cargo.toml | jq -r .workspace.package.version)" == "$private_version" ]]
     git diff --name-only | LC_ALL=C sort > "$fixture/metadata-actual"
-    bash scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP" | jq -r '.files[]' | LC_ALL=C sort > "$fixture/metadata-expected"
+    bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP" | jq -r '.files[]' | LC_ALL=C sort > "$fixture/metadata-expected"
     # Path-only qualification aliases leave the manifest byte-identical.
     # It is still owned by the transaction and must be present in its file plan.
     grep -Fx qualification/Cargo.toml "$fixture/metadata-expected" >/dev/null
@@ -274,7 +274,7 @@ commit="$(git rev-parse HEAD)"
 [[ "$(git log -1 --format=%s)" == "Release $RELEASE_GROUP $candidate" ]]
 [[ "$(git --git-dir="$fixture/remote.git" rev-parse refs/heads/main)" == "$commit" ]]
 [[ "$(git --git-dir="$fixture/remote.git" rev-parse "refs/tags/$RELEASE_GROUP-v$candidate^{}")" == "$commit" ]]
-bash scripts/ci/cargo-release-group.sh files "$RELEASE_GROUP" | tr '\0' '\n' | sort > "$fixture/expected-files"
+bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh files "$RELEASE_GROUP" | tr '\0' '\n' | sort > "$fixture/expected-files"
 # Path-only qualification aliases remain part of metadata custody, but their
 # manifest must stay byte-identical when only public versions are prepared.
 grep -Fx qualification/Cargo.toml "$fixture/expected-files" >/dev/null
@@ -296,8 +296,8 @@ perl -0pi -e 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' Cargo.toml
 export RELEASE_VERSION="$candidate"
 RELEASE_DATE="$(sed -n 's/^## \[[^]]*\] - \([0-9-]*\)$/\1/p' "$changelog_path" | head -n 1)"
 export RELEASE_DATE
-if RELEASE_COMMIT='' bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped > "$fixture/grouped-current.log" 2>&1; then exit 1; fi
-RELEASE_COMMIT="$commit" bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped > "$fixture/grouped-committed.log" 2>&1
+if RELEASE_COMMIT='' bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped > "$fixture/grouped-current.log" 2>&1; then exit 1; fi
+RELEASE_COMMIT="$commit" bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped > "$fixture/grouped-committed.log" 2>&1
 cmp Cargo.toml <(perl -0pe 's/^(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/m' "$fixture/grouped-manifest")
 cp "$fixture/grouped-manifest" Cargo.toml
 [[ "$(cat .git/release-state/0.0.1.plan)" == 'retained historical plan' ]]

@@ -6,30 +6,30 @@ operation="${1:?release adapter operation}"
 export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 case "$operation" in
     version|files) ;;
-    *) bash scripts/dev/toko-tooling.sh check --consumer "$PWD" ;;
+    *) bash vendor/toko-tooling/scripts/dev/toko-tooling.sh check --consumer "$PWD" ;;
 esac
 : "${RELEASE_GROUP:?select RELEASE_GROUP=core or endpoint explicitly}"
 export RELEASE_GROUP
-plan="$(bash scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP")"
+plan="$(bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh plan "$RELEASE_GROUP")"
 primary="$(printf '%s' "$plan" | jq -er .primary)"
 changelog="$(printf '%s' "$plan" | jq -er .changelog)"
 files=()
-while IFS= read -r -d '' path; do files+=("$path"); done < <(bash scripts/ci/cargo-release-group.sh files "$RELEASE_GROUP")
+while IFS= read -r -d '' path; do files+=("$path"); done < <(bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh files "$RELEASE_GROUP")
 source_args=()
 for path in "${files[@]}"; do source_args+=(--allow "$path"); done
-# shellcheck source=scripts/ci/release-receipts.sh
-source scripts/ci/release-receipts.sh
+# shellcheck source=vendor/toko-tooling/scripts/ci/release-receipts.sh
+source vendor/toko-tooling/scripts/ci/release-receipts.sh
 fail() { echo "IC Wire release refused: $*" >&2; exit 1; }
 [[ "${RELEASE_DELIVERY:-direct}" == direct ]] || fail 'only direct delivery is configured'
 if [[ "$operation" == version ]]; then
-    exec bash scripts/ci/cargo-release-group.sh version "$RELEASE_GROUP"
+    exec bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh version "$RELEASE_GROUP"
 fi
 if [[ "$operation" == files ]]; then
     printf '%s\0' "${files[@]}"
     exit
 fi
-perl scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" >/dev/null
-perl scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
+perl vendor/toko-tooling/scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" >/dev/null
+perl vendor/toko-tooling/scripts/ci/validate-release-inputs.pl date "${RELEASE_DATE:?}" >/dev/null
 [[ "${RELEASE_SOURCE:?}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail 'invalid source identity'
 state="$(git rev-parse --git-path release-state)/$primary-$RELEASE_VERSION"
 metadata() {
@@ -38,13 +38,13 @@ metadata() {
         export CARGO_RELEASE_METADATA_EDITOR
     fi
     if [[ "$1" == check ]]; then
-        bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
+        bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
     else
-        bash scripts/ci/cargo-release-metadata.sh "$1" "$primary"
+        bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh "$1" "$primary"
     fi
 }
 source_check() {
-    bash scripts/ci/check-release-source.sh "${source_args[@]}"
+    bash vendor/toko-tooling/scripts/ci/check-release-source.sh "${source_args[@]}"
 }
 validation_identity() {
     release_receipt_identity || return
@@ -61,23 +61,23 @@ prepared() {
 }
 case "$operation" in
     preflight)
-        bash scripts/ci/check-release-source.sh
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh
         [[ "$(git rev-parse HEAD)" == "$RELEASE_SOURCE" ]] || fail 'source changed'
-        [[ "$(bash scripts/ci/cargo-release-group.sh version "$RELEASE_GROUP")" == "$RELEASE_PREVIOUS" ]] || fail 'previous version changed'
+        [[ "$(bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh version "$RELEASE_GROUP")" == "$RELEASE_PREVIOUS" ]] || fail 'previous version changed'
         awk -v version="$RELEASE_VERSION" -v previous="$RELEASE_PREVIOUS" -v date="$RELEASE_DATE" \
-            -f scripts/ci/finalize-release-changelog.awk "$changelog" >/dev/null
+            -f vendor/toko-tooling/scripts/ci/finalize-release-changelog.awk "$changelog" >/dev/null
         # Captured groups were prepared by Shared before version lookup; exact
         # standard-runner recovery retains its existing preparation contract.
         if [[ "${RELEASE_BATCH_ACTIVE:-}" != 1 ]]; then
-            bash scripts/ci/cargo-release-preflight.sh "$PWD" "${RELEASE_CACHE_PREPARE:-1}" \
-                --pin Cargo.lock --pin qualification/Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
+            bash vendor/toko-tooling/scripts/ci/cargo-release-preflight.sh "$PWD" "${RELEASE_CACHE_PREPARE:-1}" \
+                --pin Cargo.lock --pin qualification/Cargo.lock --pin vendor/toko-tooling/ci/tool-versions.env --pin vendor/toko-tooling/ci/ic-tools.tsv \
                 --prepare install-tools --prepare tools-check --prepare install-release-editor --prepare release-editor-check \
                 --check tools-check --check release-editor-check
         fi
         metadata check-graph
         ;;
     verify)
-        bash scripts/ci/check-release-source.sh
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh
         mkdir -p "$state"
         release_receipt_archive "$state/prior-validation.XXXXXX" "$state/validated" "$state/validation-proof"
         rm -f -- "$state/validated" "$state/validation-proof"
@@ -93,8 +93,8 @@ case "$operation" in
             export WIRE_LINT_GROUP=''
         fi
         export VALIDATION_LOG_DIR="$attempt/logs" CARGO_NET_OFFLINE=true
-        bash scripts/ci/run-validation-targets.sh --plan "${attempt#$PWD/}/plan.json"
-        bash scripts/ci/check-release-source.sh
+        VALIDATION_REPOSITORY_ROOT="$PWD" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --plan "${attempt#$PWD/}/plan.json"
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh
         proof="${attempt##*/}"
         node scripts/ci/wire-release-validation.mjs seal "$RELEASE_GROUP" "$RELEASE_SOURCE" "$attempt" "$state/proofs/$proof"
         release_receipt_write "$state/validation-proof" printf '%s\n' "$proof" || fail 'cannot retain proof selection'
@@ -102,7 +102,7 @@ case "$operation" in
         ;;
     prepare)
         release_receipt_check "$state/validated" validation_identity || fail 'validation receipt missing or changed'
-        bash scripts/ci/check-release-source.sh
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh
         metadata prepare
         release_receipt_write "$state/prepared" release_receipt_payload '' "${files[@]}" || fail 'cannot retain prepared receipt'
         ;;
@@ -122,7 +122,7 @@ case "$operation" in
         for path in "${files[@]}"; do exclusions+=(":(exclude,literal)$path"); done
         git diff --quiet "$RELEASE_SOURCE" "$RELEASE_COMMIT" -- "${exclusions[@]}" || fail 'release contains unrelated source'
         if [[ "$operation" != committed ]]; then
-            bash scripts/ci/check-release-tag.sh "$RELEASE_COMMIT" "$RELEASE_VERSION"
+            bash vendor/toko-tooling/scripts/ci/check-release-tag.sh "$RELEASE_COMMIT" "$RELEASE_VERSION"
         fi
         ;;
     *) fail "unknown adapter operation: $operation" ;;

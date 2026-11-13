@@ -22,6 +22,47 @@ for the no-go on candidate lint reuse and outstanding hosted timing qualificatio
 Delivered issue 60 work adopts Tooling 0.41.0 and Rust 1.100.0; Core 0.22.0 and
 Endpoint 0.13.0 notes record the compiler-floor change.
 
+## Pending supplier adoption
+
+Both workspaces select Toko Tooling **0.42.1**, Platform Types **0.20.1** and
+Runtime/macros/guard **0.22.1**. Private qualification selects Build **0.84.1**,
+Host artifacts/fs/process **0.77.1** and native Platform **0.32.1**; Testkit
+remains **0.102.0**. The release editor is aligned at Build 0.84.1. Existing
+supplier lock updates and the deferred `cc` 1.11.2 selection were preserved.
+No product versions were bumped and nothing from this adoption is deployed.
+
+The supplier qualification below used Tooling 0.41.1 before the filesystem
+migration. The authenticated 96-file snapshot, installed tools, `deps-list`, dependency
+pins, ten product and 26 integration graphs passed. Standalone Types and combined
+Endpoint consumers passed host/Wasm isolation, strict Clippy, Rust/TypeScript
+byte vectors and malformed-input checks. Installed Endpoint calls, limits and
+rollback passed with prepared PocketIC 16.0.0; Build diagnostic tests passed.
+The actual release plans and both locks rendered into disposable files under
+`target/build0841-editor.BimqrO` without changing product metadata. Logs are
+`/tmp/wire0411-adopt.log`, `/tmp/wire-suppliers-*.log` and
+`/tmp/wire-build0841-editor.log`.
+
+Tooling 0.42.1 is now installed through the exporter with explicit release and
+publication entrypoints. All 95 managed executable/configuration/action files
+live under `vendor/toko-tooling/`; the managed baseline remains at root. Root
+licence/contribution files retain their canonical locations. Wire scripts,
+workflows, release policy and product configuration remain consumer-owned.
+The former shared paths and empty directories are retired without wrappers.
+The local hook now selects `vendor/toko-tooling/.githooks`.
+
+Make, CI actions/cache inputs, release metadata, validation and fixture callers
+use the vendor paths. Validation callers explicitly select the Wire repository
+root. Installed tools/snapshot, formatting, pins, documentation, package/LOC
+inventory, product boundaries, CI classification, disposable Make/hook routing,
+both groups' metadata transactions and the release-plan fixture passed. Logs
+are `/tmp/wire042-*.log`; no broad release gate or publication ran. The receipt
+retains 96 authenticated files. Existing unconditional tooling declarations
+remain valid and unchanged; frozen delivery, group ownership and stage-reuse
+policy remain unchanged. Pending Core 0.22.1 / Endpoint 0.13.1 notes cover the public supplier
+requirements; compiler floor remains 1.100.0. Bytes, identities, limits and
+acceptance remain unchanged (`None`: `00`; `Some`: `01 20 + 32 bytes`). No fresh
+performance matrix or size saving is claimed; full release gates were not run.
+
 ## Superseded deployment attempts
 
 Deployment batch `batch-5W4C7_rt` captured source `8e3dd70` and stopped at

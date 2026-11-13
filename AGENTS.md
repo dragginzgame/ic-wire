@@ -3,6 +3,8 @@
 Apply the installed [Toko Tooling baseline](TOKO-TOOLING.md) and its
 revision-bound references. [.toko-tooling.snapshot](.toko-tooling.snapshot)
 records the adopted payload; do not edit it or follow a moving sibling baseline.
+Shared executables and catalogs live under `vendor/toko-tooling/`; Wire-owned
+scripts and configuration remain outside that exporter-owned tree.
 This overlay owns product safeguards, local commands and approved exceptions.
 The baseline owns common action authority, validation, compiler and reporting rules,
 including scoped `git add -N` when validation requires new task-owned paths.

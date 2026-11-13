@@ -24,7 +24,7 @@ serde_json = "1.0"
 EOF_MANIFEST
 export CARGO_TARGET_DIR="$root/target/bulk-advice/build"
 cargo metadata --offline --format-version 1 --manifest-path "$fixture/Cargo.toml" > "$fixture/metadata.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 for mode in default partial all stale; do
     WIRE_ADVICE_CASE="$mode" cargo check --locked --offline --manifest-path "$fixture/Cargo.toml" > "$fixture/$mode.log" 2>&1
 done

@@ -5,6 +5,20 @@ shared this version series and now have an independent workspace. This independe
 series begins at 0.12.0. Earlier coordinated releases end at 0.11.0 and remain
 in [shared history](../history.md).
 
+## [0.22.1]
+
+### 🔧 Changed
+
+- Adopt Platform Types 0.20.1 for optional identity schemas. Principal/Account
+  bytes, bounds and acceptance remain unchanged; absent/present subaccounts stay
+  `00` / `01 20 + 32 bytes`.
+- Adopt Toko Tooling 0.42.1 and align the private Build dependency and release
+  editor at 0.84.1, with Host 0.77.1 and native Platform 0.32.1. Keep test tools
+  outside production graphs; no codec or performance change is claimed.
+- Move shared executable snapshots into `vendor/toko-tooling/`; migrate Make,
+  CI actions, hooks and release/validation callers without legacy path wrappers.
+  Keep Wire-owned scripts and configuration outside the managed tree.
+
 ## [0.22.0] - 2026-11-13
 
 ### ⚠️ Breaking

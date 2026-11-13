@@ -11,7 +11,7 @@ mkdir -p target
 inventory="$(mktemp "$root/target/documentation-inventory.XXXXXX")"
 selection="$(mktemp "$root/target/documentation-selection.XXXXXX")"
 trap 'rm -f "$inventory" "$selection"' EXIT
-bash scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$inventory"
+bash vendor/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$inventory"
 while IFS=$'\t' read -r kind _ _ file; do
     [[ "$kind" != file || "$file" != *.md ]] || printf '%s\n' "$file" >> "$selection"
 done < "$inventory"
@@ -26,4 +26,4 @@ LC_ALL=C sort -u "$selection" > "$inventory"
 documents=()
 while IFS= read -r file; do documents+=("$file"); done < "$inventory"
 [[ "${#documents[@]}" -gt 0 ]] || { echo 'No maintained documentation selected' >&2; exit 1; }
-perl scripts/ci/check-documentation-links.pl --root "$root" "${documents[@]}"
+perl vendor/toko-tooling/scripts/ci/check-documentation-links.pl --root "$root" "${documents[@]}"

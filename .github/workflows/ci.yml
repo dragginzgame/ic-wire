@@ -28,16 +28,16 @@ jobs:
           persist-credentials: false
       - name: Check reviewed snapshot integrity
         # Full Cargo/tooling admission runs in ci-* after compiler setup.
-        run: bash scripts/ci/verify-toko-tooling-snapshot.sh --consumer "$PWD" --require-annotations
+        run: bash vendor/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh --consumer "$PWD" --require-annotations
       - name: Restore pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
       - name: Prepare pinned security scanner
         id: security-tool
         run: |
-          scanner="$(bash scripts/ci/install-ci-tool.sh gitleaks --install-dir "$RUNNER_TEMP/ci-security")"
+          scanner="$(bash vendor/toko-tooling/scripts/ci/install-ci-tool.sh gitleaks --install-dir "$RUNNER_TEMP/ci-security")"
           echo "gitleaks=$scanner" >> "$GITHUB_OUTPUT"
       - name: Save pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
         with:
           mode: save
       - name: Scan repository history for secrets
@@ -54,7 +54,7 @@ jobs:
           CHANGE_HEAD: ${{ github.sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$CHANGE_HEAD"
-          scope="$(perl scripts/ci/classify-ci-change.pl --event "$CHANGE_EVENT" --ref "$CHANGE_REF" \
+          scope="$(perl vendor/toko-tooling/scripts/ci/classify-ci-change.pl --event "$CHANGE_EVENT" --ref "$CHANGE_REF" \
             --base "$CHANGE_BASE" --head "$CHANGE_HEAD" --policy ci/docs-only-paths.txt)"
           case "$scope" in docs|full) ;; *) scope=full ;; esac
           if [[ "$scope" == docs ]]; then
@@ -88,17 +88,17 @@ jobs:
         with:
           persist-credentials: false
       - name: Restore pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
       - name: Prepare reviewed bootstrap tools
         run: make install-host-tools
       - name: Prepare the compiler from local policy
         id: tool-cache-key
         run: |
           export PATH="$PWD/.tools/host/bin:$PATH"
-          bash scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
+          bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
           bash scripts/ci/rust-policy.sh
-          echo "RUSTUP_TOOLCHAIN=$(bash scripts/ci/read-cargo-workspace-rust-version.sh Cargo.toml)" >> "$GITHUB_ENV"
-          bash scripts/ci/cargo-tool-cache-key.sh ci/tool-versions.env >> "$GITHUB_OUTPUT"
+          echo "RUSTUP_TOOLCHAIN=$(bash vendor/toko-tooling/scripts/ci/read-cargo-workspace-rust-version.sh Cargo.toml)" >> "$GITHUB_ENV"
+          bash vendor/toko-tooling/scripts/ci/cargo-tool-cache-key.sh vendor/toko-tooling/ci/tool-versions.env >> "$GITHUB_OUTPUT"
       - name: Restore Cargo tool builds
         id: tool-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -129,7 +129,7 @@ jobs:
             ${{ steps.tool-cache-key.outputs.root }}/rust-*
           key: cargo-tools-${{ runner.os }}-${{ runner.arch }}-${{ matrix.suite }}-${{ steps.tool-cache-key.outputs.key }}-${{ hashFiles('Makefile') }}
       - name: Save pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
         with:
           mode: save
       - name: Prepare Node for TypeScript qualification
@@ -154,7 +154,7 @@ jobs:
         run: make "ci-$CI_GROUP"
       - name: Retain failure evidence
         if: ${{ failure() }}
-        uses: ./.github/actions/retain-failure-evidence
+        uses: ./vendor/toko-tooling/.github/actions/retain-failure-evidence
         with:
           name: validation-${{ matrix.suite }}-${{ matrix.os }}-${{ github.run_attempt }}
           temp-root: ${{ runner.temp }}

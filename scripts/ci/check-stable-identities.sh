@@ -10,16 +10,16 @@ printf 'Stable identity evidence: %s\n' "$out"
 cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --features ic-wire/platform-types,ic-wire-benchmarks/ic --format-version 1 > "$out/workspace.json"
 node scripts/ci/stable-identity-fixtures.mjs prepare "$root" "$out"
 for owner in next-platform next-endpoint next-endpoint-macros; do
-    bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$out/$owner" --external-ic
+    bash vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$out/$owner" --external-ic
 done
 export CARGO_TARGET_DIR="$out/target"
 for lane in current next; do
     manifest="$out/$lane/Cargo.toml"
     cargo metadata --manifest-path "$manifest" --offline --format-version 1 > "$out/$lane/metadata.json"
-    bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$out/$lane" --external-ic
+    bash vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$out/$lane" --external-ic
     mkdir "$out/$lane/browser"
     WIRE_PLATFORM_TYPES_OUTPUT="$out/$lane/browser" cargo test --manifest-path "$manifest" --locked --offline --lib
-    node scripts/ci/check-ic-sdk-boundary.mjs "$out/$lane/browser"
+    node vendor/toko-tooling/scripts/ci/check-ic-sdk-boundary.mjs "$out/$lane/browser"
     cargo check --manifest-path "$manifest" --locked --offline --target wasm32-unknown-unknown
     cargo tree --manifest-path "$manifest" --locked --offline --target wasm32-unknown-unknown --edges normal,build --prefix none > "$out/$lane/graph.txt"
     [[ "$(grep -c '^ic-platform-runtime-guard v' "$out/$lane/graph.txt")" == 1 ]]

@@ -70,7 +70,7 @@ selecting an alternative store. For direct shell commands:
 export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 ```
 
-Hook installation selects repository-local `core.hooksPath`. The reviewed hook
+Hook installation selects `core.hooksPath=vendor/toko-tooling/.githooks`. The reviewed hook
 sorts manifests and formats selected Rust inputs, refuses partial staging and
 preserves unrelated edits. It never installs tools implicitly.
 
@@ -790,6 +790,15 @@ expander source, building the current Endpoint macro owner.
 
 ## Updating the tooling bundle
 
+Shared executables, Make fragments, actions and tool catalogs live only under
+`vendor/toko-tooling/`. The exporter owns that tree and the root snapshot receipt;
+Wire owns its root Makefile, workflows, product configuration and local scripts.
+Root `TOKO-TOOLING.md`, `LICENSE.md` and `CONTRIBUTING.md` retain their canonical
+locations. Do not restore old-path wrappers or edit vendor files manually.
+Direct installer calls use `vendor/toko-tooling/scripts/dev/toko-tooling.sh`.
+Direct validation-runner calls must set `VALIDATION_REPOSITORY_ROOT` to Wire's
+root; script location identifies the tooling payload, not the consumer checkout.
+
 `make deps-list` prints local package versions and release groups from both
 workspaces offline, without dependency updates. Release membership belongs to
 `ci/cargo-release-groups.json`; unused workspace aliases are not a display catalog.
@@ -805,7 +814,7 @@ Declare the same exact published tooling release once per workspace root
 
 ```toml
 [workspace.dependencies]
-toko-tooling = "=0.41.0"
+toko-tooling = "=0.42.1"
 ```
 
 Every real workspace package inherits `toko-tooling.workspace = true` in its

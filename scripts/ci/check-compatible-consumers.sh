@@ -47,7 +47,7 @@ JS
     # Prepare the exact historical packages when absent from the Cargo cache;
     # only the disposable lock may change. Remaining commands stay locked/offline.
     cargo metadata --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
-    bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+    bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
     node - "$fixture/metadata.json" "$lane" <<'JS'
 const fs = require('node:fs'), assert = require('node:assert/strict');
 const [file, lane] = process.argv.slice(2), m = JSON.parse(fs.readFileSync(file));

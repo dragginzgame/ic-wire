@@ -27,8 +27,8 @@ ic-wire-endpoint-macros = { path = "crates/ic-wire-endpoint-macros", version = "
 
 # Production dependencies
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
-ic-platform-runtime = { version = "0.22.0", default-features = false }
-ic-platform-types = { version = "0.20.0", default-features = false }
+ic-platform-runtime = { version = "0.22.1", default-features = false }
+ic-platform-types = { version = "0.20.1", default-features = false }
 postcard = { version = "1.1.1", default-features = false, features = ["alloc"] }
 serde = { version = "1.0", default-features = false, features = ["alloc"] }
 serde_bytes = { version = "0.11.19", default-features = false, features = ["alloc"] }
@@ -44,7 +44,7 @@ syn = "3.0.9"
 # Tests and tooling only
 clap = { version = "4.6.7", default-features = false, features = ["std", "help", "usage", "error-context"] }
 
-toko-tooling = "=0.41.0"
+toko-tooling = "=0.42.1"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"

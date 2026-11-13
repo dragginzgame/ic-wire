@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-override TOKO_TOOLING_ROOT := $(CURDIR)
+override TOKO_TOOLING_ROOT := $(CURDIR)/vendor/toko-tooling
 TOKO_TOOLING_RUST := 1
 TOKO_TOOLING_RELEASE := 1
 _wire_cargo_target_origin := $(origin CARGO_TARGET_DIR)
@@ -27,9 +27,9 @@ unexport CARGO_TARGET_DIR
 endif
 endif
 RELEASE_SETUP_TARGET := release-candidate-setup
-RELEASE_EDITOR_VERSION := 0.84.0
+RELEASE_EDITOR_VERSION := 0.84.1
 export CARGO_RELEASE_METADATA_MAX_BYTES := 8388608
-RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
+RELEASE_EDITOR_COMMAND = bash "$(CURDIR)/vendor/toko-tooling/scripts/dev/install-rust-tools.sh" --consumer "$(CURDIR)" \
     --package ic-build --version "$(RELEASE_EDITOR_VERSION)" --bin ic-build-release-metadata --profile debug --features cli
 override CARGO_PUBLISH_PACKAGES := ic-wire-derive ic-wire ic-wire-endpoint-macros ic-wire-endpoint
 # Publication is scoped to an explicitly selected group, including PACKAGE subsets.
@@ -51,8 +51,8 @@ ifneq ($(origin PUBLISH_PACKAGES),undefined)
 $(error PUBLISH_PACKAGES was replaced by PACKAGE; use PACKAGE=ic-wire for a selected attempt)
 endif
 endif
-include make/consumer.mk
-include make/cargo-dependencies.mk
+include vendor/toko-tooling/make/consumer.mk
+include vendor/toko-tooling/make/cargo-dependencies.mk
 
 # These custom routes bypass the generic CI/release entrypoint admission.
 ci-core ci-typescript ci-benchmarks publish publish-check release-batch-resume release-batch-reconcile: toko-tooling-check
@@ -79,8 +79,8 @@ RUST_POLICY = bash "$(CURDIR)/scripts/ci/rust-policy.sh"
 .PHONY: install-release-editor release-editor-check release-candidate-setup release-browser-tools
 release-candidate-setup:
 	@case "$(RELEASE_SETUP_MODE)" in prepare|check) ;; *) echo 'Shared must select RELEASE_SETUP_MODE=prepare or check' >&2; exit 2 ;; esac
-	+@$(RUST_POLICY) bash scripts/ci/cargo-release-preflight.sh "$(CURDIR)" "$(if $(filter prepare,$(RELEASE_SETUP_MODE)),1,0)" \
-	    --pin Cargo.lock --pin qualification/Cargo.lock --pin ci/tool-versions.env --pin ci/ic-tools.tsv \
+	+@$(RUST_POLICY) bash vendor/toko-tooling/scripts/ci/cargo-release-preflight.sh "$(CURDIR)" "$(if $(filter prepare,$(RELEASE_SETUP_MODE)),1,0)" \
+	    --pin Cargo.lock --pin qualification/Cargo.lock --pin vendor/toko-tooling/ci/tool-versions.env --pin vendor/toko-tooling/ci/ic-tools.tsv \
 	    --pin examples/browser/.nvmrc --pin examples/browser/package.json --pin examples/browser/package-lock.json \
 	    --prepare install-tools --prepare tools-check --prepare install-release-editor --prepare release-editor-check --prepare release-browser-tools \
 	    --check tools-check --check release-editor-check --check release-browser-tools
@@ -250,10 +250,10 @@ check-doc-links:
 
 .PHONY: check-boundary check-candid-boundary check-browser-boundary
 check-candid-boundary:
-	@perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates qualification scripts/benchmarks
+	@perl vendor/toko-tooling/scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates qualification scripts/benchmarks
 
 check-browser-boundary:
-	@node scripts/ci/check-ic-sdk-boundary.mjs examples/browser crates qualification scripts/dev/inspect-wire.mjs
+	@node vendor/toko-tooling/scripts/ci/check-ic-sdk-boundary.mjs examples/browser crates qualification scripts/dev/inspect-wire.mjs
 
 .PHONY: check-testkit-boundary
 check-testkit-boundary:
@@ -263,17 +263,17 @@ check-testkit-boundary:
 .PHONY: check-integration-boundary
 check-integration-boundary:
 	+@node scripts/ci/check-testkit-boundary.mjs --integration
-	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)/qualification" --external-ic
+	+@bash vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)/qualification" --external-ic
 
 check-boundary: check-candid-boundary check-browser-boundary check-testkit-boundary
-	+@bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
+	+@bash vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 
 .PHONY: check-ci-selection
 check-ci-selection: host-tools-check
 	+@node scripts/ci/check-ci-selection.mjs
 
 check-pins: host-tools-check
-	+@bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"
+	+@bash vendor/toko-tooling/scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root examples/browser --node-version "$$(cat examples/browser/.nvmrc)" --npm-version "$$(jq -r '.packageManager | ltrimstr("npm@")' examples/browser/package.json)"
 
 .PHONY: check-release-validation validation-targets
 validation-targets:
@@ -294,16 +294,16 @@ version: host-tools-check
 	+@bash scripts/ci/ic-wire-release.sh version
 
 ci:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast $(IC_WIRE_CI_TARGETS)
+	+@VALIDATION_REPOSITORY_ROOT="$(CURDIR)" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --fail-fast $(IC_WIRE_CI_TARGETS)
 
 ci-core:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast $(filter-out check-benchmarks check-typescript,$(IC_WIRE_CI_TARGETS))
+	+@VALIDATION_REPOSITORY_ROOT="$(CURDIR)" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --fail-fast $(filter-out check-benchmarks check-typescript,$(IC_WIRE_CI_TARGETS))
 
 ci-typescript:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check check-rust-policy check-typescript
+	+@VALIDATION_REPOSITORY_ROOT="$(CURDIR)" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --fail-fast tools-check check-rust-policy check-typescript
 
 ci-benchmarks:
-	+@bash scripts/ci/run-validation-targets.sh --fail-fast tools-check check-rust-policy check-benchmarks
+	+@VALIDATION_REPOSITORY_ROOT="$(CURDIR)" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --fail-fast tools-check check-rust-policy check-benchmarks
 
 # Git release delivery is separate from package publication.
 export RELEASE_DELIVERY ?= direct

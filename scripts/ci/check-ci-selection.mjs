@@ -51,7 +51,7 @@ for (const job of Object.values(jobs)) {
 }
 const nativeSteps = jobs.validate.steps;
 const cacheKey = nativeSteps.find(s => s.id === 'tool-cache-key');
-assert.match(cacheKey.run, /cargo-tool-cache-key\.sh ci\/tool-versions\.env >> "\$GITHUB_OUTPUT"/);
+assert.match(cacheKey.run, /cargo-tool-cache-key\.sh vendor\/toko-tooling\/ci\/tool-versions\.env >> "\$GITHUB_OUTPUT"/);
 const cacheRestore = nativeSteps.find(s => s.id === 'tool-cache');
 const cacheSave = nativeSteps.find(s => s.name === 'Save Cargo tool builds');
 assert.equal(cacheRestore.uses, 'actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9');
@@ -82,7 +82,7 @@ assert.deepEqual(classifier.env, {
 assert.equal(jobs['change-scope'].steps[0].with['fetch-depth'], 0);
 assert.equal(jobs['change-scope'].steps[0].with['persist-credentials'], false);
 const snapshotCheck = jobs['change-scope'].steps.find(s => s.name === 'Check reviewed snapshot integrity');
-assert.equal(snapshotCheck.run, 'bash scripts/ci/verify-toko-tooling-snapshot.sh --consumer "$PWD" --require-annotations');
+assert.equal(snapshotCheck.run, 'bash vendor/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh --consumer "$PWD" --require-annotations');
 const scan = jobs['change-scope'].steps.find(s => s.name === 'Scan repository history for secrets');
 assert.equal(scan.env.GITLEAKS_BIN, '${{ steps.security-tool.outputs.gitleaks }}');
 assert.match(scan.run, /"\$GITLEAKS_BIN" git --redact=100/);
@@ -107,7 +107,7 @@ assert.deepEqual(dependencies.run.trim().split('\n'), [
 assert.ok(jobs.validate.steps.indexOf(dependencies) < jobs.validate.steps.indexOf(native));
 assert.ok(jobs.validate.steps.findIndex(s => s.name === 'Prepare the compiler from local policy') < jobs.validate.steps.indexOf(native));
 assert.match(fs.readFileSync(path.join(root, 'Makefile'), 'utf8'), /^ci-core ci-typescript ci-benchmarks .*: toko-tooling-check$/m);
-const retention = jobs.validate.steps.find(s => s.uses === './.github/actions/retain-failure-evidence');
+const retention = jobs.validate.steps.find(s => s.uses === './vendor/toko-tooling/.github/actions/retain-failure-evidence');
 assert.equal(retention.if, '${{ failure() }}');
 assert.ok(retention.with.name.includes('matrix.suite') && retention.with.name.includes('matrix.os'));
 const gate = jobs.qualification.steps[0];
@@ -134,7 +134,7 @@ fs.mkdirSync(path.join(root, 'target'), { recursive: true });
 const evidence = fs.mkdtempSync(path.join(root, 'target/ci-selection.'));
 // Exercise the installed key owner: stable inputs match, runner-image drift
 // invalidates, and an unavailable catalog cannot yield a usable cache key.
-const keyArgs = ['scripts/ci/cargo-tool-cache-key.sh', 'ci/tool-versions.env'];
+const keyArgs = ['vendor/toko-tooling/scripts/ci/cargo-tool-cache-key.sh', 'vendor/toko-tooling/ci/tool-versions.env'];
 const keyEnv = { PATH: `${root}/.tools/host/bin:${environment.PATH}`, ImageOS: 'wire-fixture', ImageVersion: 'one' };
 const firstKey = run('bash', keyArgs, root, keyEnv);
 assert.match(firstKey, /^key=[a-f0-9]{64}\nroot=\//);
@@ -167,7 +167,7 @@ const emptyRustup = path.join(evidence, 'empty-rustup');
 fs.mkdirSync(emptyRustup);
 const bootstrapEnv = { RUSTUP_HOME: emptyRustup, RUSTUP_AUTO_INSTALL: '0', RUSTUP_TOOLCHAIN: 'wire-ci-no-installed-toolchain' };
 run('bash', ['-e', '-o', 'pipefail', '-c', snapshotCheck.run], repo, bootstrapEnv);
-const managedFile = path.join(repo, 'scripts/dev/cloc.sh');
+const managedFile = path.join(repo, 'vendor/toko-tooling/scripts/dev/cloc.sh');
 const managedBytes = fs.readFileSync(managedFile);
 fs.appendFileSync(managedFile, '\n# Injected snapshot drift\n');
 run('bash', ['-e', '-o', 'pipefail', '-c', snapshotCheck.run], repo, bootstrapEnv, 1);
@@ -215,12 +215,12 @@ classify('tag ref', 'full', { CHANGE_REF: 'refs/tags/core-v0.14.3' });
 classify('missing history', 'full', { CHANGE_BASE: '0'.repeat(40) });
 classify('unsupported event', 'full', { CHANGE_EVENT: 'workflow_dispatch' });
 classify('wrong tested checkout', '', { CHANGE_HEAD: base }, 1);
-const helper = path.join(repo, 'scripts/ci/classify-ci-change.pl');
+const helper = path.join(repo, 'vendor/toko-tooling/scripts/ci/classify-ci-change.pl');
 fs.writeFileSync(helper, 'die "injected classifier failure\\n";\n');
 classify('classifier failure', '', {}, 255);
 fs.writeFileSync(helper, 'print "unknown\\n";\n');
 classify('invalid classifier output', 'full');
-git('restore', 'scripts/ci/classify-ci-change.pl');
+git('restore', 'vendor/toko-tooling/scripts/ci/classify-ci-change.pl');
 change('source edit', ['crates/ic-wire/src/lib.rs'], 'full');
 change('mixed edit', ['docs/benchmarks/performance.md', 'crates/ic-wire/src/lib.rs'], 'full');
 change('policy edit', [policyPath], 'full');

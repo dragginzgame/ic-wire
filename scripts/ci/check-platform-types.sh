@@ -46,7 +46,7 @@ JS
 # Only this disposable consumer lock is reconciled; checks thereafter are locked.
 export CARGO_TARGET_DIR="$fixture/target"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --format-version 1 > "$fixture/metadata.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 for selection in types combined; do
     options=(--manifest-path "$fixture/Cargo.toml" --locked --offline)
     [[ "$selection" != combined ]] || options+=(--features endpoint)
@@ -84,7 +84,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     if grep -Eq '^(ic-platform|ic-platform-types|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-pocket-ic|ic-testkit|serde_json|candid|pocket-ic) v' "$fixture/core-$target.txt"; then echo 'Optional integration leaked into core' >&2; exit 1; fi
 done
 printf '{"type":"module"}\n' > "$fixture/browser/package.json"
-node "$root/scripts/ci/check-ic-sdk-boundary.mjs" "$fixture/browser"
+node "$root/vendor/toko-tooling/scripts/ci/check-ic-sdk-boundary.mjs" "$fixture/browser"
 node "$compiler" --ignoreConfig --strict --noUncheckedIndexedAccess --exactOptionalPropertyTypes --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir "$fixture/browser" "$fixture/browser/principal.ts" "$fixture/browser/account.ts" "$fixture/browser/wire-runtime.ts"
 cp "$root/qualification/ic-wire-qualification/tests/fixtures/platform_types/check.mjs" "$fixture/browser/check.mjs"
 node "$fixture/browser/check.mjs"

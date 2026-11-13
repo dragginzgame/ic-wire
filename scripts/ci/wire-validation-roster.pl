@@ -21,7 +21,7 @@ open my $out, '>', "$scratch/groups.json" or die "write group projection: $!\n";
 print {$out} JSON::PP->new->canonical->encode([map { $_->{name} } @{$groups->{groups}}]), "\n"
     or die "write group projection: $!\n";
 close $out or die "close group projection: $!\n";
-my $status = system($^X, 'scripts/ci/validation-evidence.pl', 'roster', $root,
+my $status = system($^X, 'vendor/toko-tooling/scripts/ci/validation-evidence.pl', 'roster', $root,
     'ci/release-validation.json', "$scratch/groups.json");
 $status >= 0 && !($status & 127) or die "shared roster observation failed\n";
 exit($status >> 8);

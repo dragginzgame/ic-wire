@@ -62,7 +62,7 @@ serde = { version = "1.0", default-features = false, features = ["derive", "allo
 EOF_MANIFEST
 export CARGO_TARGET_DIR="$root/target/schema-targets/build"
 cargo metadata --offline --format-version 1 --manifest-path "$fixture/Cargo.toml" > "$fixture/metadata.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 # Standalone Cargo invocations prevent workspace feature unification from
 # accidentally hiding a metadata dependency in ordinary codec consumers.
 cargo build --locked --offline --manifest-path "$fixture/Cargo.toml" --message-format=json > "$fixture/runtime-artifacts.jsonl"

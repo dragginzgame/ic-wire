@@ -4,6 +4,14 @@ Covers ic-wire-endpoint and ic-wire-endpoint-macros. Its independent series begi
 repository releases remain in [shared history](../history.md). The published
 0.1.0 heading was undated and is preserved as recorded.
 
+## [0.13.1]
+
+### 🔧 Changed
+
+- Adopt Platform Runtime/macros/guard 0.22.1 with canonical Types 0.20.1.
+  Frame bytes, method identities, limits, dispatch and rollback semantics remain
+  unchanged.
+
 ## [0.13.0] - 2026-11-13
 
 ### ⚠️ Breaking

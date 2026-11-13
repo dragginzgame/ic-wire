@@ -26,7 +26,7 @@ const run = (file, args, options = {}) => execFileSync(file, args,
   { cwd: root, maxBuffer: 32 * 1024 * 1024, ...options });
 const git = (...args) => run('git', args).toString().trim();
 const at = (source, file) => run('git', ['show', `${source}:${file}`]);
-const shared = (operation, ...args) => run('perl', ['scripts/ci/validation-evidence.pl', operation, root, ...args], { maxBuffer: 4 * 1024 * 1024 });
+const shared = (operation, ...args) => run('perl', ['vendor/toko-tooling/scripts/ci/validation-evidence.pl', operation, root, ...args], { maxBuffer: 4 * 1024 * 1024 });
 function requireThat(ok, message) { if (!ok) throw new Error(message); }
 function regular(file, bound = 64 * 1024 * 1024) {
   let p = path.parse(path.resolve(file)).root;
@@ -53,7 +53,7 @@ function inventory(source) {
 }
 function admitSource(source) {
   requireThat(git('rev-parse', 'HEAD') === source, 'source moved');
-  run('bash', ['scripts/ci/check-release-source.sh']);
+  run('bash', ['vendor/toko-tooling/scripts/ci/check-release-source.sh']);
   const entries = run('git', ['ls-tree', '-rz', '--full-tree', source]).toString().split('\0').filter(Boolean);
   const files = inventory(source);
   const actual = run('git', ['hash-object', '--no-filters', '--stdin-paths'], { input: files.map(f => './' + f).join('\n') + '\n' }).toString().trim().split('\n');

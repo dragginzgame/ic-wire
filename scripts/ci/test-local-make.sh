@@ -19,7 +19,7 @@ mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/local-make.XXXXXX")"
 # Make's CURDIR is physical and normalized; compare the same path identity.
 fixture="$(cd "$fixture" && pwd -P)"
-compiler="$(bash "$root/scripts/ci/read-cargo-workspace-rust-version.sh" "$root/Cargo.toml")"
+compiler="$(bash "$root/vendor/toko-tooling/scripts/ci/read-cargo-workspace-rust-version.sh" "$root/Cargo.toml")"
 export WIRE_FIXTURE_COMPILER="$compiler"
 complete=false
 trap 'status=$?; if [[ "$complete" == true ]]; then rm -rf "$fixture"; else printf "Local Make fixture retained: %s\n" "$fixture" >&2; [[ "$status" != 0 ]] || status=1; fi; exit "$status"' EXIT
@@ -77,7 +77,7 @@ print-local-setup:
 STUB
     make --no-print-directory -s -C "$fixture/repo" print-local-setup > "$fixture/local-setup"
     if grep -E 'install-release-editor|release-editor-check' "$fixture/local-setup"; then exit 1; fi
-    cat > "$fixture/repo/scripts/ci/cargo-release-preflight.sh" <<'STUB'
+    cat > "$fixture/repo/vendor/toko-tooling/scripts/ci/cargo-release-preflight.sh" <<'STUB'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$SETUP_CALLS"
 STUB
@@ -107,8 +107,9 @@ check_ci_routing() {
     rm "$fixture/repo/examples/browser/boundary-probe.ts"
     # Verify the actual CI recipes partition the complete roster. Substitute only
     # dispatch: no broad gate or release effect runs in this disposable checkout.
-    cat > "$fixture/repo/scripts/ci/run-validation-targets.sh" <<'STUB'
+    cat > "$fixture/repo/vendor/toko-tooling/scripts/ci/run-validation-targets.sh" <<'STUB'
 #!/usr/bin/env bash
+[[ "${VALIDATION_REPOSITORY_ROOT:-}" == "$PWD" ]] || exit 91
 printf '%s\n' "$@" > "$CI_SELECTION"
 exit "${CI_FIXTURE_STATUS:-0}"
 STUB
@@ -146,7 +147,7 @@ STUB
 
     # Workflow topology, failure artifacts and required gates have one owning fixture:
     # scripts/ci/check-ci-selection.mjs. This fixture owns Make dispatch and hooks.
-    cp -p "$root/scripts/ci/run-validation-targets.sh" "$fixture/repo/scripts/ci/run-validation-targets.sh"
+    cp -p "$root/vendor/toko-tooling/scripts/ci/run-validation-targets.sh" "$fixture/repo/vendor/toko-tooling/scripts/ci/run-validation-targets.sh"
 
 }
 
@@ -162,11 +163,11 @@ make --no-print-directory -C "$fixture/repo" help > "$fixture/help.log"
 [[ ! -e "$fixture/repo/.tools" ]]
 # Exercise the real group authority and ledger inventory before effect stubs.
 for group in core endpoint; do
-    expected="$(cd "$root" && bash scripts/ci/cargo-release-group.sh version "$group")"
+    expected="$(cd "$root" && bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh version "$group")"
     actual="$(PATH="$root/.tools/host/bin:$PATH" make --no-print-directory -s -C "$fixture/repo" release-version "RELEASE_GROUP=$group")"
     [[ "$actual" == "$expected" && ! -e "$fixture/repo/.tools" ]]
 done
-cat > "$fixture/repo/scripts/ci/run-release.sh" <<'STUB'
+cat > "$fixture/repo/vendor/toko-tooling/scripts/ci/run-release.sh" <<'STUB'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$RELEASE_SENTINEL"
 exit 99
@@ -181,7 +182,7 @@ for group_selection in missing empty unknown; do
         grep -F 'Select RELEASE_GROUP=core or endpoint explicitly' "$fixture/refuse-$group_selection-$target.log" >/dev/null
     done
 done
-cat > "$fixture/repo/scripts/ci/run-release-batch.pl" <<'STUB'
+cat > "$fixture/repo/vendor/toko-tooling/scripts/ci/run-release-batch.pl" <<'STUB'
 use strict;
 use warnings;
 die "normal Cargo target leaked into launcher\n" if exists $ENV{CARGO_TARGET_DIR};
@@ -240,7 +241,7 @@ make --no-print-directory -C "$fixture/repo" release-patch RELEASE_GROUP=endpoin
     > "$fixture/frozen-active.log" 2>&1 || status=$?
 [[ "$status" == 2 && "$(cat "$RELEASE_SENTINEL")" == 'patch origin main' ]]
 rm "$RELEASE_SENTINEL"
-cp -p "$root/scripts/ci/run-release-batch.pl" "$fixture/repo/scripts/ci/run-release-batch.pl"
+cp -p "$root/vendor/toko-tooling/scripts/ci/run-release-batch.pl" "$fixture/repo/vendor/toko-tooling/scripts/ci/run-release-batch.pl"
 if [[ "$case_selection" == release-routing ]]; then
     complete=true
     echo "Local Make release routing passed (both groups; disposable fixture; release effects substituted)."
@@ -379,11 +380,11 @@ git -C "$fixture/repo" restore docs/guides/runtime.md
 check_ci_routing
 
 # Restore the reviewed runner before exercising the real formatting hook.
-cp -p "$root/scripts/ci/run-release.sh" "$fixture/repo/scripts/ci/run-release.sh"
+cp -p "$root/vendor/toko-tooling/scripts/ci/run-release.sh" "$fixture/repo/vendor/toko-tooling/scripts/ci/run-release.sh"
 git -C "$fixture/repo" init -q
 git -C "$fixture/repo" add -- "${paths[@]}"
 make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-hooks.log"
-[[ "$(git -C "$fixture/repo" config --local core.hooksPath)" == .githooks ]]
+[[ "$(git -C "$fixture/repo" config --local core.hooksPath)" == vendor/toko-tooling/.githooks ]]
 (
     cd "$fixture/repo"
     # The consumer's grouped policy must preserve roles and reject disorder
@@ -396,13 +397,13 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
     if make fmt-check > "$fixture/grouped-unsorted.log" 2>&1; then exit 1; fi
     make fmt > "$fixture/grouped-repair.log" 2>&1
     cmp Cargo.toml "$fixture/grouped-before"
-    bash .githooks/pre-commit > "$fixture/initial-hook.log" 2>&1
+    bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/initial-hook.log" 2>&1
     git -c user.name=Fixture -c user.email=fixture@example.invalid -c core.hooksPath=/dev/null commit -qm 'Disposable formatting baseline'
     printf '\nconst _:u8=1;\n' >> crates/ic-wire/src/lib.rs
     git add -- crates/ic-wire/src/lib.rs
     printf '\nUnrelated fixture edit.\n' >> TOKO-TOOLING.md
     cp TOKO-TOOLING.md "$fixture/unrelated-before"
-    bash .githooks/pre-commit > "$fixture/selected-hook.log" 2>&1
+    bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/selected-hook.log" 2>&1
     grep -F 'const _: u8 = 1;' crates/ic-wire/src/lib.rs >/dev/null
     cmp "$fixture/unrelated-before" TOKO-TOOLING.md
     [[ "$(git diff --cached --name-only)" == crates/ic-wire/src/lib.rs ]]
@@ -410,7 +411,7 @@ make --no-print-directory -C "$fixture/repo" install-hooks > "$fixture/install-h
     git diff --binary > "$fixture/unstaged-before"
     git diff --cached --binary > "$fixture/staged-before"
     status=0
-    bash .githooks/pre-commit > "$fixture/partial-hook.log" 2>&1 || status=$?
+    bash vendor/toko-tooling/.githooks/pre-commit > "$fixture/partial-hook.log" 2>&1 || status=$?
     [[ "$status" != 0 ]]
     grep -F 'partially staged file' "$fixture/partial-hook.log" >/dev/null
     git diff --binary > "$fixture/unstaged-after"
