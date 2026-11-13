@@ -18,4 +18,6 @@ case "${WIRE_LINT_GROUP-${RELEASE_GROUP:-}}" in
         ;;
     *) echo 'Select an existing lint group: core or endpoint' >&2; exit 2 ;;
 esac
-cargo clippy --locked "${packages[@]}" --all-targets --features "$schema" -- -D warnings
+# Human-readable Cargo output: deny fresh and replayed warnings without changing
+# rustc flags/cache identities. Plain JSON collectors retain their own admission.
+CARGO_BUILD_WARNINGS=deny cargo clippy --locked "${packages[@]}" --all-targets --features "$schema"

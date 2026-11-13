@@ -13,7 +13,7 @@ in [shared history](../history.md).
   their direct Types dependency to 0.20; Principal/Account bytes, schema, limits
   and acceptance remain unchanged (`None`: `00`; `Some`: `01 20 + 32 bytes`).
 
-- Require Rust 1.100.0 for Core and derive consumers; adopt Toko Tooling 0.40.1
+- Require Rust 1.100.0 for Core and derive consumers; adopt Toko Tooling 0.41.0
   and the common Rust/Clippy/Rustdoc policy ([#60](https://github.com/dragginzgame/ic-wire/issues/60)).
   Pure accessors and constructors now warn when their results are ignored.
   Upgrade the consumer compiler; codec bytes, identities, limits and acceptance
@@ -21,7 +21,24 @@ in [shared history](../history.md).
 
 ### 🔧 Changed
 
-- Adopt Tooling 0.40.1's deployment sequencing and failure-specific recovery
+- Decode each derive adapter-path literal once using Rust 1.100 `trim_prefix`.
+  Generated metadata and accepted adapter spellings are unchanged; measured
+  host expansion saves two allocations per byte-adapter field.
+- Enforce public Clippy warnings through Cargo, including cached diagnostics,
+  without changing compiler flags solely for warning denial. Keep plain-JSON
+  collectors strict; qualify warning rejection and a clean control.
+
+- Qualify Build 0.84.0 (including the release editor) and Testkit 0.102.0
+  in the private tooling/test workspace; adopt their Host 0.77.0 and Platform
+  0.32.0 suppliers. Published dependency requirements and codec bytes are unchanged.
+
+- Add offline `make deps-list`; remove unused display-only manifest entries.
+  Apply Cargo dependency/inheritance and Rustdoc table lints without suppressions.
+- Admit isolated native Testkit supplier identities while preserving typed
+  identity and Runtime singleton checks. Move private test/tool dependencies to
+  native dev-dependencies; production graphs and wire bytes remain unchanged.
+
+- Adopt Tooling 0.41.0's deployment sequencing and failure-specific recovery
   guidance; retain existing validation and compiled-tool cache admission.
 
 - Cache admitted compiled Cargo tools in hosted CI using Toko Tooling's native

@@ -7,6 +7,11 @@ license-file.workspace = true
 publish = false
 autobenches = false
 
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+# Only the native diagnostic tool consumes Build.
+ic-build.workspace = true
+stats_alloc.workspace = true
+
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
@@ -24,9 +29,9 @@ path = "benches/mod.rs"
 [features]
 allocation-fixture = ["dep:ic-wire", "dep:serde_bytes"]
 contract-fixture = ["dep:ic-wire", "dep:ic-platform-types"]
-diagnostics = ["dep:ic-build"]
+diagnostics = []
 schema-fixture = ["contract-fixture", "ic-wire/typescript"]
-schema-cost = ["schema-fixture", "dep:stats_alloc"]
+schema-cost = ["schema-fixture"]
 fuzz-runtime = ["dep:ic-wire", "dep:libfuzzer-sys"]
 
 [dependencies]
@@ -36,9 +41,7 @@ serde = { workspace = true, features = ["derive"] }
 serde_bytes = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-ic-build = { workspace = true, optional = true }
 libfuzzer-sys = { workspace = true, optional = true }
-stats_alloc = { workspace = true, optional = true }
 
 [dev-dependencies]
 clap.workspace = true

@@ -55,3 +55,25 @@ fn crate_paths_emit_the_same_metadata_implementation() {
         }
     }
 }
+
+#[test]
+fn adapter_paths_accept_one_optional_root_prefix() {
+    for adapter in [
+        "serde_bytes",
+        "ic_wire::serde_packed::bools",
+        "ic_wire::serde_packed::finite_f32",
+        "ic_wire::serde_packed::finite_f64",
+        "ic_wire::serde_packed::nonzero_i64",
+        "ic_wire::serde_packed::heap_u64",
+    ] {
+        let expand = |path: &str| {
+            let source = format!("struct A {{ #[serde(with = {path:?})] value: Vec<u8> }}");
+            super::expand(&syn::parse_str(&source).unwrap())
+        };
+        assert_eq!(
+            expand(adapter).unwrap().to_string(),
+            expand(&format!("::{adapter}")).unwrap().to_string()
+        );
+        assert!(expand(&format!("::::{adapter}")).is_err());
+    }
+}

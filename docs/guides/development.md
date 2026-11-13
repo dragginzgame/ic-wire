@@ -33,8 +33,8 @@ make install-hooks
 
 `make install-tools` prepares ordinary development tools. Release setup explicitly
 runs `make install-release-editor`; its `cli` feature is confined to that tool.
-The private diagnostic runner selects Build through `diagnostics`, without
-default features.
+The private diagnostic runner is gated by `diagnostics`; Build is its native
+dev-dependency, without default features.
 `make release-editor-check` verifies its selected executable offline. The release
 adapter selects that path automatically; metadata inputs are limited to 8 MiB
 per document. This tooling executable is separate from runtime dependencies.
@@ -46,7 +46,9 @@ Production Endpoint selects Runtime; optional schemas select canonical Types.
 Native endpoint/codec controls import the async PocketIC client and DTOs from
 `ic_testkit::pocket_ic`, with Testkit also owning server admission/lifecycle.
 Drivers/tests own one Tokio runtime, await client operations and explicitly
-await `instance.close()` before dropping an owned server. Tokio and Testkit are optional native dependencies selected by `ic`; no per-operation blocking wrappers are added.
+await `instance.close()` before dropping an owned server. Tokio and Testkit are native-only dev-dependencies.
+The feature gates simulator execution, not native dev-dependency compilation;
+no per-operation blocking wrappers are added.
 Testkit 0.90 constructors receive an explicit 300-second request budget, preserving
 the former default allowance. It covers one complete exchange, including response
 reads and accepted-operation polling. The independent 60/90-second startup
@@ -83,15 +85,21 @@ Shared-owned rollback transaction; it does not refresh private suppliers.
 Keep both locks reviewed;
 refreshes are explicit dependency maintenance, never a side effect of a check.
 
-Native corpus/allocation checks omit `ic` and `diagnostics`, so they do not compile
-Testkit/Tokio or Build. Compiler refusals select `diagnostics`; simulator checks
+Native corpus/allocation checks omit `ic` and `diagnostics`, so they do not run
+simulator or diagnostic tools. Native dev builds can compile Testkit and Build;
+ordinary library and Wasm graphs exclude them. Compiler refusals select
+`diagnostics`; simulator checks
 select `ic` and still require an explicitly prepared server. Make targets select
 the correct manifest. Direct private Cargo commands need
 `--manifest-path qualification/Cargo.toml`; use `CARGO_TARGET_DIR=$PWD/target`
 when sharing the repository's prepared build cache.
 
 `check-testkit-boundary` checks the independent product graph;
-`check-integration-boundary` checks the private composition. Future Platform-facade
+`check-integration-boundary` checks the private composition. Native supplier
+Types generations may differ only behind Testkit: the check prunes that supplier
+and verifies every remaining typed path against local Types, while the full
+graph still requires one local Wire identity and one Runtime/guard. Testkit
+remains forbidden in product and Wasm graphs. Future Platform-facade
 identity simulation runs explicitly via `check-stable-identities` and in the
 benchmark release/CI stage, rather than ordinary TypeScript/schema checks.
 Both workspaces remain covered by formatting and dependency-pin checks.
@@ -782,6 +790,10 @@ expander source, building the current Endpoint macro owner.
 
 ## Updating the tooling bundle
 
+`make deps-list` prints local package versions and release groups from both
+workspaces offline, without dependency updates. Release membership belongs to
+`ci/cargo-release-groups.json`; unused workspace aliases are not a display catalog.
+
 `make deps-update` runs sequential `cargo update -v` calls for the root and
 qualification workspaces. To update one dependency, pass
 `DEPENDENCY_PACKAGE=name` and optionally `DEPENDENCY_PRECISE=version`.
@@ -793,7 +805,7 @@ Declare the same exact published tooling release once per workspace root
 
 ```toml
 [workspace.dependencies]
-toko-tooling = "=0.39.15"
+toko-tooling = "=0.41.0"
 ```
 
 Every real workspace package inherits `toko-tooling.workspace = true` in its
@@ -827,3 +839,13 @@ Release metadata selects `qualification_workspace` in
 manifests/locks in one transaction; Wire has no custom metadata renderer.
 Use `bash scripts/ci/test-local-release.sh core --metadata` and the corresponding
 `endpoint --metadata` command to qualify both local callers and failed-input preservation.
+
+
+### Public Clippy warning admission
+
+`check-lint.sh` uses `CARGO_BUILD_WARNINGS=deny` with human-readable Cargo output.
+`check-rust-policy` qualifies a real Clippy warning on fresh and cached artifacts
+and a clean control. Do not extend this to plain `--message-format=json`
+collectors: they retain separate diagnostic admission. Rustdoc remains explicitly
+strict, and qualification commands retain their existing warning checks. This
+changes warning enforcement, not semantic compiler flags or release-stage reuse.

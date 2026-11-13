@@ -18,18 +18,24 @@ export function graph(text) {
   }
   return result;
 }
-export function admit(packages, { native = false, wire, types, runtime } = {}) {
-  const one = name => {
-    const entries = packages.get(name);
+export function admit(packages, { native = false, wire, types, runtime, typed } = {}) {
+  const one = (name, selected = packages) => {
+    const entries = selected.get(name);
     assert.equal(entries?.size, 1, `expected one ${name} identity`);
     return [...entries][0];
   };
   if (native) {
+    assert.ok(typed instanceof Map && !typed.has('ic-testkit'), 'missing supplier-pruned typed graph');
+    assert.equal(one('ic-wire', typed)[0], wire, 'typed boundary must use local Wire');
     assert.ok(!one('ic-testkit')[1].has('wire'), 'Testkit Wire adapter must remain disabled');
     assert.equal(one('ic-wire')[0], wire, 'qualification must use the local Wire codec');
-  } else assert.ok(!packages.has('ic-testkit'), 'Testkit must stay outside this graph');
+  } else {
+    for (const name of ['ic-testkit', 'ic-build', 'dhat', 'stats_alloc']) {
+      assert.ok(!packages.has(name), `${name} must stay outside this graph`);
+    }
+  }
   if (types && packages.has('ic-platform-types')) {
-    assert.equal(one('ic-platform-types')[0], types, 'canonical Types identity differs');
+    assert.equal(one('ic-platform-types', native ? typed : packages)[0], types, 'canonical Types identity differs');
   }
   if (runtime && packages.has('ic-platform-runtime')) {
     const [identity, features] = one('ic-platform-runtime');
@@ -69,9 +75,9 @@ function main() {
     assert.equal(deps.length, harnesses.includes(pkg.name) ? 1 : 0, `${pkg.name}: unexpected Testkit declaration`);
     for (const dep of deps) {
       assert.deepEqual(pkg.publish, [], `${pkg.name}: qualification package must remain private`);
-      assert.equal(dep.kind, null);
-      assert.equal(dep.optional, true);
-      assert.ok(pkg.features.ic.includes('dep:ic-testkit'));
+      assert.equal(dep.kind, 'dev');
+      assert.equal(dep.optional, false);
+      assert.ok(!pkg.features.ic.includes('dep:ic-testkit'));
       assert.equal(dep.target, 'cfg(not(target_family = "wasm"))');
       assert.equal(dep.uses_default_features, false);
       assert.ok(!dep.features.includes('wire'));
@@ -81,15 +87,16 @@ function main() {
   const out = fs.mkdtempSync(path.join(root, integration ? 'target/integration-boundary.' : 'target/product-boundary.'));
   const host = run('rustc', ['-vV']).match(/^host: (.+)$/m)[1];
   const graphs = [];
-  const select = (name, features, target, dev = false) => {
+  const select = (name, features, target, dev = false, pruneTestkit = false) => {
     const args = ['tree', '-p', name, '--target', target, '--edges', dev ? 'normal,build,dev' : 'normal,build', '--prefix', 'none', '--format', '{p}|{f}'];
     if (features) args.push('--features', features);
+    if (pruneTestkit) args.push('--prune', 'ic-testkit');
     const text = integration && !members.some(p => p.name === name)
       ? run('cargo', [...args, '--locked', '--offline']) : cargo(args);
     const parsed = graph(text);
     const file = `${graphs.length}.txt`;
     fs.writeFileSync(path.join(out, file), text);
-    graphs.push({ package: name, features, target, dev, file });
+    graphs.push({ package: name, features, target, dev, pruneTestkit, file });
     return parsed;
   };
   const schema = select('ic-wire', 'platform-types', host);
@@ -117,9 +124,16 @@ function main() {
   for (const name of integration ? harnesses : []) {
     const selections = name === 'ic-wire-benchmarks' ? ['', 'wire,candid,ic', 'ic,endpoint-input'] : ['', 'ic,schema'];
     for (const features of selections) {
-      admit(select(name, features, host, true), { ...expected, native: features.split(',').includes('ic') });
+      // Older identities may remain inside Testkit's native-only supplier tree.
+      // Pruning that owner retains every direct/local typed path; the full graph
+      // still enforces the Wire identity and Runtime singleton.
+      const typed = select(name, features, host, true, true);
+      admit(select(name, features, host, true), { ...expected, native: true, typed });
       admit(select(name, features, 'wasm32-unknown-unknown', true), expected);
     }
+  }
+  if (integration) {
+    admit(select('ic-wire-qualification', 'allocation-fixture,schema-fixture', 'wasm32-unknown-unknown', true), expected);
   }
   const sources = {};
   const hash = file => { sources[path.relative(root, file)] = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); };

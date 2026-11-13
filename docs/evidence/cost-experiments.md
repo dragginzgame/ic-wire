@@ -479,3 +479,44 @@ from the repository root, followed by `node` on analyze.mjs; use fresh source an
 target/output locations for another measurement. Initial instruction startup
 stopped on a missing cached errno package; locked fetch prepared it before any
 measurements. The completed retry retains identical locks.
+
+
+## Derive adapter prefix cleanup — 13 November 2026
+
+Keep the host-only `LitStr::value().trim_prefix("::")` replacement. The former
+`strip_prefix(...).unwrap_or(path.value().as_str())` eagerly decoded the same
+literal twice. Supported adapter names, single optional root-prefix acceptance,
+generated tokens, codec bytes, identities and limits remain unchanged. No consumer
+migration is required; repeated `::::` prefixes remain rejected.
+
+The study calls the actual copied `native_schema::expand` plus the unchanged
+`fresh_ident` helper, with pre-parsed one-field and 64-field structs. Adapter fields
+use `::serde_bytes`; the control is one ordinary `Vec<u8>` field. Rust 1.100.0
+(`0ef1bc386`), x86_64-unknown-linux-gnu, identical locked syn 3.0.10,
+proc-macro2 1.0.107, quote 1.0.47 and stats_alloc 0.1.10; LTO and one codegen unit.
+Each lane has a separate source/target directory. Fresh binaries embed the schema
+source digest; the runner verifies those identities and exact generated tokens.
+Eleven alternating paired process runs each time 50 expansions per case.
+
+| Profile / case | Allocations before → after | Allocated bytes before → after | Instrumented median ns before → after |
+| --- | --- | --- | --- |
+| opt-z / control | 168 → 168 | 15,771 → 15,771 | 14,571 → 14,443 |
+| opt-z / 1 adapter | 188 → 186 | 16,827 → 16,796 | 15,548 → 14,809 |
+| opt-z / 64 adapters | 3,346 → 3,218 | 247,749 → 245,765 | 247,010 → 235,644 |
+| opt-3 / control | 167 → 167 | 15,747 → 15,747 | 8,256 → 8,308 |
+| opt-3 / 1 adapter | 187 → 185 | 16,803 → 16,772 | 8,560 → 8,200 |
+| opt-3 / 64 adapters | 3,345 → 3,217 | 247,725 → 245,741 | 149,774 → 144,920 |
+
+The firm saving is two allocations and 31 allocated bytes per adapter in these
+inputs. Timing includes allocator instrumentation and overlaps between lanes:
+opt-z one-adapter ranges are 15,215–20,144 / 14,579–32,705 ns; opt-3 control median
+regresses about 0.6%. Do not claim a reliable wall-clock build-speed improvement.
+This is host expansion, not a complete downstream build; IC instructions and
+linked application Wasm savings are not applicable claims. No allocator, codec
+or per-type Wasm specialization was introduced.
+
+Raw paired source, locks, source/binary identities, generated tokens, all samples
+and summary remain under `target/evidence/derive-prefix-1100/`. Reproduce by
+building each lane with `cargo build --locked --offline --manifest-path
+<lane>/Cargo.toml --profile release` and `--profile speed`, then running
+`python3 target/evidence/derive-prefix-1100/measure.py`. Preserve separate targets.

@@ -80,7 +80,7 @@ fn attributes(attrs: &[syn::Attribute], site: AttributeSite) -> syn::Result<Proj
                     Ok(())
                 } else if site == AttributeSite::Field && meta.path.is_ident("with") && adapter.is_none() {
                     let path = meta.value()?.parse::<syn::LitStr>()?;
-                    adapter = Some(match path.value().strip_prefix("::").unwrap_or(path.value().as_str()) {
+                    adapter = Some(match path.value().trim_prefix("::") {
                         "serde_bytes" => Adapter::Bytes,
                         "ic_wire::serde_packed::bools" => Adapter::Bools,
                         "ic_wire::serde_packed::finite_f32" => Adapter::FiniteF32,

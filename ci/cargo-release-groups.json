@@ -26,7 +26,6 @@
       ],
       "changelog": "releases/endpoint/CHANGELOG.md",
       "dependencies": [
-        "ic-wire-endpoint",
         "ic-wire-endpoint-macros"
       ]
     }

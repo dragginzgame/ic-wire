@@ -8,8 +8,21 @@ requirements were unchanged. Issue 59's hosted compiled-tool caching was pushed
 in `29d9778`; no product release is required solely for this CI change. See the
 [release cost review](../guides/group-validation.md#release-cost-review-12-november-2026)
 for the no-go on candidate lint reuse and outstanding hosted timing qualification.
-Pending issue 60 work adopts Tooling 0.40.1 and Rust 1.100.0; Core 0.22.0 and
+Pending issue 60 work adopts Tooling 0.41.0 and Rust 1.100.0; Core 0.22.0 and
 Endpoint 0.13.0 notes record the compiler-floor change. Nothing is published.
+
+Deployment batch `batch-5W4C7_rt` captured source `8e3dd70` and stopped at
+`check-benchmarks` integration admission: Testkit 0.101.0 selects Types 0.19.5
+alongside product Types 0.20.0. Product-boundary and installed smoke checks passed,
+but they do not satisfy the stricter complete native graph contract. No version
+preparation, tag, push or upload occurred. This historical refusal came from a
+whole-native-graph Types count. Tooling 0.41.0 now admits isolated native supplier
+generations; the working-tree check instead verifies the supplier-pruned typed
+graph and the full graph's Wire identity/Runtime guard. Preserve the failed batch
+and `/tmp/wire022-resume.log`; its captured source still has the old policy.
+The initial setup-only npm mismatch was resolved using pinned npm 12.2.0 under
+`target/release-tools/npm-12.2.0`; the shell default is 12.2.1. Changed supplier
+inputs will need a fresh gate because stage reuse is not qualified.
 
 ## Delivered behavior
 
@@ -33,17 +46,17 @@ and [encoder follow-up](../evidence/encoder-followup.md).
 
 ## Tooling and suppliers
 
-Both workspaces select Toko Tooling 0.40.1; its authenticated snapshot retains
+Both workspaces select Toko Tooling 0.41.0; its authenticated snapshot retains
 96 files. Rust 1.100.0 is the minimum and pin (rustc `0ef1bc386`, Cargo `3acc79c0c`,
 LLVM 23.1.5). Both roots inherit the common lint policy; the benchmark's local
 unsafe-export exception retains equivalent checks. The dated sanitizer-only
 nightly is unchanged. Stage reuse and final-candidate opt-ins stay disabled.
-The 0.40.1 adoption changes deployment guidance only. Before delivery, inspect
+The earlier 0.40.1 adoption changed deployment guidance only. Before delivery, inspect
 nested gates and retain the existing focused wiring proofs. On failure, identify
 invalidated inputs and disclose unsupported recovery/full-rerun scope explicitly;
 use the retained timings in the release cost review, not an assumed cache saving.
 Installer/tool admission, snapshot verification, pins and documentation links pass
-for 0.40.1. An unrelated qualification-lock change to rustls-webpki 0.103.17 was
+for that adoption. An unrelated qualification-lock change to rustls-webpki 0.103.17 was
 observed and preserved during adoption; the Platform adoption below subsequently
 compiled that selection and ran the installed Endpoint smoke check. This is not
 a separate TLS behavior qualification.
@@ -58,8 +71,10 @@ Codec bytes, identities, budgets and acceptance remain unchanged. No performance
 or Wasm-size saving is claimed from this compiler/lint migration.
 
 The delivered release qualified Types 0.19.5, Runtime/macros/guard 0.21.3, native Platform
-0.31.3 and Host 0.76.5 lock selections. Qualification selects Build 0.83.0 and
-Testkit 0.101.0; the release editor remains independently selected at Build 0.81.0.
+0.31.3 and Host 0.76.5 lock selections. Pending qualification now selects Build 0.84.0 and
+Testkit 0.102.0, with the release editor aligned at Build 0.84.0. Their required
+Host 0.77.0 and native Platform 0.32.0 replace the prior private suppliers;
+the qualification lock now has only canonical Types 0.20.0.
 Testkit owns PocketIC setup/lifecycle and exposes native client 16.1.0 handles.
 Installed Endpoint calls, limits and rollback passed with prepared server 16.0.0
 before capture. The resumed full gate requalified the frozen supplier graph.
@@ -71,14 +86,51 @@ in both workspaces. Align consumer Types/Runtime requirements together; these
 versions require Rust 1.100.0. Core 0.22.0 and Endpoint 0.13.0 notes cover this
 Rust identity cut. Schema and codec bytes, limits and admission remain unchanged:
 Account absent/present subaccounts stay `00` / `01 20 + 32 bytes`. Testkit
-0.101.0 still selects Types 0.19.5 through its native Platform 0.31.3 boundary;
-product/schema/Endpoint graphs select only Types 0.20.0. No supplier patches or
+0.102.0 now shares Types 0.20.0 with product/schema/Endpoint graphs. The revised
+native admission still permits independently owned older supplier identities
+while rejecting a direct/local identity split or duplicate Runtime guard. No supplier patches or
 new compatibility wrappers are introduced. Standalone Rust/TypeScript byte and
 malformed-input checks, host/Wasm feature isolation, compatible current consumers,
 Endpoint diagnostics/lints and opt-z Wasm build passed. Installed calls, limits
 and rollback passed with prepared PocketIC 16.0.0; boundary and pin checks passed.
 Published Endpoint 0.12.2 remains on Runtime 0.21 and is not a supported mixed
 pair with the new Types generation. No performance/size comparison was run.
+
+Tooling 0.41 adds Cargo dependency/inheritance lints and strict Rustdoc table
+checks. `make deps-list` reports all seven local packages and release membership
+offline. The display-only root Endpoint dependency alias and unused qualification
+repository metadata are removed; all four public release members remain.
+Testkit/Build and allocation profilers are native-only dev-dependencies of their
+actual private tool/test consumers. Native dev builds may compile them without
+execution features; ordinary library and Wasm graphs remain isolated. The benchmark Endpoint probe
+is also a dev-dependency. Fresh opt-z standard-fixture builds before/after that
+placement measured total/code bytes 1,746,489/1,661,306 → 1,746,379/1,661,196;
+this single fixture check is not an application-size or instruction-saving claim.
+No opt-3 or runtime performance comparison was run. Raw build inputs remain in
+`target/evidence/tooling041-placement/` with separate before/after Cargo targets.
+Public host/Wasm Clippy and strict Rustdoc, private tool/Endpoint Clippy, allocation/
+heap/endpoint-input mode Clippy, installed Endpoint rollback and typed diagnostics
+pass. No lint suppression or dummy imports were added.
+
+Build 0.84 diagnostic controls and Testkit 0.102 installed Endpoint calls, limits
+and rollback passed. The prepared Build 0.84 release editor rendered both actual
+group plans and both locks into disposable candidates; parsed changes matched
+selected version/dependency edits and preserved registry packages. No release
+versions were changed.
+
+Rust 1.100 follow-up is implemented locally: the public Clippy adapter uses
+`CARGO_BUILD_WARNINGS=deny` without adding compiler warning flags. The existing
+policy fixture rejects a real warning on fresh and cached artifacts and accepts
+a clean control. Plain-JSON collectors and other strict callers are unchanged;
+no release-time saving is claimed. The derive adapter parser decodes each literal
+once via `trim_prefix`; all six supported adapter forms and repeated-prefix
+refusals pass regression coverage. Matched actual-expansion studies in both
+profiles save two allocations / 31 bytes per adapter; timing overlaps and an
+opt-3 control regression prevent a general speed claim. See the
+[measured prefix cleanup](../evidence/cost-experiments.md#derive-adapter-prefix-cleanup--13-november-2026).
+Generated tokens, codec bytes, identities, limits and acceptance remain unchanged.
+Custom allocators, Vec constructor rewrites, never-type spelling and DropGuard
+remain rejected as unnecessary for this change.
 
 Root owns four public packages; qualification owns three unpublished packages
 and its own lock. `make deps-update` updates the two locks sequentially.

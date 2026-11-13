@@ -893,9 +893,9 @@ dependencies = [
 
 [[package]]
 name = "ic-build"
-version = "0.83.0"
+version = "0.84.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47b532cca843e5855ceeb42b39c651492aa3ede7c3abb53f5b0b389e28e92b5b"
+checksum = "0b4b4af85377dbc696b9ca8b286937770f9c9c5c667f9b15e4a7d9a6760e8ac3"
 dependencies = [
  "cargo_metadata",
  "hmac",
@@ -925,9 +925,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.76.5"
+version = "0.77.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cfd133e394181238395c0915ad49fcb6802fdd5a59e0c45fbbe92e34788c3aa"
+checksum = "d4eddb145b7702d1433c10ac0c08febd2da5ae9bbab15ba9b052014cad86ea75"
 dependencies = [
  "flate2",
  "sha2 0.11.1",
@@ -935,9 +935,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-fs"
-version = "0.76.5"
+version = "0.77.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0330f9b41558f5e55db2c9a814fd83fbc638f116b5fcba8d3d9d9cedd9be4080"
+checksum = "9f90da41d1415c7940a379ede30bfa9ae77b012e06f7603cb4c993c2c9f14ce0"
 dependencies = [
  "ic-host-artifacts",
  "rustix",
@@ -946,9 +946,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.76.5"
+version = "0.77.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34c3bb46d6e871f8c0a26841f9fe39de5755a726baf01e4bc6da9904d3743d65"
+checksum = "41f35b3a943ab6dd1b424be2ec7d5bb9b8c997344b65cf349a171a87baf125fb"
 dependencies = [
  "command-fds",
  "ic-host-artifacts",
@@ -970,11 +970,11 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.31.3"
+version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fd611c3961165ef22a19764913cbf780b6f426b1f74173f02cce944a151d6aa"
+checksum = "207beedb33b13087281c5b7ca365c97eea50f600dd4155cc21bad6bbba320877"
 dependencies = [
- "ic-platform-types 0.19.5",
+ "ic-platform-types",
  "num-bigint 0.5.1",
  "serde",
  "serde_bytes",
@@ -999,7 +999,7 @@ checksum = "30ec8d27354fc1a8f376b16a9bb44663f84134a73e36a10a6f75a8ed3e7ebaef"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types 0.20.0",
+ "ic-platform-types",
  "ic0",
  "pin-project-lite",
  "serde",
@@ -1012,19 +1012,6 @@ name = "ic-platform-runtime-guard"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aa9e1a1cfcce65483d943593f50890c6800f770641fd4105056f8d80a39491e8"
-
-[[package]]
-name = "ic-platform-types"
-version = "0.19.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "038ec9df9eab1ae1324886140788dbdaf6d2791edd43ebbebcf3f17164d6303e"
-dependencies = [
- "crc32fast",
- "data-encoding",
- "serde",
- "serde_bytes",
- "thiserror 2.0.18",
-]
 
 [[package]]
 name = "ic-platform-types"
@@ -1041,15 +1028,15 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.101.0"
+version = "0.102.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e68738d09fa6453c98d9520714ca2737b73e0ad62d556eb24a5f1a6c38040a18"
+checksum = "a9cf1b45bf1c4a96367020a2ece68239d6684993d6cdeb47d9f71d2e67d1ac50"
 dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
  "ic-platform",
- "ic-platform-types 0.19.5",
+ "ic-platform-types",
  "libc",
  "pocket-ic",
  "thiserror 2.0.18",
@@ -1096,7 +1083,7 @@ dependencies = [
  "clap",
  "dhat",
  "ic-platform-runtime",
- "ic-platform-types 0.20.0",
+ "ic-platform-types",
  "ic-testkit",
  "ic-wire",
  "ic-wire-endpoint",
@@ -1135,7 +1122,7 @@ name = "ic-wire-endpoint-fixture"
 version = "0.18.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-platform-types 0.20.0",
+ "ic-platform-types",
  "ic-testkit",
  "ic-wire",
  "ic-wire-endpoint",
@@ -1162,7 +1149,7 @@ version = "0.18.0"
 dependencies = [
  "clap",
  "ic-build",
- "ic-platform-types 0.20.0",
+ "ic-platform-types",
  "ic-wire",
  "libfuzzer-sys",
  "serde",
@@ -2598,9 +2585,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.40.1"
+version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb884b05e2e5bbca2388dd0b757833fb5ad37e91b3ced09f6a37b454c7fe9f90"
+checksum = "4aaafc699324611501e051132e971288c16392a3ece605e9909e88e0c7e80a2f"
 
 [[package]]
 name = "toml"

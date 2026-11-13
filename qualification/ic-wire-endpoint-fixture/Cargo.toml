@@ -8,9 +8,12 @@ publish = false
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 ic-platform-types.workspace = true
+# Testkit is used only by native tests/examples, never a canister library.
+ic-testkit.workspace = true
 ic-wire = { workspace = true, features = ["typescript"] }
 serde_json.workspace = true
 sha2.workspace = true
+tokio.workspace = true
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
@@ -22,14 +25,10 @@ category = "tests"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-# Select the native simulator only for installed qualification targets.
-ic = ["dep:ic-testkit", "dep:tokio"]
+# Gate installed simulator tests; Testkit is a native dev-dependency.
+ic = []
 schema = ["ic-wire/typescript", "ic-wire-endpoint/typescript"]
 admission-contract = ["dep:ic-wire-qualification"]
-
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-ic-testkit = { workspace = true, optional = true }
-tokio = { workspace = true, optional = true }
 
 [dependencies]
 ic-platform-runtime = { workspace = true, features = ["cdk"] }
