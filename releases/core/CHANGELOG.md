@@ -9,6 +9,12 @@ in [shared history](../history.md).
 
 ### 🧪 Testing
 
+- Adopt Toko Tooling 0.43.0; replace `make cloc`/`CLOC_*` settings with the
+  `toko-cloc` PATH command and update local setup/help. Product APIs and codec
+  behavior are unchanged.
+- Adopt Testkit 0.104.0 in private qualification. Keep raw PocketIC calls and
+  simulator lifecycle with Testkit; no separate typed Wire adapter is needed.
+  Product dependencies, bytes, identities, limits and acceptance are unchanged.
 - Adopt Toko Tooling 0.42.8 for installed-tool recovery, vendor-layout fixes and
   CDPATH-independent hook setup/execution. Exercise repeated installation and
   staged-only formatting with CDPATH set; repository maintenance only, with no

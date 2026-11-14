@@ -219,7 +219,7 @@ help:
 		'Registry: publish (uploads); publish-check (dry run); PACKAGE selects a subset; check-package (archives)' \
 		'Dependencies: deps-update (root and qualification Cargo locks)' \
 		'Focused tooling: toko-tooling-check, check-doc-links, check-pins, check-boundary, check-tooling' \
-		'Workspace counts: cloc; workspace version: version' \
+		'Workspace counts: toko-cloc (PATH command); workspace version: version' \
 		'Complete CI gate: ci (explicit local invocation)' \
 		'Hosted CI groups: ci-core, ci-typescript, ci-benchmarks (separate runners)' \
 		'Releases: release-patch/minor/major capture the selected group; RELEASE_PUBLISH_TARGET=publish includes uploads' \

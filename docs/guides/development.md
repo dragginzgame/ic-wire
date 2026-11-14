@@ -12,9 +12,22 @@ delegates IC exports/execution to Platform; application policy remains consumer-
 The benchmark package's `benches/*.rs` files are Cargo target roots, colocated
 with their shared modules; report utilities live under `tools/`. Test bodies
 and test-only helpers use `tests/`, `tests.rs` or `*_tests.rs`. Unpublished
-packages declare their LOC roles in Cargo metadata; `make cloc` reports those
+packages declare their LOC roles in Cargo metadata; `toko-cloc` reports those
 roles and flags ambiguous source for review. Ordinary module discovery keeps
 benchmark-only dependencies out of public libraries.
+
+Install the LOC launcher once on your user PATH:
+
+```sh
+mkdir -p "$HOME/.local/bin"
+install -m 755 vendor/toko-tooling/scripts/dev/toko-cloc "$HOME/.local/bin/toko-cloc"
+export PATH="$HOME/.local/bin:$PATH"
+toko-cloc
+toko-cloc --manifest qualification/Cargo.toml
+```
+
+The launcher uses this checkout's installed reporter. Use `toko-cloc -d 1` for
+module detail; `make cloc` and the former `CLOC_*` settings are retired.
 
 ## Setup
 

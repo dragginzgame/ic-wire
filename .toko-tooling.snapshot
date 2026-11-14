@@ -1,9 +1,9 @@
 # Toko Tooling snapshot v1
-# version	0.42.8
+# version	0.43.0
 # layout	vendor
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	10dde4572301be0c5540b54a04ddeb71d3cee0fab68e6700e5c6866b6cb877e2
+revision	060d3507b66eb290ce12bc2572098f7e7cb1e12e9d6697a9b1a5d1552fcb2588
 # entrypoint	vendor/toko-tooling/make/consumer.mk
 # entrypoint	vendor/toko-tooling/.githooks/pre-commit
 # entrypoint	vendor/toko-tooling/scripts/ci/check-documentation-links.pl
@@ -67,7 +67,7 @@ file	38ff7dec5ac00d527023a4d13b89339f5d4298824ee0193ec785c1c7fc075244	x	vendor/t
 file	efdb27607dff8a634f78e1fd8268192120e09cbb3f154e58c4fd1acfccfece34	-	vendor/toko-tooling/scripts/ci/release-receipts.sh
 file	57a0d0ff82abe26422adb86b8c5f2474b019202e031bedcaf780910d6757f7e0	-	vendor/toko-tooling/scripts/ci/classify-ci-change.pl
 file	e0f1b194ddbe5e5ae35864edc67727993511e093cff07506b4ffa503681edd52	x	vendor/toko-tooling/scripts/ci/install-ci-tool.sh
-file	d2d43d1876ce29f5e08255ea86f92080ec5db0f9cadeed3b095bdd5d01fdaf1c	x	vendor/toko-tooling/scripts/dev/cloc.sh
+file	c725db04d6d44e118bcf553694f7e814ad126038840749574224a26653900c88	x	vendor/toko-tooling/scripts/dev/cloc.sh
 file	77993e5d585d46b5112a5897e6a94b85dd421e383c2b1a1dea883d2a9e207257	-	vendor/toko-tooling/scripts/ci/check-ic-sdk-boundary.mjs
 file	6b93b0a15bed59a00eb3bdace46b76ee360c396872702bb4182ad12b9bb4a29c	-	vendor/toko-tooling/.github/actions/cache-tool-downloads/action.yml
 file	4ba3a93e5ba61d532fa368d0f264a23f601693a8289e83e82749b09da53cf0e9	-	vendor/toko-tooling/scripts/ci/check-candid-boundary.pl
@@ -77,7 +77,7 @@ file	4c2ee09c8e87b43397d2df28bdbc1b5fc0197a10ebe0a94d89cb46916b93a9ca	x	vendor/t
 file	66afea686262ac5b36bf59d49d9648869bfc9933e85e9c327f91aaa7e09092c3	-	vendor/toko-tooling/make/release.mk
 file	f83e4bd3143a04e954f77eb23d38b1924658aa298b0c1d3486748197861d696d	-	vendor/toko-tooling/make/cargo-publication.mk
 file	da86464696f4f600f034566cef732aa680dc9c577e534519c71ee3d07172a875	-	vendor/toko-tooling/scripts/dev/toko-tooling.sh
-file	37ac0feae114a24b837dc3ac0a15298698145e982fadad5d11281cae3efebed2	-	vendor/toko-tooling/make/tools.mk
+file	85acf1dd722a00daa6c0bbd7edaf49255285e10085829e9d9b3da6f886fca4b9	-	vendor/toko-tooling/make/tools.mk
 file	186a718c118bfb011ae8ed31d8683a9fd90a231827215ec9be973ef76fb36938	-	vendor/toko-tooling/make/rust-format.mk
 file	46077e4508b98e086e9772ac107b759bb251b3671aa965311c51b35dd71aef8d	x	vendor/toko-tooling/scripts/dev/install-git-hooks.sh
 file	c8693a4bc058f31c1592c86e7037f0ed02a9719a8a0269038e0a45e16ca93c0b	-	vendor/toko-tooling/scripts/ci/validation-input-checkpoint.pl
@@ -117,6 +117,7 @@ file	5bb62496317accb40a1bf875dc96c15f47de6b10c2f272bc924f44adf16d0018	-	vendor/t
 file	6209a1e0b83b149b199dd8f0918c227957c5113227670f29e0e42a48925a7058	x	vendor/toko-tooling/scripts/distribution/refresh-consumer.sh
 file	86036e9aa03456ed624d3b890c1917685883421a6098a01193a9637bee427346	x	vendor/toko-tooling/scripts/dev/install-host-tools.sh
 file	c913280d89dbb1c4a2c324c58448354697dff08d570ca845c7ad36ad78a321a3	x	vendor/toko-tooling/scripts/dev/install-ic-tools.sh
+file	6830accbd4895c4fa2e75eff81fde8a5902cfbd78baab199351fbaa747cd3c35	x	vendor/toko-tooling/scripts/dev/toko-cloc
 file	a52db278800a9f02d85a6b8a780a9b1eed860c49d5442cef9db1f7f9d7ddee0a	x	vendor/toko-tooling/scripts/ci/check-format-tools.sh
 file	f3478ec454feb711fd2ad23d6c85b7b97110158f9c55293b68ed58e4781fd918	x	vendor/toko-tooling/scripts/ci/run-formatting.sh
 file	be31909f524f1b8efc0065c353101fa793bfcd4cf6004de9f053745550d6f9bf	x	vendor/toko-tooling/scripts/ci/run-rust-formatting.pl

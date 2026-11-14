@@ -8,22 +8,40 @@ the current tooling/fixture maintenance.
 
 ## Current delivery
 
-Toko Tooling **0.42.8** is adopted through the crates.io exporter in both
-workspaces. The 96-file receipt selects checksum
-`10dde4572301be0c5540b54a04ddeb71d3cee0fab68e6700e5c6866b6cb877e2`.
-Only the pre-commit hook and hook installer payloads changed from 0.42.5.
-Installation/tool checks, snapshot verification, pins, CI selection, disposable
-Make/hook checks with CDPATH set, formatting and documentation links pass.
+Testkit **0.104.0** is adopted in the private qualification workspace.
+Its removed typed Wire adapter is unused here; raw PocketIC/lifecycle callers
+need no replacement dependency or source migration. The targeted Cargo update
+changed only Testkit, preserving pre-existing supplier lock edits and `.vscode/`.
+All 26 integration graphs, dependency pins, strict Clippy for both Testkit
+consumers/all targets, and live Endpoint calls/limits/transaction rollback pass.
+The live check used the prepared PocketIC 16.0.0 server and client 16.1.0.
+Logs: `/tmp/wire-testkit104-{boundary,endpoint,clippy}.log`. No performance
+matrix was rerun. No product dependency, byte, identity, limit or acceptance
+change is implied. This Git-only delivery includes required Host 0.77.2 while
+retaining the delivered Platform/Types/Runtime and mio selections. The exact
+delivery composition is checked again; logs use `/tmp/wire043-delivery-*.log`.
+
+Toko Tooling **0.43.0** is adopted through the crates.io exporter in both
+workspaces. The 97-file receipt selects checksum
+`060d3507b66eb290ce12bc2572098f7e7cb1e12e9d6697a9b1a5d1552fcb2588`.
+The LOC reporter and Make tools payload change; `toko-cloc` is added. The
+existing user PATH launcher already matches the release. Current docs/help
+use `toko-cloc`; `make cloc` and `CLOC_*` have no compatibility aliases.
+The prior 0.42.8 hook fixes and CDPATH regression coverage remain intact.
 This Git-only delivery preserves the published Core/Endpoint versions.
+Installation, tools/snapshot admission, pins, CI selection, disposable Make/hook
+checks, docs and formatting pass. `toko-cloc --json` reports both workspaces;
+explicit qualification reporting passes and `make cloc` correctly has no target.
+Logs are `/tmp/wire043-{install,checks}.log` and `/tmp/wire043-cloc*`.
 The exact-pin exceptions are aligned. Deferred local lock edits select Types
-0.20.2, Runtime/macros/guard 0.22.2, Host 0.77.2, Platform 0.32.2 and mio 1.2.5;
-they are excluded from this delivery, preserved in the normal checkout after
-delivery, and backed up under `target/deferred-locks-0428/`. They are not newly
-adopted or fully qualified by this tooling task.
-The 0.42.8 delivery archives differ from the prior 0.42.5 archives only in the
-tooling dev-dependency pin/lock and Git provenance; product sources and runtime
-contracts are unchanged. Compared archives are under `target/issue5960-after`
-and `target/tooling0428-package`.
+0.20.2, Runtime/macros/guard 0.22.2, Platform 0.32.2 and mio 1.2.5;
+they remain excluded, restored locally after delivery and backed up under
+`target/deferred-locks-043/`. Preserve unrelated `.vscode/` files. Prior
+Testkit checks exercised that composition but did not constitute full supplier
+release qualification. All four 0.43.0 delivery archives differ from the prior
+0.42.8 archives only in tooling dev pin/lock and Git provenance. Product sources
+and runtime contracts are unchanged. Compared archives are under
+`target/tooling0428-package` and `target/tooling043-package`.
 
 Issue [60](https://github.com/dragginzgame/ic-wire/issues/60) is closed with complete native
 qualification at delivered source `fa56c2f`. Full run 43463094098 attempt 2 exposed the benchmark CLI
@@ -50,9 +68,10 @@ LLVM 23.1.5. Linux strict Clippy/Rustdoc, host/Wasm, standalone schema/codec and
 Endpoint proofs passed in the delivered gates. The dated sanitizer-only nightly
 remains separate. No new full performance-matrix or Wasm saving is claimed.
 
-Both workspaces select Types **0.20.1**, Runtime/macros/guard **0.22.1**;
-qualification selects Build **0.84.1**, Host **0.77.1**, Platform **0.32.1** and
-Testkit **0.102.0**. The release editor uses Build 0.84.1. Candid 0.10.40 remains
+The published baseline selected Types **0.20.1**, Runtime/macros/guard **0.22.1**;
+qualification selected Build **0.84.1**, Host **0.77.1**, Platform **0.32.1** and
+Testkit **0.102.0**. Current local updates are recorded above. The release editor
+uses Build 0.84.1. Candid 0.10.40 remains
 a private dev oracle with the documented bigint 0.4.8 exception. Native dev
 builds may compile Testkit/Build; production and Wasm graphs must exclude them.
 Core/Endpoint consumers align Types 0.20 and Runtime 0.22 together. Bytes,
