@@ -1,4 +1,4 @@
-//! Portable IC Wire contract evaluation.
+//! Bounded Serde/Postcard contracts with optional host schema generation.
 //!
 //! Bounded encoding and decoding, method identity and request-header
 //! admission. Header admission is
@@ -28,7 +28,7 @@ pub use fields::{Bytes, BytesRef, List, Text, TextRef};
 pub use finite::{FiniteF32, FiniteF64};
 pub use framing::{Direction, Encoding, method_id, validate_request_header};
 pub use limits::Limits;
-pub use packed::{Packed, PackedElement, PackedI16};
+pub use packed::{Packed, PackedElement};
 
 /// Published Serde bulk byte types; ByteArray includes a length prefix, unlike
 /// an ordinary `[u8; N]`. Changing field representation requires consumer review.

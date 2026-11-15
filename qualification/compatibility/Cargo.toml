@@ -15,6 +15,7 @@ category = "tests"
 ignored = ["toko-tooling"]
 
 [features]
+bench-allocations = []
 typescript = [
     "candidate/derive",
     "candidate/platform-types",
@@ -50,6 +51,10 @@ name = "typescript"
 path = "tests/typescript_tests.rs"
 required-features = ["typescript"]
 
+[[test]]
+name = "codec_bench"
+path = "tests/codec_bench.rs"
+
 [lints]
 workspace = true
 
@@ -58,3 +63,8 @@ name = "schema"
 path = "benches/schema.rs"
 harness = false
 required-features = ["typescript"]
+
+[[bench]]
+name = "codec"
+path = "benches/codec/main.rs"
+harness = false

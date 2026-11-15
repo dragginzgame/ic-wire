@@ -114,7 +114,7 @@ fn supplier_delegation_preserves_all_i16_and_u16_encodings() {
 // Same consumer declarations, independently instantiated with each package's
 // adapters. No reference implementation is copied into the candidate graph.
 macro_rules! record {
-    ($module:ident, $wire:ident) => {
+    ($module:ident, $wire:ident, $packed:ty) => {
         mod $module {
             use super::*;
             #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -128,7 +128,7 @@ macro_rules! record {
                 choice: Choice,
                 optional: Option<u8>,
                 bytes: $wire::Bytes<3>,
-                packed: $wire::PackedI16<2>,
+                packed: $packed,
                 ordinary: $wire::List<i16, 2>,
             }
             pub(super) fn value() -> Record {
@@ -137,15 +137,15 @@ macro_rules! record {
                     choice: Choice::Value(128),
                     optional: Some(9),
                     bytes: $wire::Bytes::new(vec![0xaa, 0xbb]).unwrap(),
-                    packed: $wire::PackedI16::new(vec![1, -1]).unwrap(),
+                    packed: <$packed>::new(vec![1, -1]).unwrap(),
                     ordinary: $wire::List::new(vec![1, -1]).unwrap(),
                 }
             }
         }
     };
 }
-record!(new_record, candidate);
-record!(old_record, reference);
+record!(new_record, candidate, candidate::Packed<i16, 2>);
+record!(old_record, reference, reference::PackedI16<2>);
 
 const PAYLOAD: &[u8] = &[
     7, 1, 0x80, 1, 1, 9, 2, 0xaa, 0xbb, 4, 1, 0, 255, 255, 2, 2, 1,

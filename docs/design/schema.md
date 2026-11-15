@@ -15,7 +15,7 @@ that arbitrary serialization code matches it.
 ## Admitted subset and compatibility
 
 Supported reference kinds are unit, bool, signed/unsigned integers, text, bytes,
-finite float, packed-i16, packed integer/opaque words, list, array, tuple, result,
+finite float, packed integer/opaque words, list, array, tuple, result,
 option, newtype, ref, record and enum. Field and variant order,
 supplied names, numeric widths, bounds and enum IDs are retained. Imported names
 are not regenerated or renamed. TypeScript constraints are informational comments, not
@@ -175,7 +175,7 @@ or custom serializer layouts. Serde remains the only payload implementation.
 
 Native trait implementations cover fixed-width integers, finite float wrappers,
 bool/unit, strings/Cow text, Option/Result, tuples through arity four, fixed arrays,
-slices, Box/references, ordinary Vec/List, explicit Bytes/Text/PackedI16/Packed and
+slices, Box/references, ordinary Vec/List, explicit Bytes/Text/Packed and
 published ByteBuf/ByteArray plus borrowed byte/text adapters. Ordinary Vec<u8>
 remains a list projection. The optional host-only `platform-types` feature adds
 Principal/Account projections without redefining supplier identities or Serde.

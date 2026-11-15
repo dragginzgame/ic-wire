@@ -1,20 +1,26 @@
-# IC Wire — replacement evaluation
+# IC Wire
 
-Evaluate whether rebuilding Wire around explicit contracts can materially reduce
-architectural drift and maintained complexity. This is a design foundation, not
-a deployed replacement. Adoption is a hard cut: legacy API, generated-client and
-wire compatibility are not requirements. The pinned legacy implementation is a
-comparison source, not the specification for the new crate.
+Bounded Serde/Postcard encoding with optional host schema collection, bulk-field
+lint and generated TypeScript clients. One portable codec and one validated
+host schema graph keep responsibilities explicit.
+
+See the [package guide](crates/ic-wire/README.md) for installation, examples and
+feature flags, and [release preparation](docs/release.md) for archive verification
+and the pending publication procedure. Adoption is a hard cut; legacy API,
+client and wire compatibility are not requirements.
 
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.8`, following
-the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
-the version selection and GitHub push do not constitute a crates.io release.
+The candidate keeps the `ic-wire` package name and uses version `0.23.9`, following
+the published `0.22.4` line with a breaking Rust API. The two product manifests are
+prepared for crates.io; no publication has occurred. Qualification packages stay
+private. The version selection and GitHub push are not a registry release.
 
 - [Architecture, contracts and qualification plan](docs/DESIGN.md)
 - [Current feature-parity contracts and remaining scope](docs/design/parity.md)
+- [Current performance qualification](docs/design/performance.md)
+- [Codec benchmarks and hotspot profiling](docs/design/codec-benchmarks.md)
 
 Start with one end-to-end workload and independent acceptance tests. Compare a
 small replacement against improving the current implementation before broadening
@@ -26,7 +32,7 @@ contracts, hashes and qualification limits. The previously referenced
 `reference.sha256` is absent; no verification against that manifest is claimed.
 Licensing is retained in [LICENSE.md](LICENSE.md).
 
-The unpublished `ic-wire` package implements method-ID derivation, fixed
+The `ic-wire` package implements method-ID derivation, fixed
 request-header validation and bounded payload/request/response coding through
 one `Encoding` selection. It remains `no_std`, using published
 Serde 1.0.229 and Postcard 1.1.3. The [admission ledger](docs/design/admission.md)
@@ -35,7 +41,7 @@ Encoding shares preflight across owned, reusable Vec and caller-slice outputs;
 see the [output custody contract](docs/design/encoding.md). Bounded byte, text,
 ordinary-list and borrowed adapters are implemented and exercised in a literal
 record round trip; see [field contracts](docs/design/fields.md). The explicit
-[`PackedI16` field](docs/design/packed.md) completes the native representative
+[`Packed<i16, N>` field](docs/design/packed.md) completes the native representative
 record with an ordinary-list control. Optional host [schema admission and declaration
 rendering](docs/design/schema.md) now import a defined JSON metadata subset into
 one immutable typed graph. It generates typed payload and framed method modules with private
@@ -47,8 +53,8 @@ concrete generic and borrowed instantiations, through that same graph boundary.
 Named collection now handles shared and recursive Rust types with projection
 rechecks and reference-compatible names. The [candidate runtime](docs/design/browser-runtime.md)
 executes the admitted schema subset. Strict TypeScript checks cover the runtime
-and generated clients; browser execution and matched performance qualification
-remain outstanding.
+and generated clients; browser and archive checks are described in the release
+guide. Performance results and remaining research are linked above.
 
 The separate [compatibility workspace](qualification/README.md) compares the
 candidate against published `ic-wire 0.22.4`, whose library source was verified
@@ -106,7 +112,7 @@ workspace can be selected with `DEPENDENCY_MANIFEST=relative/Cargo.toml`.
 Cargo.lock now selects the inherited `toko-tooling = "=0.44.3"` dev-dependency.
 `make toko-tooling-check` verifies package selection, lock and installed bytes.
 Every new member must inherit the tooling dev-dependency and workspace lints,
-use the cargo-machete tooling exemption, and remain unpublished during evaluation.
+use the cargo-machete tooling exemption. Qualification packages remain unpublished.
 `make qualification-tooling-check` admits the qualification selection against
 the same verified snapshot; compatibility checks run this automatically.
 Reviewed tooling updates use `make toko-tooling-preview` and

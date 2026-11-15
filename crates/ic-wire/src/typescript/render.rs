@@ -363,12 +363,9 @@ impl ValidatedRegistry {
                 output.json_bound("min", *min)?;
                 output.json_bound("max", *max)?;
             }
-            Node::PackedI16 { max } => {
-                output.quoted("packed-i16")?;
-                output.json_bound("max", Some(*max))?;
-            }
-            Node::Packed { word, nonzero } => {
+            Node::Packed { word, nonzero, max } => {
                 output.quoted("packed")?;
+                output.json_bound("max", *max)?;
                 output.write_str(",\"word\":")?;
                 output.quoted(word)?;
                 if *nonzero {
@@ -495,19 +492,22 @@ impl ValidatedRegistry {
         match &self.nodes[id] {
             Node::Unit => output.write_str("null"),
             Node::Bool => output.write_str("boolean"),
-            Node::Packed { word, .. } => output.write_str(match *word {
-                "bool" => "globalThis.ReadonlyArray<boolean>",
-                "finite-f32" => "globalThis.Float32Array",
-                "finite-f64" => "globalThis.Float64Array",
-                "i8" => "globalThis.Int8Array",
-                "i16" => "globalThis.Int16Array",
-                "u16" => "globalThis.Uint16Array",
-                "i32" => "globalThis.Int32Array",
-                "u32" => "globalThis.Uint32Array",
-                "i64" => "globalThis.BigInt64Array",
-                "u64" => "globalThis.BigUint64Array",
-                _ => "globalThis.Uint8Array",
-            }),
+            Node::Packed { word, max, .. } => {
+                output.bounds(None, *max)?;
+                output.write_str(match *word {
+                    "bool" => "globalThis.ReadonlyArray<boolean>",
+                    "finite-f32" => "globalThis.Float32Array",
+                    "finite-f64" => "globalThis.Float64Array",
+                    "i8" => "globalThis.Int8Array",
+                    "i16" => "globalThis.Int16Array",
+                    "u16" => "globalThis.Uint16Array",
+                    "i32" => "globalThis.Int32Array",
+                    "u32" => "globalThis.Uint32Array",
+                    "i64" => "globalThis.BigInt64Array",
+                    "u64" => "globalThis.BigUint64Array",
+                    _ => "globalThis.Uint8Array",
+                })
+            }
             Node::Float { bits } => {
                 write!(output, "/* f{bits} */ number")
             }
@@ -526,10 +526,6 @@ impl ValidatedRegistry {
             Node::Bytes { min, max } => {
                 output.bounds(*min, *max)?;
                 output.write_str("globalThis.Uint8Array")
-            }
-            Node::PackedI16 { max } => {
-                output.bounds(None, Some(*max))?;
-                output.write_str("globalThis.Int16Array")
             }
             Node::List { item, max } => {
                 output.bounds(None, *max)?;

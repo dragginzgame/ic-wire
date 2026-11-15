@@ -1,11 +1,13 @@
 [package]
 name = "ic-wire"
-version = "0.23.8"
+version = "0.23.9"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
-publish = false
-description = "Local evaluation of portable IC Wire contracts"
+publish = ["crates-io"]
+repository.workspace = true
+readme = "README.md"
+description = "Bounded Serde/Postcard encoding with host schema and TypeScript generation"
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]

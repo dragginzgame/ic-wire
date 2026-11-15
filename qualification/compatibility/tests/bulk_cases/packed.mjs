@@ -25,7 +25,7 @@ for (const [sizeIndex, size] of fixture.sizes.entries()) {
     const expectedList = Uint8Array.from([...listPrefixes[sizeIndex], ...listBody]);
     const storage = new Int16Array(size + 2).fill(999), selected = storage.subarray(1,size+1); selected.set(values);
     for (const [codec, id, value, expected, schema, nodes, depth] of [
-      [packed,7,selected,expectedPacked,{k:'packed-i16',max:16384},1,1],
+      [packed,7,selected,expectedPacked,{k:'packed',word:'i16',max:16384},1,1],
       [ordinary,8,values,expectedList,{k:'list',item:{k:'i',bits:16},max:16384},size+1,2],
     ]) {
       const exact = createPayloadCodec({schema,bytes:expected.length,nodes,depth});
@@ -48,7 +48,7 @@ for (const [sizeIndex, size] of fixture.sizes.entries()) {
     output.push([Array.from(expectedPacked),Array.from(expectedList)]);
   }
 }
-const codec = createPayloadCodec({schema:{k:'packed-i16',max:16384},bytes:32771,nodes:1,depth:1});
+const codec = createPayloadCodec({schema:{k:'packed',word:'i16',max:16384},bytes:32771,nodes:1,depth:1});
 refusal(() => codec.decode(Uint8Array.of(1,0)),'malformed');
 refusal(() => codec.encode(new Int16Array(16385)),'limit');
 refusal(() => codec.encode([1,2]),'value');

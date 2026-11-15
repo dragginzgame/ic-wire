@@ -17,7 +17,7 @@ fn literal_declaration_preserves_order_and_constraints() {
     let value = json!({"k":"record","fields":[
         {"name":"count","value":{"k":"u","bits":16}},
         {"name":"bytes","value":{"k":"bytes","min":1,"max":9}},
-        {"name":"packed","value":{"k":"packed-i16","max":4}},
+        {"name":"packed","value":{"k":"packed","word":"i16","max":4}},
         {"name":"list","value":{"k":"list","max":3,"item":{"k":"i","bits":64}}},
         {"name":"choice","value":{"k":"enum","variants":[
             {"name":"None","id":0,"value":{"k":"unit"}},
@@ -64,6 +64,7 @@ fn rejects_invalid_shapes_and_constraints() {
         json!({"k":"text","max":-1}),
         json!({"k":"bytes","min":3,"max":2}),
         json!({"k":"packed-i16"}),
+        json!({"k":"packed-i16","max":2}),
         json!({"k":"packed","word":"bool","nonzero":true}),
         json!({"k":"packed","word":"i64","nonzero":false}),
         json!({"k":"packed","word":"finite-f32","nonzero":true}),
@@ -209,7 +210,7 @@ fn exact_host_allowances_and_output_refusal() {
         GenerationError::Complexity
     );
     assert_eq!(
-        registry(json!({"k":"packed-i16","max":4503599627370496_u64})).unwrap_err(),
+        registry(json!({"k":"packed","word":"i16","max":4503599627370496_u64})).unwrap_err(),
         GenerationError::Complexity
     );
 }
@@ -251,7 +252,7 @@ fn metadata_export_preserves_all_admitted_shapes_and_escaped_names() {
                 {"name":"unsigned","value":{"k":"u","bits":8}},
                 {"name":"text","value":{"k":"text","max":0}},
                 {"name":"bytes","value":{"k":"bytes","min":0,"max":9007199254740991_u64}},
-                {"name":"packed","value":{"k":"packed-i16","max":2}},
+                {"name":"packed","value":{"k":"packed","word":"i16","max":2}},
                 {"name":"list","value":{"k":"list","max":4,"item":{"k":"ref","name":"__proto__"}}},
                 {"name":"optional","value":{"k":"option","item":{"k":"text"}}},
                 {"name":"newtype","value":{"k":"newtype","item":{"k":"bytes"}}},

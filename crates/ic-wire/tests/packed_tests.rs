@@ -1,8 +1,8 @@
 //! Literal packed-field representation and admission contracts.
 
 use ic_wire::{
-    Bytes, BytesRef, Direction, Encoding, Error, Limits, List, PackedI16, decode, encode,
-    encode_into, encode_to_slice,
+    Bytes, BytesRef, Direction, Encoding, Error, Limits, List, Packed, decode, encode, encode_into,
+    encode_to_slice,
 };
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +16,43 @@ fn limits() -> Limits {
 }
 
 #[test]
+fn one_bound_contract_covers_every_packed_word() {
+    macro_rules! check {
+        ($ty:ty, $value:expr) => {{
+            let one = Packed::<$ty, 1>::new(vec![$value]).unwrap();
+            assert_eq!(Packed::<$ty, 1>::new(vec![$value; 2]), Err(Error::Limit));
+            let bytes = encode(&one, Encoding::Payload, limits()).unwrap();
+            assert_eq!(usize::from(bytes[0]), size_of::<$ty>());
+            assert_eq!(
+                decode::<Packed<$ty, 1>>(&bytes, Encoding::Payload, limits()).unwrap(),
+                one
+            );
+            let two = Packed::<$ty>::new(vec![$value; 2]).unwrap();
+            let bytes = encode(&two, Encoding::Payload, limits()).unwrap();
+            assert_eq!(
+                decode::<Packed<$ty, 1>>(&bytes, Encoding::Payload, limits()),
+                Err(Error::Malformed)
+            );
+            assert!(
+                decode::<Packed<$ty, 0>>(&[0], Encoding::Payload, limits())
+                    .unwrap()
+                    .as_slice()
+                    .is_empty()
+            );
+        }};
+    }
+    check!(i8, -1);
+    check!(i16, -1);
+    check!(u16, 1);
+    check!(i32, -1);
+    check!(u32, 1);
+    check!(i64, -1);
+    check!(u64, 1);
+    check!([u8; 16], [1; 16]);
+    check!([u8; 32], [1; 32]);
+}
+
+#[test]
 fn packed_vectors_are_byte_counted_and_little_endian() {
     for (words, literal) in [
         (vec![], vec![0]),
@@ -23,13 +60,13 @@ fn packed_vectors_are_byte_counted_and_little_endian() {
         (vec![1, -1], vec![4, 1, 0, 255, 255]),
         (vec![i16::MIN, i16::MAX], vec![4, 0, 128, 255, 127]),
     ] {
-        let packed = PackedI16::<2>::new(words.clone()).unwrap();
+        let packed = Packed::<i16, 2>::new(words.clone()).unwrap();
         assert_eq!(
             encode(&packed, Encoding::Payload, limits()).unwrap(),
             literal
         );
         assert_eq!(
-            decode::<PackedI16<2>>(&literal, Encoding::Payload, limits())
+            decode::<Packed<i16, 2>>(&literal, Encoding::Payload, limits())
                 .unwrap()
                 .into_vec(),
             words
@@ -52,20 +89,20 @@ fn packed_vectors_are_byte_counted_and_little_endian() {
 
 #[test]
 fn bounds_widths_and_error_precedence_are_preserved() {
-    assert_eq!(PackedI16::<0>::new(vec![1]), Err(Error::Limit));
-    assert!(PackedI16::<0>::new(vec![]).is_ok());
+    assert_eq!(Packed::<i16, 0>::new(vec![1]), Err(Error::Limit));
+    assert!(Packed::<i16, 0>::new(vec![]).is_ok());
     for bytes in [&[1, 0][..], &[3, 0, 0, 0], &[4, 0, 0], &[4, 0, 0, 0, 0]] {
         assert_eq!(
-            decode::<PackedI16<1>>(bytes, Encoding::Payload, limits()),
+            decode::<Packed<i16, 1>>(bytes, Encoding::Payload, limits()),
             Err(Error::Malformed)
         );
     }
     assert_eq!(
-        decode::<PackedI16<0>>(&[2, 0, 0], Encoding::Payload, limits()),
+        decode::<Packed<i16, 0>>(&[2, 0, 0], Encoding::Payload, limits()),
         Err(Error::Malformed)
     );
     assert_eq!(
-        decode::<PackedI16<1>>(
+        decode::<Packed<i16, 1>>(
             &[1, 0],
             Encoding::Payload,
             Limits {
@@ -76,17 +113,17 @@ fn bounds_widths_and_error_precedence_are_preserved() {
         Err(Error::Limit)
     );
     assert_eq!(
-        decode::<PackedI16<1>>(&[2, 0, 0, 99], Encoding::Payload, limits()),
+        decode::<Packed<i16, 1>>(&[2, 0, 0, 99], Encoding::Payload, limits()),
         Err(Error::Trailing)
     );
 }
 
 #[test]
 fn packed_admission_counts_one_bulk_span_not_word_visits() {
-    let packed = PackedI16::<2>::new(vec![1, -1]).unwrap();
+    let packed = Packed::<i16, 2>::new(vec![1, -1]).unwrap();
     let encode_limits = Limits {
         bytes: 5,
-        allocation: 5 + 16 * size_of::<PackedI16<2>>() + 32,
+        allocation: 5 + 16 * size_of::<Packed<i16, 2>>() + 32,
         nodes: 4,
         depth: 3,
     };
@@ -112,11 +149,11 @@ fn packed_admission_counts_one_bulk_span_not_word_visits() {
         depth: 1,
     };
     assert_eq!(
-        decode::<PackedI16<2>>(&[4, 1, 0, 255, 255], Encoding::Payload, decode_limits).unwrap(),
+        decode::<Packed<i16, 2>>(&[4, 1, 0, 255, 255], Encoding::Payload, decode_limits).unwrap(),
         packed
     );
     assert_eq!(
-        decode::<PackedI16<2>>(
+        decode::<Packed<i16, 2>>(
             &[4, 1, 0, 255, 255],
             Encoding::Payload,
             Limits {
@@ -132,12 +169,12 @@ fn packed_admission_counts_one_bulk_span_not_word_visits() {
 fn constructors_preserve_storage_and_decoding_owns_unaligned_input() {
     let words = vec![1, 2];
     let pointer = words.as_ptr();
-    let packed = PackedI16::<2>::new(words).unwrap();
+    let packed = Packed::<i16, 2>::new(words).unwrap();
     assert_eq!(packed.as_slice().as_ptr(), pointer);
     let recovered = packed.into_vec();
     assert_eq!(recovered.as_ptr(), pointer);
     let mut backing = [99, 4, 1, 0, 255, 255, 88];
-    let decoded: PackedI16<2> = decode(&backing[1..6], Encoding::Payload, limits()).unwrap();
+    let decoded: Packed<i16, 2> = decode(&backing[1..6], Encoding::Payload, limits()).unwrap();
     backing.fill(0);
     assert_eq!(decoded.as_slice(), &[1, -1]);
 }
@@ -154,7 +191,7 @@ struct Record {
     choice: Choice,
     optional: Option<u8>,
     bytes: Bytes<3>,
-    packed: PackedI16<2>,
+    packed: Packed<i16, 2>,
     ordinary: List<i16, 2>,
 }
 
@@ -165,7 +202,7 @@ struct Projection<'a> {
     optional: Option<u8>,
     #[serde(borrow)]
     bytes: BytesRef<'a, 3>,
-    packed: PackedI16<2>,
+    packed: Packed<i16, 2>,
     ordinary: List<i16, 2>,
 }
 
@@ -181,7 +218,7 @@ fn representative_empty_small_and_large_value_controls() {
             choice: Choice::Ready,
             optional: None,
             bytes: Bytes::new(vec![]).unwrap(),
-            packed: PackedI16::new(words.clone()).unwrap(),
+            packed: Packed::new(words.clone()).unwrap(),
             ordinary: List::new(words).unwrap(),
         };
         assert_eq!(
@@ -202,7 +239,7 @@ fn representative_record_matches_literal_payload_and_frames() {
         choice: Choice::Value(128),
         optional: Some(9),
         bytes: Bytes::new(vec![0xaa, 0xbb]).unwrap(),
-        packed: PackedI16::new(vec![1, -1]).unwrap(),
+        packed: Packed::new(vec![1, -1]).unwrap(),
         ordinary: List::new(vec![1, -1]).unwrap(),
     };
     let payload = [

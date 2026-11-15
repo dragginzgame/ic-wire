@@ -7,11 +7,12 @@ resolver = "3"
 edition = "2024"
 rust-version = "1.100.0"
 license-file = "LICENSE.md"
+repository = "https://github.com/dragginzgame/ic-wire-new"
 
 [workspace.dependencies]
 bytemuck = { version = "=1.25.2", default-features = false, features = ["must_cast"] }
 ic-platform-types = { version = "=0.20.4", default-features = false }
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "=0.23.8" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "=0.23.9" }
 postcard = { version = "=1.1.3", default-features = false, features = ["alloc"] }
 proc-macro2 = "=1.0.107"
 quote = "=1.0.47"

@@ -1,0 +1,28 @@
+// Scratch copy of the real consumer, selecting only extracted crate archives.
+import { cpSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+const [output, version] = process.argv.slice(2);
+const quote = JSON.stringify;
+cpSync('qualification/consumer', join(output, 'consumer'), { recursive: true });
+let workspace = readFileSync('qualification/Cargo.toml', 'utf8')
+  .replace('members = ["compatibility", "consumer"]', 'members = ["consumer"]')
+  .replace('license-file = "../LICENSE.md"', `license-file = ${quote(join(output, 'ic-wire-' + version, 'LICENSE.md'))}`)
+  .replace('path = "../crates/ic-wire"', `path = ${quote(join(output, 'ic-wire-' + version))}`);
+workspace = workspace.replace(/^(ic-wire-consumer|serde_bytes|serde_json|stats_alloc) = .*\n/gm, '');
+// Extracted archives are standalone packages, not new workspace members.
+workspace = workspace.replace('exclude = ["ic-instructions"]',
+  `exclude = ["ic-wire-${version}", "ic-wire-derive-${version}"]`);
+writeFileSync(join(output, 'Cargo.toml'), workspace);
+cpSync('qualification/Cargo.lock', join(output, 'Cargo.lock'));
+const consumer = join(output, 'consumer', 'Cargo.toml');
+writeFileSync(consumer, readFileSync(consumer, 'utf8') +
+  '\n[target.\'cfg(not(target_family = "wasm"))\'.dev-dependencies]\nic-platform-types.workspace = true\n');
+cpSync('qualification/package-platform.rs', join(output, 'consumer', 'tests', 'package_platform.rs'));
+writeFileSync(join(output, 'patch.toml'),
+  `[patch.crates-io]\nic-wire-derive = { path = ${quote(join(output, 'ic-wire-derive-' + version))} }\n`);
+for (const name of ['ic-wire', 'ic-wire-derive']) {
+  const manifest = join(output, `${name}-${version}`, 'Cargo.toml');
+  // Isolate unpacked manifests from the enclosing source checkout. Dependency
+  // declarations and shipped source files remain unchanged.
+  writeFileSync(manifest, readFileSync(manifest, 'utf8') + '\n[workspace]\n');
+}

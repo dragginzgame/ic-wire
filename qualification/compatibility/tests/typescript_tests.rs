@@ -12,7 +12,7 @@ mod validation_cases;
 use candidate::typescript::{
     Method, PayloadLimits, RUNTIME_SCHEMA_FORMAT, SchemaLimits, SchemaRegistry, ValidatedRegistry,
 };
-use candidate::{Bytes, Direction, Encoding, Limits, List, PackedI16, decode, encode};
+use candidate::{Bytes, Direction, Encoding, Limits, List, Packed, decode, encode};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
@@ -37,7 +37,7 @@ struct Record<T = u8, const N: usize = 3> {
     choice: Choice,
     optional: Option<u8>,
     bytes: Bytes<N>,
-    packed: PackedI16<2>,
+    packed: Packed<i16, 2>,
     ordinary: List<i16, 2>,
 }
 
@@ -76,7 +76,7 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
             ]}},
             {"name":"optional","value":{"k":"option","item":{"k":"u","bits":8}}},
             {"name":"bytes","value":{"k":"bytes","max":3}},
-            {"name":"packed","value":{"k":"packed-i16","max":2}},
+            {"name":"packed","value":{"k":"packed","word":"i16","max":2}},
             {"name":"ordinary","value":{"k":"list","max":2,"item":{"k":"i","bits":16}}}
         ]}),
     )]);
@@ -116,7 +116,7 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
             choice: Choice::Ready,
             optional: None,
             bytes: Bytes::new(vec![]).unwrap(),
-            packed: PackedI16::new(words.clone()).unwrap(),
+            packed: Packed::new(words.clone()).unwrap(),
             ordinary: List::new(words).unwrap(),
         });
         literals.push(literal);
@@ -126,7 +126,7 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         choice: Choice::Value(128),
         optional: Some(9),
         bytes: Bytes::new(vec![0xaa, 0xbb]).unwrap(),
-        packed: PackedI16::new(vec![1, -1]).unwrap(),
+        packed: Packed::new(vec![1, -1]).unwrap(),
         ordinary: List::new(vec![1, -1]).unwrap(),
     });
     literals.push(vec![
@@ -362,7 +362,12 @@ fn run_typescript_source(fixture: &Value, script: &str, source: &str, candidate:
     fs::create_dir(&directory).unwrap();
     fs::write(directory.join("package.json"), r#"{"type":"module"}"#).unwrap();
     let runtime = directory.join("codec-runtime.ts");
-    fs::write(&runtime, source).unwrap();
+    if candidate {
+        fs::write(&runtime, source).unwrap();
+    } else {
+        fs::write(directory.join("reference-runtime.ts"), source).unwrap();
+        fs::write(&runtime, include_str!("reference_packed_adapter.ts")).unwrap();
+    }
     fs::write(
         directory.join("oracle-runtime.ts"),
         reference::typescript::RUNTIME,

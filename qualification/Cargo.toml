@@ -60,3 +60,17 @@ strip = "symbols"
 [profile.wire-speed]
 inherits = "wire-size"
 opt-level = 3
+
+# Native investigation only. Keep symbols for external sampling; never use these
+# artifacts for the separate total-Wasm-size or installed-IC comparisons.
+[profile.codec-profile]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+debug = 2
+strip = "none"
+
+[profile.codec-profile-speed]
+inherits = "codec-profile"
+opt-level = 3

@@ -25,7 +25,12 @@ help:
 	  'test-typescript       Exchange Rust bytes with candidate/reference TS (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
+	  'check-packages        Assemble archives and verify extracted-package consumers' \
+	  'check-browser         Chromium smoke (CLIENT_DIR and BROWSER required)' \
 	  'bench-schema          Paired host collection/finalization/export timing probe' \
+	  'bench-codec           Native codec phase timings (CODEC_ARGS selects cases)' \
+	  'bench-codec-allocations Separate allocator counts for the same cases' \
+	  'profile-codec         perf call stacks (one case/operation; host permission required)' \
 	  'test-consumer         Standalone contract against each Wire supplier' \
 	  'check-consumer-wasm   Build/run separate Wasm consumers (Node required)' \
 	  'measure-consumer-wasm Compare fixed opt-z/opt-3 consumer Wasm sizes' \
@@ -101,6 +106,18 @@ lint-typescript:
 bench-schema: qualification-tooling-check | toko-execution-check
 	+cargo bench --manifest-path qualification/Cargo.toml --features typescript --bench schema --locked --offline
 
+.PHONY: bench-codec bench-codec-allocations profile-codec
+bench-codec bench-codec-allocations profile-codec: qualification-tooling-check | toko-execution-check
+
+bench-codec:
+	node qualification/codec/run.mjs measure $(CODEC_ARGS)
+
+bench-codec-allocations:
+	node qualification/codec/run.mjs allocations $(CODEC_ARGS)
+
+profile-codec:
+	node qualification/codec/run.mjs profile $(CODEC_ARGS)
+
 .PHONY: test-consumer check-consumer-wasm
 test-consumer check-consumer-wasm: qualification-tooling-check | toko-execution-check
 
@@ -132,3 +149,10 @@ test-derive:
 lint-derive:
 	+cargo clippy -p ic-wire-derive --lib --tests --locked --offline -- -D warnings
 	+cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked --offline -- -D warnings
+
+.PHONY: check-packages check-browser
+check-packages: qualification-tooling-check | toko-execution-check
+	bash qualification/check-packages.sh
+
+check-browser:
+	bash qualification/browser/check.sh "$(CLIENT_DIR)" "$(BROWSER)"

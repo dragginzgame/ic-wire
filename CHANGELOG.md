@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.23.9] - 2026-11-15
+
+GitHub evaluation patch requested by the user; not published to crates.io.
+The intended first public hard-cut release remains 0.24.0.
+
+### ✨ Added
+
+- Simplify the checked packed-word conversion so opt-z can eliminate a per-word
+  panic-helper call. Keep one generic decode path and all preallocation bounds.
+
+- Add private native codec hotspot benchmarks with selected ordinary/bulk
+  workloads, separate timing/allocation builds, paired supplier samples and a
+  symbol-bearing profiling loop. No benchmark dependency enters product crates.
+  Extend investigation to i32/u64 varint boundaries and nested request shapes.
+
+- Consolidate packed fields into `Packed<T, N>` with an optional element bound
+  and one fallible constructor. Remove `PackedI16` and its special schema/runtime
+  branch; every supported word kind now uses the same bounded representation.
+
+- Prepare both product crates for registry publication with package guides,
+  repository metadata, extracted-archive consumer checks and a Chromium smoke
+  test of the shipped TypeScript runtime. The 0.23.8 coordinated publish dry run passed;
+  publication remains explicitly deferred.
+
 ## [0.23.8] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.
@@ -42,6 +66,13 @@ that measurement predates the subsequent lint, domain-adapter and validation wor
 
 - Keep qualification helper modules out of Cargo's standalone integration-test
   discovery; the three explicit test binaries retain their existing ownership.
+
+### ▶️ Try it
+
+Run `make check-packages`, then use the generated client directory it prints:
+`make check-browser CLIENT_DIR=/absolute/path/to/run/client BROWSER=/absolute/path/to/chrome`.
+These commands verify local archives and clients; they never publish. See
+[release preparation](docs/release.md) for prerequisites and later delivery steps.
 
 ## [0.23.7] - 2026-11-15
 

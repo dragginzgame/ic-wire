@@ -12,7 +12,14 @@ use candidate as wire;
 #[cfg(all(feature = "reference", not(feature = "candidate")))]
 use reference as wire;
 use serde::{Deserialize, Serialize};
-pub use wire::{Bytes, Error, Limits, List, PackedI16, Text};
+pub use wire::{Bytes, Error, Limits, List, Text};
+
+/// Application sample field, instantiated independently for each supplier.
+#[cfg(feature = "candidate")]
+pub type Samples = wire::Packed<i16, 64>;
+/// Reference supplier for the same application sample field.
+#[cfg(all(feature = "reference", not(feature = "candidate")))]
+pub type Samples = wire::PackedI16<64>;
 
 /// Frozen upload identity, independent of crate version.
 pub const METHOD: u64 = 7;
@@ -49,7 +56,7 @@ pub struct Upload {
     /// Opaque content, capped at 1 KiB.
     pub content: Bytes<1024>,
     /// Explicit packed little-endian signed samples.
-    pub samples: PackedI16<64>,
+    pub samples: Samples,
     /// Ordinary Postcard integer tags.
     pub tags: List<u16, 8>,
 }
@@ -78,7 +85,7 @@ pub fn sample_upload() -> Result<Upload, Error> {
         revision: 128,
         key: Text::new(String::from("sensor"))?,
         content: Bytes::new(alloc::vec![0, 255])?,
-        samples: PackedI16::new(alloc::vec![-32768, 0, 32767])?,
+        samples: Samples::new(alloc::vec![-32768, 0, 32767])?,
         tags: List::new(alloc::vec![1, 128])?,
     })
 }

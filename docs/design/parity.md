@@ -1,10 +1,20 @@
 # Required feature parity
 
-Local 0.23.8 work following the [pushed 0.23.7 comparison](comparison.md).
+Evaluation through 0.23.9 following the [pushed 0.23.7 comparison](comparison.md).
 Reference remains Core 0.22.4, revision
 `2dc434b10bec2fca92345d940dbfedc05993e9d5`. Legacy compatibility is not required: the user authorized a hard cut. The
 reference supplies comparison evidence; it does not dictate the new API or format.
 Actual production deployment remains outside this local work.
+
+## Pre-publication hard cut
+
+`Packed<T, N>` replaces separate unbounded `Packed<T>` and bounded `PackedI16<N>`
+implementations. N defaults to usize::MAX and constructors return Result. Host
+and browser metadata uses only `packed` plus a word and optional element maximum.
+The old public type and `packed-i16` kind are removed, with no product aliases.
+Existing payload bytes and admission checks still pass, but metadata consumers
+must regenerate. Legacy oracle tests lower bounded i16 metadata in a private
+fixture adapter; that bridge is not product code or a shipped runtime.
 
 ## Contracts and disposition
 
@@ -199,6 +209,11 @@ Account equality normalizes absent/zero, but qualification explicitly inspects
 the stored optional field and exact encoded bytes rather than relying on equality.
 
 ## Qualification and limits
+
+Fresh post-push measurements of the complete 0.23.8 checkpoint are recorded in
+[current performance qualification](performance.md). Size passes both profiles;
+three encoding instruction comparisons and single-root host cost remain worse
+than reference. Earlier measurements below retain their historical scope.
 
 `qualification/compatibility/tests/standard_cases/` contains independent literal
 vectors, Rust round trips and exchanges with both candidate and published

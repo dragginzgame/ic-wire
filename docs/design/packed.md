@@ -1,59 +1,67 @@
-# Bounded packed i16 workload field
+# Packed fields
 
-Destination: `PackedI16<N>`, the explicit packed field in the first native
-representative record. N counts elements; the Postcard prefix counts bytes.
-Ordinary `Vec<i16>` and `List<i16, N>` retain element counts and ZigZag varints.
-Selecting a packed field is a consumer representation decision, never an
-automatic optimization. Small-magnitude controls can be larger when packed.
+`Packed<T, N>` is the single packed field type. N counts elements and defaults to
+usize::MAX. `new(Vec<T>)` returns Result, rejecting more than N words with Limit
+without copying. `as_slice` borrows immutable words; `into_vec` returns storage.
+Supported sealed words are i8/i16/u16/i32/u32/i64/u64 and 16/32-byte opaque IDs.
+Domain bool/finite/nonzero/heap adapters remain explicit Serde field adapters.
 
-Reference: `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
-`crates/ic-wire/src/bounded/packed_i16/mod.rs` and `packed/mod.rs`.
-Their committed SHA-256 values are respectively
+The pre-publication hard cut removes `PackedI16<N>`, its duplicate wrapper methods
+and Serde implementations, the `PackedI16` graph node, and the `packed-i16` schema
+kind. No alias or product compatibility conversion remains. Use `Packed<i16, N>`
+instead. All word types share the same constructor, serializer and owned visitor.
+
+Host metadata uses `{k:"packed",word:"i16",max:N}`, omitting max for unbounded
+fields. Browser max counts words, including opaque IDs, rather than backing-array
+bytes. Host admission rejects maxima whose byte width exceeds exact JavaScript
+integer range. Runtime bounds apply to bool, finite and nonzero metadata as well.
+Consumer Rust Serde remains responsible for domain constraints on manual schemas.
+
+## Byte and allocation contract
+
+The Postcard prefix counts bytes, followed by fixed-width little-endian words.
+Ordinary lists keep element counts and Postcard varints; small values can be
+larger when packed. Choosing a packed field never rewrites Serde automatically.
+On little-endian targets a checked-width safe Bytemuck view avoids temporary
+allocation. Big-endian conversion reserves fallibly and appends little-endian
+words. That adapter work is separate from codec-owned output reservation.
+
+Decoding obtains a byte span, then rejects partial words and excessive element
+counts before reserving the owned typed output. Unaligned input is supported by
+individual word reads; output never borrows typed storage from the input.
+The visitor returns Vec, keeping traversal accounting independent of the wrapper.
+Serde field failures map to Malformed unless the codec meter refused first.
+The browser reports an exceeded element maximum as `limit`; these are separate
+Rust and TypeScript error contracts, both tested explicitly.
+Trailing bytes remain Trailing. The consolidation changes neither frame identity
+nor encoded payloads for previously admitted values.
+
+## Provenance and qualification
+
+Selected serializer/visitor patterns come from reference commit
+`2dc434b10bec2fca92345d940dbfedc05993e9d5`,
+`crates/ic-wire/src/bounded/packed_i16/mod.rs` and `packed/mod.rs`, under the
+retained licence. Their source hashes are respectively
 `5b61334310fe72e15b3cf562909c62efa45a35bde5582331bf8a90abfab61835` and
 `8f56da054856e3ba877f046bb894d3fce2c703a0aebb2ec8745ef8dbbd13a091`.
-Retain the constructor/accessor/visitor contract and the minimal safe bulk
-serialization/decoding algorithm, under the root license. The initial slice did
-not import the generic API. The requested public-feature parity work in 0.23.8
-extends the same mechanism to `Packed<T>` for the reference's qualified integer
-and opaque-ID types. A sealed word contract supplies endian conversion and host
-metadata; bounded i16 uses the same visitor and serializer. No parallel codec or
-primitive Postcard specialization is introduced. See [parity](parity.md).
+The generic bound is a destination API decision, not a copied legacy API.
 
-## Byte, identity and admission contract
+Native checks cover each supported word type, zero/exact/excess bounds, literal
+prefixes, partial/truncated words, selected input spans and storage custody.
+An isolated allocator check verifies excessive wider-word counts reject before
+allocation. Browser checks exercise all integer/ID/domain packed metadata kinds,
+including zero bounds and unsafe host maxima. Big-endian helpers are tested with
+literal bytes without claiming execution on a big-endian machine.
 
-- Constructor rejects more than N words with Limit and otherwise transfers
-  ownership without a copy. Storage stays private and immutable through views.
-- Encode emits one byte buffer: checked byte width, then little-endian i16 words.
-  On little-endian targets a safe Bytemuck byte view avoids temporary allocation;
-  use the reference's published Bytemuck 1.25.2 with `must_cast`, no defaults.
-  Its registry checksum matches the reference lock:
-  `95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797`.
-  Big-endian conversion reserves fallibly and writes each `to_le_bytes` value.
-  This conversion is adapter-owned temporary work, not codec output reservation;
-  the reference also performs it during serialization/preflight.
-- Deserialize requests a byte span, charging the existing Vec<i16> visitor
-  size and full span. Reject odd lengths and more than N words before typed
-  output reservation/copy. Read individual words with `from_le_bytes`, so
-  unaligned input is supported without borrowed typed casts or unsafe code.
-- Field and adapter allocation failures become Serde errors (Malformed through
-  the codec unless its meter refused first). No new Allocation classification
-  or acceptance rule is introduced. Trailing input remains Trailing.
-- The field retains owned decoded storage. Borrowed byte projections point into
-  original input; packed words do not. No method identity or header changes.
+The legacy interpreter remains unchanged as a private oracle. A test-only schema
+adapter lowers bounded i16 to its legacy spelling; new bounded-word behavior is
+checked independently because that interpreter does not enforce it. Historical
+performance reports retain their original source hashes; refresh qualification
+after production changes before attributing those results to the hard cut.
 
-## Qualification
-
-Literal vectors cover empty, zero, signed extrema, negative and small values;
-compare ordinary lists explicitly. Check exact and insufficient field/runtime
-bounds, malformed/truncated/odd spans, unaligned input and owned custody. Exercise
-the big-endian conversion helper on the native test host against literal bytes;
-this is not native big-endian target execution.
-
-The representative record includes enum/option, bounded bytes, packed i16 and
-ordinary bounded i16 controls. Freeze literal payload/request/response bytes and
-exercise owned/reused/slice outputs plus a borrowed-byte projection.
-The [compatibility workspace](../../qualification/README.md) now compares this
-record's bytes and budget boundaries against the published reference.
-Its isolated allocation checks also cover refused and successful packed decoding.
-Rust/TypeScript exchange, native macOS execution and opt-z/opt-3 measurements
-remain pending. Native correctness and Wasm compilation are not a replacement decision.
+The packed reader uses a checked `try_into().unwrap()` on each exact-width chunk.
+Its private caller establishes that width after rejecting partial words and
+excess element counts. Replacing the custom `expect` message lets opt-z eliminate
+a retained per-word panic-helper call; it does not remove the conversion check,
+introduce unsafe reads or change public malformed-input behavior. See the
+[codec investigation](codec-benchmarks.md) for native and Wasm qualification.

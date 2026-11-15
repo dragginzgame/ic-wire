@@ -3,11 +3,64 @@ use candidate::{Encoding, Packed, decode, encode};
 use serde_json::json;
 
 #[test]
+fn packed_element_bounds_are_shared_by_all_browser_word_kinds() {
+    use candidate::typescript::{SchemaLimits, ValidatedRegistry};
+    use std::collections::BTreeMap;
+    assert_eq!(
+        definition::<Packed<u64, 1>>("Words"),
+        json!({"k":"packed","word":"u64","max":1})
+    );
+    for (word, width) in [
+        ("i8", 1),
+        ("i16", 2),
+        ("u16", 2),
+        ("i32", 4),
+        ("u32", 4),
+        ("i64", 8),
+        ("u64", 8),
+        ("hash16", 16),
+        ("hash32", 32),
+        ("bool", 1),
+        ("finite-f32", 4),
+        ("finite-f64", 8),
+    ] {
+        let schema = json!({"k":"packed","word":word,"max":1});
+        let graph = ValidatedRegistry::from_metadata(
+            &BTreeMap::from([("Words".into(), schema.clone())]),
+            SchemaLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&graph.metadata_json().unwrap()).unwrap()["Words"],
+            schema
+        );
+        let unsafe_bound = json!({"k":"packed","word":word,"max":((1_u64<<53)-1)/width+1});
+        assert_eq!(
+            ValidatedRegistry::from_metadata(
+                &BTreeMap::from([("Words".into(), unsafe_bound)]),
+                SchemaLimits::default()
+            )
+            .unwrap_err(),
+            candidate::typescript::GenerationError::Complexity
+        );
+    }
+    // Bounds on non-i16 words are a new contract, independently checked against
+    // literals and refusal cases rather than the legacy runtime, which lacks it.
+    let output = super::super::run_typescript_source(
+        &json!({}),
+        include_str!("bounded-packed.mjs"),
+        candidate::typescript::RUNTIME,
+        true,
+    );
+    assert_eq!(output, json!(13));
+}
+
+#[test]
 fn packed_words_keep_byte_prefixes_and_owned_storage() {
     let mut cases = Vec::new();
     macro_rules! case {
         ($ty:ty,$word:literal,$values:expr,$bytes:expr) => {{
-            let value=Packed::<$ty>::new($values);
+            let value=Packed::<$ty>::new($values).unwrap();
             let bytes:Vec<u8>=$bytes;
             assert_eq!(encode(&value,Encoding::Payload,limits()).unwrap(),bytes);
             assert_eq!(decode::<Packed<$ty>>(&bytes,Encoding::Payload,limits()).unwrap(),value);

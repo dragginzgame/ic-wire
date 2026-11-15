@@ -1,7 +1,7 @@
 //! Paired packed/ordinary controls from the pinned reference packed-i16 workload.
 use super::run_typescript;
 use candidate::typescript::{Method, PayloadLimits, SchemaLimits, SchemaRegistry};
-use candidate::{Encoding, Limits, List, PackedI16, decode, encode};
+use candidate::{Encoding, Limits, List, Packed, decode, encode};
 use serde_json::json;
 
 const MAX: usize = 16_384;
@@ -9,7 +9,7 @@ const MAX: usize = 16_384;
 #[test]
 fn packed_and_ordinary_signed_buffers_preserve_distinct_representations() {
     let mut registry = SchemaRegistry::new(SchemaLimits::default()).unwrap();
-    registry.register::<PackedI16<MAX>>("Packed").unwrap();
+    registry.register::<Packed<i16, MAX>>("Packed").unwrap();
     registry.register::<List<i16, MAX>>("Ordinary").unwrap();
     let graph = registry.finish().unwrap();
     let packed = PayloadLimits {
@@ -82,7 +82,7 @@ fn packed_and_ordinary_signed_buffers_preserve_distinct_representations() {
                 _ => mixed[i % mixed.len()],
             })
             .collect();
-        let packed_value = PackedI16::<MAX>::new(values.clone()).unwrap();
+        let packed_value = Packed::<i16, MAX>::new(values.clone()).unwrap();
         let ordinary_value = List::<i16, MAX>::new(values).unwrap();
         assert_eq!(
             *packed_bytes,
@@ -93,7 +93,7 @@ fn packed_and_ordinary_signed_buffers_preserve_distinct_representations() {
             encode(&ordinary_value, Encoding::Payload, policy).unwrap()
         );
         assert_eq!(
-            decode::<PackedI16<MAX>>(packed_bytes, Encoding::Payload, policy).unwrap(),
+            decode::<Packed<i16, MAX>>(packed_bytes, Encoding::Payload, policy).unwrap(),
             packed_value
         );
         assert_eq!(

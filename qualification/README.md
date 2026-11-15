@@ -1,5 +1,10 @@
 # Native compatibility qualification
 
+For release preparation, `make check-packages` verifies extracted archives using
+this workspace's standalone consumer. `make check-browser` executes the generated
+clients in an explicitly selected Chromium binary. Neither command publishes;
+see [preparation checks and delivery boundaries](../docs/release.md).
+
 The [standalone consumer](consumer/README.md) owns a small application contract,
 independent of sibling recodes. `make test-consumer` checks its literal frames
 against each Rust supplier; `make check-consumer-wasm` builds and executes both
@@ -13,12 +18,18 @@ using an explicitly prepared PocketIC server and [isolated native driver](ic-ins
 The first run identifies request-encoding regressions at both profiles and a
 small opt-3 response-encoding regression; its performance criterion remains unmet.
 
+`make bench-codec` measures 13 native workload families with ordinary/bulk controls,
+public codec phases and paired suppliers. `make bench-codec-allocations` measures
+allocation counts in a separate build; `make profile-codec` prepares a selected
+operation for perf call-stack sampling where host permissions allow it. See
+[the codec investigation guide](../docs/design/codec-benchmarks.md).
+
 `make bench-schema` runs the separate bounded host timing probe. Its frozen
 workloads, phase boundaries and first results are recorded in
 [schema measurement](../docs/design/schema-measurement.md). The first run found
 small-registry regressions; it does not establish a candidate performance win.
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.8`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.9`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 

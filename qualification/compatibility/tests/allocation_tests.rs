@@ -2,8 +2,8 @@
 // All fixture preparation and assertions occur outside measured regions.
 
 use candidate::{
-    Bytes, BytesRef, Direction, Encoding, Error, Limits, PackedI16, Text, decode, encode,
-    encode_into, encode_to_slice, encoded_len,
+    Bytes, BytesRef, Direction, Encoding, Error, Limits, Packed, Text, decode, encode, encode_into,
+    encode_to_slice, encoded_len,
 };
 use serde::{Serialize, Serializer};
 use stats_alloc::{INSTRUMENTED_SYSTEM, Region, Stats, StatsAlloc};
@@ -158,13 +158,19 @@ fn caller_owned_destinations_allocate_nothing() {
 }
 
 fn decode_field_refusal_precedes_owned_allocation() {
+    // The generic element bound must reject before allocating for wider words too.
+    let mut wide = [0; 17];
+    wide[0] = 16;
+    let (result, stats) = measure(|| decode::<Packed<u64, 1>>(&wide, Encoding::Payload, limits()));
+    assert_eq!(result, Err(Error::Malformed));
+    no_allocation(stats);
     let input = black_box([3, 1, 2, 3]);
     let (result, stats) = measure(|| decode::<Bytes<2>>(&input, Encoding::Payload, limits()));
     assert_eq!(result, Err(Error::Malformed));
     no_allocation(stats);
     for input in [&[1, 0][..], &[4, 0, 0, 0, 0][..], &[4, 0, 0][..]] {
         let (result, stats) =
-            measure(|| decode::<PackedI16<1>>(black_box(input), Encoding::Payload, limits()));
+            measure(|| decode::<Packed<i16, 1>>(black_box(input), Encoding::Payload, limits()));
         assert_eq!(result, Err(Error::Malformed));
         no_allocation(stats);
     }
@@ -201,7 +207,7 @@ fn successful_decode_controls_and_borrowing() {
     assert_eq!(result.unwrap().as_slice(), &[1, 2, 3]);
     one_allocation(stats, 3);
     let (result, stats) =
-        measure(|| decode::<PackedI16<2>>(&[4, 1, 0, 255, 255], Encoding::Payload, limits()));
+        measure(|| decode::<Packed<i16, 2>>(&[4, 1, 0, 255, 255], Encoding::Payload, limits()));
     assert_eq!(result.unwrap().as_slice(), &[1, -1]);
     one_allocation(stats, 4);
     let (result, stats) =

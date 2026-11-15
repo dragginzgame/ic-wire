@@ -1,4 +1,4 @@
-//! One typed authority for an initial subset of reference JSON metadata.
+//! One typed authority for supported JSON metadata.
 //!
 //! This imports explicit metadata; it does not infer arbitrary Serde layouts.
 //! Manual projections remain trusted and require independent byte vectors.
@@ -20,11 +20,11 @@ pub mod __private {
     pub use serde_json::{Value, json};
 }
 
-/// Generated client modules require this metadata/runtime interface version.
+/// Generated client modules require this metadata/runtime interface marker.
 /// This labels tooling artifacts, never Wire payload bytes.
 pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json";
 
-/// Candidate interpreter for the admitted schema subset. Write this beside
+/// TypeScript interpreter for the admitted schema subset. Write this beside
 /// generated client modules at their selected runtime import path.
 /// Contains no transport, SDK, endpoint execution or deployment implementation.
 pub const RUNTIME: &str = include_str!("runtime.ts");
@@ -120,16 +120,38 @@ struct Annotations {
 enum Node {
     Unit,
     Bool,
-    Integer { bits: u8, signed: bool },
-    Float { bits: u8 },
-    Text { max: Option<u64> },
-    Bytes { min: Option<u64>, max: Option<u64> },
-    PackedI16 { max: u64 },
-    Packed { word: &'static str, nonzero: bool },
-    List { item: usize, max: Option<u64> },
-    Array { item: usize, len: u64 },
+    Integer {
+        bits: u8,
+        signed: bool,
+    },
+    Float {
+        bits: u8,
+    },
+    Text {
+        max: Option<u64>,
+    },
+    Bytes {
+        min: Option<u64>,
+        max: Option<u64>,
+    },
+    Packed {
+        word: &'static str,
+        nonzero: bool,
+        max: Option<u64>,
+    },
+    List {
+        item: usize,
+        max: Option<u64>,
+    },
+    Array {
+        item: usize,
+        len: u64,
+    },
     Tuple(Vec<usize>),
-    Result { ok: usize, err: usize },
+    Result {
+        ok: usize,
+        err: usize,
+    },
     Option(usize),
     Alias(usize),
     Ref(usize),
@@ -154,7 +176,7 @@ pub struct ValidatedRegistry {
 impl ValidatedRegistry {
     /// Import explicit definitions in the reference metadata grammar.
     ///
-    /// Supported kinds: unit, bool, u/i, float, text, bytes, packed-i16, packed, list,
+    /// Supported kinds: unit, bool, u/i, float, text, bytes, packed, list,
     /// array, tuple, result, option, newtype, ref, record and enum. Unknown keys reject;
     /// this subset is not a replacement for the reference's full schema surface.
     ///
@@ -259,8 +281,8 @@ impl Importer {
         let allowed: &[&str] = match kind {
             "unit" | "bool" => &["k", "check"],
             "u" | "i" | "float" => &["k", "check", "bits", "min", "max"],
-            "text" | "packed-i16" => &["k", "check", "max"],
-            "packed" => &["k", "check", "word", "nonzero"],
+            "text" => &["k", "check", "max"],
+            "packed" => &["k", "check", "word", "nonzero", "max"],
             "bytes" => &["k", "check", "min", "max"],
             "list" | "array" => &["k", "check", "item", "max"],
             "tuple" => &["k", "check", "items"],
@@ -303,13 +325,6 @@ impl Importer {
                 }
                 Node::Bytes { min, max }
             }
-            "packed-i16" => {
-                let max = bound(value, "max")?.ok_or(GenerationError::Schema)?;
-                if max > ((1_u64 << 53) - 1) / 2 {
-                    return Err(GenerationError::Complexity);
-                }
-                Node::PackedI16 { max }
-            }
             "packed" => {
                 let word = text(value, "word")?;
                 let word = [
@@ -334,7 +349,19 @@ impl Importer {
                     Some(Value::Bool(true)) if word == "i64" => true,
                     _ => return Err(GenerationError::Schema),
                 };
-                Node::Packed { word, nonzero }
+                let max = bound(value, "max")?;
+                let width = match word {
+                    "bool" | "i8" => 1,
+                    "i16" | "u16" => 2,
+                    "i32" | "u32" | "finite-f32" => 4,
+                    "i64" | "u64" | "finite-f64" => 8,
+                    "hash16" => 16,
+                    _ => 32,
+                };
+                if max.is_some_and(|n| n > ((1_u64 << 53) - 1) / width) {
+                    return Err(GenerationError::Complexity);
+                }
+                Node::Packed { word, nonzero, max }
             }
             "list" => Node::List {
                 max: bound(value, "max")?,

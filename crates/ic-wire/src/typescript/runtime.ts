@@ -11,10 +11,9 @@ export type Schema = ({ k: 'unit' | 'bool' }
   | { k: 'float'; bits: number; min?: number; max?: number }
   | { k: 'bytes'; min?: number; max?: number }
   | { k: 'text'; max?: number }
-  | { k: 'packed-i16'; max: number }
-  | { k: 'packed'; word: 'bool'; nonzero?: never }
-  | { k: 'packed'; word: 'i64'; nonzero?: true }
-  | { k: 'packed'; word: Exclude<keyof typeof packedArrays, 'i64'>; nonzero?: never }
+  | { k: 'packed'; max?: number; word: 'bool'; nonzero?: never }
+  | { k: 'packed'; max?: number; word: 'i64'; nonzero?: true }
+  | { k: 'packed'; max?: number; word: Exclude<keyof typeof packedArrays, 'i64'>; nonzero?: never }
   | { k: 'list'; item: Schema; max?: number }
   | { k: 'array'; item: Schema; max: number }
   | { k: 'tuple'; items: readonly Schema[] }
@@ -149,23 +148,24 @@ function write(schema: Schema, value: unknown, out: Writer, budget: Budget, dept
       if (s.max !== undefined && value.length > s.max) fail('limit');
       out.varint(BigInt(value.length)); out.raw(value); return;
     }
-    case 'packed-i16': case 'packed': {
-      if(s.k==='packed' && s.word==='bool') {
+    case 'packed': {
+      if(s.word==='bool') {
         if(!Array.isArray(value)) return fail('value');
+        if(s.max !== undefined && value.length > s.max) return fail('limit');
         out.varint(BigInt(value.length));
         if(value.length>out.limit-out.offset) return fail('limit');
         for(const item of value) { if(typeof item!=='boolean') return fail('value'); out.byte(item?1:0); }
         return;
       }
 
-      const kind=s.k==='packed-i16'?'i16':s.word, ctor=packedArrays[kind];
+      const kind=s.word, ctor=packedArrays[kind];
       if (!(value instanceof ctor)) return fail('value');
       const opaque=kind==='hash16'||kind==='hash32', width=kind==='hash16'?16:kind==='hash32'?32:ctor.BYTES_PER_ELEMENT;
       if(value.byteLength%width) return fail('value');
-      if (s.k==='packed-i16' && value.byteLength / width > s.max) fail('limit');
+      if (s.max !== undefined && value.byteLength / width > s.max) fail('limit');
       out.varint(BigInt(value.byteLength));
       if (value.byteLength > out.limit - out.offset) fail('limit');
-      if(s.k==='packed' && s.nonzero && (value as BigInt64Array).includes(0n)) return fail('value');
+      if(s.nonzero && (value as BigInt64Array).includes(0n)) return fail('value');
       const span = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
       if((kind==='finite-f32'||kind==='finite-f64') && !finiteWords(span,width,littleEndian)) return fail('value');
       if (littleEndian || opaque) out.raw(span);
@@ -247,18 +247,18 @@ function readValue(schema: Schema, input: Reader, budget: Budget, depth: number,
       if (s.min !== undefined && length < s.min) fail('malformed');
       return new Uint8Array(input.raw(length));
     }
-    case 'packed-i16': case 'packed': {
-      if(s.k==='packed' && s.word==='bool') {
-        const span=input.raw(input.length(input.bytes.length-input.offset));
+    case 'packed': {
+      if(s.word==='bool') {
+        const span=input.raw(input.length(Math.min(s.max ?? input.bytes.length, input.bytes.length-input.offset)));
         for(const byte of span) if(byte>1) return fail('malformed');
         const values=new Array<boolean>(span.length);
         for(let i=0;i<span.length;i++) values[i]=span[i]===1;
         return values;
       }
 
-      const kind=s.k==='packed-i16'?'i16':s.word, ctor=packedArrays[kind];
+      const kind=s.word, ctor=packedArrays[kind];
       const opaque=kind==='hash16'||kind==='hash32', width=kind==='hash16'?16:kind==='hash32'?32:ctor.BYTES_PER_ELEMENT;
-      const length = input.length(Math.min(s.k==='packed-i16'?s.max * width:input.bytes.length, input.bytes.length - input.offset));
+      const length = input.length(Math.min(s.max === undefined ? input.bytes.length : s.max * width, input.bytes.length - input.offset));
       if (length % width) return fail('malformed');
       if (length === 0) return new ctor(0);
       const span=input.raw(length);
@@ -266,7 +266,7 @@ function readValue(schema: Schema, input: Reader, budget: Budget, depth: number,
       const bytes = new Uint8Array(span);
       if (!littleEndian && !opaque) swapWords(bytes,width);
       const value=new ctor(bytes.buffer);
-      if(s.k==='packed' && s.nonzero && (value as BigInt64Array).includes(0n)) return fail('malformed');
+      if(s.nonzero && (value as BigInt64Array).includes(0n)) return fail('malformed');
       return value;
     }
     case 'text': return utf8.decode(input.raw(input.length(Math.min(s.max ?? input.bytes.length, input.bytes.length - input.offset))));

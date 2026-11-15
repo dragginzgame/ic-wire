@@ -141,9 +141,13 @@ impl<const N: usize> Wire for serde_bytes::ByteArray<N> {
         Ok(json!({"k":"bytes","min":N,"max":N}))
     }
 }
-impl<T: crate::PackedElement> Wire for crate::Packed<T> {
+impl<T: crate::PackedElement, const N: usize> Wire for crate::Packed<T, N> {
     fn schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
-        Ok(json!({"k":"packed","word":T::SCHEMA}))
+        let mut value = json!({"k":"packed","word":T::SCHEMA});
+        if N != usize::MAX {
+            value["max"] = json!(N);
+        }
+        Ok(value)
     }
 }
 
@@ -253,7 +257,7 @@ macro_rules! bounded {
         }
     )* };
 }
-bounded! { Bytes => "bytes", Text => "text", PackedI16 => "packed-i16" }
+bounded! { Bytes => "bytes", Text => "text" }
 impl<const N: usize> Wire for crate::BytesRef<'_, N> {
     fn schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
         Ok(json!({"k":"bytes","max":N}))

@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>IC Wire package browser qualification</title>
+<body data-result="pending">
+<script type="module">
+import {upload} from './methods.js';
+import {uploadPayload} from './payload.js';
+import {WireError} from './runtime.js';
+try {
+  const assert = (ok, label) => { if (!ok) throw new Error(label); };
+  const equal = (a, b) => JSON.stringify(Array.from(a)) === JSON.stringify(Array.from(b));
+  const refuses = (f, code) => {
+    try { f(); } catch (e) { assert(e instanceof WireError && e.code === code, `expected ${code}, got ${e}`); return; }
+    throw new Error(`missing ${code} refusal`);
+  };
+  const request = {revision:128n,key:'sensor',content:Uint8Array.of(0,255),samples:Int16Array.of(-32768,0,32767),tags:[1,128]};
+  const requestBytes = [73,87,7,0,0,0,0,0,0,0,0,128,1,6,115,101,110,115,111,114,2,0,255,6,0,128,0,0,255,127,2,1,128,1];
+  const responseBytes = [73,87,7,0,0,0,0,0,0,0,1,129,1,1];
+  assert(equal(upload.encodeRequest(request), requestBytes), 'request literal');
+  assert(equal(upload.encodeResponse({revision:129n,accepted:true}), responseBytes), 'response literal');
+  assert(equal(uploadPayload.encode(request), requestBytes.slice(11)), 'payload literal');
+  const buffer = new Uint8Array(requestBytes.length + 5); buffer.set(requestBytes, 3);
+  const decoded = upload.decodeRequest(buffer.subarray(3, -2));
+  assert(decoded.revision === 128n && decoded.key === 'sensor', 'BigInt and UTF-8');
+  assert(equal(decoded.samples, request.samples) && equal(decoded.content, request.content), 'typed arrays');
+  buffer.fill(0); assert(decoded.content[1] === 255, 'owned decoded bytes');
+  assert(upload.decodeResponse(Uint8Array.from(responseBytes)).accepted, 'response decode');
+  refuses(() => upload.decodeRequest(Uint8Array.from([...requestBytes, 0])), 'malformed');
+  refuses(() => uploadPayload.encode({...request, key:'x'.repeat(33)}), 'limit');
+  const unicode = {...request, key:'é🌍'};
+  assert(uploadPayload.decode(uploadPayload.encode(unicode)).key === unicode.key, 'Unicode');
+  document.body.dataset.result = 'pass';
+  document.body.textContent = 'PASS: packaged clients, literal frames, BigInt, typed arrays, ownership, bounds, malformed input and Unicode';
+} catch (error) {
+  document.body.dataset.result = 'fail';
+  document.body.textContent = String(error?.stack || error);
+}
+</script>

@@ -14,7 +14,18 @@ with no v1/v2 lanes, fallback readers or legacy-client support. Generated client
 and runtime ship together. Differential tests remain useful evidence, not an
 obligation to reproduce every legacy behavior. Retained safety, admission, domain
 validation and cross-language correctness contracts still need qualification.
+The user reaffirmed that there are no consumer compatibility constraints before
+publication. Remove legacy-only types and metadata forms rather than retain aliases.
 This decision does not deploy consumers, reset stored state or publish packages.
+
+## Release preparation
+
+The user selected simplicity over speculative specialization and authorized
+package preparation, explicitly excluding publication. The measured encoding and
+single-root host regressions remain disclosed tradeoffs, not reasons to add
+legacy fast paths before the first release. Zero-regression research criteria
+below remain experiment results rather than absolute publication blockers.
+Correctness, admission and package/browser verification remain required.
 
 ## 1 Decision and purpose
 
