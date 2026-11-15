@@ -1,4 +1,6 @@
-use super::{GenerationError, Node, ValidatedRegistry};
+use super::{
+    GenerationError, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT, ValidatedRegistry, identifier,
+};
 use alloc::string::String;
 use core::fmt::{self, Write};
 
@@ -45,6 +47,88 @@ impl Output {
 }
 
 impl ValidatedRegistry {
+    /// Generate a typed payload client with privately owned metadata and policy.
+    ///
+    /// `root` names an admitted type. `export` names the exported codec object.
+    /// The trusted runtime module must export `schemaFormat` matching
+    /// [`RUNTIME_SCHEMA_FORMAT`] and `createPayloadCodec(metadata, registry)`.
+    /// The factory returns `encode(unknown): Uint8Array` and `decode(Uint8Array):
+    /// unknown`, using the reference JSON grammar. Qualification currently uses
+    /// published Core 0.22.4's interpreter through an explicit format adapter.
+    /// Runtime code is not bundled, downloaded or selected by this function.
+    ///
+    /// # Errors
+    /// Returns Schema for invalid names, missing roots, empty module specifiers
+    /// or zero node/depth allowances; Complexity for unsafe JS integers or an
+    /// artifact exceeding the registry's output allowance.
+    pub fn payload_module(
+        &self,
+        export: &str,
+        root: &str,
+        runtime_module: &str,
+        limits: PayloadLimits,
+    ) -> Result<String, GenerationError> {
+        identifier(export)?;
+        if export == "globalThis"
+            || !self.names.iter().any(|name| name == root)
+            || self.names.iter().any(|name| name == export)
+            || runtime_module.is_empty()
+            || runtime_module.contains('\0')
+            || limits.nodes == 0
+            || limits.depth == 0
+        {
+            return Err(GenerationError::Schema);
+        }
+        if [limits.bytes, limits.nodes, limits.depth]
+            .into_iter()
+            .any(|n| n > (1_u64 << 53) - 1)
+        {
+            return Err(GenerationError::Complexity);
+        }
+        let mut output = Output {
+            text: String::new(),
+            remaining: self.output_bytes,
+        };
+        self.render_payload_module(&mut output, export, root, runtime_module, limits)
+            .map_err(|_| GenerationError::Complexity)?;
+        Ok(output.text)
+    }
+
+    fn render_payload_module(
+        &self,
+        output: &mut Output,
+        export: &str,
+        root: &str,
+        runtime_module: &str,
+        limits: PayloadLimits,
+    ) -> fmt::Result {
+        output.write_str("// Generated IC Wire payload client; no transport or frame.\nimport { schemaFormat as $format, createPayloadCodec as $create } from ")?;
+        output.quoted(runtime_module)?;
+        output.write_str(";\nif ($format !== ")?;
+        output.quoted(RUNTIME_SCHEMA_FORMAT)?;
+        output.write_str(") throw new globalThis.Error('IC Wire runtime format mismatch');\n")?;
+        self.render(output)?;
+        write!(
+            output,
+            "export const {export} = (() => {{\nconst $types = globalThis.JSON.parse("
+        )?;
+        // A bounded temporary JSON string permits correct JS string escaping,
+        // including __proto__ keys, without another schema interpretation path.
+        let metadata = self.metadata_json().map_err(|_| fmt::Error)?;
+        output.quoted(&metadata)?;
+        output.write_str(");\nconst $codec = $create({schema:{k:'ref',name:")?;
+        output.quoted(root)?;
+        writeln!(
+            output,
+            "}},bytes:{},nodes:{},depth:{}}}, $types);",
+            limits.bytes, limits.nodes, limits.depth
+        )?;
+        writeln!(
+            output,
+            "return globalThis.Object.freeze({{encode:(value: {root}): globalThis.Uint8Array => $codec.encode(value), decode:(bytes: globalThis.Uint8Array): {root} => $codec.decode(bytes) as {root}}});\n}})();"
+        )
+    }
+
     /// Export the admitted subset in the reference JSON registry grammar.
     ///
     /// This is data for a trusted metadata consumer, not executable JavaScript.

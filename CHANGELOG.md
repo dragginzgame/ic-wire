@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.23.3] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ✨ Added
+
+- Generate executable typed payload clients from the validated host graph, with
+  private metadata, explicit browser limits, bounded total source and runtime
+  format admission. Exercise the emitted client in representative Rust exchange,
+  including policy observation and mismatch refusal before codec creation.
+
 ## [0.23.2] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.

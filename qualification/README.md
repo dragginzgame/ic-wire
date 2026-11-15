@@ -1,6 +1,6 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.2`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.3`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -138,7 +138,7 @@ The fixture's Rust policy supplies bytes/nodes/depth to both runtime APIs with
 nonbinding baseline node/depth allowances; boundary probes narrow one resource
 at a time. Native allocation stays Rust-only. Boundaries beyond these records,
 version-mismatch refusal, browser-specific behavior, full
-schema coverage and a candidate versioned runtime pair remain unqualified.
+schema coverage and a candidate-owned runtime remain unqualified.
 
 The 0.23.1 checkpoint also exchanges a two-link recursive record and a pair of
 fields sharing the same named record schema. Literal payloads are respectively
@@ -160,3 +160,20 @@ bounds, BigInt inputs and integer range limits. Redundant `80 00` remains accept
 as zero for u64/i128; re-encoding emits `00` while retained input stays unchanged.
 These selected vectors do not qualify every scalar width, JavaScript surrogate
 normalization, or all malformed/noncanonical encodings.
+
+## Generated payload client
+
+From 0.23.3 the representative payload exchange imports the actual TypeScript
+module emitted by `ValidatedRegistry::payload_module`; the harness no longer
+constructs that baseline payload codec by hand. The generated module exports one
+frozen codec object, keeps its parsed metadata private and checks `schemaFormat`
+before invoking the runtime factory. The test observes the actual supplied policy
+and rejects a deliberately incompatible runtime before its factory can execute.
+
+A test-only adapter exports `schemaFormat = "ic-wire-json/1"` alongside the
+published 0.22.4 payload factory. This explicitly qualifies that interpreter for
+the tested metadata subset; the marker alone does not authenticate arbitrary
+runtime implementations. The published Cargo source pin supplies runtime identity.
+No adapter or reference dependency enters the product graph. Framed and scalar
+controls still exercise the supplier directly. Node transforms emitted TypeScript;
+this is not TypeScript static typechecking or browser execution evidence.

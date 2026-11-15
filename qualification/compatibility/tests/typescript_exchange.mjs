@@ -5,7 +5,13 @@ import { pathToFileURL } from 'node:url';
 const { createPayloadCodec, createCodec, WireError } = await import(pathToFileURL(process.argv[1]).href);
 const { types, cases, policy, chain, shared } = JSON.parse(readFileSync(0, 'utf8'));
 const schema = { k: 'ref', name: 'Record' };
-const payload = createPayloadCodec({ schema, ...policy }, types);
+const client = await import(new URL('./client.ts', pathToFileURL(process.argv[1])).href);
+const adapter = await import(new URL('./runtime-adapter.ts', pathToFileURL(process.argv[1])).href);
+assert.deepEqual(Object.keys(client), ['recordCodec']);
+assert.deepEqual(adapter.observed, { schema, ...policy });
+assert(Object.isFrozen(client.recordCodec));
+await assert.rejects(import(new URL('./bad-client.ts', pathToFileURL(process.argv[1])).href), { message: 'IC Wire runtime format mismatch' });
+const payload = client.recordCodec;
 const frame = createCodec({ id: '7', request: schema, response: schema,
   requestBytes: policy.bytes, responseBytes: policy.bytes,
   requestNodes: policy.nodes, responseNodes: policy.nodes,

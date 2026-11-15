@@ -82,7 +82,38 @@ reference TS node/depth boundaries and cyclic-value depth refusal. Schema sharin
 does not become decoded-value aliasing. These cases use the same graph exporter
 and runtime harness as the representative record.
 
-Automatic collection, naming/collision qualification, method admission, executable
-versioned metadata, matched browser runtime, TypeScript compiler validation,
+Automatic collection, naming/collision qualification, method admission, a
+candidate-owned browser runtime, TypeScript compiler validation,
 advisory traversal and reference performance comparisons remain outstanding.
 No Wasm size or IC instruction improvement is claimed.
+
+## Generated payload modules
+
+`payload_module(export, root, runtime_module, PayloadLimits)` renders an actual
+typed client from the same graph. It admits an existing root and an independent
+codec export name, rejects names that collide with generated types or shadow
+`globalThis`, and requires explicit browser byte/node/depth allowances. Zero bytes
+is valid for unit payloads; nodes/depth must be positive and all limits fit exact
+JavaScript integers. This does not infer browser policy from Rust allocation or
+claim equal traversal accounting.
+
+The imported runtime must export `schemaFormat = "ic-wire-json/1"` and
+`createPayloadCodec(metadata, registry)`. That factory uses the reference JSON
+grammar and returns encode/decode functions. A mismatch throws before factory
+creation. The marker identifies an interface, not cryptographic supplier identity;
+applications must select and qualify their runtime implementation. Qualification
+uses a private adapter to the pinned published reference interpreter.
+
+The module exports type aliases and a frozen codec object. Its JSON registry is
+parsed within a private closure, preserving prototype-like keys without exposing
+mutable metadata to callers. Generated codecs delegate to one runtime interpreter;
+no per-type byte writers are emitted. Runtime module specifiers are escaped strings
+selected by the caller, not resolved or downloaded by Wire.
+
+The total source shares the configured output allowance, including declarations,
+quoted metadata and client code. JSON string escaping uses one additional bounded
+metadata buffer, so this is not a single-buffer memory guarantee. The generated
+client is now the payload caller in the representative Rust exchange; format
+mismatch and actual supplied policy are checked at runtime. Automatic Serde
+projection, framed-client generation and a candidate runtime are separate remaining
+implementation work, not implied by this payload milestone.

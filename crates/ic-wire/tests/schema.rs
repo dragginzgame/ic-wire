@@ -274,3 +274,73 @@ fn metadata_output_is_bounded_in_utf8_bytes() {
         }
     }
 }
+
+#[test]
+fn generated_payload_module_admits_names_policy_and_total_output() {
+    use ic_wire::typescript::PayloadLimits;
+    let types = BTreeMap::from([("Root".into(), json!({"k":"bool"}))]);
+    let graph = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
+    let limits = PayloadLimits {
+        bytes: 1,
+        nodes: 1,
+        depth: 1,
+    };
+    let source = graph
+        .payload_module("codec", "Root", "./runtime.ts", limits)
+        .unwrap();
+    assert!(source.contains("ic-wire-json/1"));
+    assert!(source.contains("encode:(value: Root)"));
+    for name in ["Root", "globalThis", "class", "x;throw"] {
+        assert_eq!(
+            graph.payload_module(name, "Root", "./runtime.ts", limits),
+            Err(GenerationError::Schema)
+        );
+    }
+    assert_eq!(
+        graph.payload_module("codec", "Missing", "./runtime.ts", limits),
+        Err(GenerationError::Schema)
+    );
+    for module in ["", "bad\0module"] {
+        assert_eq!(
+            graph.payload_module("codec", "Root", module, limits),
+            Err(GenerationError::Schema)
+        );
+    }
+    for invalid in [
+        PayloadLimits { nodes: 0, ..limits },
+        PayloadLimits { depth: 0, ..limits },
+    ] {
+        assert_eq!(
+            graph.payload_module("codec", "Root", "./runtime.ts", invalid),
+            Err(GenerationError::Schema)
+        );
+    }
+    assert_eq!(
+        graph.payload_module(
+            "codec",
+            "Root",
+            "./runtime.ts",
+            PayloadLimits {
+                bytes: 1 << 53,
+                ..limits
+            }
+        ),
+        Err(GenerationError::Complexity)
+    );
+    for output_bytes in [source.len() - 1, source.len()] {
+        let bounded = ValidatedRegistry::from_metadata(
+            &types,
+            SchemaLimits {
+                output_bytes,
+                ..SchemaLimits::default()
+            },
+        )
+        .unwrap();
+        let result = bounded.payload_module("codec", "Root", "./runtime.ts", limits);
+        if output_bytes < source.len() {
+            assert_eq!(result, Err(GenerationError::Complexity));
+        } else {
+            assert_eq!(result.unwrap(), source);
+        }
+    }
+}

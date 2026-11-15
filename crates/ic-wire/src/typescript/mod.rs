@@ -2,9 +2,27 @@
 //!
 //! This imports explicit metadata; it does not infer arbitrary Serde layouts.
 //! Manual projections remain trusted and require independent byte vectors.
-//! Runtime generation and automatic Rust type collection are not implemented.
+//! Runtime implementation and automatic Rust type collection are not included.
 
 mod render;
+
+/// Generated payload modules require this metadata/runtime interface version.
+/// This labels tooling artifacts, never Wire payload bytes.
+pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json/1";
+
+/// Explicit browser payload allowances, owned by the consuming application.
+///
+/// Node/depth accounting follows the selected browser runtime, not Rust Serde
+/// traversal. No native allocation allowance is translated into a JS heap limit.
+#[derive(Clone, Copy, Debug)]
+pub struct PayloadLimits {
+    /// Maximum payload bytes, excluding any frame or transport envelope.
+    pub bytes: u64,
+    /// Maximum runtime value visits; must be nonzero.
+    pub nodes: u64,
+    /// Maximum runtime value depth; must be nonzero.
+    pub depth: u64,
+}
 
 use alloc::{
     collections::{BTreeMap, BTreeSet},

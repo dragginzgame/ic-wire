@@ -7,7 +7,7 @@ a decision that a rewrite is necessary or an implemented replacement.
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.2`, following
+The candidate keeps the `ic-wire` package name and uses version `0.23.3`, following
 the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
 the version selection and GitHub push do not constitute a crates.io release.
 
@@ -35,8 +35,10 @@ record round trip; see [field contracts](docs/design/fields.md). The explicit
 [`PackedI16` field](docs/design/packed.md) completes the native representative
 record with an ordinary-list control. Optional host [schema admission and declaration
 rendering](docs/design/schema.md) now import a defined JSON metadata subset into
-one immutable typed graph. Its bounded metadata export now feeds the published
-reference TypeScript runtime in a focused bidirectional byte-exchange test.
+one immutable typed graph. It generates typed payload client modules with private
+metadata, explicit browser policy and runtime-format mismatch refusal. The emitted
+client exchanges the representative record with Rust using the published reference
+TypeScript runtime in private qualification.
 Rust metadata collection and a candidate browser runtime remain unimplemented;
 the full vertical slice is not yet qualified end to end.
 
