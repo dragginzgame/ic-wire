@@ -63,7 +63,9 @@ The source SHA-256 is
 `e9a8cf090e994f8e14b79aa0dba09c5ba00dacdde607786fbe94795fbf429dda`.
 Its dependencies are Serde, alloc and the private meter; it owns no primitives,
 transport or orchestration. Keeping the exact visits avoids an unqualified
-accounting change. No primitive encoder specialization is imported.
+accounting change. The measured [one-byte integer shortcut](encoding.md) changes
+only internal Postcard dispatch after admitting the original value; it does not
+alter this accounting ledger.
 Future consolidation must preserve this ledger or obtain a migration
 decision. No complexity or performance improvement is claimed for this reuse.
 

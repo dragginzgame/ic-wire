@@ -106,11 +106,28 @@ macro_rules! finite {
             use alloc::vec::Vec;
             use serde::{Deserializer, Serializer, de};
             fn valid(bytes: &[u8]) -> bool {
-                bytes.len().is_multiple_of($width)
-                    && bytes.chunks_exact($width).all(|word| {
-                        <$float>::from_le_bytes(word.try_into().expect("whole float word"))
-                            .is_finite()
-                    })
+                if !bytes.len().is_multiple_of($width) {
+                    return false;
+                }
+                let mut tail = bytes;
+                if $width == 4 {
+                    // Independent f32 exponent lanes: adding one exponent unit
+                    // reaches each sign bit exactly for exponent 0xff. Masking
+                    // first prevents mantissa/sign bits and cross-lane carries.
+                    let mut pairs = bytes.chunks_exact(8);
+                    if !pairs.by_ref().all(|pair| {
+                        let bits = u64::from_le_bytes(pair.try_into().unwrap());
+                        ((bits & 0x7f80_0000_7f80_0000) + 0x0080_0000_0080_0000)
+                            & 0x8000_0000_8000_0000
+                            == 0
+                    }) {
+                        return false;
+                    }
+                    tail = pairs.remainder();
+                }
+                tail.chunks_exact($width).all(|word| {
+                    <$float>::from_le_bytes(word.try_into().expect("whole float word")).is_finite()
+                })
             }
             /// Encode finite values as one byte buffer without narrowing finite bits.
             /// # Errors

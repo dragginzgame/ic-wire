@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.23.9"
+ic-wire = "0.24.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -104,7 +104,7 @@ derive is a separate feature and lives under `typescript`. Generation requires
 an explicit diagnostic handler. Regenerate clients and runtime together. No
 legacy compatibility lane, fallback reader or storage migration is provided.
 
-See the [repository](https://github.com/dragginzgame/ic-wire-new) for qualification,
+See the [repository](https://github.com/dragginzgame/ic-wire) for qualification,
 design and measured tradeoffs. Smaller Wasm in the sample workload does not imply
 universally faster encoding. Licensed under the included Toko Studios Network
 Licence; see `LICENSE.md` for the controlling terms.

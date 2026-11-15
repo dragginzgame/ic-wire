@@ -1,5 +1,18 @@
 # Current performance qualification
 
+The 0.24.0 integer shortcut supersedes the encoding numbers below:
+**45,402 B opt-z / 46,331 B opt-3**, still **736/695 B smaller** than reference,
+at a cost of **129/181 B** versus 0.23.9. Request encoding drops from
+5,224/2,674 to **4,953/2,435 IC instructions**, slightly below reference
+4,961/2,443. Response encoding is **1,751/689** versus reference 1,744/690;
+the strict zero-regression criterion therefore still fails at opt-z by seven
+instructions. Decode/error counters are unchanged. All four standalone Wasm
+assertions and IC frame oracles pass. See [current optimization evidence](codec-optimizations-0.23.10.json)
+and [native qualification](codec-benchmarks.md#measured-integer-and-finite-float-improvements).
+This upload fixture does not exercise finite-float adapters.
+
+## Earlier checkpoints
+
 The latest local packed-word conversion fix measures **45,273 B opt-z / 46,150 B
 opt-3**, eight bytes smaller at opt-z than the hard cut below. All four standalone
 Wasm workloads pass. A fresh PocketIC run reproduces every instruction count in
@@ -97,8 +110,10 @@ and small-registry graph/export overhead, measuring size and instructions togeth
 Keep Postcard delegation and admission unless a measured design change justifies
 otherwise; do not import legacy fast paths merely to match its implementation.
 
-The five newly retained domain adapters need separate matched workloads, including
-ordinary-list and small-value controls, before any broad performance claim.
+The expanded [52-family native matrix](codec-benchmarks.md#expanded-matrix-results--15-november-2026)
+now covers all five domain adapters with ordinary-list/small-value controls and
+position-sensitive rejection. Its 16,760 timing rows and 8,380 allocation rows
+do not replace corresponding Wasm/IC qualification for broad performance claims.
 Full client generation with mandatory lint also needs its own host-cost probe;
 the collection/export figures above cannot stand in for it. Allocation admission
 tests pass, but are not a new total-heap performance measurement. Actual browser

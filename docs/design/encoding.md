@@ -9,12 +9,37 @@ Reference: `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
 `crates/ic-wire/src/native/encode/mod.rs` and `native/mod.rs`.
 The encode adapter's source SHA-256 is
 `6314ad42b620168133a95038e1539697ca7965f63f7137d2a0a9fc092a0df035`.
-Reuse is limited to the bounded Serialize/Serializer/compound adapter structure
-and admission visits. Preserve the IcyDB attribution and root license. Remove
-all private primitive and enum-tag writers: Postcard owns these operations.
-This is an investigational supplier-delegation candidate, not a measured win.
-Exact vectors qualify bytes and budgets; opt-z/opt-3 and instruction comparisons
-are still required before selecting this over the reference's specializations.
+The initial reuse was limited to the bounded Serialize/Serializer/compound adapter
+structure and admission visits, retaining the IcyDB attribution and root license.
+The measured integer decision below adds only a one-byte shortcut; wider varints
+and enum tags remain delegated to Postcard.
+
+## Measured one-byte integer shortcut
+
+The expanded matrix exposed approximately 2.3× native opt-z encoding losses for
+small integer lists. Assembly shows Postcard constructing a varint buffer even
+during sizing. One shared macro now handles signed/unsigned 16/32/64-bit values:
+signed values use the standard ZigZag mapping, unsigned values below 128 go
+through Postcard's raw-u8 method, and all larger values use Postcard's unsigned
+writer. Raw 8-bit values, 128-bit values, lengths and enum tags are unchanged.
+The private adapter is constructed only around Postcard serializers, where this
+one-byte identity holds; it is not a general-purpose Serde representation change.
+
+The shortcut does not write continuation bytes or maintain a second sizing
+serializer. The original value is admitted before this dispatch, so narrowing
+the internal write method changes neither visits, charges, depth nor allocation
+ordering. Exact i16/u16 exhaustive vectors, wider boundaries, all output
+destinations, inconsistent-Serde cases and budget sweeps pass.
+
+This selected one-byte technique is informed by the pinned reference encoder
+above; its wider unrolled writers are not imported. The independently measured
+request workload falls from 5,224/2,674 to 4,953/2,435 IC instructions at opt-z/
+opt-3. The representative Wasm grows by 129/181 bytes, while remaining 736/695
+bytes smaller than reference. Opt-z response encoding rises to 1,751 instructions
+(reference 1,744); the small loss is retained explicitly alongside the larger
+request improvement. See the codec benchmark guide for native controls and
+the final measured source identities. This is a measured exception to pure
+primitive delegation, not permission to recreate all legacy specializations.
 
 ## Contract
 

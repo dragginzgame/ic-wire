@@ -6,16 +6,15 @@ host schema graph keep responsibilities explicit.
 
 See the [package guide](crates/ic-wire/README.md) for installation, examples and
 feature flags, and [release preparation](docs/release.md) for archive verification
-and the pending publication procedure. Adoption is a hard cut; legacy API,
+and the publication procedure. Adoption is a hard cut; legacy API,
 client and wire compatibility are not requirements.
 
-The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
-is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
-
-The candidate keeps the `ic-wire` package name and uses version `0.23.9`, following
-the published `0.22.4` line with a breaking Rust API. The two product manifests are
-prepared for crates.io; no publication has occurred. Qualification packages stay
-private. The version selection and GitHub push are not a registry release.
+The current release is **0.24.0**, a replacement for the published 0.22.4 line
+with a breaking Rust API. Both `ic-wire` and `ic-wire-derive` are product crates;
+qualification packages remain private. The previous implementation is retained
+in the private `dragginzgame/ic-wire-legacy` repository. Reference qualification
+uses published Core 0.22.4 and source revision
+`2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
 - [Architecture, contracts and qualification plan](docs/DESIGN.md)
 - [Current feature-parity contracts and remaining scope](docs/design/parity.md)

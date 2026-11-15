@@ -18,8 +18,17 @@ const OPERATIONS: &[&str] = &[
     "encode-reuse",
     "encode-slice",
     "decode",
+    "decode-borrowed-text",
+    "decode-borrowed-bytes",
+    "invalid-first",
+    "invalid-middle",
+    "invalid-last",
     "bad-header",
     "truncated",
+    "short-header",
+    "wrong-method",
+    "wrong-direction",
+    "trailing",
     "loop",
 ];
 #[derive(Debug)]
@@ -75,6 +84,10 @@ impl Options {
                 "--supplier" => options.supplier = value,
                 "--operation" => options.operation = value,
                 "--mode" => options.mode = value,
+                "--size" if value == "boundaries" => {
+                    options.sizes =
+                        vec![0, 1, 2, 7, 8, 15, 16, 63, 64, 127, 128, 129, 255, 256, 4096]
+                }
                 "--size" if value == "all" => options.sizes = Self::default().sizes,
                 "--size" => {
                     options.sizes =
@@ -91,6 +104,12 @@ impl Options {
         }
         if options.case != "all" && !fixtures::CASES.contains(&options.case.as_str()) {
             return Err("unknown case; use --list".into());
+        }
+        if options.case != "all"
+            && options.representation == "bulk"
+            && !fixtures::supports_bulk(&options.case)
+        {
+            return Err("this case has only an ordinary representation".into());
         }
         if options.operation != "all" && !OPERATIONS.contains(&options.operation.as_str()) {
             return Err("unknown operation; use --list".into());
@@ -110,6 +129,22 @@ impl Options {
                 "size <= 1048576, samples 3..51, batch-ms 1..100 and seconds 1..120 required"
                     .into(),
             );
+        }
+        if options.operation != "all"
+            && !fixtures::CASES.iter().any(|case| {
+                (options.case == "all" || options.case == *case)
+                    && options.sizes.iter().any(|size| {
+                        [false, true].into_iter().any(|bulk| {
+                            (!bulk || fixtures::supports_bulk(case))
+                                && (options.representation == "both"
+                                    || options.representation
+                                        == if bulk { "bulk" } else { "ordinary" })
+                                && supports_operation(case, bulk, *size, &options.operation)
+                        })
+                    })
+            })
+        {
+            return Err("operation has no applicable selected fixtures".into());
         }
         if options.mode == "profile"
             && (options.case == "all"
@@ -136,9 +171,63 @@ fn checked<C: Supplier, T: Serialize + DeserializeOwned + PartialEq + Debug>(val
     assert_eq!(C::slice(value, &mut slice), bytes.len());
     assert_eq!(slice, bytes);
     assert!(C::decode::<T>(&bytes[..bytes.len() - 1]).is_err());
-    let mut bad = bytes.clone();
-    bad[0] ^= 1;
-    assert!(C::decode::<T>(&bad).is_err());
+    for name in [
+        "bad-header",
+        "short-header",
+        "wrong-method",
+        "wrong-direction",
+        "trailing",
+    ] {
+        assert!(C::decode::<T>(&malformed(name, &bytes)).is_err(), "{name}");
+    }
+    bytes
+}
+
+fn supports_operation(case: &str, bulk: bool, size: usize, operation: &str) -> bool {
+    match operation {
+        "decode-borrowed-text" => case.starts_with("text-"),
+        "decode-borrowed-bytes" => case == "bytes",
+        "invalid-first" | "invalid-middle" | "invalid-last" => {
+            bulk && size > 0
+                && (case.starts_with("finite-")
+                    || case.starts_with("bools")
+                    || case == "nonzero-i64")
+        }
+        _ => true,
+    }
+}
+
+fn invalid_word(case: &str, size: usize, operation: &str, input: &[u8]) -> Vec<u8> {
+    let word = if case.starts_with("finite-f32") {
+        f32::INFINITY.to_le_bytes().to_vec()
+    } else if case.starts_with("finite-f64") {
+        f64::INFINITY.to_le_bytes().to_vec()
+    } else if case == "nonzero-i64" {
+        vec![0; 8]
+    } else {
+        vec![2]
+    };
+    let position = match operation {
+        "invalid-first" => 0,
+        "invalid-middle" => size / 2,
+        _ => size - 1,
+    };
+    let offset = input.len() - size * word.len() + position * word.len();
+    let mut bytes = input.to_vec();
+    bytes[offset..offset + word.len()].copy_from_slice(&word);
+    bytes
+}
+
+fn malformed(name: &str, input: &[u8]) -> Vec<u8> {
+    let mut bytes = input.to_vec();
+    match name {
+        "bad-header" => bytes[0] ^= 1,
+        "wrong-method" => bytes[2] ^= 1,
+        "wrong-direction" => bytes[10] = 1,
+        "short-header" => bytes.truncate(10),
+        "trailing" => bytes.push(0),
+        _ => unreachable!("malformed operation"),
+    }
     bytes
 }
 
@@ -168,15 +257,23 @@ fn operation<'a, C: Supplier, T: Serialize + DeserializeOwned>(
                 black_box(&output[..len]);
             })
         }
+        "decode-borrowed-text" => Box::new(move || {
+            black_box(C::decode::<&str>(black_box(input)).unwrap());
+        }),
+        "decode-borrowed-bytes" => Box::new(move || {
+            black_box(C::decode::<&serde_bytes::Bytes>(black_box(input)).unwrap());
+        }),
+        "invalid-first" | "invalid-middle" | "invalid-last" => Box::new(move || {
+            black_box(C::decode::<T>(black_box(input)).is_err());
+        }),
         "decode" => Box::new(move || {
             black_box(C::decode::<T>(black_box(input)).unwrap());
         }),
         "truncated" => Box::new(move || {
             black_box(C::decode::<T>(black_box(&input[..input.len() - 1])).is_err());
         }),
-        "bad-header" => {
-            let mut bad = input.to_vec();
-            bad[0] ^= 1;
+        "bad-header" | "short-header" | "wrong-method" | "wrong-direction" | "trailing" => {
+            let bad = malformed(name, input);
             Box::new(move || {
                 black_box(C::decode::<T>(black_box(&bad)).is_err());
             })
@@ -295,15 +392,25 @@ where
         checked::<Reference, _>(reference),
         "supplier bytes differ for {case}"
     );
-    if options.mode == "check" {
-        return;
-    }
     for &name in OPERATIONS {
-        if options.operation != "all" && options.operation != name {
+        if !supports_operation(case, bulk, size, name)
+            || options.operation != "all" && options.operation != name
+        {
             continue;
         }
-        let mut left = operation::<Candidate, _>(name, candidate, &input);
-        let mut right = operation::<Reference, _>(name, reference, &input);
+        let bad = name
+            .starts_with("invalid-")
+            .then(|| invalid_word(case, size, name, &input));
+        if let Some(bytes) = &bad {
+            assert!(Candidate::decode::<A>(bytes).is_err());
+            assert!(Reference::decode::<B>(bytes).is_err());
+        }
+        if options.mode == "check" {
+            continue;
+        }
+        let operation_input = bad.as_deref().unwrap_or(&input);
+        let mut left = operation::<Candidate, _>(name, candidate, operation_input);
+        let mut right = operation::<Reference, _>(name, reference, operation_input);
         for (supplier, measurements) in measurements(options, &mut left, &mut right) {
             println!(
                 "{}",
@@ -318,7 +425,7 @@ fn main() -> Result<(), String> {
     if options.mode == "list" {
         println!(
             "{}",
-            json!({"cases":fixtures::CASES,"operations":OPERATIONS,"default_sizes":[0,1,128,4096],"limits":{"bytes":suppliers::BYTES,"allocation":suppliers::ALLOCATION,"nodes":suppliers::NODES,"depth":suppliers::DEPTH}})
+            json!({"cases":fixtures::CASES,"operations":OPERATIONS,"default_sizes":Options::default().sizes,"ordinary_only":fixtures::CASES.iter().filter(|case| !fixtures::supports_bulk(case)).collect::<Vec<_>>(),"limits":{"bytes":suppliers::BYTES,"allocation":suppliers::ALLOCATION,"nodes":suppliers::NODES,"depth":suppliers::DEPTH}})
         );
         return Ok(());
     }
@@ -328,7 +435,8 @@ fn main() -> Result<(), String> {
         }
         for &size in &options.sizes {
             for bulk in [false, true] {
-                if options.representation == "ordinary" && bulk
+                if bulk && !fixtures::supports_bulk(case)
+                    || options.representation == "ordinary" && bulk
                     || options.representation == "bulk" && !bulk
                 {
                     continue;
@@ -350,8 +458,11 @@ mod tests {
             ..Options::default()
         };
         for &case in fixtures::CASES {
-            for size in [0, 1, 128] {
+            for size in [0, 1, 2, 7, 8, 127, 128, 129] {
                 for bulk in [false, true] {
+                    if bulk && !fixtures::supports_bulk(case) {
+                        continue;
+                    }
                     fixtures::run(&options, case, size, bulk);
                 }
             }
@@ -362,6 +473,16 @@ mod tests {
         use super::*;
         for args in [
             vec!["--case", "missing"],
+            vec!["--case", "text-ascii", "--representation", "bulk"],
+            vec!["--case", "i16-small", "--operation", "decode-borrowed-text"],
+            vec![
+                "--case",
+                "finite-f32",
+                "--size",
+                "0",
+                "--operation",
+                "invalid-first",
+            ],
             vec!["--operation", "write-only"],
             vec!["--size", "1048577"],
             vec!["--samples", "0"],

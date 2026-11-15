@@ -4,6 +4,9 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+const workload = process.argv[2] ?? 'wire-consumer';
+assert(['wire-consumer', 'wire-float-consumer'].includes(workload), 'unknown workload');
+assert(process.argv.length <= 3, 'expected at most one workload');
 for (const name of Object.keys(process.env)) {
   if (['RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS', 'RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER'].includes(name) || name.startsWith('CARGO_PROFILE_') || /^CARGO_TARGET_.*_RUSTFLAGS$/.test(name)) {
     assert(!process.env[name], `unset ${name} for the fixed comparison`);
@@ -29,7 +32,7 @@ inputs.push('crates/ic-wire/Cargo.toml','crates/ic-wire-derive/Cargo.toml','qual
 const hashes = Object.fromEntries(inputs.sort().map(path => [path,sha(readFileSync(path))]));
 mkdirSync('qualification/target',{recursive:true});
 const output = mkdtempSync(resolve('qualification/target/wasm-comparison-'));
-const report = { compiler:command('rustc',['-Vv'],true), node:process.version,
+const report = { workload, compiler:command('rustc',['-Vv'],true), node:process.version,
   base_commit:command('git',['rev-parse','HEAD'],true), source_sha256:sha(JSON.stringify(hashes)),
   lock_sha256:hashes['qualification/Cargo.lock'], artifacts:[] };
 writeFileSync(join(output,'inputs.json'),JSON.stringify(hashes,null,2)+'\n');
@@ -51,8 +54,8 @@ function sections(bytes) {
 for (const profile of ['wire-size','wire-speed']) {
   for (const supplier of ['candidate','reference']) {
     const target=join(output,`${profile}-${supplier}`);
-    command('cargo',['build','--manifest-path','qualification/Cargo.toml','-p','ic-wire-consumer','--no-default-features','--features',supplier,'--bin','wire-consumer','--target','wasm32-unknown-unknown','--profile',profile,'--target-dir',target,'--locked','--offline']);
-    const path=join(target,'wasm32-unknown-unknown',profile,'wire-consumer.wasm');
+    command('cargo',['build','--manifest-path','qualification/Cargo.toml','-p','ic-wire-consumer','--no-default-features','--features',supplier,'--bin',workload,'--target','wasm32-unknown-unknown','--profile',profile,'--target-dir',target,'--locked','--offline']);
+    const path=join(target,'wasm32-unknown-unknown',profile,`${workload}.wasm`);
     const bytes=readFileSync(path), module=new WebAssembly.Module(bytes);
     assert.deepEqual(WebAssembly.Module.imports(module),[]);
     assert.equal(new WebAssembly.Instance(module).exports.main(0,0),0);

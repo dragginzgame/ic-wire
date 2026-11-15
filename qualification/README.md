@@ -18,8 +18,10 @@ using an explicitly prepared PocketIC server and [isolated native driver](ic-ins
 The first run identifies request-encoding regressions at both profiles and a
 small opt-3 response-encoding regression; its performance criterion remains unmet.
 
-`make bench-codec` measures 13 native workload families with ordinary/bulk controls,
-public codec phases and paired suppliers. `make bench-codec-allocations` measures
+`make bench-codec` measures 52 native workload families with applicable ordinary/bulk
+controls, owned/borrowed decoding, framing/domain failures and paired suppliers.
+`--size boundaries` selects length transitions; see `CODEC_ARGS` in the guide.
+`make bench-codec-allocations` measures
 allocation counts in a separate build; `make profile-codec` prepares a selected
 operation for perf call-stack sampling where host permissions allow it. See
 [the codec investigation guide](../docs/design/codec-benchmarks.md).
@@ -29,7 +31,7 @@ workloads, phase boundaries and first results are recorded in
 [schema measurement](../docs/design/schema-measurement.md). The first run found
 small-registry regressions; it does not establish a candidate performance win.
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.9`
+This independent, unpublished workspace compares candidate `ic-wire 0.24.0`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -308,3 +310,9 @@ these tests do not imply equal cross-language budget accounting. Native endian
 conversion on a big-endian host and matched performance measurements remain
 outstanding. Run this subset by replacing `bulk_cases` in the command above with
 `bulk_cases::packed`.
+## Float workload
+
+`node qualification/consumer/measure-wasm.mjs wire-float-consumer` compares a
+separate finite-f32 consumer at opt-z/opt-3 and executes bitwise roundtrips and
+nonfinite rejection. The default remains the frozen upload consumer; float
+results are size/execution evidence, not installed IC instruction counts.

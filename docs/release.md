@@ -1,21 +1,19 @@
-# Crates.io preparation
+# Crates.io release
 
-The next intended public release is **0.24.0**, selected by the user while
-performance investigation continues. Manifests now select the user-requested
-0.23.9 GitHub evaluation patch; historical archive
-evidence describes 0.23.8. At release preparation, update
-both product versions and their dependency requirements together, check registry
-availability again, and repeat archive verification for the final inputs.
-The future release target does not trigger publication during this investigation.
-The subsequent packed-word performance fix has focused native/Wasm/IC evidence;
-the archive checks below predate that fix and must be refreshed for 0.24.0.
+The user authorized public GitHub delivery and crates.io publication of both
+product packages at **0.24.0** on 15 November 2026. The repository is now
+`dragginzgame/ic-wire`; `ic-wire-legacy` retains the previous implementation
+privately. Qualification crates remain unpublished.
 
-Publication is explicitly **not authorized** for this preparation. Nothing here
-uploads packages automatically. The product roster is `ic-wire-derive` and
-`ic-wire`, version 0.23.9. Qualification crates remain private. The crates.io
-sparse index checked on 15 November 2026 lists 0.22.4 as the latest version of
-both names, leaving 0.23.8 available. Both owner lookups return `borovan`.
-A successful dry run does not establish that a credential has upload permission.
+The crates.io sparse index checked for this release lists 0.22.4 as the latest
+version of both product names; 0.24.0 is available. Direct first-party selections
+are current stable non-yanked versions: Platform Types 0.20.4, Platform Runtime
+0.22.5, Testkit 0.106.0 and Toko Tooling 0.44.3. Simulator transitive first-party
+selections are also current: Platform 0.33.7 and Host Artifacts/FS/Process 0.79.0.
+No supplier refresh is needed.
+
+Publication follows the ordered procedure below. Registry state, rather than
+these notes or a dry run, establishes whether each upload has completed.
 
 ## Prepared product
 
@@ -38,12 +36,19 @@ After that consolidation, the refreshed archive tests, Chromium smoke and
 coordinated non-publishing Cargo dry run pass. The focused TypeScript suite now
 has 24 tests, including independent generic-bound cases beyond legacy coverage.
 
-The user chose simplicity over speculative specialization. The measured request
-encode regressions (+5.30%/+9.46% at opt-z/opt-3), opt-3 response encode regression
-(+0.87%) and single-root host cost are disclosed tradeoffs for this preparation.
-They do not become speed improvements or disappear because size is smaller.
-See [performance qualification](design/performance.md). Extra domain-adapter
-benchmarks and a scratch/fallback helper are not first-publication requirements.
+The final performance changes remove the representative request-encode
+regression. Opt-z response encoding remains seven instructions above reference;
+wide integers, float decoding and single-root host costs remain disclosed. See
+[performance qualification](design/performance.md). Native timing and Wasm size
+are separate evidence; no universal speed improvement is claimed.
+
+## 0.24.0 validation
+
+Final-version Clippy gates, native/host/derive/qualification tests, strict
+TypeScript exchange, Rustdoc and Wasm checks passed. Fresh extracted archives
+passed the all-feature core tests, literal-frame/platform consumer tests, Wasm
+execution and generated-client Chromium smoke. The coordinated registry dry run
+verified both final packages and aborted uploads as expected.
 
 ## Preparation checks
 
@@ -71,7 +76,8 @@ The explicit archive checks avoid that offline verifier path. Subsequently,
 `cargo publish --workspace --dry-run --all-features --allow-dirty` with registry
 access successfully packaged and verified both crates using Cargo's temporary
 registry, then explicitly aborted both uploads. The standalone derive dry run
-also passed. No real publish command has run. Ordinary dry runs need registry
+also passed. That was historical preparation evidence; 0.24.0 requires fresh archive and
+registry checks. Ordinary dry runs need registry
 access even when all selected dependency sources are already cached.
 
 The browser check compiles the archive-generated TypeScript to ES2022 modules
@@ -83,7 +89,7 @@ smoke test, not a Safari/Firefox support matrix or a browser speed benchmark.
 The headless test disables Chromium's sandbox for this controlled local fixture;
 that is not an application/browser deployment recommendation.
 
-## Later publication, only when requested
+## Authorized publication procedure
 
 1. Freeze the intended source and review the final package lists, versions and
    dependency selection. Commit/push the prepared changes when authorized.
@@ -97,7 +103,7 @@ that is not an application/browser deployment recommendation.
    resumed from observed registry state; never blindly repeat or change a version
    that has already been uploaded.
 
-The ordered Cargo commands, for a separately authorized publication, are:
+The ordered Cargo commands are:
 
 ```sh
 cargo publish -p ic-wire-derive --locked
@@ -107,5 +113,4 @@ cargo publish -p ic-wire --all-features --locked
 ```
 
 There is no automatic release runner, consumer migration or tag creation in this
-preparation. Registry-dependent core verification and actual upload authority
-remain delivery-time checks, not a reason to publish early during preparation.
+preparation. Registry-dependent core verification remains a delivery-time check.

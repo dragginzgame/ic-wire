@@ -1,4 +1,4 @@
-//! Bounded Serde serialization; primitives delegate to Postcard.
+//! Bounded Serde serialization over Postcard.
 // Adapter structure adapted from pinned IC Wire / IcyDB native admission.
 // Provenance and qualification: docs/design/encoding.md.
 
@@ -47,6 +47,23 @@ macro_rules! forward_scalar {
     )*};
 }
 
+// This private adapter only wraps Postcard serializers. A one-byte varint is
+// exactly its raw u8 encoding; wider values keep Postcard's varint writer.
+macro_rules! small_integer {
+    ($signed:ident: $signed_ty:ty, $unsigned:ident: $unsigned_ty:ty) => {
+        fn $signed(self, value: $signed_ty) -> Result<Self::Ok, Self::Error> {
+            self.$unsigned(((value << 1) ^ (value >> (<$signed_ty>::BITS - 1))) as $unsigned_ty)
+        }
+        fn $unsigned(self, value: $unsigned_ty) -> Result<Self::Ok, Self::Error> {
+            if value < 128 {
+                self.inner.serialize_u8(value as u8)
+            } else {
+                self.inner.$unsigned(value)
+            }
+        }
+    };
+}
+
 impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     type Ok = S::Ok;
     type Error = S::Error;
@@ -60,19 +77,16 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     forward_scalar! {
         serialize_bool: bool,
         serialize_i8: i8,
-        serialize_i16: i16,
-        serialize_i32: i32,
-        serialize_i64: i64,
         serialize_i128: i128,
         serialize_u8: u8,
-        serialize_u16: u16,
-        serialize_u32: u32,
-        serialize_u64: u64,
         serialize_u128: u128,
         serialize_f32: f32,
         serialize_f64: f64,
         serialize_char: char,
     }
+    small_integer!(serialize_i16: i16, serialize_u16: u16);
+    small_integer!(serialize_i32: i32, serialize_u32: u32);
+    small_integer!(serialize_i64: i64, serialize_u64: u64);
     fn serialize_str(self, value: &str) -> Result<Self::Ok, Self::Error> {
         if !self.budget.charge_buffer(value.len()) {
             return Err(ser::Error::custom("payload allocation allowance exceeded"));

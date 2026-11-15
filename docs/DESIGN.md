@@ -2,7 +2,7 @@
 
 Status: proposed architecture and evaluation contract, 15 November 2026. This replaces the supplied Contract and qualification boundaries and Replacement evaluation as the active design proposal. The migration and qualification plan below defines execution gates.
 
-Reference: [ic-wire at 2dc434b10bec2fca92345d940dbfedc05993e9d5](https://github.com/dragginzgame/ic-wire/tree/2dc434b10bec2fca92345d940dbfedc05993e9d5), Core 0.22.4. All repository observations below refer to that commit.
+Reference: [ic-wire at 2dc434b10bec2fca92345d940dbfedc05993e9d5](https://github.com/dragginzgame/ic-wire-legacy/tree/2dc434b10bec2fca92345d940dbfedc05993e9d5), Core 0.22.4. All repository observations below refer to that commit.
 
 ## Current decision: hard cut
 
@@ -21,9 +21,13 @@ This decision does not deploy consumers, reset stored state or publish packages.
 ## Release preparation
 
 The user selected simplicity over speculative specialization and authorized
-package preparation, explicitly excluding publication. The measured encoding and
-single-root host regressions remain disclosed tradeoffs, not reasons to add
-legacy fast paths before the first release. Zero-regression research criteria
+package preparation, initially excluding publication. The user subsequently
+authorized renaming the public repository to `ic-wire` and publishing both
+product crates as 0.24.0. After the expanded matrix,
+the user requested fixing the important losses. A shared one-byte integer shortcut
+now has exact-byte/admission proof and measured native/IC benefit; wider varints
+remain delegated. The small Wasm-size and opt-z response tradeoffs are recorded in
+[encoding](design/encoding.md). Single-root host costs remain disclosed. Zero-regression research criteria
 below remain experiment results rather than absolute publication blockers.
 Correctness, admission and package/browser verification remain required.
 
@@ -53,9 +57,9 @@ The sibling checkout was unavailable in this workspace. Source was read from pub
 | The TypeScript runtime executes one schema interpreter with trusted metadata and custom checks | Do not introduce a generated execution function for every schema |
 | Release roster validation already delegates to Shared tooling | Do not recreate the Platform-specific Make-regex problem in this design |
 
-Sources: [core manifest](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/Cargo.toml), [core API](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/lib.rs), [codec orchestration](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/native/mod.rs), [schema registry](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/native_schema/registry/mod.rs), [schema rendering](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/metadata/mod.rs), [TS runtime](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/runtime.ts), [release roster](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/scripts/ci/wire-validation-roster.pl).
+Sources: [core manifest](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/Cargo.toml), [core API](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/lib.rs), [codec orchestration](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/native/mod.rs), [schema registry](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/native_schema/registry/mod.rs), [schema rendering](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/metadata/mod.rs), [TS runtime](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/runtime.ts), [release roster](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/scripts/ci/wire-validation-roster.pl).
 
-The workspace declares Rust 1.100.0. Its manifest permits Platform Types from 0.20.1 and Postcard from 1.1.1, while the committed lock resolves Platform Types 0.20.4, Postcard 1.1.3 and Serde 1.0.229. These resolved sources, not the lower manifest bounds, define the initial comparison cohort. [Manifest](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/Cargo.toml), [lockfile](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/Cargo.lock).
+The workspace declares Rust 1.100.0. Its manifest permits Platform Types from 0.20.1 and Postcard from 1.1.1, while the committed lock resolves Platform Types 0.20.4, Postcard 1.1.3 and Serde 1.0.229. These resolved sources, not the lower manifest bounds, define the initial comparison cohort. [Manifest](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/Cargo.toml), [lockfile](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/Cargo.lock).
 
 Historical reports may describe other complete runs. The user's stopped 29/39-cohort matrix remains partial evidence; neither it nor a different historical report qualifies the replacement.
 
@@ -94,7 +98,7 @@ The frame is exactly 11 header bytes followed by the existing Postcard payload:
 | 10 | Request 0 or response 1 |
 | 11 onward | Payload, with no implicit extra envelope |
 
-A payload API never adds or strips a frame. Method IDs use the existing explicit value or FNV-1a-64 over UTF-8 `ic-wire:method:` followed by the exact exported method name, with the reference constants and wrapping arithmetic. This is routing identity, not authentication or a schema hash. Duplicate numeric IDs must fail host registry admission. [Header](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/contract/mod.rs), [method ID](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/native/mod.rs).
+A payload API never adds or strips a frame. Method IDs use the existing explicit value or FNV-1a-64 over UTF-8 `ic-wire:method:` followed by the exact exported method name, with the reference constants and wrapping arithmetic. This is routing identity, not authentication or a schema hash. Duplicate numeric IDs must fail host registry admission. [Header](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/contract/mod.rs), [method ID](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/native/mod.rs).
 
 Field and variant declaration order, Serde attributes and explicit adapter selection are protocol inputs. Sorting fields, switching vectors to byte buffers, or renaming an exported method is not a harmless cleanup.
 
@@ -186,7 +190,7 @@ Create an operation-by-operation accounting table from the pinned encode/decode 
 
 On decode, suppress attacker-controlled sequence/map size hints before a standard visitor can reserve from them. Admit visited values and buffer spans before the corresponding consumer allocation boundary that Wire controls. On encode, size/admit before reserving output.
 
-Do not claim that a complete document is validated before every allocation. Incremental decoding may allocate a valid prefix before discovering malformed later data. Custom Serde can allocate or execute arbitrary work outside Wire visits. Traversal allowances neither sandbox that code nor guarantee fallible handling of every allocator failure. [Decode admission](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/native/decode/mod.rs), [allocation tests](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/tests/native/allocation/mod.rs).
+Do not claim that a complete document is validated before every allocation. Incremental decoding may allocate a valid prefix before discovering malformed later data. Custom Serde can allocate or execute arbitrary work outside Wire visits. Traversal allowances neither sandbox that code nor guarantee fallible handling of every allocator failure. [Decode admission](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/native/decode/mod.rs), [allocation tests](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/tests/native/allocation/mod.rs).
 
 Keep Postcard as the primitive engine initially. The current encoder includes specialized integer emission. Compare direct supplier delegation with each specialization; retain a specialization only with exact-byte/acceptance proof and a material measured benefit. Do not start by writing another full serializer or primitive parser.
 
@@ -212,7 +216,7 @@ Avoid a generic adapter policy language. Use a sealed set of admitted word repre
 
 Borrowed byte/text views point into the selected original input span and cannot outlive it. Packed owned decode must not accidentally become a borrowed typed cast. TypeScript byte/typed-array ownership must retain the reference's copy and selected-buffer semantics, including nonzero byteOffset and unaligned input.
 
-Ordinary small-value vector controls remain in evaluation. Packed representations can be larger or slower for those values. Advice may recommend a review; it must never rewrite fields or regenerate a different wire contract automatically. [Representation contracts](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/docs/guides/runtime.md), [Packed implementation](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/packed/mod.rs).
+Ordinary small-value vector controls remain in evaluation. Packed representations can be larger or slower for those values. Advice may recommend a review; it must never rewrite fields or regenerate a different wire contract automatically. [Representation contracts](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/docs/guides/runtime.md), [Packed implementation](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/packed/mod.rs).
 
 ## 8 One validated host schema graph
 
@@ -267,7 +271,7 @@ Validate externally supplied metadata at the host boundary. The browser factory 
 
 Preserve numeric/BigInt boundaries, option/result/enum representations, UTF-8 behavior, primitive acceptance, declaration order, little-endian packed output, strict domain validators and trailing-input rejection. Test invalid numbers and large lengths before output allocation where the corresponding runtime boundary controls it.
 
-Rust allocation charges cannot be copied into JavaScript and relabeled as heap bounds. The reference projects bytes/nodes/depth with different traversal semantics. Keep that distinction explicit and test cross-language byte behavior under separately sufficient budgets. [Limit projection](https://github.com/dragginzgame/ic-wire/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/limits/mod.rs).
+Rust allocation charges cannot be copied into JavaScript and relabeled as heap bounds. The reference projects bytes/nodes/depth with different traversal semantics. Keep that distinction explicit and test cross-language byte behavior under separately sufficient budgets. [Limit projection](https://github.com/dragginzgame/ic-wire-legacy/blob/2dc434b10bec2fca92345d940dbfedc05993e9d5/crates/ic-wire/src/typescript/limits/mod.rs).
 
 Retain the reference's TS error contract or explicitly migrate it. For example, Rust Trailing and TS malformed currently need an intentional mapping; byte interoperability does not require inventing equal error enum names.
 

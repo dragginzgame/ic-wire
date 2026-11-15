@@ -157,8 +157,19 @@ existing Serde/Postcard path. Nonzero and heap encoding reuse the packed word
 serializer; decoding reuses owned packed words before enforcing nonzero values or
 reconstructing the heap. Bool decoding uses a safe checked Bytemuck view. Both
 finite widths share one source pattern for validation, endian conversion and
-owned decoding. The reference's unrolled/exponent-carry scanner optimizations
-were not imported without a new matched measurement.
+owned decoding. The 0.24.0 change uses one two-word f32 exponent scan
+after matched native and Wasm measurement; the reference's larger unrolled
+scanner is not imported. Scalar tails and f64 retain the existing path.
+
+Destination contract: identical finite bits and partial-word/NaN/infinity
+rejection before allocation. The pair arithmetic is informed by the pinned
+reference's `crates/ic-wire/src/serde_packed/finite/mod.rs` (SHA-256
+`d6407f88e9ae36c629fbe03367a17bd0eaabf3073a9653150df54cd14bafd490`),
+under the retained attribution/license. Masking exponent lanes before addition
+prevents mantissa/sign interference and cross-lane carries. An exhaustive
+262,144-case test covers both exponent lanes and sign/mantissa extremes;
+literal signed-zero/subnormal, odd-tail and malformed-position checks remain.
+See [measured tradeoffs](codec-benchmarks.md#measured-integer-and-finite-float-improvements).
 
 Reference `serde_packed/*/mod.rs` supplies the selected contracts and minimal
 adapter algorithms under the retained license. Bool and finite spans reject

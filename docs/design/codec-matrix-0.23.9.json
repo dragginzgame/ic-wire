@@ -1,0 +1,788 @@
+{
+  "purpose": "Broad native screening; 5 samples and 1 ms calibration, no universal speed guarantee or CI timing gate.",
+  "product": "Pushed 0.23.9; this expansion changes only qualification.",
+  "correctness": {
+    "test_target": "codec_bench",
+    "test_functions": 5,
+    "unit_matrix_value_representation_pairs": 680,
+    "boundary_sweep_value_representation_pairs": 1275,
+    "large_value_representation_pairs": 5,
+    "suppliers_per_pair": 2,
+    "large_cases": [
+      "bytes ordinary/bulk at 1048576",
+      "u64-wide ordinary/bulk at 1048576",
+      "text-unicode ordinary at 1048576 repeated units"
+    ]
+  },
+  "allocation_summary": {
+    "preflight": {
+      "rows": 680,
+      "rows_with_allocation_or_reallocation": 0
+    },
+    "encode-reuse": {
+      "rows": 680,
+      "rows_with_allocation_or_reallocation": 0
+    },
+    "encode-slice": {
+      "rows": 680,
+      "rows_with_allocation_or_reallocation": 0
+    },
+    "decode-borrowed-text": {
+      "rows": 24,
+      "rows_with_allocation_or_reallocation": 0
+    },
+    "decode-borrowed-bytes": {
+      "rows": 16,
+      "rows_with_allocation_or_reallocation": 0
+    },
+    "invalid-first": {
+      "rows": 60,
+      "rows_with_allocation_or_reallocation": 6
+    },
+    "invalid-middle": {
+      "rows": 60,
+      "rows_with_allocation_or_reallocation": 6
+    },
+    "invalid-last": {
+      "rows": 60,
+      "rows_with_allocation_or_reallocation": 6
+    }
+  },
+  "reports": [
+    {
+      "mode": "measure",
+      "profile": "codec-profile",
+      "base_commit": "c9ae8e388350894aea4f6bfc938418bb92b4fe79",
+      "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+      "binary_sha256": "df67f86a5761229ef9a979f6d0d9ae8030d70480710bee11c5e51419a3f0bdd3",
+      "compiler": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.100.0\nLLVM version: 23.1.5",
+      "host": {
+        "platform": "linux",
+        "release": "7.0.0-42-generic",
+        "arch": "x64",
+        "cpu": "AMD Ryzen Threadripper 7970X 32-Cores"
+      },
+      "completed": true,
+      "total_rows": 8380,
+      "full_report_path": "qualification/target/codec-measure-BWW86B/report.json",
+      "full_report_sha256": "6b0682376e395ae1647e0a2297d5795ea9a4d439c4450ec63ba2be78b7b04afe",
+      "rows": [
+        {
+          "case": "u32-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 59578.09375,
+            "median_ns": 55920.0625,
+            "min_ns": 53620.0625,
+            "repetitions": 32
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 24064.640625,
+            "median_ns": 23908.171875,
+            "min_ns": 23612.078125,
+            "repetitions": 64
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 34778.28125,
+            "median_ns": 34124.15625,
+            "min_ns": 33634.34375,
+            "repetitions": 32
+          },
+          "operation": "decode",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 35818.25,
+            "median_ns": 34839.3125,
+            "min_ns": 34801.71875,
+            "repetitions": 32
+          },
+          "operation": "decode",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 315.198486328125,
+            "median_ns": 312.62353515625,
+            "min_ns": 312.19091796875,
+            "repetitions": 4096
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 300.45703125,
+            "median_ns": 299.801513671875,
+            "min_ns": 287.95751953125,
+            "repetitions": 4096
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 1880.3193359375,
+            "median_ns": 1864.4072265625,
+            "min_ns": 1861.9521484375,
+            "repetitions": 1024
+          },
+          "operation": "decode",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "u32-small",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 1550.5166015625,
+            "median_ns": 1188.7216796875,
+            "min_ns": 1177.19140625,
+            "repetitions": 1024
+          },
+          "operation": "decode",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "nested-list",
+          "frame_bytes": 32333,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 267086.75,
+            "median_ns": 261435.75,
+            "min_ns": 261090.25,
+            "repetitions": 4
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 32322,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "nested-list",
+          "frame_bytes": 32333,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 168960.375,
+            "median_ns": 165104.75,
+            "min_ns": 162348,
+            "repetitions": 8
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 32322,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "nested-list",
+          "frame_bytes": 32333,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 331841.75,
+            "median_ns": 328314,
+            "min_ns": 322720.75,
+            "repetitions": 4
+          },
+          "operation": "decode",
+          "payload_bytes": 32322,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "nested-list",
+          "frame_bytes": 32333,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 333466.75,
+            "median_ns": 331015.5,
+            "min_ns": 325282,
+            "repetitions": 4
+          },
+          "operation": "decode",
+          "payload_bytes": 32322,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 53833.8125,
+            "median_ns": 50991.40625,
+            "min_ns": 50040.28125,
+            "repetitions": 32
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 22042.6875,
+            "median_ns": 21799.515625,
+            "min_ns": 21100.65625,
+            "repetitions": 64
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 23922.25,
+            "median_ns": 23815.046875,
+            "min_ns": 23602.53125,
+            "repetitions": 64
+          },
+          "operation": "decode",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 4109,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 32384.8125,
+            "median_ns": 27444.578125,
+            "min_ns": 27256.78125,
+            "repetitions": 64
+          },
+          "operation": "decode",
+          "payload_bytes": 4098,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 8205,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 166.4173583984375,
+            "median_ns": 153.328857421875,
+            "min_ns": 148.6527099609375,
+            "repetitions": 8192
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 8194,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 8205,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 140.5484619140625,
+            "median_ns": 135.43212890625,
+            "min_ns": 134.4783935546875,
+            "repetitions": 8192
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 8194,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 8205,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 1846.087890625,
+            "median_ns": 1780.3642578125,
+            "min_ns": 1775.9140625,
+            "repetitions": 1024
+          },
+          "operation": "decode",
+          "payload_bytes": 8194,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "i16-small",
+          "frame_bytes": 8205,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 1809.34375,
+            "median_ns": 1092.1708984375,
+            "min_ns": 1087.69140625,
+            "repetitions": 1024
+          },
+          "operation": "decode",
+          "payload_bytes": 8194,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16397,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 26903.140625,
+            "median_ns": 25363,
+            "min_ns": 24940.65625,
+            "repetitions": 64
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 16386,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16397,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 27727.8125,
+            "median_ns": 27193.5625,
+            "min_ns": 26615.984375,
+            "repetitions": 64
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 16386,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16397,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 19960.03125,
+            "median_ns": 17864.21875,
+            "min_ns": 17527.3125,
+            "repetitions": 64
+          },
+          "operation": "decode",
+          "payload_bytes": 16386,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16397,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 22578.34375,
+            "median_ns": 21324.75,
+            "min_ns": 20044.0625,
+            "repetitions": 64
+          },
+          "operation": "decode",
+          "payload_bytes": 16386,
+          "representation": "ordinary",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 2048.765625,
+            "median_ns": 2026.564453125,
+            "min_ns": 2017.29296875,
+            "repetitions": 512
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 1151.0185546875,
+            "median_ns": 1141.130859375,
+            "min_ns": 1117.82421875,
+            "repetitions": 1024
+          },
+          "operation": "encode-owned",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 2088.904296875,
+            "median_ns": 2043.015625,
+            "min_ns": 1991.455078125,
+            "repetitions": 512
+          },
+          "operation": "decode",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 2027.201171875,
+            "median_ns": 1450.39453125,
+            "min_ns": 1403.9287109375,
+            "repetitions": 1024
+          },
+          "operation": "decode",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 15.209503173828125,
+            "median_ns": 14.958343505859375,
+            "min_ns": 14.6226806640625,
+            "repetitions": 131072
+          },
+          "operation": "invalid-first",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 15.816940307617188,
+            "median_ns": 15.555465698242188,
+            "min_ns": 15.25823974609375,
+            "repetitions": 65536
+          },
+          "operation": "invalid-first",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 1075.26513671875,
+            "median_ns": 928.66796875,
+            "min_ns": 904.994140625,
+            "repetitions": 2048
+          },
+          "operation": "invalid-last",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "candidate"
+        },
+        {
+          "case": "finite-f32",
+          "frame_bytes": 16398,
+          "instrumented_allocator": false,
+          "measurements": {
+            "max_ns": 484.3076171875,
+            "median_ns": 479.08984375,
+            "min_ns": 466.85986328125,
+            "repetitions": 2048
+          },
+          "operation": "invalid-last",
+          "payload_bytes": 16387,
+          "representation": "bulk",
+          "size": 4096,
+          "supplier": "reference"
+        }
+      ]
+    },
+    {
+      "mode": "measure",
+      "profile": "codec-profile-speed",
+      "base_commit": "c9ae8e388350894aea4f6bfc938418bb92b4fe79",
+      "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+      "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e",
+      "compiler": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.100.0\nLLVM version: 23.1.5",
+      "host": {
+        "platform": "linux",
+        "release": "7.0.0-42-generic",
+        "arch": "x64",
+        "cpu": "AMD Ryzen Threadripper 7970X 32-Cores"
+      },
+      "completed": true,
+      "total_rows": 8380,
+      "full_report_path": "qualification/target/codec-measure-T6Zl8e/report.json",
+      "full_report_sha256": "62e148d257a3a68241fc70f1d1092f044a19e229f53a4fe9b3035ec88878db9d"
+    },
+    {
+      "mode": "allocations",
+      "profile": "codec-profile",
+      "base_commit": "c9ae8e388350894aea4f6bfc938418bb92b4fe79",
+      "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+      "binary_sha256": "a70fa1531ef1cab92437d3d42d5130f849bfd09d7345ab3d3f23733c06ed217f",
+      "compiler": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.100.0\nLLVM version: 23.1.5",
+      "host": {
+        "platform": "linux",
+        "release": "7.0.0-42-generic",
+        "arch": "x64",
+        "cpu": "AMD Ryzen Threadripper 7970X 32-Cores"
+      },
+      "completed": true,
+      "total_rows": 8380,
+      "full_report_path": "qualification/target/codec-allocations-lWYa3o/report.json",
+      "full_report_sha256": "43e9caa5b14246f25c00bc4a38fde50ea123a0a8704528d885cab3a7b3c7eadb"
+    }
+  ],
+  "admission_inline_investigation": {
+    "decision": "Rejected and source restored exactly to 0.23.9. Native opt-z ordinary encoding improved about 9-11% in selected runs, but packed-u16 decode regressed reproducibly about 69%. Broad opt-3 bulk encode anomaly did not reproduce in longer selected runs.",
+    "change": "Temporary replacement of cfg_attr(target_arch = \"wasm32\", inline(always)) with inline(always) on Budget::enter_many only. All checks/accounting remained unchanged.",
+    "assembly_observation": "Baseline opt-z ordinary i16 sizing loop calls Budget::enter_many and Postcard try_push_varint_u16 per element. The latter materializes a temporary varint buffer and invokes varint_u16 before adding its length. The private Postcard supplier was inspected, not modified.",
+    "broad_screen": [
+      {
+        "profile": "codec-profile",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "caa582d4da3183b745c978581f8914eddf9d99ec235ada8b5b3f4f335c1179fd",
+        "total_rows": 680,
+        "run": [
+          "/home/adam/projects/ic-wire-new/qualification/target/codec-profile/build/ic-wire-compatibility/e6f1825e20c1501e/out/codec-e6f1825e20c1501e",
+          "--operation",
+          "encode-owned",
+          "--samples",
+          "5",
+          "--batch-ms",
+          "1",
+          "--mode",
+          "measure"
+        ],
+        "local_report": "qualification/target/codec-measure-vfRvUS/report.json"
+      },
+      {
+        "profile": "codec-profile",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "caa582d4da3183b745c978581f8914eddf9d99ec235ada8b5b3f4f335c1179fd",
+        "total_rows": 680,
+        "run": [
+          "/home/adam/projects/ic-wire-new/qualification/target/codec-profile/build/ic-wire-compatibility/e6f1825e20c1501e/out/codec-e6f1825e20c1501e",
+          "--operation",
+          "decode",
+          "--samples",
+          "5",
+          "--batch-ms",
+          "1",
+          "--mode",
+          "measure"
+        ],
+        "local_report": "qualification/target/codec-measure-PuM7vw/report.json"
+      },
+      {
+        "profile": "codec-profile-speed",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e",
+        "total_rows": 680,
+        "run": [
+          "/home/adam/projects/ic-wire-new/qualification/target/codec-profile-speed/build/ic-wire-compatibility/85fd2a853726d01a/out/codec-85fd2a853726d01a",
+          "--operation",
+          "encode-owned",
+          "--samples",
+          "5",
+          "--batch-ms",
+          "1",
+          "--mode",
+          "measure"
+        ],
+        "local_report": "qualification/target/codec-measure-mSDcjF/report.json"
+      },
+      {
+        "profile": "codec-profile-speed",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e",
+        "total_rows": 680,
+        "run": [
+          "/home/adam/projects/ic-wire-new/qualification/target/codec-profile-speed/build/ic-wire-compatibility/85fd2a853726d01a/out/codec-85fd2a853726d01a",
+          "--operation",
+          "decode",
+          "--samples",
+          "5",
+          "--batch-ms",
+          "1",
+          "--mode",
+          "measure"
+        ],
+        "local_report": "qualification/target/codec-measure-5lLKDV/report.json"
+      }
+    ],
+    "selected": [
+      {
+        "description": "baseline i16",
+        "profile": "codec-profile",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "df67f86a5761229ef9a979f6d0d9ae8030d70480710bee11c5e51419a3f0bdd3"
+      },
+      {
+        "description": "baseline u32",
+        "profile": "codec-profile",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "df67f86a5761229ef9a979f6d0d9ae8030d70480710bee11c5e51419a3f0bdd3"
+      },
+      {
+        "description": "baseline nested",
+        "profile": "codec-profile",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "df67f86a5761229ef9a979f6d0d9ae8030d70480710bee11c5e51419a3f0bdd3"
+      },
+      {
+        "description": "inline i16",
+        "profile": "codec-profile",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "caa582d4da3183b745c978581f8914eddf9d99ec235ada8b5b3f4f335c1179fd"
+      },
+      {
+        "description": "inline u32",
+        "profile": "codec-profile",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "caa582d4da3183b745c978581f8914eddf9d99ec235ada8b5b3f4f335c1179fd"
+      },
+      {
+        "description": "inline nested",
+        "profile": "codec-profile",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "caa582d4da3183b745c978581f8914eddf9d99ec235ada8b5b3f4f335c1179fd"
+      },
+      {
+        "description": "baseline opt-3 i16",
+        "profile": "codec-profile-speed",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e"
+      },
+      {
+        "description": "baseline opt-3 nested",
+        "profile": "codec-profile-speed",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e"
+      },
+      {
+        "description": "inline opt-3 i16",
+        "profile": "codec-profile-speed",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e"
+      },
+      {
+        "description": "inline opt-3 nested",
+        "profile": "codec-profile-speed",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e"
+      },
+      {
+        "description": "inline opt-3 bulk repeat",
+        "profile": "codec-profile-speed",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e"
+      },
+      {
+        "description": "inline opt-z bulk repeat",
+        "profile": "codec-profile",
+        "source_sha256": "3c8e821a433d0f3c5f5e27ff7852f7db26ee4780ca2352f5713efe7cf75c97eb",
+        "binary_sha256": "caa582d4da3183b745c978581f8914eddf9d99ec235ada8b5b3f4f335c1179fd"
+      },
+      {
+        "description": "restored opt-3 bulk repeat",
+        "profile": "codec-profile-speed",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "a4cd26c14578dc01eb6917be24a74817568c5591e73d94dedfb1ee993cc86c0e"
+      },
+      {
+        "description": "restored opt-z bulk repeat",
+        "profile": "codec-profile",
+        "source_sha256": "38a7df9750790d57cbc6eba7f48cd4d41c74ec7fdf0d02cb616ac414a9ba32f2",
+        "binary_sha256": "df67f86a5761229ef9a979f6d0d9ae8030d70480710bee11c5e51419a3f0bdd3"
+      }
+    ],
+    "wasm_and_ic": "Not rerun for this rejected experiment. The final product source is restored unchanged; no new Wasm or IC improvement is claimed."
+  },
+  "retention": "Compact selected results and identities; raw samples/input manifests remain in local target reports and are not retained in Git."
+}

@@ -1,5 +1,5 @@
 //! Thin benchmark-only mappings to the two public request APIs.
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize};
 
 pub const METHOD: u64 = 7;
 pub const BYTES: usize = 64 * 1024 * 1024;
@@ -13,7 +13,7 @@ pub trait Supplier {
     fn encode<T: Serialize>(value: &T) -> Vec<u8>;
     fn reuse<T: Serialize>(value: &T, output: &mut Vec<u8>);
     fn slice<T: Serialize>(value: &T, output: &mut [u8]) -> usize;
-    fn decode<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, ()>;
+    fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8]) -> Result<T, ()>;
 }
 
 pub struct Candidate;
@@ -51,7 +51,7 @@ impl Supplier for Candidate {
             .unwrap()
             .len()
     }
-    fn decode<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, ()> {
+    fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8]) -> Result<T, ()> {
         candidate::decode(bytes, ENCODING, NEW_LIMITS).map_err(|_| ())
     }
 }
@@ -71,7 +71,7 @@ impl Supplier for Reference {
             .unwrap()
             .len()
     }
-    fn decode<T: DeserializeOwned>(bytes: &[u8]) -> Result<T, ()> {
+    fn decode<'de, T: Deserialize<'de>>(bytes: &'de [u8]) -> Result<T, ()> {
         reference::native::decode_request(METHOD, bytes, OLD_LIMITS).map_err(|_| ())
     }
 }

@@ -4,7 +4,7 @@ Host-only schema projection for IC Wire. Prefer the coordinated re-export:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.23.9", features = ["derive"] }
+ic-wire = { version = "0.24.0", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -22,5 +22,5 @@ qualified IC Wire packed adapters are supported. Renamed dependencies use
 
 Gate the derive on native builds if the same contract source targets Wasm.
 Requires Rust 1.100.0. The derive and runtime crate are released together.
-See [IC Wire](https://github.com/dragginzgame/ic-wire-new) for usage and qualification.
+See [IC Wire](https://github.com/dragginzgame/ic-wire) for usage and qualification.
 Licensed under the included Toko Studios Network Licence (`LICENSE.md`).

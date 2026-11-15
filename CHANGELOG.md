@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.24.0] - 2026-11-15
+
+First public release of the replacement implementation, following published
+0.22.4. This is a hard cut: migrate to root-level APIs with `Encoding`, replace
+`PackedI16<N>` with `Packed<i16, N>`, and regenerate TypeScript clients and runtime
+together. No legacy compatibility lane is retained.
+
+The public repository is now `dragginzgame/ic-wire`; the previous implementation
+is retained privately as `dragginzgame/ic-wire-legacy`.
+
+### 🐛 Fixed
+
+- Avoid Postcard's general varint buffer for one-byte 16/32/64-bit integers
+  through one shared serializer shortcut. Keep admission and exact bytes;
+  request encoding now narrowly beats the reference IC instruction count in
+  both profiles, with a small Wasm-size and opt-z response cost.
+- Validate finite-f32 buffers two words at a time, preserving exact finite bits
+  and rejection before allocation. Qualify exponent lanes, native timing and a
+  separate Wasm float consumer; keep the f64 path unchanged.
+
+### ✨ Added
+
+- Expand the native comparison to 52 workload families, owned/borrowed decoding,
+  framing failures and position-sensitive domain rejection. Add integer/length
+  boundaries, collection shapes, identities and bitwise float/borrowing checks
+  without importing the legacy feature-matrix or adding product dependencies.
+
+### ▶️ Try it
+
+Add `ic-wire = "0.24.0"` to use the portable codec; enable `derive` for host schema
+projection and TypeScript generation. See the [package guide](crates/ic-wire/README.md).
+
 ## [0.23.9] - 2026-11-15
 
 GitHub evaluation patch requested by the user; not published to crates.io.
