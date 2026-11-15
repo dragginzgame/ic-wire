@@ -1,5 +1,7 @@
 //! Candidate Rust exchange with the published reference TypeScript runtime.
 
+mod scalar_cases;
+
 use candidate::typescript::{SchemaLimits, ValidatedRegistry};
 use candidate::{Bytes, Direction, Encoding, Limits, List, PackedI16, decode, encode};
 use serde::{Deserialize, Serialize};
@@ -170,44 +172,7 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
     assert_eq!(chain_bytes, [1, 1, 128, 1, 0]);
     assert_eq!(shared_bytes, [7, 0, 7, 0]);
     let fixture = json!({"types":exported,"cases":cases,"chain":chain_bytes,"shared":shared_bytes,"policy":{"bytes":policy.bytes,"nodes":policy.nodes,"depth":policy.depth}});
-    // The published constant owns the runtime source; no sibling path or copied
-    // product runtime is involved. Node runs it directly with type transformation.
-    let nonce = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_nanos();
-    let directory =
-        std::env::temp_dir().join(format!("ic-wire-interop-{}-{nonce}", std::process::id()));
-    fs::create_dir(&directory).unwrap();
-    let runtime = directory.join("reference-runtime.ts");
-    fs::write(&runtime, reference::typescript::RUNTIME).unwrap();
-    let mut child = Command::new("node")
-        .args([
-            "--experimental-transform-types",
-            "--input-type=module",
-            "--eval",
-            include_str!("typescript_exchange.mjs"),
-        ])
-        .arg(&runtime)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("Node with --experimental-transform-types must be installed explicitly");
-    child
-        .stdin
-        .take()
-        .unwrap()
-        .write_all(serde_json::to_string(&fixture).unwrap().as_bytes())
-        .unwrap();
-    let result = child.wait_with_output().unwrap();
-    fs::remove_dir_all(&directory).unwrap();
-    assert!(
-        result.status.success(),
-        "TypeScript exchange failed: {}",
-        String::from_utf8_lossy(&result.stderr)
-    );
-    let result: Value = serde_json::from_slice(&result.stdout).unwrap();
+    let result = run_typescript(&fixture, include_str!("typescript_exchange.mjs"));
     let returned_chain: Vec<u8> = serde_json::from_value(result["chain"].clone()).unwrap();
     let returned_shared: Vec<u8> = serde_json::from_value(result["shared"].clone()).unwrap();
     assert_eq!(returned_chain, chain_bytes);
@@ -242,4 +207,44 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         }
         assert_eq!(&output[0], literal);
     }
+}
+
+fn run_typescript(fixture: &Value, script: &str) -> Value {
+    // Published runtime source, without sibling paths or product copies.
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let directory =
+        std::env::temp_dir().join(format!("ic-wire-interop-{}-{nonce}", std::process::id()));
+    fs::create_dir(&directory).unwrap();
+    let runtime = directory.join("reference-runtime.ts");
+    fs::write(&runtime, reference::typescript::RUNTIME).unwrap();
+    let mut child = Command::new("node")
+        .args([
+            "--experimental-transform-types",
+            "--input-type=module",
+            "--eval",
+            script,
+        ])
+        .arg(&runtime)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("Node with --experimental-transform-types must be installed explicitly");
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(serde_json::to_string(fixture).unwrap().as_bytes())
+        .unwrap();
+    let result = child.wait_with_output().unwrap();
+    fs::remove_dir_all(&directory).unwrap();
+    assert!(
+        result.status.success(),
+        "TypeScript exchange failed: {}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    serde_json::from_slice(&result.stdout).unwrap()
 }

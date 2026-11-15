@@ -1,6 +1,6 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.1`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.2`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -149,3 +149,14 @@ mutating the left field leaves the right field unchanged. A cyclic JavaScript
 input reaches the configured depth allowance and returns `WireError('limit')`.
 These are selected recursive-value checks, not arbitrary graph or stack-safety
 qualification. Native Rust retains independently sufficient budgets here.
+
+The 0.23.2 checkpoint adds 11 literal scalar/text vectors through the same
+published runtime harness: u64 zero/128/maximum, i128 zero/-1/minimum/maximum,
+empty text, a multibyte character, a retained BOM and a supplementary character.
+Rust decodes the TypeScript-produced bytes as well as checking its own encoding.
+Both runtimes reject selected invalid UTF-8, including overlong encodings,
+surrogates and values beyond Unicode's range. TypeScript enforces UTF-8 byte
+bounds, BigInt inputs and integer range limits. Redundant `80 00` remains accepted
+as zero for u64/i128; re-encoding emits `00` while retained input stays unchanged.
+These selected vectors do not qualify every scalar width, JavaScript surrogate
+normalization, or all malformed/noncanonical encodings.

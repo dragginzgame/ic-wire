@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.23.2] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ✨ Added
+
+- Qualify wide integer and UTF-8 exchange with the published reference TypeScript
+  runtime. Cover literal extremes, BigInt/range refusal, BOM preservation,
+  malformed UTF-8, byte-counted text bounds and retained noncanonical integers.
+
 ## [0.23.1] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.
