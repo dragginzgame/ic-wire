@@ -82,7 +82,7 @@ reference TS node/depth boundaries and cyclic-value depth refusal. Schema sharin
 does not become decoded-value aliasing. These cases use the same graph exporter
 and runtime harness as the representative record.
 
-Automatic collection, generated-name/collision qualification, a
+Recursive automatic collection, generated-name/collision qualification, a
 candidate-owned browser runtime, TypeScript compiler validation,
 advisory traversal and reference performance comparisons remain outstanding.
 No Wasm size or IC instruction improvement is claimed.
@@ -115,7 +115,8 @@ quoted metadata and client code. JSON string escaping uses one additional bounde
 metadata buffer, so this is not a single-buffer memory guarantee. The generated
 client is now the payload caller in the representative Rust exchange; format
 mismatch and actual supplied policy are checked at runtime. Automatic Serde
-projection and a candidate runtime remain separate implementation work.
+projection beyond the strict subset below and a candidate runtime remain separate
+implementation work.
 
 ## Generated method modules
 
@@ -139,3 +140,63 @@ binary search over admitted names; duplicate detection uses bounded sets, with
 method count capped by the source-byte allowance before allocating them. All
 declarations, shared metadata and method wrappers count toward one output ceiling.
 Independent separately generated modules are not a global routing registry.
+
+## Strict Rust metadata projection (0.23.5)
+
+Enable `derive` to re-export the host-only `Wire` derive beside the Wire trait.
+`ValidatedRegistry::from_type::<T>("Root", limits)` projects an inline root and
+feeds it through the existing JSON admission boundary. The derive is a producer
+of metadata, not another schema validator or serializer; the sealed graph remains
+rendering's sole authority. The representative payload client now uses this path,
+with its independently authored JSON retained as a qualification oracle.
+
+Supported derives are named/unit/newtype structs and ordinary enums
+with unit, single-value or named-field variants. Raw identifiers lose only the
+Rust `r#` syntax. The default crate path is `::ic_wire`; renamed dependencies use
+`#[wire(crate = "candidate")]`. Type parameters gain a Wire bound; lifetimes,
+const parameters, defaults and existing where clauses are preserved. Concrete
+instantiations project their own field widths and bounds, without TypeId or a
+`'static` requirement. The derive currently requires Wire for every type parameter,
+including parameters that a custom wrapper might otherwise leave unconstrained.
+Field `#[serde(borrow)]` and explicit borrow-lifetime lists are accepted because
+they do not change bytes. Other Serde attributes, unsupported Wire attributes,
+explicit enum discriminants, multi-field tuples and unions reject.
+This conservative subset does not silently approximate rename/flatten/skip/tagged
+or custom serializer layouts. Serde remains the only payload implementation.
+
+Native trait implementations cover fixed-width integers, bool/unit, strings,
+Option, Box/references, ordinary Vec/List and explicit Bytes/Text/PackedI16 plus
+borrowed byte/text adapters. Ordinary Vec<u8> remains a list projection; it is not
+rewritten into a byte-buffer field. No Platform identity type is redefined.
+
+SchemaContext bounds nested projection calls and active Rust type depth. Active
+recursive type labels reject, and a failed nested call invalidates the context
+so manual code cannot swallow failure and return an apparently admitted graph.
+Construction work counts Rust projection calls, not exact JSON nodes. Final graph
+admission independently enforces its exact node/name/depth limits. Producer JSON
+allocations occur before that admission; arbitrary manual projection code remains
+trusted and can do work outside the construction allowance. This is not an exact
+host heap cap. Nested types are inline: no new generated-name algorithm or type
+identity promise replaces the reference named collector. Recursive graphs still
+use explicit named metadata; automatic recursive collection is outstanding.
+
+The macro is a real unpublished `ic-wire-derive` product package, authored for
+this strict destination contract rather than transplanted from the reference.
+Its selected syn/quote/proc-macro2 versions match the already locked suppliers.
+The optional host target dependency means default codec builds and Wasm builds
+forwarding `derive` contain neither this macro nor serde_json. Consumers must
+native-gate derive annotations when compiling the same source for Wasm. Existing
+Serde/Postcard supplier macros are a separate, unchanged dependency fact.
+
+`make test-derive` checks macro rejection and exact graph projections, construction
+limits, recursive refusal and sticky failure. `make test-typescript` compiles and
+executes the renamed-dependency derived client against literal bytes. Focused
+Clippy, Rustdoc and Wasm feature forwarding pass; neither a full Serde attribute
+surface nor standalone publication/browser/typechecker proof is claimed.
+
+Generic qualification includes distinct u16/u64 instantiations, independent const
+field limits, generic enum payloads, defaults/where clauses and a type parameter
+named Result to check generated-path hygiene. A borrowed generic record uses a
+non-static source lifetime and verifies decoded string/byte pointers into its
+input. The generated-client exchange now starts from `Record<u8, 3>` and retains
+the same independent schema and byte oracles.

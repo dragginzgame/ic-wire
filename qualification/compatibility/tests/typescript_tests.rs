@@ -16,18 +16,20 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, candidate::typescript::Wire)]
+#[wire(crate = "candidate")]
 enum Choice {
     Ready,
     Value(u16),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-struct Record {
-    number: u8,
+#[derive(Debug, PartialEq, Serialize, Deserialize, candidate::typescript::Wire)]
+#[wire(crate = "candidate")]
+struct Record<T = u8, const N: usize = 3> {
+    number: T,
     choice: Choice,
     optional: Option<u8>,
-    bytes: Bytes<3>,
+    bytes: Bytes<N>,
     packed: PackedI16<2>,
     ordinary: List<i16, 2>,
 }
@@ -84,12 +86,16 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         ]}),
     );
     let graph = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
+    let derived =
+        ValidatedRegistry::from_type::<Record<u8, 3>>("Record", SchemaLimits::default()).unwrap();
+    let derived_metadata: Value = serde_json::from_str(&derived.metadata_json().unwrap()).unwrap();
+    assert_eq!(derived_metadata["Record"], types["Record"]);
     let exported: Value = serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
     assert_eq!(exported, serde_json::to_value(&types).unwrap());
     reference::typescript::validate_payload_schema(&types, &json!({"k":"ref","name":"Record"}))
         .unwrap();
 
-    let mut records = Vec::new();
+    let mut records: Vec<Record> = Vec::new();
     let mut literals = Vec::new();
     for (words, literal) in [
         (vec![], vec![0, 0, 0, 0, 0, 0]),
@@ -180,7 +186,7 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         depth: policy.depth as u64,
     };
     let mut fixture = fixture;
-    fixture["module"] = graph
+    fixture["module"] = derived
         .payload_module(
             "recordCodec",
             "Record",

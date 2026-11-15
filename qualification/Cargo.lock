@@ -36,7 +36,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12f9ea1376af8b628c513c838043106a79d0c94c2946fe4a79b8fefbc595c250"
 dependencies = [
  "bytemuck",
- "ic-wire-derive",
+ "ic-wire-derive 0.22.4",
  "postcard",
  "serde",
  "serde_bytes",
@@ -45,9 +45,10 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.23.4"
+version = "0.23.5"
 dependencies = [
  "bytemuck",
+ "ic-wire-derive 0.23.5",
  "postcard",
  "serde",
  "serde_json",
@@ -58,7 +59,7 @@ name = "ic-wire-compatibility"
 version = "0.1.0"
 dependencies = [
  "ic-wire 0.22.4",
- "ic-wire 0.23.4",
+ "ic-wire 0.23.5",
  "serde",
  "serde_json",
  "stats_alloc",
@@ -70,6 +71,15 @@ name = "ic-wire-derive"
 version = "0.22.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86e81922509d7e3fdbac7a421141ce55ad457e68ab0f59cd378ee503df0beb9f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "ic-wire-derive"
+version = "0.23.5"
 dependencies = [
  "proc-macro2",
  "quote",

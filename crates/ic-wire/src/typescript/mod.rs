@@ -4,7 +4,17 @@
 //! Manual projections remain trusted and require independent byte vectors.
 //! Runtime implementation and automatic Rust type collection are not included.
 
+mod native;
 mod render;
+#[cfg(feature = "derive")]
+pub use ic_wire_derive::Wire;
+pub use native::{SchemaContext, Wire};
+
+/// Macro support for generated metadata; not a second schema API.
+#[doc(hidden)]
+pub mod __private {
+    pub use serde_json::{Value, json};
+}
 
 /// Generated client modules require this metadata/runtime interface version.
 /// This labels tooling artifacts, never Wire payload bytes.

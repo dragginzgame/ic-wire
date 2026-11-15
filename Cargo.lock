@@ -31,12 +31,23 @@ checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
 name = "ic-wire"
-version = "0.23.4"
+version = "0.23.5"
 dependencies = [
  "bytemuck",
+ "ic-wire-derive",
  "postcard",
  "serde",
  "serde_json",
+ "toko-tooling",
+]
+
+[[package]]
+name = "ic-wire-derive"
+version = "0.23.5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
  "toko-tooling",
 ]
 

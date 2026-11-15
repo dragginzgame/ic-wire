@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire"
-version = "0.23.4"
+version = "0.23.5"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -11,9 +11,11 @@ description = "Local evaluation of portable IC Wire contracts"
 ignored = ["toko-tooling"]
 
 [features]
+derive = ["typescript", "dep:ic-wire-derive"]
 typescript = ["dep:serde_json"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
+ic-wire-derive = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 
 [dependencies]

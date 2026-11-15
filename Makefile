@@ -23,6 +23,8 @@ help:
 	  'check-wasm-host       Check TypeScript feature forwarding on Wasm' \
 	  'test-typescript       Exchange Rust bytes with published reference TS (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
+	  'test-derive           Check strict derive rejection and typed projection' \
+	  'lint-derive           Lint the derive implementation and contract tests' \
 	  'lint-compatibility    Lint the independent qualification workspace' \
 	  'lint                  Run Clippy with warnings denied' \
 	  'doc                   Check Rustdoc with warnings denied' \
@@ -84,3 +86,14 @@ test-typescript:
 
 lint-typescript:
 	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline -- -D warnings
+
+.PHONY: test-derive lint-derive
+test-derive lint-derive: toko-tooling-check | toko-execution-check
+
+test-derive:
+	+cargo test -p ic-wire-derive --lib --locked --offline
+	+cargo test -p ic-wire --features derive --test derive_tests --locked --offline
+
+lint-derive:
+	+cargo clippy -p ic-wire-derive --lib --tests --locked --offline -- -D warnings
+	+cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked --offline -- -D warnings

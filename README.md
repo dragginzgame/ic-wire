@@ -7,7 +7,7 @@ a decision that a rewrite is necessary or an implemented replacement.
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.4`, following
+The candidate keeps the `ic-wire` package name and uses version `0.23.5`, following
 the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
 the version selection and GitHub push do not constitute a crates.io release.
 
@@ -39,7 +39,10 @@ one immutable typed graph. It generates typed payload and framed method modules 
 metadata, explicit browser policy and runtime-format mismatch refusal. The emitted
 clients exchange the representative record with Rust using the published reference
 TypeScript runtime in private qualification.
-Rust metadata collection and a candidate browser runtime remain unimplemented;
+An optional strict derive now projects ordinary Rust structs/enums, including
+concrete generic and borrowed instantiations, through that same graph boundary.
+Recursive automatic collection and a
+candidate browser runtime remain unimplemented;
 the full vertical slice is not yet qualified end to end.
 
 The separate [compatibility workspace](qualification/README.md) compares the
@@ -53,7 +56,7 @@ admission boundaries, including positive controls and trusted-Serde limitations.
 
 The root is a virtual Cargo workspace pinned to Rust 1.100.0, including rustfmt,
 Clippy and `wasm32-unknown-unknown`, with the real product package at
-`crates/ic-wire`. The separate `qualification/` workspace contains the unpublished
+`crates/ic-wire` and the optional host macro at `crates/ic-wire-derive`. The separate `qualification/` workspace contains the unpublished
 `ic-wire-compatibility 0.1.0` test package. No placeholder packages are present.
 
 Toko Tooling 0.44.3 is installed from its published crate through its authenticated
@@ -82,6 +85,8 @@ make doc-host
 make check-wasm-host       # TypeScript feature forwarding on Wasm
 make test-typescript       # Candidate Rust ↔ reference TS; explicit Node prerequisite
 make lint-typescript
+make test-derive           # Macro rejection and derived metadata contracts
+make lint-derive
 make fmt-check
 ```
 

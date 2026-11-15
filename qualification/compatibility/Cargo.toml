@@ -14,7 +14,7 @@ category = "tests"
 ignored = ["toko-tooling"]
 
 [features]
-typescript = ["candidate/typescript", "reference/typescript"]
+typescript = ["candidate/derive", "reference/typescript"]
 
 [dev-dependencies]
 candidate.workspace = true

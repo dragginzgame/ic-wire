@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.23.5] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ✨ Added
+
+- Add optional strict metadata derivation for ordinary structs/enums and field
+  adapter projections. Generate the representative payload client directly from
+  its Rust type, admitting the result through the existing validated graph.
+  Support concrete type/const generics and borrowed fields without a static
+  lifetime requirement. Reject unsupported Serde layouts and recursive projection;
+  preserve the explicit named-metadata path for recursive schemas.
+
 ## [0.23.4] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.

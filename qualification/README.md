@@ -1,6 +1,6 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.4`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.5`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -186,3 +186,14 @@ addition yields 16 and 15 byte frames. Independent literal vectors and Rust deco
 prove the full eight-byte identity, direction and layouts. Wrong method/direction
 and mismatched runtime modules reject. Duplicate export names/IDs, missing roots,
 header-inclusive JS integer overflow and total output limits have host tests.
+
+Version 0.23.5 switches the representative payload module's schema source to
+`#[derive(candidate::typescript::Wire)]` on its Rust Record and Choice types.
+The renamed dependency is explicit with `#[wire(crate = "candidate")]`.
+The representative record is now generic; `Record<u8, 3>` supplies the concrete
+integer type and byte-field bound to generation. The derived metadata must exactly
+match the independently authored JSON fixture
+before generation; the generated client then runs the same byte/custody tests.
+Framed recursive controls retain the explicit named graph. The qualification
+feature now enables the candidate host derive, while the reference's macro stays
+its separately selected published supplier.

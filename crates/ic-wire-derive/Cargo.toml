@@ -1,0 +1,25 @@
+[package]
+name = "ic-wire-derive"
+version = "0.23.5"
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+description = "Strict metadata projection for the IC Wire replacement evaluation"
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+toko-tooling.workspace = true
+
+[lints]
+workspace = true
