@@ -1,7 +1,8 @@
 use super::{
-    GenerationError, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT, ValidatedRegistry, identifier,
+    GenerationError, Method, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT, ValidatedRegistry,
+    identifier,
 };
-use alloc::string::String;
+use alloc::{collections::BTreeSet, string::String};
 use core::fmt::{self, Write};
 
 // Check before extending the output, including escaped field names. Syntax
@@ -68,10 +69,33 @@ impl ValidatedRegistry {
         runtime_module: &str,
         limits: PayloadLimits,
     ) -> Result<String, GenerationError> {
+        self.admit_client(export, root, runtime_module, limits)?;
+        let mut output = Output {
+            text: String::new(),
+            remaining: self.output_bytes,
+        };
+        self.render_payload_module(&mut output, export, root, runtime_module, limits)
+            .map_err(|_| GenerationError::Complexity)?;
+        Ok(output.text)
+    }
+
+    fn admit_client(
+        &self,
+        export: &str,
+        root: &str,
+        runtime_module: &str,
+        limits: PayloadLimits,
+    ) -> Result<(), GenerationError> {
         identifier(export)?;
         if export == "globalThis"
-            || !self.names.iter().any(|name| name == root)
-            || self.names.iter().any(|name| name == export)
+            || self
+                .names
+                .binary_search_by(|name| name.as_str().cmp(root))
+                .is_err()
+            || self
+                .names
+                .binary_search_by(|name| name.as_str().cmp(export))
+                .is_ok()
             || runtime_module.is_empty()
             || runtime_module.contains('\0')
             || limits.nodes == 0
@@ -85,13 +109,97 @@ impl ValidatedRegistry {
         {
             return Err(GenerationError::Complexity);
         }
+        Ok(())
+    }
+
+    /// Generate typed framed codecs with independent request/response policy.
+    ///
+    /// The runtime must export `schemaFormat` and `createCodec` with the
+    /// reference framed-codec interface. IDs are emitted as decimal strings,
+    /// preserving all u64 values without JavaScript Number rounding. Duplicate
+    /// IDs or exports reject before rendering. This emits no routing/execution.
+    ///
+    /// # Errors
+    /// Returns Schema for invalid names, roots, policies or duplicate IDs;
+    /// Complexity for unsafe header-inclusive byte allowances or excess output.
+    pub fn method_module(
+        &self,
+        methods: &[Method<'_>],
+        runtime_module: &str,
+    ) -> Result<String, GenerationError> {
+        if methods.is_empty() {
+            return Err(GenerationError::Schema);
+        }
+        // Each method necessarily emits at least one byte; bound admission work
+        // before allocating duplicate-detection sets for caller-owned input.
+        if methods.len() > self.output_bytes {
+            return Err(GenerationError::Complexity);
+        }
+        let mut names = BTreeSet::new();
+        let mut ids = BTreeSet::new();
+        for method in methods {
+            for (root, limits) in [
+                (method.request, method.request_limits),
+                (method.response, method.response_limits),
+            ] {
+                self.admit_client(method.export, root, runtime_module, limits)?;
+                if limits.bytes > (1_u64 << 53) - 12 {
+                    return Err(GenerationError::Complexity);
+                }
+            }
+            if !names.insert(method.export) || !ids.insert(method.id) {
+                return Err(GenerationError::Schema);
+            }
+        }
         let mut output = Output {
             text: String::new(),
             remaining: self.output_bytes,
         };
-        self.render_payload_module(&mut output, export, root, runtime_module, limits)
+        self.render_methods(&mut output, methods, runtime_module)
             .map_err(|_| GenerationError::Complexity)?;
         Ok(output.text)
+    }
+
+    fn render_methods(
+        &self,
+        output: &mut Output,
+        methods: &[Method<'_>],
+        runtime_module: &str,
+    ) -> fmt::Result {
+        self.module_prelude(output, runtime_module, "createCodec")?;
+        for method in methods {
+            writeln!(output, "export const {} = (() => {{", method.export)?;
+            write!(
+                output,
+                "const $codec = $create({{id:'{}',request:{{k:'ref',name:",
+                method.id
+            )?;
+            output.quoted(method.request)?;
+            output.write_str("},response:{k:'ref',name:")?;
+            output.quoted(method.response)?;
+            for (prefix, limits) in [
+                ("request", method.request_limits),
+                ("response", method.response_limits),
+            ] {
+                write!(
+                    output,
+                    "{separator}{prefix}Bytes:{}, {prefix}Nodes:{}, {prefix}Depth:{}",
+                    limits.bytes + 11,
+                    limits.nodes,
+                    limits.depth,
+                    separator = if prefix == "request" { "}," } else { "," }
+                )?;
+            }
+            output.write_str("}, $types);\nreturn globalThis.Object.freeze({\n")?;
+            for (direction, root) in [("Request", method.request), ("Response", method.response)] {
+                writeln!(
+                    output,
+                    "encode{direction}:(value: {root}): globalThis.Uint8Array => $codec.encode{direction}(value), decode{direction}:(bytes: globalThis.Uint8Array): {root} => $codec.decode{direction}(bytes) as {root},"
+                )?;
+            }
+            output.write_str("});\n})();\n")?;
+        }
+        Ok(())
     }
 
     fn render_payload_module(
@@ -102,21 +210,9 @@ impl ValidatedRegistry {
         runtime_module: &str,
         limits: PayloadLimits,
     ) -> fmt::Result {
-        output.write_str("// Generated IC Wire payload client; no transport or frame.\nimport { schemaFormat as $format, createPayloadCodec as $create } from ")?;
-        output.quoted(runtime_module)?;
-        output.write_str(";\nif ($format !== ")?;
-        output.quoted(RUNTIME_SCHEMA_FORMAT)?;
-        output.write_str(") throw new globalThis.Error('IC Wire runtime format mismatch');\n")?;
-        self.render(output)?;
-        write!(
-            output,
-            "export const {export} = (() => {{\nconst $types = globalThis.JSON.parse("
-        )?;
-        // A bounded temporary JSON string permits correct JS string escaping,
-        // including __proto__ keys, without another schema interpretation path.
-        let metadata = self.metadata_json().map_err(|_| fmt::Error)?;
-        output.quoted(&metadata)?;
-        output.write_str(");\nconst $codec = $create({schema:{k:'ref',name:")?;
+        self.module_prelude(output, runtime_module, "createPayloadCodec")?;
+        writeln!(output, "export const {export} = (() => {{")?;
+        output.write_str("const $codec = $create({schema:{k:'ref',name:")?;
         output.quoted(root)?;
         writeln!(
             output,
@@ -127,6 +223,29 @@ impl ValidatedRegistry {
             output,
             "return globalThis.Object.freeze({{encode:(value: {root}): globalThis.Uint8Array => $codec.encode(value), decode:(bytes: globalThis.Uint8Array): {root} => $codec.decode(bytes) as {root}}});\n}})();"
         )
+    }
+
+    fn module_prelude(
+        &self,
+        output: &mut Output,
+        runtime_module: &str,
+        factory: &str,
+    ) -> fmt::Result {
+        write!(
+            output,
+            "// Generated IC Wire client; no transport or execution.\nimport {{ schemaFormat as $format, {factory} as $create }} from "
+        )?;
+        output.quoted(runtime_module)?;
+        output.write_str(";\nif ($format !== ")?;
+        output.quoted(RUNTIME_SCHEMA_FORMAT)?;
+        output.write_str(") throw new globalThis.Error('IC Wire runtime format mismatch');\n")?;
+        self.render(output)?;
+        output.write_str("const $types = globalThis.JSON.parse(")?;
+        // A bounded temporary JSON string permits correct JS string escaping,
+        // including __proto__ keys, without another schema interpretation path.
+        let metadata = self.metadata_json().map_err(|_| fmt::Error)?;
+        output.quoted(&metadata)?;
+        output.write_str(");\n")
     }
 
     /// Export the admitted subset in the reference JSON registry grammar.

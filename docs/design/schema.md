@@ -82,7 +82,7 @@ reference TS node/depth boundaries and cyclic-value depth refusal. Schema sharin
 does not become decoded-value aliasing. These cases use the same graph exporter
 and runtime harness as the representative record.
 
-Automatic collection, naming/collision qualification, method admission, a
+Automatic collection, generated-name/collision qualification, a
 candidate-owned browser runtime, TypeScript compiler validation,
 advisory traversal and reference performance comparisons remain outstanding.
 No Wasm size or IC instruction improvement is claimed.
@@ -105,7 +105,7 @@ applications must select and qualify their runtime implementation. Qualification
 uses a private adapter to the pinned published reference interpreter.
 
 The module exports type aliases and a frozen codec object. Its JSON registry is
-parsed within a private closure, preserving prototype-like keys without exposing
+parsed into private module storage, preserving prototype-like keys without exposing
 mutable metadata to callers. Generated codecs delegate to one runtime interpreter;
 no per-type byte writers are emitted. Runtime module specifiers are escaped strings
 selected by the caller, not resolved or downloaded by Wire.
@@ -115,5 +115,27 @@ quoted metadata and client code. JSON string escaping uses one additional bounde
 metadata buffer, so this is not a single-buffer memory guarantee. The generated
 client is now the payload caller in the representative Rust exchange; format
 mismatch and actual supplied policy are checked at runtime. Automatic Serde
-projection, framed-client generation and a candidate runtime are separate remaining
-implementation work, not implied by this payload milestone.
+projection and a candidate runtime remain separate implementation work.
+
+## Generated method modules
+
+`method_module(&[Method], runtime_module)` emits request/response codecs using the
+same name/policy admission, runtime-format prelude, declarations, JSON export and
+bounded writer as payload modules. The supplied runtime exports `createCodec`.
+All methods share one private metadata registry; each exported frozen object has
+typed encodeRequest/decodeRequest/encodeResponse/decodeResponse functions. No
+endpoint executor, router or transport is generated.
+
+Each Method supplies an explicit u64 ID, export name, request/response root names
+and separate PayloadLimits. Byte limits exclude the header at this API; generation
+adds exactly 11 and refuses totals beyond JavaScript's safe-integer range. Zero
+payload bytes remains valid for unit schemas. Node/depth limits are unchanged.
+IDs are decimal strings interpreted by the runtime as BigInt, never JS numbers.
+Callers may explicitly use Rust `method_id` for name-derived identities; renaming
+an exported codec alone does not silently change its routing identity.
+
+Duplicate exports and IDs within a module reject before rendering. Root lookup is
+binary search over admitted names; duplicate detection uses bounded sets, with
+method count capped by the source-byte allowance before allocating them. All
+declarations, shared metadata and method wrappers count toward one output ceiling.
+Independent separately generated modules are not a global routing registry.

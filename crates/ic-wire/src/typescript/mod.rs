@@ -6,7 +6,7 @@
 
 mod render;
 
-/// Generated payload modules require this metadata/runtime interface version.
+/// Generated client modules require this metadata/runtime interface version.
 /// This labels tooling artifacts, never Wire payload bytes.
 pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json/1";
 
@@ -22,6 +22,26 @@ pub struct PayloadLimits {
     pub nodes: u64,
     /// Maximum runtime value depth; must be nonzero.
     pub depth: u64,
+}
+
+/// One typed request/response contract for generated framed clients.
+///
+/// Both byte allowances are payload-only; generation adds the existing 11-byte
+/// header. Node/depth allowances retain browser runtime accounting.
+#[derive(Clone, Copy, Debug)]
+pub struct Method<'a> {
+    /// Exported codec identifier. Does not implicitly determine the method ID.
+    pub export: &'a str,
+    /// Exact routing identity; use crate::method_id explicitly for named IDs.
+    pub id: u64,
+    /// Admitted request type name.
+    pub request: &'a str,
+    /// Admitted response type name.
+    pub response: &'a str,
+    /// Request payload allowances.
+    pub request_limits: PayloadLimits,
+    /// Response payload allowances.
+    pub response_limits: PayloadLimits,
 }
 
 use alloc::{

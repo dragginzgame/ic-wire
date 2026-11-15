@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.23.4] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ✨ Added
+
+- Generate typed request/response codecs with duplicate export/ID admission,
+  exact u64 method identities and separate directional policy. Share module
+  metadata and runtime admission with payload generation. Exercise emitted
+  frames, asymmetric request/response schemas and the maximum method ID in Rust
+  and the reference TypeScript runtime.
+
 ## [0.23.3] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.

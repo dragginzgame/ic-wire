@@ -344,3 +344,110 @@ fn generated_payload_module_admits_names_policy_and_total_output() {
         }
     }
 }
+
+#[test]
+fn method_modules_admit_identities_directions_and_bounded_source() {
+    use ic_wire::typescript::{Method, PayloadLimits};
+    let types = BTreeMap::from([
+        ("Request".into(), json!({"k":"unit"})),
+        ("Response".into(), json!({"k":"bool"})),
+    ]);
+    let graph = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
+    let method = Method {
+        export: "call",
+        id: u64::MAX,
+        request: "Request",
+        response: "Response",
+        request_limits: PayloadLimits {
+            bytes: 0,
+            nodes: 1,
+            depth: 1,
+        },
+        response_limits: PayloadLimits {
+            bytes: 1,
+            nodes: 2,
+            depth: 3,
+        },
+    };
+    let source = graph.method_module(&[method], "./runtime.ts").unwrap();
+    assert!(source.contains("id:'18446744073709551615'"));
+    assert!(source.contains("requestBytes:11, requestNodes:1, requestDepth:1"));
+    assert!(source.contains("responseBytes:12, responseNodes:2, responseDepth:3"));
+    assert!(source.contains("encodeRequest:(value: Request)"));
+    assert!(source.contains("decodeResponse:(bytes: globalThis.Uint8Array): Response"));
+    for duplicate in [
+        Method {
+            export: "other",
+            ..method
+        },
+        Method { id: 7, ..method },
+    ] {
+        assert_eq!(
+            graph.method_module(&[method, duplicate], "./runtime.ts"),
+            Err(GenerationError::Schema)
+        );
+    }
+    for invalid in [
+        Method {
+            request: "Missing",
+            ..method
+        },
+        Method {
+            response: "Missing",
+            ..method
+        },
+        Method {
+            export: "globalThis",
+            ..method
+        },
+    ] {
+        assert_eq!(
+            graph.method_module(&[invalid], "./runtime.ts"),
+            Err(GenerationError::Schema)
+        );
+    }
+    assert_eq!(
+        graph.method_module(&[], "./runtime.ts"),
+        Err(GenerationError::Schema)
+    );
+    let safe = Method {
+        request_limits: PayloadLimits {
+            bytes: (1_u64 << 53) - 12,
+            ..method.request_limits
+        },
+        ..method
+    };
+    assert!(graph.method_module(&[safe], "./runtime.ts").is_ok());
+    let overflow = Method {
+        request_limits: PayloadLimits {
+            bytes: (1_u64 << 53) - 11,
+            ..method.request_limits
+        },
+        ..method
+    };
+    assert_eq!(
+        graph.method_module(&[overflow], "./runtime.ts"),
+        Err(GenerationError::Complexity)
+    );
+    for output_bytes in [source.len() - 1, source.len()] {
+        let graph = ValidatedRegistry::from_metadata(
+            &types,
+            SchemaLimits {
+                output_bytes,
+                ..SchemaLimits::default()
+            },
+        )
+        .unwrap();
+        if output_bytes < source.len() {
+            assert_eq!(
+                graph.method_module(&[method], "./runtime.ts"),
+                Err(GenerationError::Complexity)
+            );
+        } else {
+            assert_eq!(
+                graph.method_module(&[method], "./runtime.ts").unwrap(),
+                source
+            );
+        }
+    }
+}

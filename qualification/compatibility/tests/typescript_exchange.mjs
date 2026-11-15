@@ -12,10 +12,16 @@ assert.deepEqual(adapter.observed, { schema, ...policy });
 assert(Object.isFrozen(client.recordCodec));
 await assert.rejects(import(new URL('./bad-client.ts', pathToFileURL(process.argv[1])).href), { message: 'IC Wire runtime format mismatch' });
 const payload = client.recordCodec;
-const frame = createCodec({ id: '7', request: schema, response: schema,
+const framedClient = await import(new URL('./frame-client.ts', pathToFileURL(process.argv[1])).href);
+assert.deepEqual(Object.keys(framedClient), ['highId', 'roundtrip']);
+assert(Object.isFrozen(framedClient.roundtrip));
+await assert.rejects(import(new URL('./bad-frame-client.ts', pathToFileURL(process.argv[1])).href), { message: 'IC Wire runtime format mismatch' });
+assert.deepEqual(adapter.observedMethods, [{ id: '7', request: schema, response: schema,
   requestBytes: policy.bytes, responseBytes: policy.bytes,
   requestNodes: policy.nodes, responseNodes: policy.nodes,
-  requestDepth: policy.depth, responseDepth: policy.depth }, types);
+  requestDepth: policy.depth, responseDepth: policy.depth },
+  { id: '18446744073709551615', request: {k:'ref',name:'Chain'}, response: {k:'ref',name:'Shared'}, requestBytes:16, responseBytes:15, requestNodes:6, responseNodes:7, requestDepth:4, responseDepth:3 }]);
+const frame = framedClient.roundtrip;
 const malformed = error => error instanceof WireError && error.code === 'malformed';
 const limited = error => error instanceof WireError && error.code === 'limit';
 const outputs = [];
@@ -133,4 +139,12 @@ const cyclic = record({ value: 1, next: null });
 cyclic.next = { some: cyclic };
 const bounded = createPayloadCodec({ schema: { k: 'ref', name: 'Chain' }, ...policy, depth: 4 }, types);
 assert.throws(() => bounded.encode(cyclic), limited);
-process.stdout.write(JSON.stringify({ records: outputs, chain: recursiveOutputs[0], shared: recursiveOutputs[1] }));
+const highRequest = framedClient.highId.encodeRequest(chainValue);
+const highResponse = framedClient.highId.encodeResponse(sharedValue);
+assert.deepEqual(Array.from(highRequest), [73,87,255,255,255,255,255,255,255,255,0,1,1,128,1,0]);
+assert.deepEqual(Array.from(highResponse), [73,87,255,255,255,255,255,255,255,255,1,7,0,7,0]);
+assert.deepEqual(framedClient.highId.decodeRequest(highRequest), chainValue);
+assert.deepEqual(framedClient.highId.decodeResponse(highResponse), sharedValue);
+assert.throws(() => frame.decodeRequest(highRequest), error => error instanceof WireError && error.code === 'identity');
+assert.throws(() => frame.decodeRequest(new Uint8Array(cases[0].response)), error => error instanceof WireError && error.code === 'identity');
+process.stdout.write(JSON.stringify({ records: outputs, chain: recursiveOutputs[0], shared: recursiveOutputs[1], highRequest: Array.from(highRequest), highResponse: Array.from(highResponse) }));

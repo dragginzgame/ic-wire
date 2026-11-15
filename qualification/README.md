@@ -1,6 +1,6 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.3`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.4`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -174,6 +174,15 @@ A test-only adapter exports `schemaFormat = "ic-wire-json/1"` alongside the
 published 0.22.4 payload factory. This explicitly qualifies that interpreter for
 the tested metadata subset; the marker alone does not authenticate arbitrary
 runtime implementations. The published Cargo source pin supplies runtime identity.
-No adapter or reference dependency enters the product graph. Framed and scalar
-controls still exercise the supplier directly. Node transforms emitted TypeScript;
+No adapter or reference dependency enters the product graph. Scalar and
+boundary-sweep controls still exercise the supplier directly. Node transforms emitted TypeScript;
 this is not TypeScript static typechecking or browser execution evidence.
+
+From 0.23.4, baseline request/response exchange also imports generated method
+codecs. The adapter records both directions' actual factory policy. A second
+generated method uses u64::MAX, a recursive request and a distinct shared-schema
+response, with exact payload byte/node/depth allowances 5/6/4 and 4/7/3. Header
+addition yields 16 and 15 byte frames. Independent literal vectors and Rust decode
+prove the full eight-byte identity, direction and layouts. Wrong method/direction
+and mismatched runtime modules reject. Duplicate export names/IDs, missing roots,
+header-inclusive JS integer overflow and total output limits have host tests.

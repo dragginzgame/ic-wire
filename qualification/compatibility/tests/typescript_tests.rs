@@ -3,7 +3,7 @@
 mod scalar_cases;
 
 use candidate::typescript::{
-    PayloadLimits, RUNTIME_SCHEMA_FORMAT, SchemaLimits, ValidatedRegistry,
+    Method, PayloadLimits, RUNTIME_SCHEMA_FORMAT, SchemaLimits, ValidatedRegistry,
 };
 use candidate::{Bytes, Direction, Encoding, Limits, List, PackedI16, decode, encode};
 use serde::{Deserialize, Serialize};
@@ -193,7 +193,71 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         .payload_module("recordCodec", "Record", "./bad-runtime.ts", browser_limits)
         .unwrap()
         .into();
+    let framed_limits = PayloadLimits {
+        bytes: browser_limits.bytes - 11,
+        ..browser_limits
+    };
+    let methods = [
+        Method {
+            export: "roundtrip",
+            id: 7,
+            request: "Record",
+            response: "Record",
+            request_limits: framed_limits,
+            response_limits: framed_limits,
+        },
+        Method {
+            export: "highId",
+            id: u64::MAX,
+            request: "Chain",
+            response: "Shared",
+            request_limits: PayloadLimits {
+                bytes: 5,
+                nodes: 6,
+                depth: 4,
+            },
+            response_limits: PayloadLimits {
+                bytes: 4,
+                nodes: 7,
+                depth: 3,
+            },
+        },
+    ];
+    fixture["frameModule"] = graph
+        .method_module(&methods, "./runtime-adapter.ts")
+        .unwrap()
+        .into();
+    fixture["badFrameModule"] = graph
+        .method_module(&methods, "./bad-runtime.ts")
+        .unwrap()
+        .into();
     let result = run_typescript(&fixture, include_str!("typescript_exchange.mjs"));
+    let high_request: Vec<u8> = serde_json::from_value(result["highRequest"].clone()).unwrap();
+    let high_response: Vec<u8> = serde_json::from_value(result["highResponse"].clone()).unwrap();
+    assert_eq!(
+        decode::<Chain>(
+            &high_request,
+            Encoding::Frame {
+                method: u64::MAX,
+                direction: Direction::Request
+            },
+            policy
+        )
+        .unwrap(),
+        chain
+    );
+    assert_eq!(
+        decode::<Shared>(
+            &high_response,
+            Encoding::Frame {
+                method: u64::MAX,
+                direction: Direction::Response
+            },
+            policy
+        )
+        .unwrap(),
+        shared
+    );
     let returned_chain: Vec<u8> = serde_json::from_value(result["chain"].clone()).unwrap();
     let returned_shared: Vec<u8> = serde_json::from_value(result["shared"].clone()).unwrap();
     assert_eq!(returned_chain, chain_bytes);
@@ -244,14 +308,24 @@ fn run_typescript(fixture: &Value, script: &str) -> Value {
     if let Some(module) = fixture["module"].as_str() {
         fs::write(directory.join("client.ts"), module).unwrap();
         fs::write(
+            directory.join("frame-client.ts"),
+            fixture["frameModule"].as_str().unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            directory.join("bad-frame-client.ts"),
+            fixture["badFrameModule"].as_str().unwrap(),
+        )
+        .unwrap();
+        fs::write(
             directory.join("bad-client.ts"),
             fixture["badModule"].as_str().unwrap(),
         )
         .unwrap();
         fs::write(directory.join("runtime-adapter.ts"), format!(
-            "import {{createPayloadCodec as create}} from './reference-runtime.ts';\nexport const schemaFormat = {RUNTIME_SCHEMA_FORMAT:?};\nexport let observed: unknown;\nexport function createPayloadCodec(meta: unknown, types: unknown) {{ observed = structuredClone(meta); return create(meta, types); }}\n"
+            "import {{createPayloadCodec as create, createCodec as frame}} from './reference-runtime.ts';\nexport const schemaFormat = {RUNTIME_SCHEMA_FORMAT:?};\nexport let observed: unknown;\nexport const observedMethods: unknown[] = [];\nexport function createPayloadCodec(meta: unknown, types: unknown) {{ observed = structuredClone(meta); return create(meta, types); }}\nexport function createCodec(meta: unknown, types: unknown) {{ observedMethods.push(structuredClone(meta)); return frame(meta, types); }}\n"
         )).unwrap();
-        fs::write(directory.join("bad-runtime.ts"), "export const schemaFormat = 'incompatible'; export function createPayloadCodec() { throw new Error('factory must not run'); }").unwrap();
+        fs::write(directory.join("bad-runtime.ts"), "export const schemaFormat = 'incompatible'; export function createPayloadCodec() { throw new Error('factory must not run'); } export const createCodec = createPayloadCodec;").unwrap();
     }
     let mut child = Command::new("node")
         .args([
