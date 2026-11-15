@@ -5,7 +5,11 @@ fn rejects_layout_attributes_and_unqualified_shapes() {
     for input in [
         "#[serde(transparent)] struct Record { value: u8 }",
         "struct Record { #[serde(skip)] value: u8 }",
-        "enum Choice { #[serde(rename = \"x\")] Value(u8) }",
+        "enum Choice { #[serde(rename(serialize = \"x\", deserialize = \"y\"))] Value(u8) }",
+        "struct Record { #[serde(rename = \"x\", rename = \"y\")] value: u8 }",
+        "#[serde(rename_all = \"camelCase\")] struct Record { some_value: u8 }",
+        "enum Choice { #[serde(borrow)] Value(u8) }",
+        "struct Record(#[serde(rename = \"ignored\")] u8);",
         "#[serde(untagged)] enum Choice { Value(u8) }",
         "struct Pair(u8, u8);",
         "enum Choice { Pair(u8, u8) }",
@@ -29,6 +33,8 @@ fn supports_ordinary_shapes_and_renamed_dependency() {
         "enum Choice { Empty, Value(u16), Record { flag: bool } }",
         "#[wire(crate = \"candidate\")] struct Record { value: u8 }",
         "struct Generic<T>(T);",
+        "enum Choice { #[serde(rename = \"x\")] Value(u8) }",
+        "struct Record<'a> { #[serde(rename = \"text-value\", borrow)] value: &'a str }",
         "struct Generic<'a, T: Clone = u8, const N: usize = 4> where T: Copy { value: T, text: &'a str, bytes: Bytes<N> }",
         "struct Borrowed<'a> { #[serde(borrow = \"'a\")] bytes: BytesRef<'a, 8> }",
     ] {

@@ -54,8 +54,8 @@ impl ValidatedRegistry {
     /// The trusted runtime module must export `schemaFormat` matching
     /// [`RUNTIME_SCHEMA_FORMAT`] and `createPayloadCodec(metadata, registry)`.
     /// The factory returns `encode(unknown): Uint8Array` and `decode(Uint8Array):
-    /// unknown`, using the reference JSON grammar. Qualification currently uses
-    /// published Core 0.22.4's interpreter through an explicit format adapter.
+    /// unknown`, using the reference JSON grammar. Qualification uses both the
+    /// candidate runtime and published Core 0.22.4's interpreter.
     /// Runtime code is not bundled, downloaded or selected by this function.
     ///
     /// # Errors

@@ -1,9 +1,11 @@
-//! Candidate Rust exchange with the published reference TypeScript runtime.
+//! Candidate Rust exchange with candidate and published reference TypeScript runtimes.
 
+mod bulk_cases;
+mod renamed_cases;
 mod scalar_cases;
 
 use candidate::typescript::{
-    Method, PayloadLimits, RUNTIME_SCHEMA_FORMAT, SchemaLimits, ValidatedRegistry,
+    Method, PayloadLimits, RUNTIME_SCHEMA_FORMAT, SchemaLimits, SchemaRegistry, ValidatedRegistry,
 };
 use candidate::{Bytes, Direction, Encoding, Limits, List, PackedI16, decode, encode};
 use serde::{Deserialize, Serialize};
@@ -34,13 +36,15 @@ struct Record<T = u8, const N: usize = 3> {
     ordinary: List<i16, 2>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, candidate::typescript::Wire)]
+#[wire(crate = "candidate")]
 struct Chain {
     value: u16,
     next: Option<Box<Chain>>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, candidate::typescript::Wire)]
+#[wire(crate = "candidate")]
 struct Shared {
     left: Chain,
     right: Chain,
@@ -186,6 +190,7 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         depth: policy.depth as u64,
     };
     let mut fixture = fixture;
+    fixture["typeAssertions"] = include_str!("typescript_contract.ts").into();
     fixture["module"] = derived
         .payload_module(
             "recordCodec",
@@ -229,11 +234,16 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
             },
         },
     ];
-    fixture["frameModule"] = graph
+    let mut collection = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    collection.register::<Record<u8, 3>>("Record").unwrap();
+    collection.register::<Chain>("Chain").unwrap();
+    collection.register::<Shared>("Shared").unwrap();
+    let collected = collection.finish().unwrap();
+    fixture["frameModule"] = collected
         .method_module(&methods, "./runtime-adapter.ts")
         .unwrap()
         .into();
-    fixture["badFrameModule"] = graph
+    fixture["badFrameModule"] = collected
         .method_module(&methods, "./bad-runtime.ts")
         .unwrap()
         .into();
@@ -300,8 +310,25 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
     }
 }
 
+#[test]
+fn runtime_primitive_acceptance_matches_reference() {
+    let result = run_typescript_source(
+        &json!({}),
+        include_str!("runtime_differential.mjs"),
+        candidate::typescript::RUNTIME,
+        true,
+    );
+    assert!(result["checked"].as_u64().unwrap() > 130_000);
+}
+
 fn run_typescript(fixture: &Value, script: &str) -> Value {
-    // Published runtime source, without sibling paths or product copies.
+    let reference = run_typescript_source(fixture, script, reference::typescript::RUNTIME, false);
+    let candidate = run_typescript_source(fixture, script, candidate::typescript::RUNTIME, true);
+    assert_eq!(candidate, reference, "runtime exchange results differ");
+    candidate
+}
+
+fn run_typescript_source(fixture: &Value, script: &str, source: &str, candidate: bool) -> Value {
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -309,29 +336,37 @@ fn run_typescript(fixture: &Value, script: &str) -> Value {
     let directory =
         std::env::temp_dir().join(format!("ic-wire-interop-{}-{nonce}", std::process::id()));
     fs::create_dir(&directory).unwrap();
-    let runtime = directory.join("reference-runtime.ts");
-    fs::write(&runtime, reference::typescript::RUNTIME).unwrap();
+    fs::write(directory.join("package.json"), r#"{"type":"module"}"#).unwrap();
+    let runtime = directory.join("codec-runtime.ts");
+    fs::write(&runtime, source).unwrap();
+    fs::write(
+        directory.join("oracle-runtime.ts"),
+        reference::typescript::RUNTIME,
+    )
+    .unwrap();
     if let Some(module) = fixture["module"].as_str() {
         fs::write(directory.join("client.ts"), module).unwrap();
-        fs::write(
-            directory.join("frame-client.ts"),
-            fixture["frameModule"].as_str().unwrap(),
-        )
-        .unwrap();
-        fs::write(
-            directory.join("bad-frame-client.ts"),
-            fixture["badFrameModule"].as_str().unwrap(),
-        )
-        .unwrap();
-        fs::write(
-            directory.join("bad-client.ts"),
-            fixture["badModule"].as_str().unwrap(),
-        )
-        .unwrap();
+        for (key, file) in [
+            ("frameModule", "frame-client.ts"),
+            ("badFrameModule", "bad-frame-client.ts"),
+            ("badModule", "bad-client.ts"),
+        ] {
+            if let Some(source) = fixture[key].as_str() {
+                fs::write(directory.join(file), source).unwrap();
+            }
+        }
+        let marker = if candidate {
+            "export {schemaFormat} from './codec-runtime.ts';".to_owned()
+        } else {
+            format!("export const schemaFormat = {RUNTIME_SCHEMA_FORMAT:?};")
+        };
         fs::write(directory.join("runtime-adapter.ts"), format!(
-            "import {{createPayloadCodec as create, createCodec as frame}} from './reference-runtime.ts';\nexport const schemaFormat = {RUNTIME_SCHEMA_FORMAT:?};\nexport let observed: unknown;\nexport const observedMethods: unknown[] = [];\nexport function createPayloadCodec(meta: unknown, types: unknown) {{ observed = structuredClone(meta); return create(meta, types); }}\nexport function createCodec(meta: unknown, types: unknown) {{ observedMethods.push(structuredClone(meta)); return frame(meta, types); }}\n"
+            "import {{createPayloadCodec as create, createCodec as frame}} from './codec-runtime.ts';\n{marker}\nexport let observed: unknown;\nexport const observedMethods: unknown[] = [];\nexport function createPayloadCodec(meta: unknown, types: unknown) {{ observed = structuredClone(meta); return create(meta, types); }}\nexport function createCodec(meta: unknown, types: unknown) {{ observedMethods.push(structuredClone(meta)); return frame(meta, types); }}\n"
         )).unwrap();
         fs::write(directory.join("bad-runtime.ts"), "export const schemaFormat = 'incompatible'; export function createPayloadCodec() { throw new Error('factory must not run'); } export const createCodec = createPayloadCodec;").unwrap();
+        if candidate && std::env::var_os("IC_WIRE_CHECK_TYPESCRIPT").is_some() {
+            check_typescript(&directory, fixture);
+        }
     }
     let mut child = Command::new("node")
         .args([
@@ -360,4 +395,78 @@ fn run_typescript(fixture: &Value, script: &str) -> Value {
         String::from_utf8_lossy(&result.stderr)
     );
     serde_json::from_slice(&result.stdout).unwrap()
+}
+
+fn check_typescript(directory: &std::path::Path, fixture: &Value) {
+    let compiler = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../typescript/node_modules/typescript/bin/tsc");
+    assert!(
+        compiler.is_file(),
+        "Install qualification/typescript with npm ci --ignore-scripts first"
+    );
+    let mut files = vec!["client.ts"];
+    if fixture["frameModule"].is_string() {
+        files.push("frame-client.ts");
+    }
+    if let Some(source) = fixture["typeAssertions"].as_str() {
+        fs::write(directory.join("type-assertions.ts"), source).unwrap();
+        files.push("type-assertions.ts");
+    }
+    let result = Command::new("node")
+        .arg(compiler)
+        .args([
+            "--strict",
+            "--noUncheckedIndexedAccess",
+            "--exactOptionalPropertyTypes",
+            "--noEmit",
+            "--target",
+            "es2022",
+            "--module",
+            "nodenext",
+            "--allowImportingTsExtensions",
+        ])
+        .args(files)
+        .current_dir(directory)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "TypeScript static check failed: {}{}",
+        String::from_utf8_lossy(&result.stdout),
+        String::from_utf8_lossy(&result.stderr)
+    );
+}
+
+impl reference::typescript::Wire for Chain {
+    fn native_schema(
+        context: &mut reference::typescript::SchemaContext,
+    ) -> Result<Value, reference::typescript::GenerationError> {
+        Ok(json!({"k":"record","fields":[
+            {"name":"value","value":context.describe::<u16>()?},
+            {"name":"next","value":context.describe::<Option<Box<Chain>>>()?}
+        ]}))
+    }
+}
+impl reference::typescript::Wire for Shared {
+    fn native_schema(
+        context: &mut reference::typescript::SchemaContext,
+    ) -> Result<Value, reference::typescript::GenerationError> {
+        Ok(json!({"k":"record","fields":[
+            {"name":"left","value":context.describe::<Chain>()?},
+            {"name":"right","value":context.describe::<Chain>()?}
+        ]}))
+    }
+}
+
+#[test]
+fn named_recursive_collection_matches_reference_names_and_structure() {
+    let mut candidate = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    candidate.register::<Chain>("Chain").unwrap();
+    candidate.register::<Shared>("Shared").unwrap();
+    let mut reference = reference::typescript::SchemaRegistry::new();
+    reference.register::<Chain>("Chain").unwrap();
+    reference.register::<Shared>("Shared").unwrap();
+    let actual: BTreeMap<String, Value> =
+        serde_json::from_str(&candidate.finish().unwrap().metadata_json().unwrap()).unwrap();
+    assert_eq!(actual, reference.finish().unwrap());
 }

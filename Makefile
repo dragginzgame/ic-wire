@@ -21,8 +21,9 @@ help:
 	  'lint-host             Lint host schema library and tests' \
 	  'doc-host              Check host feature Rustdoc' \
 	  'check-wasm-host       Check TypeScript feature forwarding on Wasm' \
-	  'test-typescript       Exchange Rust bytes with published reference TS (Node required)' \
+	  'test-typescript       Exchange Rust bytes with candidate/reference TS (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
+	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
 	  'test-derive           Check strict derive rejection and typed projection' \
 	  'lint-derive           Lint the derive implementation and contract tests' \
 	  'lint-compatibility    Lint the independent qualification workspace' \
@@ -78,8 +79,11 @@ doc-host:
 check-wasm-host:
 	+RUSTFLAGS="-D warnings" cargo check -p ic-wire --features typescript --lib --target wasm32-unknown-unknown --locked --offline
 
-.PHONY: test-typescript lint-typescript
-test-typescript lint-typescript: qualification-tooling-check | toko-execution-check
+.PHONY: test-typescript lint-typescript check-typescript
+test-typescript lint-typescript check-typescript: qualification-tooling-check | toko-execution-check
+
+check-typescript:
+	+IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline
 
 test-typescript:
 	+cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline

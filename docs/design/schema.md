@@ -16,14 +16,15 @@ that arbitrary serialization code matches it.
 
 Supported reference kinds are unit, bool, signed/unsigned integers, text, bytes,
 packed-i16, list, option, newtype, ref, record and enum. Field and variant order,
-supplied names, numeric widths, bounds and enum IDs are retained. Names are not
-generated or renamed. TypeScript constraints are informational comments, not
+supplied names, numeric widths, bounds and enum IDs are retained. Imported names
+are not regenerated or renamed. TypeScript constraints are informational comments, not
 runtime enforcement. References render as names; shared graphs never expand into
 root-to-leaf paths. Options preserve `null | { readonly some: T }`.
 
-Unknown keys and unsupported shapes reject explicitly. Unlike the reference,
-this subset does not admit custom checks, all scalar/collection kinds, methods,
-payload policies, or automatic Rust metadata collection. It is an experimental
+Unknown keys and unsupported shapes reject explicitly. This subset does not admit
+all reference scalar/collection kinds, custom runtime checks or the full reference
+Serde projection surface. Method identities and payload policies are supplied
+through the separate generation APIs. It is an experimental
 API, not a replacement for the full reference host surface. No consumer source,
 wire acceptance, byte, identity or persistence migration is approved here.
 
@@ -74,7 +75,7 @@ pair is claimed by this reference-format registry alone.
 
 The [cross-language qualification](../../qualification/README.md) is its first
 runtime consumer. Candidate Rust exchanges four representative records in payload,
-request and response form with published Core 0.22.4's TypeScript runtime under
+request and response form with candidate and published Core 0.22.4 TypeScript runtimes under
 Node. It verifies literal bytes, both decode directions, selected spans and owned
 bulk storage. This does not install the reference runtime into the product.
 The 0.23.1 checkpoint adds recursive and shared named-record exchange, exact
@@ -82,8 +83,7 @@ reference TS node/depth boundaries and cyclic-value depth refusal. Schema sharin
 does not become decoded-value aliasing. These cases use the same graph exporter
 and runtime harness as the representative record.
 
-Recursive automatic collection, generated-name/collision qualification, a
-candidate-owned browser runtime, TypeScript compiler validation,
+Broad named-collection performance qualification, browser execution,
 advisory traversal and reference performance comparisons remain outstanding.
 No Wasm size or IC instruction improvement is claimed.
 
@@ -102,7 +102,8 @@ The imported runtime must export `schemaFormat = "ic-wire-json/1"` and
 grammar and returns encode/decode functions. A mismatch throws before factory
 creation. The marker identifies an interface, not cryptographic supplier identity;
 applications must select and qualify their runtime implementation. Qualification
-uses a private adapter to the pinned published reference interpreter.
+uses private observation adapters to both the candidate interpreter and the pinned
+published reference. The candidate adapter forwards the runtime's actual marker.
 
 The module exports type aliases and a frozen codec object. Its JSON registry is
 parsed into private module storage, preserving prototype-like keys without exposing
@@ -115,8 +116,9 @@ quoted metadata and client code. JSON string escaping uses one additional bounde
 metadata buffer, so this is not a single-buffer memory guarantee. The generated
 client is now the payload caller in the representative Rust exchange; format
 mismatch and actual supplied policy are checked at runtime. Automatic Serde
-projection beyond the strict subset below and a candidate runtime remain separate
-implementation work.
+projection beyond the strict subset below remains separate implementation work.
+The candidate interpreter is exported as `typescript::RUNTIME`; its scope and
+reuse contract are recorded in [browser runtime](browser-runtime.md).
 
 ## Generated method modules
 
@@ -159,7 +161,12 @@ instantiations project their own field widths and bounds, without TypeId or a
 `'static` requirement. The derive currently requires Wire for every type parameter,
 including parameters that a custom wrapper might otherwise leave unconstrained.
 Field `#[serde(borrow)]` and explicit borrow-lifetime lists are accepted because
-they do not change bytes. Other Serde attributes, unsupported Wire attributes,
+they do not change bytes. Version 0.23.6 also accepts symmetric
+`#[serde(rename = "name")]` on named fields and enum variants. Renames affect
+generated JavaScript keys/tags while preserving Postcard field order and numeric
+variant indices. Projected name collisions reject at the existing graph boundary.
+Directional rename forms, rename_all, container renames, unnamed-field renames,
+other Serde attributes, unsupported Wire attributes,
 explicit enum discriminants, multi-field tuples and unions reject.
 This conservative subset does not silently approximate rename/flatten/skip/tagged
 or custom serializer layouts. Serde remains the only payload implementation.
@@ -170,15 +177,15 @@ borrowed byte/text adapters. Ordinary Vec<u8> remains a list projection; it is n
 rewritten into a byte-buffer field. No Platform identity type is redefined.
 
 SchemaContext bounds nested projection calls and active Rust type depth. Active
-recursive type labels reject, and a failed nested call invalidates the context
+recursive type labels reject in inline mode, and a failed nested call invalidates the context
 so manual code cannot swallow failure and return an apparently admitted graph.
 Construction work counts Rust projection calls, not exact JSON nodes. Final graph
 admission independently enforces its exact node/name/depth limits. Producer JSON
 allocations occur before that admission; arbitrary manual projection code remains
 trusted and can do work outside the construction allowance. This is not an exact
 host heap cap. Nested types are inline: no new generated-name algorithm or type
-identity promise replaces the reference named collector. Recursive graphs still
-use explicit named metadata; automatic recursive collection is outstanding.
+identity promise replaces the reference named collector in this inline API.
+Use the named collector below for recursive/shared types.
 
 The macro is a real unpublished `ic-wire-derive` product package, authored for
 this strict destination contract rather than transplanted from the reference.
@@ -200,3 +207,44 @@ named Result to check generated-path hygiene. A borrowed generic record uses a
 non-static source lifetime and verifies decoded string/byte pointers into its
 input. The generated-client exchange now starts from `Record<u8, 3>` and retains
 the same independent schema and byte oracles.
+
+## Named Rust collection (0.23.6)
+
+`SchemaRegistry::new(limits)`, `register::<T>(alias)` and consuming `finish()`
+collect concrete Rust roots into the same JSON import boundary and return the
+same immutable ValidatedRegistry. SchemaContext owns both inline and named
+production; derives emit one projection implementation. Every nested concrete
+Rust type receives one definition and subsequent occurrences emit references.
+A reserved name breaks recursive expansion before its definition is complete.
+Explicit aliases remain independent of discovery order. No TypeId or static
+borrow requirement is introduced.
+
+Generated names retain the exact reference algorithm from
+`typescript/native_schema/registry/mod.rs` at
+`2dc434b10bec2fca92345d940dbfedc05993e9d5`: a sanitized 48-character stem plus
+FNV-1a-64 of the full compiler type spelling. Only this naming function is reused;
+collection integrates with the destination context and sealed-graph admission.
+The retained repository license applies. These names are compiler-source labels,
+not guaranteed unique Rust type identities or wire/method IDs.
+
+Each encountered projection callback is retained within the construction call
+allowance. Finalization replays those callbacks with known children resolving to
+references and compares the result with its collected definition. This catches
+conflicting concrete types sharing a diagnostic spelling and nondeterministic
+manual projections. It is not a proof against arbitrary malicious custom code.
+Failed registration is sticky; finish cannot expose partially admitted metadata.
+The existing graph validator rejects unresolved references and alias-only cycles.
+
+Construction and verification share a finite call allowance; generated/root
+names consume a separate name-byte allowance before insertion. The graph import
+then independently enforces its exact nodes, labels and inline depth bounds.
+References do not recursively expand during verification or rendering. JSON
+producer allocations and manual work retain the limitations described above;
+no exact heap cap or supplier-identical construction budget is claimed.
+
+Focused evidence includes complete named-map equality with the published
+reference for recursive Chain/Shared types, generated framed exchange from
+actual derives, root-order stability, diagnostic-name and explicit-root collisions,
+unstable projections, failure poisoning, alias cycles and non-static borrowed
+roots. Large graph timing/allocation and the full Serde surface remain gates
+before treating this as a replacement for the reference collector.

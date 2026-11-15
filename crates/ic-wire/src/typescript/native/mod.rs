@@ -1,7 +1,9 @@
-//! Bounded inline metadata production for the existing JSON admission boundary.
+//! Bounded inline/named metadata production for the shared admission boundary.
 use super::{GenerationError, SchemaLimits, ValidatedRegistry};
 use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 use serde_json::{Value, json};
+mod registry;
+pub use registry::SchemaRegistry;
 
 /// A trusted description of a type's Serde representation.
 ///
@@ -15,10 +17,11 @@ pub trait Wire {
     fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError>;
 }
 
-/// Construction allowance for inline Rust metadata, separate from graph admission.
+/// Construction allowance for Rust metadata, separate from graph admission.
 ///
-/// Created by `ValidatedRegistry::from_type`. Calls and active type depth are
-/// bounded; recursion rejects rather than infinitely expanding. Manual projection
+/// Created by `ValidatedRegistry::from_type` or `SchemaRegistry`. Calls and active
+/// type depth are bounded; inline recursion rejects and named recursion emits
+/// references rather than expanding. Manual projection
 /// code is trusted and may allocate/work outside this accounting, like custom
 /// Serde code. Final JSON admission independently checks names and exact nodes.
 #[derive(Debug)]
@@ -27,13 +30,14 @@ pub struct SchemaContext {
     depth: usize,
     active: Vec<&'static str>,
     failed: bool,
+    names: Option<Box<registry::Names>>,
 }
 
 impl SchemaContext {
     /// Describe a nested type without bypassing construction admission.
     ///
     /// # Errors
-    /// Schema rejects recursive automatic projection or a previously failed
+    /// Schema rejects recursive inline projection or a previously failed
     /// context; Complexity rejects exhausted construction calls or depth.
     pub fn describe<T: Wire + ?Sized>(&mut self) -> Result<Value, GenerationError> {
         if self.failed {
@@ -41,7 +45,7 @@ impl SchemaContext {
         }
         self.failed = true;
         let name = core::any::type_name::<T>();
-        if self.active.contains(&name) {
+        if self.names.is_none() && self.active.contains(&name) {
             return Err(GenerationError::Schema);
         }
         if self.active.len() > self.depth {
@@ -53,7 +57,11 @@ impl SchemaContext {
             .ok_or(GenerationError::Complexity)?;
         self.active.push(name);
         self.failed = false;
-        let result = T::schema(self);
+        let result = if self.names.is_some() {
+            self.named::<T>()
+        } else {
+            T::schema(self)
+        };
         self.active.pop();
         // A manual projection cannot hide a failed nested registration.
         if self.failed && result.is_ok() {
@@ -71,7 +79,7 @@ impl ValidatedRegistry {
     ///
     /// Nested declarations are inline; no generated-name algorithm is substituted
     /// for the reference named collector. Recursive automatic projection rejects;
-    /// use explicit named metadata for recursive graphs until collection qualifies.
+    /// use SchemaRegistry for shared or recursive named collection.
     ///
     /// # Errors
     /// Returns Schema for invalid/recursive projections and Complexity for
@@ -89,6 +97,7 @@ impl ValidatedRegistry {
             depth: limits.depth,
             active: Vec::new(),
             failed: false,
+            names: None,
         };
         let schema = context.describe::<T>()?;
         Self::from_metadata(&BTreeMap::from([(String::from(root), schema)]), limits)

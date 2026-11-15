@@ -1,6 +1,6 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.5`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.6`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -99,22 +99,32 @@ cargo test --manifest-path qualification/Cargo.toml --test allocation --release 
 `make test-compatibility` runs both comparison tests and allocation qualification.
 Release-profile allocation checks are not a matched opt-z/opt-3 Wasm benchmark.
 
-## Candidate Rust / reference TypeScript exchange
+## Candidate Rust / candidate and reference TypeScript exchange
 
 `make test-typescript` selects the private `typescript` qualification feature.
 The harness imports candidate metadata into its typed graph, exports JSON from
-that graph, and feeds it to published `ic-wire 0.22.4`'s `typescript::RUNTIME`.
+that graph, and feeds it to both candidate and published `ic-wire 0.22.4`'s `typescript::RUNTIME`. Generated clients run against each source and their returned results must agree.
 That source is emitted only into a unique temporary test directory and removed
-when the subprocess finishes. No sibling checkout or copied product runtime is
-required. The published source comparison above covers this runtime source too.
+when the subprocess finishes. No sibling checkout is required. The published source comparison above covers this runtime source too.
 The reference's matching `ic-wire-derive 0.22.4` is selected only by this optional
 qualification feature; it is not a candidate product dependency.
 
 Prerequisite: explicitly installed Node supporting `--experimental-transform-types`.
 This check passed on Linux with Node 24.21.0 and Rust 1.100.0. It does not install
-Node or TypeScript, invoke npm, or claim TypeScript compiler/browser/macOS proof.
+Node or TypeScript, invoke npm, or claim browser/macOS proof.
 `make lint-typescript` lints the focused Rust harness. Ordinary native qualification
 continues to run without this optional feature or a Node prerequisite.
+
+For static checking, install the private pinned compiler with
+`npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund`,
+then run `make check-typescript`. The lock selects TypeScript 5.9.3 with registry
+integrity verification; it is a qualification-only dev dependency. This target
+runs the same exchange tests and additionally checks the candidate runtime and
+generated payload/frame clients with `strict`, `noUncheckedIndexedAccess`, and
+`exactOptionalPropertyTypes`, targeting ES2022 ES modules. Positive and expected-error
+consumer fixtures check Number/BigInt, options, enum payloads, packed arrays,
+decode result types and distinct request/response shapes. The check does not
+download tools automatically. `make test-typescript` still requires only Node.
 
 The four literal cases cover empty, zero, large signed and mixed representative
 records: small integer, enum, option, bounded bytes, packed i16 and ordinary list.
@@ -137,8 +147,7 @@ identical cross-language error enums or allocation/node accounting.
 The fixture's Rust policy supplies bytes/nodes/depth to both runtime APIs with
 nonbinding baseline node/depth allowances; boundary probes narrow one resource
 at a time. Native allocation stays Rust-only. Boundaries beyond these records,
-version-mismatch refusal, browser-specific behavior, full
-schema coverage and a candidate-owned runtime remain unqualified.
+browser-specific behavior and full schema coverage remain unqualified.
 
 The 0.23.1 checkpoint also exchanges a two-link recursive record and a pair of
 fields sharing the same named record schema. Literal payloads are respectively
@@ -176,7 +185,8 @@ the tested metadata subset; the marker alone does not authenticate arbitrary
 runtime implementations. The published Cargo source pin supplies runtime identity.
 No adapter or reference dependency enters the product graph. Scalar and
 boundary-sweep controls still exercise the supplier directly. Node transforms emitted TypeScript;
-this is not TypeScript static typechecking or browser execution evidence.
+static checking is supplied separately by `make check-typescript`; neither target
+constitutes browser execution evidence.
 
 From 0.23.4, baseline request/response exchange also imports generated method
 codecs. The adapter records both directions' actual factory policy. A second
@@ -194,6 +204,78 @@ The representative record is now generic; `Record<u8, 3>` supplies the concrete
 integer type and byte-field bound to generation. The derived metadata must exactly
 match the independently authored JSON fixture
 before generation; the generated client then runs the same byte/custody tests.
-Framed recursive controls retain the explicit named graph. The qualification
+Version 0.23.6 framed controls use SchemaRegistry to collect their generic,
+recursive and shared Rust types. The qualification
 feature now enables the candidate host derive, while the reference's macro stays
 its separately selected published supplier.
+
+Version 0.23.6 adds a generated-client exchange for explicitly renamed fields
+and variants. Independent JSON and literal bytes prove the selected names and
+unchanged Postcard order/tags; JavaScript must use the projected names. A field
+named `__proto__` survives JSON parsing and decodes as an own property on a
+null-prototype record. This is an opt-in fixture contract, not a rename or
+migration of any production consumer.
+
+Named recursive collection is compared directly with the published reference's
+SchemaRegistry using the same concrete Chain/Shared Rust types and independent
+reference trait implementations. The complete JSON maps, including generated
+names and wrapper references, match. Root-order stability, duplicate and generated
+name collisions, identical diagnostic labels for distinct Rust types, inconsistent
+manual projections, alias-only cycles and sticky failure have host tests. Named
+borrowed projection also compiles without a static lifetime bound. These are
+focused contract checks, not large-registry performance qualification.
+
+## Large-byte generated-client qualification
+
+The 0.23.6 `bulk_cases` fixture adapts the workload from
+`crates/ic-wire/examples/typescript_conformance/large_bytes/{mod.rs,checks.mjs}`
+at the pinned reference commit above. The source SHA-256 values are respectively
+`6033c1eb16dcb25eb3fba0b0bddfa7fffb8850a26e90b4e2a8035a3a7151ae07` and
+`a9e511850e6325164d948d31e1ca5283618dc514df9e31a4134d0cb351a063e7`.
+The retained repository license applies. Reuse is limited to the 1 MiB byte
+workload, its `i % 251` pattern and boundary-check ideas; no legacy generator,
+benchmark driver, executor or release machinery is imported.
+
+The destination is the existing generated-client exchange harness. Independent
+literal length prefixes cover 0, 63, 64, 127, 128, 16,383, 16,384 and 1,048,576
+bytes. Candidate and reference TypeScript encoders match those prefixes and the
+byte pattern in payload/request/response form; Rust independently encodes and
+decodes the returned payloads. Checks cover writer growth, exact/short payload
+byte allowances, field overflow, selected spans, owned decoded buffers, retained
+output, malformed missing bodies, trailing bytes and frame identity/direction.
+The same generated modules also pass strict TypeScript checking.
+
+Reproduce this focused case with:
+
+```sh
+IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript bulk_cases --locked --offline
+```
+
+This is correctness evidence at selected sizes, not throughput, JS heap-allocation,
+browser, Wasm-size or IC-instruction evidence.
+
+## Paired packed and ordinary signed buffers
+
+`bulk_cases::packed` adapts the four value distributions from
+`qualification/ic-wire-benchmarks/benches/fixtures/packed_i16/mod.rs` at the same
+pinned reference commit. Its SHA-256 is
+`e2f873f88d0e190652ae43e51ff88507689f42843b85aca0d6bb3202fd102f22`.
+The retained repository license applies. Only workload sizes/value patterns are
+reused; historical measurements, Candid controls and benchmark orchestration are
+not imported.
+
+The 24 paired cases combine 0, 1, 64, 128, 1,024 and 16,384 elements with small
+positive, maximum, small negative and mixed boundary values. Independent literal
+prefixes and word/varint tables check little-endian packed bytes versus ordinary
+Postcard ZigZag varints. Generated request/response clients run against both TS
+runtimes; returned payloads also match Rust encoding and decode to the original
+values. Exact/short byte and node allowances, selected unaligned input spans,
+owned decoded results, odd packed lengths, field overflow and redundant empty
+lengths are checked. Generated modules pass strict TypeScript checking.
+
+Browser policy counts packed data as one value and ordinary lists as one plus
+their element count. Rust uses a separately sufficient weighted Serde allowance;
+these tests do not imply equal cross-language budget accounting. Native endian
+conversion on a big-endian host and matched performance measurements remain
+outstanding. Run this subset by replacing `bulk_cases` in the command above with
+`bulk_cases::packed`.

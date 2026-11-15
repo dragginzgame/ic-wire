@@ -182,6 +182,9 @@ fn concrete_generics_preserve_bounds_defaults_and_variant_layout() {
 fn borrowed_generic_projection_accepts_nonstatic_lifetimes_and_preserves_custody() {
     use ic_wire::{Encoding, Limits, decode};
     fn project<'a>(_: &'a str) -> ValidatedRegistry {
+        let mut named = ic_wire::typescript::SchemaRegistry::new(SchemaLimits::default()).unwrap();
+        named.register::<Borrowed<'a, u16, 3>>("Borrowed").unwrap();
+        assert!(named.finish().is_ok());
         ValidatedRegistry::from_type::<Borrowed<'a, u16, 3>>("Borrowed", SchemaLimits::default())
             .unwrap()
     }
@@ -209,4 +212,129 @@ fn borrowed_generic_projection_accepts_nonstatic_lifetimes_and_preserves_custody
     assert_eq!(decoded.value, 128);
     assert_eq!(decoded.text.as_ptr(), literal[1..].as_ptr());
     assert_eq!(decoded.bytes.as_slice().as_ptr(), literal[4..].as_ptr());
+}
+
+#[derive(Serialize, Wire)]
+struct DuplicateNames {
+    #[serde(rename = "same")]
+    first: u8,
+    #[serde(rename = "same")]
+    second: u8,
+}
+
+#[test]
+fn renamed_field_collisions_fail_graph_admission() {
+    assert_eq!(
+        ValidatedRegistry::from_type::<DuplicateNames>("Root", SchemaLimits::default())
+            .unwrap_err(),
+        GenerationError::Schema
+    );
+}
+
+#[test]
+fn named_collection_handles_recursion_and_is_order_independent() {
+    use ic_wire::typescript::SchemaRegistry;
+    let mut first = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    first.register::<Recursive>("Recursive").unwrap();
+    first.register::<Generic<u64, 16>>("Generic").unwrap();
+    let mut second = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    second.register::<Generic<u64, 16>>("Generic").unwrap();
+    second.register::<Recursive>("Recursive").unwrap();
+    assert_eq!(
+        first.finish().unwrap().metadata_json().unwrap(),
+        second.finish().unwrap().metadata_json().unwrap()
+    );
+}
+
+#[test]
+fn named_collection_rejects_duplicate_roots_and_stays_failed() {
+    use ic_wire::typescript::SchemaRegistry;
+    let mut registry = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    registry.register::<bool>("Root").unwrap();
+    assert_eq!(
+        registry.register::<bool>("Root"),
+        Err(GenerationError::Schema)
+    );
+    assert_eq!(
+        registry.register::<u8>("Other"),
+        Err(GenerationError::Schema)
+    );
+    assert_eq!(registry.finish().unwrap_err(), GenerationError::Schema);
+    let mut small = SchemaRegistry::new(SchemaLimits {
+        nodes: 0,
+        ..SchemaLimits::default()
+    })
+    .unwrap();
+    assert_eq!(
+        small.register::<bool>("Root"),
+        Err(GenerationError::Complexity)
+    );
+    assert_eq!(small.finish().unwrap_err(), GenerationError::Schema);
+    let mut exact = SchemaRegistry::new(SchemaLimits {
+        nodes: 4,
+        ..SchemaLimits::default()
+    })
+    .unwrap();
+    exact.register::<bool>("Root").unwrap();
+    let graph = exact.finish().unwrap();
+    let metadata: Value = serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
+    let generated = metadata["Root"]["name"].as_str().unwrap();
+    let mut collision = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    assert_eq!(
+        collision.register::<bool>(generated),
+        Err(GenerationError::Schema)
+    );
+}
+
+struct AliasCycle;
+impl Wire for AliasCycle {
+    fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
+        context.describe::<Self>()
+    }
+}
+#[test]
+fn named_collection_rejects_alias_cycles_and_unstable_projections() {
+    use ic_wire::typescript::SchemaRegistry;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    static CALLS: AtomicUsize = AtomicUsize::new(0);
+    struct Unstable;
+    impl Wire for Unstable {
+        fn schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
+            Ok(if CALLS.fetch_add(1, Ordering::SeqCst) == 0 {
+                json!({"k":"bool"})
+            } else {
+                json!({"k":"unit"})
+            })
+        }
+    }
+    let mut cyclic = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    cyclic.register::<AliasCycle>("Root").unwrap();
+    assert_eq!(cyclic.finish().unwrap_err(), GenerationError::Schema);
+    let mut unstable = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    unstable.register::<Unstable>("Root").unwrap();
+    assert_eq!(unstable.finish().unwrap_err(), GenerationError::Schema);
+}
+
+#[test]
+fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
+    use ic_wire::typescript::SchemaRegistry;
+    let mut registry = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+    let first_name = {
+        #[derive(Serialize, Wire)]
+        struct Same {
+            value: bool,
+        }
+        registry.register::<Same>("First").unwrap();
+        core::any::type_name::<Same>()
+    };
+    let second_name = {
+        #[derive(Serialize, Wire)]
+        struct Same {
+            value: u8,
+        }
+        registry.register::<Same>("Second").unwrap();
+        core::any::type_name::<Same>()
+    };
+    assert_eq!(first_name, second_name);
+    assert_eq!(registry.finish().unwrap_err(), GenerationError::Schema);
 }

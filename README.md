@@ -7,7 +7,7 @@ a decision that a rewrite is necessary or an implemented replacement.
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.5`, following
+The candidate keeps the `ic-wire` package name and uses version `0.23.6`, following
 the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
 the version selection and GitHub push do not constitute a crates.io release.
 
@@ -37,13 +37,15 @@ record with an ordinary-list control. Optional host [schema admission and declar
 rendering](docs/design/schema.md) now import a defined JSON metadata subset into
 one immutable typed graph. It generates typed payload and framed method modules with private
 metadata, explicit browser policy and runtime-format mismatch refusal. The emitted
-clients exchange the representative record with Rust using the published reference
-TypeScript runtime in private qualification.
+clients exchange the representative record with Rust using both the candidate and
+published reference TypeScript runtimes in private qualification.
 An optional strict derive now projects ordinary Rust structs/enums, including
 concrete generic and borrowed instantiations, through that same graph boundary.
-Recursive automatic collection and a
-candidate browser runtime remain unimplemented;
-the full vertical slice is not yet qualified end to end.
+Named collection now handles shared and recursive Rust types with projection
+rechecks and reference-compatible names. The [candidate runtime](docs/design/browser-runtime.md)
+executes the admitted schema subset. Strict TypeScript checks cover the runtime
+and generated clients; browser execution and matched performance qualification
+remain outstanding.
 
 The separate [compatibility workspace](qualification/README.md) compares the
 candidate against published `ic-wire 0.22.4`, whose library source was verified
@@ -83,8 +85,9 @@ make test-host             # Focused host schema contracts
 make lint-host
 make doc-host
 make check-wasm-host       # TypeScript feature forwarding on Wasm
-make test-typescript       # Candidate Rust ↔ reference TS; explicit Node prerequisite
+make test-typescript       # Rust ↔ candidate/reference TS; explicit Node prerequisite
 make lint-typescript
+make check-typescript      # Strict client types; install private npm compiler first
 make test-derive           # Macro rejection and derived metadata contracts
 make lint-derive
 make fmt-check

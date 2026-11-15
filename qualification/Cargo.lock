@@ -45,10 +45,10 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.23.5"
+version = "0.23.6"
 dependencies = [
  "bytemuck",
- "ic-wire-derive 0.23.5",
+ "ic-wire-derive 0.23.6",
  "postcard",
  "serde",
  "serde_json",
@@ -59,7 +59,7 @@ name = "ic-wire-compatibility"
 version = "0.1.0"
 dependencies = [
  "ic-wire 0.22.4",
- "ic-wire 0.23.5",
+ "ic-wire 0.23.6",
  "serde",
  "serde_json",
  "stats_alloc",
@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.23.5"
+version = "0.23.6"
 dependencies = [
  "proc-macro2",
  "quote",

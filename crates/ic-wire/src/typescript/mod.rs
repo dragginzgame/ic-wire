@@ -2,13 +2,13 @@
 //!
 //! This imports explicit metadata; it does not infer arbitrary Serde layouts.
 //! Manual projections remain trusted and require independent byte vectors.
-//! Runtime implementation and automatic Rust type collection are not included.
+//! Named Rust type collection and a matching subset runtime share this contract.
 
 mod native;
 mod render;
 #[cfg(feature = "derive")]
 pub use ic_wire_derive::Wire;
-pub use native::{SchemaContext, Wire};
+pub use native::{SchemaContext, SchemaRegistry, Wire};
 
 /// Macro support for generated metadata; not a second schema API.
 #[doc(hidden)]
@@ -19,6 +19,11 @@ pub mod __private {
 /// Generated client modules require this metadata/runtime interface version.
 /// This labels tooling artifacts, never Wire payload bytes.
 pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json/1";
+
+/// Candidate interpreter for the admitted schema subset. Write this beside
+/// generated client modules at their selected runtime import path.
+/// Contains no transport, SDK, endpoint execution or deployment implementation.
+pub const RUNTIME: &str = include_str!("runtime.ts");
 
 /// Explicit browser payload allowances, owned by the consuming application.
 ///
