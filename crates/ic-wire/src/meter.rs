@@ -18,19 +18,21 @@ impl Budget {
         }
     }
 
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     pub(super) fn enter(&self, depth: usize, units: usize) -> bool {
         self.enter_many(depth, units, 1)
     }
 
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     pub(super) fn enter_many(&self, depth: usize, units: usize, count: usize) -> bool {
-        if self.refused.get() || depth > self.depth || self.nodes.get() < count {
+        let nodes = self.nodes.get();
+        let available = self.units.get();
+        if self.refused.get() || depth > self.depth || nodes < count || available < units {
             self.refused.set(true);
             return false;
         }
-        if !self.charge_buffer(units) {
-            return false;
-        }
-        self.nodes.set(self.nodes.get() - count);
+        self.units.set(available - units);
+        self.nodes.set(nodes - count);
         true
     }
 
@@ -38,6 +40,7 @@ impl Budget {
         self.refused.set(true);
     }
 
+    #[cfg_attr(target_arch = "wasm32", inline(always))]
     pub(super) fn charge_buffer(&self, units: usize) -> bool {
         // Preserve the reference's buffer debit even after a prior refusal.
         // Refusal remains sticky for subsequent visits and error classification.

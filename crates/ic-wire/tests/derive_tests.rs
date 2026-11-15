@@ -338,3 +338,81 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
     assert_eq!(first_name, second_name);
     assert_eq!(registry.finish().unwrap_err(), GenerationError::Schema);
 }
+
+#[test]
+fn many_public_roots_share_one_definition_with_exact_graph_admission() {
+    use ic_wire::typescript::SchemaRegistry;
+    const ROOTS: usize = 1024;
+    // Each public alias and the one shared bool definition contributes a named
+    // definition and one inline node. Aliases must not clone the shared shape.
+    let exact = SchemaLimits {
+        nodes: 2 * (ROOTS + 1),
+        ..SchemaLimits::default()
+    };
+    let collect = |reverse: bool, limits| {
+        let mut registry = SchemaRegistry::new(limits).unwrap();
+        for offset in 0..ROOTS {
+            let index = if reverse { ROOTS - offset - 1 } else { offset };
+            registry
+                .register::<bool>(&format!("Root{index:04}"))
+                .unwrap();
+        }
+        registry.finish()
+    };
+    let forward = collect(false, exact).unwrap();
+    let reverse = collect(true, exact).unwrap();
+    let metadata = forward.metadata_json().unwrap();
+    assert_eq!(metadata, reverse.metadata_json().unwrap());
+    assert_eq!(
+        forward.declarations().unwrap(),
+        reverse.declarations().unwrap()
+    );
+    let definitions: std::collections::BTreeMap<String, Value> =
+        serde_json::from_str(&metadata).unwrap();
+    assert_eq!(definitions.len(), ROOTS + 1);
+    let target = definitions["Root0000"]["name"].as_str().unwrap();
+    assert_eq!(definitions[target], json!({"k":"bool"}));
+    for index in 0..ROOTS {
+        assert_eq!(
+            definitions[&format!("Root{index:04}")],
+            json!({"k":"ref","name":target})
+        );
+    }
+    assert!(matches!(
+        collect(
+            false,
+            SchemaLimits {
+                nodes: exact.nodes - 1,
+                ..exact
+            }
+        ),
+        Err(GenerationError::Complexity)
+    ));
+}
+
+#[test]
+fn many_recursive_roots_keep_a_shared_finite_graph() {
+    use ic_wire::typescript::SchemaRegistry;
+    let collect = |roots: usize| {
+        let mut registry = SchemaRegistry::new(SchemaLimits::default()).unwrap();
+        for index in 0..roots {
+            registry
+                .register::<Recursive>(&format!("Root{index:04}"))
+                .unwrap();
+        }
+        registry.finish().unwrap()
+    };
+    let baseline: std::collections::BTreeMap<String, Value> =
+        serde_json::from_str(&collect(1).metadata_json().unwrap()).unwrap();
+    let large = collect(1024);
+    let expanded: std::collections::BTreeMap<String, Value> =
+        serde_json::from_str(&large.metadata_json().unwrap()).unwrap();
+    assert_eq!(expanded.len(), baseline.len() + 1023);
+    for (name, definition) in &baseline {
+        assert_eq!(&expanded[name], definition);
+    }
+    for index in 1..1024 {
+        assert_eq!(expanded[&format!("Root{index:04}")], baseline["Root0000"]);
+    }
+    assert!(large.declarations().unwrap().len() < 128 * 1024);
+}

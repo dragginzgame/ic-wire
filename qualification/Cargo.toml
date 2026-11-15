@@ -1,6 +1,19 @@
 [workspace]
-members = ["compatibility"]
+members = ["compatibility", "consumer"]
+exclude = ["ic-instructions"]
 resolver = "3"
+
+[profile.wire-size]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
+[profile.wire-speed]
+inherits = "wire-size"
+opt-level = 3
 
 [workspace.package]
 edition = "2024"
@@ -8,6 +21,8 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
+ic-platform-runtime = { version = "=0.22.5", default-features = false }
+ic-wire-consumer = { path = "consumer", default-features = false }
 candidate = { package = "ic-wire", path = "../crates/ic-wire" }
 reference = { package = "ic-wire", version = "=0.22.4", default-features = false }
 serde = { version = "=1.0.229", default-features = false, features = ["alloc", "derive"] }

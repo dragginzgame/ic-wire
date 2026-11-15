@@ -14,7 +14,10 @@ category = "tests"
 ignored = ["toko-tooling"]
 
 [features]
-typescript = ["candidate/derive", "reference/typescript"]
+typescript = ["candidate/derive", "reference/typescript", "dep:ic-wire-consumer", "ic-wire-consumer/schema"]
+
+[dependencies]
+ic-wire-consumer = { workspace = true, optional = true }
 
 [dev-dependencies]
 candidate.workspace = true
@@ -40,3 +43,9 @@ required-features = ["typescript"]
 
 [lints]
 workspace = true
+
+[[bench]]
+name = "schema"
+path = "benches/schema.rs"
+harness = false
+required-features = ["typescript"]

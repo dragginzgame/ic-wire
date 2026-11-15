@@ -1,6 +1,7 @@
 //! Candidate Rust exchange with candidate and published reference TypeScript runtimes.
 
 mod bulk_cases;
+mod consumer_cases;
 mod renamed_cases;
 mod scalar_cases;
 

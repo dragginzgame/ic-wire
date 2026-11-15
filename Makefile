@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := help
 
 override TOKO_TOOLING_ROOT := $(CURDIR)/vendor/toko-tooling
-FORMAT_RUST_ARGS := --extra-workspace qualification
+FORMAT_RUST_ARGS := --extra-workspace qualification --extra-workspace qualification/ic-instructions
+DEPENDENCY_MANIFEST ?= qualification/ic-instructions/Cargo.toml
 include vendor/toko-tooling/make/consumer.mk
 include vendor/toko-tooling/make/cargo-dependencies.mk
 
@@ -24,6 +25,11 @@ help:
 	  'test-typescript       Exchange Rust bytes with candidate/reference TS (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
+	  'bench-schema          Paired host collection/finalization/export timing probe' \
+	  'test-consumer         Standalone contract against each Wire supplier' \
+	  'check-consumer-wasm   Build/run separate Wasm consumers (Node required)' \
+	  'measure-consumer-wasm Compare fixed opt-z/opt-3 consumer Wasm sizes' \
+	  'measure-consumer-ic   Installed counters (explicit POCKET_IC_BIN required)' \
 	  'test-derive           Check strict derive rejection and typed projection' \
 	  'lint-derive           Lint the derive implementation and contract tests' \
 	  'lint-compatibility    Lint the independent qualification workspace' \
@@ -90,6 +96,31 @@ test-typescript:
 
 lint-typescript:
 	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline -- -D warnings
+
+.PHONY: bench-schema
+bench-schema: qualification-tooling-check | toko-execution-check
+	+cargo bench --manifest-path qualification/Cargo.toml --features typescript --bench schema --locked --offline
+
+.PHONY: test-consumer check-consumer-wasm
+test-consumer check-consumer-wasm: qualification-tooling-check | toko-execution-check
+
+.PHONY: measure-consumer-wasm
+measure-consumer-wasm: qualification-tooling-check | toko-execution-check
+	node qualification/consumer/measure-wasm.mjs
+
+.PHONY: measure-consumer-ic
+measure-consumer-ic: qualification-tooling-check | toko-execution-check
+	@native_selection="$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)/qualification/ic-instructions")" && test "$$native_selection" = "$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)")"
+	bash qualification/ic-instructions/run.sh
+
+test-consumer:
+	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --test contract --locked --offline
+	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --no-default-features --features reference --test contract --locked --offline
+
+check-consumer-wasm:
+	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer-candidate --locked --offline
+	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --no-default-features --features reference --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer-reference --locked --offline
+	node qualification/consumer/check-wasm.mjs qualification/target/consumer-candidate/wasm32-unknown-unknown/debug/wire-consumer.wasm qualification/target/consumer-reference/wasm32-unknown-unknown/debug/wire-consumer.wasm
 
 .PHONY: test-derive lint-derive
 test-derive lint-derive: toko-tooling-check | toko-execution-check

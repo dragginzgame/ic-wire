@@ -7,7 +7,7 @@ a decision that a rewrite is necessary or an implemented replacement.
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.6`, following
+The candidate keeps the `ic-wire` package name and uses version `0.23.7`, following
 the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
 the version selection and GitHub push do not constitute a crates.io release.
 
@@ -87,6 +87,8 @@ make doc-host
 make check-wasm-host       # TypeScript feature forwarding on Wasm
 make test-typescript       # Rust ↔ candidate/reference TS; explicit Node prerequisite
 make lint-typescript
+make test-consumer         # Independent contract against both Rust suppliers
+make check-consumer-wasm   # Separate SDK-free Wasm builds and Node execution
 make check-typescript      # Strict client types; install private npm compiler first
 make test-derive           # Macro rejection and derived metadata contracts
 make lint-derive

@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
+let stdin = ''; for await (const chunk of process.stdin) stdin += chunk;
+const fixture = JSON.parse(stdin), url = pathToFileURL(process.argv[1]);
+const { upload } = await import(new URL('./frame-client.ts', url));
+const { uploadPayload } = await import(new URL('./client.ts', url));
+const request = {revision:128n,key:'sensor',content:Uint8Array.of(0,255),samples:Int16Array.of(-32768,0,32767),tags:[1,128]};
+const response = {revision:129n,accepted:true};
+const requestBytes = upload.encodeRequest(request), responseBytes = upload.encodeResponse(response);
+assert.deepEqual(Array.from(requestBytes),fixture.request);
+assert.deepEqual(Array.from(responseBytes),fixture.response);
+assert.deepEqual(uploadPayload.encode(request),requestBytes.subarray(11));
+assert.equal(upload.decodeRequest(Uint8Array.from(fixture.request)).revision,128n);
+assert.equal(upload.decodeResponse(Uint8Array.from(fixture.response)).accepted,true);
+process.stdout.write(JSON.stringify([Array.from(requestBytes),Array.from(responseBytes)]));

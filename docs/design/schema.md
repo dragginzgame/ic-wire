@@ -210,6 +210,13 @@ the same independent schema and byte oracles.
 
 ## Named Rust collection (0.23.6)
 
+Version 0.23.7 scale controls register 1,024 public scalar aliases in opposite
+orders and require identical JSON/declarations with exactly one shared scalar
+definition. Graph admission succeeds at 2,050 named-plus-inline nodes and rejects
+2,049. A separate 1,024-root recursive fixture preserves every baseline shared
+definition and adds only root aliases. These are bounded correctness checks;
+generation timing, allocation cost and broad registry performance remain unmeasured.
+
 `SchemaRegistry::new(limits)`, `register::<T>(alias)` and consuming `finish()`
 collect concrete Rust roots into the same JSON import boundary and return the
 same immutable ValidatedRegistry. SchemaContext owns both inline and named

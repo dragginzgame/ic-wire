@@ -1,6 +1,24 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.6`
+The [standalone consumer](consumer/README.md) owns a small application contract,
+independent of sibling recodes. `make test-consumer` checks its literal frames
+against each Rust supplier; `make check-consumer-wasm` builds and executes both
+standalone Wasm artifacts. Its generated clients participate in the TypeScript
+exchange harness. These are integration checks, not size/instruction measurements.
+The separate `make measure-consumer-wasm` target supplies a matched uncompressed
+size comparison; [both profiles pass for this consumer](../docs/design/consumer-measurement.md).
+It does not measure IC instruction counts.
+`make measure-consumer-ic` supplies the separate installed counter experiment,
+using an explicitly prepared PocketIC server and [isolated native driver](ic-instructions/README.md).
+The first run identifies request-encoding regressions at both profiles and a
+small opt-3 response-encoding regression; its performance criterion remains unmet.
+
+`make bench-schema` runs the separate bounded host timing probe. Its frozen
+workloads, phase boundaries and first results are recorded in
+[schema measurement](../docs/design/schema-measurement.md). The first run found
+small-registry regressions; it does not establish a candidate performance win.
+
+This independent, unpublished workspace compares candidate `ic-wire 0.23.7`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 

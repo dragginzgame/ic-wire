@@ -451,3 +451,45 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
         }
     }
 }
+
+#[test]
+fn quoted_utf8_spans_preserve_escapes_and_every_output_boundary() {
+    let controls: String = (0_u8..32).map(char::from).collect();
+    let label = format!("plainé😀\"\\{controls}\u{2028}\u{2029}tail");
+    let types = BTreeMap::from([(
+        "Root".into(),
+        json!({"k":"record","fields":[
+            {"name":label,"value":{"k":"bool"}}
+        ]}),
+    )]);
+    let graph = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
+    let metadata = graph.metadata_json().unwrap();
+    assert_eq!(
+        serde_json::from_str::<BTreeMap<String, Value>>(&metadata).unwrap(),
+        types
+    );
+    assert!(metadata.contains("plainé😀\\\"\\\\\\u0000"));
+    assert!(metadata.contains("\\u001f\\u2028\\u2029tail"));
+    assert!(!metadata.contains('\u{2028}'));
+    let declaration = graph.declarations().unwrap();
+    for limit in 0..=metadata.len().max(declaration.len()) {
+        let graph = ValidatedRegistry::from_metadata(
+            &types,
+            SchemaLimits {
+                output_bytes: limit,
+                ..SchemaLimits::default()
+            },
+        )
+        .unwrap();
+        for (actual, expected) in [
+            (graph.metadata_json(), &metadata),
+            (graph.declarations(), &declaration),
+        ] {
+            if limit < expected.len() {
+                assert_eq!(actual, Err(GenerationError::Complexity));
+            } else {
+                assert_eq!(actual.unwrap(), *expected);
+            }
+        }
+    }
+}

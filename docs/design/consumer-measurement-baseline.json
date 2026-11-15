@@ -1,0 +1,53 @@
+{
+  "compiler": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.100.0\nLLVM version: 23.1.5",
+  "node": "v24.21.0",
+  "base_commit": "3a9614d8105486807db18fdf7e4c0653b0a063e8",
+  "source_sha256": "10abcec2e8b6e510b41223846ee9148b519bf097155fabe5929eeadcf7fe53a7",
+  "lock_sha256": "5c87505e7167c88c5966c3a9c8c6e9c3ab8165e88ad8552ecc72e0273230dc9d",
+  "artifacts": [
+    {
+      "profile": "wire-size",
+      "supplier": "candidate",
+      "sha256": "c3d75d6360d5662eea5febb1259e7d3156b7f2ed61b836fdd4049b036d020c1a",
+      "total_bytes": 44127,
+      "code_payload_bytes": 37165,
+      "other_bytes": 6962
+    },
+    {
+      "profile": "wire-size",
+      "supplier": "reference",
+      "sha256": "2ac9305a6da1e3cf4dce9c3f78fc7c249558977ffecad58a8a16449d6d67c40d",
+      "total_bytes": 46138,
+      "code_payload_bytes": 39180,
+      "other_bytes": 6958
+    },
+    {
+      "profile": "wire-speed",
+      "supplier": "candidate",
+      "sha256": "863041f60c9c50d3a782161998c6291ce6170bf592ef7b0a3e16f2b10e711398",
+      "total_bytes": 47770,
+      "code_payload_bytes": 41179,
+      "other_bytes": 6591
+    },
+    {
+      "profile": "wire-speed",
+      "supplier": "reference",
+      "sha256": "2ca6be5197539066e478cf8783a89d53e4e49f758d303ebf57e1b15d20e77857",
+      "total_bytes": 47026,
+      "code_payload_bytes": 40426,
+      "other_bytes": 6600
+    }
+  ],
+  "comparisons": [
+    {
+      "profile": "wire-size",
+      "delta_bytes": -2011,
+      "criterion_met": true
+    },
+    {
+      "profile": "wire-speed",
+      "delta_bytes": 744,
+      "criterion_met": false
+    }
+  ]
+}

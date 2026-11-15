@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.23.7] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ⚡ Improved
+
+- Combine visit-budget checks and apply measured Wasm meter inlining, preserving
+  admission behavior. The standalone consumer is smaller than the reference at
+  both opt-z and opt-3; record the opt-z cost relative to the initial candidate.
+- Append ordinary UTF-8 spans together in the bounded JSON/TypeScript writer,
+  preserving escaping and exact output admission. The unchanged host probe shows
+  lower export cost; single-root total-cost regressions remain unresolved.
+
+### ✨ Added
+
+- Add installed IC instruction qualification with a separately locked native
+  simulator driver and optional guest counter. Record reproducible encoding
+  regressions while preserving exact frame and independent size evidence.
+- Add fixed-profile, fresh-build Wasm comparison with artifact execution, source
+  hashes and total/code-section sizes. Retain the initial opt-3 regression and
+  final passing results for the standalone consumer.
+- Add an independent qualification consumer with a frozen sample-upload contract,
+  candidate/reference supplier builds, generated TypeScript clients and runnable
+  SDK-free Wasm artifacts. Qualify literal frames and typed refusals.
+- Add a bounded paired host-schema timing probe for collection, finalization and
+  JSON export. Record initial small-registry regressions without accepting a
+  performance tradeoff or claiming replacement readiness.
+- Qualify named collection with 1,024 shared scalar and recursive roots, including
+  deterministic registration order, finite shared definitions and exact graph
+  admission boundaries.
+
 ## [0.23.6] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.

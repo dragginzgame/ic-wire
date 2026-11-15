@@ -23,16 +23,28 @@ impl Write for Output {
 impl Output {
     fn quoted(&mut self, value: &str) -> fmt::Result {
         self.write_char('"')?;
-        for character in value.chars() {
+        let mut start = 0;
+        for (index, character) in value.char_indices() {
+            if !matches!(
+                character,
+                '"' | '\\' | '\u{0000}'..='\u{001f}' | '\u{2028}' | '\u{2029}'
+            ) {
+                continue;
+            }
+            // Admit and append ordinary UTF-8 spans together. Only escape
+            // boundaries need individual writes; byte accounting stays exact.
+            self.write_str(&value[start..index])?;
             match character {
                 '"' => self.write_str("\\\"")?,
                 '\\' => self.write_str("\\\\")?,
                 '\u{0000}'..='\u{001f}' | '\u{2028}' | '\u{2029}' => {
                     write!(self, "\\u{:04x}", u32::from(character))?;
                 }
-                _ => self.write_char(character)?,
+                _ => unreachable!(),
             }
+            start = index + character.len_utf8();
         }
+        self.write_str(&value[start..])?;
         self.write_char('"')
     }
 
