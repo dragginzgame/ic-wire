@@ -122,8 +122,12 @@ Each is exchanged in both directions as a payload and both 11-byte frame directi
 Rust and TypeScript both encode independently to the frozen literals; Rust also
 checks the values decoded from the TypeScript-produced bytes.
 The test checks nonzero input offsets, decoded bulk ownership, retained output,
-all truncated prefixes, trailing bytes, out-of-range values and byte limits at
-and immediately below a valid payload size.
+all truncated prefixes, trailing bytes and out-of-range values. Each record is
+tested below, at and above its byte/node/depth boundary for payloads and both
+frame directions. Request and response policies vary independently; the opposite
+direction must remain admitted. The reference JS minimum node counts are 8, 9,
+9 and 11 respectively, with depth 3 for all four records. These count value visits,
+including enum payloads, optional Some values and ordinary list elements.
 
 The reference decoder returns null-prototype records. Packed-length admission
 reports `limit` at selected truncated prefixes; other tested truncations and
@@ -131,6 +135,7 @@ trailing bytes report `malformed`. Those categories are asserted explicitly.
 Rust retains its own `Malformed`/`Trailing` contract. This harness does not claim
 identical cross-language error enums or allocation/node accounting.
 The fixture's Rust policy supplies bytes/nodes/depth to both runtime APIs with
-nonbinding node/depth allowances; native allocation stays Rust-only. Exhaustive
-node/depth boundaries, version-mismatch refusal, browser-specific behavior, full
+nonbinding baseline node/depth allowances; boundary probes narrow one resource
+at a time. Native allocation stays Rust-only. Boundaries beyond these records,
+version-mismatch refusal, browser-specific behavior, full
 schema coverage and a candidate versioned runtime pair remain unqualified.

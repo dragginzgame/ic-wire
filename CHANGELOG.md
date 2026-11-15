@@ -19,7 +19,8 @@
 - Export bounded reference-format JSON from the admitted host graph. Qualify
   representative payload/request/response byte exchange between candidate Rust
   and the published reference TypeScript runtime, including selected-span custody,
-  truncation categories and byte-budget boundaries.
+  truncation categories and byte/node/depth boundaries. Check request and response
+  allowances independently without changing codec policy.
 - Add optional host-only metadata admission into an immutable typed registry and
   bounded TypeScript declaration rendering. Validate references, alias cycles,
   names and constraints once; retain productive recursion and shared references.

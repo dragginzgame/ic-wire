@@ -11,12 +11,57 @@ const frame = createCodec({ id: '7', request: schema, response: schema,
   requestNodes: policy.nodes, responseNodes: policy.nodes,
   requestDepth: policy.depth, responseDepth: policy.depth }, types);
 const malformed = error => error instanceof WireError && error.code === 'malformed';
+const limited = error => error instanceof WireError && error.code === 'limit';
 const outputs = [];
 for (const [caseIndex, item] of cases.entries()) {
   const value = Object.assign(Object.create(null), item.value, {
     bytes: new Uint8Array(item.value.bytes), packed: new Int16Array(item.value.packed),
   });
   const encoded = [];
+  // One record, six fields, an enum payload, optional Some and list elements.
+  // Reference JS counts values; these are not Rust allocation/node allowances.
+  const minimumNodes = [8, 9, 9, 11][caseIndex];
+  for (const resource of ['bytes', 'nodes', 'depth']) {
+    const minimum = { bytes: item.payload.length, nodes: minimumNodes, depth: 3 }[resource];
+    for (const delta of [-1, 0, 1]) {
+      const codec = createPayloadCodec({ schema, ...policy, [resource]: minimum + delta }, types);
+      if (delta < 0) {
+        assert.throws(() => codec.encode(value), limited);
+        assert.throws(() => codec.decode(new Uint8Array(item.payload)), limited);
+      } else {
+        assert.deepEqual(Array.from(codec.encode(value)), item.payload);
+        assert.deepEqual(codec.decode(new Uint8Array(item.payload)), value);
+      }
+    }
+  }
+  // Vary one direction/resource while the opposite direction stays sufficient.
+  for (const direction of ['request', 'response']) {
+    for (const resource of ['Bytes', 'Nodes', 'Depth']) {
+      const minimum = { Bytes: item.request.length, Nodes: minimumNodes, Depth: 3 }[resource];
+      for (const delta of [-1, 0, 1]) {
+        const codec = createCodec({ id: '7', request: schema, response: schema,
+          requestBytes: policy.bytes, responseBytes: policy.bytes,
+          requestNodes: policy.nodes, responseNodes: policy.nodes,
+          requestDepth: policy.depth, responseDepth: policy.depth,
+          [direction + resource]: minimum + delta }, types);
+        const encode = direction === 'request' ? codec.encodeRequest : codec.encodeResponse;
+        const decode = direction === 'request' ? codec.decodeRequest : codec.decodeResponse;
+        const bytes = item[direction];
+        if (delta < 0) {
+          assert.throws(() => encode(value), limited);
+          assert.throws(() => decode(new Uint8Array(bytes)), limited);
+        } else {
+          assert.deepEqual(Array.from(encode(value)), bytes);
+          assert.deepEqual(decode(new Uint8Array(bytes)), value);
+        }
+        const otherEncode = direction === 'request' ? codec.encodeResponse : codec.encodeRequest;
+        const otherDecode = direction === 'request' ? codec.decodeResponse : codec.decodeRequest;
+        const otherBytes = item[direction === 'request' ? 'response' : 'request'];
+        assert.deepEqual(Array.from(otherEncode(value)), otherBytes);
+        assert.deepEqual(otherDecode(new Uint8Array(otherBytes)), value);
+      }
+    }
+  }
   for (const [bytes, encode, decode, header] of [
     [item.payload, payload.encode, payload.decode, 0],
     [item.request, frame.encodeRequest, frame.decodeRequest, 11],
@@ -49,9 +94,4 @@ sample.bytes.fill(0); sample.packed.fill(0);
 assert.deepEqual(Array.from(retained), cases.at(-1).payload);
 assert.throws(() => payload.encode({ ...sample, number: 256 }), error => error instanceof WireError && error.code === 'limit');
 assert.throws(() => payload.encode({ ...sample, bytes: new Uint8Array(4) }), error => error instanceof WireError && error.code === 'limit');
-const exact = createPayloadCodec({ schema, ...policy, bytes: retained.length }, types);
-assert.deepEqual(Array.from(exact.encode(payload.decode(retained))), Array.from(retained));
-const short = createPayloadCodec({ schema, ...policy, bytes: retained.length - 1 }, types);
-assert.throws(() => short.decode(retained), error => error instanceof WireError && error.code === 'limit');
-assert.throws(() => short.encode(payload.decode(retained)), error => error instanceof WireError && error.code === 'limit');
 process.stdout.write(JSON.stringify(outputs));
