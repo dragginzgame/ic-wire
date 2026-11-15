@@ -28,6 +28,18 @@ struct Record {
     ordinary: List<i16, 2>,
 }
 
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+struct Chain {
+    value: u16,
+    next: Option<Box<Chain>>,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+struct Shared {
+    left: Chain,
+    right: Chain,
+}
+
 fn limits() -> Limits {
     Limits {
         bytes: 128,
@@ -39,7 +51,7 @@ fn limits() -> Limits {
 
 #[test]
 fn reference_typescript_exchanges_candidate_payloads_and_frames() {
-    let types = BTreeMap::from([(
+    let mut types = BTreeMap::from([(
         "Record".into(),
         json!({"k":"record","fields":[
             {"name":"number","value":{"k":"u","bits":8}},
@@ -53,6 +65,20 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
             {"name":"ordinary","value":{"k":"list","max":2,"item":{"k":"i","bits":16}}}
         ]}),
     )]);
+    types.insert(
+        "Chain".into(),
+        json!({"k":"record","fields":[
+            {"name":"value","value":{"k":"u","bits":16}},
+            {"name":"next","value":{"k":"option","item":{"k":"ref","name":"Chain"}}}
+        ]}),
+    );
+    types.insert(
+        "Shared".into(),
+        json!({"k":"record","fields":[
+            {"name":"left","value":{"k":"ref","name":"Chain"}},
+            {"name":"right","value":{"k":"ref","name":"Chain"}}
+        ]}),
+    );
     let graph = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
     let exported: Value = serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
     assert_eq!(exported, serde_json::to_value(&types).unwrap());
@@ -122,7 +148,28 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         }, "payload":payload, "request":request, "response":response}));
     }
     let policy = limits();
-    let fixture = json!({"types":exported,"cases":cases,"policy":{"bytes":policy.bytes,"nodes":policy.nodes,"depth":policy.depth}});
+    let chain = Chain {
+        value: 1,
+        next: Some(Box::new(Chain {
+            value: 128,
+            next: None,
+        })),
+    };
+    let shared = Shared {
+        left: Chain {
+            value: 7,
+            next: None,
+        },
+        right: Chain {
+            value: 7,
+            next: None,
+        },
+    };
+    let chain_bytes = encode(&chain, Encoding::Payload, policy).unwrap();
+    let shared_bytes = encode(&shared, Encoding::Payload, policy).unwrap();
+    assert_eq!(chain_bytes, [1, 1, 128, 1, 0]);
+    assert_eq!(shared_bytes, [7, 0, 7, 0]);
+    let fixture = json!({"types":exported,"cases":cases,"chain":chain_bytes,"shared":shared_bytes,"policy":{"bytes":policy.bytes,"nodes":policy.nodes,"depth":policy.depth}});
     // The published constant owns the runtime source; no sibling path or copied
     // product runtime is involved. Node runs it directly with type transformation.
     let nonce = SystemTime::now()
@@ -160,7 +207,20 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
         "TypeScript exchange failed: {}",
         String::from_utf8_lossy(&result.stderr)
     );
-    let outputs: Vec<Vec<Vec<u8>>> = serde_json::from_slice(&result.stdout).unwrap();
+    let result: Value = serde_json::from_slice(&result.stdout).unwrap();
+    let returned_chain: Vec<u8> = serde_json::from_value(result["chain"].clone()).unwrap();
+    let returned_shared: Vec<u8> = serde_json::from_value(result["shared"].clone()).unwrap();
+    assert_eq!(returned_chain, chain_bytes);
+    assert_eq!(returned_shared, shared_bytes);
+    assert_eq!(
+        decode::<Chain>(&returned_chain, Encoding::Payload, policy).unwrap(),
+        chain
+    );
+    assert_eq!(
+        decode::<Shared>(&returned_shared, Encoding::Payload, policy).unwrap(),
+        shared
+    );
+    let outputs: Vec<Vec<Vec<u8>>> = serde_json::from_value(result["records"].clone()).unwrap();
     assert_eq!(outputs.len(), records.len());
     for ((output, record), literal) in outputs.iter().zip(&records).zip(&literals) {
         assert_eq!(output.len(), 3);

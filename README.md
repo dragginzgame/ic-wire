@@ -7,7 +7,7 @@ a decision that a rewrite is necessary or an implemented replacement.
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.0`, following
+The candidate keeps the `ic-wire` package name and uses version `0.23.1`, following
 the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
 the version selection and GitHub push do not constitute a crates.io release.
 

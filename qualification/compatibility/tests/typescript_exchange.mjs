@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 const { createPayloadCodec, createCodec, WireError } = await import(pathToFileURL(process.argv[1]).href);
-const { types, cases, policy } = JSON.parse(readFileSync(0, 'utf8'));
+const { types, cases, policy, chain, shared } = JSON.parse(readFileSync(0, 'utf8'));
 const schema = { k: 'ref', name: 'Record' };
 const payload = createPayloadCodec({ schema, ...policy }, types);
 const frame = createCodec({ id: '7', request: schema, response: schema,
@@ -94,4 +94,37 @@ sample.bytes.fill(0); sample.packed.fill(0);
 assert.deepEqual(Array.from(retained), cases.at(-1).payload);
 assert.throws(() => payload.encode({ ...sample, number: 256 }), error => error instanceof WireError && error.code === 'limit');
 assert.throws(() => payload.encode({ ...sample, bytes: new Uint8Array(4) }), error => error instanceof WireError && error.code === 'limit');
-process.stdout.write(JSON.stringify(outputs));
+const record = fields => Object.assign(Object.create(null), fields);
+const chainValue = record({ value: 1, next: { some: record({ value: 128, next: null }) } });
+const leaf = record({ value: 7, next: null });
+// Same JS object in two fields: schemas share structure, bytes contain two values.
+const sharedValue = record({ left: leaf, right: leaf });
+const recursiveOutputs = [];
+for (const [name, value, literal, nodes, depth] of [
+  ['Chain', chainValue, [1, 1, 128, 1, 0], 6, 4],
+  ['Shared', sharedValue, [7, 0, 7, 0], 7, 3],
+]) {
+  assert.deepEqual(name === 'Chain' ? chain : shared, literal);
+  const schema = { k: 'ref', name };
+  const codec = createPayloadCodec({ schema, ...policy, nodes, depth }, types);
+  const bytes = codec.encode(value);
+  assert.deepEqual(Array.from(bytes), literal);
+  const decoded = codec.decode(new Uint8Array(literal));
+  assert.deepEqual(decoded, value);
+  if (name === 'Shared') {
+    assert.notEqual(decoded.left, decoded.right);
+    decoded.left.value = 9;
+    assert.equal(decoded.right.value, 7);
+  }
+  for (const allowance of [{ nodes: nodes - 1, depth }, { nodes, depth: depth - 1 }]) {
+    const short = createPayloadCodec({ schema, ...policy, ...allowance }, types);
+    assert.throws(() => short.encode(value), limited);
+    assert.throws(() => short.decode(new Uint8Array(literal)), limited);
+  }
+  recursiveOutputs.push(Array.from(bytes));
+}
+const cyclic = record({ value: 1, next: null });
+cyclic.next = { some: cyclic };
+const bounded = createPayloadCodec({ schema: { k: 'ref', name: 'Chain' }, ...policy, depth: 4 }, types);
+assert.throws(() => bounded.encode(cyclic), limited);
+process.stdout.write(JSON.stringify({ records: outputs, chain: recursiveOutputs[0], shared: recursiveOutputs[1] }));

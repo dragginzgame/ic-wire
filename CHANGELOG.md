@@ -1,6 +1,18 @@
 # Changelog
 
-## [0.23.0] - Unreleased
+## [0.23.1] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ✨ Added
+
+- Qualify recursive records and shared named schemas through the candidate graph
+  and published reference TypeScript runtime, with literal bytes, value custody
+  and recursive depth-limit refusal.
+
+## [0.23.0] - 2026-11-15
+
+Initial evaluation checkpoint; not published to crates.io.
 
 ### ⚠️ Breaking
 

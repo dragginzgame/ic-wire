@@ -77,6 +77,10 @@ runtime consumer. Candidate Rust exchanges four representative records in payloa
 request and response form with published Core 0.22.4's TypeScript runtime under
 Node. It verifies literal bytes, both decode directions, selected spans and owned
 bulk storage. This does not install the reference runtime into the product.
+The 0.23.1 checkpoint adds recursive and shared named-record exchange, exact
+reference TS node/depth boundaries and cyclic-value depth refusal. Schema sharing
+does not become decoded-value aliasing. These cases use the same graph exporter
+and runtime harness as the representative record.
 
 Automatic collection, naming/collision qualification, method admission, executable
 versioned metadata, matched browser runtime, TypeScript compiler validation,

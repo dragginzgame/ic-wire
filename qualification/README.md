@@ -1,6 +1,6 @@
 # Native compatibility qualification
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.0`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.1`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -139,3 +139,13 @@ nonbinding baseline node/depth allowances; boundary probes narrow one resource
 at a time. Native allocation stays Rust-only. Boundaries beyond these records,
 version-mismatch refusal, browser-specific behavior, full
 schema coverage and a candidate versioned runtime pair remain unqualified.
+
+The 0.23.1 checkpoint also exchanges a two-link recursive record and a pair of
+fields sharing the same named record schema. Literal payloads are respectively
+`01 01 80 01 00` and `07 00 07 00`. Both are decoded in Rust and the reference TS
+runtime. TypeScript admits them at node/depth allowances of 6/4 and 7/3 and rejects
+one below either allowance. Shared schema references do not alias decoded values;
+mutating the left field leaves the right field unchanged. A cyclic JavaScript
+input reaches the configured depth allowance and returns `WireError('limit')`.
+These are selected recursive-value checks, not arbitrary graph or stack-safety
+qualification. Native Rust retains independently sufficient budgets here.
