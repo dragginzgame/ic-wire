@@ -1,0 +1,87 @@
+# Payload admission contract
+
+Reference: `ic-wire` commit `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
+`crates/ic-wire/src/native/{mod.rs,encode/mod.rs,decode/mod.rs}`.
+Encoding and decoding use the same private meter with different visit rules.
+The [encoding contract](encoding.md) records preflight and destination custody.
+
+## Accounting ledger
+
+Let B be configured byte allowance and A allocation allowance. A fresh meter
+reserves B, refuses if A < B, and retains floor((A - B) / 8) charge units.
+One unit represents eight conservative allowance bytes, not measured live heap.
+
+| Operation | Nodes | Charge units | Depth |
+| --- | --- | --- | --- |
+| Decode deserializer call | 1 | size_of(visitor result) | Check current depth, root 1 |
+| Decode sequence element/map key/map value/enum discriminant/newtype variant seed | 1 | size_of(seed result) | Check access depth before invoking seed |
+| Decode visitor after deserializer call | 0 | 0 | Current depth + 1 |
+| Decode Some/newtype body | Through next deserializer call | Through next call | Visitor depth |
+| Decode sequence/map/enum access | 0 | 0 | Visitor depth |
+| Decode tuple/struct variant visitor | 0 | 0 | Access depth, no extra outer charge |
+| Decode borrowed/owned text or byte span | 0 | span length | No extra depth check |
+| Encode bounded value | 4 | 2 * size_of_val(value), checked | Require current depth + 2 (saturating) |
+| Encode child | Through bounded value | Through bounded value | Parent depth + 1 |
+| Encode text/bytes | 0 | span length | No additional check |
+
+Every failed debit sets a sticky refusal. Subsequent visits fail and errors map
+to Limit. Like the reference, a later buffer debit can still succeed; it does
+not clear refusal. Trusted custom Serde may catch an error and return success;
+there is no additional post-success refusal check in this compatible slice.
+Sequence and map size hints are suppressed before consumer visitors reserve.
+An element's seed charge is in addition to its deserializer charge. Zero-sized
+elements still consume nodes. Type sizes are target-dependent; borrowed and
+owned buffers both pay conservative span charges. Custom Serde work outside
+these boundaries is trusted and unbounded; consumer collection normalization
+can change re-encoded bytes. Retain original input for hashes/signatures/retries.
+
+## Framing and error precedence
+
+`decode(input, Encoding, Limits)` replaces the reference's payload/request/response
+wrappers for this local evaluation. No consumer migration is performed.
+
+1. Reject total input exceeding configured bytes as Limit.
+2. For frames, reject fewer than 11 bytes as Malformed, then mismatched magic,
+   little-endian method or direction as Identity.
+3. For frames, subtract 11 from both byte and allocation allowances with checked
+   subtraction; failure is Limit. Nodes and depth remain unchanged.
+4. Deserialize once through admission and Postcard. A failing operation maps to
+   Limit after a meter refusal, otherwise Malformed.
+5. After successful deserialization, reject remaining input as Trailing.
+
+Primitive acceptance belongs to published Postcard 1.1.3, with Serde 1.0.229.
+Redundant varints and the reference's multi-scalar char behavior remain admitted.
+No reserialization/canonicality pass is introduced. Incremental decoding may
+allocate a valid prefix before encountering malformed later input.
+
+## Narrow reuse decision
+
+Destination: private `decode/admitted.rs`, a Serde adapter around Postcard.
+Reuse unit: the reference `native/decode/mod.rs` visitor/access/seed adapter,
+including its IcyDB adaptation attribution. License remains the root LICENSE.md.
+The source SHA-256 is
+`e9a8cf090e994f8e14b79aa0dba09c5ba00dacdde607786fbe94795fbf429dda`.
+Its dependencies are Serde, alloc and the private meter; it owns no primitives,
+transport or orchestration. Keeping the exact visits avoids an unqualified
+accounting change. No primitive encoder specialization is imported.
+Future consolidation must preserve this ledger or obtain a migration
+decision. No complexity or performance improvement is claimed for this reuse.
+
+Qualification uses literal payload/frame cases, exact and insufficient allowances,
+borrowed-pointer checks, malformed/trailing intersections and zero-sized sequence
+visits. Native and Wasm compilation are separate from runtime/performance proof.
+Full differential and allocator-instrumented qualification remain pending.
+
+All selected registry package versions and checksums (excluding the independently
+selected Toko Tooling) match the reference lockfile. The Wasm graph contains no
+SDK, Candid, host schema module or serde_json. It does include supplier-owned
+`serde_derive` and `thiserror-impl` proc macros via Postcard/Serde/cobs. Thus a
+strict macro-free build-graph goal is not met by this upstream supplier cohort;
+no private fork or alternate codec was introduced to remove them. These macros
+run on the host; Wasm target compilation passes but is not a size measurement.
+
+Bounded byte/text/list adapters now have a [field contract](fields.md) and a
+record-level literal test. The [packed-field workload](packed.md) now covers the
+native representative record. Next: independent reference comparison,
+allocation instrumentation and Rust/TS exchange. The codec increments do
+not qualify the complete architecture or all custom Serde behavior.
