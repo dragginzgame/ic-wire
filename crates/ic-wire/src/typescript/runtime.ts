@@ -1,5 +1,5 @@
 // Candidate interpreter for the admitted host schema subset. See
-// docs/design/browser-runtime.md for the pinned reference and reuse contract.
+// docs/design/browser-runtime.md for source provenance and the reuse contract.
 // Generated metadata is trusted; allowances do not bound the JS engine heap.
 export const schemaFormat = 'ic-wire-json';
 export class WireError extends Error {
@@ -111,7 +111,7 @@ class Reader {
     }
     return fail('malformed');
   }
-  // Preserve Wasm32 collection lengths and the reference's refusal ordering.
+  // Preserve Wasm32 collection lengths and admission refusal ordering.
   length(max: number): number { const n = Number(this.varint(32)); if (n > max) return fail('limit'); return n; }
   raw(length: number): Uint8Array {
     if (length > this.bytes.length - this.offset) return fail('malformed');

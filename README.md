@@ -1,122 +1,114 @@
 # IC Wire
 
 Bounded Serde/Postcard encoding with optional host schema collection, bulk-field
-lint and generated TypeScript clients. One portable codec and one validated
-host schema graph keep responsibilities explicit.
+advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
+Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
+pinned development toolchain.
 
-See the [package guide](crates/ic-wire/README.md) for installation, examples and
-feature flags, and [release preparation](docs/release.md) for archive verification
-and the publication procedure. Adoption is a hard cut; legacy API,
-client and wire compatibility are not requirements.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.1**.
+Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
+round trip, feature flags and TypeScript delivery.
 
-The current release is **0.24.0**, a replacement for the published 0.22.4 line
-with a breaking Rust API. Both `ic-wire` and `ic-wire-derive` are product crates;
-qualification packages remain private. The previous implementation is retained
-in the private `dragginzgame/ic-wire-legacy` repository. Reference qualification
-uses published Core 0.22.4 and source revision
-`2dc434b10bec2fca92345d940dbfedc05993e9d5`.
+- One `Encoding` selection covers payloads and request/response frames.
+- Owned, reusable `Vec` and caller-slice outputs share sizing and admission.
+- Explicit byte, text, list and packed fields retain consumer-selected layouts.
+- Optional native schema collection and derive feed one validated graph and one
+  bundled TypeScript interpreter. No default features are enabled.
+- Transport, authentication, retries, endpoint execution and deployment belong
+  to consuming applications.
 
-- [Architecture, contracts and qualification plan](docs/DESIGN.md)
-- [Current feature-parity contracts and remaining scope](docs/design/parity.md)
-- [Current performance qualification](docs/design/performance.md)
-- [Codec benchmarks and hotspot profiling](docs/design/codec-benchmarks.md)
+Limits cover bytes, conservative allocation charges, traversal nodes and depth;
+they are not a process heap cap. Custom Serde work remains trusted. Preserve
+original bytes for signing, hashing and retries because decode/re-encode may
+normalize collections or accepted noncanonical encodings.
 
-Start with one end-to-end workload and independent acceptance tests. Compare a
-small replacement against improving the current implementation before broadening
-scope. No performance or Wasm savings are claimed by creating this repository.
+The 0.24 API is a hard cut from 0.22: use root-level operations with `Encoding`,
+use `Packed<T, N>` for bounded packed fields, and regenerate clients and runtime
+together. There is no legacy fallback reader or automatic storage migration.
 
-No whole implementation, remote, release machinery or build artifacts were copied.
-The initial [framing slice](docs/design/framing.md) records the selected source
-contracts, hashes and qualification limits. The previously referenced
-`reference.sha256` is absent; no verification against that manifest is claimed.
-Licensing is retained in [LICENSE.md](LICENSE.md).
+## Repository map
 
-The `ic-wire` package implements method-ID derivation, fixed
-request-header validation and bounded payload/request/response coding through
-one `Encoding` selection. It remains `no_std`, using published
-Serde 1.0.229 and Postcard 1.1.3. The [admission ledger](docs/design/admission.md)
-records exact accounting, error precedence and narrow adapter reuse.
-Encoding shares preflight across owned, reusable Vec and caller-slice outputs;
-see the [output custody contract](docs/design/encoding.md). Bounded byte, text,
-ordinary-list and borrowed adapters are implemented and exercised in a literal
-record round trip; see [field contracts](docs/design/fields.md). The explicit
-[`Packed<i16, N>` field](docs/design/packed.md) completes the native representative
-record with an ordinary-list control. Optional host [schema admission and declaration
-rendering](docs/design/schema.md) now import a defined JSON metadata subset into
-one immutable typed graph. It generates typed payload and framed method modules with private
-metadata, explicit browser policy and runtime-format mismatch refusal. The emitted
-clients exchange the representative record with Rust using both the candidate and
-published reference TypeScript runtimes in private qualification.
-An optional strict derive now projects ordinary Rust structs/enums, including
-concrete generic and borrowed instantiations, through that same graph boundary.
-Named collection now handles shared and recursive Rust types with projection
-rechecks and reference-compatible names. The [candidate runtime](docs/design/browser-runtime.md)
-executes the admitted schema subset. Strict TypeScript checks cover the runtime
-and generated clients; browser and archive checks are described in the release
-guide. Performance results and remaining research are linked above.
+| Path | Responsibility |
+| --- | --- |
+| `crates/ic-wire/` | Portable codec, field adapters and optional host tooling |
+| `crates/ic-wire-derive/` | Strict host schema derive; does not generate serialization |
+| `qualification/` | Private contract tests and standalone consumer workspace |
+| `qualification/ic-instructions/` | Separate private native simulator workspace |
+| `vendor/toko-tooling/` | Snapshot-owned tooling; no local edits |
 
-The separate [compatibility workspace](qualification/README.md) compares the
-candidate against published `ic-wire 0.22.4`, whose library source was verified
-against the pinned revision. It exercises bytes, acceptance, budget boundaries
-and output custody without introducing the reference into product dependencies.
-Its isolated allocation executable checks selected preflight, output and field
-admission boundaries, including positive controls and trusted-Serde limitations.
+## Development
 
-## Rust and tooling setup
-
-The root is a virtual Cargo workspace pinned to Rust 1.100.0, including rustfmt,
-Clippy and `wasm32-unknown-unknown`, with the real product package at
-`crates/ic-wire` and the optional host macro at `crates/ic-wire-derive`. The separate `qualification/` workspace contains the unpublished
-`ic-wire-compatibility 0.1.0` test package. No placeholder packages are present.
-
-Toko Tooling 0.44.3 is installed from its published crate through its authenticated
-snapshot exporter. The archive SHA-256 is
-`8a9bc7b6827044baac8134cada7ee6bc31f86c70beec9608d1d39d911eba15e1`.
-The root receipt owns the baseline and the executable closure in
-`vendor/toko-tooling/`; do not edit installed files. Release commands are not enabled.
+Run commands from this repository root. Prepare the pinned Rust toolchain and
+locked dependencies before using the offline checks:
 
 ```sh
-make snapshot-check
-make install-tools
-make tools-check
-make deps-list
-make deps-update
-make deps-update DEPENDENCY_PACKAGE=toko-tooling
-make test
-make lint
-make doc
-make check-wasm
-make test-compatibility
-make test-allocation
-make lint-compatibility
-make test-host             # Focused host schema contracts
-make lint-host
-make doc-host
-make check-wasm-host       # TypeScript feature forwarding on Wasm
-make test-typescript       # Rust ↔ candidate/reference TS; explicit Node prerequisite
-make lint-typescript
-make test-consumer         # Independent contract against both Rust suppliers
-make check-consumer-wasm   # Separate SDK-free Wasm builds and Node execution
-make check-typescript      # Strict client types; install private npm compiler first
-make test-derive           # Macro rejection and derived metadata contracts
-make lint-derive
-make fmt-check
+rustup show
+cargo fetch --locked
+cargo fetch --locked --manifest-path qualification/Cargo.toml
+make toko-tooling-check
 ```
 
-`deps-list` lists local package versions; `deps-update` runs `cargo update -v`.
-Both automatically include `qualification/Cargo.toml` when it exists. Updates
-accept `DEPENDENCY_PACKAGE` and, with it, `DEPENDENCY_PRECISE`; an additional
-workspace can be selected with `DEPENDENCY_MANIFEST=relative/Cargo.toml`.
+`rust-toolchain.toml` includes rustfmt, Clippy and `wasm32-unknown-unknown`.
+`make install-tools` explicitly installs the reviewed common host/Rust tools;
+`make tools-check` checks them offline. Make configures their PATH. For direct
+interactive use, add `.tools/host/bin` and `.tools/rust/common/bin` to PATH.
 
-Cargo.lock now selects the inherited `toko-tooling = "=0.44.3"` dev-dependency.
-`make toko-tooling-check` verifies package selection, lock and installed bytes.
-Every new member must inherit the tooling dev-dependency and workspace lints,
-use the cargo-machete tooling exemption. Qualification packages remain unpublished.
-`make qualification-tooling-check` admits the qualification selection against
-the same verified snapshot; compatibility checks run this automatically.
+Choose checks for the affected contract; these commands are not a mandatory
+sequence:
+
+| Scope | Commands |
+| --- | --- |
+| One codec contract | `cargo test -p ic-wire --test encode_tests --locked --offline` (replace the test name as needed) |
+| Host graph | `make test-host`, `make lint-host`, `make doc-host` |
+| Strict derive | `make test-derive`, `make lint-derive` |
+| Allocation admission | `make test-allocation` |
+| Rust/TypeScript exchange | `make test-typescript`, `make lint-typescript` |
+| Strict generated client types and exchange | `make check-typescript` |
+| Standalone Rust consumer | `make test-consumer` |
+| Standalone Wasm execution | `make check-consumer-wasm` |
+| TypeScript feature forwarded to Wasm | `make check-wasm-host` |
+
+TypeScript exchange requires Node supporting `--experimental-transform-types`.
+Strict checking additionally requires the private pinned compiler:
+
+```sh
+npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund
+make check-typescript
+```
+
+Broad targets are `make test`, `make lint`, `make doc` and `make check-wasm`
+(product workspace, default features), `make test-compatibility` and
+`make lint-compatibility` (qualification workspace, default features), and
+`make fmt-check` (all three maintained workspaces). Optional host and TypeScript
+checks require the focused targets above. `make help` lists archive, browser and
+measurement commands; see [qualification](qualification/README.md) for their
+prerequisites and evidence limits. IC measurements additionally require fetching
+`qualification/ic-instructions/Cargo.toml` and explicitly selecting PocketIC.
+
+Toko Tooling **0.44.4** is installed through its authenticated published exporter.
+`.toko-tooling.snapshot` records source identity and owned bytes.
+`make snapshot-check` verifies only installed bytes; `make toko-tooling-check`
+also admits product declarations and Cargo.lock. `make qualification-tooling-check`
+checks the parent qualification selection against the same snapshot.
+
+`make deps-list` and `make deps-update` include all three maintained workspaces by
+default. Updates accept `DEPENDENCY_PACKAGE` and, with it, `DEPENDENCY_PRECISE`;
+`DEPENDENCY_MANIFEST` overrides the additional IC-runner workspace selection.
+Ordinary registry libraries use compatible version requirements. Exact pins are
+limited to the coordinated Wire derive/runtime pair and the Toko Tooling snapshot; [reasons and the runner isolation exception](AGENTS.md#dependency-selection)
+are recorded in the local overlay. Lockfiles keep ordinary checks reproducible.
 Reviewed tooling updates use `make toko-tooling-preview` and
-`make toko-tooling-update` after explicitly updating the Cargo selection.
+`make toko-tooling-update` after updating the Cargo selection. No automatic
+release runner, CI workflows or Git hooks are installed by this repository setup.
 
-For direct interactive tool use, add `.tools/host/bin` and
-`.tools/rust/common/bin` under this checkout to PATH. Make sets these paths itself.
-No hooks, CI workflows, publication or deployment are activated by this setup.
+## Design and evidence
+
+- [Current architecture and contracts](docs/DESIGN.md)
+- [Current feature scope](docs/design/parity.md)
+- [Performance measurement scope](docs/design/performance.md)
+- [Package/browser verification and release procedure](docs/release.md)
+- [Changelog](CHANGELOG.md) and [licence](LICENSE.md)
+
+Measurements apply to their recorded workloads and source hashes. Current-only
+Wasm size and IC instruction runners report costs separately; correctness checks
+do not establish performance.

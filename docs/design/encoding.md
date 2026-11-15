@@ -1,11 +1,11 @@
 # Shared encoding preflight and output custody
 
-Destination contract: the proposed `encoded_len`, `encode`, `encode_into` and
-`encode_to_slice` APIs in DESIGN.md, each taking one Encoding selection.
-They replace payload/request/response wrapper multiplication only in this
-unpublished evaluation. Bytes, limits and failure categories remain frozen.
+The root `encoded_len`, `encode`, `encode_into` and `encode_to_slice` APIs
+share one Encoding selection and replace the old payload/request/response
+wrappers. This document owns current output custody and the measured shortcut;
+the [architecture](../DESIGN.md) records the hard-cut policy.
 
-Reference: `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
+Source provenance: `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
 `crates/ic-wire/src/native/encode/mod.rs` and `native/mod.rs`.
 The encode adapter's source SHA-256 is
 `6314ad42b620168133a95038e1539697ca7965f63f7137d2a0a9fc092a0df035`.
@@ -14,11 +14,9 @@ structure and admission visits, retaining the IcyDB attribution and root license
 The measured integer decision below adds only a one-byte shortcut; wider varints
 and enum tags remain delegated to Postcard.
 
-## Measured one-byte integer shortcut
+## One-byte integer shortcut
 
-The expanded matrix exposed approximately 2.3× native opt-z encoding losses for
-small integer lists. Assembly shows Postcard constructing a varint buffer even
-during sizing. One shared macro now handles signed/unsigned 16/32/64-bit values:
+Postcard can construct a varint buffer even during sizing. One shared macro handles signed/unsigned 16/32/64-bit values:
 signed values use the standard ZigZag mapping, unsigned values below 128 go
 through Postcard's raw-u8 method, and all larger values use Postcard's unsigned
 writer. Raw 8-bit values, 128-bit values, lengths and enum tags are unchanged.
@@ -31,15 +29,9 @@ the internal write method changes neither visits, charges, depth nor allocation
 ordering. Exact i16/u16 exhaustive vectors, wider boundaries, all output
 destinations, inconsistent-Serde cases and budget sweeps pass.
 
-This selected one-byte technique is informed by the pinned reference encoder
-above; its wider unrolled writers are not imported. The independently measured
-request workload falls from 5,224/2,674 to 4,953/2,435 IC instructions at opt-z/
-opt-3. The representative Wasm grows by 129/181 bytes, while remaining 736/695
-bytes smaller than reference. Opt-z response encoding rises to 1,751 instructions
-(reference 1,744); the small loss is retained explicitly alongside the larger
-request improvement. See the codec benchmark guide for native controls and
-the final measured source identities. This is a measured exception to pure
-primitive delegation, not permission to recreate all legacy specializations.
+The shortcut is limited to this one-byte identity. Wider varints and enum tags
+remain delegated to Postcard. Historical comparison runners have been retired;
+[performance measurement](performance.md) covers current workloads.
 
 ## Contract
 
@@ -58,8 +50,8 @@ primitive delegation, not permission to recreate all legacy specializations.
   its contents; only the successful returned prefix is publishable.
 - Custom Serialize must be deterministic across passes and is trusted for
   work outside visited values. A longer second pass cannot overrun preflight;
-  without a budget refusal its supplier error maps to Malformed. As in the
-  reference, a shorter successful second pass can return fewer bytes.
+  without a budget refusal its supplier error maps to Malformed. A shorter
+  successful second pass can return fewer bytes.
 - Sizing/serialization failures map to Limit after budget refusal, otherwise
   Malformed. Fallible output reservation failure maps to Allocation.
 
@@ -68,5 +60,5 @@ schema graph or new codec is introduced. Tests use independent literal payload
 and frame vectors plus exact and insufficient allowances, unchanged short
 buffers, cleared reused output, and deliberately inconsistent serializers.
 The [qualification workspace](../../qualification/README.md) now checks selected
-allocation ordering and reference comparisons. These focused cases do not prove
+allocation ordering and literal-byte contracts. These focused cases do not prove
 universal compatibility or process-wide allocation bounds.

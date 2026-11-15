@@ -55,7 +55,7 @@ pub mod nonzero_i64 {
     ) -> Result<S::Ok, S::Error> {
         crate::packed::serialize_words::<i64, S>(bytemuck::must_cast_slice(values), serializer)
     }
-    /// Decode packed words and enforce nonzero values, as in the reference.
+    /// Decode packed words and enforce nonzero values.
     /// # Errors
     /// Rejects zero and propagates packed decoding failures. Validation follows
     /// owned word decoding; it is not a pre-allocation validation guarantee.

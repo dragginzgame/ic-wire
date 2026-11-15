@@ -1,6 +1,6 @@
 # Payload admission contract
 
-Reference: `ic-wire` commit `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
+Source provenance: `ic-wire` commit `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
 `crates/ic-wire/src/native/{mod.rs,encode/mod.rs,decode/mod.rs}`.
 Encoding and decoding use the same private meter with different visit rules.
 The [encoding contract](encoding.md) records preflight and destination custody.
@@ -25,9 +25,9 @@ One unit represents eight conservative allowance bytes, not measured live heap.
 | Encode text/bytes | 0 | span length | No additional check |
 
 Every failed debit sets a sticky refusal. Subsequent visits fail and errors map
-to Limit. Like the reference, a later buffer debit can still succeed; it does
+to Limit. A later buffer debit can still succeed; it does
 not clear refusal. Trusted custom Serde may catch an error and return success;
-there is no additional post-success refusal check in this compatible slice.
+there is no additional post-success refusal check in the current contract.
 Sequence and map size hints are suppressed before consumer visitors reserve.
 An element's seed charge is in addition to its deserializer charge. Zero-sized
 elements still consume nodes. Type sizes are target-dependent; borrowed and
@@ -37,8 +37,7 @@ can change re-encoded bytes. Retain original input for hashes/signatures/retries
 
 ## Framing and error precedence
 
-`decode(input, Encoding, Limits)` replaces the reference's payload/request/response
-wrappers for this local evaluation. No consumer migration is performed.
+`decode(input, Encoding, Limits)` admits the complete selected input.
 
 1. Reject total input exceeding configured bytes as Limit.
 2. For frames, reject fewer than 11 bytes as Malformed, then mismatched magic,
@@ -50,14 +49,14 @@ wrappers for this local evaluation. No consumer migration is performed.
 5. After successful deserialization, reject remaining input as Trailing.
 
 Primitive acceptance belongs to published Postcard 1.1.3, with Serde 1.0.229.
-Redundant varints and the reference's multi-scalar char behavior remain admitted.
+Redundant varints and Postcard's multi-scalar char behavior remain admitted.
 No reserialization/canonicality pass is introduced. Incremental decoding may
 allocate a valid prefix before encountering malformed later input.
 
 ## Narrow reuse decision
 
 Destination: private `decode/admitted.rs`, a Serde adapter around Postcard.
-Reuse unit: the reference `native/decode/mod.rs` visitor/access/seed adapter,
+Reuse unit: the source `native/decode/mod.rs` visitor/access/seed adapter,
 including its IcyDB adaptation attribution. License remains the root LICENSE.md.
 The source SHA-256 is
 `e9a8cf090e994f8e14b79aa0dba09c5ba00dacdde607786fbe94795fbf429dda`.
@@ -72,11 +71,10 @@ decision. No complexity or performance improvement is claimed for this reuse.
 Qualification uses literal payload/frame cases, exact and insufficient allowances,
 borrowed-pointer checks, malformed/trailing intersections and zero-sized sequence
 visits. Native and Wasm compilation are separate from runtime/performance proof.
-Selected differential and allocator-instrumented checks are recorded in the
+Selected literal and allocator-instrumented checks are recorded in the
 [qualification workspace](../../qualification/README.md); full coverage remains open.
 
-All selected registry package versions and checksums (excluding the independently
-selected Toko Tooling) match the reference lockfile. The Wasm graph contains no
+The Wasm graph contains no
 SDK, Candid, host schema module or serde_json. It does include supplier-owned
 `serde_derive` and `thiserror-impl` proc macros via Postcard/Serde/cobs. Thus a
 strict macro-free build-graph goal is not met by this upstream supplier cohort;
@@ -85,7 +83,7 @@ run on the host; Wasm target compilation passes but is not a size measurement.
 
 Bounded byte/text/list adapters now have a [field contract](fields.md) and a
 record-level literal test. The [packed-field workload](packed.md) now covers the
-native representative record. The [compatibility workspace](../../qualification/README.md)
-now compares selected byte, admission and custody contracts against the reference.
-Selected allocation checks now pass; Rust/TS exchange remains pending. The codec increments do
-not qualify the complete architecture or all custom Serde behavior.
+native representative record. The [qualification workspace](../../qualification/README.md)
+checks selected literal bytes, admission and custody contracts independently.
+Selected allocation and Rust/TS exchange checks are recorded there. They do not
+qualify all custom Serde behavior or establish a process-wide allocation cap.

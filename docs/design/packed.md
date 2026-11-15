@@ -38,7 +38,7 @@ nor encoded payloads for previously admitted values.
 
 ## Provenance and qualification
 
-Selected serializer/visitor patterns come from reference commit
+Selected serializer/visitor patterns came from source revision
 `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
 `crates/ic-wire/src/bounded/packed_i16/mod.rs` and `packed/mod.rs`, under the
 retained licence. Their source hashes are respectively
@@ -53,15 +53,11 @@ allocation. Browser checks exercise all integer/ID/domain packed metadata kinds,
 including zero bounds and unsafe host maxima. Big-endian helpers are tested with
 literal bytes without claiming execution on a big-endian machine.
 
-The legacy interpreter remains unchanged as a private oracle. A test-only schema
-adapter lowers bounded i16 to its legacy spelling; new bounded-word behavior is
-checked independently because that interpreter does not enforce it. Historical
-performance reports retain their original source hashes; refresh qualification
-after production changes before attributing those results to the hard cut.
+Browser checks use the current bundled runtime and independent literal bytes
+and refusal cases.
 
 The packed reader uses a checked `try_into().unwrap()` on each exact-width chunk.
 Its private caller establishes that width after rejecting partial words and
 excess element counts. Replacing the custom `expect` message lets opt-z eliminate
 a retained per-word panic-helper call; it does not remove the conversion check,
-introduce unsafe reads or change public malformed-input behavior. See the
-[codec investigation](codec-benchmarks.md) for native and Wasm qualification.
+introduce unsafe reads or change public malformed-input behavior. See [measurement scope](performance.md) for current workload qualification.

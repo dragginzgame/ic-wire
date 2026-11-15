@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.24.1] - 2026-11-15
+
+### ▶️ Try it
+
+From the repository root, prepare locked qualification dependencies once
+(registry access required), then run the offline checks:
+
+```sh
+cargo fetch --locked --manifest-path qualification/Cargo.toml
+make toko-tooling-check
+cargo test --manifest-path qualification/Cargo.toml \
+  -p ic-wire-compatibility --test compatibility --locked --offline
+```
+
+The tooling check admits 0.44.4; the test runs the independent codec contracts
+from the renamed package directory. Neither command publishes or deploys.
+
+### 🛠️ Maintenance
+
+- Adopt Toko Tooling 0.44.4 through its authenticated exporter in all three
+  workspaces. Rename qualification package directories to their Cargo names,
+  update local callers and remove the obsolete candidate dependency alias.
+- Remove the historical Wire dependency, paired comparison runners, runtime
+  adapter and comparison reports. Retain independent literal, allocation,
+  malformed-input and Rust/TypeScript qualification; measure only current Wasm
+  and installed IC workloads.
+- Allow compatible registry dependency updates while retaining coordinated derive
+  and required tooling pins. Preserve surviving locked dependency versions,
+  including the native graph constraints.
+- Align the isolated instruction runner with the common Cargo, Rust, Rustdoc and
+  Clippy policy. Document its scoped workspace exception after reproducing the
+  codec dependency downgrade that merging it would cause.
+
+### 📚 Documentation
+
+- Replace the obsolete evaluation proposal with current architecture and API
+  contracts. Refresh setup and qualification commands, remove obsolete repository links,
+  and distinguish historical measurements and release preparation from current
+  evidence and separately authorized publication.
+
 ## [0.24.0] - 2026-11-15
 
 First public release of the replacement implementation, following published
@@ -7,8 +47,7 @@ First public release of the replacement implementation, following published
 `PackedI16<N>` with `Packed<i16, N>`, and regenerate TypeScript clients and runtime
 together. No legacy compatibility lane is retained.
 
-The public repository is now `dragginzgame/ic-wire`; the previous implementation
-is retained privately as `dragginzgame/ic-wire-legacy`.
+The public repository is `dragginzgame/ic-wire`.
 
 ### 🐛 Fixed
 

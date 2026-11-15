@@ -1,5 +1,5 @@
 [workspace]
-members = ["compatibility", "consumer"]
+members = ["ic-wire-compatibility", "ic-wire-consumer"]
 exclude = ["ic-instructions"]
 resolver = "3"
 
@@ -9,16 +9,15 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
-candidate = { package = "ic-wire", path = "../crates/ic-wire" }
-ic-platform-runtime = { version = "=0.22.5", default-features = false }
-ic-platform-types = { version = "=0.20.4", default-features = false }
-ic-wire-consumer = { path = "consumer", default-features = false }
-reference = { package = "ic-wire", version = "=0.22.4", default-features = false }
-serde = { version = "=1.0.229", default-features = false, features = ["alloc", "derive"] }
-serde_bytes = { version = "=0.11.19", default-features = false, features = ["alloc"] }
-serde_json = { version = "=1.0.154", default-features = false, features = ["alloc"] }
-stats_alloc = "=0.1.10"
-toko-tooling = "=0.44.3"
+ic-platform-runtime = { version = "0.22.5", default-features = false }
+ic-platform-types = { version = "0.20.4", default-features = false }
+ic-wire-consumer = { path = "ic-wire-consumer", default-features = false }
+serde = { version = "1.0.229", default-features = false, features = ["alloc", "derive"] }
+serde_bytes = { version = "0.11.19", default-features = false, features = ["alloc"] }
+serde_json = { version = "1.0.154", default-features = false, features = ["alloc"] }
+stats_alloc = "0.1.10"
+toko-tooling = "=0.44.4"
+wire = { package = "ic-wire", path = "../crates/ic-wire" }
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"
@@ -59,18 +58,4 @@ strip = "symbols"
 
 [profile.wire-speed]
 inherits = "wire-size"
-opt-level = 3
-
-# Native investigation only. Keep symbols for external sampling; never use these
-# artifacts for the separate total-Wasm-size or installed-IC comparisons.
-[profile.codec-profile]
-inherits = "release"
-opt-level = "z"
-lto = true
-codegen-units = 1
-debug = 2
-strip = "none"
-
-[profile.codec-profile-speed]
-inherits = "codec-profile"
 opt-level = 3

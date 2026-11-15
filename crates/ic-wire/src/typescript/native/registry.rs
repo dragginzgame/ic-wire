@@ -24,7 +24,7 @@ pub(super) struct Names {
 /// Bounded named Rust collection, including shared and recursive projections.
 ///
 /// Explicit root aliases are stable consumer names. Nested generated names retain
-/// the reference algorithm over compiler type spelling, not a protocol identity.
+/// a deterministic algorithm over compiler type spelling, not a protocol identity.
 /// A failed registration invalidates the collector. Finishing rechecks every
 /// encountered projection before admitting one immutable typed graph.
 #[derive(Debug)]
@@ -163,7 +163,7 @@ impl SchemaContext {
     }
 }
 
-// Narrow reuse: reference 2dc434b10bec2fca92345d940dbfedc05993e9d5,
+// Source provenance: revision 2dc434b10bec2fca92345d940dbfedc05993e9d5,
 // typescript/native_schema/registry/mod.rs. Retains source-name compatibility.
 fn generated_name(key: &str) -> String {
     let base = key

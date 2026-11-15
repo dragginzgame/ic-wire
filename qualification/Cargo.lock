@@ -98,25 +98,11 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.22.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12f9ea1376af8b628c513c838043106a79d0c94c2946fe4a79b8fefbc595c250"
-dependencies = [
- "bytemuck",
- "ic-wire-derive 0.22.4",
- "postcard",
- "serde",
- "serde_bytes",
- "serde_json",
-]
-
-[[package]]
-name = "ic-wire"
-version = "0.24.0"
+version = "0.24.1"
 dependencies = [
  "bytemuck",
  "ic-platform-types",
- "ic-wire-derive 0.24.0",
+ "ic-wire-derive",
  "postcard",
  "serde",
  "serde_bytes",
@@ -128,8 +114,7 @@ name = "ic-wire-compatibility"
 version = "0.1.0"
 dependencies = [
  "ic-platform-types",
- "ic-wire 0.22.4",
- "ic-wire 0.24.0",
+ "ic-wire",
  "ic-wire-consumer",
  "serde",
  "serde_bytes",
@@ -143,26 +128,14 @@ name = "ic-wire-consumer"
 version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-wire 0.22.4",
- "ic-wire 0.24.0",
+ "ic-wire",
  "serde",
  "toko-tooling",
 ]
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.22.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86e81922509d7e3fdbac7a421141ce55ad457e68ab0f59cd378ee503df0beb9f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "ic-wire-derive"
-version = "0.24.0"
+version = "0.24.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -324,9 +297,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.44.3"
+version = "0.44.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a9bc7b6827044baac8134cada7ee6bc31f86c70beec9608d1d39d911eba15e1"
+checksum = "b52bb793b386309b8c4a9e88f32711bb5d1fd11a47bf337c11c63ca2aa22fc97"
 
 [[package]]
 name = "unicode-ident"

@@ -1,11 +1,11 @@
 # Bounded bytes, text and ordinary lists
 
 Scope: `Bytes<N>`, `Text<N>`, `List<T, N>`, `BytesRef<'a, N>` and
-`TextRef<'a, N>`. These preserve the corresponding reference field contracts.
+`TextRef<'a, N>`. These are explicit consumer-selected field contracts.
 They do not automatically rewrite consumer Serde layouts. The subsequent
-[packed i16 field](packed.md) is a separate opt-in representation.
+[packed fields](packed.md) is a separate opt-in representation.
 
-Reference: `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
+Source provenance: `2dc434b10bec2fca92345d940dbfedc05993e9d5`,
 `crates/ic-wire/src/bounded/mod.rs` and `bounded/borrowed/mod.rs`.
 SHA-256 of the inspected committed sources:
 
@@ -30,7 +30,7 @@ size/performance claim. No packed code or host metadata is imported.
 | Bulk bytes | Byte count followed by the byte span; no per-element visits |
 | Field rejection during decode | Serde custom error maps to Malformed, unless a traversal refusal takes precedence as Limit |
 | Bytes decode | Admit span and bound before fallible owned-output reservation/copy |
-| Text decode | Preserve reference byte-buffer admission, then validate UTF-8 on owned bytes; no claim of UTF-8 validation before allocation |
+| Text decode | Admit the byte buffer, then validate UTF-8 on owned bytes; no claim of UTF-8 validation before allocation |
 | List decode | Suppress input size hints at codec boundary; bounded amortized growth after admitted element decoding |
 | Excess list element | Reject with a seed that never calls the excess element's decoder; seed admission can itself fail first |
 | Borrowed decode | Accept only borrowed byte/text visits; no owned or transient fallback |
@@ -43,8 +43,8 @@ Qualification: literal encodings, empty/exact/excess bounds, UTF-8 byte lengths,
 borrowed pointers and transient-input rejection, ordinary-vector controls,
 constructor ownership, excess-element decoder suppression, and a record with
 bounded bytes/text/list and an enum/option through every encoding destination.
-The subsequent packed-field tests cover the full native record shape; Rust/TS
-exchange remains pending.
-Selected allocation and reference differential checks now pass in the
-[qualification workspace](../../qualification/README.md). Opt-z/opt-3 measurements
-and full replacement qualification remain pending.
+Packed-field tests cover the full native record shape. Selected allocation,
+literal-byte and generated Rust/TS exchange checks are recorded in the
+[qualification workspace](../../qualification/README.md). Current opt-z/opt-3
+measurement scope and workload limits are in [performance qualification](performance.md);
+they do not qualify every field combination or custom Serde implementation.

@@ -161,7 +161,7 @@ enum Node {
 
 /// Immutable admitted registry with private node indices.
 ///
-/// Supplied definition names are preserved, including reference-generated names.
+/// Supplied definition names are preserved.
 /// Input metadata can be mutated or dropped after construction without changing
 /// the graph. All rendering consumes this graph, never the original JSON.
 #[derive(Debug)]
@@ -174,11 +174,11 @@ pub struct ValidatedRegistry {
 }
 
 impl ValidatedRegistry {
-    /// Import explicit definitions in the reference metadata grammar.
+    /// Import explicit definitions in the Wire metadata grammar.
     ///
     /// Supported kinds: unit, bool, u/i, float, text, bytes, packed, list,
     /// array, tuple, result, option, newtype, ref, record and enum. Unknown keys reject;
-    /// this subset is not a replacement for the reference's full schema surface.
+    /// manual metadata must match the consumer's actual Serde representation.
     ///
     /// # Errors
     /// Returns Schema for invalid metadata and Complexity for exceeded bounds.

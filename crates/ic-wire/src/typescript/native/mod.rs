@@ -92,7 +92,7 @@ impl ValidatedRegistry {
     /// Project one Rust root and admit its inline metadata into the shared graph.
     ///
     /// Nested declarations are inline; no generated-name algorithm is substituted
-    /// for the reference named collector. Recursive automatic projection rejects;
+    /// for the named collector. Recursive automatic projection rejects;
     /// use SchemaRegistry for shared or recursive named collection.
     ///
     /// # Errors

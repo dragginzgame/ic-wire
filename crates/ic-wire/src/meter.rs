@@ -42,7 +42,7 @@ impl Budget {
 
     #[cfg_attr(target_arch = "wasm32", inline(always))]
     pub(super) fn charge_buffer(&self, units: usize) -> bool {
-        // Preserve the reference's buffer debit even after a prior refusal.
+        // A buffer debit can succeed after a prior refusal without clearing it.
         // Refusal remains sticky for subsequent visits and error classification.
         match self.units.get().checked_sub(units) {
             Some(remaining) => {

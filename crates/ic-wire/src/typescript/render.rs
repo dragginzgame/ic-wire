@@ -82,8 +82,8 @@ impl ValidatedRegistry {
     /// The trusted runtime module must export `schemaFormat` matching
     /// [`RUNTIME_SCHEMA_FORMAT`] and `createPayloadCodec(metadata, registry)`.
     /// The factory returns `encode(unknown): Uint8Array` and `decode(Uint8Array):
-    /// unknown`, using the reference JSON grammar. Qualification uses both the
-    /// candidate runtime and published Core 0.22.4's interpreter.
+    /// unknown`, using the exported JSON grammar. Qualification executes the bundled
+    /// runtime against independent literal bytes and Rust decode results.
     /// Runtime code is not bundled, downloaded or selected by this function.
     /// Bulk advice always runs for `/types/ROOT`. The required handler runs once
     /// after successful rendering and linting, including a clean report. It should
@@ -158,7 +158,7 @@ impl ValidatedRegistry {
     /// Generate typed framed codecs with independent request/response policy.
     ///
     /// The runtime must export `schemaFormat` and `createCodec` with the
-    /// reference framed-codec interface. IDs are emitted as decimal strings,
+    /// bundled framed-codec interface. IDs are emitted as decimal strings,
     /// preserving all u64 values without JavaScript Number rounding. Duplicate
     /// IDs or exports reject before rendering. This emits no routing/execution.
     /// Bulk advice always reviews each `/methods/EXPORT/request` and `/response`
@@ -309,7 +309,7 @@ impl ValidatedRegistry {
         output.write_str(");\n")
     }
 
-    /// Export the admitted subset in the reference JSON registry grammar.
+    /// Export the admitted subset in the JSON registry grammar.
     ///
     /// This is data for a trusted metadata consumer, not executable JavaScript.
     /// Parse it as JSON: embedding it as an object literal changes the meaning

@@ -1,7 +1,7 @@
-# Host schema experiment
+# Host schema contract
 
 The optional `typescript` feature admits explicit JSON definitions into
-`ValidatedRegistry`, then renders type aliases and exports reference-format JSON
+`ValidatedRegistry`, then renders type aliases and exports schema JSON
 from its private typed nodes.
 It is native-only: forwarding the feature on Wasm excludes both the module and
 serde_json. The codec-only graph is unchanged.
@@ -14,7 +14,7 @@ that arbitrary serialization code matches it.
 
 ## Admitted subset and compatibility
 
-Supported reference kinds are unit, bool, signed/unsigned integers, text, bytes,
+Supported schema kinds are unit, bool, signed/unsigned integers, text, bytes,
 finite float, packed integer/opaque words, list, array, tuple, result,
 option, newtype, ref, record and enum. Field and variant order,
 supplied names, numeric widths, bounds and enum IDs are retained. Imported names
@@ -23,18 +23,17 @@ runtime enforcement. References render as names; shared graphs never expand into
 root-to-leaf paths. Options preserve `null | { readonly some: T }`.
 
 Unknown keys and unsupported shapes reject explicitly. This subset does not admit
-the full reference Serde projection surface. Scalar bounds and named custom
+every possible Serde projection. Scalar bounds and named custom
 runtime checks are supported. Method identities and payload policies are supplied
 through the separate generation APIs. It is an experimental
 API for a hard cut, without a legacy compatibility requirement.
 
 The reviewed source is `crates/ic-wire/src/typescript/metadata/mod.rs` at
-`2dc434b10bec2fca92345d940dbfedc05993e9d5` in the read-only reference. Reuse is
+source revision `2dc434b10bec2fca92345d940dbfedc05993e9d5`. Reuse is
 limited to metadata grammar, identifier restrictions/reserved words and emitted
 type representations, under the retained repository license. The importer,
 typed storage, alias worklist and bounded renderer are destination implementations;
-the reference generator and registry were not transplanted. serde_json 1.0.154
-matches the reviewed reference lock and is used only for the import boundary.
+serde_json handles the import/export boundary.
 
 ## Admission and output bounds
 
@@ -71,21 +70,16 @@ serde_json. Existing supplier proc macros remain; this is not a macro-free claim
 Round-trip tests preserve all admitted kinds, signedness, bounds, IDs, recursive
 references and escaped/prototype-like names. It returns JSON data, not an object
 literal or executable module; consumers must parse it as JSON. No versioned runtime
-pair is claimed by this reference-format registry alone.
+pair is claimed by this schema registry alone.
 
 The [cross-language qualification](../../qualification/README.md) is its first
-runtime consumer. Candidate Rust exchanges four representative records in payload,
-request and response form with candidate and published Core 0.22.4 TypeScript runtimes under
-Node. It verifies literal bytes, both decode directions, selected spans and owned
-bulk storage. This does not install the reference runtime into the product.
-The 0.23.1 checkpoint adds recursive and shared named-record exchange, exact
-reference TS node/depth boundaries and cyclic-value depth refusal. Schema sharing
-does not become decoded-value aliasing. These cases use the same graph exporter
-and runtime harness as the representative record.
-
-Broad named-collection performance qualification, browser execution,
-and reference performance comparisons remain outstanding.
-No Wasm size or IC instruction improvement is claimed.
+runtime consumer. Rust exchanges representative and recursive/shared records
+in payload, request and response form with the current bundled TypeScript runtime
+under Node. It verifies literal bytes, both decode directions, selected spans,
+owned bulk storage, node/depth boundaries and cyclic-value refusal. Schema sharing
+does not become decoded-value aliasing. Archive consumers and a Chromium smoke
+check are described in the [release guide](../release.md); these checks do not
+establish full client-generation cost or cross-browser coverage.
 
 ## Generated payload modules
 
@@ -98,12 +92,11 @@ JavaScript integers. This does not infer browser policy from Rust allocation or
 claim equal traversal accounting.
 
 The imported runtime must export `schemaFormat = "ic-wire-json"` and
-`createPayloadCodec(metadata, registry)`. That factory uses the reference JSON
+`createPayloadCodec(metadata, registry)`. That factory uses the exported JSON
 grammar and returns encode/decode functions. A mismatch throws before factory
 creation. The marker identifies an interface, not cryptographic supplier identity;
 applications must select and qualify their runtime implementation. Qualification
-uses private observation adapters to both the candidate interpreter and the pinned
-published reference. The candidate adapter forwards the runtime's actual marker.
+uses a private observation adapter that forwards the runtime's actual marker.
 
 The module exports type aliases and a frozen codec object. Its JSON registry is
 parsed into private module storage, preserving prototype-like keys without exposing
@@ -117,7 +110,7 @@ metadata buffer, so this is not a single-buffer memory guarantee. The generated
 client is now the payload caller in the representative Rust exchange; format
 mismatch and actual supplied policy are checked at runtime. Automatic Serde
 projection beyond the strict subset below remains separate implementation work.
-The candidate interpreter is exported as `typescript::RUNTIME`; its scope and
+The bundled interpreter is exported as `typescript::RUNTIME`; its scope and
 reuse contract are recorded in [browser runtime](browser-runtime.md).
 
 ## Generated method modules
@@ -155,7 +148,7 @@ with its independently authored JSON retained as a qualification oracle.
 Supported derives are named/unit/newtype/tuple structs and ordinary enums
 with unit, single-value, tuple or named-field variants. Raw identifiers lose only the
 Rust `r#` syntax. The default crate path is `::ic_wire`; renamed dependencies use
-`#[wire(crate = "candidate")]`. Type parameters gain a Wire bound; lifetimes,
+`#[wire(crate = "wire")]`. Type parameters gain a Wire bound; lifetimes,
 const parameters, defaults and existing where clauses are preserved. Concrete
 instantiations project their own field widths and bounds, without TypeId or a
 `'static` requirement. The derive currently requires Wire for every type parameter,
@@ -188,11 +181,10 @@ admission independently enforces its exact node/name/depth limits. Producer JSON
 allocations occur before that admission; arbitrary manual projection code remains
 trusted and can do work outside the construction allowance. This is not an exact
 host heap cap. Nested types are inline: no new generated-name algorithm or type
-identity promise replaces the reference named collector in this inline API.
+identity promise is introduced in this inline API.
 Use the named collector below for recursive/shared types.
 
-The macro is a real unpublished `ic-wire-derive` product package, authored for
-this strict destination contract rather than transplanted from the reference.
+The macro is the `ic-wire-derive` product package, authored for this strict contract.
 Its selected syn/quote/proc-macro2 versions match the already locked suppliers.
 The optional host target dependency means default codec builds and Wasm builds
 forwarding `derive` contain neither this macro nor serde_json. Consumers must
@@ -219,7 +211,7 @@ orders and require identical JSON/declarations with exactly one shared scalar
 definition. Graph admission succeeds at 2,050 named-plus-inline nodes and rejects
 2,049. A separate 1,024-root recursive fixture preserves every baseline shared
 definition and adds only root aliases. These are bounded correctness checks;
-generation timing, allocation cost and broad registry performance remain unmeasured.
+they do not measure full generation or host allocation costs.
 
 `SchemaRegistry::new(limits)`, `register::<T>(alias)` and consuming `finish()`
 collect concrete Rust roots into the same JSON import boundary and return the
@@ -230,7 +222,7 @@ A reserved name breaks recursive expansion before its definition is complete.
 Explicit aliases remain independent of discovery order. No TypeId or static
 borrow requirement is introduced.
 
-Generated names retain the exact reference algorithm from
+The naming algorithm was adapted from
 `typescript/native_schema/registry/mod.rs` at
 `2dc434b10bec2fca92345d940dbfedc05993e9d5`: a sanitized 48-character stem plus
 FNV-1a-64 of the full compiler type spelling. Only this naming function is reused;
@@ -253,9 +245,9 @@ References do not recursively expand during verification or rendering. JSON
 producer allocations and manual work retain the limitations described above;
 no exact heap cap or supplier-identical construction budget is claimed.
 
-Focused evidence includes complete named-map equality with the published
-reference for recursive Chain/Shared types, generated framed exchange from
+Focused evidence includes recursive Chain/Shared schemas, generated framed exchange from
 actual derives, root-order stability, diagnostic-name and explicit-root collisions,
 unstable projections, failure poisoning, alias cycles and non-static borrowed
-roots. Large graph timing/allocation and the full Serde surface remain gates
-before treating this as a replacement for the reference collector.
+roots. Full generation/allocation cost remains unmeasured. Unsupported Serde
+attributes intentionally reject; full legacy surface parity is not a hard-cut
+release requirement.

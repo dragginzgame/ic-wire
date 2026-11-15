@@ -15,32 +15,30 @@ help:
 	  'deps-list             List workspace package versions offline' \
 	  'deps-update           Run cargo update -v for maintained workspaces' \
 	  '  Optional: DEPENDENCY_PACKAGE=name DEPENDENCY_PRECISE=version' \
-	  'test                  Run native contract tests' \
-	  'test-compatibility    Compare candidate with published ic-wire 0.22.4' \
+	  'test                  Aggregate product tests (default features)' \
+	  '  Focused codec: cargo test -p ic-wire --test encode_tests --locked --offline' \
+	  'test-compatibility    Aggregate qualification tests (default features)' \
 	  'test-allocation       Run isolated native allocation checks' \
 	  'test-host             Run focused host schema contracts' \
 	  'lint-host             Lint host schema library and tests' \
 	  'doc-host              Check host feature Rustdoc' \
 	  'check-wasm-host       Check TypeScript feature forwarding on Wasm' \
-	  'test-typescript       Exchange Rust bytes with candidate/reference TS (Node required)' \
+	  'test-typescript       Exchange Rust bytes with current TypeScript (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
 	  'check-packages        Assemble archives and verify extracted-package consumers' \
 	  'check-browser         Chromium smoke (CLIENT_DIR and BROWSER required)' \
-	  'bench-schema          Paired host collection/finalization/export timing probe' \
-	  'bench-codec           Native codec phase timings (CODEC_ARGS selects cases)' \
-	  'bench-codec-allocations Separate allocator counts for the same cases' \
-	  'profile-codec         perf call stacks (one case/operation; host permission required)' \
-	  'test-consumer         Standalone contract against each Wire supplier' \
-	  'check-consumer-wasm   Build/run separate Wasm consumers (Node required)' \
-	  'measure-consumer-wasm Compare fixed opt-z/opt-3 consumer Wasm sizes' \
+	  'test-consumer         Standalone contract against the current codec' \
+	  'check-consumer-wasm   Build/run the current Wasm consumer (Node required)' \
+	  'measure-consumer-wasm Measure current opt-z/opt-3 consumer Wasm sizes' \
 	  'measure-consumer-ic   Installed counters (explicit POCKET_IC_BIN required)' \
 	  'test-derive           Check strict derive rejection and typed projection' \
 	  'lint-derive           Lint the derive implementation and contract tests' \
-	  'lint-compatibility    Lint the independent qualification workspace' \
-	  'lint                  Run Clippy with warnings denied' \
-	  'doc                   Check Rustdoc with warnings denied' \
-	  'check-wasm            Check the portable library on wasm32'
+	  'lint-compatibility    Aggregate qualification Clippy (default features)' \
+	  'lint                  Aggregate product Clippy (default features)' \
+	  'doc                   Aggregate product Rustdoc (default features)' \
+	  'check-wasm            Aggregate product Wasm check (default features)' \
+	  'fmt-check             Aggregate formatting across all three workspaces'
 
 snapshot-check:
 	@bash "$(TOKO_TOOLING_ROOT)/scripts/ci/verify-toko-tooling-snapshot.sh" --consumer "$(CURDIR)"
@@ -102,28 +100,12 @@ test-typescript:
 lint-typescript:
 	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline -- -D warnings
 
-.PHONY: bench-schema
-bench-schema: qualification-tooling-check | toko-execution-check
-	+cargo bench --manifest-path qualification/Cargo.toml --features typescript --bench schema --locked --offline
-
-.PHONY: bench-codec bench-codec-allocations profile-codec
-bench-codec bench-codec-allocations profile-codec: qualification-tooling-check | toko-execution-check
-
-bench-codec:
-	node qualification/codec/run.mjs measure $(CODEC_ARGS)
-
-bench-codec-allocations:
-	node qualification/codec/run.mjs allocations $(CODEC_ARGS)
-
-profile-codec:
-	node qualification/codec/run.mjs profile $(CODEC_ARGS)
-
 .PHONY: test-consumer check-consumer-wasm
 test-consumer check-consumer-wasm: qualification-tooling-check | toko-execution-check
 
 .PHONY: measure-consumer-wasm
 measure-consumer-wasm: qualification-tooling-check | toko-execution-check
-	node qualification/consumer/measure-wasm.mjs
+	node qualification/ic-wire-consumer/measure-wasm.mjs
 
 .PHONY: measure-consumer-ic
 measure-consumer-ic: qualification-tooling-check | toko-execution-check
@@ -132,12 +114,10 @@ measure-consumer-ic: qualification-tooling-check | toko-execution-check
 
 test-consumer:
 	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --test contract --locked --offline
-	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --no-default-features --features reference --test contract --locked --offline
 
 check-consumer-wasm:
-	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer-candidate --locked --offline
-	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --no-default-features --features reference --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer-reference --locked --offline
-	node qualification/consumer/check-wasm.mjs qualification/target/consumer-candidate/wasm32-unknown-unknown/debug/wire-consumer.wasm qualification/target/consumer-reference/wasm32-unknown-unknown/debug/wire-consumer.wasm
+	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer --locked --offline
+	node qualification/ic-wire-consumer/check-wasm.mjs qualification/target/consumer/wasm32-unknown-unknown/debug/wire-consumer.wasm
 
 .PHONY: test-derive lint-derive
 test-derive lint-derive: toko-tooling-check | toko-execution-check

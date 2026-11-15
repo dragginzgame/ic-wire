@@ -1,6 +1,6 @@
 //! Installed archive's optional identity projection uses the published supplier.
-use candidate::typescript::{SchemaLimits, ValidatedRegistry};
-use candidate::{Encoding, Limits, decode, encode};
+use wire::typescript::{SchemaLimits, ValidatedRegistry};
+use wire::{Encoding, Limits, decode, encode};
 use ic_platform_types::{Account, Principal};
 
 #[test]
