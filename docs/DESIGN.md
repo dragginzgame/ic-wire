@@ -4,15 +4,27 @@ Status: proposed architecture and evaluation contract, 15 November 2026. This re
 
 Reference: [ic-wire at 2dc434b10bec2fca92345d940dbfedc05993e9d5](https://github.com/dragginzgame/ic-wire/tree/2dc434b10bec2fca92345d940dbfedc05993e9d5), Core 0.22.4. All repository observations below refer to that commit.
 
+## Current decision: hard cut
+
+The user explicitly authorized a hard cut on 15 November 2026. Legacy ic-wire
+API, schema, wire, acceptance and budget compatibility are not release requirements.
+This supersedes preservation and migration-approval gates below wherever they
+exist solely to maintain legacy compatibility. Keep one current implementation,
+with no v1/v2 lanes, fallback readers or legacy-client support. Generated clients
+and runtime ship together. Differential tests remain useful evidence, not an
+obligation to reproduce every legacy behavior. Retained safety, admission, domain
+validation and cross-language correctness contracts still need qualification.
+This decision does not deploy consumers, reset stored state or publish packages.
+
 ## 1 Decision and purpose
 
-Evaluate a smaller implementation with one portable codec, one admission policy and one validated host schema graph. Preserve required bytes, accepted input behavior, field representations, resource allowances and consumer type identity. Remove duplicate interpretation and orchestration rather than changing the wire protocol to make implementation easier.
+Evaluate a smaller implementation with one portable codec, one admission policy and one validated host schema graph. Define the current bytes, accepted input behavior, field representations, resource allowances and consumer type identity. Remove duplicate interpretation and orchestration rather than changing the wire protocol to make implementation easier.
 
 Compare two candidates: targeted consolidation of the reference and a minimal fresh implementation of these same contracts. Select the simpler qualified outcome. A new repository, fewer crates or fewer source lines is not evidence that replacement is better.
 
 Zero future technical debt cannot be guaranteed. The release target is no known unresolved correctness obligation, one authoritative representation per responsibility, and no unmeasured performance claim.
 
-This design does not authorize resetting stored data, migrating consumer state, removing old-client compatibility or publishing new packages.
+This design does not authorize resetting stored data, migrating consumer state, publishing new packages.
 
 ## 2 Source findings and evidence limits
 
@@ -47,7 +59,7 @@ Historical reports may describe other complete runs. The user's stopped 29/39-co
 | Consumer layout and collection normalization | Consumer Serde declarations |
 | Metadata projection and schema graph validation | Optional host schema module |
 | TypeScript module rendering and field advice | Consumers of the validated host graph |
-| Browser byte operations | One versioned TS runtime |
+| Browser byte operations | One current TS runtime |
 | Principal and Account semantics | Published Platform Types |
 | Execution, routing, authentication and retry | Platform and application owners |
 | Build and simulator custody | Host, Build and Testkit in private qualification |
@@ -60,7 +72,7 @@ Do not make the derive generate Rust serialization. Serde remains the sole Rust 
 
 No endpoint crate, transport wrapper, stable-memory subsystem, lifecycle manager, generic plugin registry or alternative binary format belongs here.
 
-## 4 Frozen protocol contract
+## 4 Current protocol contract
 
 The frame is exactly 11 header bytes followed by the existing Postcard payload:
 
@@ -75,7 +87,7 @@ A payload API never adds or strips a frame. Method IDs use the existing explicit
 
 Field and variant declaration order, Serde attributes and explicit adapter selection are protocol inputs. Sorting fields, switching vectors to byte buffers, or renaming an exported method is not a harmless cleanup.
 
-Preserve Postcard's accepted noncanonical forms. The reference explicitly documents redundant varint `80 00` decoding as zero and char payload `02 61 62` decoding through upstream behavior. Do not add canonicality checks under the label of malformed-input hardening. A stricter format requires a separately authorized compatibility decision.
+Preserve Postcard's accepted noncanonical forms. The reference explicitly documents redundant varint `80 00` decoding as zero and char payload `02 61 62` decoding through upstream behavior. Do not add canonicality checks under the label of malformed-input hardening. Any intentional acceptance change needs an explicit current contract and focused tests, not legacy compatibility approval.
 
 Decode/re-encode may change maps, sets, heaps or custom values. Signatures, hashes, stored requests and retry records use the retained original byte sequence, not a regenerated approximation.
 
@@ -258,7 +270,7 @@ Do not pull Platform Runtime, Protocol, crypto or native Agent into Wire to acco
 
 Before cutover, inventory all retained requests, response archives, hashes/signatures, browser clients and persisted Wire values. The 11-byte header has no new schema-version discriminator. Reusing the same method ID with an incompatible layout cannot safely distinguish old data.
 
-Default adoption preserves the wire contract. Where a consumer explicitly chooses a representation/layout break, it must authorize the method/version separation, storage migration or old-client retirement itself. No fallback reader, implicit normalization, automatic reset or migration lives in Wire.
+Adoption is a hard cut with regenerated clients. Legacy method/version separation and old-client support are not required. Actual storage operations remain downstream actions. No fallback reader, implicit normalization, automatic reset or migration lives in Wire.
 
 ## 11 Deletions and reuse policy
 
@@ -437,7 +449,7 @@ The stopped 29/39-cohort matrix is not resumed automatically. Select a new bound
 | Replacement demonstrably reduces independent invariants/paths and passes all required gates | Proceed to consumer migration |
 | Codec slice passes but registry/advice or supplier boundaries remain unresolved | Continue limited evaluation; no replacement decision |
 | Performance worsens outside agreed bounds or complexity simply moves | Rework or stop |
-| Required stored/client compatibility cannot be established | Block cutover pending downstream decision |
+| Current Rust/browser contracts disagree | Fix the contract or implementation before cutover |
 
 The decision record names the authoritative survivor for each consolidated responsibility, removed paths, measured results, remaining limitations and implementation/review cost.
 
@@ -445,9 +457,9 @@ A new repository is not a reason to prefer replacement. Old code is not a reason
 
 ## 9 Consumer migration and deletion
 
-Choose a breaking Rust release when paths/signatures change. Keep byte-compatible consumer data and method identities unchanged by default. Regenerate TS with its matched runtime and qualify retained browser clients.
+Use a breaking release and regenerate TypeScript with the current runtime. Qualify current browser clients; retaining legacy clients is not required.
 
-If any consumer adopts a different field representation or layout, obtain that consumer's explicit authority for the method/version change, client rollout and persisted-state handling. Wire supplies no generic fallback reader or migration engine.
+The hard-cut decision permits incompatible field representations and layouts. Client rollout and persisted-state operations still belong to the consumer. Wire supplies no generic fallback reader or migration engine.
 
 Record how exact original request bytes survive retries, signing and rollback. Changing a package version does not make old retained values safe to reinterpret.
 

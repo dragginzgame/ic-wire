@@ -7,6 +7,9 @@ license-file.workspace = true
 publish = false
 description = "Private installed IC instruction measurements for the Wire consumer"
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
 [dependencies]
 ic-testkit.workspace = true
 serde_json.workspace = true
@@ -15,9 +18,6 @@ tokio.workspace = true
 
 [dev-dependencies]
 toko-tooling.workspace = true
-
-[package.metadata.cargo-machete]
-ignored = ["toko-tooling"]
 
 [lints]
 workspace = true

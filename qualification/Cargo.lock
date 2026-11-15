@@ -112,12 +112,14 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.23.7"
+version = "0.23.8"
 dependencies = [
  "bytemuck",
- "ic-wire-derive 0.23.7",
+ "ic-platform-types",
+ "ic-wire-derive 0.23.8",
  "postcard",
  "serde",
+ "serde_bytes",
  "serde_json",
 ]
 
@@ -125,10 +127,12 @@ dependencies = [
 name = "ic-wire-compatibility"
 version = "0.1.0"
 dependencies = [
+ "ic-platform-types",
  "ic-wire 0.22.4",
- "ic-wire 0.23.7",
+ "ic-wire 0.23.8",
  "ic-wire-consumer",
  "serde",
+ "serde_bytes",
  "serde_json",
  "stats_alloc",
  "toko-tooling",
@@ -140,7 +144,7 @@ version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
  "ic-wire 0.22.4",
- "ic-wire 0.23.7",
+ "ic-wire 0.23.8",
  "serde",
  "toko-tooling",
 ]
@@ -158,7 +162,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.23.7"
+version = "0.23.8"
 dependencies = [
  "proc-macro2",
  "quote",

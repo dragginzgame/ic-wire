@@ -4,10 +4,14 @@
 //! Manual projections remain trusted and require independent byte vectors.
 //! Named Rust type collection and a matching subset runtime share this contract.
 
+mod advice;
 mod native;
+pub use advice::{BulkLintReport, BulkWarning};
 mod render;
 #[cfg(feature = "derive")]
 pub use ic_wire_derive::Wire;
+#[doc(hidden)]
+pub use native::{PackedField, SerdeBytesField};
 pub use native::{SchemaContext, SchemaRegistry, Wire};
 
 /// Macro support for generated metadata; not a second schema API.
@@ -18,7 +22,7 @@ pub mod __private {
 
 /// Generated client modules require this metadata/runtime interface version.
 /// This labels tooling artifacts, never Wire payload bytes.
-pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json/1";
+pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json";
 
 /// Candidate interpreter for the admitted schema subset. Write this beside
 /// generated client modules at their selected runtime import path.
@@ -65,7 +69,7 @@ use alloc::{
     vec,
     vec::Vec,
 };
-use serde_json::Value;
+use serde_json::{Number, Value};
 
 /// Invalid metadata or exhausted host generation allowance.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -83,7 +87,7 @@ pub struct SchemaLimits {
     pub nodes: usize,
     /// Maximum nested inline JSON depth; references are not expanded.
     pub depth: usize,
-    /// Maximum total bytes of names and field/variant labels retained.
+    /// Maximum total bytes of names, field/variant labels and check names retained.
     pub names_bytes: usize,
     /// Maximum bytes per emitted declaration or metadata artifact.
     pub output_bytes: usize,
@@ -101,14 +105,31 @@ impl Default for SchemaLimits {
 }
 
 #[derive(Debug)]
+struct ScalarBounds {
+    min: Option<Number>,
+    max: Option<Number>,
+}
+
+#[derive(Debug)]
+struct Annotations {
+    check: Option<String>,
+    bounds: Option<ScalarBounds>,
+}
+
+#[derive(Debug)]
 enum Node {
     Unit,
     Bool,
     Integer { bits: u8, signed: bool },
+    Float { bits: u8 },
     Text { max: Option<u64> },
     Bytes { min: Option<u64>, max: Option<u64> },
     PackedI16 { max: u64 },
+    Packed { word: &'static str, nonzero: bool },
     List { item: usize, max: Option<u64> },
+    Array { item: usize, len: u64 },
+    Tuple(Vec<usize>),
+    Result { ok: usize, err: usize },
     Option(usize),
     Alias(usize),
     Ref(usize),
@@ -126,14 +147,15 @@ pub struct ValidatedRegistry {
     names: Vec<String>,
     roots: Vec<usize>,
     nodes: Vec<Node>,
+    annotations: BTreeMap<usize, Annotations>,
     output_bytes: usize,
 }
 
 impl ValidatedRegistry {
     /// Import explicit definitions in the reference metadata grammar.
     ///
-    /// Supported kinds: unit, bool, u/i, text, bytes, packed-i16, list, option,
-    /// newtype, ref, record and enum. Unknown keys and unsupported kinds reject;
+    /// Supported kinds: unit, bool, u/i, float, text, bytes, packed-i16, packed, list,
+    /// array, tuple, result, option, newtype, ref, record and enum. Unknown keys reject;
     /// this subset is not a replacement for the reference's full schema surface.
     ///
     /// # Errors
@@ -149,6 +171,7 @@ impl ValidatedRegistry {
         }
         let mut importer = Importer {
             nodes: Vec::new(),
+            annotations: BTreeMap::new(),
             names: BTreeMap::new(),
             remaining: limits.nodes - types.len(),
             name_bytes: limits.names_bytes,
@@ -169,6 +192,7 @@ impl ValidatedRegistry {
             names,
             roots,
             nodes: importer.nodes,
+            annotations: importer.annotations,
             output_bytes: limits.output_bytes,
         };
         graph.validate_aliases()?;
@@ -207,6 +231,7 @@ impl ValidatedRegistry {
 
 struct Importer {
     nodes: Vec<Node>,
+    annotations: BTreeMap<usize, Annotations>,
     names: BTreeMap<String, usize>,
     remaining: usize,
     name_bytes: usize,
@@ -232,21 +257,31 @@ impl Importer {
             .ok_or(GenerationError::Complexity)?;
         let kind = text(value, "k")?;
         let allowed: &[&str] = match kind {
-            "unit" | "bool" => &["k"],
-            "u" | "i" => &["k", "bits"],
-            "text" | "packed-i16" => &["k", "max"],
-            "bytes" => &["k", "min", "max"],
-            "list" => &["k", "item", "max"],
-            "option" | "newtype" => &["k", "item"],
-            "ref" => &["k", "name"],
-            "record" => &["k", "fields"],
-            "enum" => &["k", "variants"],
+            "unit" | "bool" => &["k", "check"],
+            "u" | "i" | "float" => &["k", "check", "bits", "min", "max"],
+            "text" | "packed-i16" => &["k", "check", "max"],
+            "packed" => &["k", "check", "word", "nonzero"],
+            "bytes" => &["k", "check", "min", "max"],
+            "list" | "array" => &["k", "check", "item", "max"],
+            "tuple" => &["k", "check", "items"],
+            "result" => &["k", "check", "ok", "err"],
+            "option" | "newtype" => &["k", "check", "item"],
+            "ref" => &["k", "check", "name"],
+            "record" => &["k", "check", "fields"],
+            "enum" => &["k", "check", "variants"],
             _ => return Err(GenerationError::Schema),
         };
         keys(value, allowed)?;
         let node = match kind {
             "unit" => Node::Unit,
             "bool" => Node::Bool,
+            "float" => {
+                let bits = value["bits"].as_u64().ok_or(GenerationError::Schema)?;
+                if ![32, 64].contains(&bits) {
+                    return Err(GenerationError::Schema);
+                }
+                Node::Float { bits: bits as u8 }
+            }
             "u" | "i" => {
                 let bits = value["bits"].as_u64().ok_or(GenerationError::Schema)?;
                 if ![8, 16, 32, 64, 128].contains(&bits) {
@@ -275,9 +310,55 @@ impl Importer {
                 }
                 Node::PackedI16 { max }
             }
+            "packed" => {
+                let word = text(value, "word")?;
+                let word = [
+                    "i8",
+                    "i16",
+                    "u16",
+                    "i32",
+                    "u32",
+                    "i64",
+                    "u64",
+                    "hash16",
+                    "hash32",
+                    "bool",
+                    "finite-f32",
+                    "finite-f64",
+                ]
+                .into_iter()
+                .find(|candidate| *candidate == word)
+                .ok_or(GenerationError::Schema)?;
+                let nonzero = match value.get("nonzero") {
+                    None => false,
+                    Some(Value::Bool(true)) if word == "i64" => true,
+                    _ => return Err(GenerationError::Schema),
+                };
+                Node::Packed { word, nonzero }
+            }
             "list" => Node::List {
                 max: bound(value, "max")?,
                 item: self.parse(&value["item"], depth + 1)?,
+            },
+            "array" => Node::Array {
+                len: bound(value, "max")?.ok_or(GenerationError::Schema)?,
+                item: self.parse(&value["item"], depth + 1)?,
+            },
+            "tuple" => {
+                let items = value["items"].as_array().ok_or(GenerationError::Schema)?;
+                if items.len() > self.remaining {
+                    return Err(GenerationError::Complexity);
+                }
+                Node::Tuple(
+                    items
+                        .iter()
+                        .map(|item| self.parse(item, depth + 1))
+                        .collect::<Result<_, _>>()?,
+                )
+            }
+            "result" => Node::Result {
+                ok: self.parse(&value["ok"], depth + 1)?,
+                err: self.parse(&value["err"], depth + 1)?,
             },
             "option" => Node::Option(self.parse(&value["item"], depth + 1)?),
             "newtype" => Node::Alias(self.parse(&value["item"], depth + 1)?),
@@ -339,6 +420,20 @@ impl Importer {
             _ => return Err(GenerationError::Schema),
         };
         let id = self.nodes.len();
+        let check = value
+            .get("check")
+            .map(|check| self.name(check.as_str().ok_or(GenerationError::Schema)?))
+            .transpose()?;
+        let bounds = if matches!(kind, "u" | "i" | "float")
+            && (value.get("min").is_some() || value.get("max").is_some())
+        {
+            Some(scalar_bounds(value, kind != "float")?)
+        } else {
+            None
+        };
+        if check.is_some() || bounds.is_some() {
+            self.annotations.insert(id, Annotations { check, bounds });
+        }
         self.nodes.push(node);
         Ok(id)
     }
@@ -449,3 +544,40 @@ const RESERVED: &[&str] = &[
     "eval",
     "arguments",
 ];
+
+fn scalar_bounds(value: &Value, integer: bool) -> Result<ScalarBounds, GenerationError> {
+    let read = |key| -> Result<Option<Number>, GenerationError> {
+        value
+            .get(key)
+            .map(|value| {
+                let number = value.as_number().ok_or(GenerationError::Schema)?;
+                let n = number
+                    .as_f64()
+                    .filter(|n| n.is_finite())
+                    .ok_or(GenerationError::Schema)?;
+                if integer {
+                    if n % 1.0 != 0.0 {
+                        return Err(GenerationError::Schema);
+                    }
+                    if n.abs() > 9_007_199_254_740_991.0 {
+                        return Err(GenerationError::Complexity);
+                    }
+                }
+                Ok(number.clone())
+            })
+            .transpose()
+    };
+    let bounds = ScalarBounds {
+        min: read("min")?,
+        max: read("max")?,
+    };
+    if bounds
+        .min
+        .as_ref()
+        .zip(bounds.max.as_ref())
+        .is_some_and(|(min, max)| min.as_f64() > max.as_f64())
+    {
+        return Err(GenerationError::Schema);
+    }
+    Ok(bounds)
+}

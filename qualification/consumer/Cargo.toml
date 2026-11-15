@@ -7,6 +7,18 @@ license-file.workspace = true
 publish = false
 description = "Standalone portable request/response consumer for Wire qualification"
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[[bin]]
+name = "wire-consumer"
+path = "src/bin/workload.rs"
+
+[[bin]]
+name = "wire-consumer-generate"
+path = "src/bin/generate.rs"
+required-features = ["schema"]
+
 [features]
 default = ["candidate"]
 candidate = ["dep:candidate"]
@@ -25,20 +37,8 @@ serde.workspace = true
 [dev-dependencies]
 toko-tooling.workspace = true
 
-[package.metadata.cargo-machete]
-ignored = ["toko-tooling"]
-
 [lints]
 workspace = true
-
-[[bin]]
-name = "wire-consumer"
-path = "src/bin/workload.rs"
-
-[[bin]]
-name = "wire-consumer-generate"
-path = "src/bin/generate.rs"
-required-features = ["schema"]
 
 [[example]]
 name = "instruction-counter"

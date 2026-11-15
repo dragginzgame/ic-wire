@@ -168,7 +168,10 @@ pub fn decode_receipt(bytes: &[u8]) -> Result<Receipt, Error> {
 /// # Errors
 /// Returns schema or bounded-output admission errors.
 #[cfg(all(feature = "schema", not(target_family = "wasm")))]
-pub fn clients(runtime: &str) -> Result<(String, String), wire::typescript::GenerationError> {
+pub fn clients(
+    runtime: &str,
+    mut diagnostics: impl FnMut(wire::typescript::BulkLintReport),
+) -> Result<(String, String), wire::typescript::GenerationError> {
     use wire::typescript::{Method, PayloadLimits, SchemaLimits, SchemaRegistry};
     let mut registry = SchemaRegistry::new(SchemaLimits::default())?;
     registry.register::<Upload>("Upload")?;
@@ -185,7 +188,14 @@ pub fn clients(runtime: &str) -> Result<(String, String), wire::typescript::Gene
         depth: 2,
     };
     Ok((
-        graph.payload_module("uploadPayload", "Upload", runtime, request)?,
+        graph.payload_module(
+            "uploadPayload",
+            "Upload",
+            runtime,
+            request,
+            &Default::default(),
+            &mut diagnostics,
+        )?,
         graph.method_module(
             &[Method {
                 export: "upload",
@@ -196,6 +206,8 @@ pub fn clients(runtime: &str) -> Result<(String, String), wire::typescript::Gene
                 response_limits: response,
             }],
             runtime,
+            &Default::default(),
+            &mut diagnostics,
         )?,
     ))
 }

@@ -293,6 +293,62 @@ fn failed_second_pass_releases_output_without_growth() {
     }
 }
 
+fn domain_validation_allocation_boundaries() {
+    #[derive(serde::Deserialize)]
+    struct Bools(#[serde(with = "candidate::serde_packed::bools")] Vec<bool>);
+    #[derive(serde::Deserialize)]
+    struct Floats(#[serde(with = "candidate::serde_packed::finite_f32")] Vec<f32>);
+    #[derive(serde::Deserialize)]
+    struct Doubles(#[serde(with = "candidate::serde_packed::finite_f64")] Vec<f64>);
+    #[derive(serde::Deserialize)]
+    struct Nonzero(
+        #[serde(with = "candidate::serde_packed::nonzero_i64")] Vec<core::num::NonZeroI64>,
+    );
+    let (result, stats) = measure(|| decode::<Bools>(&[2, 0, 2], Encoding::Payload, limits()));
+    assert!(result.is_err());
+    no_allocation(stats);
+    let (result, stats) = measure(|| {
+        decode::<Floats>(
+            &[8, 0, 0, 128, 63, 0, 0, 128, 127],
+            Encoding::Payload,
+            limits(),
+        )
+    });
+    assert!(result.is_err());
+    no_allocation(stats);
+    let (result, stats) = measure(|| {
+        decode::<Doubles>(
+            &[8, 0, 0, 0, 0, 0, 0, 240, 127],
+            Encoding::Payload,
+            limits(),
+        )
+    });
+    assert!(result.is_err());
+    no_allocation(stats);
+    let (result, stats) = measure(|| decode::<Bools>(&[2, 0, 1], Encoding::Payload, limits()));
+    assert_eq!(result.unwrap().0, [false, true]);
+    one_allocation(stats, 2);
+    let (result, stats) =
+        measure(|| decode::<Floats>(&[4, 0, 0, 128, 63], Encoding::Payload, limits()));
+    assert_eq!(result.unwrap().0, [1.0]);
+    one_allocation(stats, 4);
+    let (result, stats) =
+        measure(|| decode::<Doubles>(&[8, 0, 0, 0, 0, 0, 0, 240, 63], Encoding::Payload, limits()));
+    assert_eq!(result.unwrap().0, [1.0]);
+    one_allocation(stats, 8);
+    let (result, stats) =
+        measure(|| decode::<Nonzero>(&[8, 0, 0, 0, 0, 0, 0, 0, 0], Encoding::Payload, limits()));
+    assert!(result.is_err());
+    one_allocation(stats, 8);
+    assert_eq!(
+        decode::<Nonzero>(&[8, 1, 0, 0, 0, 0, 0, 0, 0], Encoding::Payload, limits())
+            .unwrap()
+            .0[0]
+            .get(),
+        1
+    );
+}
+
 fn main() {
     preflight_refusal_and_sizing_allocate_nothing();
     owned_output_is_reserved_between_passes();
@@ -302,5 +358,6 @@ fn main() {
     incremental_and_trusted_work_are_not_a_global_allocation_ban();
     reference_positive_and_negative_controls();
     failed_second_pass_releases_output_without_growth();
-    println!("allocation qualification: 8 groups passed");
+    domain_validation_allocation_boundaries();
+    println!("allocation qualification: 9 groups passed");
 }

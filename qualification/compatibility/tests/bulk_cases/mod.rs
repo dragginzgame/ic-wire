@@ -17,7 +17,14 @@ fn large_bytes_cross_growth_and_length_prefix_boundaries() {
         depth: 1,
     };
     let module = graph
-        .payload_module("blob", "Blob", "./runtime-adapter.ts", limits)
+        .payload_module(
+            "blob",
+            "Blob",
+            "./runtime-adapter.ts",
+            limits,
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
         .unwrap();
     let frame = graph
         .method_module(
@@ -30,6 +37,8 @@ fn large_bytes_cross_growth_and_length_prefix_boundaries() {
                 response_limits: limits,
             }],
             "./runtime-adapter.ts",
+            &Default::default(),
+            |report| eprint!("{report}"),
         )
         .unwrap();
     let sizes = [0, 63, 64, 127, 128, 16_383, 16_384, MAX];

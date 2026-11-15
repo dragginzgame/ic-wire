@@ -64,8 +64,18 @@ fn rejects_invalid_shapes_and_constraints() {
         json!({"k":"text","max":-1}),
         json!({"k":"bytes","min":3,"max":2}),
         json!({"k":"packed-i16"}),
+        json!({"k":"packed","word":"bool","nonzero":true}),
+        json!({"k":"packed","word":"i64","nonzero":false}),
+        json!({"k":"packed","word":"finite-f32","nonzero":true}),
+        json!({"k":"packed","word":"f32"}),
         json!({"k":"enum","variants":[]}),
         json!({"k":"list"}),
+        json!({"k":"array","item":{"k":"unit"}}),
+        json!({"k":"array","max":-1,"item":{"k":"unit"}}),
+        json!({"k":"tuple","items":null}),
+        json!({"k":"tuple","items":[{"k":"missing"}]}),
+        json!({"k":"result","ok":{"k":"unit"}}),
+        json!({"k":"float","bits":16}),
         json!({"k":"enum","variants":[{"name":"A","id":0,"value":{"k":"unit"}}, {"name":"B","id":0,"value":{"k":"unit"}}]}),
         json!({"k":"record","fields":[{"name":"x","value":{"k":"unit"}}, {"name":"x","value":{"k":"bool"}}]}),
     ] {
@@ -80,6 +90,25 @@ fn rejects_invalid_shapes_and_constraints() {
             .is_err()
         );
     }
+}
+
+#[test]
+fn standard_shape_metadata_roundtrips_and_charges_all_children() {
+    let value = json!({"k":"result","ok":{"k":"tuple","items":[{"k":"array","max":0,"item":{"k":"u","bits":8}},{"k":"float","bits":64}]},"err":{"k":"unit"}});
+    let types = BTreeMap::from([("Root".into(), value)]);
+    let limits = SchemaLimits {
+        nodes: 7,
+        ..SchemaLimits::default()
+    };
+    let graph = ValidatedRegistry::from_metadata(&types, limits).unwrap();
+    let exported: BTreeMap<String, Value> =
+        serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
+    assert_eq!(exported, types);
+    assert_eq!(
+        ValidatedRegistry::from_metadata(&types, SchemaLimits { nodes: 6, ..limits }).unwrap_err(),
+        GenerationError::Complexity
+    );
+    assert!(registry(json!({"k":"array","max":9007199254740992_u64,"item":{"k":"unit"}})).is_err());
 }
 
 #[test]
@@ -286,23 +315,51 @@ fn generated_payload_module_admits_names_policy_and_total_output() {
         depth: 1,
     };
     let source = graph
-        .payload_module("codec", "Root", "./runtime.ts", limits)
+        .payload_module(
+            "codec",
+            "Root",
+            "./runtime.ts",
+            limits,
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
         .unwrap();
-    assert!(source.contains("ic-wire-json/1"));
+    assert!(source.contains("ic-wire-json"));
     assert!(source.contains("encode:(value: Root)"));
     for name in ["Root", "globalThis", "class", "x;throw"] {
         assert_eq!(
-            graph.payload_module(name, "Root", "./runtime.ts", limits),
+            graph.payload_module(
+                name,
+                "Root",
+                "./runtime.ts",
+                limits,
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
     assert_eq!(
-        graph.payload_module("codec", "Missing", "./runtime.ts", limits),
+        graph.payload_module(
+            "codec",
+            "Missing",
+            "./runtime.ts",
+            limits,
+            &Default::default(),
+            |report| eprint!("{report}")
+        ),
         Err(GenerationError::Schema)
     );
     for module in ["", "bad\0module"] {
         assert_eq!(
-            graph.payload_module("codec", "Root", module, limits),
+            graph.payload_module(
+                "codec",
+                "Root",
+                module,
+                limits,
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
@@ -311,7 +368,14 @@ fn generated_payload_module_admits_names_policy_and_total_output() {
         PayloadLimits { depth: 0, ..limits },
     ] {
         assert_eq!(
-            graph.payload_module("codec", "Root", "./runtime.ts", invalid),
+            graph.payload_module(
+                "codec",
+                "Root",
+                "./runtime.ts",
+                invalid,
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
@@ -323,7 +387,9 @@ fn generated_payload_module_admits_names_policy_and_total_output() {
             PayloadLimits {
                 bytes: 1 << 53,
                 ..limits
-            }
+            },
+            &Default::default(),
+            |report| eprint!("{report}")
         ),
         Err(GenerationError::Complexity)
     );
@@ -336,7 +402,14 @@ fn generated_payload_module_admits_names_policy_and_total_output() {
             },
         )
         .unwrap();
-        let result = bounded.payload_module("codec", "Root", "./runtime.ts", limits);
+        let result = bounded.payload_module(
+            "codec",
+            "Root",
+            "./runtime.ts",
+            limits,
+            &Default::default(),
+            |report| eprint!("{report}"),
+        );
         if output_bytes < source.len() {
             assert_eq!(result, Err(GenerationError::Complexity));
         } else {
@@ -369,7 +442,11 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
             depth: 3,
         },
     };
-    let source = graph.method_module(&[method], "./runtime.ts").unwrap();
+    let source = graph
+        .method_module(&[method], "./runtime.ts", &Default::default(), |report| {
+            eprint!("{report}")
+        })
+        .unwrap();
     assert!(source.contains("id:'18446744073709551615'"));
     assert!(source.contains("requestBytes:11, requestNodes:1, requestDepth:1"));
     assert!(source.contains("responseBytes:12, responseNodes:2, responseDepth:3"));
@@ -383,7 +460,12 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
         Method { id: 7, ..method },
     ] {
         assert_eq!(
-            graph.method_module(&[method, duplicate], "./runtime.ts"),
+            graph.method_module(
+                &[method, duplicate],
+                "./runtime.ts",
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
@@ -402,12 +484,19 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
         },
     ] {
         assert_eq!(
-            graph.method_module(&[invalid], "./runtime.ts"),
+            graph.method_module(
+                &[invalid],
+                "./runtime.ts",
+                &Default::default(),
+                |report| eprint!("{report}")
+            ),
             Err(GenerationError::Schema)
         );
     }
     assert_eq!(
-        graph.method_module(&[], "./runtime.ts"),
+        graph.method_module(&[], "./runtime.ts", &Default::default(), |report| eprint!(
+            "{report}"
+        )),
         Err(GenerationError::Schema)
     );
     let safe = Method {
@@ -417,7 +506,16 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
         },
         ..method
     };
-    assert!(graph.method_module(&[safe], "./runtime.ts").is_ok());
+    assert!(
+        graph
+            .method_module(
+                &[safe],
+                "./runtime.ts",
+                &Default::default(),
+                |report| eprint!("{report}")
+            )
+            .is_ok()
+    );
     let overflow = Method {
         request_limits: PayloadLimits {
             bytes: (1_u64 << 53) - 11,
@@ -426,7 +524,12 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
         ..method
     };
     assert_eq!(
-        graph.method_module(&[overflow], "./runtime.ts"),
+        graph.method_module(
+            &[overflow],
+            "./runtime.ts",
+            &Default::default(),
+            |report| eprint!("{report}")
+        ),
         Err(GenerationError::Complexity)
     );
     for output_bytes in [source.len() - 1, source.len()] {
@@ -440,12 +543,24 @@ fn method_modules_admit_identities_directions_and_bounded_source() {
         .unwrap();
         if output_bytes < source.len() {
             assert_eq!(
-                graph.method_module(&[method], "./runtime.ts"),
+                graph.method_module(
+                    &[method],
+                    "./runtime.ts",
+                    &Default::default(),
+                    |report| eprint!("{report}")
+                ),
                 Err(GenerationError::Complexity)
             );
         } else {
             assert_eq!(
-                graph.method_module(&[method], "./runtime.ts").unwrap(),
+                graph
+                    .method_module(
+                        &[method],
+                        "./runtime.ts",
+                        &Default::default(),
+                        |report| eprint!("{report}")
+                    )
+                    .unwrap(),
                 source
             );
         }

@@ -2,16 +2,19 @@
 
 Evaluate whether rebuilding Wire around explicit contracts can materially reduce
 architectural drift and maintained complexity. This is a design foundation, not
-a decision that a rewrite is necessary or an implemented replacement.
+a deployed replacement. Adoption is a hard cut: legacy API, generated-client and
+wire compatibility are not requirements. The pinned legacy implementation is a
+comparison source, not the specification for the new crate.
 
 The existing `../ic-wire` remains the production owner. Its released Core 0.22.4
 is the reference; source review is pinned at `2dc434b10bec2fca92345d940dbfedc05993e9d5`.
 
-The candidate keeps the `ic-wire` package name and uses version `0.23.7`, following
+The candidate keeps the `ic-wire` package name and uses version `0.23.8`, following
 the published `0.22.4` line with a breaking Rust API. It remains `publish = false`;
 the version selection and GitHub push do not constitute a crates.io release.
 
 - [Architecture, contracts and qualification plan](docs/DESIGN.md)
+- [Current feature-parity contracts and remaining scope](docs/design/parity.md)
 
 Start with one end-to-end workload and independent acceptance tests. Compare a
 small replacement against improving the current implementation before broadening

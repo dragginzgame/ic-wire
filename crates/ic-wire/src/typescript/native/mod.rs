@@ -1,8 +1,12 @@
 //! Bounded inline/named metadata production for the shared admission boundary.
 use super::{GenerationError, SchemaLimits, ValidatedRegistry};
-use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 use serde_json::{Value, json};
+mod adapters;
+#[cfg(feature = "platform-types")]
+mod platform;
 mod registry;
+pub use adapters::PackedField;
 pub use registry::SchemaRegistry;
 
 /// A trusted description of a type's Serde representation.
@@ -34,6 +38,16 @@ pub struct SchemaContext {
 }
 
 impl SchemaContext {
+    /// Project the sealed standard serde_bytes adapter without guessing an
+    /// arbitrary custom serializer's representation.
+    /// # Errors
+    /// Returns the same admission errors as describe.
+    #[doc(hidden)]
+    pub fn describe_bytes<T: SerdeBytesField + ?Sized>(
+        &mut self,
+    ) -> Result<Value, GenerationError> {
+        self.describe::<T::Layout>()
+    }
     /// Describe a nested type without bypassing construction admission.
     ///
     /// # Errors
@@ -112,18 +126,106 @@ macro_rules! scalar {
     )* };
 }
 scalar! {
+    crate::FiniteF32 => json!({"k":"float","bits":32}),
+    crate::FiniteF64 => json!({"k":"float","bits":64}),
     () => json!({"k":"unit"}), bool => json!({"k":"bool"}),
     u8 => json!({"k":"u","bits":8}), u16 => json!({"k":"u","bits":16}),
     u32 => json!({"k":"u","bits":32}), u64 => json!({"k":"u","bits":64}), u128 => json!({"k":"u","bits":128}),
     i8 => json!({"k":"i","bits":8}), i16 => json!({"k":"i","bits":16}),
     i32 => json!({"k":"i","bits":32}), i64 => json!({"k":"i","bits":64}), i128 => json!({"k":"i","bits":128}),
     str => json!({"k":"text"}), String => json!({"k":"text"}),
+    serde_bytes::ByteBuf => json!({"k":"bytes"}), serde_bytes::Bytes => json!({"k":"bytes"}),
 }
+impl<const N: usize> Wire for serde_bytes::ByteArray<N> {
+    fn schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
+        Ok(json!({"k":"bytes","min":N,"max":N}))
+    }
+}
+impl<T: crate::PackedElement> Wire for crate::Packed<T> {
+    fn schema(_: &mut SchemaContext) -> Result<Value, GenerationError> {
+        Ok(json!({"k":"packed","word":T::SCHEMA}))
+    }
+}
+
+mod byte_field {
+    pub trait Sealed {
+        type Layout: super::Wire;
+    }
+    impl Sealed for alloc::vec::Vec<u8> {
+        type Layout = serde_bytes::ByteBuf;
+    }
+    impl Sealed for [u8] {
+        type Layout = serde_bytes::ByteBuf;
+    }
+    impl Sealed for serde_bytes::ByteBuf {
+        type Layout = Self;
+    }
+    impl Sealed for serde_bytes::Bytes {
+        type Layout = serde_bytes::ByteBuf;
+    }
+    impl<const N: usize> Sealed for [u8; N] {
+        type Layout = serde_bytes::ByteArray<N>;
+    }
+    impl<const N: usize> Sealed for serde_bytes::ByteArray<N> {
+        type Layout = Self;
+    }
+    impl<T: Sealed + ?Sized> Sealed for &T {
+        type Layout = T::Layout;
+    }
+    impl<T: Sealed> Sealed for Option<T> {
+        type Layout = Option<T::Layout>;
+    }
+}
+/// Sealed inputs for the standard Serde bulk-byte adapter.
+///
+/// ```compile_fail
+/// fn requires_bytes<T: ic_wire::typescript::SerdeBytesField>() {}
+/// requires_bytes::<Vec<u16>>();
+/// ```
+#[doc(hidden)]
+pub trait SerdeBytesField: byte_field::Sealed {}
+impl<T: byte_field::Sealed + ?Sized> SerdeBytesField for T {}
 impl<T: Wire> Wire for Option<T> {
     fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
         Ok(json!({"k":"option","item":context.describe::<T>()?}))
     }
 }
+impl<T: Wire, E: Wire> Wire for Result<T, E> {
+    fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
+        Ok(json!({"k":"result","ok":context.describe::<T>()?,"err":context.describe::<E>()?}))
+    }
+}
+impl<T: Wire, const N: usize> Wire for [T; N]
+where
+    [T; N]: serde::Serialize,
+{
+    fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
+        Ok(json!({"k":"array","max":N,"item":context.describe::<T>()?}))
+    }
+}
+impl<T: Wire> Wire for [T] {
+    fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
+        Ok(json!({"k":"list","item":context.describe::<T>()?}))
+    }
+}
+impl Wire for Cow<'_, str> {
+    fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
+        context.describe::<str>()
+    }
+}
+macro_rules! tuple {
+    ($($ty:ident),+) => {
+        impl<$($ty: Wire),+> Wire for ($($ty,)+) {
+            fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
+                Ok(json!({"k":"tuple","items":[$(context.describe::<$ty>()?),+]}))
+            }
+        }
+    };
+}
+tuple!(A);
+tuple!(A, B);
+tuple!(A, B, C);
+tuple!(A, B, C, D);
 impl<T: Wire> Wire for Vec<T> {
     fn schema(context: &mut SchemaContext) -> Result<Value, GenerationError> {
         Ok(json!({"k":"list","item":context.describe::<T>()?}))

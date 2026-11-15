@@ -62,6 +62,8 @@ fn explicit_serde_names_reach_generated_clients_without_changing_bytes() {
                 nodes: 512,
                 depth: 32,
             },
+            &Default::default(),
+            |report| eprint!("{report}"),
         )
         .unwrap();
     let output = run_typescript(

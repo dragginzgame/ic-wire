@@ -7,7 +7,8 @@ use syn::{Data, DeriveInput, Fields, parse_macro_input};
 ///
 /// Type parameters require Wire; existing lifetimes, const parameters and where
 /// clauses are preserved. Field `serde(borrow)` and symmetric field/variant
-/// `serde(rename = "name")` are supported; other attributes/discriminants reject.
+/// `serde(rename = "name")`, standard byte and qualified packed field adapters
+/// are supported; other attributes/discriminants reject.
 /// Use `#[wire(crate = "renamed_dependency")]` when ic-wire is renamed.
 #[proc_macro_derive(Wire, attributes(serde, wire))]
 pub fn derive_wire(input: TokenStream) -> TokenStream {
@@ -36,9 +37,9 @@ fn fields(
     Ok(match fields {
         Fields::Unit => quote!(#owner::typescript::__private::json!({"k":"unit"})),
         Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-            unnamed_attributes(&fields.unnamed[0].attrs)?;
-            let ty = &fields.unnamed[0].ty;
-            quote!(#owner::typescript::__private::json!({"k":"newtype","item":#context.describe::<#ty>()?}))
+            let bytes = unnamed_attributes(&fields.unnamed[0].attrs, owner)?;
+            let value = projection(&fields.unnamed[0].ty, bytes, context);
+            quote!(#owner::typescript::__private::json!({"k":"newtype","item":#value}))
         }
         Fields::Named(fields) => {
             let entries = fields
@@ -46,19 +47,25 @@ fn fields(
                 .iter()
                 .map(|field| -> syn::Result<_> {
                     let name = field.ident.as_ref().unwrap().to_string();
-                    let name = member_attributes(&field.attrs, true)?
+                    let (rename, bytes) = member_attributes(&field.attrs, true, owner)?;
+                    let name = rename
                         .unwrap_or_else(|| name.strip_prefix("r#").unwrap_or(&name).to_owned());
-                    let ty = &field.ty;
-                    Ok(quote!({"name":#name,"value":#context.describe::<#ty>()?}))
+                    let value = projection(&field.ty, bytes, context);
+                    Ok(quote!({"name":#name,"value":#value}))
                 })
                 .collect::<syn::Result<Vec<_>>>()?;
             quote!(#owner::typescript::__private::json!({"k":"record","fields":[#(#entries),*]}))
         }
-        _ => {
-            return Err(syn::Error::new_spanned(
-                fields,
-                "tuple layouts are not in the admitted schema subset",
-            ));
+        Fields::Unnamed(fields) => {
+            let entries = fields
+                .unnamed
+                .iter()
+                .map(|field| -> syn::Result<_> {
+                    let bytes = unnamed_attributes(&field.attrs, owner)?;
+                    Ok(projection(&field.ty, bytes, context))
+                })
+                .collect::<syn::Result<Vec<_>>>()?;
+            quote!(#owner::typescript::__private::json!({"k":"tuple","items":[#(#entries),*]}))
         }
     })
 }
@@ -92,7 +99,7 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
         Data::Enum(data) => {
             let mut variants = Vec::new();
             for (id, variant) in data.variants.iter().enumerate() {
-                let renamed_variant = member_attributes(&variant.attrs, false)?;
+                let (renamed_variant, _) = member_attributes(&variant.attrs, false, &owner)?;
                 if variant.discriminant.is_some() {
                     return Err(syn::Error::new_spanned(
                         variant,
@@ -104,9 +111,8 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                     .unwrap_or_else(|| name.strip_prefix("r#").unwrap_or(&name).to_owned());
                 let value = if let Fields::Unnamed(unnamed) = &variant.fields {
                     if unnamed.unnamed.len() == 1 {
-                        unnamed_attributes(&unnamed.unnamed[0].attrs)?;
-                        let ty = &unnamed.unnamed[0].ty;
-                        quote!(#context.describe::<#ty>()?)
+                        let bytes = unnamed_attributes(&unnamed.unnamed[0].attrs, &owner)?;
+                        projection(&unnamed.unnamed[0].ty, bytes, &context)
                     } else {
                         fields(&variant.fields, &owner, &context)?
                     }
@@ -141,16 +147,61 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     })
 }
 
-fn member_attributes(attrs: &[syn::Attribute], allow_borrow: bool) -> syn::Result<Option<String>> {
+#[derive(Clone, Copy)]
+enum Adapter {
+    Bytes,
+    Packed(u8),
+}
+
+fn projection(
+    ty: &syn::Type,
+    bytes: Option<Adapter>,
+    context: &syn::Ident,
+) -> proc_macro2::TokenStream {
+    match bytes {
+        Some(Adapter::Bytes) => quote!(#context.describe_bytes::<#ty>()?),
+        Some(Adapter::Packed(kind)) => quote!(#context.describe_packed::<#ty,#kind>()?),
+        None => quote!(#context.describe::<#ty>()?),
+    }
+}
+
+fn member_attributes(
+    attrs: &[syn::Attribute],
+    allow_field: bool,
+    owner: &syn::Path,
+) -> syn::Result<(Option<String>, Option<Adapter>)> {
     let mut borrowed = false;
     let mut renamed = None;
+    let mut bytes = None;
     for attr in attrs {
         if attr.path().is_ident("serde") {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident("rename") && renamed.is_none() {
                     let name: syn::LitStr = meta.value()?.parse()?;
                     renamed = Some(name.value());
-                } else if meta.path.is_ident("borrow") && allow_borrow && !borrowed {
+                } else if meta.path.is_ident("with") && allow_field && bytes.is_none() {
+                    let path: syn::LitStr = meta.value()?.parse()?;
+                    let path = path.value();
+                    let path = path.trim_start_matches("::");
+                    if path == "serde_bytes" {
+                        bytes = Some(Adapter::Bytes);
+                    } else {
+                        let owner = owner.to_token_stream().to_string().replace(' ', "");
+                        let prefix = format!("{}::serde_packed::", owner.trim_start_matches("::"));
+                        let kind =
+                            match path.strip_prefix(&prefix) {
+                                Some("bools") => 0,
+                                Some("finite_f32") => 1,
+                                Some("finite_f64") => 2,
+                                Some("nonzero_i64") => 3,
+                                Some("heap_u64") => 4,
+                                _ => return Err(meta.error(
+                                    "only qualified standard byte/packed adapters are supported",
+                                )),
+                            };
+                        bytes = Some(Adapter::Packed(kind));
+                    }
+                } else if meta.path.is_ident("borrow") && allow_field && !borrowed {
                     borrowed = true;
                     if meta.input.peek(syn::Token![=]) {
                         let _: syn::LitStr = meta.value()?.parse()?;
@@ -164,17 +215,18 @@ fn member_attributes(attrs: &[syn::Attribute], allow_borrow: bool) -> syn::Resul
             reject_attributes(core::slice::from_ref(attr))?;
         }
     }
-    Ok(renamed)
+    Ok((renamed, bytes))
 }
 
-fn unnamed_attributes(attrs: &[syn::Attribute]) -> syn::Result<()> {
-    if member_attributes(attrs, true)?.is_some() {
+fn unnamed_attributes(attrs: &[syn::Attribute], owner: &syn::Path) -> syn::Result<Option<Adapter>> {
+    let (rename, bytes) = member_attributes(attrs, true, owner)?;
+    if rename.is_some() {
         return Err(syn::Error::new(
             proc_macro2::Span::call_site(),
             "renaming an unnamed field is not supported",
         ));
     }
-    Ok(())
+    Ok(bytes)
 }
 
 #[cfg(test)]

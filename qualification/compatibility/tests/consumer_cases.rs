@@ -6,7 +6,19 @@ use ic_wire_consumer::{
 use serde_json::json;
 #[test]
 fn standalone_consumer_exchanges_generated_clients() {
-    let (module, frame) = clients("./runtime-adapter.ts").unwrap();
+    let mut paths = Vec::new();
+    let (module, frame) = clients("./runtime-adapter.ts", |report| {
+        eprint!("{report}");
+        paths.extend(report.warnings.into_iter().map(|warning| warning.path));
+    })
+    .unwrap();
+    assert_eq!(
+        paths,
+        [
+            "/types/Upload/fields/tags/list/u16",
+            "/methods/upload/request/fields/tags/list/u16"
+        ]
+    );
     let request = sample_upload().unwrap();
     let reply = Receipt {
         revision: 129,

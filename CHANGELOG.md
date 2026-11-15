@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.23.8] - 2026-11-15
+
+Versioned evaluation checkpoint; not published to crates.io.
+
+### ✨ Added
+
+- Add scalar bounds and named synchronous browser validators through the shared
+  schema graph. Keep one current, unversioned schema/runtime interface for the
+  authorized hard cut; legacy compatibility is not a release requirement.
+
+- Add explicit bool, finite-float, nonzero-i64 and heap-u64 bulk field adapters,
+  sealed derive projections and matching browser validation. Qualify bytes,
+  admission boundaries, allocation ordering and heap normalization against the
+  reference; lint advice now names the available bool/float adapters.
+
+- Add rooted bulk advice over the validated graph, with exact acknowledgements,
+  stale-path detection, bounded recursive traversal and bounded diagnostic display.
+  Payload/method client generation requires a diagnostic handler; the standalone
+  consumer prints warnings and supports `--deny-warnings` before artifact output.
+
+- Preserve standard Result, fixed-array, tuple, slice and Cow text schema layouts,
+  including tuple structs and multi-field enum variants, across Rust and both
+  TypeScript runtimes. Fixed arrays and tuples carry no sequence-length prefix.
+- Expose published ByteBuf/ByteArray types and sealed standard serde_bytes field
+  projection, retaining ordinary-array versus bulk-byte distinctions.
+- Add optional host schemas for published Platform Types 0.20.4 Principal and
+  Account, preserving absent versus explicit-zero subaccount bytes.
+- Add finite float wrappers and browser projection, preserving finite IEEE-754
+  bits and refusing nonfinite values and inexact browser f32 inputs.
+- Add explicit packed integer and 16/32-byte identifier fields over the shared
+  bounded-i16 bulk path, with owned decoding and partial-word rejection.
+
+These are local evaluation additions, not a production migration or performance
+acceptance. Browser/distribution and matched performance qualification remain;
+see [the current parity ledger](docs/design/parity.md). The standalone Wasm size
+gates passed at both optimization levels after sharing the packed implementation;
+that measurement predates the subsequent lint, domain-adapter and validation work.
+
+### 🐛 Fixed
+
+- Keep qualification helper modules out of Cargo's standalone integration-test
+  discovery; the three explicit test binaries retain their existing ownership.
+
 ## [0.23.7] - 2026-11-15
 
 Versioned evaluation checkpoint; not published to crates.io.

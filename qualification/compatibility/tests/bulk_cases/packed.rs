@@ -23,7 +23,14 @@ fn packed_and_ordinary_signed_buffers_preserve_distinct_representations() {
         depth: 2,
     };
     let module = graph
-        .payload_module("packedPayload", "Packed", "./runtime-adapter.ts", packed)
+        .payload_module(
+            "packedPayload",
+            "Packed",
+            "./runtime-adapter.ts",
+            packed,
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
         .unwrap();
     let frame = graph
         .method_module(
@@ -46,6 +53,8 @@ fn packed_and_ordinary_signed_buffers_preserve_distinct_representations() {
                 },
             ],
             "./runtime-adapter.ts",
+            &Default::default(),
+            |report| eprint!("{report}"),
         )
         .unwrap();
     let sizes = [0, 1, 64, 128, 1024, MAX];

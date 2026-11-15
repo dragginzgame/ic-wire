@@ -19,9 +19,11 @@ product scope and stricter safety constraints.
   Wire owns optional host schema integration; keep codec-only graphs small.
 - Preserve pre-allocation admission and typed malformed-input errors. Account for
   trusted custom Serde work and consumer-owned collection normalization explicitly.
-- Internal API redesign is investigable; this initialization does not authorize
-  byte, identity, acceptance, budget, persisted-state or upgrade changes. Record
-  old/new contracts and obtain the relevant migration decision before any cut.
+- The user authorized a hard cut: legacy API, wire, schema, acceptance and budget
+  compatibility are not requirements. Keep one current implementation without
+  versioned compatibility lanes. Record intentional contract changes and qualify
+  safety and cross-language behavior. Actual deployment and persisted-state
+  operations remain separately authorized actions.
 - Avoid new abstraction layers and per-type codec specialization without measured
   justification. Prioritize total uncompressed Wasm at opt-z; report opt-3 losses,
   IC instructions, allocation and payload bytes separately. Do not optimize gzip.

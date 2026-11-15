@@ -15,18 +15,18 @@ that arbitrary serialization code matches it.
 ## Admitted subset and compatibility
 
 Supported reference kinds are unit, bool, signed/unsigned integers, text, bytes,
-packed-i16, list, option, newtype, ref, record and enum. Field and variant order,
+finite float, packed-i16, packed integer/opaque words, list, array, tuple, result,
+option, newtype, ref, record and enum. Field and variant order,
 supplied names, numeric widths, bounds and enum IDs are retained. Imported names
 are not regenerated or renamed. TypeScript constraints are informational comments, not
 runtime enforcement. References render as names; shared graphs never expand into
 root-to-leaf paths. Options preserve `null | { readonly some: T }`.
 
 Unknown keys and unsupported shapes reject explicitly. This subset does not admit
-all reference scalar/collection kinds, custom runtime checks or the full reference
-Serde projection surface. Method identities and payload policies are supplied
+the full reference Serde projection surface. Scalar bounds and named custom
+runtime checks are supported. Method identities and payload policies are supplied
 through the separate generation APIs. It is an experimental
-API, not a replacement for the full reference host surface. No consumer source,
-wire acceptance, byte, identity or persistence migration is approved here.
+API for a hard cut, without a legacy compatibility requirement.
 
 The reviewed source is `crates/ic-wire/src/typescript/metadata/mod.rs` at
 `2dc434b10bec2fca92345d940dbfedc05993e9d5` in the read-only reference. Reuse is
@@ -84,12 +84,12 @@ does not become decoded-value aliasing. These cases use the same graph exporter
 and runtime harness as the representative record.
 
 Broad named-collection performance qualification, browser execution,
-advisory traversal and reference performance comparisons remain outstanding.
+and reference performance comparisons remain outstanding.
 No Wasm size or IC instruction improvement is claimed.
 
 ## Generated payload modules
 
-`payload_module(export, root, runtime_module, PayloadLimits)` renders an actual
+`payload_module(export, root, runtime_module, PayloadLimits, acknowledgements, diagnostics)` renders an actual
 typed client from the same graph. It admits an existing root and an independent
 codec export name, rejects names that collide with generated types or shadow
 `globalThis`, and requires explicit browser byte/node/depth allowances. Zero bytes
@@ -97,7 +97,7 @@ is valid for unit payloads; nodes/depth must be positive and all limits fit exac
 JavaScript integers. This does not infer browser policy from Rust allocation or
 claim equal traversal accounting.
 
-The imported runtime must export `schemaFormat = "ic-wire-json/1"` and
+The imported runtime must export `schemaFormat = "ic-wire-json"` and
 `createPayloadCodec(metadata, registry)`. That factory uses the reference JSON
 grammar and returns encode/decode functions. A mismatch throws before factory
 creation. The marker identifies an interface, not cryptographic supplier identity;
@@ -122,7 +122,7 @@ reuse contract are recorded in [browser runtime](browser-runtime.md).
 
 ## Generated method modules
 
-`method_module(&[Method], runtime_module)` emits request/response codecs using the
+`method_module(&[Method], runtime_module, acknowledgements, diagnostics)` emits request/response codecs using the
 same name/policy admission, runtime-format prelude, declarations, JSON export and
 bounded writer as payload modules. The supplied runtime exports `createCodec`.
 All methods share one private metadata registry; each exported frozen object has
@@ -152,8 +152,8 @@ of metadata, not another schema validator or serializer; the sealed graph remain
 rendering's sole authority. The representative payload client now uses this path,
 with its independently authored JSON retained as a qualification oracle.
 
-Supported derives are named/unit/newtype structs and ordinary enums
-with unit, single-value or named-field variants. Raw identifiers lose only the
+Supported derives are named/unit/newtype/tuple structs and ordinary enums
+with unit, single-value, tuple or named-field variants. Raw identifiers lose only the
 Rust `r#` syntax. The default crate path is `::ic_wire`; renamed dependencies use
 `#[wire(crate = "candidate")]`. Type parameters gain a Wire bound; lifetimes,
 const parameters, defaults and existing where clauses are preserved. Concrete
@@ -166,15 +166,19 @@ they do not change bytes. Version 0.23.6 also accepts symmetric
 generated JavaScript keys/tags while preserving Postcard field order and numeric
 variant indices. Projected name collisions reject at the existing graph boundary.
 Directional rename forms, rename_all, container renames, unnamed-field renames,
-other Serde attributes, unsupported Wire attributes,
-explicit enum discriminants, multi-field tuples and unions reject.
+other Serde attributes except the sealed standard `with = "serde_bytes"` and
+qualified `ic_wire::serde_packed::{bools,finite_f32,finite_f64,nonzero_i64,heap_u64}`
+field projections, unsupported Wire attributes, explicit enum discriminants and
+unions reject. Packed adapter paths follow the selected Wire dependency name.
 This conservative subset does not silently approximate rename/flatten/skip/tagged
 or custom serializer layouts. Serde remains the only payload implementation.
 
-Native trait implementations cover fixed-width integers, bool/unit, strings,
-Option, Box/references, ordinary Vec/List and explicit Bytes/Text/PackedI16 plus
-borrowed byte/text adapters. Ordinary Vec<u8> remains a list projection; it is not
-rewritten into a byte-buffer field. No Platform identity type is redefined.
+Native trait implementations cover fixed-width integers, finite float wrappers,
+bool/unit, strings/Cow text, Option/Result, tuples through arity four, fixed arrays,
+slices, Box/references, ordinary Vec/List, explicit Bytes/Text/PackedI16/Packed and
+published ByteBuf/ByteArray plus borrowed byte/text adapters. Ordinary Vec<u8>
+remains a list projection. The optional host-only `platform-types` feature adds
+Principal/Account projections without redefining supplier identities or Serde.
 
 SchemaContext bounds nested projection calls and active Rust type depth. Active
 recursive type labels reject in inline mode, and a failed nested call invalidates the context

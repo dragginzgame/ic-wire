@@ -18,7 +18,7 @@ workloads, phase boundaries and first results are recorded in
 [schema measurement](../docs/design/schema-measurement.md). The first run found
 small-registry regressions; it does not establish a candidate performance win.
 
-This independent, unpublished workspace compares candidate `ic-wire 0.23.7`
+This independent, unpublished workspace compares candidate `ic-wire 0.23.8`
 with crates.io `ic-wire =0.22.4`. It contains real integration tests; product
 packages do not depend on it. Run from the repository:
 
@@ -197,7 +197,7 @@ frozen codec object, keeps its parsed metadata private and checks `schemaFormat`
 before invoking the runtime factory. The test observes the actual supplied policy
 and rejects a deliberately incompatible runtime before its factory can execute.
 
-A test-only adapter exports `schemaFormat = "ic-wire-json/1"` alongside the
+A test-only adapter exports `schemaFormat = "ic-wire-json"` alongside the
 published 0.22.4 payload factory. This explicitly qualifies that interpreter for
 the tested metadata subset; the marker alone does not authenticate arbitrary
 runtime implementations. The published Cargo source pin supplies runtime identity.

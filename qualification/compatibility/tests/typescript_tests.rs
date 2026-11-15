@@ -1,9 +1,13 @@
 //! Candidate Rust exchange with candidate and published reference TypeScript runtimes.
 
+mod advice_cases;
 mod bulk_cases;
 mod consumer_cases;
+mod domain_cases;
 mod renamed_cases;
 mod scalar_cases;
+mod standard_cases;
+mod validation_cases;
 
 use candidate::typescript::{
     Method, PayloadLimits, RUNTIME_SCHEMA_FORMAT, SchemaLimits, SchemaRegistry, ValidatedRegistry,
@@ -198,11 +202,20 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
             "Record",
             "./runtime-adapter.ts",
             browser_limits,
+            &Default::default(),
+            |report| eprint!("{report}"),
         )
         .unwrap()
         .into();
     fixture["badModule"] = graph
-        .payload_module("recordCodec", "Record", "./bad-runtime.ts", browser_limits)
+        .payload_module(
+            "recordCodec",
+            "Record",
+            "./bad-runtime.ts",
+            browser_limits,
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
         .unwrap()
         .into();
     let framed_limits = PayloadLimits {
@@ -241,11 +254,21 @@ fn reference_typescript_exchanges_candidate_payloads_and_frames() {
     collection.register::<Shared>("Shared").unwrap();
     let collected = collection.finish().unwrap();
     fixture["frameModule"] = collected
-        .method_module(&methods, "./runtime-adapter.ts")
+        .method_module(
+            &methods,
+            "./runtime-adapter.ts",
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
         .unwrap()
         .into();
     fixture["badFrameModule"] = collected
-        .method_module(&methods, "./bad-runtime.ts")
+        .method_module(
+            &methods,
+            "./bad-runtime.ts",
+            &Default::default(),
+            |report| eprint!("{report}"),
+        )
         .unwrap()
         .into();
     let result = run_typescript(&fixture, include_str!("typescript_exchange.mjs"));
@@ -364,6 +387,13 @@ fn run_typescript_source(fixture: &Value, script: &str, source: &str, candidate:
         fs::write(directory.join("runtime-adapter.ts"), format!(
             "import {{createPayloadCodec as create, createCodec as frame}} from './codec-runtime.ts';\n{marker}\nexport let observed: unknown;\nexport const observedMethods: unknown[] = [];\nexport function createPayloadCodec(meta: unknown, types: unknown) {{ observed = structuredClone(meta); return create(meta, types); }}\nexport function createCodec(meta: unknown, types: unknown) {{ observedMethods.push(structuredClone(meta)); return frame(meta, types); }}\n"
         )).unwrap();
+        if let Some(adapter) = fixture["runtimeAdapter"].as_str() {
+            fs::write(
+                directory.join("runtime-adapter.ts"),
+                format!("{marker}\n{adapter}"),
+            )
+            .unwrap();
+        }
         fs::write(directory.join("bad-runtime.ts"), "export const schemaFormat = 'incompatible'; export function createPayloadCodec() { throw new Error('factory must not run'); } export const createCodec = createPayloadCodec;").unwrap();
         if candidate && std::env::var_os("IC_WIRE_CHECK_TYPESCRIPT").is_some() {
             check_typescript(&directory, fixture);

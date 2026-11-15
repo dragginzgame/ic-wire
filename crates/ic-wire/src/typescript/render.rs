@@ -2,7 +2,11 @@ use super::{
     GenerationError, Method, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT, ValidatedRegistry,
     identifier,
 };
-use alloc::{collections::BTreeSet, string::String};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    format,
+    string::String,
+};
 use core::fmt::{self, Write};
 
 // Check before extending the output, including escaped field names. Syntax
@@ -21,6 +25,18 @@ impl Write for Output {
 }
 
 impl Output {
+    fn scalar_bounds(&mut self, bounds: &super::ScalarBounds, json: bool) -> fmt::Result {
+        for (key, bound) in [("min", &bounds.min), ("max", &bounds.max)] {
+            if let Some(bound) = bound {
+                if json {
+                    write!(self, ",\"{key}\":{bound}")?;
+                } else {
+                    write!(self, "/* {key} {bound} */ ")?;
+                }
+            }
+        }
+        Ok(())
+    }
     fn quoted(&mut self, value: &str) -> fmt::Result {
         self.write_char('"')?;
         let mut start = 0;
@@ -69,17 +85,24 @@ impl ValidatedRegistry {
     /// unknown`, using the reference JSON grammar. Qualification uses both the
     /// candidate runtime and published Core 0.22.4's interpreter.
     /// Runtime code is not bundled, downloaded or selected by this function.
+    /// Bulk advice always runs for `/types/ROOT`. The required handler runs once
+    /// after successful rendering and linting, including a clean report. It should
+    /// display diagnostics in the consumer's build output or enforce `is_clean()`.
+    /// Acknowledgements never change generated source.
     ///
     /// # Errors
     /// Returns Schema for invalid names, missing roots, empty module specifiers
     /// or zero node/depth allowances; Complexity for unsafe JS integers or an
-    /// artifact exceeding the registry's output allowance.
+    /// artifact exceeding the registry's output allowance. Rooted advice can also
+    /// return the errors documented by [`Self::lint_bulk_roots`].
     pub fn payload_module(
         &self,
         export: &str,
         root: &str,
         runtime_module: &str,
         limits: PayloadLimits,
+        acknowledgements: &BTreeMap<String, String>,
+        diagnostics: impl FnOnce(super::BulkLintReport),
     ) -> Result<String, GenerationError> {
         self.admit_client(export, root, runtime_module, limits)?;
         let mut output = Output {
@@ -88,6 +111,14 @@ impl ValidatedRegistry {
         };
         self.render_payload_module(&mut output, export, root, runtime_module, limits)
             .map_err(|_| GenerationError::Complexity)?;
+        let report = self.lint_roots(
+            [Ok((
+                format!("/types/{}", super::advice::escape(root)),
+                self.root_index(root)?,
+            ))],
+            acknowledgements,
+        )?;
+        diagnostics(report);
         Ok(output.text)
     }
 
@@ -130,14 +161,19 @@ impl ValidatedRegistry {
     /// reference framed-codec interface. IDs are emitted as decimal strings,
     /// preserving all u64 values without JavaScript Number rounding. Duplicate
     /// IDs or exports reject before rendering. This emits no routing/execution.
+    /// Bulk advice always reviews each `/methods/EXPORT/request` and `/response`
+    /// independently. The required handler runs once on success, even when clean.
     ///
     /// # Errors
     /// Returns Schema for invalid names, roots, policies or duplicate IDs;
-    /// Complexity for unsafe header-inclusive byte allowances or excess output.
+    /// Complexity for unsafe header-inclusive byte allowances or excess output,
+    /// and the rooted-advice errors documented by [`Self::lint_bulk_roots`].
     pub fn method_module(
         &self,
         methods: &[Method<'_>],
         runtime_module: &str,
+        acknowledgements: &BTreeMap<String, String>,
+        diagnostics: impl FnOnce(super::BulkLintReport),
     ) -> Result<String, GenerationError> {
         if methods.is_empty() {
             return Err(GenerationError::Schema);
@@ -169,6 +205,19 @@ impl ValidatedRegistry {
         };
         self.render_methods(&mut output, methods, runtime_module)
             .map_err(|_| GenerationError::Complexity)?;
+        let roots = methods.iter().flat_map(|method| {
+            [("request", method.request), ("response", method.response)].map(|(direction, root)| {
+                Ok((
+                    format!(
+                        "/methods/{}/{direction}",
+                        super::advice::escape(method.export)
+                    ),
+                    self.root_index(root)?,
+                ))
+            })
+        });
+        let report = self.lint_roots(roots, acknowledgements)?;
+        diagnostics(report);
         Ok(output.text)
     }
 
@@ -297,6 +346,10 @@ impl ValidatedRegistry {
         match &self.nodes[id] {
             Node::Unit => output.quoted("unit")?,
             Node::Bool => output.quoted("bool")?,
+            Node::Float { bits } => {
+                output.quoted("float")?;
+                write!(output, ",\"bits\":{bits}")?;
+            }
             Node::Integer { bits, signed } => {
                 output.quoted(if *signed { "i" } else { "u" })?;
                 write!(output, ",\"bits\":{bits}")?;
@@ -314,11 +367,41 @@ impl ValidatedRegistry {
                 output.quoted("packed-i16")?;
                 output.json_bound("max", Some(*max))?;
             }
+            Node::Packed { word, nonzero } => {
+                output.quoted("packed")?;
+                output.write_str(",\"word\":")?;
+                output.quoted(word)?;
+                if *nonzero {
+                    output.write_str(",\"nonzero\":true")?;
+                }
+            }
             Node::List { item, max } => {
                 output.quoted("list")?;
                 output.json_bound("max", *max)?;
                 output.write_str(",\"item\":")?;
                 self.metadata_node(*item, output)?;
+            }
+            Node::Array { item, len } => {
+                output.quoted("array")?;
+                output.json_bound("max", Some(*len))?;
+                output.write_str(",\"item\":")?;
+                self.metadata_node(*item, output)?;
+            }
+            Node::Tuple(items) => {
+                output.write_str("\"tuple\",\"items\":[")?;
+                for (index, item) in items.iter().enumerate() {
+                    if index != 0 {
+                        output.write_char(',')?;
+                    }
+                    self.metadata_node(*item, output)?;
+                }
+                output.write_char(']')?;
+            }
+            Node::Result { ok, err } => {
+                output.write_str("\"result\",\"ok\":")?;
+                self.metadata_node(*ok, output)?;
+                output.write_str(",\"err\":")?;
+                self.metadata_node(*err, output)?;
             }
             Node::Option(item) | Node::Alias(item) => {
                 output.quoted(if matches!(self.nodes[id], Node::Option(_)) {
@@ -362,6 +445,15 @@ impl ValidatedRegistry {
                 output.write_char(']')?;
             }
         }
+        if let Some(annotation) = self.annotations.get(&id) {
+            if let Some(bounds) = &annotation.bounds {
+                output.scalar_bounds(bounds, true)?;
+            }
+            if let Some(check) = &annotation.check {
+                output.write_str(",\"check\":")?;
+                output.quoted(check)?;
+            }
+        }
         output.write_char('}')
     }
 
@@ -393,9 +485,32 @@ impl ValidatedRegistry {
     }
 
     fn render_node(&self, id: usize, output: &mut Output) -> fmt::Result {
+        if let Some(bounds) = self
+            .annotations
+            .get(&id)
+            .and_then(|annotation| annotation.bounds.as_ref())
+        {
+            output.scalar_bounds(bounds, false)?;
+        }
         match &self.nodes[id] {
             Node::Unit => output.write_str("null"),
             Node::Bool => output.write_str("boolean"),
+            Node::Packed { word, .. } => output.write_str(match *word {
+                "bool" => "globalThis.ReadonlyArray<boolean>",
+                "finite-f32" => "globalThis.Float32Array",
+                "finite-f64" => "globalThis.Float64Array",
+                "i8" => "globalThis.Int8Array",
+                "i16" => "globalThis.Int16Array",
+                "u16" => "globalThis.Uint16Array",
+                "i32" => "globalThis.Int32Array",
+                "u32" => "globalThis.Uint32Array",
+                "i64" => "globalThis.BigInt64Array",
+                "u64" => "globalThis.BigUint64Array",
+                _ => "globalThis.Uint8Array",
+            }),
+            Node::Float { bits } => {
+                write!(output, "/* f{bits} */ number")
+            }
             Node::Integer { bits, signed } => {
                 write!(
                     output,
@@ -425,6 +540,29 @@ impl ValidatedRegistry {
             Node::Option(item) => {
                 output.write_str("null | { readonly some: ")?;
                 self.render_node(*item, output)?;
+                output.write_str(" }")
+            }
+            Node::Array { item, len } => {
+                output.bounds(None, Some(*len))?;
+                output.write_str("globalThis.ReadonlyArray<")?;
+                self.render_node(*item, output)?;
+                output.write_char('>')
+            }
+            Node::Tuple(items) => {
+                output.write_str("readonly [")?;
+                for (index, item) in items.iter().enumerate() {
+                    if index != 0 {
+                        output.write_str(", ")?;
+                    }
+                    self.render_node(*item, output)?;
+                }
+                output.write_char(']')
+            }
+            Node::Result { ok, err } => {
+                output.write_str("{ readonly ok: ")?;
+                self.render_node(*ok, output)?;
+                output.write_str(" } | { readonly err: ")?;
+                self.render_node(*err, output)?;
                 output.write_str(" }")
             }
             Node::Alias(item) => self.render_node(*item, output),

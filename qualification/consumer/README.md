@@ -36,6 +36,14 @@ runs the clients against both TS runtimes and checks returned frames in Rust.
 Strict checking requires the private compiler installation described in the
 [parent README](../README.md). The generator itself needs neither npm nor Node.
 
+Generation always prints bulk-field diagnostics. The bounded ordinary `tags`
+list deliberately produces advice; qualification retains that control instead of
+silently converting it to packed words. Append `--deny-warnings` after the output
+directory to enforce review in CI: the command fails before creating artifacts.
+The library `clients(runtime, diagnostics)` requires a handler and reports the
+payload and method generations separately. Production users acknowledge exact
+paths with reasons through the Wire generation APIs, preserving field constraints.
+
 Native tests check independent literal frames, every truncation, wrong method and
 direction, oversized frames, trailing bytes and malformed boolean replies. Both
 supplier builds pass. Separate candidate/reference debug Wasm artifacts also run

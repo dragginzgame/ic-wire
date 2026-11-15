@@ -12,10 +12,12 @@ Their committed SHA-256 values are respectively
 `5b61334310fe72e15b3cf562909c62efa45a35bde5582331bf8a90abfab61835` and
 `8f56da054856e3ba877f046bb894d3fce2c703a0aebb2ec8745ef8dbbd13a091`.
 Retain the constructor/accessor/visitor contract and the minimal safe bulk
-serialization/decoding algorithm, under the root license. Do not import the
-generic Packed API, word trait hierarchy, metadata or per-type specialization.
-One implemented word representation does not require a generic abstraction;
-additional word types must share the bulk mechanism when a real caller arrives.
+serialization/decoding algorithm, under the root license. The initial slice did
+not import the generic API. The requested public-feature parity work in 0.23.8
+extends the same mechanism to `Packed<T>` for the reference's qualified integer
+and opaque-ID types. A sealed word contract supplies endian conversion and host
+metadata; bounded i16 uses the same visitor and serializer. No parallel codec or
+primitive Postcard specialization is introduced. See [parity](parity.md).
 
 ## Byte, identity and admission contract
 
