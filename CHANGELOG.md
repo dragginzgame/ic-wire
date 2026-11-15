@@ -16,6 +16,14 @@
 
 ### ✨ Added
 
+- Export bounded reference-format JSON from the admitted host graph. Qualify
+  representative payload/request/response byte exchange between candidate Rust
+  and the published reference TypeScript runtime, including selected-span custody,
+  truncation categories and byte-budget boundaries.
+- Add optional host-only metadata admission into an immutable typed registry and
+  bounded TypeScript declaration rendering. Validate references, alias cycles,
+  names and constraints once; retain productive recursion and shared references.
+  This initial subset does not yet generate a browser codec or collect Rust types.
 - Start the portable core with method-ID derivation and fixed request-header
   validation, preserving reference identities and typed rejection behavior.
   Add literal contract vectors and native/Wasm development checks.
@@ -31,3 +39,9 @@
 - Add explicit bounded packed i16 fields and a native representative record
   with ordinary-vector controls. Check little-endian bytes, element bounds,
   unaligned decoding, owned custody and bulk admission without unsafe code.
+- Add a separate native compatibility workspace against published ic-wire
+  0.22.4, with exhaustive short-primitive checks, representative budget sweeps,
+  frame mutations and output-custody comparisons.
+- Add isolated allocator qualification for preflight/output ordering, bounded
+  field rejection and borrowed decoding, with successful-allocation controls and
+  explicit coverage of incremental decoding and custom Serde allocations.

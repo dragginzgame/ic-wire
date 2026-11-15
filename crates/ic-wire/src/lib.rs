@@ -15,6 +15,10 @@ mod limits;
 mod meter;
 mod packed;
 
+/// Optional host-only schema admission and TypeScript declarations.
+#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
+pub mod typescript;
+
 pub use decode::decode;
 pub use encode::{encode, encode_into, encode_to_slice, encoded_len};
 pub use error::Error;

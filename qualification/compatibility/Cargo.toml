@@ -1,0 +1,42 @@
+[package]
+name = "ic-wire-compatibility"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+description = "Independent native compatibility qualification for the Wire evaluation"
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[features]
+typescript = ["candidate/typescript", "reference/typescript"]
+
+[dev-dependencies]
+candidate.workspace = true
+reference.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+stats_alloc.workspace = true
+toko-tooling.workspace = true
+
+[[test]]
+name = "compatibility"
+path = "tests/compatibility_tests.rs"
+
+[[test]]
+name = "allocation"
+path = "tests/allocation_tests.rs"
+harness = false
+
+[[test]]
+name = "typescript"
+path = "tests/typescript_tests.rs"
+required-features = ["typescript"]
+
+[lints]
+workspace = true

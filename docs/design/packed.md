@@ -50,6 +50,8 @@ this is not native big-endian target execution.
 The representative record includes enum/option, bounded bytes, packed i16 and
 ordinary bounded i16 controls. Freeze literal payload/request/response bytes and
 exercise owned/reused/slice outputs plus a borrowed-byte projection.
-Rust/TypeScript exchange, reference differential comparison, allocator
-instrumentation, native macOS execution and opt-z/opt-3 measurements remain
-pending. Native correctness and Wasm compilation are not a replacement decision.
+The [compatibility workspace](../../qualification/README.md) now compares this
+record's bytes and budget boundaries against the published reference.
+Its isolated allocation checks also cover refused and successful packed decoding.
+Rust/TypeScript exchange, native macOS execution and opt-z/opt-3 measurements
+remain pending. Native correctness and Wasm compilation are not a replacement decision.

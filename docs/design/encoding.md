@@ -42,5 +42,6 @@ No prepared-encoding token, new sink abstraction, scratch callback, executor,
 schema graph or new codec is introduced. Tests use independent literal payload
 and frame vectors plus exact and insufficient allowances, unchanged short
 buffers, cleared reused output, and deliberately inconsistent serializers.
-Allocator instrumentation and full reference differential qualification remain
-pending; capacity observations alone do not prove process-wide allocation bounds.
+The [qualification workspace](../../qualification/README.md) now checks selected
+allocation ordering and reference comparisons. These focused cases do not prove
+universal compatibility or process-wide allocation bounds.

@@ -45,5 +45,6 @@ constructor ownership, excess-element decoder suppression, and a record with
 bounded bytes/text/list and an enum/option through every encoding destination.
 The subsequent packed-field tests cover the full native record shape; Rust/TS
 exchange remains pending.
-Allocation instrumentation, reference differential comparison and opt-z/opt-3
-measurements remain pending; this is not completed replacement qualification.
+Selected allocation and reference differential checks now pass in the
+[qualification workspace](../../qualification/README.md). Opt-z/opt-3 measurements
+and full replacement qualification remain pending.

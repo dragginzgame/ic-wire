@@ -70,7 +70,8 @@ decision. No complexity or performance improvement is claimed for this reuse.
 Qualification uses literal payload/frame cases, exact and insufficient allowances,
 borrowed-pointer checks, malformed/trailing intersections and zero-sized sequence
 visits. Native and Wasm compilation are separate from runtime/performance proof.
-Full differential and allocator-instrumented qualification remain pending.
+Selected differential and allocator-instrumented checks are recorded in the
+[qualification workspace](../../qualification/README.md); full coverage remains open.
 
 All selected registry package versions and checksums (excluding the independently
 selected Toko Tooling) match the reference lockfile. The Wasm graph contains no
@@ -82,6 +83,7 @@ run on the host; Wasm target compilation passes but is not a size measurement.
 
 Bounded byte/text/list adapters now have a [field contract](fields.md) and a
 record-level literal test. The [packed-field workload](packed.md) now covers the
-native representative record. Next: independent reference comparison,
-allocation instrumentation and Rust/TS exchange. The codec increments do
+native representative record. The [compatibility workspace](../../qualification/README.md)
+now compares selected byte, admission and custody contracts against the reference.
+Selected allocation checks now pass; Rust/TS exchange remains pending. The codec increments do
 not qualify the complete architecture or all custom Serde behavior.

@@ -33,15 +33,26 @@ see the [output custody contract](docs/design/encoding.md). Bounded byte, text,
 ordinary-list and borrowed adapters are implemented and exercised in a literal
 record round trip; see [field contracts](docs/design/fields.md). The explicit
 [`PackedI16` field](docs/design/packed.md) completes the native representative
-record with an ordinary-list control. Host schema generation and Rust/TypeScript
-exchange remain unimplemented; the vertical slice is not yet qualified end to end.
+record with an ordinary-list control. Optional host [schema admission and declaration
+rendering](docs/design/schema.md) now import a defined JSON metadata subset into
+one immutable typed graph. Its bounded metadata export now feeds the published
+reference TypeScript runtime in a focused bidirectional byte-exchange test.
+Rust metadata collection and a candidate browser runtime remain unimplemented;
+the full vertical slice is not yet qualified end to end.
+
+The separate [compatibility workspace](qualification/README.md) compares the
+candidate against published `ic-wire 0.22.4`, whose library source was verified
+against the pinned revision. It exercises bytes, acceptance, budget boundaries
+and output custody without introducing the reference into product dependencies.
+Its isolated allocation executable checks selected preflight, output and field
+admission boundaries, including positive controls and trusted-Serde limitations.
 
 ## Rust and tooling setup
 
 The root is a virtual Cargo workspace pinned to Rust 1.100.0, including rustfmt,
 Clippy and `wasm32-unknown-unknown`, with the real product package at
-`crates/ic-wire`. Create the separate `qualification/` workspace only when a real
-qualification package exists. No placeholder packages are present.
+`crates/ic-wire`. The separate `qualification/` workspace contains the unpublished
+`ic-wire-compatibility 0.1.0` test package. No placeholder packages are present.
 
 Toko Tooling 0.44.3 is installed from its published crate through its authenticated
 snapshot exporter. The archive SHA-256 is
@@ -60,6 +71,15 @@ make test
 make lint
 make doc
 make check-wasm
+make test-compatibility
+make test-allocation
+make lint-compatibility
+make test-host             # Focused host schema contracts
+make lint-host
+make doc-host
+make check-wasm-host       # TypeScript feature forwarding on Wasm
+make test-typescript       # Candidate Rust ↔ reference TS; explicit Node prerequisite
+make lint-typescript
 make fmt-check
 ```
 
@@ -72,7 +92,8 @@ Cargo.lock now selects the inherited `toko-tooling = "=0.44.3"` dev-dependency.
 `make toko-tooling-check` verifies package selection, lock and installed bytes.
 Every new member must inherit the tooling dev-dependency and workspace lints,
 use the cargo-machete tooling exemption, and remain unpublished during evaluation.
-Apply the same selection contract independently when qualification is created.
+`make qualification-tooling-check` admits the qualification selection against
+the same verified snapshot; compatibility checks run this automatically.
 Reviewed tooling updates use `make toko-tooling-preview` and
 `make toko-tooling-update` after explicitly updating the Cargo selection.
 
