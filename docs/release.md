@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.24.1** for
+The repository's product manifests and finalized changelog select **0.24.2** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
@@ -51,6 +51,18 @@ rewritten `.js` imports, then executes the local fixture in the selected browser
 Its headless invocation disables Chromium's sandbox for this controlled test;
 that is not an application deployment recommendation. It covers literal frames,
 BigInt, UTF-8, typed arrays, selected spans, ownership, limits and malformed input.
+
+## Recorded 0.24.2 preparation evidence
+
+The 16 November 2026 release checks passed native codec, host/derive and private
+qualification tests, strict TypeScript exchange, Clippy, Rustdoc and portable
+Wasm execution. Extracted archives passed all-feature tests and Platform Types
+0.21.1 identity/Serde consumers. Generated clients passed Chromium 156.0.8078.4.
+The migrated Runtime 0.23.11 raw query passed PocketIC 16.1.0 at opt-z and opt-3,
+including nonempty-input rejection and subsequent independent literal frames.
+Local evidence is retained under `target/package-check/run-42yPsI/` and
+`qualification/target/ic-counter-EV9ey3/`. These passes do not establish macOS
+or hosted workflow success, performance improvements or consumer rollout.
 
 ## Recorded 0.24.1 preparation evidence
 

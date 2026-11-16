@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.1**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.2**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -45,13 +45,25 @@ locked dependencies before using the offline checks:
 rustup show
 cargo fetch --locked
 cargo fetch --locked --manifest-path qualification/Cargo.toml
-make toko-tooling-check
+cargo fetch --locked --manifest-path qualification/ic-instructions/Cargo.toml
+make instruction-tooling-check
+make install-tools
+make install-hooks
 ```
 
 `rust-toolchain.toml` includes rustfmt, Clippy and `wasm32-unknown-unknown`.
 `make install-tools` explicitly installs the reviewed common host/Rust tools;
 `make tools-check` checks them offline. Make configures their PATH. For direct
 interactive use, add `.tools/host/bin` and `.tools/rust/common/bin` to PATH.
+
+Run `make install-hooks` once per clone, including existing clones after this
+setup update. It sets repository-local `core.hooksPath` to
+`vendor/toko-tooling/.githooks`; it refuses to replace conflicting hooks.
+The shared pre-commit hook formats the staged selection in isolation, rejects
+partially staged files, and preserves unrelated working edits. It never installs
+tools. `make check-formatting-hooks` qualifies that behavior against Wire's
+manifests and formatting inputs. Both `make fmt` and `make fmt-check` cover all
+three maintained workspaces.
 
 Choose checks for the affected contract; these commands are not a mandatory
 sequence:
@@ -67,6 +79,7 @@ sequence:
 | Standalone Rust consumer | `make test-consumer` |
 | Standalone Wasm execution | `make check-consumer-wasm` |
 | TypeScript feature forwarded to Wasm | `make check-wasm-host` |
+| Native instruction driver, without PocketIC | `make lint-instructions`, `make doc-instructions` |
 
 TypeScript exchange requires Node supporting `--experimental-transform-types`.
 Strict checking additionally requires the private pinned compiler:
@@ -85,11 +98,12 @@ measurement commands; see [qualification](qualification/README.md) for their
 prerequisites and evidence limits. IC measurements additionally require fetching
 `qualification/ic-instructions/Cargo.toml` and explicitly selecting PocketIC.
 
-Toko Tooling **0.44.4** is installed through its authenticated published exporter.
+Toko Tooling **0.44.6** is installed through its authenticated published exporter.
 `.toko-tooling.snapshot` records source identity and owned bytes.
 `make snapshot-check` verifies only installed bytes; `make toko-tooling-check`
 also admits product declarations and Cargo.lock. `make qualification-tooling-check`
-checks the parent qualification selection against the same snapshot.
+checks the parent qualification selection against the same snapshot;
+`make instruction-tooling-check` additionally admits the native driver workspace.
 
 `make deps-list` and `make deps-update` include all three maintained workspaces by
 default. Updates accept `DEPENDENCY_PACKAGE` and, with it, `DEPENDENCY_PRECISE`;
@@ -99,7 +113,18 @@ limited to the coordinated Wire derive/runtime pair and the Toko Tooling snapsho
 are recorded in the local overlay. Lockfiles keep ordinary checks reproducible.
 Reviewed tooling updates use `make toko-tooling-preview` and
 `make toko-tooling-update` after updating the Cargo selection. No automatic
-release runner, CI workflows or Git hooks are installed by this repository setup.
+release runner is installed.
+
+The checked-in [CI workflow](.github/workflows/ci.yml) runs on pull requests,
+pushes to `main` and manual dispatch. Linux and macOS run tooling admission,
+non-mutating formatting, hook qualification, strict Rust checks and native product
+contracts. Linux also checks the simulator driver without launching PocketIC,
+executes the standalone Wasm consumer, and checks generated TypeScript with Node
+24.21.0 and the locked compiler. A separate Linux job scans full Git history once
+per workflow run with the snapshot-pinned Gitleaks. Failed setup and formatting
+evidence is retained. Hosted results are asynchronous evidence; local passes do
+not establish macOS or hosted success. Simulator measurements, browser provisioning,
+publication and deployment remain separately selected operations.
 
 ## Design and evidence
 

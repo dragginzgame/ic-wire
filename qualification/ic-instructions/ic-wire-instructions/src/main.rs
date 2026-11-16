@@ -58,6 +58,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let canister = pic.create_canister().await;
             pic.add_cycles(canister, 100_000_000_000_000).await;
             pic.install_canister(canister, wasm, vec![], None).await;
+            if pic.query_call(canister, CanisterId::anonymous(), "measure", vec![1]).await.is_ok() {
+                return Err("counter admitted nonempty arguments".into());
+            }
             let mut samples = Vec::new();
             for _ in 0..3 {
                 caller += 1;

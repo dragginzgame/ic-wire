@@ -1,4 +1,4 @@
-//! Projection of published Platform Types 0.20.4, which owns identity and Serde.
+//! Projection of published Platform Types 0.21.1, which owns identity and Serde.
 use super::{GenerationError, SchemaContext, Wire};
 use serde_json::{Value, json};
 

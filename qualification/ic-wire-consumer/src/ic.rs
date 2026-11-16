@@ -1,36 +1,20 @@
 //! Private IC counter wrapper; SDK is confined to this optional qualification guest.
 #[cfg(target_family = "wasm")]
 mod guest {
-    use ic_platform_runtime::{cdk, ic0};
+    use ic_platform_runtime::raw;
     use ic_wire_consumer::{
         Receipt, decode_receipt, decode_upload, encode_receipt, encode_upload, sample_upload,
     };
     use std::hint::black_box;
     const REPETITIONS: usize = 8;
-    fn guard() -> Result<(), String> {
-        if ic0::msg_arg_data_size() == 0 {
-            Ok(())
-        } else {
-            Err("expected empty counter request".into())
+    // Rust 2024 requires an unsafe attribute for this fixed IC ABI export.
+    // All memory and system-call operations remain in published Runtime.
+    #[expect(unsafe_code, reason = "Fixed no-argument IC query export")]
+    #[unsafe(export_name = "canister_query measure")]
+    extern "C" fn measure() {
+        if raw::msg_arg_data_size() != 0 {
+            raw::trap(b"expected empty counter request");
         }
-    }
-    #[expect(
-        clippy::needless_pass_by_value,
-        reason = "The runtime decode hook transfers ownership of the argument buffer"
-    )]
-    fn decode(bytes: Vec<u8>) {
-        assert!(bytes.is_empty());
-    }
-    fn encode(bytes: Vec<u8>) -> Vec<u8> {
-        bytes
-    }
-    #[cdk::query(
-        name = "measure",
-        guard = "guard",
-        decode_with = "decode",
-        encode_with = "encode"
-    )]
-    fn measure() -> Vec<u8> {
         let request = sample_upload().unwrap();
         let receipt = Receipt {
             revision: 129,
@@ -70,15 +54,16 @@ mod guest {
                 _ => unreachable!(),
             };
             run();
-            let start = ic0::performance_counter(0);
+            let start = raw::instruction_counter();
             for _ in 0..REPETITIONS {
                 run();
             }
-            *count = ic0::performance_counter(0) - start;
+            *count = raw::instruction_counter() - start;
         }
         let mut reply: Vec<u8> = counts.into_iter().flat_map(u64::to_le_bytes).collect();
         reply.extend(request_bytes);
         reply.extend(receipt_bytes);
-        reply
+        raw::msg_reply_data_append(&reply);
+        raw::msg_reply();
     }
 }

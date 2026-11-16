@@ -24,7 +24,7 @@ schema = ["wire/derive"]
 ic = ["dep:ic-platform-runtime"]
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-ic-platform-runtime = { workspace = true, optional = true, features = ["cdk"] }
+ic-platform-runtime = { workspace = true, optional = true, features = ["system-raw"] }
 
 [dependencies]
 serde.workspace = true

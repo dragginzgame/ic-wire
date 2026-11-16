@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.24.2] - 2026-11-16
+
+### 🔧 Dependencies
+
+- Adopt published Platform Types 0.21.1 and Runtime 0.23.11. Migrate the private
+  counter query to explicit Runtime admission and encoding; retain the raw reply
+  protocol and zero-argument guard. Types owns the exact thiserror 2.0.18 selection.
+
+### 🛠️ Maintenance
+
+- Wire the shared formatting hook and Linux/macOS CI to the existing product,
+  Wasm and TypeScript checks, with once-per-run secret scanning and explicit
+  native-driver checks that do not start a simulator
+  ([#2](https://github.com/dragginzgame/ic-wire/issues/2)).
+- Adopt the verified Toko Tooling 0.44.6 snapshot and exact selection in all
+  three workspaces, including its clarified asynchronous hosted-CI policy.
+  Preserve unrelated dependency versions.
+
 ## [0.24.1] - 2026-11-15
 
 ### ▶️ Try it

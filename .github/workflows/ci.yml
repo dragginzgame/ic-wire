@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+
+jobs:
+  lint-and-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare pinned CI tools
+        run: |
+          for tool in actionlint shellcheck gitleaks; do
+            bash vendor/toko-tooling/scripts/ci/install-ci-tool.sh "$tool" \
+              --install-dir "$RUNNER_TEMP/wire-ci-bin"
+          done
+          echo "$RUNNER_TEMP/wire-ci-bin" >> "$GITHUB_PATH"
+      - name: Check workflow and hook caller
+        run: |
+          actionlint .github/workflows/ci.yml
+          shellcheck scripts/ci/check-formatting-hooks.sh
+      - name: Scan complete repository history once
+        run: gitleaks git --redact=100 --no-banner --no-color --log-level error
+
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare pinned host tools
+        run: |
+          make install-host-tools host-tools-check 2>&1 | tee "$RUNNER_TEMP/host-tools-setup.log"
+          echo "$GITHUB_WORKSPACE/.tools/host/bin" >> "$GITHUB_PATH"
+      - name: Prepare declared Rust compiler and targets
+        run: |
+          bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh \
+            --toolchain-file rust-toolchain.toml 2>&1 | tee "$RUNNER_TEMP/rust-tools-toolchain.log"
+      - name: Prepare and admit pinned Rust tools
+        run: make install-rust-tools rust-tools-check 2>&1 | tee "$RUNNER_TEMP/rust-tools-setup.log"
+      - name: Fetch locked dependencies for all maintained workspaces
+        run: |
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qualification/Cargo.toml
+          cargo fetch --locked --manifest-path qualification/ic-instructions/Cargo.toml
+      - name: Admit snapshots, pins and formatting
+        run: make instruction-tooling-check fmt-check
+      - name: Qualify shared formatting hook against Wire inputs
+        env:
+          TMPDIR: ${{ runner.temp }}/portable-fixtures
+        run: |
+          mkdir -p "$TMPDIR"
+          make check-formatting-hooks
+      - name: Check portable codec, host schemas and derive diagnostics
+        run: |
+          make lint lint-host lint-compatibility doc doc-host
+          cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked --offline -- -D warnings
+          make test test-host test-compatibility
+          cargo test -p ic-wire --features derive --test derive_tests --locked --offline
+      - name: Check native instruction driver without a simulator
+        if: runner.os == 'Linux'
+        run: make lint-instructions doc-instructions
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        if: runner.os == 'Linux'
+        with:
+          node-version: '24.21.0'
+      - name: Prepare locked TypeScript compiler
+        if: runner.os == 'Linux'
+        run: npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund
+      - name: Check strict generated clients and Rust/TypeScript exchange
+        if: runner.os == 'Linux'
+        run: make lint-typescript check-typescript
+      - name: Check portable Wasm and execute standalone consumer
+        if: runner.os == 'Linux'
+        run: |
+          make check-wasm check-wasm-host check-consumer-wasm
+          cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
+            --features ic --example instruction-counter --target wasm32-unknown-unknown \
+            --locked --offline -- -D warnings
+      - name: Retain failed setup and formatting evidence
+        if: failure()
+        uses: ./vendor/toko-tooling/.github/actions/retain-failure-evidence
+        with:
+          name: wire-${{ matrix.os }}-${{ github.run_attempt }}
+          temp-root: ${{ runner.temp }}
+          repository-root: ${{ github.workspace }}
+          compact-successful-tools: 'true'

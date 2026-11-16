@@ -8,15 +8,18 @@ It creates/funds/installs two disposable canisters, queries each with distinct
 callers, then stops/deletes them and closes the owned instance/server.
 
 The separate workspace has a [scoped adoption exception](../../AGENTS.md#scoped-instruction-workspace-exception).
-PocketIC 16.1.0 pins thiserror 2.0.18, whereas the codec workspace selects 2.0.21.
+PocketIC 16.1.0 pins thiserror 2.0.18. Platform Types 0.21.1 now independently
+requires that same version; the following probe records the earlier graph.
 A 15 November 2026 resolver probe merged the real driver into a scratch parent
 workspace: it resolved successfully, but downgraded the codec's thiserror and
 thiserror-impl to 2.0.18. Isolation keeps that native constraint out of codec
 dependency maintenance. Revisit the exception when the selected Testkit/PocketIC
 stack relaxes it. The guest is built from the parent qualification workspace,
 not this host lock. No native simulator, Candid or SDK
-is added to product Wire. The optional guest SDK is Platform Runtime 0.22.5;
-its safe macros provide the IC export while this repository forbids unsafe code.
+is added to product Wire. The optional guest SDK is Platform Runtime 0.23.11;
+its dependency-free `system-raw` feature supplies the IC operations. The private
+guest owns one fixed query export with a narrowly expected Rust 2024 unsafe
+attribute; product Wire continues to forbid unsafe code.
 
 From the repository root, explicitly select a prepared server:
 
@@ -28,7 +31,7 @@ The command never downloads a server. It uses offline locked Cargo dependencies,
 creates fresh per-profile guest targets and retains instructions.json,
 compiler identity and the exact measured artifacts under qualification/target.
 The report contains current measurements without a historical comparison gate.
-Counter intervals include result destruction and loop overhead; setup and SDK
+Counter intervals include result destruction and loop overhead; setup and raw
 reply wrapping are outside them. Loop control is reported, not subtracted.
 
 The [measurement contract](../../docs/design/performance.md) records operations

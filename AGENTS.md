@@ -33,7 +33,7 @@ product scope and stricter safety constraints.
   packages in a separate qualification/ workspace. Add no placeholder packages.
   Candid is an optional research comparator in private dev-only qualification.
   Use published Host, Build and Testkit for their owned native responsibilities.
-- Tooling is installed through the authenticated Toko Tooling 0.44.4 exporter;
+- Tooling is installed through the authenticated Toko Tooling 0.44.6 exporter;
   `.toko-tooling.snapshot` records its source and owned bytes. Detailed reference
   policy remains pinned at revision 626da7cd9626cc2e152594862a2d82ea82ef51da;
   do not follow a moving sibling baseline. The compiler is Rust 1.100.0.
@@ -55,10 +55,10 @@ Review future lock updates as dependency changes, not automatic new benchmark pr
 
 Retained exact requirements have these specific owners and reasons:
 
-- Root `Cargo.toml`: `ic-wire-derive =0.24.1` is coupled to the product runtime's
+- Root `Cargo.toml`: `ic-wire-derive =0.24.2` is coupled to the product runtime's
   generated metadata API, including its private macro support. Update the pair
   together and qualify derived consumers and archives.
-- All three workspace catalogs: `toko-tooling =0.44.4` is the required exact
+- All three workspace catalogs: `toko-tooling =0.44.6` is the required exact
   source-bundle selection. Change it only with the authenticated snapshot update
   and admission procedure above.
 
@@ -92,3 +92,15 @@ qualification workspace and no native dependency enters product Wire.
 Revisit this exception when a selected Testkit/PocketIC update removes or relaxes
 the exact constraint. Consolidate only after a resolver probe preserves the
 independently selected codec suppliers and focused driver/consumer checks pass.
+
+## Platform 0.21 adoption
+
+Platform Types 0.21.1 independently requires thiserror =2.0.18, so the product
+and parent qualification locks now select that version too. The isolation probe
+above is historical; keep the native simulator graph separately owned while
+its exact constraint remains. Generic-array 0.14.7 remains in the native lock.
+
+The parent qualification workspace denies unsafe code, permitting only the
+explicitly expected Rust 2024 export attribute on the private synchronous
+instruction query. Runtime system-raw owns system calls; no unsafe block or
+executor is added here. Product workspaces continue to forbid unsafe code.

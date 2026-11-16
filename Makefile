@@ -11,6 +11,8 @@ help:
 	@printf '%s\n' \
 	  'install-tools         Install the reviewed common host and Rust tools' \
 	  'tools-check           Check installed tools offline' \
+	  'install-hooks         Activate the shared formatting hook in this clone' \
+	  'check-formatting-hooks Qualify the hook against Wire formatting inputs' \
 	  'snapshot-check        Verify installed snapshot bytes offline' \
 	  'deps-list             List workspace package versions offline' \
 	  'deps-update           Run cargo update -v for maintained workspaces' \
@@ -32,6 +34,8 @@ help:
 	  'check-consumer-wasm   Build/run the current Wasm consumer (Node required)' \
 	  'measure-consumer-wasm Measure current opt-z/opt-3 consumer Wasm sizes' \
 	  'measure-consumer-ic   Installed counters (explicit POCKET_IC_BIN required)' \
+	  'lint-instructions    Lint the native driver without starting PocketIC' \
+	  'doc-instructions     Check native driver Rustdoc without starting PocketIC' \
 	  'test-derive           Check strict derive rejection and typed projection' \
 	  'lint-derive           Lint the derive implementation and contract tests' \
 	  'lint-compatibility    Aggregate qualification Clippy (default features)' \
@@ -61,6 +65,21 @@ qualification-tooling-check: toko-tooling-check
 	+@root_selection="$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)")" && \
 	  qualification_selection="$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)/qualification")" && \
 	  test "$$root_selection" = "$$qualification_selection"
+
+.PHONY: instruction-tooling-check lint-instructions doc-instructions check-formatting-hooks
+instruction-tooling-check: qualification-tooling-check
+	+@native_selection="$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)/qualification/ic-instructions")" && test "$$native_selection" = "$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)")"
+
+lint-instructions doc-instructions: instruction-tooling-check | toko-execution-check
+
+lint-instructions:
+	+cargo clippy --manifest-path qualification/ic-instructions/Cargo.toml --all-targets --locked --offline -- -D warnings
+
+doc-instructions:
+	+RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path qualification/ic-instructions/Cargo.toml --no-deps --locked --offline
+
+check-formatting-hooks: instruction-tooling-check format-tools-check | toko-execution-check
+	+bash scripts/ci/check-formatting-hooks.sh
 
 test-compatibility test-allocation lint-compatibility: qualification-tooling-check | toko-execution-check
 
@@ -108,8 +127,7 @@ measure-consumer-wasm: qualification-tooling-check | toko-execution-check
 	node qualification/ic-wire-consumer/measure-wasm.mjs
 
 .PHONY: measure-consumer-ic
-measure-consumer-ic: qualification-tooling-check | toko-execution-check
-	@native_selection="$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)/qualification/ic-instructions")" && test "$$native_selection" = "$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)")"
+measure-consumer-ic: instruction-tooling-check | toko-execution-check
 	bash qualification/ic-instructions/run.sh
 
 test-consumer:
