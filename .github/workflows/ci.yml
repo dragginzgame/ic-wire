@@ -29,7 +29,7 @@ jobs:
       - name: Prepare pinned CI tools
         run: |
           for tool in actionlint shellcheck gitleaks; do
-            bash vendor/toko-tooling/scripts/ci/install-ci-tool.sh "$tool" \
+            perl scripts/ci/setup-diagnostics.pl "install-$tool" bash vendor/toko-tooling/scripts/ci/install-ci-tool.sh "$tool" \
               --install-dir "$RUNNER_TEMP/wire-ci-bin"
           done
           echo "$RUNNER_TEMP/wire-ci-bin" >> "$GITHUB_PATH"
@@ -39,6 +39,14 @@ jobs:
           shellcheck scripts/ci/check-formatting-hooks.sh
       - name: Scan complete repository history once
         run: gitleaks git --redact=100 --no-banner --no-color --log-level error
+      - name: Retain sanitized setup diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: wire-security-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wire-diagnostics/*.txt
+          retention-days: 7
+          if-no-files-found: warn
 
   native:
     strategy:
@@ -53,27 +61,26 @@ jobs:
           persist-credentials: false
       - name: Prepare pinned host tools
         run: |
-          make install-host-tools host-tools-check 2>&1 | tee "$RUNNER_TEMP/host-tools-setup.log"
+          perl scripts/ci/setup-diagnostics.pl host-tools make install-host-tools host-tools-check
           echo "$GITHUB_WORKSPACE/.tools/host/bin" >> "$GITHUB_PATH"
       - name: Prepare declared Rust compiler and targets
         run: |
-          bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh \
-            --toolchain-file rust-toolchain.toml 2>&1 | tee "$RUNNER_TEMP/rust-tools-toolchain.log"
+          perl scripts/ci/setup-diagnostics.pl rust-toolchain bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh \
+            --toolchain-file rust-toolchain.toml
       - name: Prepare and admit pinned Rust tools
-        run: make install-rust-tools rust-tools-check 2>&1 | tee "$RUNNER_TEMP/rust-tools-setup.log"
+        run: perl scripts/ci/setup-diagnostics.pl rust-tools make install-rust-tools rust-tools-check
       - name: Fetch locked dependencies for all maintained workspaces
         run: |
-          cargo fetch --locked
-          cargo fetch --locked --manifest-path qualification/Cargo.toml
-          cargo fetch --locked --manifest-path qualification/ic-instructions/Cargo.toml
+          perl scripts/ci/setup-diagnostics.pl fetch-product cargo fetch --locked
+          perl scripts/ci/setup-diagnostics.pl fetch-qualification cargo fetch --locked --manifest-path qualification/Cargo.toml
       - name: Admit snapshots, pins and formatting
-        run: make instruction-tooling-check fmt-check
+        run: make qualification-tooling-check fmt-check
       - name: Qualify shared formatting hook against Wire inputs
         env:
           TMPDIR: ${{ runner.temp }}/portable-fixtures
         run: |
           mkdir -p "$TMPDIR"
-          make check-formatting-hooks
+          perl scripts/ci/setup-diagnostics.pl formatting-hook make check-formatting-hooks
       - name: Check portable codec, host schemas and derive diagnostics
         run: |
           make lint lint-host lint-compatibility doc doc-host
@@ -89,7 +96,7 @@ jobs:
           node-version: '24.21.0'
       - name: Prepare locked TypeScript compiler
         if: runner.os == 'Linux'
-        run: npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund
+        run: perl scripts/ci/setup-diagnostics.pl typescript npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund
       - name: Check strict generated clients and Rust/TypeScript exchange
         if: runner.os == 'Linux'
         run: make lint-typescript check-typescript
@@ -100,11 +107,11 @@ jobs:
           cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
             --features ic --example instruction-counter --target wasm32-unknown-unknown \
             --locked --offline -- -D warnings
-      - name: Retain failed setup and formatting evidence
+      - name: Retain sanitized setup diagnostics
         if: failure()
-        uses: ./vendor/toko-tooling/.github/actions/retain-failure-evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wire-${{ matrix.os }}-${{ github.run_attempt }}
-          temp-root: ${{ runner.temp }}
-          repository-root: ${{ github.workspace }}
-          compact-successful-tools: 'true'
+          path: ${{ runner.temp }}/wire-diagnostics/*.txt
+          retention-days: 7
+          if-no-files-found: warn

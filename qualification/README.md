@@ -8,7 +8,7 @@ current Rust and TypeScript implementations, with no older Wire dependency.
 | --- | --- |
 | `ic-wire-compatibility/` | Native, allocation and Rust/TypeScript contract tests |
 | `ic-wire-consumer/` | Standalone upload workload and client generator |
-| `ic-instructions/ic-wire-instructions/` | Native instruction measurement driver in its isolated workspace |
+| `ic-wire-instructions/` | Native instruction measurement driver |
 | `typescript/` | Private compiler dependency for strict generated-client checks |
 | `browser/` | Explicit Chromium smoke fixture |
 
@@ -37,13 +37,14 @@ boundaries and malformed-input precedence.
 
 The [standalone consumer](ic-wire-consumer/README.md) checks a bounded upload contract
 against literal frames. Its native and SDK-free Wasm workload uses only the
-current codec. Optional installed measurements use an
-[isolated native driver](ic-instructions/README.md).
+current codec. Optional installed measurements use a
+[native driver](ic-wire-instructions/README.md).
 
-`make test-compatibility` and `make lint-compatibility` are aggregate checks of
-this workspace with default features. They do not enable TypeScript or start a
-simulator. The root Makefile admits the tooling snapshot and includes all three
-workspaces in formatting/dependency commands. Each owns a lockfile and lint policy.
+`make test-compatibility` and `make lint-compatibility` select the contract-test
+and standalone-consumer packages with default features. They do not enable
+TypeScript or start a simulator. The root Makefile admits the tooling snapshot and includes both
+workspaces in formatting/dependency commands. All three qualification packages
+share this workspace’s catalog, lockfile, profiles and common lint policy.
 
 ## Allocation qualification
 

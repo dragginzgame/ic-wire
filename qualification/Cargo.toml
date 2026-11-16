@@ -1,6 +1,5 @@
 [workspace]
-members = ["ic-wire-compatibility", "ic-wire-consumer"]
-exclude = ["ic-instructions"]
+members = ["ic-wire-compatibility", "ic-wire-consumer", "ic-wire-instructions"]
 resolver = "3"
 
 [workspace.package]
@@ -9,14 +8,17 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
-ic-platform-runtime = { version = "0.23.11", default-features = false }
-ic-platform-types = { version = "0.21.1", default-features = false }
+ic-platform-runtime = { version = "0.23.14", default-features = false }
+ic-platform-types = { version = "0.21.2", default-features = false }
+ic-testkit = { version = "0.107.3", default-features = false }
 ic-wire-consumer = { path = "ic-wire-consumer", default-features = false }
 serde = { version = "1.0.229", default-features = false, features = ["alloc", "derive"] }
 serde_bytes = { version = "0.11.19", default-features = false, features = ["alloc"] }
 serde_json = { version = "1.0.154", default-features = false, features = ["alloc"] }
+sha2 = "0.11.1"
 stats_alloc = "0.1.10"
-toko-tooling = "=0.44.6"
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread"] }
+toko-tooling = "=0.44.11"
 wire = { package = "ic-wire", path = "../crates/ic-wire" }
 
 [workspace.lints.cargo]

@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.24.2** for
+The repository's product manifests and finalized changelog select **0.24.3** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
@@ -51,6 +51,15 @@ rewritten `.js` imports, then executes the local fixture in the selected browser
 Its headless invocation disables Chromium's sandbox for this controlled test;
 that is not an application deployment recommendation. It covers literal frames,
 BigInt, UTF-8, typed arrays, selected spans, ownership, limits and malformed input.
+
+## Recorded 0.24.3 preparation evidence
+
+Fresh archive checks passed all-feature tests, Platform Types 0.21.2 consumers,
+codec-only Wasm execution and all-feature Wasm forwarding. Generated clients
+passed Chromium 156.0.8078.4. Evidence is under
+`target/package-check/run-1JG63E/`. Relevant unchanged codec, TypeScript and
+managed-server evidence from the adoption checks remains applicable; the native
+run at `qualification/target/ic-counter-jqQyV7/` records its own exact inputs.
 
 ## Recorded 0.24.2 preparation evidence
 

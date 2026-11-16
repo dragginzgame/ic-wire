@@ -10,8 +10,8 @@ Historical measurements qualify only their recorded inputs.
 Wire owns bounded Serde/Postcard encoding, framing, explicit field adapters and
 optional native schema tooling. It has two product packages in the root virtual
 workspace: `ic-wire` and `ic-wire-derive`. Private contract tests and consumer packages
-live in `qualification/`; its excluded `ic-instructions/` workspace isolates the
-native simulator dependency graph. Product packages do not depend on either.
+live directly under `qualification/` and share one workspace and lockfile, including
+the private instruction driver. Product packages do not depend on qualification.
 
 | Responsibility | Owner |
 | --- | --- |
@@ -25,7 +25,7 @@ native simulator dependency graph. Product packages do not depend on either.
 | Browser byte operations | One bundled TypeScript interpreter |
 | Principal/Account identity and Serde | Published Platform Types |
 | Execution, routing, authentication, retries and deployment | Downstream application/platform owners |
-| Native simulator lifetime | Published Testkit in private qualification |
+| Native simulator lifetime | Published Testkit managed-server in private qualification |
 
 The codec is `no_std` with `alloc`, forbids unsafe Rust and remains SDK-independent.
 Host modules and optional schema/derive/Platform dependencies are excluded on

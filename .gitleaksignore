@@ -1,2 +1,5 @@
-# Historical benchmark prose: "byte-key maps, ordinary/bulk controls" is not a credential.
+# Exact historical prose false positive; no credential.
 ef493a63362adb8c0696e464790e3a0c5ba8710c:docs/design/codec-benchmarks.md:generic-api-key:168
+
+# Historical suppression comment also matched the detector.
+1da48059e36132b09775f6130638b8b9c3169538:.gitleaksignore:generic-api-key:1

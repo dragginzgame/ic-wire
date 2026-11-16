@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.24.3] - 2026-11-16
+
+### 🛠️ Maintenance
+
+- Adopt ic-testkit 0.107.3, Platform Types 0.21.2 and Runtime 0.23.14 across
+  their product and qualification callers. Replace the temporary shell launcher
+  with Testkit managed-server ownership and explicit lifecycle evidence. The
+  product selects thiserror 2.0.21; PocketIC retains 2.0.18 in qualification.
+- Adopt authenticated Toko Tooling 0.44.11, with bounded sanitized CI setup
+  diagnostics and finite artifact retention. Correct the historical secret-scan
+  prose suppression ([Wire #2](https://github.com/dragginzgame/ic-wire/issues/2)).
+- Flatten qualification packages into one tier and one workspace/lockfile. Move
+  the instruction driver to qualification/ic-wire-instructions and update
+  admission, formatting, CI, archive fixtures and measurement paths while
+  preserving the previous dependency selections.
+
 ## [0.24.2] - 2026-11-16
 
 ### 🔧 Dependencies

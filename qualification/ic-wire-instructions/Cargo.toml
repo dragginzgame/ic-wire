@@ -11,7 +11,7 @@ description = "Private installed IC instruction measurements for the Wire consum
 ignored = ["toko-tooling"]
 
 [dependencies]
-ic-testkit.workspace = true
+ic-testkit = { workspace = true, features = ["managed-server"] }
 serde_json.workspace = true
 sha2.workspace = true
 tokio.workspace = true

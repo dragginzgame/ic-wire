@@ -1,7 +1,8 @@
-//! Installed consumer counters; published Testkit owns server/instance lifetime.
+//! Installed counters over original PocketIC types; the runner owns the server.
+#![forbid(unsafe_code)]
 use ic_testkit::{
-    pic::PocketIcStartupConfig,
     pocket_ic::{CanisterId, PocketIcBuilder},
+    server::{Deletion, Limits as ServerLimits, PreparedServer, Server},
 };
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -43,10 +44,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if !version.status.success() {
         return Err("server version failed".into());
     }
-    let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))?
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+    if std::env::var_os("IC_WIRE_POCKET_IC_URL").is_some() {
+        return Err("external endpoint overrides are not supported".into());
+    }
+    if server.file_name().is_none_or(|name| name != "pocket-ic") {
+        return Err("prepared server must be named pocket-ic".into());
+    }
+    let prepared = PreparedServer::check(server.parent().ok_or("server directory required")?)?;
+    let mut server_owner = Server::start(
+        prepared,
+        ServerLimits {
+            startup: Duration::from_secs(60),
+            lifetime: Duration::from_secs(300),
+            stdout_bytes: 65536,
+            stderr_bytes: 65536,
+        },
+    )?;
+    let instance = server_owner
+        .instance(
+            PocketIcBuilder::new().with_application_subnet(),
+            Duration::from_secs(60),
+        )
         .await?;
-    let pic = owned.instance();
+    let pic = instance.client();
+    let instance_id = pic.instance_id;
     let result = async {
         let expected = [73,87,7,0,0,0,0,0,0,0,0,128,1,6,115,101,110,115,111,114,2,0,255,6,0,128,0,0,255,127,2,1,128,1,
             73,87,7,0,0,0,0,0,0,0,1,129,1,1];
@@ -79,11 +100,45 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Ok::<_, Box<dyn std::error::Error>>(rows)
     }.await;
-    owned.close().await;
+    let deletion = instance.close(Duration::from_secs(30)).await;
+    let observation = std::process::Command::new("curl")
+        .args([
+            "--fail",
+            "--silent",
+            "--show-error",
+            "--noproxy",
+            "*",
+            "--max-time",
+            "10",
+            "--max-filesize",
+            "4096",
+        ])
+        .arg(format!("{}instances", server_owner.endpoint()))
+        .output();
+    let stopped = server_owner.stop()?;
+    fs::write(directory.join("server.stdout"), &stopped.output.stdout)?;
+    fs::write(directory.join("server.stderr"), &stopped.output.stderr)?;
+    fs::write(directory.join("server-process.txt"), format!("{stopped:?}"))?;
+    if deletion != Deletion::Attempted
+        || stopped.abandoned != 0
+        || !stopped.process.cleanup.is_empty()
+        || stopped.process.status.is_none()
+    {
+        return Err("simulator cleanup did not complete; inspect server-process.txt".into());
+    }
+    let observation = observation?;
+    if !observation.status.success() {
+        return Err("instance deletion observation failed".into());
+    }
+    fs::write(directory.join("instances.json"), &observation.stdout)?;
+    let instances: Vec<String> = serde_json::from_slice(&observation.stdout)?;
+    if instances != ["Deleted"] {
+        return Err("owned instance remains on server".into());
+    }
     let rows = result?;
-    let report = json!({"counter":"ic0.performance_counter(0)","server_version":String::from_utf8(version.stdout)?,"server_sha256":server_hash,"rows":rows,
-        "host_lock_sha256":hash(include_bytes!("../../Cargo.lock")),"guest_lock_sha256":hash(include_bytes!("../../../Cargo.lock")),"driver_sha256":hash(include_bytes!("main.rs")),"guest_sha256":hash(include_bytes!("../../../ic-wire-consumer/src/ic.rs")),
-        "consumer_sha256":hash(include_bytes!("../../../ic-wire-consumer/src/lib.rs")),"meter_sha256":hash(include_bytes!("../../../../crates/ic-wire/src/meter.rs")),
+    let report = json!({"counter":"ic0.performance_counter(0)","instance_id":instance_id,"server_version":String::from_utf8(version.stdout)?,"server_sha256":server_hash,"rows":rows,
+        "qualification_lock_sha256":hash(include_bytes!("../../Cargo.lock")),"driver_sha256":hash(include_bytes!("main.rs")),"guest_sha256":hash(include_bytes!("../../ic-wire-consumer/src/ic.rs")),
+        "consumer_sha256":hash(include_bytes!("../../ic-wire-consumer/src/lib.rs")),"meter_sha256":hash(include_bytes!("../../../crates/ic-wire/src/meter.rs")),
         "compiler":String::from_utf8(std::process::Command::new("rustc").arg("-Vv").output()?.stdout)?});
     fs::write(
         directory.join("instructions.json"),

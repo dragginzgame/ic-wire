@@ -28,8 +28,9 @@ nonfinite words. Its size does not stand in for the upload workload or IC costs.
 
 `POCKET_IC_BIN=/absolute/path/to/pocket-ic make measure-consumer-ic` measures the
 upload consumer in a local simulator at both profiles. The
-[isolated runner](../../qualification/ic-instructions/README.md) uses published
-Testkit for server lifetime. It records three batches of eight repetitions for
+[native runner](../../qualification/ic-wire-instructions/README.md) uses published
+Testkit for original PocketIC types and explicit bounded server/instance
+ownership. It records three batches of eight repetitions for
 request/response encode/decode, bad headers, truncation and loop control. Reports
 retain samples and median batches without subtracting loop overhead. Every query
 also checks independently specified 34-byte request and 14-byte response frames.

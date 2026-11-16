@@ -10,4 +10,4 @@ perl -0pe 's/(proc-macro2[^\n]*\n)(quote[^\n]*\n)/$2$1/' \
 bash vendor/toko-tooling/scripts/ci/check-formatting-hooks.sh "$PWD" \
     crates/ic-wire-derive/src/lib.rs crates/ic-wire-derive/Cargo.toml \
     "$unsorted" --rust-sources rust-toolchain.toml \
-    Cargo.lock qualification/Cargo.lock qualification/ic-instructions/Cargo.lock
+    Cargo.lock qualification/Cargo.lock

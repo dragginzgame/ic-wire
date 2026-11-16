@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire-derive"
-version = "0.24.2"
+version = "0.24.3"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "LICENSE.md"

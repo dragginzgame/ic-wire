@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.2**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.3**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -33,7 +33,7 @@ together. There is no legacy fallback reader or automatic storage migration.
 | `crates/ic-wire/` | Portable codec, field adapters and optional host tooling |
 | `crates/ic-wire-derive/` | Strict host schema derive; does not generate serialization |
 | `qualification/` | Private contract tests and standalone consumer workspace |
-| `qualification/ic-instructions/` | Separate private native simulator workspace |
+| `qualification/ic-wire-instructions/` | Private native simulator driver |
 | `vendor/toko-tooling/` | Snapshot-owned tooling; no local edits |
 
 ## Development
@@ -45,8 +45,7 @@ locked dependencies before using the offline checks:
 rustup show
 cargo fetch --locked
 cargo fetch --locked --manifest-path qualification/Cargo.toml
-cargo fetch --locked --manifest-path qualification/ic-instructions/Cargo.toml
-make instruction-tooling-check
+make qualification-tooling-check
 make install-tools
 make install-hooks
 ```
@@ -62,8 +61,8 @@ setup update. It sets repository-local `core.hooksPath` to
 The shared pre-commit hook formats the staged selection in isolation, rejects
 partially staged files, and preserves unrelated working edits. It never installs
 tools. `make check-formatting-hooks` qualifies that behavior against Wire's
-manifests and formatting inputs. Both `make fmt` and `make fmt-check` cover all
-three maintained workspaces.
+manifests and formatting inputs. Both `make fmt` and `make fmt-check` cover both
+maintained workspaces.
 
 Choose checks for the affected contract; these commands are not a mandatory
 sequence:
@@ -92,24 +91,22 @@ make check-typescript
 Broad targets are `make test`, `make lint`, `make doc` and `make check-wasm`
 (product workspace, default features), `make test-compatibility` and
 `make lint-compatibility` (qualification workspace, default features), and
-`make fmt-check` (all three maintained workspaces). Optional host and TypeScript
+`make fmt-check` (both maintained workspaces). Optional host and TypeScript
 checks require the focused targets above. `make help` lists archive, browser and
 measurement commands; see [qualification](qualification/README.md) for their
-prerequisites and evidence limits. IC measurements additionally require fetching
-`qualification/ic-instructions/Cargo.toml` and explicitly selecting PocketIC.
+prerequisites and evidence limits. IC measurements additionally require explicitly
+selecting PocketIC.
 
-Toko Tooling **0.44.6** is installed through its authenticated published exporter.
+Toko Tooling **0.44.11** is installed through its authenticated published exporter.
 `.toko-tooling.snapshot` records source identity and owned bytes.
 `make snapshot-check` verifies only installed bytes; `make toko-tooling-check`
 also admits product declarations and Cargo.lock. `make qualification-tooling-check`
-checks the parent qualification selection against the same snapshot;
-`make instruction-tooling-check` additionally admits the native driver workspace.
+checks all qualification members against the same snapshot.
 
-`make deps-list` and `make deps-update` include all three maintained workspaces by
-default. Updates accept `DEPENDENCY_PACKAGE` and, with it, `DEPENDENCY_PRECISE`;
-`DEPENDENCY_MANIFEST` overrides the additional IC-runner workspace selection.
+`make deps-list` and `make deps-update` include both maintained workspaces by
+default. Updates accept `DEPENDENCY_PACKAGE` and, with it, `DEPENDENCY_PRECISE`.
 Ordinary registry libraries use compatible version requirements. Exact pins are
-limited to the coordinated Wire derive/runtime pair and the Toko Tooling snapshot; [reasons and the runner isolation exception](AGENTS.md#dependency-selection)
+limited to the coordinated Wire derive/runtime pair and the Toko Tooling snapshot; [reasons](AGENTS.md#dependency-selection)
 are recorded in the local overlay. Lockfiles keep ordinary checks reproducible.
 Reviewed tooling updates use `make toko-tooling-preview` and
 `make toko-tooling-update` after updating the Cargo selection. No automatic
@@ -121,8 +118,9 @@ non-mutating formatting, hook qualification, strict Rust checks and native produ
 contracts. Linux also checks the simulator driver without launching PocketIC,
 executes the standalone Wasm consumer, and checks generated TypeScript with Node
 24.21.0 and the locked compiler. A separate Linux job scans full Git history once
-per workflow run with the snapshot-pinned Gitleaks. Failed setup and formatting
-evidence is retained. Hosted results are asynchronous evidence; local passes do
+per workflow run with the snapshot-pinned Gitleaks. Failed setup and formatting diagnostics are sanitized and bounded to nine
+16 KiB excerpts per phase, then retained for seven days. Tool payloads and raw
+logs are excluded from uploads. Hosted results are asynchronous evidence; local passes do
 not establish macOS or hosted success. Simulator measurements, browser provisioning,
 publication and deployment remain separately selected operations.
 
