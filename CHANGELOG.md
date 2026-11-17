@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.24.4] - Unreleased
+
+### 🔧 Dependencies
+
+- Adopt published Platform Runtime 0.23.15 for the private Wasm instruction
+  guest. Retain Platform Types 0.21.2, already the latest published release,
+  and qualify the existing qualification lock selection, including Testkit
+  0.107.4 and Host Process 0.80.3 with its macOS dependency refresh.
+
 ## [0.24.3] - 2026-11-16
 
 ### 🛠️ Maintenance

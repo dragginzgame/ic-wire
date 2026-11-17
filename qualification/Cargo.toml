@@ -8,7 +8,7 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
-ic-platform-runtime = { version = "0.23.14", default-features = false }
+ic-platform-runtime = { version = "0.23.15", default-features = false }
 ic-platform-types = { version = "0.21.2", default-features = false }
 ic-testkit = { version = "0.107.3", default-features = false }
 ic-wire-consumer = { path = "ic-wire-consumer", default-features = false }
