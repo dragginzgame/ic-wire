@@ -1,7 +1,7 @@
 # Installed IC instruction runner
 
 This private native package belongs to the single qualification workspace and
-consumes locked published Testkit 0.107.4 for original PocketIC client/type identities.
+consumes locked published Testkit 0.110.0 for original PocketIC client/type identities.
 The Rust driver selects Testkit’s managed-server capability, verifies a prepared
 PocketIC 16.1.0 executable, and supplies explicit startup, lifetime and output
 budgets. It retains process/cleanup evidence and bounded server logs, explicitly
@@ -11,7 +11,7 @@ callers, then stops/deletes them and closes the owned instance/server.
 
 The driver and guest share qualification/Cargo.toml and Cargo.lock. PocketIC 16.1.0 requires thiserror 2.0.18 in this graph; Platform Types
 0.21.2 uses a compatible requirement. Generic-array 0.14.7 remains selected. No native simulator,
-Candid or SDK is added to product Wire. The guest uses Platform Runtime 0.23.15;
+Candid or SDK is added to product Wire. The guest uses locked Platform Runtime 0.23.17;
 its dependency-free `system-raw` feature supplies the IC operations. The private
 guest owns one fixed query export with a narrowly expected Rust 2024 unsafe
 attribute; product Wire continues to forbid unsafe code.

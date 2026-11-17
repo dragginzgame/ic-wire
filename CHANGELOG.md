@@ -1,13 +1,14 @@
 # Changelog
 
-## [0.24.4] - Unreleased
+## [0.24.4] - 2026-11-18
 
 ### 🔧 Dependencies
 
-- Adopt published Platform Runtime 0.23.15 for the private Wasm instruction
-  guest. Retain Platform Types 0.21.2, already the latest published release,
-  and qualify the existing qualification lock selection, including Testkit
-  0.107.4 and Host Process 0.80.3 with its macOS dependency refresh.
+- Adopt Testkit 0.110.0 and Host Process 0.81.0 for the private instruction
+  runner, and authenticated Toko Tooling 0.45.0 in both workspaces.
+- Refresh the private qualification graph to Platform Runtime 0.23.17,
+  Host Artifacts/FS 0.80.3, bytes 1.12.2 and zeroize 1.9.2. Retain
+  Platform Types 0.21.2 and PocketIC's thiserror 2.0.18 selection.
 
 ## [0.24.3] - 2026-11-16
 

@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.24.3** for
+The repository's product manifests and finalized changelog select **0.24.4** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
@@ -51,6 +51,19 @@ rewritten `.js` imports, then executes the local fixture in the selected browser
 Its headless invocation disables Chromium's sandbox for this controlled test;
 that is not an application deployment recommendation. It covers literal frames,
 BigInt, UTF-8, typed arrays, selected spans, ownership, limits and malformed input.
+
+## Recorded 0.24.4 preparation evidence
+
+The tooling upgrade changes the packaged development dependency and lock metadata;
+runtime source and normal dependency requirements remain unchanged. Fresh archive
+checks passed all-feature tests, standalone consumers, Platform Types integration,
+codec-only Wasm execution and all-feature Wasm forwarding. Generated clients
+passed Chromium 156.0.8078.4 under `target/package-check/run-z4kZ1u/`.
+Product all-feature Clippy and native driver Clippy/Rustdoc passed. The updated
+Testkit 0.110.0 / Host Process 0.81.0 graph passed both installed profiles, instance
+deletion and server cleanup under `qualification/target/ic-counter-p1DhNI/` before
+the package version bump. These local results do not establish macOS or hosted
+CI success.
 
 ## Recorded 0.24.3 preparation evidence
 
