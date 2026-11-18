@@ -15,6 +15,35 @@ current Rust and TypeScript implementations, with no older Wire dependency.
 Package directories match Cargo package names. `wire` is the renamed dependency
 on the local product crate, also exercising derive support for renamed imports.
 
+## Candid comparison
+
+Run the optional native matrix to print byte lengths for matched values and
+verify that each codec decodes its own bytes back to the input. Rows compare a
+Wire payload (add 11 bytes for a Wire frame) with a complete single-argument
+Candid message including its type information. The numeric list cases exercise
+both short and maximum-width Wire varints.
+
+```sh
+cargo test --manifest-path qualification/Cargo.toml --locked --offline \
+  -p ic-wire-compatibility --features candid-comparison --test candid_matrix -- --nocapture --test-threads=1
+```
+
+The numeric distribution matrix repeats four lengths and four distributions
+across signed and unsigned 16-, 32- and 64-bit integers. Compare ordinary and
+packed Wire lengths for a field using its expected value distribution. Ordinary
+lists pay the sum of the varint widths plus an element-count prefix. Packed
+lists pay the word width times the count plus a byte-length prefix. Choose the
+field representation once in the schema and preserve its element bound.
+
+The batch rows compare individually encoded request frames with one request
+frame containing the full list. Candid uses individual one-argument messages
+and one list argument respectively. For 128 nested events, batching reduces
+Wire from 3,328 to 1,933 bytes and Candid from 11,392 to 4,157. A one-event
+batch adds overhead in both formats. Consumers can use bounded batches when
+their endpoint permits shared ordering, retry and failure semantics.
+For installed instructions, whole Wasm sizes and native allocations, see the
+[numeric list comparison](../docs/design/performance.md#numeric-list-comparison).
+
 ## Focused checks
 
 Run from the repository root after `cargo fetch --locked --manifest-path

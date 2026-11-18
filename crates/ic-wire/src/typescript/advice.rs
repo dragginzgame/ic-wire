@@ -8,6 +8,22 @@ use alloc::{
 };
 use core::fmt;
 
+// Keep the width-specific type name and the selection rule in the same diagnostic.
+macro_rules! integer_list {
+    ($word:literal) => {
+        Some((
+            $word,
+            concat!(
+                "Start with an ordinary list for mostly small values. Try Packed<",
+                $word,
+                ", N> for wide values or an IC instruction bottleneck. ",
+                "Compare encoded_len on typical and worst-case inputs, preserve the field bound, ",
+                "and choose one layout for the schema."
+            ),
+        ))
+    };
+}
+
 /// A primitive-list use site requiring an explicit representation review.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BulkWarning {
@@ -18,11 +34,7 @@ pub struct BulkWarning {
 }
 impl fmt::Display for BulkWarning {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}: consider {}; preserve bounds and domain validation; measure small-value size and per-element/truncated-input costs",
-            self.path, self.representation
-        )
+        write!(f, "{}: {}", self.path, self.representation)
     }
 }
 /// Complete bounded advice. Warnings never change generated source or wire bytes.
@@ -180,42 +192,48 @@ impl ValidatedRegistry {
                             bits: 8,
                             signed: false,
                             ..
-                        } => Some(("u8", "ByteBuf / Bytes<N> / serde_bytes")),
+                        } => Some((
+                            "u8",
+                            "For opaque bytes use Bytes<N> for a field bound, ByteBuf for owned bytes, or serde_bytes on an existing byte field.",
+                        )),
                         Node::Integer {
                             bits: 8,
                             signed: true,
                             ..
-                        } => Some(("i8", "Packed<i8>")),
+                        } => Some((
+                            "i8",
+                            "Use Packed<i8, N> for bulk signed bytes when element traversal costs matter. Preserve the element bound.",
+                        )),
                         Node::Integer {
                             bits: 16,
                             signed: false,
                             ..
-                        } => Some(("u16", "Packed<u16>")),
+                        } => integer_list!("u16"),
                         Node::Integer {
                             bits: 16,
                             signed: true,
                             ..
-                        } => Some(("i16", "Packed<i16>")),
+                        } => integer_list!("i16"),
                         Node::Integer {
                             bits: 32,
                             signed: false,
                             ..
-                        } => Some(("u32", "Packed<u32>")),
+                        } => integer_list!("u32"),
                         Node::Integer {
                             bits: 32,
                             signed: true,
                             ..
-                        } => Some(("i32", "Packed<i32>")),
+                        } => integer_list!("i32"),
                         Node::Integer {
                             bits: 64,
                             signed: false,
                             ..
-                        } => Some(("u64", "Packed<u64>")),
+                        } => integer_list!("u64"),
                         Node::Integer {
                             bits: 64,
                             signed: true,
                             ..
-                        } => Some(("i64", "Packed<i64>")),
+                        } => integer_list!("i64"),
                         Node::Integer {
                             bits: 128,
                             signed: false,

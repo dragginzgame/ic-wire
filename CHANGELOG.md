@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.24.5] - 2026-11-18
+
+- Add an optional private Candid comparison for payload sizes and round trips.
+- Measure numeric-list encoding, decoding, allocation and whole Wasm size across
+  three value distributions. Refine bulk-field lint guidance around these costs.
+
 ## [0.24.4] - 2026-11-18
 
 ### 🔧 Dependencies

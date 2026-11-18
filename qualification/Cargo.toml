@@ -8,6 +8,7 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
+candid = { version = "0.10.40", default-features = false }
 ic-platform-runtime = { version = "0.23.15", default-features = false }
 ic-platform-types = { version = "0.21.2", default-features = false }
 ic-testkit = { version = "0.110.0", default-features = false }

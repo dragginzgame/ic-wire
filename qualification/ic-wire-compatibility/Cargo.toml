@@ -15,6 +15,7 @@ category = "tests"
 ignored = ["toko-tooling"]
 
 [features]
+candid-comparison = ["dep:candid"]
 typescript = [
     "wire/derive",
     "wire/platform-types",
@@ -23,7 +24,11 @@ typescript = [
 ]
 
 [dependencies]
+candid = { workspace = true, features = ["serde_bytes"], optional = true }
 ic-wire-consumer = { workspace = true, optional = true }
+
+[target.'cfg(target_family = "wasm")'.dev-dependencies]
+ic-platform-runtime = { workspace = true, features = ["system-raw"] }
 
 [dev-dependencies]
 ic-platform-types.workspace = true
@@ -52,5 +57,26 @@ required-features = ["typescript"]
 name = "codec_contracts"
 path = "tests/codec_contract_tests.rs"
 
+[[test]]
+name = "candid_matrix"
+path = "tests/candid_matrix.rs"
+required-features = ["candid-comparison"]
+
 [lints]
 workspace = true
+
+[[example]]
+name = "numeric-ordinary"
+path = "examples/numeric/ordinary.rs"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "numeric-packed"
+path = "examples/numeric/packed.rs"
+crate-type = ["cdylib"]
+
+[[example]]
+name = "numeric-candid"
+path = "examples/numeric/candid.rs"
+crate-type = ["cdylib"]
+required-features = ["candid-comparison"]

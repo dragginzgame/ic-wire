@@ -1,5 +1,6 @@
 //! Installed counters over original PocketIC types; the runner owns the server.
 #![forbid(unsafe_code)]
+mod numeric;
 use ic_testkit::{
     pocket_ic::{CanisterId, PocketIcBuilder},
     server::{Deletion, Limits as ServerLimits, PreparedServer, Server},
@@ -68,7 +69,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     let pic = instance.client();
     let instance_id = pic.instance_id;
+    let numeric_mode =
+        std::env::args_os().nth(2).as_deref() == Some(std::ffi::OsStr::new("--numeric"));
     let result = async {
+        if numeric_mode {
+            return numeric::run(pic, &directory).await;
+        }
         let expected = [73,87,7,0,0,0,0,0,0,0,0,128,1,6,115,101,110,115,111,114,2,0,255,6,0,128,0,0,255,127,2,1,128,1,
             73,87,7,0,0,0,0,0,0,0,1,129,1,1];
         let mut rows = Vec::new();
@@ -136,10 +142,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("owned instance remains on server".into());
     }
     let rows = result?;
-    let report = json!({"counter":"ic0.performance_counter(0)","instance_id":instance_id,"server_version":String::from_utf8(version.stdout)?,"server_sha256":server_hash,"rows":rows,
+    let mut report = json!({"counter":"ic0.performance_counter(0)","instance_id":instance_id,"server_version":String::from_utf8(version.stdout)?,"server_sha256":server_hash,"rows":rows,
         "qualification_lock_sha256":hash(include_bytes!("../../Cargo.lock")),"driver_sha256":hash(include_bytes!("main.rs")),"guest_sha256":hash(include_bytes!("../../ic-wire-consumer/src/ic.rs")),
         "consumer_sha256":hash(include_bytes!("../../ic-wire-consumer/src/lib.rs")),"meter_sha256":hash(include_bytes!("../../../crates/ic-wire/src/meter.rs")),
         "compiler":String::from_utf8(std::process::Command::new("rustc").arg("-Vv").output()?.stdout)?});
+    if numeric_mode {
+        let fields = report.as_object_mut().unwrap();
+        for field in ["guest_sha256", "consumer_sha256", "meter_sha256"] {
+            fields.remove(field);
+        }
+        fields.insert(
+            "probe_sha256".into(),
+            json!(hash(include_bytes!(
+                "../../ic-wire-compatibility/examples/numeric/probe.inc"
+            ))),
+        );
+        fields.insert(
+            "numeric_driver_sha256".into(),
+            json!(hash(include_bytes!("numeric.rs"))),
+        );
+    }
     fs::write(
         directory.join("instructions.json"),
         serde_json::to_vec_pretty(&report)?,

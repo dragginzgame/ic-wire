@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.24.4"
+ic-wire = "0.24.5"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -51,6 +51,24 @@ deterministically across passes. Reusable output is empty after errors; slice
 output may be modified on errors other than an undersized destination. Retain
 original input bytes when signatures, retries or hashes depend on them: decoding
 and re-encoding can normalize collections or accepted noncanonical forms.
+
+### Choosing an integer list layout
+
+For signed and unsigned 16-, 32- and 64-bit lists, use the field's element
+limit for `N` in either layout.
+
+| What matters for this field? | Starting choice | How to confirm |
+| --- | --- | --- |
+| Typical values are small, or their distribution is unknown | `List<T, N>` for ordinary varints | Compare `encoded_len` for both layouts on representative inputs. |
+| Most values require many varint bytes | `Packed<T, N>` for fixed-width words | Check typical and largest allowed messages against your byte budget. |
+| Encoding or decoding a large list dominates IC instructions | Try `Packed<T, N>`, even for small integers | Measure encode and decode on the target canister and check the larger small-value payload fits. |
+
+For example, 4,096 copies of `1_u32` use 4,098 ordinary payload bytes or
+16,387 packed bytes. With 4,096 copies of `u32::MAX`, the ordinary payload
+grows to 20,482 bytes and the packed payload stays at 16,387. If both layouts
+meet your budgets and you already ship one, keep the existing layout. Select
+once per schema: switching layouts per message changes how the receiver must
+decode the field.
 
 ## Optional host features
 

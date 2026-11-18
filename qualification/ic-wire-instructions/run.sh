@@ -13,6 +13,16 @@ mkdir -p qualification/target
 output=$(mktemp -d "$PWD/qualification/target/ic-counter-XXXXXX")
 printf 'Instruction evidence: %s\n' "$output"
 rustc -Vv > "$output/compiler.txt"
+if [[ ${1:-} == --numeric ]]; then
+    for profile in wire-size wire-speed; do
+        cargo build --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --offline --profile "$profile" --target wasm32-unknown-unknown --features candid-comparison --example numeric-ordinary --example numeric-packed --example numeric-candid
+        for codec in ordinary packed candid; do
+            cp "qualification/target/wasm32-unknown-unknown/$profile/examples/numeric_$codec.wasm" "$output/$profile-$codec.wasm"
+        done
+    done
+    cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --offline --features candid-comparison --example numeric-ordinary --example numeric-packed --example numeric-candid -- --nocapture --test-threads=1 > "$output/allocations.txt"
+    exec cargo run --manifest-path qualification/Cargo.toml -p ic-wire-instructions --locked --offline -- "$output" --numeric
+fi
 for profile in wire-size wire-speed; do
     target="$output/$profile"
     cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --features ic --example instruction-counter --target wasm32-unknown-unknown --profile "$profile" --target-dir "$target" --locked --offline
