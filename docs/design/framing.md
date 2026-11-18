@@ -18,7 +18,7 @@ Literal headers cover zero, maximum and asymmetric IDs, plus name-derived `ping`
 Every differing byte at each header offset is checked as an identity refusal.
 Method vectors cover empty, ASCII, case-sensitive, embedded-NUL and multibyte
 UTF-8 names. Expected IDs were independently calculated with arbitrary-precision
-arithmetic. Run `cargo test -p ic-wire --test framing_tests --locked --offline`.
+arithmetic. Run `cargo test -p ic-wire --test framing_tests --locked`.
 The [standalone consumer](../../qualification/ic-wire-consumer/README.md) independently
 checks complete request/response literals and malformed-input boundaries.
 

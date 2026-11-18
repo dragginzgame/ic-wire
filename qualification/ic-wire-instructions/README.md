@@ -22,7 +22,7 @@ From the repository root, explicitly select a prepared server:
 POCKET_IC_BIN=/absolute/path/to/pocket-ic make measure-consumer-ic
 ```
 
-The command requires curl and never downloads a server. It uses offline locked Cargo dependencies,
+The command requires curl and never downloads a server. It uses locked Cargo dependencies,
 creates fresh per-profile guest targets and retains instructions.json,
 compiler identity and the exact measured artifacts under qualification/target.
 The report contains current measurements without a historical comparison gate.
@@ -33,9 +33,9 @@ The [measurement contract](../../docs/design/performance.md) records operations
 and evidence limits. Focused checks for the native driver, without starting a server:
 
 ```sh
-cargo metadata --manifest-path qualification/Cargo.toml --format-version 1 --locked --offline > /dev/null
-cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-instructions --locked --offline -- -D warnings
-RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path qualification/Cargo.toml -p ic-wire-instructions --no-deps --locked --offline
+cargo metadata --manifest-path qualification/Cargo.toml --format-version 1 --locked > /dev/null
+cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-instructions --locked -- -D warnings
+RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path qualification/Cargo.toml -p ic-wire-instructions --no-deps --locked
 ```
 
 All common Cargo, Rust, Rustdoc and Clippy lints are inherited by the driver.

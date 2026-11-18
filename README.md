@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.6**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.25.0**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -39,7 +39,7 @@ together. There is no legacy fallback reader or automatic storage migration.
 ## Development
 
 Run commands from this repository root. Prepare the pinned Rust toolchain and
-locked dependencies before using the offline checks:
+locked dependencies before running the checks:
 
 ```sh
 rustup show
@@ -69,7 +69,7 @@ sequence:
 
 | Scope | Commands |
 | --- | --- |
-| One codec contract | `cargo test -p ic-wire --test encode_tests --locked --offline` (replace the test name as needed) |
+| One codec contract | `cargo test -p ic-wire --test encode_tests --locked` (replace the test name as needed) |
 | Host graph | `make test-host`, `make lint-host`, `make doc-host` |
 | Strict derive | `make test-derive`, `make lint-derive` |
 | Allocation admission | `make test-allocation` |
@@ -97,7 +97,7 @@ measurement commands; see [qualification](qualification/README.md) for their
 prerequisites and evidence limits. IC measurements additionally require explicitly
 selecting PocketIC.
 
-Toko Tooling **0.45.1** is installed through its authenticated published exporter.
+Toko Tooling **0.45.6** is installed through its authenticated published exporter.
 `.toko-tooling.snapshot` records source identity and owned bytes.
 `make snapshot-check` verifies only installed bytes; `make toko-tooling-check`
 also admits product declarations and Cargo.lock. `make qualification-tooling-check`

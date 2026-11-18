@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.24.6** for
+The repository's product manifests and finalized changelog select **0.25.0** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
@@ -43,7 +43,7 @@ Only scratch manifests receive an empty `[workspace]` and local derive patch;
 product source is not rewritten. This verifies archive contents without relying
 on registry availability of the coordinated derive version. It is not proof that
 registry consumers resolve the same packages without patches. Archive builds
-resolve their scratch manifests offline against the prepared cache; final
+resolve their scratch manifests using the caller’s Cargo settings; final
 registry-dependent verification is separate.
 
 The browser check compiles generated TypeScript to strict ES2022 modules with

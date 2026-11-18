@@ -13,11 +13,11 @@ help:
 	  'install-hooks         Activate the shared formatting hook in this clone' \
 	  'check-formatting-hooks Qualify the hook against Wire formatting inputs' \
 	  'snapshot-check        Verify installed snapshot bytes offline' \
-	  'deps-list             List workspace package versions offline' \
+	  'deps-list             List workspace package versions' \
 	  'deps-update           Run cargo update -v for maintained workspaces' \
 	  '  Optional: DEPENDENCY_PACKAGE=name DEPENDENCY_PRECISE=version' \
 	  'test                  Aggregate product tests (default features)' \
-	  '  Focused codec: cargo test -p ic-wire --test encode_tests --locked --offline' \
+	  '  Focused codec: cargo test -p ic-wire --test encode_tests --locked' \
 	  'test-compatibility    Aggregate qualification tests (default features)' \
 	  'test-allocation       Run isolated native allocation checks' \
 	  'test-host             Run focused host schema contracts' \
@@ -49,16 +49,16 @@ snapshot-check:
 test lint doc check-wasm: toko-tooling-check | toko-execution-check
 
 test:
-	+cargo test --workspace --locked --offline
+	+cargo test --workspace --locked
 
 lint:
-	+cargo clippy --workspace --all-targets --locked --offline -- -D warnings
+	+cargo clippy --workspace --all-targets --locked -- -D warnings
 
 doc:
-	+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked --offline
+	+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
 
 check-wasm:
-	+RUSTFLAGS="-D warnings" cargo check --workspace --lib --target wasm32-unknown-unknown --locked --offline
+	+RUSTFLAGS="-D warnings" cargo check --workspace --lib --target wasm32-unknown-unknown --locked
 
 qualification-tooling-check: toko-tooling-check
 	+@root_selection="$$(perl "$(TOKO_TOOLING_ROOT)/scripts/dev/tooling-lock.pl" "$(CURDIR)")" && \
@@ -70,10 +70,10 @@ qualification-tooling-check: toko-tooling-check
 lint-instructions doc-instructions: qualification-tooling-check | toko-execution-check
 
 lint-instructions:
-	+cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-instructions --all-targets --locked --offline -- -D warnings
+	+cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-instructions --all-targets --locked -- -D warnings
 
 doc-instructions:
-	+RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path qualification/Cargo.toml -p ic-wire-instructions --no-deps --locked --offline
+	+RUSTDOCFLAGS="-D warnings" cargo doc --manifest-path qualification/Cargo.toml -p ic-wire-instructions --no-deps --locked
 
 check-formatting-hooks: qualification-tooling-check format-tools-check | toko-execution-check
 	+bash scripts/ci/check-formatting-hooks.sh
@@ -81,40 +81,40 @@ check-formatting-hooks: qualification-tooling-check format-tools-check | toko-ex
 test-compatibility test-allocation lint-compatibility: qualification-tooling-check | toko-execution-check
 
 test-compatibility:
-	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility -p ic-wire-consumer --locked --offline
+	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility -p ic-wire-consumer --locked
 
 test-allocation:
-	+cargo test --manifest-path qualification/Cargo.toml --test allocation --locked --offline
+	+cargo test --manifest-path qualification/Cargo.toml --test allocation --locked
 
 lint-compatibility:
-	+cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-compatibility -p ic-wire-consumer --all-targets --locked --offline -- -D warnings
+	+cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-compatibility -p ic-wire-consumer --all-targets --locked -- -D warnings
 
 .PHONY: test-host lint-host doc-host check-wasm-host
 test-host lint-host doc-host check-wasm-host: toko-tooling-check | toko-execution-check
 
 test-host:
-	+cargo test -p ic-wire --features typescript --test schema --locked --offline
+	+cargo test -p ic-wire --features typescript --test schema --locked
 
 lint-host:
-	+cargo clippy -p ic-wire --features typescript --lib --test schema --locked --offline -- -D warnings
+	+cargo clippy -p ic-wire --features typescript --lib --test schema --locked -- -D warnings
 
 doc-host:
-	+RUSTDOCFLAGS="-D warnings" cargo doc -p ic-wire --features typescript --no-deps --locked --offline
+	+RUSTDOCFLAGS="-D warnings" cargo doc -p ic-wire --features typescript --no-deps --locked
 
 check-wasm-host:
-	+RUSTFLAGS="-D warnings" cargo check -p ic-wire --features typescript --lib --target wasm32-unknown-unknown --locked --offline
+	+RUSTFLAGS="-D warnings" cargo check -p ic-wire --features typescript --lib --target wasm32-unknown-unknown --locked
 
 .PHONY: test-typescript lint-typescript check-typescript
 test-typescript lint-typescript check-typescript: qualification-tooling-check | toko-execution-check
 
 check-typescript:
-	+IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline
+	+IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked
 
 test-typescript:
-	+cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline
+	+cargo test --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked
 
 lint-typescript:
-	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked --offline -- -D warnings
+	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked -- -D warnings
 
 .PHONY: test-consumer check-consumer-wasm
 test-consumer check-consumer-wasm: qualification-tooling-check | toko-execution-check
@@ -128,22 +128,22 @@ measure-consumer-ic: qualification-tooling-check | toko-execution-check
 	bash qualification/ic-wire-instructions/run.sh
 
 test-consumer:
-	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --test contract --locked --offline
+	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --test contract --locked
 
 check-consumer-wasm:
-	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer --locked --offline
+	+cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --bin wire-consumer --target wasm32-unknown-unknown --target-dir qualification/target/consumer --locked
 	node qualification/ic-wire-consumer/check-wasm.mjs qualification/target/consumer/wasm32-unknown-unknown/debug/wire-consumer.wasm
 
 .PHONY: test-derive lint-derive
 test-derive lint-derive: toko-tooling-check | toko-execution-check
 
 test-derive:
-	+cargo test -p ic-wire-derive --lib --locked --offline
-	+cargo test -p ic-wire --features derive --test derive_tests --locked --offline
+	+cargo test -p ic-wire-derive --lib --locked
+	+cargo test -p ic-wire --features derive --test derive_tests --locked
 
 lint-derive:
-	+cargo clippy -p ic-wire-derive --lib --tests --locked --offline -- -D warnings
-	+cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked --offline -- -D warnings
+	+cargo clippy -p ic-wire-derive --lib --tests --locked -- -D warnings
+	+cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked -- -D warnings
 
 .PHONY: check-packages check-browser
 check-packages: qualification-tooling-check | toko-execution-check

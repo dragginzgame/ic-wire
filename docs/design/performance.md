@@ -97,3 +97,24 @@ allocation followed by 10 reallocations for Vec, 12 for List and zero for Packed
 For this input Candid used 16 allocations and three reallocations on encode,
 then 23 allocations on decode. See the runner's allocations.txt for every length
 and instructions.json for all samples and artifact hashes.
+
+### Bounded list initial allocation
+
+A matched run compared the current first growth of one element with an initial
+capacity of up to four elements, targeting 16 bytes and capped by the field
+bound. Both grew only after admitting an element. For 4,096 small u32 values
+the candidate reduced native growth reallocations from 12 to 10. A singleton
+requested 16 bytes instead of 4. Payload lengths matched across the probes.
+
+| Bounded u32 probe | Current | Candidate |
+|---|---:|---:|
+| opt-z whole Wasm bytes | 22,115 | 22,115 |
+| opt-z decode instructions, 16 ones | 4,220 | 3,577 |
+| opt-z decode instructions, 4,096 ones | 525,126 | 524,483 |
+| opt-3 whole Wasm bytes | 24,158 | 24,366 |
+| opt-3 decode instructions, 4,096 ones | 257,220 | 264,952 |
+
+Retain one-element first growth. The candidate improved medium-length decode,
+but the long-list opt-z gain was small relative to the singleton memory increase
+and the opt-3 regression. Local artifacts are in
+`qualification/target/ic-counter-FW107X/` and `qualification/target/ic-counter-ycDm7K/`.

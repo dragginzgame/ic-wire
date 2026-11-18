@@ -10,16 +10,20 @@ use core::fmt;
 
 // Keep the width-specific type name and the selection rule in the same diagnostic.
 macro_rules! integer_list {
-    ($word:literal) => {
+    ($word:literal, $one_byte:expr) => {
         Some((
             $word,
-            concat!(
-                "Start with an ordinary list for mostly small values. Try Packed<",
-                $word,
-                ", N> for wide values or an IC instruction bottleneck. ",
-                "Compare encoded_len on typical and worst-case inputs, preserve the field bound, ",
-                "and choose one layout for the schema."
-            ),
+            if $one_byte {
+                "Keep the ordinary list for payload size. Each value within the declared scalar bounds uses one varint byte. Measure packed traversal separately if instructions matter, and preserve the scalar and element bounds."
+            } else {
+                concat!(
+                    "Start with an ordinary list for mostly small values. Try Packed<",
+                    $word,
+                    ", N> for wide values or an IC instruction bottleneck. ",
+                    "Compare encoded_len on typical and worst-case inputs, preserve the field bound, ",
+                    "and choose one layout for the schema."
+                )
+            },
         ))
     };
 }
@@ -29,12 +33,18 @@ macro_rules! integer_list {
 pub struct BulkWarning {
     /// JSON-pointer path rooted in a public consumer label.
     pub path: String,
+    /// Maximum element count declared at this list use site.
+    pub max_elements: Option<u64>,
     /// Suggested representation or resource policy; never an automatic rewrite.
     pub representation: &'static str,
 }
 impl fmt::Display for BulkWarning {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}: {}", self.path, self.representation)
+        write!(f, "{}", self.path)?;
+        if let Some(max) = self.max_elements {
+            write!(f, " (max {max} elements)")?;
+        }
+        write!(f, ": {}", self.representation)
     }
 }
 /// Complete bounded advice. Warnings never change generated source or wire bytes.
@@ -161,6 +171,7 @@ impl ValidatedRegistry {
     fn representation(
         &self,
         mut id: usize,
+        max_elements: Option<u64>,
     ) -> Result<Option<(&'static str, &'static str)>, GenerationError> {
         let mut hash = None;
         for _ in 0..64 {
@@ -173,20 +184,49 @@ impl ValidatedRegistry {
                 }
                 node => {
                     if let Some(width) = hash {
-                        return Ok(matches!(
+                        if !matches!(
                             node,
                             Node::Integer {
                                 bits: 8,
                                 signed: false,
                                 ..
                             }
-                        )
-                        .then_some(if width == 16 {
-                            ("hash16", "Packed<[u8; 16]>")
+                        ) {
+                            return Ok(None);
+                        }
+                        let word = if width == 16 { "hash16" } else { "hash32" };
+                        if max_elements.is_some_and(|max| max <= 127 / width) {
+                            return Ok(Some((
+                                word,
+                                "At this bound both length prefixes use one byte. Packing keeps the same payload size and reduces traversal. Preserve the hash width and element bound.",
+                            )));
+                        }
+                        return Ok(Some(if width == 16 {
+                            (
+                                "hash16",
+                                "Try Packed<[u8; 16], N> to reduce traversal. Its byte-count prefix can be larger than the ordinary hash-count prefix. Preserve the element bound.",
+                            )
                         } else {
-                            ("hash32", "Packed<[u8; 32]>")
+                            (
+                                "hash32",
+                                "Try Packed<[u8; 32], N> to reduce traversal. Its byte-count prefix can be larger than the ordinary hash-count prefix. Preserve the element bound.",
+                            )
                         }));
                     }
+                    let one_byte = |signed: bool| {
+                        let Some(bounds) =
+                            self.annotations.get(&id).and_then(|a| a.bounds.as_ref())
+                        else {
+                            return false;
+                        };
+                        let min = bounds.min.as_ref().and_then(|n| n.as_f64());
+                        let max = bounds.max.as_ref().and_then(|n| n.as_f64());
+                        if signed {
+                            min.is_some_and(|n| n >= -64.0) && max.is_some_and(|n| n <= 63.0)
+                        } else {
+                            max.is_some_and(|n| n <= 127.0)
+                        }
+                    };
                     return Ok(match node {
                         Node::Integer {
                             bits: 8,
@@ -208,32 +248,32 @@ impl ValidatedRegistry {
                             bits: 16,
                             signed: false,
                             ..
-                        } => integer_list!("u16"),
+                        } => integer_list!("u16", one_byte(false)),
                         Node::Integer {
                             bits: 16,
                             signed: true,
                             ..
-                        } => integer_list!("i16"),
+                        } => integer_list!("i16", one_byte(true)),
                         Node::Integer {
                             bits: 32,
                             signed: false,
                             ..
-                        } => integer_list!("u32"),
+                        } => integer_list!("u32", one_byte(false)),
                         Node::Integer {
                             bits: 32,
                             signed: true,
                             ..
-                        } => integer_list!("i32"),
+                        } => integer_list!("i32", one_byte(true)),
                         Node::Integer {
                             bits: 64,
                             signed: false,
                             ..
-                        } => integer_list!("u64"),
+                        } => integer_list!("u64", one_byte(false)),
                         Node::Integer {
                             bits: 64,
                             signed: true,
                             ..
-                        } => integer_list!("i64"),
+                        } => integer_list!("i64", one_byte(true)),
                         Node::Integer {
                             bits: 128,
                             signed: false,
@@ -250,17 +290,21 @@ impl ValidatedRegistry {
                             "i128",
                             "bounded i128 lists and workload-specific node limits; Packed<i128> is unsupported",
                         )),
+                        Node::Bool if matches!(max_elements, Some(1 | 2)) => Some((
+                            "bool",
+                            "Keep the ordinary list for payload size. At this bound a flag count plus a length-prefixed bitmap cannot save bytes.",
+                        )),
                         Node::Bool => Some((
                             "bool",
-                            "the explicit ic_wire::serde_packed::bools field adapter; preserve field bounds and review buffer admission",
+                            "Ordinary lists and serde_packed::bools use one byte per flag. Choose the adapter for bulk traversal. For smaller payloads, compare a bounded flag count plus bitmap bytes at typical list lengths.",
                         )),
                         Node::Float { bits: 32, .. } => Some((
                             "f32",
-                            "the explicit finite_f32 adapter for primitive Vec<f32> fields; preserve bounds and review changed bytes/buffer admission; Packed<f32> remains unsupported",
+                            "Keep the ordinary list if NaN or infinity is valid. For finite-only fields, serde_packed::finite_f32 enables bulk traversal at the same payload size through 31 values. At 32 values its prefix costs one extra byte. Preserve the field bound.",
                         )),
                         Node::Float { bits: 64, .. } => Some((
                             "f64",
-                            "the explicit finite_f64 adapter for primitive Vec<f64> fields; preserve bounds and review changed bytes/buffer admission; Packed<f64> remains unsupported",
+                            "Keep the ordinary list if NaN or infinity is valid. For finite-only fields, serde_packed::finite_f64 enables bulk traversal at the same payload size through 15 values. At 16 values its prefix costs one extra byte. Preserve the field bound.",
                         )),
                         Node::Unit => Some(("unit", ZERO)),
                         Node::Record(fields) if fields.is_empty() => Some(("empty-record", ZERO)),
@@ -319,8 +363,9 @@ impl Walk<'_> {
                     self.active.remove(root);
                 }
             }
-            Node::List { item, .. } => {
-                if let Some((word, representation)) = self.graph.representation(*item)? {
+            Node::List { max: Some(0), .. } | Node::Array { len: 0, .. } => {}
+            Node::List { item, max } => {
+                if let Some((word, representation)) = self.graph.representation(*item, *max)? {
                     let length = self.path.len() + 6 + word.len();
                     if length > 4096 {
                         return Err(GenerationError::Complexity);
@@ -331,6 +376,7 @@ impl Walk<'_> {
                         .ok_or(GenerationError::Complexity)?;
                     self.warnings.push(BulkWarning {
                         path: format!("{}/list/{word}", self.path),
+                        max_elements: *max,
                         representation,
                     });
                 }

@@ -900,7 +900,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.24.6"
+version = "0.25.0"
 dependencies = [
  "bytemuck",
  "ic-platform-types",
@@ -939,7 +939,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.24.6"
+version = "0.25.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1598,9 +1598,9 @@ checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
 
 [[package]]
 name = "rand_pcg"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a"
+checksum = "eb95882a1e14462c69aea9984bb261293ccfe6022ef8de0eda18bd5afb0052df"
 dependencies = [
  "rand_core",
 ]
@@ -2341,9 +2341,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.1"
+version = "0.45.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc38b1d6932310739c21ab8a821c811d4bf43e306f89751faea38638c8bc1373"
+checksum = "85a1ec2a953eb8c41f66fdb121591c64e7ae3b6d77196a982740e790f0ed021a"
 
 [[package]]
 name = "tower"

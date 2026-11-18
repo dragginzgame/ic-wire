@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.25.0] - 2026-11-18
+
+- Bulk warnings expose the declared list bound in `max_elements` and in printed
+  diagnostics. Code constructing or exhaustively matching `BulkWarning` must
+  account for this field. Skip unreachable elements of empty-only collections
+  and clarify the traversal and domain tradeoffs of bulk adapters.
+- Integer-list advice recognizes scalar bounds that guarantee one-byte varints
+  for signed and unsigned 16-, 32- and 64-bit elements.
+
+- Adopt authenticated Toko Tooling 0.45.6 and group the product workspace's
+  dependency catalog by production, shared and tooling use. Cargo checks
+  respect the caller's network settings throughout CI and qualification.
+- Document finite-float list prefix costs in bulk diagnostics and verify both
+  the 128-byte and 16,384-byte boundaries for f32 and f64.
+- Hash-list advice identifies bounds where packing reduces traversal while
+  preserving the payload size for every allowed list length.
+- Compare finite f32/f64 list layouts and signed/unsigned 128-bit integer lists
+  with Candid, including bit preservation and non-finite adapter rejection.
+- Compare sparse and dense reading layouts and matched UTF-8 byte lengths
+  across both variable-length prefix boundaries exercised by the matrix.
+- Compare inline and table-indexed labels across repetition rates and text widths.
+- Compare fixed and variable coordinate rows, and flat and grouped relations
+  across key widths and target counts, in the Wire/Candid matrix.
+- Compare unit and nested optional lists with Candid, and measure absolute versus
+  gap-encoded ordered integers across element-count and gap-width boundaries.
+- Compare counted flag bitmaps and run-length encoded enum lists with their
+  ordinary list representations in Wire and Candid. Boolean-list advice uses
+  the declared bound to identify fields too short for a counted bitmap to save bytes.
+
 ## [0.24.6] - 2026-11-18
 
 - Adopt authenticated Toko Tooling 0.45.1 and use its setup diagnostic helper in CI.

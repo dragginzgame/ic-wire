@@ -84,12 +84,12 @@ jobs:
       - name: Check portable codec, host schemas and derive diagnostics
         run: |
           make lint lint-host lint-compatibility doc doc-host
-          cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked --offline -- -D warnings
+          cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked -- -D warnings
           make test test-host test-compatibility
-          cargo test -p ic-wire --features derive --test derive_tests --locked --offline
+          cargo test -p ic-wire --features derive --test derive_tests --locked
       - name: Check Wire and Candid comparison matrix
         if: runner.os == 'Linux'
-        run: cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --features candid-comparison --test candid_matrix --locked --offline
+        run: cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --features candid-comparison --test candid_matrix --locked
       - name: Check native instruction driver without a simulator
         if: runner.os == 'Linux'
         run: make lint-instructions doc-instructions
@@ -109,7 +109,7 @@ jobs:
           make check-wasm check-wasm-host check-consumer-wasm
           cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
             --features ic --example instruction-counter --target wasm32-unknown-unknown \
-            --locked --offline -- -D warnings
+            --locked -- -D warnings
       - name: Retain sanitized setup diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

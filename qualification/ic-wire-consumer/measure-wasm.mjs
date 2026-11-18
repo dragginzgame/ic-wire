@@ -53,7 +53,7 @@ function sections(bytes) {
 }
 for (const profile of ['wire-size','wire-speed']) {
   const target=join(output,profile);
-  command('cargo',['build','--manifest-path','qualification/Cargo.toml','-p','ic-wire-consumer','--bin',workload,'--target','wasm32-unknown-unknown','--profile',profile,'--target-dir',target,'--locked','--offline']);
+  command('cargo',['build','--manifest-path','qualification/Cargo.toml','-p','ic-wire-consumer','--bin',workload,'--target','wasm32-unknown-unknown','--profile',profile,'--target-dir',target,'--locked']);
   const path=join(target,'wasm32-unknown-unknown',profile,`${workload}.wasm`);
   const bytes=readFileSync(path), module=new WebAssembly.Module(bytes);
   assert.deepEqual(WebAssembly.Module.imports(module),[]);

@@ -290,3 +290,121 @@ fn diagnostic_paths_are_bounded_and_clean_handlers_are_not_skipped() {
         .unwrap();
     assert!(called);
 }
+
+#[test]
+fn advice_uses_reachable_list_bounds() {
+    let words = json!({"k":"list","item":{"k":"u","bits":32},"max":3});
+    let types = BTreeMap::from([(
+        "Root".into(),
+        json!({"k":"tuple","items":[
+            {"k":"list","max":0,"item":{"k":"u","bits":32}},
+            {"k":"array","max":0,"item":words},
+            {"k":"list","max":1,"item":{"k":"array","max":0,"item":words}},
+            words
+        ]}),
+    )]);
+    let report = lint_roots(
+        &types,
+        &BTreeMap::from([("Reply".into(), "Root".into())]),
+        &BTreeMap::new(),
+    );
+    let warnings: Vec<_> = report
+        .warnings
+        .iter()
+        .map(|w| (w.path.as_str(), w.max_elements))
+        .collect();
+    assert_eq!(
+        warnings,
+        [
+            ("/Reply/items/2/list/empty-array", Some(1)),
+            ("/Reply/items/3/list/u32", Some(3))
+        ]
+    );
+    assert!(
+        report
+            .to_string()
+            .contains("/Reply/items/3/list/u32 (max 3 elements)")
+    );
+}
+
+#[test]
+fn bitmap_advice_depends_on_the_flag_count_bound() {
+    let types = BTreeMap::from([(
+        "Flags".into(),
+        json!({"k":"tuple","items":[
+            {"k":"list","max":2,"item":{"k":"bool"}},
+            {"k":"list","max":3,"item":{"k":"bool"}},
+            {"k":"list","item":{"k":"bool"}}
+        ]}),
+    )]);
+    let report = lint_roots(
+        &types,
+        &BTreeMap::from([("Flags".into(), "Flags".into())]),
+        &BTreeMap::new(),
+    );
+    let [two, three, unbounded] = report.warnings.as_slice() else {
+        panic!("expected advice for each boolean list");
+    };
+    assert!(two.representation.contains("cannot save bytes"));
+    assert!(
+        three
+            .representation
+            .contains("compare a bounded flag count")
+    );
+    assert_eq!(three.representation, unbounded.representation);
+}
+
+#[test]
+fn scalar_bounds_identify_one_byte_integer_lists() {
+    for bits in [16, 32, 64] {
+        for (item, fits) in [
+            (json!({"k":"u","bits":bits,"max":127}), true),
+            (json!({"k":"u","bits":bits,"max":128}), false),
+            (json!({"k":"i","bits":bits,"min":-64,"max":63}), true),
+            (json!({"k":"i","bits":bits,"min":-65,"max":63}), false),
+            (json!({"k":"i","bits":bits,"min":-64,"max":64}), false),
+            (json!({"k":"i","bits":bits,"max":63}), false),
+            (json!({"k":"i","bits":bits,"min":-64}), false),
+        ] {
+            let types =
+                BTreeMap::from([("Values".into(), json!({"k":"list","max":1,"item":item}))]);
+            let report = lint_roots(
+                &types,
+                &BTreeMap::from([("Values".into(), "Values".into())]),
+                &BTreeMap::new(),
+            );
+            assert_eq!(
+                report.warnings[0]
+                    .representation
+                    .contains("one varint byte"),
+                fits,
+                "{item}"
+            );
+        }
+    }
+}
+
+#[test]
+fn hash_list_advice_accounts_for_the_first_byte_prefix_boundary() {
+    for (width, last_single_byte) in [(16, 7), (32, 3)] {
+        for max in [Some(last_single_byte), Some(last_single_byte + 1), None] {
+            let mut list =
+                json!({"k":"list","item":{"k":"array","max":width,"item":{"k":"u","bits":8}}});
+            if let Some(max) = max {
+                list["max"] = json!(max);
+            }
+            let report = lint_roots(
+                &BTreeMap::from([("Hashes".into(), list)]),
+                &BTreeMap::from([("Hashes".into(), "Hashes".into())]),
+                &BTreeMap::new(),
+            );
+            assert_eq!(report.warnings.len(), 1);
+            let warning = &report.warnings[0];
+            assert_eq!(warning.path, format!("/Hashes/list/hash{width}"));
+            assert_eq!(
+                warning.representation.contains("same payload size"),
+                max == Some(last_single_byte)
+            );
+        }
+    }
+}

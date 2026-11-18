@@ -26,6 +26,18 @@ Identity comparisons use Platform Types on Wire and Candid principal/account
 values with matching fields. Checks distinguish absent and explicit-zero subaccounts.
 Linux CI runs this target. Ragged lists keep the same row lengths across small
 values, one maximum per 16 elements, and all maxima.
+Finite-float rows compare ordinary Wire and Candid lists with the Wire finite
+adapter at byte- and element-prefix boundaries. They check the decoded bits,
+including negative zero and subnormals, and qualify non-finite rejection separately.
+Signed and unsigned 128-bit rows include values beyond the 64-bit range.
+Sparse-reading rows compare optional slots with an explicit slot count and
+ordered (index, value) pairs. They retain present zero and trailing empty slots.
+UTF-8 rows hold byte length constant for one- through four-byte characters at
+the 128- and 16,384-byte length-prefix transitions.
+Repeated-label rows compare inline text with a per-message table of distinct
+labels and ordered u16 indices. Sizes include the complete table and references.
+Rows vary message length, distinct label count and label width independently
+where possible, including the transition from index 127 to 128.
 Fixed-width rows compare boolean lists and 16- and 32-byte hashes in ordinary
 Wire, Candid and bulk Wire. Hash size rows use 524,288 Wire nodes for both
 representations. A separate 511-element check exercises the 65,536-node limit.
@@ -33,8 +45,39 @@ The structural cases cover recursive trees, maps with optional values, ragged
 integer lists and success/error variants. Primitive f32 cases compare decoded
 bits, including signed zero and a noncanonical quiet NaN payload.
 
+Unit, optional-unit and nested-option lists exercise empty values, presence tags
+and the 127/128 element-count boundary. For 128 units the Wire payload is just
+the two-byte count. Alternating absent and present units takes 130 bytes.
+
+The ordered-sequence rows compare a nonempty list of absolute u64 values with
+its first value and unsigned gaps. Both layouts preserve duplicates. For 128
+consecutive values starting at 1,700,000,000, the Wire payload shrinks from 642
+to 133 bytes. The complete Candid message grows from 1,035 to 1,047 bytes.
+The matrix also covers singletons, large gaps and the 127/128 gap-width boundary.
+
+Flag bitmap rows include the logical flag count so trailing false flags survive
+byte padding. At 128 flags, the bitmap reduces Wire from 130 to 19 bytes and
+Candid from 139 to 42. At one flag it costs an extra Wire byte. State-run rows
+compare a list of enum tags with ordered (state, count) pairs. For 256 entries,
+runs of eight reduce Wire from 258 to 65 bytes and Candid from 287 to 132.
+When the state changes every entry, the pairs grow to 514 and 805 bytes.
+Both comparisons measure the complete payload for each consumer schema.
+
+Three-axis point rows compare fixed `[i16; 3]` coordinates with vectors holding
+the same three coordinates. At 128 points, fixed arrays use 642 Wire bytes and
+vectors use 770. Each inner vector adds a count byte. Both Candid messages use
+909 bytes because both coordinate types encode as `vec int16`.
+
+Relation rows compare source-ordered pairs with a map from each source to its
+ordered list of targets. They preserve repeated targets and cover sources with
+at least one edge, plus the empty relation. For 16 sources starting at key
+1,000,000, grouping one edge per source grows Wire from 81 to 97 bytes. With
+eight edges per source, grouping reduces Wire from 578 to 257 bytes and Candid
+from 785 to 354. The matrix varies source-key width and crosses the 127/128
+count boundary separately for sources and targets.
+
 ```sh
-cargo test --manifest-path qualification/Cargo.toml --locked --offline \
+cargo test --manifest-path qualification/Cargo.toml --locked \
   -p ic-wire-compatibility --features candid-comparison --test candid_matrix -- --nocapture --test-threads=1
 ```
 
@@ -57,10 +100,10 @@ For installed instructions, whole Wasm sizes and native allocations, see the
 ## Focused checks
 
 Run from the repository root after `cargo fetch --locked --manifest-path
-qualification/Cargo.toml`. Checks use locked offline dependencies.
+qualification/Cargo.toml`. Checks use the workspace lockfile and respect Cargo’s network settings.
 
 ```sh
-cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --test compatibility --test codec_contracts --locked --offline
+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --test compatibility --test codec_contracts --locked
 make test-allocation
 make test-consumer
 make check-consumer-wasm

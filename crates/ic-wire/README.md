@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.24.6"
+ic-wire = "0.25.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -59,6 +59,7 @@ limit for `N` in either layout.
 
 | What matters for this field? | Starting choice | How to confirm |
 | --- | --- | --- |
+| Schema limits every unsigned value to 0–127 or every signed value to −64–63 | Keep the ordinary list for payload size | Each element uses one varint byte throughout that range. |
 | Typical values are small, or their distribution is unknown | `List<T, N>` for ordinary varints | Compare `encoded_len` for both layouts on representative inputs. |
 | Most values require many varint bytes | `Packed<T, N>` for fixed-width words | Check typical and largest allowed messages against your byte budget. |
 | Encoding or decoding a large list dominates IC instructions | Try `Packed<T, N>`, even for small integers | Measure encode and decode on the target canister and check the larger small-value payload fits. |
@@ -76,14 +77,47 @@ meet your budgets and you already ship one, keep the existing layout. Select
 once per schema: switching layouts per message changes how the receiver must
 decode the field.
 
+### Floating-point lists
+
+Keep an ordinary list when NaN or infinity is valid. For finite-only fields,
+the bulk adapters preserve the bits of finite values, including negative zero.
+Both layouts use four bytes per f32 or eight per f64. Their prefixes count
+different units, so packing first costs an extra byte at 32 f32s or 16 f64s.
+At 128 elements the ordinary count also needs two bytes and the sizes match again.
+
 ### Flags and fixed-size hashes
 
 Ordinary boolean lists and `serde_packed::bools` both use one byte per flag
 plus the count prefix. Choose the adapter for bulk traversal and boolean-byte
-validation. For a list of 16- or 32-byte hashes, `Packed<[u8; W], N>`
+validation. If payload size matters, compare a bounded flag count and a
+length-prefixed bitmap. In the measured Wire layout the bitmap costs one extra
+byte at one flag, ties at two, and first saves a byte at three. At 128 flags
+it uses 19 bytes versus 130. Specify bit order and enforce the flag bound and
+exactly `ceil(count / 8)` bytes when decoding.
+
+For a list of 16- or 32-byte hashes, `Packed<[u8; W], N>`
 counts payload bytes in its prefix, while an ordinary list counts hashes.
-Packing can therefore cost a prefix byte while substantially reducing node
-charges. Choose the layout against both the payload and traversal budgets.
+At a field bound of seven 16-byte hashes or three 32-byte hashes, both prefixes
+always fit in one byte. Packing then reduces traversal at the same payload size.
+The first extra prefix byte appears at eight or four hashes respectively.
+
+### Sparse readings and repeated labels
+
+For mostly empty readings, compare a list of optional values with a slot count
+and ordered index/value pairs. Include the slot count so trailing empty slots
+survive decoding. Measure both typical and dense inputs, where the index for
+each reading can outweigh the savings from omitting empty slots.
+
+For repeated labels, compare inline text with a per-message table and a list of
+indices. Include the table in the measured payload and try messages with all
+distinct labels. The choice depends on label length and repetition, which the
+schema alone cannot tell you.
+
+For consecutive repeats of the same enum state, compare a list of tags with
+ordered `(state, run_length)` pairs. For 256 states with runs of eight, pairs
+used 65 Wire bytes versus 258 for tags. When the state changed every entry,
+pairs used 514 bytes. Measure both patterns and bound the sum of run lengths
+before expanding the list.
 
 ## Optional host features
 
@@ -113,6 +147,9 @@ Register application roots with `SchemaRegistry`, finish into `ValidatedRegistry
 then call `payload_module` or `method_module` with explicit `PayloadLimits`, an
 acknowledgement map and a diagnostic handler. Display the bulk report or reject
 it with `is_clean()`; acknowledgements require exact paths and review reasons.
+Warnings include the declared maximum element count when available. Empty-only
+collections skip element advice; lists that can contain zero-byte elements still
+receive traversal guidance.
 
 Write `ic_wire::typescript::RUNTIME` to `runtime.ts` beside the generated modules
 and select `./runtime.ts` as their runtime import. Compile them together with a

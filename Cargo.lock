@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.24.6"
+version = "0.25.0"
 dependencies = [
  "bytemuck",
  "ic-platform-types",
@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.24.6"
+version = "0.25.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -215,9 +215,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.1"
+version = "0.45.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc38b1d6932310739c21ab8a821c811d4bf43e306f89751faea38638c8bc1373"
+checksum = "85a1ec2a953eb8c41f66fdb121591c64e7ae3b6d77196a982740e790f0ed021a"
 
 [[package]]
 name = "unicode-ident"

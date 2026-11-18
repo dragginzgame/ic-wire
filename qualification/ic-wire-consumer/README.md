@@ -22,8 +22,8 @@ From the repository root:
 ```sh
 make test-consumer
 make check-consumer-wasm
-cargo run --manifest-path qualification/Cargo.toml -p ic-wire-consumer --features schema --bin wire-consumer-generate --locked --offline -- qualification/target/consumer-client
-IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --features typescript --test typescript consumer_cases --locked --offline
+cargo run --manifest-path qualification/Cargo.toml -p ic-wire-consumer --features schema --bin wire-consumer-generate --locked -- qualification/target/consumer-client
+IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --features typescript --test typescript consumer_cases --locked
 ```
 
 The generator writes payload.ts, methods.ts and the matching runtime.ts into the
