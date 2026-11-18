@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.24.6] - 2026-11-18
+
+- Adopt authenticated Toko Tooling 0.45.1 and use its setup diagnostic helper in CI.
+  Limit attempt-log reads to 1 MiB per file and label excerpts by number.
+- Extend the private comparison with recursive trees, maps, ragged lists, results
+  and bit-exact f32 values including signed zero, infinities and a NaN payload.
+  Run the matrix on Linux CI with matched small, sparse-wide and wide ragged lists.
+- Compare ordinary and bulk boolean and fixed-size hash fields across prefix
+  boundaries, including a hash-list traversal budget regression check.
+- Compare bounded List, Vec, Packed and Candid from 1 through 4,096 elements,
+  and add Principal and Account round trips with exact subaccount checks.
+
 ## [0.24.5] - 2026-11-18
 
 - Add an optional private Candid comparison for payload sizes and round trips.

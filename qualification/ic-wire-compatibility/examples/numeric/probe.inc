@@ -1,8 +1,8 @@
 use std::hint::black_box;
 
-fn workload(stride: usize) -> Value {
+fn workload(len: usize, stride: usize) -> Value {
     prepare(
-        (0..4096)
+        (0..len)
             .map(|i| {
                 if stride != 0 && i % stride == 0 {
                     u32::MAX
@@ -25,8 +25,11 @@ extern "C" fn measure() {
     if raw::msg_arg_data_size() != 0 {
         raw::trap(b"expected empty request");
     }
-    for stride in [0, 16, 1] {
-        let value = workload(black_box(stride));
+    for (len, stride) in [1, 16, 127, 128, 4096]
+        .into_iter()
+        .flat_map(|len| [0, 16, 1].map(|stride| (len, stride)))
+    {
+        let value = workload(black_box(len), black_box(stride));
         let bytes = encode(&value);
         assert_eq!(decode(&bytes), value);
         let start = raw::instruction_counter();
@@ -48,8 +51,11 @@ static ALLOCATOR: &stats_alloc::StatsAlloc<std::alloc::System> = &stats_alloc::I
 #[cfg(all(test, not(target_family = "wasm")))]
 #[test]
 fn allocations() {
-    for stride in [0, 16, 1] {
-        let value = workload(stride);
+    for (len, stride) in [1, 16, 127, 128, 4096]
+        .into_iter()
+        .flat_map(|len| [0, 16, 1].map(|stride| (len, stride)))
+    {
+        let value = workload(len, stride);
         let warm = encode(&value);
         assert_eq!(decode(&warm), value);
         let region = stats_alloc::Region::new(ALLOCATOR);
@@ -60,7 +66,7 @@ fn allocations() {
         let decoding = region.change();
         assert_eq!(roundtrip, value);
         println!(
-            "stride={stride} payload={} encode={encoding:?} decode={decoding:?}",
+            "len={len} stride={stride} payload={} encode={encoding:?} decode={decoding:?}",
             bytes.len()
         );
     }

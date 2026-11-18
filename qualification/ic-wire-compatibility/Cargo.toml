@@ -66,6 +66,11 @@ required-features = ["candid-comparison"]
 workspace = true
 
 [[example]]
+name = "numeric-bounded"
+path = "examples/numeric/bounded.rs"
+crate-type = ["cdylib"]
+
+[[example]]
 name = "numeric-ordinary"
 path = "examples/numeric/ordinary.rs"
 crate-type = ["cdylib"]

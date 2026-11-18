@@ -1,9 +1,9 @@
 # Toko Tooling snapshot v1
-# version	0.45.0
+# version	0.45.1
 # layout	vendor
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	3789a925c1165317eff84cc80436195b66c0478b0c2b441bc2f1a755caf6a23a
+revision	dc38b1d6932310739c21ab8a821c811d4bf43e306f89751faea38638c8bc1373
 # entrypoint	TOKO-TOOLING.md
 # entrypoint	vendor/toko-tooling/make/consumer.mk
 # entrypoint	vendor/toko-tooling/make/cargo-dependencies.mk
@@ -11,6 +11,7 @@ revision	3789a925c1165317eff84cc80436195b66c0478b0c2b441bc2f1a755caf6a23a
 # entrypoint	vendor/toko-tooling/scripts/ci/check-formatting-hooks.sh
 # entrypoint	vendor/toko-tooling/scripts/ci/install-ci-tool.sh
 # entrypoint	vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh
+# entrypoint	vendor/toko-tooling/scripts/ci/SetupDiagnostics.pm
 file	b7ed261ca8619522abd6c240bce178cb30b771890f77afe56b7673be7e5e5f0a	-	TOKO-TOOLING.md
 file	e5be6f538ee619be119aef9b3fca9d156f35c08732d9775e4e2efd698db8cbd7	-	vendor/toko-tooling/make/consumer.mk
 file	07b59f8cc784c79c648d379561f2493e40bac5b7c2809e8eda960cba661fae7d	-	vendor/toko-tooling/make/cargo-dependencies.mk
@@ -18,6 +19,7 @@ file	1085e5521dfacb38aed065b70f905aab666ab73ef49dd5a25270c2ec2cf63710	x	vendor/t
 file	4b6be8e82fd0fd2dd5006da4fc398200710d57dcfb8d3334187b1ef7f2e30064	x	vendor/toko-tooling/scripts/ci/check-formatting-hooks.sh
 file	e0f1b194ddbe5e5ae35864edc67727993511e093cff07506b4ffa503681edd52	x	vendor/toko-tooling/scripts/ci/install-ci-tool.sh
 file	31c47b675fba90850681c6fac0d685def34b08a68e7e05bc55ae0403419fdf82	x	vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh
+file	6669586f99f4395332b1204c284648a5bf49ce2d029883e3bf5f525e2dcb5be4	-	vendor/toko-tooling/scripts/ci/SetupDiagnostics.pm
 file	578a5f7217e378280fe378328d39e4b7dcea653bd868159b57362461bd4e8555	x	vendor/toko-tooling/scripts/ci/verify-file-checksum.sh
 file	aec8dfcff940adbf7ca69d0e9edb4cd31b65648e1deef299ffb194e94e64c536	x	vendor/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh
 file	da86464696f4f600f034566cef732aa680dc9c577e534519c71ee3d07172a875	-	vendor/toko-tooling/scripts/dev/toko-tooling.sh

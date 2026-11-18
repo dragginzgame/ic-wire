@@ -4,7 +4,7 @@ Host-only schema projection for IC Wire. Prefer the coordinated re-export:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.24.5", features = ["derive"] }
+ic-wire = { version = "0.24.6", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 

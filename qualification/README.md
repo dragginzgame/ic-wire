@@ -22,6 +22,16 @@ verify that each codec decodes its own bytes back to the input. Rows compare a
 Wire payload (add 11 bytes for a Wire frame) with a complete single-argument
 Candid message including its type information. The numeric list cases exercise
 both short and maximum-width Wire varints.
+Identity comparisons use Platform Types on Wire and Candid principal/account
+values with matching fields. Checks distinguish absent and explicit-zero subaccounts.
+Linux CI runs this target. Ragged lists keep the same row lengths across small
+values, one maximum per 16 elements, and all maxima.
+Fixed-width rows compare boolean lists and 16- and 32-byte hashes in ordinary
+Wire, Candid and bulk Wire. Hash size rows use 524,288 Wire nodes for both
+representations. A separate 511-element check exercises the 65,536-node limit.
+The structural cases cover recursive trees, maps with optional values, ragged
+integer lists and success/error variants. Primitive f32 cases compare decoded
+bits, including signed zero and a noncanonical quiet NaN payload.
 
 ```sh
 cargo test --manifest-path qualification/Cargo.toml --locked --offline \

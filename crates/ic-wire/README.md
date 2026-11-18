@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.24.5"
+ic-wire = "0.24.6"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -63,12 +63,27 @@ limit for `N` in either layout.
 | Most values require many varint bytes | `Packed<T, N>` for fixed-width words | Check typical and largest allowed messages against your byte budget. |
 | Encoding or decoding a large list dominates IC instructions | Try `Packed<T, N>`, even for small integers | Measure encode and decode on the target canister and check the larger small-value payload fits. |
 
+For short lists, include typical lengths in the decision. On the measured opt-z
+canister, a single small `u32` used 2 bytes and 1,075 encode instructions with
+`List`, versus 5 bytes and 1,121 instructions with `Packed`. At 16 such values,
+`Packed` used fewer instructions for both encoding and decoding, while `List`
+still produced the shorter payload.
+
 For example, 4,096 copies of `1_u32` use 4,098 ordinary payload bytes or
 16,387 packed bytes. With 4,096 copies of `u32::MAX`, the ordinary payload
 grows to 20,482 bytes and the packed payload stays at 16,387. If both layouts
 meet your budgets and you already ship one, keep the existing layout. Select
 once per schema: switching layouts per message changes how the receiver must
 decode the field.
+
+### Flags and fixed-size hashes
+
+Ordinary boolean lists and `serde_packed::bools` both use one byte per flag
+plus the count prefix. Choose the adapter for bulk traversal and boolean-byte
+validation. For a list of 16- or 32-byte hashes, `Packed<[u8; W], N>`
+counts payload bytes in its prefix, while an ordinary list counts hashes.
+Packing can therefore cost a prefix byte while substantially reducing node
+charges. Choose the layout against both the payload and traversal budgets.
 
 ## Optional host features
 

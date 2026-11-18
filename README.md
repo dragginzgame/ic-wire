@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.5**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.24.6**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -97,7 +97,7 @@ measurement commands; see [qualification](qualification/README.md) for their
 prerequisites and evidence limits. IC measurements additionally require explicitly
 selecting PocketIC.
 
-Toko Tooling **0.45.0** is installed through its authenticated published exporter.
+Toko Tooling **0.45.1** is installed through its authenticated published exporter.
 `.toko-tooling.snapshot` records source identity and owned bytes.
 `make snapshot-check` verifies only installed bytes; `make toko-tooling-check`
 also admits product declarations and Cargo.lock. `make qualification-tooling-check`
@@ -119,7 +119,7 @@ contracts. Linux also checks the simulator driver without launching PocketIC,
 executes the standalone Wasm consumer, and checks generated TypeScript with Node
 24.21.0 and the locked compiler. A separate Linux job scans full Git history once
 per workflow run with the snapshot-pinned Gitleaks. Failed setup and formatting diagnostics are sanitized and bounded to nine
-16 KiB excerpts per phase, then retained for seven days. Tool payloads and raw
+16 KiB excerpts per phase, then retained for seven days. Attempt logs over 1 MiB are skipped. Tool payloads and raw
 logs are excluded from uploads. Hosted results are asynchronous evidence; local passes do
 not establish macOS or hosted success. Simulator measurements, browser provisioning,
 publication and deployment remain separately selected operations.

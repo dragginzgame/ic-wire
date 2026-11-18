@@ -57,32 +57,43 @@ PocketIC 16.1.0 executable:
 POCKET_IC_BIN=/absolute/path/to/pocket-ic bash qualification/ic-wire-instructions/run.sh --numeric
 ```
 
-Each guest encodes and decodes 4,096 u32 values, either all 1, one u32::MAX per
-16 elements, or all u32::MAX. Wire uses payload encoding. Candid encodes one
-argument. The packed guest starts with an owned packed field. Input construction,
-round-trip assertions and raw reply handling occur outside the counter intervals.
-Counts include dropping the output. Each table cell reports the median encode /
-decode instructions over three query calls from distinct callers. Wasm bytes are
-whole uncompressed guest modules including the probe. These numbers describe this
-fixture on Rust 1.100.0 and Candid 0.10.40.
+Each guest round-trips lists of 1, 16, 127, 128 and 4,096 u32 values in that
+order within each query. For each length it measures all ones, one maximum
+value every 16 elements starting with the first, and all maxima. Wire encodes
+payloads and Candid encodes one argument. Input construction and round-trip
+assertions precede the counters. Intervals include destruction of the result.
+Allocator and Wasm linear-memory state carry over within the query. Measurements
+are medians of three calls from distinct callers on PocketIC 16.1.0, Rust
+1.100.0 and Candid 0.10.40.
+
+At 4,096 elements the whole uncompressed guest sizes include the multi-length
+probe. Instruction pairs are encode / decode.
 
 | Profile | Representation | Wasm bytes | Small | Sparse wide | Wide |
 |---|---|---:|---:|---:|---:|
-| opt-z | Ordinary Wire | 21,108 | 332,767 / 512,305 | 461,279 / 556,593 | 2,388,959 / 1,220,913 |
-| opt-z | Packed Wire | 20,677 | 17,623 / 111,424 | 17,623 / 111,424 | 17,623 / 111,424 |
-| opt-z | Candid | 258,732 | 52,555 / 321,902 | 53,066 / 321,902 | 53,066 / 321,902 |
-| opt-3 | Ordinary Wire | 22,801 | 291,517 / 236,640 | 341,693 / 261,472 | 1,094,333 / 633,952 |
-| opt-3 | Packed Wire | 21,225 | 17,159 / 29,302 | 17,159 / 29,302 | 17,159 / 29,302 |
-| opt-3 | Candid | 358,278 | 47,113 / 354,991 | 47,549 / 354,991 | 47,549 / 354,991 |
+| opt-z | Vec | 21,592 | 332,767 / 512,321 | 461,279 / 556,609 | 2,388,959 / 1,220,929 |
+| opt-z | List | 22,115 | 332,825 / 525,126 | 464,409 / 569,414 | 2,438,169 / 1,233,734 |
+| opt-z | Packed | 21,211 | 17,623 / 111,424 | 17,623 / 111,424 | 17,623 / 111,424 |
+| opt-z | Candid | 259,180 | 133,658 / 322,057 | 53,508 / 321,932 | 53,285 / 321,902 |
+| opt-3 | Vec | 23,172 | 291,517 / 236,640 | 341,693 / 261,472 | 1,094,333 / 633,952 |
+| opt-3 | List | 24,158 | 291,517 / 257,220 | 341,693 / 282,056 | 1,094,333 / 654,536 |
+| opt-3 | Packed | 21,874 | 17,159 / 29,302 | 17,159 / 29,302 | 17,159 / 29,302 |
+| opt-3 | Candid | 358,649 | 128,141 / 355,146 | 47,984 / 355,020 | 47,762 / 354,991 |
 
-Ordinary Wire payloads were 4,098 / 5,122 / 20,482 bytes in distribution order.
-Packed payloads were 16,387 bytes throughout and Candid messages were 16,395.
-Use observed value widths and the application's byte and instruction budgets
-when selecting a field layout. Changing an existing field changes its contract.
+For all-ones input, the bounded types have the following opt-z costs.
 
-The separate warmed Linux allocator probe observed one encode allocation for
-both Wire representations. Ordinary decode took one allocation and ten growth
-reallocations, while packed decode took one allocation of 16,384 bytes. Candid
-took 16 encode allocations and three reallocations, then 23 decode allocations.
-The runner retains native allocation details, all counter samples, artifact
-hashes and process cleanup evidence in its printed output directory.
+| Elements | List bytes | Packed bytes | List instructions | Packed instructions |
+|---:|---:|---:|---:|---:|
+| 1 | 2 | 5 | 1,075 / 996 | 1,121 / 805 |
+| 16 | 17 | 65 | 2,290 / 4,220 | 1,181 / 1,210 |
+| 127 | 128 | 510 | 11,281 / 19,331 | 1,680 / 4,228 |
+| 128 | 130 | 514 | 11,429 / 19,500 | 1,684 / 4,255 |
+| 4096 | 4,098 | 16,387 | 332,825 / 525,126 | 17,623 / 111,424 |
+
+At 4,096 elements, Vec and List payload sizes matched across distributions
+(4,098 / 5,122 / 20,482 bytes), versus 16,387 for Packed and 16,395 for Candid.
+On Linux, each Wire encoder allocated once. Decoding 4,096 ones yielded one
+allocation followed by 10 reallocations for Vec, 12 for List and zero for Packed.
+For this input Candid used 16 allocations and three reallocations on encode,
+then 23 allocations on decode. See the runner's allocations.txt for every length
+and instructions.json for all samples and artifact hashes.

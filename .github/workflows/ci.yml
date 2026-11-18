@@ -87,6 +87,9 @@ jobs:
           cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked --offline -- -D warnings
           make test test-host test-compatibility
           cargo test -p ic-wire --features derive --test derive_tests --locked --offline
+      - name: Check Wire and Candid comparison matrix
+        if: runner.os == 'Linux'
+        run: cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --features candid-comparison --test candid_matrix --locked --offline
       - name: Check native instruction driver without a simulator
         if: runner.os == 'Linux'
         run: make lint-instructions doc-instructions
