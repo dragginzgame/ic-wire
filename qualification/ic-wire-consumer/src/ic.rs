@@ -1,16 +1,14 @@
 //! Private IC counter wrapper; SDK is confined to this optional qualification guest.
 // Rust 2024 requires an unsafe attribute for this fixed IC ABI export.
 // All memory and system-call operations remain in published Runtime.
+use ic_platform_runtime::raw;
+
 // measure
-// Return instruction counts and frames for the upload workload.
-// scope  : public
-// limits : empty request, fixed workload
-#[cfg(target_arch = "wasm32")]
+// Return seven instruction counts and both frames for the fixed upload workload.
+// limits : empty request, 104-byte reply
 #[expect(unsafe_code, reason = "Fixed no-argument IC query export")]
 #[unsafe(export_name = "canister_query measure")]
 extern "C" fn measure() {
-    use ic_platform_runtime::raw;
-
     if raw::msg_arg_data_size() != 0 {
         raw::trap(b"expected empty counter request");
     }

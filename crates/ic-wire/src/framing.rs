@@ -35,6 +35,7 @@ pub(crate) fn validate_header(
     if header[..2] != *b"IW" || header[2..10] != method.to_le_bytes() || header[10] != direction {
         return Err(Error::Identity);
     }
+
     Ok(())
 }
 
@@ -57,6 +58,7 @@ pub const fn method_id(name: &str) -> u64 {
         }
         part += 1;
     }
+
     hash
 }
 

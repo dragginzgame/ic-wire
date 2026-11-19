@@ -52,7 +52,7 @@ To print the bounded list's native allocation measurements, run from the reposit
 cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --example numeric-bounded
 ```
 
-The Wasm binaries export the IC query in place of a process entrypoint.
-The query uses Platform Runtime’s wasm32-only raw calls. Native allocation runs
-install their own instrumented allocator so its overhead stays out of installed
-instruction counts.
+Each `numeric-*-ic` Cargo example builds an IC query as a Wasm cdylib. The
+`numeric-*` native examples run the same codecs and inputs with an instrumented
+allocator. The IC targets use Platform Runtime’s raw system calls. Use the
+measurement runner above to select the appropriate examples and profiles.

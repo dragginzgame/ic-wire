@@ -280,7 +280,7 @@ fn domain_validation_allocation_boundaries() {
     #[derive(serde::Deserialize)]
     struct Doubles(#[serde(with = "wire::serde_packed::finite_f64")] Vec<f64>);
     #[derive(serde::Deserialize)]
-    struct Nonzero(#[serde(with = "wire::serde_packed::nonzero_i64")] Vec<core::num::NonZeroI64>);
+    struct Nonzero(#[serde(with = "wire::serde_packed::nonzero_i64")] Vec<std::num::NonZeroI64>);
     let (result, stats) = measure(|| decode::<Bools>(&[2, 0, 2], Encoding::Payload, limits()));
     assert!(result.is_err());
     no_allocation(stats);

@@ -110,6 +110,10 @@ jobs:
           cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
             --features ic --example instruction-counter --target wasm32-unknown-unknown \
             --locked -- -D warnings
+          cargo clippy --manifest-path qualification/Cargo.toml -p ic-wire-compatibility \
+            --features ic,candid-comparison --target wasm32-unknown-unknown \
+            --example numeric-ordinary-ic --example numeric-bounded-ic \
+            --example numeric-packed-ic --example numeric-candid-ic --locked -- -D warnings
       - name: Retain sanitized setup diagnostics
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

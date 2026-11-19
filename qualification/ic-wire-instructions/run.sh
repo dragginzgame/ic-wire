@@ -15,9 +15,9 @@ printf 'Instruction evidence: %s\n' "$output"
 rustc -Vv > "$output/compiler.txt"
 if [[ ${1:-} == --numeric ]]; then
     for profile in wire-size wire-speed; do
-        cargo build --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --profile "$profile" --target wasm32-unknown-unknown --features candid-comparison --example numeric-bounded --example numeric-ordinary --example numeric-packed --example numeric-candid
+        cargo build --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --profile "$profile" --target wasm32-unknown-unknown --features ic,candid-comparison --example numeric-bounded-ic --example numeric-ordinary-ic --example numeric-packed-ic --example numeric-candid-ic
         for codec in ordinary bounded packed candid; do
-            cp "qualification/target/wasm32-unknown-unknown/$profile/examples/numeric-$codec.wasm" "$output/$profile-$codec.wasm"
+            cp "qualification/target/wasm32-unknown-unknown/$profile/examples/numeric_${codec}_ic.wasm" "$output/$profile-$codec.wasm"
         done
     done
     cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --features candid-comparison --example numeric-bounded --example numeric-ordinary --example numeric-packed --example numeric-candid -- --nocapture --test-threads=1 > "$output/allocations.txt"

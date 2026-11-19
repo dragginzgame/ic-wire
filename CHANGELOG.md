@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.26.1] - 2026-11-19
+
+- Adopt Toko Tooling 0.45.21 in both workspaces. Native allocation examples and
+  IC instruction guests now select their entry points through Cargo targets
+  and share the same numeric workloads without Wasm target guards. The
+  instruction driver verifies the prepared PocketIC executable before querying
+  its version.
+
 ## [0.26.0] - 2026-11-19
 
 - The optional TypeScript schema API, Wire derive and Platform type projections

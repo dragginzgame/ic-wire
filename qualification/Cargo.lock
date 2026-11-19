@@ -848,9 +848,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.18"
+version = "0.23.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7381b5315043417fe9c309223c516f0c43a4c1c5dc5620726b72f1a4785746e"
+checksum = "49ac0af0e78945df40f85dc34a65e47b2a9acd9716354169ecfc1911c6923f2a"
 
 [[package]]
 name = "ic-platform-types"
@@ -900,7 +900,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.26.0"
+version = "0.26.1"
 dependencies = [
  "bytemuck",
  "ic-platform-types",
@@ -940,7 +940,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.26.0"
+version = "0.26.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1409,9 +1409,9 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "pin-project-lite"
-version = "0.2.17"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+checksum = "c938015719552d665fd0553b90d96cd7ff58e83e4c061ca99e6bb78865a72752"
 
 [[package]]
 name = "pkg-config"
@@ -2342,9 +2342,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.18"
+version = "0.45.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d24c2c13aacee2afda27e77ed8d6c13ff5ad383e08a2f80645561b2a9f935b11"
+checksum = "af1ba8e16aaf1dae0951f08a228a4f00b928d09ff68997bd94ccc397ace5e4be"
 
 [[package]]
 name = "tower"

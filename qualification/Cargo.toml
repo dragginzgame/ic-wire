@@ -19,7 +19,7 @@ serde_json = { version = "1.0.154", default-features = false, features = ["alloc
 sha2 = "0.11.1"
 stats_alloc = "0.1.10"
 tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread"] }
-toko-tooling = "=0.45.18"
+toko-tooling = "=0.45.21"
 wire = { package = "ic-wire", path = "../crates/ic-wire" }
 
 [workspace.lints.cargo]
@@ -50,6 +50,7 @@ wildcard_imports = "warn"
 missing_panics_doc = "warn"
 must_use_candidate = "warn"
 too_many_lines = "allow"
+empty_line_after_doc_comments = "allow"
 
 [profile.wire-size]
 inherits = "release"

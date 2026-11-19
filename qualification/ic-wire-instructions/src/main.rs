@@ -1,6 +1,7 @@
 //! Installed counters over original PocketIC types; the runner owns the server.
 #![forbid(unsafe_code)]
 mod numeric;
+
 use ic_testkit::{
     pocket_ic::{CanisterId, PocketIcBuilder},
     server::{Deletion, Limits as ServerLimits, PreparedServer, Server},
@@ -8,6 +9,7 @@ use ic_testkit::{
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{fs, path::PathBuf, time::Duration};
+
 const OPERATIONS: [&str; 7] = [
     "encode_request",
     "decode_request",
@@ -17,14 +19,17 @@ const OPERATIONS: [&str; 7] = [
     "truncated",
     "loop",
 ];
+
 fn hash(bytes: &[u8]) -> String {
     use std::fmt::Write;
     let mut result = String::with_capacity(64);
     for byte in Sha256::digest(bytes) {
         write!(result, "{byte:02x}").unwrap();
     }
+
     result
 }
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let directory = PathBuf::from(
@@ -38,13 +43,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if std::env::var_os("IC_TESTKIT_POCKET_IC_URL").is_some() {
         return Err("owned prepared server required".into());
     }
-    let server_hash = hash(&fs::read(&server)?);
-    let version = std::process::Command::new(&server)
-        .arg("--version")
-        .output()?;
-    if !version.status.success() {
-        return Err("server version failed".into());
-    }
     if std::env::var_os("IC_WIRE_POCKET_IC_URL").is_some() {
         return Err("external endpoint overrides are not supported".into());
     }
@@ -52,6 +50,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("prepared server must be named pocket-ic".into());
     }
     let prepared = PreparedServer::check(server.parent().ok_or("server directory required")?)?;
+    let server_hash = ic_testkit::server::host_asset()?.binary_sha256;
+    let version = std::process::Command::new(prepared.path())
+        .arg("--version")
+        .output()?;
+    if !version.status.success() {
+        return Err("server version failed".into());
+    }
+
     let mut server_owner = Server::start(
         prepared,
         ServerLimits {
@@ -154,7 +160,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         fields.insert(
             "probe_sha256".into(),
             json!(hash(include_bytes!(
-                "../../ic-wire-compatibility/examples/numeric/probe/entry.rs"
+                "../../ic-wire-compatibility/examples/numeric/guest.rs"
+            ))),
+        );
+        fields.insert(
+            "workload_sha256".into(),
+            json!(hash(include_bytes!(
+                "../../ic-wire-compatibility/examples/numeric/workload.rs"
             ))),
         );
         fields.insert(
@@ -167,5 +179,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         serde_json::to_vec_pretty(&report)?,
     )?;
     println!("{}", serde_json::to_string_pretty(&report)?);
+
     Ok(())
 }

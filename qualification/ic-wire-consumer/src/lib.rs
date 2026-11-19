@@ -229,5 +229,6 @@ pub fn instruction_reply(mut counter: impl FnMut() -> u64) -> Vec<u8> {
     let mut reply: Vec<u8> = counts.into_iter().flat_map(u64::to_le_bytes).collect();
     reply.extend(request_bytes);
     reply.extend(receipt_bytes);
+
     reply
 }

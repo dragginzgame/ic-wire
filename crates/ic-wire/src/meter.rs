@@ -29,10 +29,12 @@ impl Budget {
         let available = self.units.get();
         if self.refused.get() || depth > self.depth || nodes < count || available < units {
             self.refused.set(true);
+
             return false;
         }
         self.units.set(available - units);
         self.nodes.set(nodes - count);
+
         true
     }
 
@@ -47,10 +49,12 @@ impl Budget {
         match self.units.get().checked_sub(units) {
             Some(remaining) => {
                 self.units.set(remaining);
+
                 true
             }
             None => {
                 self.refused.set(true);
+
                 false
             }
         }

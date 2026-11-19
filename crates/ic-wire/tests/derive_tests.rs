@@ -327,7 +327,7 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
             value: bool,
         }
         registry.register::<Same>("First").unwrap();
-        core::any::type_name::<Same>()
+        std::any::type_name::<Same>()
     };
     let second_name = {
         #[derive(Serialize, Wire)]
@@ -335,7 +335,7 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
             value: u8,
         }
         registry.register::<Same>("Second").unwrap();
-        core::any::type_name::<Same>()
+        std::any::type_name::<Same>()
     };
     assert_eq!(first_name, second_name);
     assert_eq!(registry.finish().unwrap_err(), GenerationError::Schema);

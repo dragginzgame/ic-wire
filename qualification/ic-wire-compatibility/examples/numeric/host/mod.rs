@@ -1,16 +1,17 @@
 #[cfg(test)]
 mod tests;
 
-use super::{black_box, decode, encode, workload};
+use super::{
+    decode, encode,
+    workload::{cases, workload},
+};
+use std::hint::black_box;
 
 #[global_allocator]
 static ALLOCATOR: &stats_alloc::StatsAlloc<std::alloc::System> = &stats_alloc::INSTRUMENTED_SYSTEM;
 
 pub(crate) fn allocations() {
-    for (len, stride) in [1, 16, 127, 128, 4096]
-        .into_iter()
-        .flat_map(|len| [0, 16, 1].map(|stride| (len, stride)))
-    {
+    for (len, stride) in cases() {
         let value = workload(len, stride);
         let warm = encode(&value);
         assert_eq!(decode(&warm), value);

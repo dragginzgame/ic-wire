@@ -15,6 +15,7 @@ category = "tests"
 ignored = ["toko-tooling"]
 
 [features]
+ic = ["dep:ic-platform-runtime"]
 candid-comparison = ["dep:candid"]
 typescript = [
     "wire/derive",
@@ -25,10 +26,8 @@ typescript = [
 
 [dependencies]
 candid = { workspace = true, features = ["serde_bytes"], optional = true }
+ic-platform-runtime = { workspace = true, optional = true, features = ["system-raw"] }
 ic-wire-consumer = { workspace = true, optional = true }
-
-[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-ic-platform-runtime = { workspace = true, features = ["system-raw"] }
 
 [dev-dependencies]
 ic-platform-types.workspace = true
@@ -67,17 +66,41 @@ workspace = true
 
 [[example]]
 name = "numeric-bounded"
-path = "examples/numeric/bounded.rs"
+path = "examples/numeric/bounded_allocations.rs"
 
 [[example]]
 name = "numeric-ordinary"
-path = "examples/numeric/ordinary.rs"
+path = "examples/numeric/ordinary_allocations.rs"
 
 [[example]]
 name = "numeric-packed"
-path = "examples/numeric/packed.rs"
+path = "examples/numeric/packed_allocations.rs"
 
 [[example]]
 name = "numeric-candid"
-path = "examples/numeric/candid.rs"
+path = "examples/numeric/candid_allocations.rs"
 required-features = ["candid-comparison"]
+
+[[example]]
+name = "numeric-ordinary-ic"
+path = "examples/numeric/ordinary_ic.rs"
+crate-type = ["cdylib"]
+required-features = ["ic"]
+
+[[example]]
+name = "numeric-bounded-ic"
+path = "examples/numeric/bounded_ic.rs"
+crate-type = ["cdylib"]
+required-features = ["ic"]
+
+[[example]]
+name = "numeric-packed-ic"
+path = "examples/numeric/packed_ic.rs"
+crate-type = ["cdylib"]
+required-features = ["ic"]
+
+[[example]]
+name = "numeric-candid-ic"
+path = "examples/numeric/candid_ic.rs"
+crate-type = ["cdylib"]
+required-features = ["ic", "candid-comparison"]
