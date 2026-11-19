@@ -125,6 +125,45 @@ pub fn decode_receipt(bytes: &[u8]) -> Result<Receipt, Error> {
     )
 }
 
+/// Collect the application types and describe the upload method for client generation
+/// and API baseline checks.
+///
+/// # Errors
+/// Returns a schema error if the application types exceed the registry limits.
+#[cfg(feature = "schema")]
+pub fn upload_contract() -> Result<
+    (
+        wire::typescript::ValidatedRegistry,
+        wire::typescript::Method<'static>,
+    ),
+    wire::typescript::GenerationError,
+> {
+    use wire::typescript::{Method, PayloadLimits, SchemaLimits, SchemaRegistry};
+
+    let method = Method {
+        export: "upload",
+        id: METHOD,
+        request: "Upload",
+        response: "Receipt",
+        request_limits: PayloadLimits {
+            bytes: 1389,
+            nodes: 32,
+            depth: 8,
+        },
+        response_limits: PayloadLimits {
+            bytes: 21,
+            nodes: 3,
+            depth: 2,
+        },
+    };
+
+    let mut registry = SchemaRegistry::new(SchemaLimits::default())?;
+    registry.register::<Upload>(method.request)?;
+    registry.register::<Receipt>(method.response)?;
+
+    Ok((registry.finish()?, method))
+}
+
 /// Generate typed payload and method clients from the application types.
 /// # Errors
 /// Returns schema or bounded-output admission errors.
@@ -133,43 +172,18 @@ pub fn clients(
     runtime: &str,
     mut diagnostics: impl FnMut(wire::typescript::BulkLintReport),
 ) -> Result<(String, String), wire::typescript::GenerationError> {
-    use wire::typescript::{Method, PayloadLimits, SchemaLimits, SchemaRegistry};
-    let mut registry = SchemaRegistry::new(SchemaLimits::default())?;
-    registry.register::<Upload>("Upload")?;
-    registry.register::<Receipt>("Receipt")?;
-    let graph = registry.finish()?;
-    let request = PayloadLimits {
-        bytes: 1389,
-        nodes: 32,
-        depth: 8,
-    };
-    let response = PayloadLimits {
-        bytes: 21,
-        nodes: 3,
-        depth: 2,
-    };
+    let (graph, method) = upload_contract()?;
+
     Ok((
         graph.payload_module(
             "uploadPayload",
-            "Upload",
+            method.request,
             runtime,
-            request,
+            method.request_limits,
             &Default::default(),
             &mut diagnostics,
         )?,
-        graph.method_module(
-            &[Method {
-                export: "upload",
-                id: METHOD,
-                request: "Upload",
-                response: "Receipt",
-                request_limits: request,
-                response_limits: response,
-            }],
-            runtime,
-            &Default::default(),
-            &mut diagnostics,
-        )?,
+        graph.method_module(&[method], runtime, &Default::default(), &mut diagnostics)?,
     ))
 }
 

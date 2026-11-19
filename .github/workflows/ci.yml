@@ -102,7 +102,7 @@ jobs:
         run: perl scripts/ci/setup-diagnostics.pl typescript npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund
       - name: Check strict generated clients and Rust/TypeScript exchange
         if: runner.os == 'Linux'
-        run: make lint-typescript check-typescript
+        run: make lint-typescript check-typescript check-api-manifest
       - name: Check portable Wasm and execute standalone consumer
         if: runner.os == 'Linux'
         run: |

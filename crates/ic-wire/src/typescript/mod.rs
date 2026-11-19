@@ -22,6 +22,8 @@ pub use native::{PackedField, SerdeBytesField};
 pub use native::{SchemaContext, SchemaRegistry, Wire};
 use serde_json::{Number, Value};
 
+const MAX_SAFE_INTEGER: u64 = (1_u64 << 53) - 1;
+
 /// Macro support for generated metadata; not a second schema API.
 #[doc(hidden)]
 pub mod __private {
@@ -358,7 +360,7 @@ impl Importer {
                     "hash16" => 16,
                     _ => 32,
                 };
-                if max.is_some_and(|n| n > ((1_u64 << 53) - 1) / width) {
+                if max.is_some_and(|n| n > MAX_SAFE_INTEGER / width) {
                     return Err(GenerationError::Complexity);
                 }
                 Node::Packed { word, nonzero, max }
@@ -487,7 +489,7 @@ fn bound(value: &Value, key: &str) -> Result<Option<u64>, GenerationError> {
         .get(key)
         .map(|n| {
             let n = n.as_u64().ok_or(GenerationError::Schema)?;
-            if n > (1_u64 << 53) - 1 {
+            if n > MAX_SAFE_INTEGER {
                 return Err(GenerationError::Complexity);
             }
             Ok(n)

@@ -4,7 +4,11 @@ mod admitted;
 #[cfg(test)]
 mod tests;
 
-use crate::{Encoding, Error, Limits, framing::validate_header, meter::Budget};
+use crate::{
+    Encoding, Error, Limits,
+    framing::{HEADER_BYTES, validate_header},
+    meter::Budget,
+};
 use serde::Deserialize;
 
 /// Decode exactly one payload or frame under explicit traversal allowances.
@@ -33,9 +37,12 @@ pub fn decode<'de, T: Deserialize<'de>>(
     let payload = match encoding {
         Encoding::Payload => input,
         Encoding::Frame { method, direction } => {
-            let (header, payload) = input.split_first_chunk::<11>().ok_or(Error::Malformed)?;
+            let (header, payload) = input
+                .split_first_chunk::<HEADER_BYTES>()
+                .ok_or(Error::Malformed)?;
             validate_header(method, direction, header)?;
-            limits = limits.without_prefix(11)?;
+            limits = limits.without_prefix(HEADER_BYTES)?;
+
             payload
         }
     };

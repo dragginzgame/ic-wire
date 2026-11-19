@@ -1,5 +1,7 @@
 use crate::Error;
 
+pub(crate) const HEADER_BYTES: usize = 11;
+
 /// Interpretation of the input byte span.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Encoding {
@@ -26,7 +28,7 @@ pub enum Direction {
 pub(crate) fn validate_header(
     method: u64,
     direction: Direction,
-    header: &[u8; 11],
+    header: &[u8; HEADER_BYTES],
 ) -> Result<(), Error> {
     let direction = match direction {
         Direction::Request => 0,
@@ -72,6 +74,6 @@ pub const fn method_id(name: &str) -> u64 {
 ///
 /// Returns [`Error::Identity`] for any marker, method or direction mismatch.
 /// The fixed-size argument excludes truncated headers at this API boundary.
-pub fn validate_request_header(method: u64, header: &[u8; 11]) -> Result<(), Error> {
+pub fn validate_request_header(method: u64, header: &[u8; HEADER_BYTES]) -> Result<(), Error> {
     validate_header(method, Direction::Request, header)
 }

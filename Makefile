@@ -27,6 +27,7 @@ help:
 	  'test-typescript       Exchange Rust bytes with current TypeScript (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
+	  'check-api-manifest    Compare the upload contract with its reviewed baseline' \
 	  'check-packages        Assemble archives and verify extracted-package consumers' \
 	  'check-browser         Chromium smoke (CLIENT_DIR and BROWSER required)' \
 	  'test-consumer         Standalone contract against the current codec' \
@@ -117,6 +118,13 @@ test-typescript:
 
 lint-typescript:
 	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked -- -D warnings
+
+.PHONY: check-api-manifest
+check-api-manifest: qualification-tooling-check | toko-execution-check
+	+@set -eu; candidate=$$(mktemp "$${TMPDIR:-/tmp}/wire-upload-api.XXXXXXXX"); trap 'rm -f "$$candidate"' EXIT; \
+	  cargo run --quiet --locked --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
+	    --features schema,wire/api-manifest --example upload-manifest > "$$candidate"; \
+	  diff -u qualification/ic-wire-consumer/api/upload.json "$$candidate"
 
 .PHONY: test-consumer check-consumer-wasm
 test-consumer check-consumer-wasm: qualification-tooling-check | toko-execution-check

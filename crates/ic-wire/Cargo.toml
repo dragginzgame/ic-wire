@@ -1,6 +1,6 @@
 [package]
 name = "ic-wire"
-version = "0.26.1"
+version = "0.27.0"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -13,6 +13,7 @@ description = "Bounded Serde/Postcard encoding with schema and TypeScript genera
 ignored = ["toko-tooling"]
 
 [features]
+api-manifest = ["typescript"]
 platform-types = ["typescript", "dep:ic-platform-types"]
 derive = ["typescript", "dep:ic-wire-derive"]
 typescript = ["dep:serde_json"]

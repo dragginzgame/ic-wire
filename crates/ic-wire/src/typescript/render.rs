@@ -1,7 +1,8 @@
 use super::{
-    GenerationError, Method, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT, ValidatedRegistry,
-    identifier,
+    GenerationError, MAX_SAFE_INTEGER, Method, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT,
+    ValidatedRegistry, identifier,
 };
+use crate::framing::HEADER_BYTES;
 use alloc::{
     collections::{BTreeMap, BTreeSet},
     format,
@@ -105,7 +106,8 @@ impl ValidatedRegistry {
         acknowledgements: &BTreeMap<String, String>,
         diagnostics: impl FnOnce(super::BulkLintReport),
     ) -> Result<String, GenerationError> {
-        self.admit_client(export, root, runtime_module, limits)?;
+        Self::admit_runtime_module(runtime_module)?;
+        self.admit_client(export, root, limits)?;
         let mut output = Output {
             text: String::new(),
             remaining: self.output_bytes,
@@ -120,14 +122,22 @@ impl ValidatedRegistry {
             acknowledgements,
         )?;
         diagnostics(report);
+
         Ok(output.text)
+    }
+
+    fn admit_runtime_module(module: &str) -> Result<(), GenerationError> {
+        if module.is_empty() || module.contains('\0') {
+            return Err(GenerationError::Schema);
+        }
+
+        Ok(())
     }
 
     fn admit_client(
         &self,
         export: &str,
         root: &str,
-        runtime_module: &str,
         limits: PayloadLimits,
     ) -> Result<(), GenerationError> {
         identifier(export)?;
@@ -140,8 +150,6 @@ impl ValidatedRegistry {
                 .names
                 .binary_search_by(|name| name.as_str().cmp(export))
                 .is_ok()
-            || runtime_module.is_empty()
-            || runtime_module.contains('\0')
             || limits.nodes == 0
             || limits.depth == 0
         {
@@ -149,10 +157,11 @@ impl ValidatedRegistry {
         }
         if [limits.bytes, limits.nodes, limits.depth]
             .into_iter()
-            .any(|n| n > (1_u64 << 53) - 1)
+            .any(|n| n > MAX_SAFE_INTEGER)
         {
             return Err(GenerationError::Complexity);
         }
+
         Ok(())
     }
 
@@ -184,22 +193,8 @@ impl ValidatedRegistry {
         if methods.len() > self.output_bytes {
             return Err(GenerationError::Complexity);
         }
-        let mut names = BTreeSet::new();
-        let mut ids = BTreeSet::new();
-        for method in methods {
-            for (root, limits) in [
-                (method.request, method.request_limits),
-                (method.response, method.response_limits),
-            ] {
-                self.admit_client(method.export, root, runtime_module, limits)?;
-                if limits.bytes > (1_u64 << 53) - 12 {
-                    return Err(GenerationError::Complexity);
-                }
-            }
-            if !names.insert(method.export) || !ids.insert(method.id) {
-                return Err(GenerationError::Schema);
-            }
-        }
+        Self::admit_runtime_module(runtime_module)?;
+        self.admit_methods(methods.iter())?;
         let mut output = Output {
             text: String::new(),
             remaining: self.output_bytes,
@@ -219,7 +214,32 @@ impl ValidatedRegistry {
         });
         let report = self.lint_roots(roots, acknowledgements)?;
         diagnostics(report);
+
         Ok(output.text)
+    }
+
+    fn admit_methods<'a>(
+        &self,
+        methods: impl Iterator<Item = &'a Method<'a>>,
+    ) -> Result<(), GenerationError> {
+        let mut names = BTreeSet::new();
+        let mut ids = BTreeSet::new();
+        for method in methods {
+            for (root, limits) in [
+                (method.request, method.request_limits),
+                (method.response, method.response_limits),
+            ] {
+                self.admit_client(method.export, root, limits)?;
+                if limits.bytes > MAX_SAFE_INTEGER - HEADER_BYTES as u64 {
+                    return Err(GenerationError::Complexity);
+                }
+            }
+            if !names.insert(method.export) || !ids.insert(method.id) {
+                return Err(GenerationError::Schema);
+            }
+        }
+
+        Ok(())
     }
 
     fn render_methods(
@@ -246,7 +266,7 @@ impl ValidatedRegistry {
                 write!(
                     output,
                     "{separator}{prefix}Bytes:{}, {prefix}Nodes:{}, {prefix}Depth:{}",
-                    limits.bytes + 11,
+                    limits.bytes + HEADER_BYTES as u64,
                     limits.nodes,
                     limits.depth,
                     separator = if prefix == "request" { "}," } else { "," }
@@ -337,12 +357,18 @@ impl ValidatedRegistry {
             }
             output.quoted(name)?;
             output.write_char(':')?;
-            self.metadata_node(*root, output)?;
+            self.metadata_node(*root, output, &mut |_| {}, "")?;
         }
         output.write_char('}')
     }
 
-    fn metadata_node(&self, id: usize, output: &mut Output) -> fmt::Result {
+    fn metadata_node(
+        &self,
+        id: usize,
+        output: &mut Output,
+        reference: &mut impl FnMut(usize),
+        entry_break: &str,
+    ) -> fmt::Result {
         output.write_str("{\"k\":")?;
         match &self.nodes[id] {
             Node::Unit => output.quoted("unit")?,
@@ -377,13 +403,13 @@ impl ValidatedRegistry {
                 output.quoted("list")?;
                 output.json_bound("max", *max)?;
                 output.write_str(",\"item\":")?;
-                self.metadata_node(*item, output)?;
+                self.metadata_node(*item, output, reference, entry_break)?;
             }
             Node::Array { item, len } => {
                 output.quoted("array")?;
                 output.json_bound("max", Some(*len))?;
                 output.write_str(",\"item\":")?;
-                self.metadata_node(*item, output)?;
+                self.metadata_node(*item, output, reference, entry_break)?;
             }
             Node::Tuple(items) => {
                 output.write_str("\"tuple\",\"items\":[")?;
@@ -391,15 +417,15 @@ impl ValidatedRegistry {
                     if index != 0 {
                         output.write_char(',')?;
                     }
-                    self.metadata_node(*item, output)?;
+                    self.metadata_node(*item, output, reference, entry_break)?;
                 }
                 output.write_char(']')?;
             }
             Node::Result { ok, err } => {
                 output.write_str("\"result\",\"ok\":")?;
-                self.metadata_node(*ok, output)?;
+                self.metadata_node(*ok, output, reference, entry_break)?;
                 output.write_str(",\"err\":")?;
-                self.metadata_node(*err, output)?;
+                self.metadata_node(*err, output, reference, entry_break)?;
             }
             Node::Option(item) | Node::Alias(item) => {
                 output.quoted(if matches!(self.nodes[id], Node::Option(_)) {
@@ -408,9 +434,10 @@ impl ValidatedRegistry {
                     "newtype"
                 })?;
                 output.write_str(",\"item\":")?;
-                self.metadata_node(*item, output)?;
+                self.metadata_node(*item, output, reference, entry_break)?;
             }
             Node::Ref(root) => {
+                reference(*root);
                 output.write_str("\"ref\",\"name\":")?;
                 output.quoted(&self.names[*root])?;
             }
@@ -420,10 +447,11 @@ impl ValidatedRegistry {
                     if index != 0 {
                         output.write_char(',')?;
                     }
+                    output.write_str(entry_break)?;
                     output.write_str("{\"name\":")?;
                     output.quoted(name)?;
                     output.write_str(",\"value\":")?;
-                    self.metadata_node(*child, output)?;
+                    self.metadata_node(*child, output, reference, entry_break)?;
                     output.write_char('}')?;
                 }
                 output.write_char(']')?;
@@ -434,10 +462,11 @@ impl ValidatedRegistry {
                     if index != 0 {
                         output.write_char(',')?;
                     }
+                    output.write_str(entry_break)?;
                     output.write_str("{\"name\":")?;
                     output.quoted(name)?;
                     write!(output, ",\"id\":{tag},\"value\":")?;
-                    self.metadata_node(*child, output)?;
+                    self.metadata_node(*child, output, reference, entry_break)?;
                     output.write_char('}')?;
                 }
                 output.write_char(']')?;
@@ -598,5 +627,103 @@ impl Output {
             write!(self, ",\"{name}\":{value}")?;
         }
         Ok(())
+    }
+}
+
+#[cfg(feature = "api-manifest")]
+impl ValidatedRegistry {
+    /// Export one format-1 JSON contract per deployed endpoint for offline comparison.
+    ///
+    /// Supply the deployed name alongside the existing client descriptor. Map keys
+    /// are endpoint names, not filesystem paths. Each document contains only named
+    /// definitions reachable from its two roots. The sum of all document lengths
+    /// is limited by the registry's output byte allowance. Empty inventories are valid.
+    /// Applications own export coverage and the decision to accept baseline changes.
+    ///
+    /// # Errors
+    /// Returns Schema for empty or duplicate endpoint names or inadmissible method
+    /// descriptors, and Complexity for excessive method counts, limits or output.
+    pub fn api_manifests(
+        &self,
+        endpoints: &[(&str, Method<'_>)],
+    ) -> Result<BTreeMap<String, String>, GenerationError> {
+        if endpoints.len() > self.output_bytes {
+            return Err(GenerationError::Complexity);
+        }
+        self.admit_methods(endpoints.iter().map(|(_, method)| method))?;
+        let mut documents = BTreeMap::new();
+        let mut remaining = self.output_bytes;
+        for &(endpoint, method) in endpoints {
+            if endpoint.len() > remaining {
+                return Err(GenerationError::Complexity);
+            }
+            if endpoint.is_empty() || documents.contains_key(endpoint) {
+                return Err(GenerationError::Schema);
+            }
+            let roots = [
+                self.root_index(method.request)?,
+                self.root_index(method.response)?,
+            ];
+            let mut output = Output {
+                text: String::new(),
+                remaining,
+            };
+            self.render_manifest(&mut output, endpoint, &method, roots)
+                .map_err(|_| GenerationError::Complexity)?;
+            remaining = output.remaining;
+            documents.insert(String::from(endpoint), output.text);
+        }
+
+        Ok(documents)
+    }
+
+    fn render_manifest(
+        &self,
+        out: &mut Output,
+        endpoint: &str,
+        method: &Method<'_>,
+        roots: [usize; 2],
+    ) -> fmt::Result {
+        out.write_str("{\n  \"format\":1,\n  \"endpoint\":")?;
+        out.quoted(endpoint)?;
+        out.write_str(",\n  \"export\":")?;
+        out.quoted(method.export)?;
+        write!(out, ",\n  \"id\":\"{}\"", method.id)?;
+        for (direction, root, limits) in [
+            ("request", method.request, method.request_limits),
+            ("response", method.response, method.response_limits),
+        ] {
+            write!(out, ",\n  \"{direction}\":{{\"root\":")?;
+            out.quoted(root)?;
+            write!(
+                out,
+                ",\"payload_limits\":{{\"bytes\":{},\"nodes\":{},\"depth\":{}}}}}",
+                limits.bytes, limits.nodes, limits.depth
+            )?;
+        }
+        out.write_str(",\n  \"schemas\":{")?;
+        let mut pending = BTreeSet::from(roots);
+        let mut written = BTreeSet::new();
+        while let Some(root) = pending.pop_first() {
+            if !written.is_empty() {
+                out.write_char(',')?;
+            }
+            written.insert(root);
+            out.write_str("\n    ")?;
+            out.quoted(&self.names[root])?;
+            out.write_char(':')?;
+            self.metadata_node(
+                self.roots[root],
+                out,
+                &mut |target| {
+                    if !written.contains(&target) {
+                        pending.insert(target);
+                    }
+                },
+                "\n      ",
+            )?;
+        }
+
+        out.write_str("\n  }\n}\n")
     }
 }

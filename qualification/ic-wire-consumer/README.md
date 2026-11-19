@@ -31,6 +31,23 @@ selected directory. Schema generation is opt-in on both targets. The CLI writes 
 native/TS exchange is integrated into the existing compatibility harness, which
 runs the clients against the bundled TypeScript runtime and checks returned frames in Rust.
 
+The client generator and the host-side manifest example use the same
+`upload_contract()` registry and method descriptor. Run `make check-api-manifest`
+to compare current output with the [upload baseline](api/upload.json). A mismatch
+prints a unified diff and fails CI. To review a candidate without overwriting the
+baseline, run:
+
+```sh
+cargo run --quiet --locked --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
+  --features schema,wire/api-manifest --example upload-manifest > /tmp/upload-candidate.json
+diff -u qualification/ic-wire-consumer/api/upload.json /tmp/upload-candidate.json
+```
+
+The initial baseline matches the schema, roots, ID and client allowances in the
+0.26.1 archive-generated upload client. Its bytes are exercised by the independent
+request and reply frame vectors. This fixture has one application contract. Final
+canister export coverage is tracked separately in [IC Tooling #16](https://github.com/dragginzgame/ic-tooling/issues/16).
+
 Linux CI runs `make check-wasm-host` to build and execute a Wasm consumer
 that derives a schema for a payment containing a Platform Account, checks its
 TypeScript declaration and round-trips account bytes. Node verifies zero host imports.

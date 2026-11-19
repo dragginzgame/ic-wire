@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.27.0] - 2026-11-19
+
+- Adopt Toko Tooling 0.45.22 in both workspaces. Frame encoding, decoding and
+  generated client limits now use the same Rust header-size constant.
+
+- Add the optional `api-manifest` exporter for bounded, deterministic snapshots
+  of public endpoint contracts. CI checks the upload consumer against its 0.26.1
+  client baseline. [IC Wire #4](https://github.com/dragginzgame/ic-wire/issues/4)
+
 ## [0.26.1] - 2026-11-19
 
 - Adopt Toko Tooling 0.45.21 in both workspaces. Native allocation examples and

@@ -2,7 +2,7 @@
 
 mod admitted;
 
-use crate::{Direction, Encoding, Error, Limits, meter::Budget};
+use crate::{Direction, Encoding, Error, Limits, framing::HEADER_BYTES, meter::Budget};
 use alloc::vec::Vec;
 use postcard::ser_flavors::Flavor;
 use serde::Serialize;
@@ -11,11 +11,11 @@ fn preflight<T: Serialize + ?Sized>(
     value: &T,
     encoding: Encoding,
     limits: Limits,
-) -> Result<(Option<[u8; 11]>, usize), Error> {
+) -> Result<(Option<[u8; HEADER_BYTES]>, usize), Error> {
     let header = match encoding {
         Encoding::Payload => None,
         Encoding::Frame { method, direction } => {
-            let mut header = [0; 11];
+            let mut header = [0; HEADER_BYTES];
             header[..2].copy_from_slice(b"IW");
             header[2..10].copy_from_slice(&method.to_le_bytes());
             header[10] = match direction {
@@ -25,7 +25,7 @@ fn preflight<T: Serialize + ?Sized>(
             Some(header)
         }
     };
-    let prefix = if header.is_some() { 11 } else { 0 };
+    let prefix = if header.is_some() { HEADER_BYTES } else { 0 };
     let payload_limits = limits.without_prefix(prefix)?;
     let budget = Budget::new(payload_limits);
     let size = postcard::experimental::serialized_size(&admitted::Bounded {
@@ -37,6 +37,7 @@ fn preflight<T: Serialize + ?Sized>(
     if size > payload_limits.bytes {
         return Err(Error::Limit);
     }
+
     // The byte allowance was reduced by prefix before sizing, so addition fits.
     Ok((header, size + prefix))
 }
@@ -68,6 +69,7 @@ pub fn encode<T: Serialize + ?Sized>(
 ) -> Result<Vec<u8>, Error> {
     let mut output = Vec::new();
     encode_into(value, encoding, limits, &mut output)?;
+
     Ok(output)
 }
 
@@ -130,8 +132,9 @@ pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     let (header, size) = preflight(value, encoding, limits)?;
     let output = output.get_mut(..size).ok_or(Error::Limit)?;
     let prefix = if let Some(header) = header {
-        output[..11].copy_from_slice(&header);
-        11
+        output[..HEADER_BYTES].copy_from_slice(&header);
+
+        HEADER_BYTES
     } else {
         0
     };
@@ -146,6 +149,7 @@ pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     )
     .map_err(|_| budget.error())?;
     let written = prefix + payload.len();
+
     Ok(&output[..written])
 }
 
@@ -163,6 +167,7 @@ impl Flavor for Output {
             return Err(postcard::Error::SerializeBufferFull);
         }
         self.bytes.push(byte);
+
         Ok(())
     }
 
@@ -171,6 +176,7 @@ impl Flavor for Output {
             return Err(postcard::Error::SerializeBufferFull);
         }
         self.bytes.extend_from_slice(bytes);
+
         Ok(())
     }
 

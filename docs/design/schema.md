@@ -62,9 +62,9 @@ A 1,000-definition diamond stays below 100 KB of declarations; adding an unrelat
 definition preserves existing output. This is structural evidence, not a host
 performance comparison. `make lint-host`, `make doc-host` and
 `make check-wasm-host` check the optional module and its target boundary.
-These focused checks passed with Rust 1.100.0. Normal/build dependency trees for
-the default native selection and TypeScript-enabled Wasm selection contain no
-serde_json. Existing supplier proc macros remain; this is not a macro-free claim.
+Codec-only native and Wasm builds omit `serde_json`. Enabling `typescript`
+selects it on both targets. Postcard still selects Serde’s derive proc macro
+in codec-only builds.
 
 `metadata_json()` exports only admitted graph nodes, never the original input.
 Round-trip tests preserve all admitted kinds, signedness, bounds, IDs, recursive
@@ -251,3 +251,5 @@ unstable projections, failure poisoning, alias cycles and non-static borrowed
 roots. Full generation/allocation cost remains unmeasured. Unsupported Serde
 attributes intentionally reject; full legacy surface parity is not a hard-cut
 release requirement.
+
+The [API manifest exporter](api-manifest.md) supports development-time drift detection using the admitted registry and method descriptors.

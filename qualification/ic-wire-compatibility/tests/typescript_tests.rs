@@ -4,6 +4,7 @@ mod advice_cases;
 mod bulk_cases;
 mod consumer_cases;
 mod domain_cases;
+mod manifest_cases;
 mod renamed_cases;
 mod scalar_cases;
 mod standard_cases;

@@ -36,6 +36,11 @@ toko-tooling.workspace = true
 workspace = true
 
 [[example]]
+name = "upload-manifest"
+path = "examples/upload_manifest.rs"
+required-features = ["schema", "wire/api-manifest"]
+
+[[example]]
 name = "platform-schema"
 path = "examples/platform_schema.rs"
 required-features = ["schema", "wire/platform-types"]

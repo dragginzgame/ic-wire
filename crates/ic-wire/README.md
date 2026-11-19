@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.26.1"
+ic-wire = "0.27.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -123,6 +123,7 @@ before expanding the list.
 
 | Feature | Purpose |
 | --- | --- |
+| `api-manifest` | Also exports bounded per-endpoint API snapshots for CI |
 | `typescript` | Schema collection, validated graph, lint and generated clients |
 | `derive` | Also provides `ic_wire::typescript::Wire` derive |
 | `platform-types` | Also projects published Platform Types Principal/Account |
@@ -131,7 +132,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.26.1", features = ["derive"] }
+ic-wire = { version = "0.27.0", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -148,6 +149,18 @@ With `derive` enabled, the same schema trait implementation is available on both
 targets, including `ValidatedRegistry::from_type::<Request>`. A crate that explicitly offers a codec-only
 build can instead forward `ic-wire/derive` from its own optional feature and
 apply `cfg_attr` for that feature alone.
+
+For API drift checks, enable `api-manifest` on the host-side generator.
+Pass the deployed endpoint names and the same `Method` descriptors used to
+generate clients. The map contains JSON text keyed by endpoint name:
+
+```rust,ignore
+let documents = graph.api_manifests(&[("system_get_user_authority", method)])?;
+let snapshot = &documents["system_get_user_authority"];
+```
+
+Compare the generated directory with a known-good client baseline. The exporter
+runs when explicitly called and writes no files itself.
 
 ## TypeScript delivery
 
