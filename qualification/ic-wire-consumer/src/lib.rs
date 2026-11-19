@@ -128,7 +128,7 @@ pub fn decode_receipt(bytes: &[u8]) -> Result<Receipt, Error> {
 /// Generate typed payload and method clients from the application types.
 /// # Errors
 /// Returns schema or bounded-output admission errors.
-#[cfg(all(feature = "schema", not(target_family = "wasm")))]
+#[cfg(feature = "schema")]
 pub fn clients(
     runtime: &str,
     mut diagnostics: impl FnMut(wire::typescript::BulkLintReport),

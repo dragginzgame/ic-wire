@@ -1,10 +1,10 @@
-# Host schema contract
+# Schema contract
 
 The optional `typescript` feature admits explicit JSON definitions into
 `ValidatedRegistry`, then renders type aliases and exports schema JSON
 from its private typed nodes.
-It is native-only: forwarding the feature on Wasm excludes both the module and
-serde_json. The codec-only graph is unchanged.
+The same module and serde_json dependency are enabled on native and Wasm.
+Codec-only builds omit both.
 
 The destination contract is one admission boundary and one immutable authority.
 Rendering does not read JSON or revalidate shapes. The initial caller is explicit
@@ -138,7 +138,7 @@ Independent separately generated modules are not a global routing registry.
 
 ## Strict Rust metadata projection (0.23.5)
 
-Enable `derive` to use the `Wire` derive on shared DTOs. On native targets
+Enable `derive` to use the `Wire` derive on shared DTOs. On native and Wasm targets
 the schema trait is available under the same name.
 `ValidatedRegistry::from_type::<T>("Root", limits)` projects an inline root and
 feeds it through the existing JSON admission boundary. The derive is a producer
@@ -171,7 +171,7 @@ Native trait implementations cover fixed-width integers, finite float wrappers,
 bool/unit, strings/Cow text, Option/Result, tuples through arity four, fixed arrays,
 slices, Box/references, ordinary Vec/List, explicit Bytes/Text/Packed and
 published ByteBuf/ByteArray plus borrowed byte/text adapters. Ordinary Vec<u8>
-remains a list projection. The optional host-only `platform-types` feature adds
+remains a list projection. The optional `platform-types` feature adds
 Principal/Account projections without redefining supplier identities or Serde.
 
 SchemaContext bounds nested projection calls and active Rust type depth. Active
@@ -181,21 +181,20 @@ Construction work counts Rust projection calls, not exact JSON nodes. Final grap
 admission independently enforces its exact node/name/depth limits. Producer JSON
 allocations occur before that admission; arbitrary manual projection code remains
 trusted and can do work outside the construction allowance. This is not an exact
-host heap cap. Nested types are inline: no new generated-name algorithm or type
+heap cap. Nested types are inline: no new generated-name algorithm or type
 identity promise is introduced in this inline API.
 Use the named collector below for recursive/shared types.
 
 The macro is the `ic-wire-derive` product package, authored for this strict contract.
 Its selected syn/quote/proc-macro2 versions match the already locked suppliers.
 Default codec builds omit the Wire macro. With `derive` enabled, the macro runs
-on the build host and guards its generated implementation for the consuming
-target. Wasm code can use the same derive and helper attributes without linking
-the registry or serde_json. Calls that generate TypeScript still require a host.
+on the build host and emits the same schema trait implementation for native and
+Wasm consumers. Both can construct a registry and render TypeScript in memory.
 
 `make test-derive` checks macro rejection and exact graph projections, construction
 limits, recursive refusal and sticky failure. `make test-typescript` compiles and
 executes the renamed-dependency derived client against literal bytes. Focused
-Clippy, Rustdoc and Wasm feature forwarding pass; neither a full Serde attribute
+`make check-wasm-host` executes a derived Platform schema on Wasm. Neither a full Serde attribute
 surface nor standalone publication/browser/typechecker proof is claimed.
 
 Generic qualification includes distinct u16/u64 instantiations, independent const

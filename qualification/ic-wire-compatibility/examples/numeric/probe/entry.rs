@@ -1,25 +1,16 @@
-//! Matched integer workloads for the native allocator and IC instruction probes.
+// Matched integer workloads for the native allocator and IC instruction probes.
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(super) mod host;
+mod host;
 
-use super::{Value, decode, encode, prepare};
+#[cfg(all(not(test), not(target_arch = "wasm32")))]
+use host::allocations as main;
 use std::hint::black_box;
 
-fn workload(len: usize, stride: usize) -> Value {
-    prepare(
-        (0..len)
-            .map(|i| {
-                if stride != 0 && i % stride == 0 {
-                    u32::MAX
-                } else {
-                    1
-                }
-            })
-            .collect(),
-    )
-}
-
+// measure
+// Return payload sizes and encode/decode instruction counts for the numeric workloads.
+// scope  : public
+// limits : empty request, 15 fixed workloads
 #[cfg(target_arch = "wasm32")]
 #[expect(
     unsafe_code,
@@ -48,4 +39,18 @@ extern "C" fn measure() {
         }
     }
     raw::msg_reply();
+}
+
+fn workload(len: usize, stride: usize) -> Value {
+    prepare(
+        (0..len)
+            .map(|i| {
+                if stride != 0 && i % stride == 0 {
+                    u32::MAX
+                } else {
+                    1
+                }
+            })
+            .collect(),
+    )
 }

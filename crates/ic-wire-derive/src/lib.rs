@@ -13,7 +13,7 @@ use syn::{Data, DeriveInput, Fields, parse_macro_input};
 /// `serde(rename = "name")`, standard byte and qualified packed field adapters
 /// are supported; other attributes/discriminants reject.
 /// Use `#[wire(crate = "renamed_dependency")]` when ic-wire is renamed.
-/// On Wasm the derive checks the declaration and omits the host schema implementation.
+/// The generated schema implementation is available on both native and Wasm targets.
 #[proc_macro_derive(Wire, attributes(serde, wire))]
 pub fn derive_wire(input: TokenStream) -> TokenStream {
     expand(&parse_macro_input!(input as DeriveInput))
@@ -143,7 +143,6 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     }
     let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
     Ok(quote! {
-        #[cfg(not(target_family = "wasm"))]
         impl #impl_generics #owner::typescript::Wire for #name #type_generics #where_clause {
             fn schema(#context: &mut #owner::typescript::SchemaContext) -> ::core::result::Result<#owner::typescript::__private::Value, #owner::typescript::GenerationError> {
                 ::core::result::Result::Ok(#body)

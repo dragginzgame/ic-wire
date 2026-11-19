@@ -23,7 +23,7 @@ help:
 	  'test-host             Run focused host schema contracts' \
 	  'lint-host             Lint host schema library and tests' \
 	  'doc-host              Check host feature Rustdoc' \
-	  'check-wasm-host       Check TypeScript feature forwarding on Wasm' \
+	  'check-wasm-host       Run derived Platform schema on Wasm (Node required)' \
 	  'test-typescript       Exchange Rust bytes with current TypeScript (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
@@ -103,7 +103,8 @@ doc-host:
 
 check-wasm-host: qualification-tooling-check
 	+RUSTFLAGS="-D warnings" cargo check -p ic-wire --features typescript --lib --target wasm32-unknown-unknown --locked
-	+RUSTFLAGS="-D warnings" cargo check --manifest-path qualification/Cargo.toml -p ic-wire-consumer --features schema --lib --target wasm32-unknown-unknown --locked
+	+RUSTFLAGS="-D warnings" cargo build --manifest-path qualification/Cargo.toml -p ic-wire-consumer --features schema,wire/platform-types --example platform-schema --profile wire-size --target wasm32-unknown-unknown --locked
+	node qualification/ic-wire-consumer/check-wasm.mjs qualification/target/wasm32-unknown-unknown/wire-size/examples/platform-schema.wasm
 
 .PHONY: test-typescript lint-typescript check-typescript
 test-typescript lint-typescript check-typescript: qualification-tooling-check | toko-execution-check

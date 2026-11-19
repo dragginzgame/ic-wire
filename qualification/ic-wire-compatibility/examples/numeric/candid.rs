@@ -1,10 +1,7 @@
 //! Single-argument Candid integer list probe.
 #![cfg_attr(all(target_arch = "wasm32", not(test)), no_main)]
 
-mod probe;
-
-#[cfg(all(not(test), not(target_arch = "wasm32")))]
-use probe::host::allocations as main;
+include!("probe/entry.rs");
 
 type Value = Vec<u32>;
 

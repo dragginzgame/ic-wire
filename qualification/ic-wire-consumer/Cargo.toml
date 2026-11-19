@@ -31,10 +31,16 @@ serde.workspace = true
 wire.workspace = true
 
 [dev-dependencies]
+ic-platform-types.workspace = true
 toko-tooling.workspace = true
 
 [lints]
 workspace = true
+
+[[example]]
+name = "platform-schema"
+path = "examples/platform_schema.rs"
+required-features = ["schema", "wire/platform-types"]
 
 [[example]]
 name = "instruction-counter"

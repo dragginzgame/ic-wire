@@ -1,5 +1,4 @@
 //! Write standalone application clients and their matching runtime.
-#[cfg(not(target_family = "wasm"))]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args_os().skip(1);
     let output = args
@@ -28,8 +27,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     std::fs::write(output.join("methods.ts"), methods)?;
     std::fs::write(output.join("runtime.ts"), wire::typescript::RUNTIME)?;
     Ok(())
-}
-#[cfg(target_family = "wasm")]
-fn main() {
-    panic!("client generation is host-only");
 }

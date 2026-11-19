@@ -1,13 +1,13 @@
 # IC Wire
 
 Bounded Serde/Postcard encoding for controlled Internet Computer contracts, with
-optional host schema collection, bulk-field lint and TypeScript client generation.
+optional schema collection, bulk-field lint and TypeScript client generation.
 The codec is `no_std` with `alloc`, Wasm-safe and independent of IC SDKs.
 Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.25.2"
+ic-wire = "0.26.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -119,7 +119,7 @@ used 65 Wire bytes versus 258 for tags. When the state changed every entry,
 pairs used 514 bytes. Measure both patterns and bound the sum of run lengths
 before expanding the list.
 
-## Optional host features
+## Optional schema features
 
 | Feature | Purpose |
 | --- | --- |
@@ -131,7 +131,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.25.2", features = ["derive"] }
+ic-wire = { version = "0.26.0", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -144,8 +144,8 @@ use serde::{Deserialize, Serialize};
 struct Request { sequence: u64 }
 ```
 
-Keep client generation in a host tool. Wire handles the target check for each
-derived schema implementation. A crate that explicitly offers a codec-only
+With `derive` enabled, the same schema trait implementation is available on both
+targets, including `ValidatedRegistry::from_type::<Request>`. A crate that explicitly offers a codec-only
 build can instead forward `ic-wire/derive` from its own optional feature and
 apply `cfg_attr` for that feature alone.
 

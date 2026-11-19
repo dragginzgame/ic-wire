@@ -27,15 +27,13 @@ IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml -
 ```
 
 The generator writes payload.ts, methods.ts and the matching runtime.ts into the
-selected directory. Schema generation is optional and host-only. Its complete
+selected directory. Schema generation is opt-in on both targets. The CLI writes files on the host. Its complete
 native/TS exchange is integrated into the existing compatibility harness, which
 runs the clients against the bundled TypeScript runtime and checks returned frames in Rust.
 
-Linux CI runs `make check-wasm-host` when checking Wasm feature forwarding.
-Its consumer check catches a missing derive re-export or a generated schema
-implementation that refers to host types on Wasm. Recheck it after changes to
-the derive, feature wiring or DTO annotations. The consumer check took 2.73 s
-locally with a partially populated Cargo cache.
+Linux CI runs `make check-wasm-host` to build and execute a Wasm consumer
+that derives a schema for a payment containing a Platform Account, checks its
+TypeScript declaration and round-trips account bytes. Node verifies zero host imports.
 Strict checking requires the private compiler installation described in the
 [parent README](../README.md). The generator itself needs neither npm nor Node.
 
@@ -49,7 +47,7 @@ paths with reasons through the Wire generation APIs, preserving field constraint
 
 Native tests check independent literal frames, every truncation, wrong method and
 direction, oversized frames, trailing bytes and malformed boolean replies. The SDK-free Wasm workload runs
-under Node with zero host imports. Its dependency graph contains no host schema JSON, Wire macro, SDK or transport dependency (Serde's
+under Node with zero host imports. The codec-only dependency graph contains no schema JSON, Wire macro, SDK or transport dependency (Serde's
 own derive remains a build-time dependency).
 
 These checks establish standalone integration. `make measure-consumer-wasm`

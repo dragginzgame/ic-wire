@@ -14,7 +14,7 @@ repository = "https://github.com/dragginzgame/ic-wire"
 bytemuck = { version = "1.25.2", default-features = false, features = ["must_cast"] }
 ic-platform-types = { version = "0.21.2", default-features = false }
 # Generated macro output uses the coordinated runtime API; see AGENTS.md.
-ic-wire-derive = { path = "crates/ic-wire-derive", version = "=0.25.2" }
+ic-wire-derive = { path = "crates/ic-wire-derive", version = "=0.26.0" }
 postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
@@ -26,7 +26,7 @@ syn = "3.0.10"
 serde = { version = "1.0.229", default-features = false, features = ["alloc"] }
 
 # Tests and tooling
-toko-tooling = "=0.45.16"
+toko-tooling = "=0.45.18"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"

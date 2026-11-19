@@ -1,6 +1,6 @@
 # Architecture and contracts
 
-This document describes the current 0.25 implementation. It replaces the initial
+This document describes the current 0.26 implementation. It replaces the initial
 replacement proposal and its superseded execution sequence. Detailed contracts,
 source provenance and checkpoint evidence remain in the linked topic documents.
 Historical measurements qualify only their recorded inputs.
@@ -8,7 +8,7 @@ Historical measurements qualify only their recorded inputs.
 ## Scope and ownership
 
 Wire owns bounded Serde/Postcard encoding, framing, explicit field adapters and
-optional native schema tooling. It has two product packages in the root virtual
+optional schema tooling. It has two product packages in the root virtual
 workspace: `ic-wire` and `ic-wire-derive`. Private contract tests and consumer packages
 live directly under `qualification/` and share one workspace and lockfile, including
 the private instruction driver. Product packages do not depend on qualification.
@@ -20,7 +20,7 @@ the private instruction driver. Product packages do not depend on qualification.
 | Header and routing identity | Portable Wire framing |
 | Byte, bounded and packed field semantics | Explicit Wire/Serde field adapters |
 | Layout, custom Serde work and collection normalization | Consumer |
-| Metadata projection and validation | Optional host schema module and strict derive |
+| Metadata projection and validation | Optional schema module and strict derive |
 | Declarations, client generation and bulk advice | Projections of the validated graph |
 | Browser byte operations | One bundled TypeScript interpreter |
 | Principal/Account identity and Serde | Published Platform Types |
@@ -29,7 +29,8 @@ the private instruction driver. Product packages do not depend on qualification.
 
 The codec is `no_std` with `alloc`, forbids unsafe Rust and remains SDK-independent.
 The derive runs on the build host when selected for either target. Its schema
-implementation, the registry and the optional Platform integration are native-only.
+implementation, the registry and the optional Platform integration work on native
+and wasm32-unknown-unknown when their Cargo features are enabled.
 There is no endpoint or executor.
 Keep one production Serde/Postcard path; additional abstractions, specializations
 or package splits need a concrete caller or measured justification.
@@ -108,7 +109,7 @@ and heap-u64 adapters have separate domain checks. Nonzero validation follows
 packed allocation; heap reconstruction may change re-encoded ordering. No unsafe
 unaligned casts or automatic field normalization are introduced.
 
-## Host graph and browser clients
+## Schema graph and browser clients
 
 `SchemaRegistry` collects named Rust `Wire` projections and finishes into
 `ValidatedRegistry`. `ValidatedRegistry::from_metadata` imports explicit JSON

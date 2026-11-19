@@ -1,18 +1,18 @@
 # IC Wire
 
-Bounded Serde/Postcard encoding with optional host schema collection, bulk-field
+Bounded Serde/Postcard encoding with optional schema collection, bulk-field
 advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.25.2**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.26.0**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
 - One `Encoding` selection covers payloads and request/response frames.
 - Owned, reusable `Vec` and caller-slice outputs share sizing and admission.
 - Explicit byte, text, list and packed fields retain consumer-selected layouts.
-- Optional native schema collection and derive feed one validated graph and one
+- Optional schema collection and derive feed one validated graph and one
   bundled TypeScript interpreter. No default features are enabled.
 - Transport, authentication, retries, endpoint execution and deployment belong
   to consuming applications.
@@ -30,8 +30,8 @@ together. There is no legacy fallback reader or automatic storage migration.
 
 | Path | Responsibility |
 | --- | --- |
-| `crates/ic-wire/` | Portable codec, field adapters and optional host tooling |
-| `crates/ic-wire-derive/` | Strict host schema derive; does not generate serialization |
+| `crates/ic-wire/` | Portable codec, field adapters and optional schema tooling |
+| `crates/ic-wire-derive/` | Strict schema derive; does not generate serialization |
 | `qualification/` | Private contract tests and standalone consumer workspace |
 | `qualification/ic-wire-instructions/` | Private native simulator driver |
 | `vendor/toko-tooling/` | Snapshot-owned tooling; no local edits |
@@ -70,14 +70,14 @@ sequence:
 | Scope | Commands |
 | --- | --- |
 | One codec contract | `cargo test -p ic-wire --test encode_tests --locked` (replace the test name as needed) |
-| Host graph | `make test-host`, `make lint-host`, `make doc-host` |
+| Native schema checks | `make test-host`, `make lint-host`, `make doc-host` |
 | Strict derive | `make test-derive`, `make lint-derive` |
 | Allocation admission | `make test-allocation` |
 | Rust/TypeScript exchange | `make test-typescript`, `make lint-typescript` |
 | Strict generated client types and exchange | `make check-typescript` |
 | Standalone Rust consumer | `make test-consumer` |
 | Standalone Wasm execution | `make check-consumer-wasm` |
-| TypeScript feature forwarded to Wasm | `make check-wasm-host` |
+| Derived schema execution on Wasm | `make check-wasm-host` |
 | Native instruction driver, without PocketIC | `make lint-instructions`, `make doc-instructions` |
 
 TypeScript exchange requires Node supporting `--experimental-transform-types`.

@@ -1,13 +1,13 @@
 [package]
 name = "ic-wire"
-version = "0.25.2"
+version = "0.26.0"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
 publish = ["crates-io"]
 repository.workspace = true
 readme = "README.md"
-description = "Bounded Serde/Postcard encoding with host schema and TypeScript generation"
+description = "Bounded Serde/Postcard encoding with schema and TypeScript generation"
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
@@ -17,16 +17,14 @@ platform-types = ["typescript", "dep:ic-platform-types"]
 derive = ["typescript", "dep:ic-wire-derive"]
 typescript = ["dep:serde_json"]
 
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-ic-platform-types = { workspace = true, optional = true }
-serde_json = { workspace = true, optional = true }
-
 [dependencies]
 bytemuck.workspace = true
+ic-platform-types = { workspace = true, optional = true }
 ic-wire-derive = { workspace = true, optional = true }
 postcard.workspace = true
 serde.workspace = true
 serde_bytes.workspace = true
+serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde = { workspace = true, features = ["derive"] }

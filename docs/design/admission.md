@@ -74,8 +74,8 @@ visits. Native and Wasm compilation are separate from runtime/performance proof.
 Selected literal and allocator-instrumented checks are recorded in the
 [qualification workspace](../../qualification/README.md); full coverage remains open.
 
-The Wasm graph contains no
-SDK, Candid, host schema module or serde_json. It does include supplier-owned
+The codec-only Wasm graph contains no
+SDK, Candid, schema module or serde_json. It does include supplier-owned
 `serde_derive` and `thiserror-impl` proc macros via Postcard/Serde/cobs. Thus a
 strict macro-free build-graph goal is not met by this upstream supplier cohort;
 no private fork or alternate codec was introduced to remove them. These macros

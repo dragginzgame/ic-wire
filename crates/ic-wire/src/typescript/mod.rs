@@ -71,16 +71,16 @@ pub struct Method<'a> {
     pub response_limits: PayloadLimits,
 }
 
-/// Invalid metadata or exhausted host generation allowance.
+/// Invalid metadata or exhausted schema generation allowance.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GenerationError {
     /// Unsupported shape, invalid field, unresolved name or alias-only cycle.
     Schema,
-    /// Metadata or output exceeds its host-only allowance.
+    /// Metadata or output exceeds its schema allowance.
     Complexity,
 }
 
-/// Host schema limits, independent of codec runtime allowances.
+/// Schema limits, independent of codec runtime allowances.
 #[derive(Clone, Copy, Debug)]
 pub struct SchemaLimits {
     /// Maximum number of named definitions plus inline nodes.

@@ -1,5 +1,5 @@
 //! Derived metadata goes through the same graph admission as explicit schemas.
-#![cfg(all(feature = "derive", not(target_family = "wasm")))]
+#![cfg(feature = "derive")]
 use ic_wire::typescript::{GenerationError, SchemaContext, SchemaLimits, ValidatedRegistry, Wire};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};

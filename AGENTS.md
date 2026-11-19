@@ -18,7 +18,7 @@ product scope and stricter safety constraints.
   Endpoint execution, transport, authentication, retries and deployment belong
   downstream. Do not restore Wire Endpoint or an executor.
 - Platform Types owns Principal/Account identities and Serde implementations.
-  Wire owns optional host schema integration; keep codec-only graphs small.
+  Wire owns optional schema integration; keep codec-only graphs small.
 - Preserve pre-allocation admission and typed malformed-input errors. Account for
   trusted custom Serde work and consumer-owned collection normalization explicitly.
 - The user authorized a hard cut: legacy API, wire, schema, acceptance and budget

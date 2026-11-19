@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.25.2** for
+The repository's product manifests and finalized changelog select **0.26.0** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
@@ -37,7 +37,7 @@ assembles both crates and extracts fresh copies under `target/`. It checks
 README/licence inclusion, tests the core archive with all features, and copies
 the real qualification consumer into scratch storage. The consumer checks literal
 frames, metadata generation and published Platform Types identities. The script
-also builds and executes codec-only Wasm and checks all-feature Wasm forwarding.
+also executes codec-only and derived Platform schema consumers on Wasm.
 
 Only scratch manifests receive an empty `[workspace]` and local derive patch;
 product source is not rewritten. This verifies archive contents without relying

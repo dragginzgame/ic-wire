@@ -1,4 +1,4 @@
-//! Bounded Serde/Postcard contracts with optional host schema generation.
+//! Bounded Serde/Postcard contracts with optional schema generation.
 //!
 //! Bounded encoding and decoding, method identity and request-header
 //! admission. Header admission is
@@ -17,15 +17,9 @@ mod meter;
 mod packed;
 pub mod serde_packed;
 
-/// Optional host-only schema admission and TypeScript declarations.
-#[cfg(all(feature = "typescript", not(target_family = "wasm")))]
+/// Optional schema admission and TypeScript declarations.
+#[cfg(feature = "typescript")]
 pub mod typescript;
-
-/// Schema derive for DTOs shared with host tooling.
-#[cfg(all(feature = "derive", target_family = "wasm"))]
-pub mod typescript {
-    pub use ic_wire_derive::Wire;
-}
 
 pub use decode::decode;
 pub use encode::{encode, encode_into, encode_to_slice, encoded_len};

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.26.0] - 2026-11-19
+
+- The optional TypeScript schema API, Wire derive and Platform type projections
+  now work on wasm32-unknown-unknown as well as native. Enabling these features
+  selects their schema dependencies on both targets.
+
+- Adopt Toko Tooling 0.45.18 and share native and Wasm entry-point wiring across
+  the four numeric qualification probes.
+
 ## [0.25.2] - 2026-11-19
 
 ### ➕ Added

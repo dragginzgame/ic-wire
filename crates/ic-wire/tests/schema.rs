@@ -1,5 +1,5 @@
-//! Host graph admission and declaration contracts.
-#![cfg(all(feature = "typescript", not(target_family = "wasm")))]
+//! Schema graph admission and declaration contracts.
+#![cfg(feature = "typescript")]
 
 use ic_wire::typescript::{GenerationError, SchemaLimits, ValidatedRegistry};
 use serde_json::{Value, json};

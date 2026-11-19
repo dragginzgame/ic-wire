@@ -14,10 +14,6 @@ workspace = workspace.replace('[workspace]\n',
   `[workspace]\nexclude = ["ic-wire-${version}", "ic-wire-derive-${version}"]\n`);
 writeFileSync(join(output, 'Cargo.toml'), workspace);
 cpSync('qualification/Cargo.lock', join(output, 'Cargo.lock'));
-const consumer = join(output, 'ic-wire-consumer', 'Cargo.toml');
-writeFileSync(consumer, readFileSync(consumer, 'utf8') +
-  '\n[target.\'cfg(not(target_family = "wasm"))\'.dev-dependencies]\nic-platform-types.workspace = true\n');
-cpSync('qualification/package-platform.rs', join(output, 'ic-wire-consumer', 'tests', 'package_platform.rs'));
 writeFileSync(join(output, 'patch.toml'),
   `[patch.crates-io]\nic-wire-derive = { path = ${quote(join(output, 'ic-wire-derive-' + version))} }\n`);
 for (const name of ['ic-wire', 'ic-wire-derive']) {
