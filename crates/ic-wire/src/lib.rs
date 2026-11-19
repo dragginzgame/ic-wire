@@ -21,6 +21,12 @@ pub mod serde_packed;
 #[cfg(all(feature = "typescript", not(target_family = "wasm")))]
 pub mod typescript;
 
+/// Schema derive for DTOs shared with host tooling.
+#[cfg(all(feature = "derive", target_family = "wasm"))]
+pub mod typescript {
+    pub use ic_wire_derive::Wire;
+}
+
 pub use decode::decode;
 pub use encode::{encode, encode_into, encode_to_slice, encoded_len};
 pub use error::Error;

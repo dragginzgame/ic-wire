@@ -138,7 +138,8 @@ Independent separately generated modules are not a global routing registry.
 
 ## Strict Rust metadata projection (0.23.5)
 
-Enable `derive` to re-export the host-only `Wire` derive beside the Wire trait.
+Enable `derive` to use the `Wire` derive on shared DTOs. On native targets
+the schema trait is available under the same name.
 `ValidatedRegistry::from_type::<T>("Root", limits)` projects an inline root and
 feeds it through the existing JSON admission boundary. The derive is a producer
 of metadata, not another schema validator or serializer; the sealed graph remains
@@ -186,10 +187,10 @@ Use the named collector below for recursive/shared types.
 
 The macro is the `ic-wire-derive` product package, authored for this strict contract.
 Its selected syn/quote/proc-macro2 versions match the already locked suppliers.
-The optional host target dependency means default codec builds and Wasm builds
-forwarding `derive` contain neither this macro nor serde_json. Consumers must
-native-gate derive annotations when compiling the same source for Wasm. Existing
-Serde/Postcard supplier macros are a separate, unchanged dependency fact.
+Default codec builds omit the Wire macro. With `derive` enabled, the macro runs
+on the build host and guards its generated implementation for the consuming
+target. Wasm code can use the same derive and helper attributes without linking
+the registry or serde_json. Calls that generate TypeScript still require a host.
 
 `make test-derive` checks macro rejection and exact graph projections, construction
 limits, recursive refusal and sticky failure. `make test-typescript` compiles and

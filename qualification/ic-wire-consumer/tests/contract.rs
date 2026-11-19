@@ -40,3 +40,19 @@ fn frozen_contract_and_refusals() {
     *invalid.last_mut().unwrap() = 2;
     assert_eq!(decode_receipt(&invalid), Err(Error::Malformed));
 }
+
+#[cfg(feature = "ic")]
+#[test]
+fn counter_reply_preserves_operation_order_and_frames() {
+    let mut reads = 0_u64;
+    let reply = ic_wire_consumer::instruction_reply(|| {
+        reads += 1;
+        reads * reads
+    });
+    let expected: Vec<_> = (0..7_u64)
+        .flat_map(|i| (4 * i + 3).to_le_bytes())
+        .chain(REQUEST.iter().chain(RESPONSE).copied())
+        .collect();
+    assert_eq!(reads, 14);
+    assert_eq!(reply, expected);
+}

@@ -154,7 +154,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         fields.insert(
             "probe_sha256".into(),
             json!(hash(include_bytes!(
-                "../../ic-wire-compatibility/examples/numeric/probe.inc"
+                "../../ic-wire-compatibility/examples/numeric/probe/mod.rs"
             ))),
         );
         fields.insert(

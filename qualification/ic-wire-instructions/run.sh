@@ -17,7 +17,7 @@ if [[ ${1:-} == --numeric ]]; then
     for profile in wire-size wire-speed; do
         cargo build --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --profile "$profile" --target wasm32-unknown-unknown --features candid-comparison --example numeric-bounded --example numeric-ordinary --example numeric-packed --example numeric-candid
         for codec in ordinary bounded packed candid; do
-            cp "qualification/target/wasm32-unknown-unknown/$profile/examples/numeric_$codec.wasm" "$output/$profile-$codec.wasm"
+            cp "qualification/target/wasm32-unknown-unknown/$profile/examples/numeric-$codec.wasm" "$output/$profile-$codec.wasm"
         done
     done
     cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --locked --features candid-comparison --example numeric-bounded --example numeric-ordinary --example numeric-packed --example numeric-candid -- --nocapture --test-threads=1 > "$output/allocations.txt"

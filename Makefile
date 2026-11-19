@@ -101,8 +101,9 @@ lint-host:
 doc-host:
 	+RUSTDOCFLAGS="-D warnings" cargo doc -p ic-wire --features typescript --no-deps --locked
 
-check-wasm-host:
+check-wasm-host: qualification-tooling-check
 	+RUSTFLAGS="-D warnings" cargo check -p ic-wire --features typescript --lib --target wasm32-unknown-unknown --locked
+	+RUSTFLAGS="-D warnings" cargo check --manifest-path qualification/Cargo.toml -p ic-wire-consumer --features schema --lib --target wasm32-unknown-unknown --locked
 
 .PHONY: test-typescript lint-typescript check-typescript
 test-typescript lint-typescript check-typescript: qualification-tooling-check | toko-execution-check

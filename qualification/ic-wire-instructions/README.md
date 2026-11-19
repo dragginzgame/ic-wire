@@ -45,3 +45,14 @@ Root dependency commands and formatting include this package through the
 qualification workspace. The measurement target admits the qualification Toko Tooling selection.
 The inherited package source/license markers are development-only; all packages
 remain unpublished. Ordinary consumer tests need neither this runner nor a server.
+
+To print the bounded list's native allocation measurements, run from the repository root:
+
+```sh
+cargo run --locked --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --example numeric-bounded
+```
+
+The Wasm binaries export the IC query in place of a process entrypoint.
+The query uses Platform Runtime’s wasm32-only raw calls. Native allocation runs
+install their own instrumented allocator so its overhead stays out of installed
+instruction counts.

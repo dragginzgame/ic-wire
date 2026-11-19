@@ -29,11 +29,8 @@ pub const RESPONSE_LIMITS: Limits = Limits {
 /// Application's explicit field representations; ordinary tags stay a list.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(
-    all(feature = "schema", not(target_family = "wasm")),
-    derive(wire::typescript::Wire)
-)]
-#[cfg_attr(
-    all(feature = "schema", not(target_family = "wasm")),
+    feature = "schema",
+    derive(wire::typescript::Wire),
     wire(crate = "wire")
 )]
 pub struct Upload {
@@ -51,11 +48,8 @@ pub struct Upload {
 /// Application reply, distinct from the upload shape.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(
-    all(feature = "schema", not(target_family = "wasm")),
-    derive(wire::typescript::Wire)
-)]
-#[cfg_attr(
-    all(feature = "schema", not(target_family = "wasm")),
+    feature = "schema",
+    derive(wire::typescript::Wire),
     wire(crate = "wire")
 )]
 pub struct Receipt {
@@ -177,4 +171,63 @@ pub fn clients(
             &mut diagnostics,
         )?,
     ))
+}
+
+/// Run the upload probe and return seven little-endian counter deltas and the two frames.
+///
+/// # Panics
+/// Panics if the supplied counter goes backwards or the fixed codec fixture fails.
+#[cfg(feature = "ic")]
+pub fn instruction_reply(mut counter: impl FnMut() -> u64) -> Vec<u8> {
+    use core::hint::black_box;
+    const REPETITIONS: usize = 8;
+
+    let request = sample_upload().unwrap();
+    let receipt = Receipt {
+        revision: 129,
+        accepted: true,
+    };
+    let request_bytes = encode_upload(&request).unwrap();
+    let receipt_bytes = encode_receipt(&receipt).unwrap();
+    let mut bad = request_bytes.clone();
+    bad[0] ^= 1;
+    let mut counts = [0_u64; 7];
+    for (operation, count) in counts.iter_mut().enumerate() {
+        let run = || match operation {
+            0 => {
+                black_box(encode_upload(black_box(&request)).unwrap());
+            }
+            1 => {
+                black_box(decode_upload(black_box(&request_bytes)).unwrap());
+            }
+            2 => {
+                black_box(encode_receipt(black_box(&receipt)).unwrap());
+            }
+            3 => {
+                black_box(decode_receipt(black_box(&receipt_bytes)).unwrap());
+            }
+            4 => {
+                assert!(decode_upload(black_box(&bad)).is_err());
+            }
+            5 => {
+                assert!(
+                    decode_upload(black_box(&request_bytes[..request_bytes.len() - 1])).is_err()
+                );
+            }
+            6 => {
+                black_box(&request_bytes);
+            }
+            _ => unreachable!(),
+        };
+        run();
+        let start = counter();
+        for _ in 0..REPETITIONS {
+            run();
+        }
+        *count = counter() - start;
+    }
+    let mut reply: Vec<u8> = counts.into_iter().flat_map(u64::to_le_bytes).collect();
+    reply.extend(request_bytes);
+    reply.extend(receipt_bytes);
+    reply
 }

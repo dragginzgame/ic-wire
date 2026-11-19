@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.25.2] - 2026-11-19
+
+### ➕ Added
+
+- Enable `derive` once in Cargo to use `#[derive(Wire)]` on shared native and
+  Wasm DTOs without per-type guards. Schema generation remains host-only.
+
+### 🧪 Testing
+
+- Adopt Toko Tooling 0.45.16. The four numeric probes share their codec workload
+  between native allocation runs and Wasm instruction measurements. Native
+  examples can also run directly with Cargo.
+
 ## [0.25.1] - 2026-11-19
 
 ### 🧹 Cleanup

@@ -28,8 +28,9 @@ the private instruction driver. Product packages do not depend on qualification.
 | Native simulator lifetime | Published Testkit managed-server in private qualification |
 
 The codec is `no_std` with `alloc`, forbids unsafe Rust and remains SDK-independent.
-Host modules and optional schema/derive/Platform dependencies are excluded on
-Wasm even when their features are forwarded. There is no endpoint or executor.
+The derive runs on the build host when selected for either target. Its schema
+implementation, the registry and the optional Platform integration are native-only.
+There is no endpoint or executor.
 Keep one production Serde/Postcard path; additional abstractions, specializations
 or package splits need a concrete caller or measured justification.
 

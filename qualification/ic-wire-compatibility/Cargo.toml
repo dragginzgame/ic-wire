@@ -27,7 +27,7 @@ typescript = [
 candid = { workspace = true, features = ["serde_bytes"], optional = true }
 ic-wire-consumer = { workspace = true, optional = true }
 
-[target.'cfg(target_family = "wasm")'.dev-dependencies]
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 ic-platform-runtime = { workspace = true, features = ["system-raw"] }
 
 [dev-dependencies]
@@ -68,20 +68,16 @@ workspace = true
 [[example]]
 name = "numeric-bounded"
 path = "examples/numeric/bounded.rs"
-crate-type = ["cdylib"]
 
 [[example]]
 name = "numeric-ordinary"
 path = "examples/numeric/ordinary.rs"
-crate-type = ["cdylib"]
 
 [[example]]
 name = "numeric-packed"
 path = "examples/numeric/packed.rs"
-crate-type = ["cdylib"]
 
 [[example]]
 name = "numeric-candid"
 path = "examples/numeric/candid.rs"
-crate-type = ["cdylib"]
 required-features = ["candid-comparison"]

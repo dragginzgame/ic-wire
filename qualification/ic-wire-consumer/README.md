@@ -30,6 +30,12 @@ The generator writes payload.ts, methods.ts and the matching runtime.ts into the
 selected directory. Schema generation is optional and host-only. Its complete
 native/TS exchange is integrated into the existing compatibility harness, which
 runs the clients against the bundled TypeScript runtime and checks returned frames in Rust.
+
+Linux CI runs `make check-wasm-host` when checking Wasm feature forwarding.
+Its consumer check catches a missing derive re-export or a generated schema
+implementation that refers to host types on Wasm. Recheck it after changes to
+the derive, feature wiring or DTO annotations. The consumer check took 2.73 s
+locally with a partially populated Cargo cache.
 Strict checking requires the private compiler installation described in the
 [parent README](../README.md). The generator itself needs neither npm nor Node.
 

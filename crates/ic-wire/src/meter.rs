@@ -18,12 +18,12 @@ impl Budget {
         }
     }
 
-    #[cfg_attr(target_arch = "wasm32", inline(always))]
+    #[inline(always)]
     pub(super) fn enter(&self, depth: usize, units: usize) -> bool {
         self.enter_many(depth, units, 1)
     }
 
-    #[cfg_attr(target_arch = "wasm32", inline(always))]
+    #[inline(always)]
     pub(super) fn enter_many(&self, depth: usize, units: usize, count: usize) -> bool {
         let nodes = self.nodes.get();
         let available = self.units.get();
@@ -40,7 +40,7 @@ impl Budget {
         self.refused.set(true);
     }
 
-    #[cfg_attr(target_arch = "wasm32", inline(always))]
+    #[inline(always)]
     pub(super) fn charge_buffer(&self, units: usize) -> bool {
         // A buffer debit can succeed after a prior refusal without clearing it.
         // Refusal remains sticky for subsequent visits and error classification.

@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.25.1"
+ic-wire = "0.25.2"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -127,19 +127,27 @@ before expanding the list.
 | `derive` | Also provides `ic_wire::typescript::Wire` derive |
 | `platform-types` | Also projects published Platform Types Principal/Account |
 
-There are no default features. Host modules and their optional dependencies are
-excluded on Wasm even when features are forwarded. Gate derives on native builds:
+For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
+
+```toml
+[dependencies]
+ic-wire = { version = "0.25.2", features = ["derive"] }
+```
+
+Use the same declaration on native and Wasm:
 
 ```rust
-#[derive(serde::Serialize, serde::Deserialize)]
-#[cfg_attr(all(feature = "schema", not(target_family = "wasm")),
-    derive(ic_wire::typescript::Wire))]
+use ic_wire::typescript::Wire;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Wire)]
 struct Request { sequence: u64 }
 ```
 
-Here `schema` is a consumer feature forwarding `ic-wire/derive`. The derive
-supports explicit supported Serde layouts and rejects unsupported attributes;
-it never generates or changes Rust serialization.
+Keep client generation in a host tool. Wire handles the target check for each
+derived schema implementation. A crate that explicitly offers a codec-only
+build can instead forward `ic-wire/derive` from its own optional feature and
+apply `cfg_attr` for that feature alone.
 
 ## TypeScript delivery
 
