@@ -83,12 +83,13 @@ fn rejects_invalid_shapes_and_constraints() {
         assert_eq!(registry(value).unwrap_err(), GenerationError::Schema);
     }
     for name in ["", "0Root", "class", "bad-name"] {
-        assert!(
+        assert_eq!(
             ValidatedRegistry::from_metadata(
                 &BTreeMap::from([(name.into(), json!({"k":"unit"}))]),
                 SchemaLimits::default()
             )
-            .is_err()
+            .unwrap_err(),
+            GenerationError::Schema
         );
     }
 }
@@ -109,7 +110,10 @@ fn standard_shape_metadata_roundtrips_and_charges_all_children() {
         ValidatedRegistry::from_metadata(&types, SchemaLimits { nodes: 6, ..limits }).unwrap_err(),
         GenerationError::Complexity
     );
-    assert!(registry(json!({"k":"array","max":9007199254740992_u64,"item":{"k":"unit"}})).is_err());
+    assert_eq!(
+        registry(json!({"k":"array","max":9007199254740992_u64,"item":{"k":"unit"}})).unwrap_err(),
+        GenerationError::Complexity
+    );
 }
 
 #[test]

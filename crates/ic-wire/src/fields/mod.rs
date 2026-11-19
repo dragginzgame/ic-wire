@@ -20,11 +20,13 @@ impl<T, const N: usize> List<T, N> {
             Ok(Self(values))
         }
     }
+
     /// Borrow the elements.
     #[must_use]
     pub fn as_slice(&self) -> &[T] {
         &self.0
     }
+
     /// Recover the admitted sequence.
     #[must_use]
     pub fn into_vec(self) -> Vec<T> {
@@ -49,6 +51,7 @@ impl<'de, T: Deserialize<'de>, const N: usize> de::Visitor<'de> for ListVisitor<
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("bounded sequence")
     }
+
     fn visit_seq<A: de::SeqAccess<'de>>(self, seq: A) -> Result<Self::Value, A::Error> {
         read_list(seq, N)
     }
@@ -107,16 +110,19 @@ impl<const N: usize> Bytes<N> {
             Ok(Self(bytes))
         }
     }
+
     /// Borrow the bytes.
     #[must_use]
     pub fn as_slice(&self) -> &[u8] {
         &self.0
     }
+
     /// Borrow this bounded value without copying or repeating admission.
     #[must_use]
     pub fn as_borrowed(&self) -> BytesRef<'_, N> {
         BytesRef::from_owned(self)
     }
+
     /// Recover the admitted bytes without copying or allocating.
     #[must_use]
     pub fn into_vec(self) -> Vec<u8> {
@@ -145,6 +151,7 @@ impl de::Visitor<'_> for BytesVisitor {
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("bounded bytes")
     }
+
     fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
         if bytes.len() > self.limit {
             return Err(E::custom("byte limit"));
@@ -169,16 +176,19 @@ impl<const N: usize> Text<N> {
             Ok(Self(text))
         }
     }
+
     /// Borrow the text.
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
     /// Borrow this bounded value without copying or repeating admission.
     #[must_use]
     pub fn as_borrowed(&self) -> TextRef<'_, N> {
         TextRef::from_owned(self)
     }
+
     /// Recover the admitted text without copying or allocating.
     #[must_use]
     pub fn into_string(self) -> String {

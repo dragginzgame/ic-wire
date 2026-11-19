@@ -27,11 +27,13 @@ impl<'a, const N: usize> BytesRef<'a, N> {
             Ok(Self(bytes))
         }
     }
+
     /// Borrow the admitted bytes for their original storage lifetime.
     #[must_use]
     pub fn as_slice(&self) -> &'a [u8] {
         self.0
     }
+
     pub(super) fn from_owned(bytes: &'a Bytes<N>) -> Self {
         Self(bytes.as_slice())
     }
@@ -49,6 +51,7 @@ impl<'de: 'a, 'a, const N: usize> Deserialize<'de> for BytesRef<'a, N> {
             fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str("bounded borrowed bytes")
             }
+
             fn visit_borrowed_bytes<E: de::Error>(
                 self,
                 bytes: &'de [u8],
@@ -82,11 +85,13 @@ impl<'a, const N: usize> TextRef<'a, N> {
             Ok(Self(text))
         }
     }
+
     /// Borrow the admitted text for its original storage lifetime.
     #[must_use]
     pub fn as_str(&self) -> &'a str {
         self.0
     }
+
     pub(super) fn from_owned(text: &'a Text<N>) -> Self {
         Self(text.as_str())
     }
@@ -104,6 +109,7 @@ impl<'de: 'a, 'a, const N: usize> Deserialize<'de> for TextRef<'a, N> {
             fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str("bounded borrowed UTF-8 text")
             }
+
             fn visit_borrowed_str<E: de::Error>(self, text: &'de str) -> Result<Self::Value, E> {
                 TextRef::new(text).map_err(|_| E::custom("text limit"))
             }

@@ -1,13 +1,14 @@
 //! Bounded inline/named metadata production for the shared admission boundary.
-use super::{GenerationError, SchemaLimits, ValidatedRegistry};
-use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap, string::String, vec::Vec};
-use serde_json::{Value, json};
 mod adapters;
 #[cfg(feature = "platform-types")]
 mod platform;
 mod registry;
+
+use super::{GenerationError, SchemaLimits, ValidatedRegistry};
 pub use adapters::PackedField;
+use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 pub use registry::SchemaRegistry;
+use serde_json::{Value, json};
 
 /// A trusted description of a type's Serde representation.
 ///
@@ -48,6 +49,7 @@ impl SchemaContext {
     ) -> Result<Value, GenerationError> {
         self.describe::<T::Layout>()
     }
+
     /// Describe a nested type without bypassing construction admission.
     ///
     /// # Errors

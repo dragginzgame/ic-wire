@@ -111,6 +111,7 @@ impl Wire for SwallowsFailure {
         Ok(json!({"k":"bool"}))
     }
 }
+
 #[test]
 fn manual_projection_cannot_hide_a_nested_admission_failure() {
     assert_eq!(
@@ -292,6 +293,7 @@ impl Wire for AliasCycle {
         context.describe::<Self>()
     }
 }
+
 #[test]
 fn named_collection_rejects_alias_cycles_and_unstable_projections() {
     use ic_wire::typescript::SchemaRegistry;

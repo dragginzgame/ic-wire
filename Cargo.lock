@@ -52,9 +52,9 @@ checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.2"
+version = "0.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b08201b2ebbb9a9f0e1c8ee2854f48ff3f68a777c441147273c600bf6723d7d"
+checksum = "1ebaae959b3a485c68803aa242a967568ed15411208670de5a858da84324dba0"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.25.0"
+version = "0.25.1"
 dependencies = [
  "bytemuck",
  "ic-platform-types",
@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.25.0"
+version = "0.25.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -215,9 +215,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.6"
+version = "0.45.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85a1ec2a953eb8c41f66fdb121591c64e7ae3b6d77196a982740e790f0ed021a"
+checksum = "ededc08e16376776359ddfee6cc7670784f45e831a8c415e831d9600129a8c30"
 
 [[package]]
 name = "unicode-ident"

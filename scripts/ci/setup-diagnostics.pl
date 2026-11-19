@@ -6,7 +6,6 @@ use lib "$FindBin::Bin/../../vendor/toko-tooling/scripts/ci";
 use SetupDiagnostics qw(run_setup excerpt);
 use File::Path qw(make_path);
 use File::Find qw(find);
-use File::Temp ();
 use Fcntl qw(O_RDONLY O_NOFOLLOW O_NONBLOCK);
 use constant MAX_ATTEMPT_BYTES => 1024 * 1024;
 
@@ -16,7 +15,6 @@ die "usage: setup-diagnostics.pl PHASE COMMAND...\n" unless defined($phase) && $
 # Consumer-specific environment filtering and artifact size policy.
 sub bounded {
     my ($text) = @_;
-    $text =~ s/\bBearer\s+\S+/Bearer [REDACTED]/ig;
     $text =~ s/^\s*(?:export\s+)?[A-Z_][A-Z0-9_]*=.*$/[environment assignment omitted]/mg;
     $text =~ s/\b[A-Za-z0-9_+\/=.-]{40,}\b/[long value omitted]/g;
     return length($text) <= 16384 ? $text : "[truncated]\n" . substr($text, -(16384 - 12));
@@ -29,15 +27,9 @@ sub attempt_excerpt {
     return "[attempt log unavailable]\n" unless -f $in;
     my $size = -s $in;
     return "[attempt log skipped: $size bytes exceeds 1 MiB]\n" if $size > MAX_ATTEMPT_BYTES;
-    # Snapshot at most the observed size, even if the producer keeps appending.
-    # The shared sanitizer reads a file descriptor to EOF.
-    my $count = read($in, my $bytes, $size);
-    return "[attempt log changed during collection]\n"
-        unless defined($count) && $count == $size && (-s $in) == $size;
-    my $snapshot = File::Temp->new(TMPDIR => 1);
-    print {$snapshot} $bytes or die "cannot buffer attempt log";
-    seek($snapshot, 0, 0) or die "cannot rewind attempt log";
-    return bounded(excerpt($snapshot));
+    my $log = excerpt($in, MAX_ATTEMPT_BYTES);
+    return "[attempt log changed during collection]\n" unless (-s $in) == $size;
+    return bounded($log);
 }
 
 sub collect {

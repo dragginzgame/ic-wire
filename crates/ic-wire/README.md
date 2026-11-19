@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.25.0"
+ic-wire = "0.25.1"
 serde = { version = "1", features = ["derive"] }
 ```
 

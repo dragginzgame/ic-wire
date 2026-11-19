@@ -4,8 +4,7 @@ mod admitted;
 #[cfg(test)]
 mod tests;
 
-use crate::meter::Budget;
-use crate::{Encoding, Error, Limits, framing::validate_header};
+use crate::{Encoding, Error, Limits, framing::validate_header, meter::Budget};
 use serde::Deserialize;
 
 /// Decode exactly one payload or frame under explicit traversal allowances.

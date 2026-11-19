@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.25.1] - 2026-11-19
+
+### 🧹 Cleanup
+
+- Adopt Toko Tooling 0.45.14. CI now sanitizes attempt logs directly through
+  the bounded reader without writing temporary copies of the raw output.
+- Compile packed little-endian conversion helpers on all supported targets
+  and exercise their byte conversion in native tests.
+
 ## [0.25.0] - 2026-11-18
 
 - Bulk warnings expose the declared list bound in `max_elements` and in printed

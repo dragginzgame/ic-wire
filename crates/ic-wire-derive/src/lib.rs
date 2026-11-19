@@ -1,4 +1,7 @@
 //! Strict metadata derivation; Serde alone owns payload serialization.
+#[cfg(test)]
+mod tests;
+
 use proc_macro::TokenStream;
 use quote::{ToTokens, format_ident, quote};
 use syn::{Data, DeriveInput, Fields, parse_macro_input};
@@ -91,7 +94,7 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                 Ok(())
             })?;
         } else {
-            reject_attributes(core::slice::from_ref(attr))?;
+            reject_attributes(std::slice::from_ref(attr))?;
         }
     }
     let body = match &input.data {
@@ -212,7 +215,7 @@ fn member_attributes(
                 Ok(())
             })?;
         } else {
-            reject_attributes(core::slice::from_ref(attr))?;
+            reject_attributes(std::slice::from_ref(attr))?;
         }
     }
     Ok((renamed, bytes))
@@ -228,6 +231,3 @@ fn unnamed_attributes(attrs: &[syn::Attribute], owner: &syn::Path) -> syn::Resul
     }
     Ok(bytes)
 }
-
-#[cfg(test)]
-mod tests;

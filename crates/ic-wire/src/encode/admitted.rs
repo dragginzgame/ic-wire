@@ -54,6 +54,7 @@ macro_rules! small_integer {
         fn $signed(self, value: $signed_ty) -> Result<Self::Ok, Self::Error> {
             self.$unsigned(((value << 1) ^ (value >> (<$signed_ty>::BITS - 1))) as $unsigned_ty)
         }
+
         fn $unsigned(self, value: $unsigned_ty) -> Result<Self::Ok, Self::Error> {
             if value < 128 {
                 self.inner.serialize_u8(value as u8)
@@ -93,21 +94,26 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
         }
         self.inner.serialize_str(value)
     }
+
     fn serialize_bytes(self, value: &[u8]) -> Result<Self::Ok, Self::Error> {
         if !self.budget.charge_buffer(value.len()) {
             return Err(ser::Error::custom("payload allocation allowance exceeded"));
         }
         self.inner.serialize_bytes(value)
     }
+
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
         self.inner.serialize_none()
     }
+
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
         self.inner.serialize_unit()
     }
+
     fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
         self.inner.serialize_unit_struct(name)
     }
+
     fn serialize_unit_variant(
         self,
         name: &'static str,
@@ -116,6 +122,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
     ) -> Result<Self::Ok, Self::Error> {
         self.inner.serialize_unit_variant(name, index, variant)
     }
+
     fn serialize_some<T: Serialize + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
         self.inner.serialize_some(&Bounded {
             value,
@@ -123,6 +130,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_newtype_struct<T: Serialize + ?Sized>(
         self,
         name: &'static str,
@@ -137,6 +145,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             },
         )
     }
+
     fn serialize_newtype_variant<T: Serialize + ?Sized>(
         self,
         name: &'static str,
@@ -155,9 +164,11 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             },
         )
     }
+
     fn is_human_readable(&self) -> bool {
         self.inner.is_human_readable()
     }
+
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
         Ok(Compound {
             inner: self.inner.serialize_seq(len)?,
@@ -165,6 +176,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
         Ok(Compound {
             inner: self.inner.serialize_tuple(len)?,
@@ -172,6 +184,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_tuple_struct(
         self,
         name: &'static str,
@@ -183,6 +196,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_tuple_variant(
         self,
         name: &'static str,
@@ -198,6 +212,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
         Ok(Compound {
             inner: self.inner.serialize_map(len)?,
@@ -205,6 +220,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_struct(
         self,
         name: &'static str,
@@ -216,6 +232,7 @@ impl<'a, S: Serializer> Serializer for Checked<'a, S> {
             depth: self.depth + 1,
         })
     }
+
     fn serialize_struct_variant(
         self,
         name: &'static str,

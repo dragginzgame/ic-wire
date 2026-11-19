@@ -37,6 +37,7 @@ impl Output {
         }
         Ok(())
     }
+
     fn quoted(&mut self, value: &str) -> fmt::Result {
         self.write_char('"')?;
         let mut start = 0;

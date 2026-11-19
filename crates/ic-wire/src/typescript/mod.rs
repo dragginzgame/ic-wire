@@ -6,13 +6,21 @@
 
 mod advice;
 mod native;
-pub use advice::{BulkLintReport, BulkWarning};
 mod render;
+
+pub use advice::{BulkLintReport, BulkWarning};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 #[cfg(feature = "derive")]
 pub use ic_wire_derive::Wire;
 #[doc(hidden)]
 pub use native::{PackedField, SerdeBytesField};
 pub use native::{SchemaContext, SchemaRegistry, Wire};
+use serde_json::{Number, Value};
 
 /// Macro support for generated metadata; not a second schema API.
 #[doc(hidden)]
@@ -62,14 +70,6 @@ pub struct Method<'a> {
     /// Response payload allowances.
     pub response_limits: PayloadLimits,
 }
-
-use alloc::{
-    collections::{BTreeMap, BTreeSet},
-    string::{String, ToString},
-    vec,
-    vec::Vec,
-};
-use serde_json::{Number, Value};
 
 /// Invalid metadata or exhausted host generation allowance.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

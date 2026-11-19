@@ -84,6 +84,7 @@ impl fmt::Display for BulkLintReport {
         Ok(())
     }
 }
+
 pub(super) fn escape(name: &str) -> String {
     name.replace('~', "~0").replace('/', "~1")
 }
@@ -110,11 +111,13 @@ impl ValidatedRegistry {
         });
         self.lint_roots(roots, acknowledgements)
     }
+
     pub(super) fn root_index(&self, name: &str) -> Result<usize, GenerationError> {
         self.names
             .binary_search_by(|candidate| candidate.as_str().cmp(name))
             .map_err(|_| GenerationError::Schema)
     }
+
     pub(super) fn lint_roots(
         &self,
         roots: impl IntoIterator<Item = Result<(String, usize), GenerationError>>,
@@ -168,6 +171,7 @@ impl ValidatedRegistry {
             stale_acknowledgements: stale,
         })
     }
+
     fn representation(
         &self,
         mut id: usize,
@@ -344,6 +348,7 @@ impl Walk<'_> {
             .ok_or(GenerationError::Complexity)?;
         Ok(())
     }
+
     fn child(&mut self, item: usize, suffix: &str, depth: usize) -> Result<(), GenerationError> {
         let length = self.path.len();
         if length + suffix.len() > 4096 {
@@ -354,6 +359,7 @@ impl Walk<'_> {
         self.path.truncate(length);
         result
     }
+
     fn visit(&mut self, id: usize, depth: usize) -> Result<(), GenerationError> {
         self.charge(depth)?;
         match &self.graph.nodes[id] {

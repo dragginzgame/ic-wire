@@ -116,6 +116,7 @@ impl<'de, D: Deserializer<'de>> Deserializer<'de> for Bounded<'_, D> {
         deserialize_struct(name: &'static str, fields: &'static [&'static str]),
         deserialize_enum(name: &'static str, variants: &'static [&'static str]),
     }
+
     fn is_human_readable(&self) -> bool {
         self.inner.is_human_readable()
     }
@@ -150,12 +151,15 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
         visit_borrowed_bytes: &'de [u8],
         visit_byte_buf: Vec<u8>,
     }
+
     fn visit_none<E: de::Error>(self) -> Result<Self::Value, E> {
         self.inner.visit_none()
     }
+
     fn visit_unit<E: de::Error>(self) -> Result<Self::Value, E> {
         self.inner.visit_unit()
     }
+
     fn visit_some<D: Deserializer<'de>>(self, inner: D) -> Result<Self::Value, D::Error> {
         self.inner.visit_some(Bounded {
             inner,
@@ -163,6 +167,7 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
             depth: self.depth,
         })
     }
+
     fn visit_newtype_struct<D: Deserializer<'de>>(self, inner: D) -> Result<Self::Value, D::Error> {
         self.inner.visit_newtype_struct(Bounded {
             inner,
@@ -170,6 +175,7 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
             depth: self.depth,
         })
     }
+
     fn visit_seq<A: SeqAccess<'de>>(self, inner: A) -> Result<Self::Value, A::Error> {
         self.inner.visit_seq(Access {
             inner,
@@ -177,6 +183,7 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
             depth: self.depth,
         })
     }
+
     fn visit_map<A: MapAccess<'de>>(self, inner: A) -> Result<Self::Value, A::Error> {
         self.inner.visit_map(Access {
             inner,
@@ -184,6 +191,7 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
             depth: self.depth,
         })
     }
+
     fn visit_enum<A: EnumAccess<'de>>(self, inner: A) -> Result<Self::Value, A::Error> {
         self.inner.visit_enum(Access {
             inner,
@@ -222,6 +230,7 @@ impl<'de, A: MapAccess<'de>> MapAccess<'de> for Access<'_, A> {
             depth: self.depth,
         })
     }
+
     fn next_value_seed<T: DeserializeSeed<'de>>(
         &mut self,
         seed: T,
@@ -232,6 +241,7 @@ impl<'de, A: MapAccess<'de>> MapAccess<'de> for Access<'_, A> {
             depth: self.depth,
         })
     }
+
     fn size_hint(&self) -> Option<usize> {
         None
     }
@@ -263,6 +273,7 @@ impl<'de, A: VariantAccess<'de>> VariantAccess<'de> for Access<'_, A> {
     fn unit_variant(self) -> Result<(), Self::Error> {
         self.inner.unit_variant()
     }
+
     fn newtype_variant_seed<T: DeserializeSeed<'de>>(
         self,
         seed: T,
@@ -273,6 +284,7 @@ impl<'de, A: VariantAccess<'de>> VariantAccess<'de> for Access<'_, A> {
             depth: self.depth,
         })
     }
+
     fn tuple_variant<V: Visitor<'de>>(
         self,
         len: usize,
@@ -287,6 +299,7 @@ impl<'de, A: VariantAccess<'de>> VariantAccess<'de> for Access<'_, A> {
             },
         )
     }
+
     fn struct_variant<V: Visitor<'de>>(
         self,
         fields: &'static [&'static str],

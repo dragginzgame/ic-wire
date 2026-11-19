@@ -6,6 +6,9 @@
 //! coordinate clients and retain original retry/hash bytes. Reference contracts
 //! and qualification are recorded in docs/design/parity.md.
 
+#[cfg(test)]
+mod tests;
+
 /// Checked boolean bytes, projected as a browser boolean array.
 pub mod bools {
     use alloc::vec::Vec;
@@ -16,6 +19,7 @@ pub mod bools {
     pub fn serialize<S: Serializer>(values: &[bool], serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_bytes(bytemuck::must_cast_slice(values))
     }
+
     /// Validate every byte before reserving owned output.
     /// # Errors
     /// Rejects invalid boolean patterns and propagates admission/allocation errors.
@@ -26,6 +30,7 @@ pub mod bools {
             fn expecting(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 f.write_str("boolean bytes")
             }
+
             fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
                 let words: &[bool] = bytemuck::checked::try_cast_slice(bytes)
                     .map_err(|_| E::custom("invalid boolean byte"))?;
@@ -55,6 +60,7 @@ pub mod nonzero_i64 {
     ) -> Result<S::Ok, S::Error> {
         crate::packed::serialize_words::<i64, S>(bytemuck::must_cast_slice(values), serializer)
     }
+
     /// Decode packed words and enforce nonzero values.
     /// # Errors
     /// Rejects zero and propagates packed decoding failures. Validation follows
@@ -85,6 +91,7 @@ pub mod heap_u64 {
     ) -> Result<S::Ok, S::Error> {
         crate::packed::serialize_words(values.as_slice(), serializer)
     }
+
     /// Rebuild a heap from owned packed words, accepting duplicates and any order.
     /// # Errors
     /// Propagates packed decoding failures.
@@ -129,6 +136,7 @@ macro_rules! finite {
                     <$float>::from_le_bytes(word.try_into().expect("whole float word")).is_finite()
                 })
             }
+
             /// Encode finite values as one byte buffer without narrowing finite bits.
             /// # Errors
             /// Rejects NaN/infinity and propagates serializer/allocation failures.
@@ -136,20 +144,17 @@ macro_rules! finite {
                 values: &[$float],
                 serializer: S,
             ) -> Result<S::Ok, S::Error> {
-                #[cfg(target_endian = "little")]
-                {
+                if cfg!(target_endian = "little") {
                     let bytes = bytemuck::must_cast_slice(values);
                     if !valid(bytes) {
                         return Err(serde::ser::Error::custom("non-finite float"));
                     }
                     serializer.serialize_bytes(bytes)
-                }
-                #[cfg(target_endian = "big")]
-                {
+                } else {
                     serializer.serialize_bytes(&little_endian::<S::Error>(values)?)
                 }
             }
-            #[cfg(any(target_endian = "big", test))]
+
             pub(super) fn little_endian<E: serde::ser::Error>(
                 values: &[$float],
             ) -> Result<Vec<u8>, E> {
@@ -169,6 +174,7 @@ macro_rules! finite {
                 }
                 Ok(bytes)
             }
+
             /// Reject partial/nonfinite words before allocating owned float storage.
             /// # Errors
             /// Rejects invalid spans and propagates admission/allocation failures.
@@ -181,6 +187,7 @@ macro_rules! finite {
                     fn expecting(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                         f.write_str("finite little-endian float bytes")
                     }
+
                     fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
                         if !valid(bytes) {
                             return Err(E::custom("invalid finite float bytes"));
@@ -204,5 +211,3 @@ macro_rules! finite {
 }
 finite!(finite_f32, f32, 4);
 finite!(finite_f64, f64, 8);
-#[cfg(test)]
-mod tests;

@@ -18,6 +18,7 @@ macro_rules! finite {
                     Err(Error::Malformed)
                 }
             }
+
             /// Return the exact admitted primitive.
             pub fn get(self) -> $primitive {
                 self.0

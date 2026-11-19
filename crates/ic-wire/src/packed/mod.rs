@@ -1,14 +1,13 @@
 //! Explicit fixed-width little-endian packed fields with optional element bounds.
 // Contract and minimal algorithm adapted from pinned IC Wire; see docs/design/packed.md.
 
-use crate::Error;
-use alloc::vec::Vec;
-use core::fmt;
-use core::marker::PhantomData;
-use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
-
 #[cfg(test)]
 mod tests;
+
+use crate::Error;
+use alloc::vec::Vec;
+use core::{fmt, marker::PhantomData};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 
 /// Qualified fixed-width packed words. Sealed; arbitrary-bit casts never admit
 /// booleans, nonzero integers or floating-point domain values.
@@ -20,7 +19,6 @@ mod word {
     pub trait Word: bytemuck::Pod + core::fmt::Debug + Eq {
         const SCHEMA: &'static str;
         fn read(bytes: &[u8]) -> Self;
-        #[cfg(any(target_endian = "big", test))]
         fn append(self, bytes: &mut alloc::vec::Vec<u8>);
     }
     macro_rules! integer {
@@ -29,7 +27,6 @@ mod word {
             impl Word for $ty {
                 const SCHEMA: &'static str = stringify!($ty);
                 fn read(bytes: &[u8]) -> Self { Self::from_le_bytes(bytes.try_into().unwrap()) }
-                #[cfg(any(target_endian = "big", test))]
                 fn append(self, bytes: &mut alloc::vec::Vec<u8>) { bytes.extend_from_slice(&self.to_le_bytes()); }
             }
         )+};
@@ -43,7 +40,7 @@ mod word {
                 fn read(bytes: &[u8]) -> Self {
                     bytes.try_into().unwrap()
                 }
-                #[cfg(any(target_endian = "big", test))]
+
                 fn append(self, bytes: &mut alloc::vec::Vec<u8>) {
                     bytes.extend_from_slice(&self);
                 }
@@ -76,11 +73,13 @@ impl<T, const N: usize> Packed<T, N> {
             Ok(Self(words))
         }
     }
+
     /// Borrow the words.
     #[must_use]
     pub fn as_slice(&self) -> &[T] {
         &self.0
     }
+
     /// Recover storage without copying.
     #[must_use]
     pub fn into_vec(self) -> Vec<T> {
@@ -107,12 +106,9 @@ pub(crate) fn serialize_words<T: PackedElement, S: Serializer>(
     words: &[T],
     serializer: S,
 ) -> Result<S::Ok, S::Error> {
-    #[cfg(target_endian = "little")]
-    {
+    if cfg!(target_endian = "little") {
         serializer.serialize_bytes(bytemuck::must_cast_slice(words))
-    }
-    #[cfg(target_endian = "big")]
-    {
+    } else {
         let bytes = little_endian_bytes::<T, S::Error>(words)?;
         serializer.serialize_bytes(&bytes)
     }
@@ -120,7 +116,6 @@ pub(crate) fn serialize_words<T: PackedElement, S: Serializer>(
 
 // Compiled in native tests as well as on big-endian targets, so conversion is
 // exercised without claiming a native big-endian execution result.
-#[cfg(any(target_endian = "big", test))]
 fn little_endian_bytes<T: PackedElement, E: serde::ser::Error>(words: &[T]) -> Result<Vec<u8>, E> {
     let length = words
         .len()

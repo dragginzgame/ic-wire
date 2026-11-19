@@ -53,6 +53,7 @@ impl<'de> Deserialize<'de> for NoHint {
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence without a size hint")
             }
+
             fn visit_seq<A: SeqAccess<'de>>(self, mut access: A) -> Result<NoHint, A::Error> {
                 assert_eq!(access.size_hint(), None);
                 while access.next_element::<()>()?.is_some() {}
