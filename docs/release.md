@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.27.0** for
+The repository's product manifests and finalized changelog select **0.27.1** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
@@ -110,6 +110,10 @@ evidence; no universal speed improvement is claimed.
 
 Use this procedure only for a separately authorized release of the selected
 version. The repository has no automatic release runner.
+
+For a version bump, update `workspace.package.version` and the exact
+`ic-wire-derive` requirement in the root `Cargo.toml` together. Match the new
+requirement in [the pinning exception](../ci/dependency-pinning-exceptions.json).
 
 1. Review final source, versions, package lists and dependency selections. Verify
    registry state and credentials at delivery time; do not treat old supplier

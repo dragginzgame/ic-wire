@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.27.1] - 2026-11-20
+
+### 📦 Dependencies
+
+- Adopt Toko Tooling 0.45.23 in both workspaces.
+- Inherit the product version from the workspace and record the exact derive
+  dependency required by the generated metadata API. [#5 — Reconcile shared dependency-pin and inheritance audit findings](https://github.com/dragginzgame/ic-wire/issues/5)
+
 ## [0.27.0] - 2026-11-19
 
 - Adopt Toko Tooling 0.45.22 in both workspaces. Frame encoding, decoding and
