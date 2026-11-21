@@ -48,8 +48,9 @@ can change re-encoded bytes. Retain original input for hashes/signatures/retries
    Limit after a meter refusal, otherwise Malformed.
 5. After successful deserialization, reject remaining input as Trailing.
 
-Primitive acceptance belongs to published Postcard 1.1.3, with Serde 1.0.229.
-Redundant varints and Postcard's multi-scalar char behavior remain admitted.
+Primitive acceptance belongs to published Postcard 1.2.0, with Serde 1.0.229.
+Redundant varints remain admitted. A length-prefixed Rust `char` must contain
+exactly one Unicode scalar. Multiple scalars produce `Error::Malformed`.
 No reserialization/canonicality pass is introduced. Incremental decoding may
 allocate a valid prefix before encountering malformed later input.
 
@@ -74,12 +75,9 @@ visits. Native and Wasm compilation are separate from runtime/performance proof.
 Selected literal and allocator-instrumented checks are recorded in the
 [qualification workspace](../../qualification/README.md); full coverage remains open.
 
-The codec-only Wasm graph contains no
-SDK, Candid, schema module or serde_json. It does include supplier-owned
-`serde_derive` and `thiserror-impl` proc macros via Postcard/Serde/cobs. Thus a
-strict macro-free build-graph goal is not met by this upstream supplier cohort;
-no private fork or alternate codec was introduced to remove them. These macros
-run on the host; Wasm target compilation passes but is not a size measurement.
+The codec-only Wasm graph excludes SDKs, Candid, schema generation,
+`serde_json` and `serde_derive`. Postcard's cobs dependency still brings in
+`thiserror-impl`, a proc macro that runs on the build host.
 
 Bounded byte/text/list adapters now have a [field contract](fields.md) and a
 record-level literal test. The [packed-field workload](packed.md) now covers the

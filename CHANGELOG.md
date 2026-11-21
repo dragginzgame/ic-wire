@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.28.0] - 2026-11-21
+
+### 🔄 Changed
+
+- Decoding a Rust `char` now requires exactly one Unicode scalar. Earlier
+  releases accepted the first scalar when the declared span contained several.
+  Such inputs now return `Error::Malformed`. Valid encoded characters keep
+  their existing bytes.
+
+### 📦 Dependencies
+
+- Require Postcard 1.2.0 so codec-only native and Wasm consumers can build
+  without `serde_derive`. [#1 — Adopt a published Postcard release that removes unconditional Serde derive](https://github.com/dragginzgame/ic-wire/issues/1)
+- Adopt Toko Tooling 0.45.25 in both workspaces.
+
 ## [0.27.1] - 2026-11-20
 
 ### 📦 Dependencies

@@ -63,8 +63,8 @@ definition preserves existing output. This is structural evidence, not a host
 performance comparison. `make lint-host`, `make doc-host` and
 `make check-wasm-host` check the optional module and its target boundary.
 Codec-only native and Wasm builds omit `serde_json`. Enabling `typescript`
-selects it on both targets. Postcard still selects Serde’s derive proc macro
-in codec-only builds.
+selects it on both targets. Postcard 1.2.0 lets codec-only consumers omit
+`serde_derive`. Applications using Serde derives enable Serde's `derive` feature.
 
 `metadata_json()` exports only admitted graph nodes, never the original input.
 Round-trip tests preserve all admitted kinds, signedness, bounds, IDs, recursive

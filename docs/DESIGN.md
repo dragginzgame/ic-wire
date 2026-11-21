@@ -1,6 +1,6 @@
 # Architecture and contracts
 
-This document describes the current 0.27 implementation. It replaces the initial
+This document describes the current 0.28 implementation. It replaces the initial
 replacement proposal and its superseded execution sequence. Detailed contracts,
 source provenance and checkpoint evidence remain in the linked topic documents.
 Historical measurements qualify only their recorded inputs.

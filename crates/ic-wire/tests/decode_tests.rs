@@ -130,7 +130,11 @@ fn literal_payloads_preserve_supplier_acceptance() {
     );
     assert_eq!(
         decode::<char>(&[2, b'a', b'b'], Encoding::Payload, limits()),
-        Ok('a')
+        Err(Error::Malformed)
+    );
+    assert_eq!(
+        decode::<char>(&[2, 0xc3, 0xa9], Encoding::Payload, limits()),
+        Ok('é')
     );
     assert_eq!(
         decode::<(u8, Option<u16>, Vec<u8>)>(

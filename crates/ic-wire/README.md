@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.27.1"
+ic-wire = "0.28.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -132,7 +132,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.27.1", features = ["derive"] }
+ic-wire = { version = "0.28.0", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
