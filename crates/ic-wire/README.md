@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.28.1"
+ic-wire = "0.29.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -133,7 +133,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.28.1", features = ["derive"] }
+ic-wire = { version = "0.29.0", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -194,7 +194,10 @@ promise. An application error variant in a valid reply resolves as typed data.
 Register application roots with `SchemaRegistry`, finish into `ValidatedRegistry`,
 then call `payload_module` or `method_module` with explicit `PayloadLimits`, an
 acknowledgement map and a diagnostic handler. Display the bulk report or reject
-it with `is_clean()`; acknowledgements require exact paths and review reasons.
+it with `is_clean()`. The map accepts exact paths and review reasons. An
+application exporter can also share a `BulkPolicy` across method callbacks to
+acknowledge one advisory kind for a declared list element type or DTO field.
+Check `policy.stale()` after the final module.
 Warnings include the declared maximum element count when available. Empty-only
 collections skip element advice; lists that can contain zero-byte elements still
 receive traversal guidance.

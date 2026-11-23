@@ -1,5 +1,5 @@
 //! Rooted advice over the admitted graph. Reference contracts: docs/design/parity.md.
-use super::{GenerationError, Node, ValidatedRegistry};
+use super::{BulkAdvisory, BulkSite, GenerationError, Node, ValidatedRegistry};
 use alloc::{
     collections::{BTreeMap, BTreeSet},
     format,
@@ -31,6 +31,10 @@ macro_rules! integer_list {
 /// A primitive-list use site requiring an explicit representation review.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BulkWarning {
+    /// Stable advisory kind for policy matching.
+    pub advisory: BulkAdvisory,
+    /// Declared sites known from named metadata. Anonymous layouts have no nominal identity.
+    pub sites: Vec<BulkSite>,
     /// JSON-pointer path rooted in a public consumer label.
     pub path: String,
     /// Maximum element count declared at this list use site.
@@ -44,7 +48,7 @@ impl fmt::Display for BulkWarning {
         if let Some(max) = self.max_elements {
             write!(f, " (max {max} elements)")?;
         }
-        write!(f, ": {}", self.representation)
+        write!(f, " [{}]: {}", self.advisory.as_str(), self.representation)
     }
 }
 /// Complete bounded advice. Warnings never change generated source or wire bytes.
@@ -97,7 +101,7 @@ impl ValidatedRegistry {
     /// # Errors
     /// Schema for unknown roots or empty reasons; Complexity for depth >=64,
     /// more than 65,536 visits/root or 1,000,000 visits/report, paths over 4 KiB
-    /// or retained diagnostic paths over 16 MiB. No partial report is returned.
+    /// or retained diagnostic path and declaration text over 16 MiB. No partial report is returned.
     pub fn lint_bulk_roots(
         &self,
         roots: &BTreeMap<String, String>,
@@ -145,7 +149,7 @@ impl ValidatedRegistry {
             // Model the public named root as a reference, just like nested refs.
             walk.charge(0)?;
             walk.active.insert(root);
-            walk.visit(self.roots[root], 1)?;
+            walk.visit(self.roots[root], 1, Some(root), None)?;
             walk.active.remove(&root);
         }
         let paths: BTreeSet<_> = walk
@@ -349,66 +353,122 @@ impl Walk<'_> {
         Ok(())
     }
 
-    fn child(&mut self, item: usize, suffix: &str, depth: usize) -> Result<(), GenerationError> {
+    fn child(
+        &mut self,
+        item: usize,
+        suffix: &str,
+        depth: usize,
+        field: Option<(usize, &str)>,
+    ) -> Result<(), GenerationError> {
         let length = self.path.len();
         if length + suffix.len() > 4096 {
             return Err(GenerationError::Complexity);
         }
         self.path.push_str(suffix);
-        let result = self.visit(item, depth + 1);
+        let result = self.visit(item, depth + 1, None, field);
         self.path.truncate(length);
         result
     }
 
-    fn visit(&mut self, id: usize, depth: usize) -> Result<(), GenerationError> {
+    fn warn(
+        &mut self,
+        item: usize,
+        max_elements: Option<u64>,
+        field: Option<(usize, &str)>,
+        word: &str,
+        representation: &'static str,
+    ) -> Result<(), GenerationError> {
+        let length = self.path.len() + 6 + word.len();
+        if length > 4096 {
+            return Err(GenerationError::Complexity);
+        }
+        self.bytes = self
+            .bytes
+            .checked_sub(length)
+            .ok_or(GenerationError::Complexity)?;
+        let mut sites = Vec::new();
+        if let Node::Ref(root) = self.graph.nodes[item] {
+            let label = &self.graph.names[root];
+            self.bytes = self
+                .bytes
+                .checked_sub(label.len())
+                .ok_or(GenerationError::Complexity)?;
+            sites.push(BulkSite::ListElement(label.clone()));
+        }
+        if let Some((record, name)) = field {
+            let label = &self.graph.names[record];
+            self.bytes = self
+                .bytes
+                .checked_sub(label.len() + name.len())
+                .ok_or(GenerationError::Complexity)?;
+            sites.push(BulkSite::Field(label.clone(), name.into()));
+        }
+        self.warnings.push(BulkWarning {
+            advisory: match word {
+                "u8" => BulkAdvisory::OpaqueBytes,
+                "unit" | "empty-record" | "empty-tuple" | "empty-array" => {
+                    BulkAdvisory::ZeroByteList
+                }
+                "bool" => BulkAdvisory::BooleanList,
+                "i128" | "u128" => BulkAdvisory::WideIntegerList,
+                _ => BulkAdvisory::PackedList,
+            },
+            sites,
+            path: format!("{}/list/{word}", self.path),
+            max_elements,
+            representation,
+        });
+        Ok(())
+    }
+
+    fn visit(
+        &mut self,
+        id: usize,
+        depth: usize,
+        owner: Option<usize>,
+        field: Option<(usize, &str)>,
+    ) -> Result<(), GenerationError> {
         self.charge(depth)?;
         match &self.graph.nodes[id] {
             Node::Ref(root) => {
                 if self.active.insert(*root) {
-                    self.visit(self.graph.roots[*root], depth + 1)?;
+                    self.visit(self.graph.roots[*root], depth + 1, Some(*root), field)?;
                     self.active.remove(root);
                 }
             }
             Node::List { max: Some(0), .. } | Node::Array { len: 0, .. } => {}
             Node::List { item, max } => {
                 if let Some((word, representation)) = self.graph.representation(*item, *max)? {
-                    let length = self.path.len() + 6 + word.len();
-                    if length > 4096 {
-                        return Err(GenerationError::Complexity);
-                    }
-                    self.bytes = self
-                        .bytes
-                        .checked_sub(length)
-                        .ok_or(GenerationError::Complexity)?;
-                    self.warnings.push(BulkWarning {
-                        path: format!("{}/list/{word}", self.path),
-                        max_elements: *max,
-                        representation,
-                    });
+                    self.warn(*item, *max, field, word, representation)?;
                 }
-                self.child(*item, "/item", depth)?;
+                self.child(*item, "/item", depth, None)?;
             }
             Node::Array { item, .. } | Node::Option(item) | Node::Alias(item) => {
-                self.child(*item, "/item", depth)?
+                self.child(*item, "/item", depth, None)?
             }
             Node::Record(fields) => {
                 for (name, item) in fields {
-                    self.child(*item, &format!("/fields/{}", escape(name)), depth)?;
+                    self.child(
+                        *item,
+                        &format!("/fields/{}", escape(name)),
+                        depth,
+                        owner.map(|record| (record, name.as_str())),
+                    )?;
                 }
             }
             Node::Enum(variants) => {
                 for (name, _, item) in variants {
-                    self.child(*item, &format!("/variants/{}", escape(name)), depth)?;
+                    self.child(*item, &format!("/variants/{}", escape(name)), depth, None)?;
                 }
             }
             Node::Tuple(items) => {
                 for (index, item) in items.iter().enumerate() {
-                    self.child(*item, &format!("/items/{index}"), depth)?;
+                    self.child(*item, &format!("/items/{index}"), depth, None)?;
                 }
             }
             Node::Result { ok, err } => {
-                self.child(*ok, "/ok", depth)?;
-                self.child(*err, "/err", depth)?;
+                self.child(*ok, "/ok", depth, None)?;
+                self.child(*err, "/err", depth, None)?;
             }
             _ => {}
         }

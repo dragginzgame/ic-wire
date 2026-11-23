@@ -408,3 +408,120 @@ fn hash_list_advice_accounts_for_the_first_byte_prefix_boundary() {
         }
     }
 }
+
+#[test]
+fn application_policy_matches_declarations_across_modules_and_bare_roots() {
+    use wire::typescript::{BulkAdvisory, BulkPolicy, BulkSite, SchemaRegistry, Wire};
+
+    #[derive(serde::Serialize, Wire)]
+    #[wire(crate = "wire")]
+    struct Identifier([u8; 16]);
+    #[derive(serde::Serialize, Wire)]
+    #[wire(crate = "wire")]
+    struct Other([u8; 16]);
+    #[derive(serde::Serialize, Wire)]
+    #[wire(crate = "wire")]
+    struct Policy {
+        unlocked_rarity_tiers: Vec<u8>,
+        cursor: Vec<u8>,
+    }
+
+    let mut schemas = SchemaRegistry::new(Default::default()).unwrap();
+    schemas.register::<Vec<Identifier>>("Ids").unwrap();
+    schemas.register::<Vec<Other>>("OtherIds").unwrap();
+    schemas.register::<Policy>("Policy").unwrap();
+    let graph = schemas.finish().unwrap();
+    let baseline = graph.metadata_json().unwrap();
+    let mut policy = BulkPolicy::default();
+    policy
+        .acknowledge(
+            BulkSite::list_element::<Identifier>(),
+            BulkAdvisory::PackedList,
+            "Keep typed IDs",
+        )
+        .unwrap();
+    let tiers = BulkSite::field::<Policy>("unlocked_rarity_tiers");
+    assert_eq!(
+        policy.acknowledge(tiers.clone(), BulkAdvisory::OpaqueBytes, " "),
+        Err(GenerationError::Schema)
+    );
+    policy
+        .acknowledge(
+            tiers.clone(),
+            BulkAdvisory::OpaqueBytes,
+            "Numeric tier values",
+        )
+        .unwrap();
+    assert_eq!(
+        policy.acknowledge(tiers.clone(), BulkAdvisory::OpaqueBytes, "duplicate"),
+        Err(GenerationError::Schema)
+    );
+
+    let limits = PayloadLimits {
+        bytes: 200,
+        nodes: 400,
+        depth: 10,
+    };
+    for (req, rep, remaining) in [("Ids", "Policy", 1), ("OtherIds", "Ids", 1)] {
+        let methods = [Method {
+            export: "codec",
+            id: 1,
+            request: req,
+            response: rep,
+            request_limits: limits,
+            response_limits: limits,
+        }];
+        let render = |f: &mut dyn FnMut(wire::typescript::BulkLintReport)| {
+            graph
+                .method_module(&methods, "./runtime.ts", &Default::default(), f)
+                .unwrap()
+        };
+        let original = render(&mut |_| {});
+        let filtered = render(&mut |mut report| {
+            policy.apply(&mut report);
+            assert_eq!(report.warnings.len(), remaining);
+            let w = &report.warnings[0];
+            if req == "Ids" {
+                assert!(w.path.ends_with("/fields/cursor/list/u8"));
+            } else {
+                assert_eq!(w.advisory, BulkAdvisory::PackedList);
+                assert!(w.sites.contains(&BulkSite::list_element::<Other>()));
+            }
+        });
+        assert_eq!(original, filtered);
+    }
+    assert_eq!(baseline, graph.metadata_json().unwrap());
+    assert_eq!(policy.stale().count(), 0);
+
+    // Same serialized field, a different advisory after a declaration change.
+    let mut definitions: BTreeMap<String, Value> = serde_json::from_str(&baseline).unwrap();
+    definitions
+        .get_mut(&SchemaRegistry::type_label::<Policy>())
+        .unwrap()["fields"][0]["value"] = json!({"k":"list","item":{"k":"u","bits":16}});
+    let changed = ValidatedRegistry::from_metadata(&definitions, Default::default()).unwrap();
+    let mut report = changed
+        .lint_bulk_roots(
+            &[("reply".into(), "Policy".into())].into(),
+            &Default::default(),
+        )
+        .unwrap();
+    let mut next_export = BulkPolicy::default();
+    next_export
+        .acknowledge(
+            tiers.clone(),
+            BulkAdvisory::OpaqueBytes,
+            "Numeric tier values",
+        )
+        .unwrap();
+    next_export.apply(&mut report);
+    assert!(
+        report
+            .warnings
+            .iter()
+            .any(|w| w.sites.contains(&tiers) && w.advisory == BulkAdvisory::PackedList)
+    );
+    assert_eq!(
+        next_export.stale().collect::<Vec<_>>(),
+        [(&tiers, BulkAdvisory::OpaqueBytes, "Numeric tier values")]
+    );
+}

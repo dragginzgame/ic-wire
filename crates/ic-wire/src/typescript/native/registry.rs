@@ -34,6 +34,12 @@ pub struct SchemaRegistry {
 }
 
 impl SchemaRegistry {
+    /// Named graph label for this concrete Rust type under the current toolchain.
+    #[must_use]
+    pub fn type_label<T: ?Sized>() -> String {
+        generated_name(core::any::type_name::<T>())
+    }
+
     /// Start collection with explicit host allowances.
     ///
     /// # Errors

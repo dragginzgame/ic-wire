@@ -5,10 +5,12 @@
 //! Named Rust type collection and a matching subset runtime share this contract.
 
 mod advice;
+mod advice_policy;
 mod native;
 mod render;
 
 pub use advice::{BulkLintReport, BulkWarning};
+pub use advice_policy::{BulkAdvisory, BulkPolicy, BulkSite};
 use alloc::{
     collections::{BTreeMap, BTreeSet},
     string::{String, ToString},

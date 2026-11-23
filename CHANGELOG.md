@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.29.0] - 2026-11-23
+
+### ➕ Added
+
+- Exporters can acknowledge a bulk advisory for a named list element or DTO field across an application. Each decision records a reason and the exporter can report unused decisions after its final method. [#7 — Allow a specific Wire advisory by application type or DTO field](https://github.com/dragginzgame/ic-wire/issues/7)
+
+### ⚠️ Breaking
+
+- `BulkWarning` exposes the advisory identifier and declaration sites. Update struct literals and exhaustive patterns for the two additional fields.
+
 ## [0.28.1] - 2026-11-23
 
 ### ➕ Added

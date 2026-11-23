@@ -253,3 +253,62 @@ attributes intentionally reject; full legacy surface parity is not a hard-cut
 release requirement.
 
 The [API manifest exporter](api-manifest.md) supports development-time drift detection using the admitted registry and method descriptors.
+
+### Application-scoped bulk acknowledgements
+
+An exporter can share one `BulkPolicy` across the reports from every canister
+and method in an application. Register each decision with a stable advisory ID,
+an exact declaration and a nonempty reason. For example, a typed application
+generator could register the following decisions before its first method:
+
+```rust,ignore
+use ic_wire::typescript::{BulkAdvisory, BulkPolicy, BulkSite};
+
+let mut policy = BulkPolicy::default();
+policy.acknowledge(
+    BulkSite::list_element::<ic_db::Ulid>(),
+    BulkAdvisory::PackedList,
+    "Keep typed ULIDs in the public request and reply.",
+)?;
+policy.acknowledge(
+    BulkSite::field::<LaunchPolicy>("unlocked_rarity_tiers"),
+    BulkAdvisory::OpaqueBytes,
+    "Each element is a numeric tier.",
+)?;
+```
+
+Apply the policy in the existing diagnostics callback and check stale decisions
+once after processing the whole application:
+
+```rust,ignore
+let module = registry.method_module(&methods, runtime, &exact_paths, |mut report| {
+    policy.apply(&mut report);
+    eprint!("{report}");
+})?;
+// After the final method:
+for (site, advisory, reason) in policy.stale() {
+    eprintln!("stale {} acknowledgement for {site:?}: {reason}", advisory.as_str());
+}
+```
+
+A generic host such as Canic can load decisions from application configuration.
+Parse advisory IDs such as `packed-list` and `opaque-bytes` with
+`str::parse::<BulkAdvisory>()`. For a JSON schema inventory, construct
+`BulkSite::ListElement(label)` or `BulkSite::Field(record_label, serialized_field)`.
+The application can obtain labels using `SchemaRegistry::type_label::<T>()`
+with its build toolchain. Carry the exact named definitions through inspection.
+Inline, anonymous elements have no declared type identity to match. A list of
+another newtype with the same wire layout keeps its own advisory. Record fields
+match across root aliases and endpoints, including whenever the same DTO is nested.
+
+The per-module exact-path map still runs first and reports its own stale paths.
+A declaration rule matches only remaining warnings of its specified kind.
+Keep decisions alongside exporter inputs. They affect the diagnostic report
+alone and are absent from generated clients, manifests and wire data.
+
+For issue #7, a local Canic 0.264.0 exporter build applied these two rules
+through the callback during `canic app export-wire` on Toko's seven-canister
+fixture. The baseline emitted 51 advisories. The configured run removed 25
+ULID and two rarity-tier advisories, retained all 24 cursor advisories, and
+produced the same 157 files byte for byte. The released Canic 0.264.0 CLI
+requires downstream integration to load an application policy.
