@@ -13,6 +13,7 @@ description = "Bounded Serde/Postcard encoding with schema and TypeScript genera
 ignored = ["toko-tooling"]
 
 [features]
+service-client = ["typescript"]
 api-manifest = ["typescript"]
 platform-types = ["typescript", "dep:ic-platform-types"]
 derive = ["typescript", "dep:ic-wire-derive"]

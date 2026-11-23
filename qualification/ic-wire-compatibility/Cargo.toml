@@ -18,6 +18,7 @@ ignored = ["toko-tooling"]
 ic = ["dep:ic-platform-runtime"]
 candid-comparison = ["dep:candid"]
 typescript = [
+    "wire/service-client",
     "wire/api-manifest",
     "wire/derive",
     "wire/platform-types",

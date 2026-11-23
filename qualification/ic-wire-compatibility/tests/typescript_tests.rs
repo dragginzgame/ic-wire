@@ -7,6 +7,7 @@ mod domain_cases;
 mod manifest_cases;
 mod renamed_cases;
 mod scalar_cases;
+mod service_cases;
 mod standard_cases;
 mod validation_cases;
 
@@ -352,6 +353,7 @@ fn run_typescript(fixture: &Value, script: &str) -> Value {
         fs::write(directory.join("client.ts"), module).unwrap();
         for (key, file) in [
             ("frameModule", "frame-client.ts"),
+            ("serviceModule", "service.ts"),
             ("badFrameModule", "bad-frame-client.ts"),
             ("badModule", "bad-client.ts"),
         ] {

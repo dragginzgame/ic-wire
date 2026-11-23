@@ -1,12 +1,12 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.28.0** for
+The repository's product manifests and finalized changelog select **0.28.1** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
 
 The 0.28.0 release qualifies Postcard 1.2.0 with the selected Toko Tooling
-0.45.25 snapshot. Review Toko Tooling 0.46.0 at the next tooling adoption.
+0.45.25 snapshot.
 Review the private Testkit 0.110.4, Platform Runtime 0.23.24 and Host updates
 (Artifacts/FS 0.80.8, Process 0.81.4) together at the next simulator refresh.
 

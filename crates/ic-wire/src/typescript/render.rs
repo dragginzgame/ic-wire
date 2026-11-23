@@ -1,3 +1,6 @@
+#[cfg(feature = "service-client")]
+mod service;
+
 use super::{
     GenerationError, MAX_SAFE_INTEGER, Method, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT,
     ValidatedRegistry, identifier,
@@ -10,22 +13,24 @@ use alloc::{
 };
 use core::fmt::{self, Write};
 
-// Check before extending the output, including escaped field names. Syntax
-// recursion is bounded at import; named references never expand during rendering.
+///
+/// Output
+/// Charges each UTF-8 write against the remaining generation budget before appending it.
+///
+
 struct Output {
     text: String,
     remaining: usize,
 }
 
-impl Write for Output {
-    fn write_str(&mut self, value: &str) -> fmt::Result {
-        self.remaining = self.remaining.checked_sub(value.len()).ok_or(fmt::Error)?;
-        self.text.push_str(value);
-        Ok(())
-    }
-}
-
 impl Output {
+    fn new(remaining: usize) -> Self {
+        Self {
+            text: String::new(),
+            remaining,
+        }
+    }
+
     fn scalar_bounds(&mut self, bounds: &super::ScalarBounds, json: bool) -> fmt::Result {
         for (key, bound) in [("min", &bounds.min), ("max", &bounds.max)] {
             if let Some(bound) = bound {
@@ -36,6 +41,7 @@ impl Output {
                 }
             }
         }
+
         Ok(())
     }
 
@@ -63,6 +69,7 @@ impl Output {
             start = index + character.len_utf8();
         }
         self.write_str(&value[start..])?;
+
         self.write_char('"')
     }
 
@@ -73,6 +80,24 @@ impl Output {
         if let Some(max) = max {
             write!(self, "/* max {max} */ ")?;
         }
+
+        Ok(())
+    }
+
+    fn json_bound(&mut self, name: &str, value: Option<u64>) -> fmt::Result {
+        if let Some(value) = value {
+            write!(self, ",\"{name}\":{value}")?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Write for Output {
+    fn write_str(&mut self, value: &str) -> fmt::Result {
+        self.remaining = self.remaining.checked_sub(value.len()).ok_or(fmt::Error)?;
+        self.text.push_str(value);
+
         Ok(())
     }
 }
@@ -108,10 +133,7 @@ impl ValidatedRegistry {
     ) -> Result<String, GenerationError> {
         Self::admit_runtime_module(runtime_module)?;
         self.admit_client(export, root, limits)?;
-        let mut output = Output {
-            text: String::new(),
-            remaining: self.output_bytes,
-        };
+        let mut output = Output::new(self.output_bytes);
         self.render_payload_module(&mut output, export, root, runtime_module, limits)
             .map_err(|_| GenerationError::Complexity)?;
         let report = self.lint_roots(
@@ -195,10 +217,7 @@ impl ValidatedRegistry {
         }
         Self::admit_runtime_module(runtime_module)?;
         self.admit_methods(methods.iter())?;
-        let mut output = Output {
-            text: String::new(),
-            remaining: self.output_bytes,
-        };
+        let mut output = Output::new(self.output_bytes);
         self.render_methods(&mut output, methods, runtime_module)
             .map_err(|_| GenerationError::Complexity)?;
         let roots = methods.iter().flat_map(|method| {
@@ -340,10 +359,7 @@ impl ValidatedRegistry {
     /// # Errors
     /// Returns Complexity before extending output beyond its byte allowance.
     pub fn metadata_json(&self) -> Result<String, GenerationError> {
-        let mut output = Output {
-            text: String::new(),
-            remaining: self.output_bytes,
-        };
+        let mut output = Output::new(self.output_bytes);
         self.render_metadata(&mut output)
             .map_err(|_| GenerationError::Complexity)?;
         Ok(output.text)
@@ -493,10 +509,7 @@ impl ValidatedRegistry {
     /// # Errors
     /// Returns Complexity before extending output beyond its byte allowance.
     pub fn declarations(&self) -> Result<String, GenerationError> {
-        let mut output = Output {
-            text: String::new(),
-            remaining: self.output_bytes,
-        };
+        let mut output = Output::new(self.output_bytes);
         self.render(&mut output)
             .map_err(|_| GenerationError::Complexity)?;
         Ok(output.text)
@@ -621,15 +634,6 @@ impl ValidatedRegistry {
     }
 }
 
-impl Output {
-    fn json_bound(&mut self, name: &str, value: Option<u64>) -> fmt::Result {
-        if let Some(value) = value {
-            write!(self, ",\"{name}\":{value}")?;
-        }
-        Ok(())
-    }
-}
-
 #[cfg(feature = "api-manifest")]
 impl ValidatedRegistry {
     /// Export one format-1 JSON contract per deployed endpoint for offline comparison.
@@ -664,10 +668,7 @@ impl ValidatedRegistry {
                 self.root_index(method.request)?,
                 self.root_index(method.response)?,
             ];
-            let mut output = Output {
-                text: String::new(),
-                remaining,
-            };
+            let mut output = Output::new(remaining);
             self.render_manifest(&mut output, endpoint, &method, roots)
                 .map_err(|_| GenerationError::Complexity)?;
             remaining = output.remaining;

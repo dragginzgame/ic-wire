@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.28.0"
+ic-wire = "0.28.1"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -124,6 +124,7 @@ before expanding the list.
 | Feature | Purpose |
 | --- | --- |
 | `api-manifest` | Also exports bounded per-endpoint API snapshots for CI |
+| `service-client` | Generates a typed TypeScript service over existing method codecs |
 | `typescript` | Schema collection, validated graph, lint and generated clients |
 | `derive` | Also provides `ic_wire::typescript::Wire` derive |
 | `platform-types` | Also projects published Platform Types Principal/Account |
@@ -132,7 +133,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.28.0", features = ["derive"] }
+ic-wire = { version = "0.28.1", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -163,6 +164,32 @@ Compare the generated directory with a known-good client baseline. The exporter
 runs when explicitly called and writes no files itself.
 
 ## TypeScript delivery
+
+Enable `service-client` in the generator to group mounted methods into one client.
+For example, if `method_module` exported a codec named `codec` into
+`profile.ts`, select the public client name and the deployed endpoint separately.
+Each method module can export its own `codec`, `Request`, and `Response`. Pass
+any of the validated registries to set the service module's output allowance:
+
+```rust,ignore
+use ic_wire::typescript::ServiceMethod;
+
+let source = graph.service_module(&[ServiceMethod {
+    binding: "getProfile",
+    codec_export: "codec",
+    endpoint: "get_profile",
+    mode: "query",
+    codec_module: "./profile.ts",
+}])?;
+```
+
+Write the returned source to `service.ts`. Call
+`createService(canisterId, transport).getProfile(request)` to receive a promise
+of the codec's reply type. The generated `Transport<CanisterId>` interface
+accepts the application's canister ID type. Its `query` and `update` methods
+receive the deployed name and request frame and return a promise of reply bytes.
+Composite queries use `query`. Codec refusals and transport failures reject the
+promise. An application error variant in a valid reply resolves as typed data.
 
 Register application roots with `SchemaRegistry`, finish into `ValidatedRegistry`,
 then call `payload_module` or `method_module` with explicit `PayloadLimits`, an

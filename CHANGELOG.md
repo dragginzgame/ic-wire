@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.28.1] - 2026-11-23
+
+### ➕ Added
+
+- Generate a typed TypeScript service client from existing method codecs with
+  the optional `service-client` feature. Applications supply the transport.
+  [#6 — Render a typed TypeScript service client with an injected transport](https://github.com/dragginzgame/ic-wire/issues/6)
+
+### 📦 Dependencies
+
+- Adopt Toko Tooling 0.46.3 in the product and qualification workspaces.
+
 ## [0.28.0] - 2026-11-21
 
 ### 🔄 Changed
