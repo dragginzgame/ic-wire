@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.30.0"
+ic-wire = "0.30.1"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -157,7 +157,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.30.0", features = ["derive"] }
+ic-wire = { version = "0.30.1", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -214,6 +214,12 @@ accepts the application's canister ID type. Its `query` and `update` methods
 receive the deployed name and request frame and return a promise of reply bytes.
 Composite queries use `query`. Codec refusals and transport failures reject the
 promise. An application error variant in a valid reply resolves as typed data.
+
+Shared error handlers can recognise a Wire codec error from any generated
+runtime copy by its stable `name` and `code` properties. Check for
+`name === 'WireError'` and one of the codes `'limit'`, `'malformed'`,
+`'identity'`, or `'value'`. Each bundled runtime defines its own constructor,
+so `instanceof WireError` only recognises errors from that copy.
 
 The [executable counter example](https://github.com/dragginzgame/ic-wire/tree/main/qualification#raw-service-round-trip)
 connects a generated client to a Rust canister over HTTP. Its `read` query and

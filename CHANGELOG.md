@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.30.1] - 2026-11-24
+
+### 🐛 Fixed
+
+- TypeScript codec errors expose the name `WireError` so shared handlers can recognise their error codes across generated client packages. [ic-wire #16 — Set WireError.name so errors are recognisable across runtime copies](https://github.com/dragginzgame/ic-wire/issues/16)
+
 ## [0.30.0] - 2026-11-24
 
 ### ⚠️ Breaking

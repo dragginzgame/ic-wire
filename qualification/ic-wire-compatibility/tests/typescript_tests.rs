@@ -338,6 +338,14 @@ fn runtime_primitive_acceptance_matches_literal_rules() {
     assert!(result["checked"].as_u64().unwrap() > 130_000);
 }
 
+#[test]
+fn wire_errors_are_recognisable_across_runtime_copies() {
+    assert_eq!(
+        run_typescript(&json!({}), include_str!("runtime_errors.mjs")),
+        json!(true)
+    );
+}
+
 fn run_typescript(fixture: &Value, script: &str) -> Value {
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
