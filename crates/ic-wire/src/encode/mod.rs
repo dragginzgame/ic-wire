@@ -35,7 +35,7 @@ fn preflight<T: Serialize + ?Sized>(
     })
     .map_err(|_| budget.error())?;
     if size > payload_limits.bytes {
-        return Err(Error::Limit);
+        return Err(Error::Limit(crate::LimitKind::Bytes));
     }
 
     // The byte allowance was reduced by prefix before sizing, so addition fits.
@@ -130,7 +130,9 @@ pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     output: &'out mut [u8],
 ) -> Result<&'out [u8], Error> {
     let (header, size) = preflight(value, encoding, limits)?;
-    let output = output.get_mut(..size).ok_or(Error::Limit)?;
+    let output = output
+        .get_mut(..size)
+        .ok_or(Error::Limit(crate::LimitKind::Output))?;
     let prefix = if let Some(header) = header {
         output[..HEADER_BYTES].copy_from_slice(&header);
 

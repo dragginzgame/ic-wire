@@ -118,3 +118,33 @@ Retain one-element first growth. The candidate improved medium-length decode,
 but the long-list opt-z gain was small relative to the singleton memory increase
 and the opt-3 regression. Local artifacts are in
 `qualification/target/ic-counter-FW107X/` and `qualification/target/ic-counter-ycDm7K/`.
+
+## Packed reads and allowance diagnostics
+
+The standalone upload and finite-float workloads ran under Rust 1.100.0 on
+wasm32-unknown-unknown. Each cell gives uncompressed module bytes / code-section
+payload bytes. The middle build isolates exact-width reads. The last build adds
+the first refused allowance and shares the meter debit across callers.
+
+| Workload and profile | Before | Packed reads | With diagnostics | Combined change |
+| --- | ---: | ---: | ---: | ---: |
+| Upload, opt-z | 46,856 / 39,551 | 46,814 / 39,509 | 46,397 / 39,063 | −459 / −488 |
+| Upload, opt-3 | 48,140 / 41,531 | 48,385 / 41,775 | 49,619 / 42,953 | +1,479 / +1,422 |
+| Finite float, opt-z | 21,632 / 18,620 | 21,612 / 18,600 | 23,181 / 20,099 | +1,549 / +1,479 |
+| Finite float, opt-3 | 22,160 / 19,356 | 22,154 / 19,350 | 23,879 / 21,004 | +1,719 / +1,648 |
+
+The size tradeoff buys typed diagnostics on a refused traversal. It depends on
+which codec operations and error paths the consumer retains. The measurement
+runner executed every artifact. Its source digests for the three columns start
+with `e8335fa30e95`, `dcaa858f0a7c` and `c2b472d62ae6`.
+
+The upload probe on PocketIC 16.1.0 reported the following median IC
+instruction counts for batches of eight operations across three calls. Counts
+include loop overhead. The bare request and reply payloads were 23 and 3 bytes
+respectively (34 and 14 bytes framed). The isolated native allocation probe
+passed its eight existing groups, including refusal before output allocation.
+
+| Profile | Encode request | Decode request | Encode reply | Decode reply | Loop control |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| opt-z | 48,222 | 45,758 | 18,854 | 5,926 | 606 |
+| opt-3 | 27,192 | 28,624 | 9,096 | 4,464 | 432 |

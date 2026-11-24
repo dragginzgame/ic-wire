@@ -100,8 +100,10 @@ fn reusable_and_slice_destinations_preserve_custody_and_bytes() {
                 ..limits()
             },
         ] {
-            let expected = if limit.nodes == 0 || limit.bytes == 10 {
-                Err(Error::Limit)
+            let expected = if limit.nodes == 0 {
+                Err(Error::Limit(wire::LimitKind::Nodes))
+            } else if limit.bytes == 10 {
+                Err(Error::Limit(wire::LimitKind::Bytes))
             } else {
                 Ok(literal(encoding))
             };
@@ -121,7 +123,14 @@ fn reusable_and_slice_destinations_preserve_custody_and_bytes() {
                 let result = wire::encode_to_slice(&value(), encoding, limit, &mut storage)
                     .map(|bytes| bytes.to_vec());
                 if expected.is_err() || capacity < literal(encoding).len() {
-                    assert_eq!(result, Err(Error::Limit));
+                    assert_eq!(
+                        result.unwrap_err(),
+                        expected
+                            .as_ref()
+                            .err()
+                            .copied()
+                            .unwrap_or(Error::Limit(wire::LimitKind::Output))
+                    );
                     assert!(storage.iter().all(|byte| *byte == 0xa5));
                 } else {
                     assert_eq!(result, expected);
@@ -209,4 +218,68 @@ fn borrowed_bytes_retain_the_input_span() {
     let decoded =
         wire::decode::<wire::BytesRef<'_, 3>>(&input, Encoding::Payload, limits()).unwrap();
     assert_eq!(decoded.as_slice().as_ptr(), input[1..].as_ptr());
+}
+
+mod properties {
+    use super::*;
+    use proptest::prelude::*;
+
+    #[derive(Deserialize)]
+    struct Floats(#[serde(with = "wire::serde_packed::finite_f32")] Vec<f32>);
+
+    proptest! {
+        #[test]
+        fn arbitrary_payloads_and_frames(
+            bytes in prop::collection::vec(any::<u8>(), 0..80),
+            byte_cap in 0..64usize, nodes in 0..32usize, depth in 0..5usize,
+            allocation in 0..1024usize,
+        ) {
+            let limits = Limits { bytes: byte_cap, allocation, nodes, depth };
+            for encoding in encodings() {
+                let mut frame = literal(encoding);
+                frame.truncate(frame.len() - PAYLOAD.len());
+                frame.extend_from_slice(&bytes);
+                for input in [&bytes, &frame] {
+                    let result = wire::decode::<Vec<Vec<u8>>>(input, encoding, limits);
+                    if input.len() > byte_cap {
+                        prop_assert_eq!(result, Err(Error::Limit(wire::LimitKind::Bytes)));
+                    } else if let Ok(values) = result {
+                        let elements: usize = values.iter().map(Vec::len).sum();
+                        let needed_depth = 1 + usize::from(!values.is_empty()) + usize::from(elements > 0);
+                        prop_assert!(depth >= needed_depth);
+                        let needed_nodes = 1 + 2 * (values.len() + elements);
+                        prop_assert!(nodes >= needed_nodes);
+                        let units = size_of::<Vec<Vec<u8>>>() + 2 * (values.len() * size_of::<Vec<u8>>() + elements);
+                        prop_assert!(allocation >= byte_cap + 8 * units);
+                    }
+                }
+            }
+        }
+
+        #[test]
+        fn generated_packed_values_round_trip(words in prop::collection::vec(any::<i16>(), 0..16)) {
+            let value = wire::Packed::<_, 16>::new(words).unwrap();
+            for encoding in encodings() {
+                let bytes = wire::encode(&value, encoding, limits()).unwrap();
+                let decoded = wire::decode(&bytes, encoding, limits()).unwrap();
+                prop_assert_eq!(&value, &decoded);
+            }
+        }
+
+        #[test]
+        fn packed_word_domains(bytes in prop::collection::vec(any::<u8>(), 0..40)) {
+            let mut payload = vec![bytes.len() as u8];
+            payload.extend_from_slice(&bytes);
+            let packed = wire::decode::<wire::Packed<i16>>(&payload, Encoding::Payload, limits());
+            prop_assert_eq!(packed.is_ok(), bytes.len().is_multiple_of(2));
+            let floats = wire::decode::<Floats>(&payload, Encoding::Payload, limits());
+            let (words, tail) = bytes.as_chunks::<4>();
+            let expected: Vec<_> = words.iter().map(|word| f32::from_le_bytes(*word)).collect();
+            if tail.is_empty() && expected.iter().all(|word| word.is_finite()) {
+                prop_assert_eq!(floats.unwrap().0, expected);
+            } else {
+                prop_assert!(matches!(floats, Err(Error::Malformed)));
+            }
+        }
+    }
 }

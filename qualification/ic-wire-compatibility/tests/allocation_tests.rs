@@ -4,6 +4,7 @@
 use serde::{Serialize, Serializer};
 use stats_alloc::{INSTRUMENTED_SYSTEM, Region, Stats, StatsAlloc};
 use std::{alloc::System, cell::Cell, hint::black_box};
+use wire::LimitKind;
 use wire::{
     Bytes, BytesRef, Direction, Encoding, Error, Limits, Packed, Text, decode, encode, encode_into,
     encode_to_slice, encoded_len,
@@ -49,7 +50,7 @@ fn preflight_refusal_and_sizing_allocate_nothing() {
             direction: Direction::Request,
         },
     ] {
-        for short in [
+        for (short, reason) in [
             Limits {
                 bytes: 0,
                 ..limits()
@@ -66,9 +67,16 @@ fn preflight_refusal_and_sizing_allocate_nothing() {
                 depth: 0,
                 ..limits()
             },
-        ] {
+        ]
+        .into_iter()
+        .zip([
+            LimitKind::Bytes,
+            LimitKind::Allocation,
+            LimitKind::Nodes,
+            LimitKind::Depth,
+        ]) {
             let (result, stats) = measure(|| encode(&value, encoding, short));
-            assert_eq!(result, Err(Error::Limit));
+            assert_eq!(result, Err(Error::Limit(reason)));
             no_allocation(stats);
         }
         let (result, stats) = measure(|| encoded_len(&value, encoding, limits()));
@@ -138,7 +146,7 @@ fn caller_owned_destinations_allocate_nothing() {
     no_allocation(stats);
     let mut short = [0xa5; 12];
     let (result, stats) = measure(|| encode_to_slice(&value, encoding, limits(), &mut short));
-    assert_eq!(result, Err(Error::Limit));
+    assert_eq!(result, Err(Error::Limit(LimitKind::Output)));
     assert_eq!(short, [0xa5; 12]);
     no_allocation(stats);
     let (result, stats) = measure(|| {
@@ -152,7 +160,7 @@ fn caller_owned_destinations_allocate_nothing() {
             &mut reused,
         )
     });
-    assert_eq!(result, Err(Error::Limit));
+    assert_eq!(result, Err(Error::Limit(LimitKind::Nodes)));
     assert!(reused.is_empty());
     no_allocation(stats);
 }
@@ -184,7 +192,7 @@ fn decode_field_refusal_precedes_owned_allocation() {
             },
         )
     });
-    assert_eq!(result, Err(Error::Limit));
+    assert_eq!(result, Err(Error::Limit(LimitKind::Allocation)));
     no_allocation(stats);
     // A huge element count must not reserve before the first seed is refused.
     let (result, stats) = measure(|| {
@@ -197,7 +205,7 @@ fn decode_field_refusal_precedes_owned_allocation() {
             },
         )
     });
-    assert_eq!(result, Err(Error::Limit));
+    assert_eq!(result, Err(Error::Limit(LimitKind::Nodes)));
     no_allocation(stats);
 }
 

@@ -13,6 +13,8 @@ ic-platform-runtime = { version = "0.23.15", default-features = false }
 ic-platform-types = { version = "0.21.2", default-features = false }
 ic-testkit = { version = "0.110.0", default-features = false }
 ic-wire-consumer = { path = "ic-wire-consumer", default-features = false }
+libfuzzer-sys = "0.4.13"
+proptest = { version = "1.12.0", default-features = false, features = ["std"] }
 serde = { version = "1.0.229", default-features = false, features = ["alloc", "derive"] }
 serde_bytes = { version = "0.11.19", default-features = false, features = ["alloc"] }
 serde_json = { version = "1.0.154", default-features = false, features = ["alloc"] }

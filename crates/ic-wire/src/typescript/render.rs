@@ -64,6 +64,7 @@ impl Output {
                 '\u{0000}'..='\u{001f}' | '\u{2028}' | '\u{2029}' => {
                     write!(self, "\\u{:04x}", u32::from(character))?;
                 }
+                // The guard above passes only the three escape classes in this match.
                 _ => unreachable!(),
             }
             start = index + character.len_utf8();

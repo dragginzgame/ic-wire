@@ -1,5 +1,6 @@
 //! Literal packed-field representation and admission contracts.
 
+use ic_wire::LimitKind;
 use ic_wire::{
     Bytes, BytesRef, Direction, Encoding, Error, Limits, List, Packed, decode, encode, encode_into,
     encode_to_slice,
@@ -20,7 +21,10 @@ fn one_bound_contract_covers_every_packed_word() {
     macro_rules! check {
         ($ty:ty, $value:expr) => {{
             let one = Packed::<$ty, 1>::new(vec![$value]).unwrap();
-            assert_eq!(Packed::<$ty, 1>::new(vec![$value; 2]), Err(Error::Limit));
+            assert_eq!(
+                Packed::<$ty, 1>::new(vec![$value; 2]),
+                Err(Error::Limit(LimitKind::Field))
+            );
             let bytes = encode(&one, Encoding::Payload, limits()).unwrap();
             assert_eq!(usize::from(bytes[0]), size_of::<$ty>());
             assert_eq!(
@@ -89,7 +93,10 @@ fn packed_vectors_are_byte_counted_and_little_endian() {
 
 #[test]
 fn bounds_widths_and_error_precedence_are_preserved() {
-    assert_eq!(Packed::<i16, 0>::new(vec![1]), Err(Error::Limit));
+    assert_eq!(
+        Packed::<i16, 0>::new(vec![1]),
+        Err(Error::Limit(LimitKind::Field))
+    );
     assert!(Packed::<i16, 0>::new(vec![]).is_ok());
     for bytes in [&[1, 0][..], &[3, 0, 0, 0], &[4, 0, 0], &[4, 0, 0, 0, 0]] {
         assert_eq!(
@@ -110,7 +117,7 @@ fn bounds_widths_and_error_precedence_are_preserved() {
                 ..limits()
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     );
     assert_eq!(
         decode::<Packed<i16, 1>>(&[2, 0, 0, 99], Encoding::Payload, limits()),
@@ -140,7 +147,7 @@ fn packed_admission_counts_one_bulk_span_not_word_visits() {
                 ..encode_limits
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
     let decode_limits = Limits {
         bytes: 5,
@@ -161,7 +168,7 @@ fn packed_admission_counts_one_bulk_span_not_word_visits() {
                 ..decode_limits
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }
 

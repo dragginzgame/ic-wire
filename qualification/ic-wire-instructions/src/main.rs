@@ -67,17 +67,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             stderr_bytes: 65536,
         },
     )?;
-    let instance = server_owner
+    let mut instance = server_owner
         .instance(
             PocketIcBuilder::new().with_application_subnet(),
             Duration::from_secs(60),
         )
         .await?;
-    let pic = instance.client();
+    let pic = instance.client_mut();
     let instance_id = pic.instance_id;
     let numeric_mode =
         std::env::args_os().nth(2).as_deref() == Some(std::ffi::OsStr::new("--numeric"));
+    let service_mode =
+        std::env::args_os().nth(2).as_deref() == Some(std::ffi::OsStr::new("--service"));
     let result = async {
+        if service_mode {
+            let wasm = fs::read(directory.join("raw_service.wasm"))?;
+            let canister = pic.create_canister().await;
+            pic.add_cycles(canister, 100_000_000_000_000).await;
+            pic.install_canister(canister, wasm, vec![], None).await;
+            let gateway = pic.make_live(None).await;
+            let outcome = std::process::Command::new("node")
+                .args(["--experimental-transform-types", "qualification/typescript/check-service.mjs", gateway.as_str(), &canister.to_text()])
+                .status();
+            pic.stop_live().await;
+            if !outcome?.success() { return Err("raw service check failed".into()); }
+            return Ok(Vec::new());
+        }
         if numeric_mode {
             return numeric::run(pic, &directory).await;
         }
@@ -148,6 +163,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("owned instance remains on server".into());
     }
     let rows = result?;
+    if service_mode {
+        return Ok(());
+    }
     let mut report = json!({"counter":"ic0.performance_counter(0)","instance_id":instance_id,"server_version":String::from_utf8(version.stdout)?,"server_sha256":server_hash,"rows":rows,
         "qualification_lock_sha256":hash(include_bytes!("../../Cargo.lock")),"driver_sha256":hash(include_bytes!("main.rs")),"guest_sha256":hash(include_bytes!("../../ic-wire-consumer/src/ic.rs")),
         "consumer_sha256":hash(include_bytes!("../../ic-wire-consumer/src/lib.rs")),"meter_sha256":hash(include_bytes!("../../../crates/ic-wire/src/meter.rs")),

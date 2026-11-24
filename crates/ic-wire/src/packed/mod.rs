@@ -13,12 +13,9 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 /// booleans, nonzero integers or floating-point domain values.
 pub trait PackedElement: word::Word {}
 mod word {
-    // Readers receive exact-width chunks after visitor admission. Keep the
-    // checked conversion simple: a custom expect message retains a per-word
-    // Result::expect call under opt-z (see the codec benchmark investigation).
     pub trait Word: bytemuck::Pod + core::fmt::Debug + Eq {
         const SCHEMA: &'static str;
-        fn read(bytes: &[u8]) -> Self;
+        fn extend_words(output: &mut alloc::vec::Vec<Self>, bytes: &[u8]);
         fn append(self, bytes: &mut alloc::vec::Vec<u8>);
     }
     macro_rules! integer {
@@ -26,7 +23,9 @@ mod word {
             impl super::PackedElement for $ty {}
             impl Word for $ty {
                 const SCHEMA: &'static str = stringify!($ty);
-                fn read(bytes: &[u8]) -> Self { Self::from_le_bytes(bytes.try_into().unwrap()) }
+                fn extend_words(output: &mut alloc::vec::Vec<Self>, bytes: &[u8]) {
+                    output.extend(bytes.as_chunks::<{ size_of::<Self>() }>().0.iter().copied().map(Self::from_le_bytes));
+                }
                 fn append(self, bytes: &mut alloc::vec::Vec<u8>) { bytes.extend_from_slice(&self.to_le_bytes()); }
             }
         )+};
@@ -37,8 +36,8 @@ mod word {
             impl super::PackedElement for [u8; $n] {}
             impl Word for [u8; $n] {
                 const SCHEMA: &'static str = $schema;
-                fn read(bytes: &[u8]) -> Self {
-                    bytes.try_into().unwrap()
+                fn extend_words(output: &mut alloc::vec::Vec<Self>, bytes: &[u8]) {
+                    output.extend_from_slice(bytes.as_chunks::<$n>().0);
                 }
 
                 fn append(self, bytes: &mut alloc::vec::Vec<u8>) {
@@ -68,7 +67,7 @@ impl<T, const N: usize> Packed<T, N> {
     /// Returns [`Error::Limit`] when the element count exceeds N.
     pub fn new(words: Vec<T>) -> Result<Self, Error> {
         if words.len() > N {
-            Err(Error::Limit)
+            Err(Error::Limit(crate::LimitKind::Field))
         } else {
             Ok(Self(words))
         }
@@ -154,7 +153,7 @@ impl<T: PackedElement> de::Visitor<'_> for PackedVisitor<T> {
         values
             .try_reserve_exact(bytes.len() / width)
             .map_err(|_| E::custom("allocation"))?;
-        values.extend(bytes.chunks_exact(width).map(T::read));
+        T::extend_words(&mut values, bytes);
         Ok(values)
     }
 }

@@ -8,6 +8,9 @@ license-file.workspace = true
 publish = false
 description = "Independent codec contract qualification for Wire"
 
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+proptest.workspace = true
+
 [package.metadata.toko-tooling.loc]
 category = "tests"
 
@@ -15,6 +18,7 @@ category = "tests"
 ignored = ["toko-tooling"]
 
 [features]
+fuzz = ["dep:libfuzzer-sys"]
 ic = ["dep:ic-platform-runtime"]
 candid-comparison = ["dep:candid"]
 typescript = [
@@ -30,6 +34,7 @@ typescript = [
 candid = { workspace = true, features = ["serde_bytes"], optional = true }
 ic-platform-runtime = { workspace = true, optional = true, features = ["system-raw"] }
 ic-wire-consumer = { workspace = true, optional = true }
+libfuzzer-sys = { workspace = true, optional = true }
 
 [dev-dependencies]
 ic-platform-types.workspace = true
@@ -106,3 +111,8 @@ name = "numeric-candid-ic"
 path = "examples/numeric/candid_ic.rs"
 crate-type = ["cdylib"]
 required-features = ["ic", "candid-comparison"]
+
+[[example]]
+name = "fuzz-decode"
+path = "examples/fuzz_decode.rs"
+required-features = ["fuzz"]

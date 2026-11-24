@@ -1,5 +1,6 @@
 //! Independent byte vectors and encoding custody/admission boundaries.
 
+use ic_wire::LimitKind;
 use ic_wire::{
     Direction, Encoding, Error, Limits, decode, encode, encode_into, encode_to_slice, encoded_len,
 };
@@ -52,7 +53,7 @@ fn wide_variant_tags_and_bulk_bytes_delegate_without_extra_visits() {
             Encoding::Payload,
             Limits { nodes: 7, ..exact }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     );
     let bulk = Bulk(&[9, 10]);
     destinations(&bulk, &[2, 9, 10], Encoding::Payload);
@@ -72,7 +73,7 @@ fn wide_variant_tags_and_bulk_bytes_delegate_without_extra_visits() {
                 ..exact
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }
 
@@ -194,7 +195,7 @@ fn exact_encoding_allowances_include_four_visits_and_two_value_charges() {
         encode(&128_u16, Encoding::Payload, exact).unwrap(),
         [0x80, 1]
     );
-    for insufficient in [
+    for (insufficient, reason) in [
         Limits { bytes: 1, ..exact },
         Limits {
             allocation: 33,
@@ -203,17 +204,25 @@ fn exact_encoding_allowances_include_four_visits_and_two_value_charges() {
         Limits { nodes: 3, ..exact },
         Limits { depth: 2, ..exact },
         Limits { bytes: 3, ..exact },
-    ] {
+    ]
+    .into_iter()
+    .zip([
+        LimitKind::Bytes,
+        LimitKind::Allocation,
+        LimitKind::Nodes,
+        LimitKind::Depth,
+        LimitKind::Allocation,
+    ]) {
         let mut reused = vec![42];
         assert_eq!(
             encode_into(&128_u16, Encoding::Payload, insufficient, &mut reused),
-            Err(Error::Limit)
+            Err(Error::Limit(reason))
         );
         assert!(reused.is_empty());
         let mut storage = [0xa5; 8];
         assert_eq!(
             encode_to_slice(&128_u16, Encoding::Payload, insufficient, &mut storage),
-            Err(Error::Limit)
+            Err(Error::Limit(reason))
         );
         assert_eq!(storage, [0xa5; 8]);
     }
@@ -242,7 +251,7 @@ fn exact_encoding_allowances_include_four_visits_and_two_value_charges() {
                 ..limits()
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Bytes))
     );
     assert_eq!(
         encoded_len(
@@ -253,7 +262,7 @@ fn exact_encoding_allowances_include_four_visits_and_two_value_charges() {
                 ..limits()
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }
 
@@ -266,7 +275,7 @@ fn short_slice_is_untouched_including_frame_header() {
     let mut storage = [0xa5; 11];
     assert_eq!(
         encode_to_slice(&7_u8, encoding, limits(), &mut storage),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Output))
     );
     assert_eq!(storage, [0xa5; 11]);
 }
@@ -342,11 +351,11 @@ fn zero_width_sequences_and_text_keep_reference_charges() {
     assert_eq!(encoded_len(&value, Encoding::Payload, exact), Ok(0));
     assert_eq!(
         encoded_len(&value, Encoding::Payload, Limits { nodes: 11, ..exact }),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     );
     assert_eq!(
         encoded_len(&value, Encoding::Payload, Limits { depth: 3, ..exact }),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Depth))
     );
     // Unsized str: 2 * three value bytes + three span bytes, eight each.
     let text = Limits {
@@ -365,6 +374,33 @@ fn zero_width_sequences_and_text_keep_reference_charges() {
                 ..text
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
+    );
+}
+
+#[test]
+fn package_guide_reply_allowances_cover_the_largest_revision() {
+    #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+    struct Reply {
+        accepted: bool,
+        revision: u64,
+    }
+
+    let bytes = 11;
+    let limits = Limits {
+        bytes,
+        allocation: bytes + 16 * (size_of::<Reply>() + size_of::<bool>() + size_of::<u64>()),
+        nodes: 12,
+        depth: 4,
+    };
+    let value = Reply {
+        accepted: true,
+        revision: u64::MAX,
+    };
+    let payload = encode(&value, Encoding::Payload, limits).unwrap();
+    assert_eq!(payload.len(), bytes);
+    assert_eq!(
+        ic_wire::decode(&payload, Encoding::Payload, limits),
+        Ok(value)
     );
 }

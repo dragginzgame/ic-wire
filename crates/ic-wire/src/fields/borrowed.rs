@@ -22,7 +22,7 @@ impl<'a, const N: usize> BytesRef<'a, N> {
     /// Admit a borrowed slice without copying or allocating.
     pub fn new(bytes: &'a [u8]) -> Result<Self, Error> {
         if bytes.len() > N {
-            Err(Error::Limit)
+            Err(Error::Limit(crate::LimitKind::Field))
         } else {
             Ok(Self(bytes))
         }
@@ -80,7 +80,7 @@ impl<'a, const N: usize> TextRef<'a, N> {
     /// Admit borrowed text without copying or allocating.
     pub fn new(text: &'a str) -> Result<Self, Error> {
         if text.len() > N {
-            Err(Error::Limit)
+            Err(Error::Limit(crate::LimitKind::Field))
         } else {
             Ok(Self(text))
         }

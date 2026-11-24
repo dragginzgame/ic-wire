@@ -15,7 +15,7 @@ impl<T, const N: usize> List<T, N> {
     /// Admit an owned sequence without copying.
     pub fn new(values: Vec<T>) -> Result<Self, Error> {
         if values.len() > N {
-            Err(Error::Limit)
+            Err(Error::Limit(crate::LimitKind::Field))
         } else {
             Ok(Self(values))
         }
@@ -105,7 +105,7 @@ impl<const N: usize> Bytes<N> {
     /// Admit bytes without copying.
     pub fn new(bytes: Vec<u8>) -> Result<Self, Error> {
         if bytes.len() > N {
-            Err(Error::Limit)
+            Err(Error::Limit(crate::LimitKind::Field))
         } else {
             Ok(Self(bytes))
         }
@@ -171,7 +171,7 @@ impl<const N: usize> Text<N> {
     /// Admit owned text without copying.
     pub fn new(text: String) -> Result<Self, Error> {
         if text.len() > N {
-            Err(Error::Limit)
+            Err(Error::Limit(crate::LimitKind::Field))
         } else {
             Ok(Self(text))
         }

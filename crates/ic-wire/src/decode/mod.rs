@@ -32,7 +32,7 @@ pub fn decode<'de, T: Deserialize<'de>>(
     mut limits: Limits,
 ) -> Result<T, Error> {
     if input.len() > limits.bytes {
-        return Err(Error::Limit);
+        return Err(Error::Limit(crate::LimitKind::Bytes));
     }
     let payload = match encoding {
         Encoding::Payload => input,

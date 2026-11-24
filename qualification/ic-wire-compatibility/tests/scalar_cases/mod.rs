@@ -97,3 +97,34 @@ fn wide_integers_and_utf8_exchange_without_normalizing_retained_input() {
         }
     }
 }
+
+#[test]
+fn generated_boolean_payloads_agree_with_the_browser_decoder() {
+    use proptest::{collection::vec, prelude::*, strategy::ValueTree, test_runner::TestRunner};
+
+    let mut runner = TestRunner::default();
+    let inputs = vec(prop_oneof![Just(0_u8), Just(1), any::<u8>()], 0..8);
+    let mut cases = Vec::new();
+    for _ in 0..256 {
+        let bytes = inputs.new_tree(&mut runner).unwrap().current();
+        let expected = match decode::<bool>(
+            &bytes,
+            Encoding::Payload,
+            wire::Limits {
+                bytes: 4,
+                ..limits()
+            },
+        ) {
+            Ok(value) => json!(value),
+            Err(Error::Limit(wire::LimitKind::Bytes)) => json!("limit"),
+            // The browser groups a trailing suffix with malformed representations.
+            Err(Error::Trailing | Error::Malformed) => json!("malformed"),
+            Err(error) => panic!("unexpected bool error {error:?} for {bytes:?}"),
+        };
+        cases.push(json!([bytes, expected]));
+    }
+    assert_eq!(
+        run_typescript(&json!(cases), include_str!("generated.mjs")),
+        json!(true)
+    );
+}

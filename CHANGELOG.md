@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.30.0] - 2026-11-24
+
+### ⚠️ Breaking
+
+- Match Rust admission failures as `Error::Limit(kind)`. The kind identifies bytes, allocation allowance, nodes, depth, destination capacity or a constructor field bound. Encoded bytes and browser errors are unchanged. [ic-wire #9 — Report which allowance was exceeded in Error::Limit](https://github.com/dragginzgame/ic-wire/issues/9)
+
+### 🔄 Changed
+
+- Decode admitted integer, opaque and finite-float words through fixed-width chunks. The sealed word trait no longer exposes its previous single-word slice reader. [ic-wire #11 — Remove unwrap/expect panic paths in packed element reads](https://github.com/dragginzgame/ic-wire/issues/11)
+
+### 📚 Documentation
+
+- Work out the byte, node, depth and allocation allowances for a two-field reply. [ic-wire #10 — Make Limits easier to configure correctly](https://github.com/dragginzgame/ic-wire/issues/10)
+- Document when to batch related breaking changes and what maintainers would need to support at 1.0. [ic-wire #12 — Reduce breaking-release churn before 1.0](https://github.com/dragginzgame/ic-wire/issues/12)
+- Add a contributor glossary and link users directly to the package guide. [ic-wire #13 — Make docs approachable for outside contributors and users](https://github.com/dragginzgame/ic-wire/issues/13)
+
+### 🧪 Testing
+
+- Exercise arbitrary inputs with libFuzzer, generated values with proptest, and matching Rust and TypeScript outcomes. [ic-wire #8 — Add fuzz and property tests for untrusted-input decoding](https://github.com/dragginzgame/ic-wire/issues/8)
+- Measure source lines and clean native check times for codec-only and TypeScript builds. [ic-wire #14 — Track growth of the typescript feature relative to the codec core](https://github.com/dragginzgame/ic-wire/issues/14)
+- Run a generated TypeScript client over HTTP against a raw-frame query and update on PocketIC. [ic-wire #15 — Add a reference frontend↔canister integration (transport + raw-frame endpoints)](https://github.com/dragginzgame/ic-wire/issues/15)
+
 ## [0.29.0] - 2026-11-23
 
 ### ➕ Added

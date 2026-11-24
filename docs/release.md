@@ -1,14 +1,30 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.29.0** for
+The repository's product manifests and finalized changelog select **0.30.0** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.
 
-The 0.28.0 release qualifies Postcard 1.2.0 with the selected Toko Tooling
-0.45.25 snapshot.
-Review the private Testkit 0.110.4, Platform Runtime 0.23.24 and Host updates
-(Artifacts/FS 0.80.8, Process 0.81.4) together at the next simulator refresh.
+The 0.30.0 release selects Platform Types 0.21.4 and Toko Tooling 0.46.3.
+The private qualification graph selects Testkit 0.110.4, Platform Runtime
+0.23.25, Host Artifacts and FS 0.80.8, and Host Process 0.81.4. The raw-service
+and instruction checks exercised this graph on PocketIC 16.1.0.
+
+## Planning pre-1.0 releases
+
+Group related breaking changes that are ready together into one minor release
+so consumers can update their Rust code and regenerate affected clients once.
+Use a patch for compatible changes. Describe the affected surface in each
+release note so consumers can tell whether a change affects their generated
+client, Rust source, retained bytes or deployment. A correctness fix can ship
+as soon as its affected contracts have been checked.
+
+Before proposing 1.0, maintainers should be ready to support the frame layout
+and method identity rules, public error categories and limit accounting, and
+the schema metadata shared by derive, generator and runtime. Review each
+against literal frames, allowance boundaries and Rust/TypeScript exchange.
+Document which future changes would require a major version and how consumers
+can identify them. The release decision stays with the maintainers.
 
 ## Package contract
 

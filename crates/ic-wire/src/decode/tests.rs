@@ -1,4 +1,5 @@
 use super::Budget;
+use crate::LimitKind;
 use crate::{Error, Limits};
 
 #[test]
@@ -11,7 +12,7 @@ fn refusal_is_sticky_and_extreme_charges_cannot_wrap() {
     });
     assert!(!budget.charge_buffer(usize::MAX));
     assert!(!budget.enter(1, 0));
-    assert_eq!(budget.error(), Error::Limit);
+    assert_eq!(budget.error(), Error::Limit(LimitKind::Allocation));
     let budget = Budget::new(Limits {
         bytes: 2,
         allocation: 1,
@@ -19,5 +20,5 @@ fn refusal_is_sticky_and_extreme_charges_cannot_wrap() {
         depth: 1,
     });
     assert!(!budget.enter(1, 0));
-    assert_eq!(budget.error(), Error::Limit);
+    assert_eq!(budget.error(), Error::Limit(LimitKind::Allocation));
 }

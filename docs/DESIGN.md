@@ -1,9 +1,18 @@
 # Architecture and contracts
 
-This document describes the current 0.29 implementation. It replaces the initial
+This document describes the current implementation. It replaces the initial
 replacement proposal and its superseded execution sequence. Detailed contracts,
 source provenance and checkpoint evidence remain in the linked topic documents.
 Historical measurements qualify only their recorded inputs.
+
+## Vocabulary
+
+| Term | Meaning in Wire |
+| --- | --- |
+| Admission | Checking whether Wire may visit a value, accept a byte span or reserve output before it performs that work. |
+| Allowance | A configured maximum for one resource. A boundary test exercises the exact maximum and a value just beyond it. |
+| Qualification | Running a specific contract or workload and recording what passed on the tested inputs. |
+| Lane | A particular build or test configuration, such as a codec-only Wasm build. |
 
 ## Scope and ownership
 
@@ -93,7 +102,7 @@ The private meter owns sticky refusal and checked accounting. Encode sizing,
 writing and decode have distinct visit sequences; their allowances are not
 interchangeable with browser budgets. The [admission ledger](design/admission.md)
 owns exact accounting and failure precedence, including frame transformations.
-Typed errors are `Limit`, `Allocation`, `Malformed`, `Trailing` and `Identity`.
+Typed errors are `Limit(LimitKind)`, `Allocation`, `Malformed`, `Trailing` and `Identity`.
 
 Preflight precedes codec output allocation. Field adapters admit their span and
 bounds at their own boundary; this does not promise whole-document validation

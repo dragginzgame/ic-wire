@@ -2,6 +2,7 @@
 use candid::CandidType;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::fmt::Debug;
+use wire::LimitKind;
 use wire::{Encoding, Limits};
 
 #[derive(CandidType, Debug, Deserialize, PartialEq, Serialize)]
@@ -363,7 +364,7 @@ where
     if WIDTH == 32 && len == 511 {
         assert_eq!(
             wire::encode(&hashes, Encoding::Payload, MATRIX_LIMITS),
-            Err(wire::Error::Limit)
+            Err(wire::Error::Limit(LimitKind::Nodes))
         );
     }
     let packed = wire::Packed::<_, 1024>::new(hashes).unwrap();

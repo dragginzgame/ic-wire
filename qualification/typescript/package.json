@@ -1,8 +1,10 @@
 {
   "name": "ic-wire-typescript-qualification",
   "private": true,
+  "type": "module",
   "version": "0.0.0",
   "devDependencies": {
+    "@icp-sdk/core": "6.1.1",
     "typescript": "5.9.3"
   }
 }

@@ -1,5 +1,6 @@
 //! Literal decoding and admission boundary cases.
 
+use ic_wire::LimitKind;
 use ic_wire::{Direction, Encoding, Error, Limits, decode};
 use serde::{
     Deserialize, Deserializer,
@@ -76,7 +77,7 @@ fn attacker_count_is_hidden_and_work_stops_at_node_budget() {
                 ..limits()
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     ));
 }
 
@@ -94,7 +95,7 @@ fn map_keys_and_values_each_pay_seed_and_visitor_charges() {
     );
     assert_eq!(
         decode::<BTreeMap<u8, u8>>(&[1, 2, 3], Encoding::Payload, Limits { nodes: 4, ..exact }),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     );
     assert_eq!(
         decode::<BTreeMap<u8, u8>>(
@@ -105,7 +106,7 @@ fn map_keys_and_values_each_pay_seed_and_visitor_charges() {
                 ..exact
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }
 
@@ -155,7 +156,7 @@ fn scalar_admission_has_exact_boundaries() {
         depth: 1,
     };
     assert_eq!(decode::<u16>(&[7], Encoding::Payload, exact), Ok(7));
-    for insufficient in [
+    for (insufficient, reason) in [
         Limits { bytes: 0, ..exact },
         Limits {
             allocation: 16,
@@ -163,16 +164,23 @@ fn scalar_admission_has_exact_boundaries() {
         },
         Limits { nodes: 0, ..exact },
         Limits { depth: 0, ..exact },
-    ] {
+    ]
+    .into_iter()
+    .zip([
+        LimitKind::Bytes,
+        LimitKind::Allocation,
+        LimitKind::Nodes,
+        LimitKind::Depth,
+    ]) {
         assert_eq!(
             decode::<u16>(&[7], Encoding::Payload, insufficient),
-            Err(Error::Limit)
+            Err(Error::Limit(reason))
         );
     }
     // Reserve the configured bytes, not actual input length.
     assert_eq!(
         decode::<u16>(&[7], Encoding::Payload, Limits { bytes: 2, ..exact }),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }
 
@@ -199,7 +207,7 @@ fn borrowed_spans_keep_input_custody_and_pay_for_the_span() {
                 ..exact
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }
 
@@ -215,10 +223,13 @@ fn zero_sized_elements_still_pay_seed_and_visitor_nodes() {
         decode::<Vec<()>>(&[3], Encoding::Payload, exact),
         Ok(vec![(); 3])
     );
-    for insufficient in [Limits { nodes: 6, ..exact }, Limits { depth: 1, ..exact }] {
+    for (insufficient, reason) in [Limits { nodes: 6, ..exact }, Limits { depth: 1, ..exact }]
+        .into_iter()
+        .zip([LimitKind::Nodes, LimitKind::Depth])
+    {
         assert_eq!(
             decode::<Vec<()>>(&[3], Encoding::Payload, insufficient),
-            Err(Error::Limit)
+            Err(Error::Limit(reason))
         );
     }
 }
@@ -239,7 +250,7 @@ fn malformed_trailing_and_budget_precedence() {
                     ..limits()
                 }
             ),
-            Err(Error::Limit)
+            Err(Error::Limit(LimitKind::Nodes))
         );
     }
     assert_eq!(
@@ -295,7 +306,7 @@ fn frame_identity_precedes_payload_admission_but_follows_size() {
     );
     assert_eq!(
         decode::<u8>(&frame, request, Limits { bytes: 11, ..exact }),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Bytes))
     );
     assert_eq!(
         decode::<u8>(
@@ -318,6 +329,6 @@ fn frame_identity_precedes_payload_admission_but_follows_size() {
                 ..exact
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
 }

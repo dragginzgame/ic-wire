@@ -27,6 +27,7 @@ help:
 	  'test-typescript       Exchange Rust bytes with current TypeScript (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
+	  'check-raw-service     Run the generated client against a local PocketIC canister' \
 	  'check-api-manifest    Compare the upload contract with its reviewed baseline' \
 	  'check-packages        Assemble archives and verify extracted-package consumers' \
 	  'check-browser         Chromium smoke (CLIENT_DIR and BROWSER required)' \
@@ -161,3 +162,12 @@ check-packages: qualification-tooling-check | toko-execution-check
 
 check-browser:
 	bash qualification/browser/check.sh "$(CLIENT_DIR)" "$(BROWSER)"
+
+.PHONY: check-raw-service
+check-raw-service:
+	@test -x "$(POCKET_IC_BIN)" || { echo 'Set POCKET_IC_BIN to a prepared PocketIC server'; exit 1; }
+	cargo build --manifest-path qualification/Cargo.toml --locked -p ic-wire-consumer --example raw-service --features ic --target wasm32-unknown-unknown --profile wire-size
+	cargo run --manifest-path qualification/Cargo.toml --locked -p ic-wire-consumer --example generate-service --features wire/service-client -- qualification/target/service
+	cp qualification/target/wasm32-unknown-unknown/wire-size/examples/raw_service.wasm qualification/target/service/
+	qualification/typescript/node_modules/.bin/tsc --strict --target ES2022 --module ESNext --moduleResolution bundler --allowImportingTsExtensions --noEmit --skipLibCheck qualification/typescript/agent-transport.ts
+	cargo run --manifest-path qualification/Cargo.toml --locked -p ic-wire-instructions -- qualification/target/service --service

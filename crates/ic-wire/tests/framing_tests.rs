@@ -1,5 +1,6 @@
 //! Literal vectors are independent of the candidate implementation.
 
+use ic_wire::LimitKind;
 use ic_wire::{Error, method_id, validate_request_header};
 
 #[test]
@@ -69,7 +70,7 @@ fn every_single_byte_header_mutation_is_an_identity_error() {
 #[test]
 fn error_display_preserves_the_reference_contract() {
     for (error, text) in [
-        (Error::Limit, "wire limit"),
+        (Error::Limit(LimitKind::Bytes), "wire bytes limit"),
         (Error::Allocation, "wire allocation"),
         (Error::Malformed, "wire malformed"),
         (Error::Trailing, "wire trailing"),

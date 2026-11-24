@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.29.0"
+ic-wire = "0.30.0"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -51,6 +51,30 @@ deterministically across passes. Reusable output is empty after errors; slice
 output may be modified on errors other than an undersized destination. Retain
 original input bytes when signatures, retries or hashes depend on them: decoding
 and re-encoding can normalize collections or accepted noncanonical forms.
+
+### Sizing a request or reply
+
+For the two-field `Reply` above, the largest bare payload takes 11 bytes
+(one boolean and a ten-byte `u64`). Encoding visits the struct and its two
+fields. Each visit costs four nodes and twice the visited Rust value size in
+charge units. Each unit costs eight allowance bytes. The deepest field has
+depth two, and the encoder requires two additional levels.
+
+```rust,ignore
+let bytes = 11;
+let limits = Limits {
+    bytes,
+    allocation: bytes + 16 * (size_of::<Reply>() + size_of::<bool>() + size_of::<u64>()),
+    nodes: 12,
+    depth: 4,
+};
+```
+
+These limits cover both directions for this plain derived DTO. For a frame,
+add 11 to both byte and allocation allowances. Text, byte spans and nested
+collections incur additional charges. Size requests and replies separately and
+test the largest admitted value on the target. The allocation calculation uses
+the configured byte cap even when a particular message is short.
 
 ### Choosing an integer list layout
 
@@ -133,7 +157,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.29.0", features = ["derive"] }
+ic-wire = { version = "0.30.0", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -190,6 +214,14 @@ accepts the application's canister ID type. Its `query` and `update` methods
 receive the deployed name and request frame and return a promise of reply bytes.
 Composite queries use `query`. Codec refusals and transport failures reject the
 promise. An application error variant in a valid reply resolves as typed data.
+
+The [executable counter example](https://github.com/dragginzgame/ic-wire/tree/main/qualification#raw-service-round-trip)
+connects a generated client to a Rust canister over HTTP. Its `read` query and
+`add` update both use raw Wire frames. The application supplies the agent and
+its identity. The guest checks the complete request length before copying it,
+decodes before updating the counter, and traps on invalid input. Both request
+and reply allow 16 bytes including the header. The generator checks both method
+IDs together. These raw methods have no Candid signature for Candid UI calls.
 
 Register application roots with `SchemaRegistry`, finish into `ValidatedRegistry`,
 then call `payload_module` or `method_module` with explicit `PayloadLimits`, an

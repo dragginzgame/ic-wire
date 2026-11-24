@@ -121,20 +121,21 @@ macro_rules! finite {
                     // Independent f32 exponent lanes: adding one exponent unit
                     // reaches each sign bit exactly for exponent 0xff. Masking
                     // first prevents mantissa/sign bits and cross-lane carries.
-                    let mut pairs = bytes.chunks_exact(8);
-                    if !pairs.by_ref().all(|pair| {
-                        let bits = u64::from_le_bytes(pair.try_into().unwrap());
+                    let (pairs, remainder) = bytes.as_chunks::<8>();
+                    if !pairs.iter().all(|pair| {
+                        let bits = u64::from_le_bytes(*pair);
                         ((bits & 0x7f80_0000_7f80_0000) + 0x0080_0000_0080_0000)
                             & 0x8000_0000_8000_0000
                             == 0
                     }) {
                         return false;
                     }
-                    tail = pairs.remainder();
+                    tail = remainder;
                 }
-                tail.chunks_exact($width).all(|word| {
-                    <$float>::from_le_bytes(word.try_into().expect("whole float word")).is_finite()
-                })
+                tail.as_chunks::<$width>()
+                    .0
+                    .iter()
+                    .all(|word| <$float>::from_le_bytes(*word).is_finite())
             }
 
             /// Encode finite values as one byte buffer without narrowing finite bits.
@@ -196,11 +197,14 @@ macro_rules! finite {
                         values
                             .try_reserve_exact(bytes.len() / $width)
                             .map_err(|_| E::custom("allocation"))?;
-                        values.extend(bytes.chunks_exact($width).map(|word| {
-                            <$float>::from_le_bytes(
-                                word.try_into().expect("validated whole float word"),
-                            )
-                        }));
+                        values.extend(
+                            bytes
+                                .as_chunks::<$width>()
+                                .0
+                                .iter()
+                                .copied()
+                                .map(<$float>::from_le_bytes),
+                        );
                         Ok(values)
                     }
                 }

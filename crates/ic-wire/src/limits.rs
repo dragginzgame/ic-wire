@@ -19,11 +19,14 @@ pub struct Limits {
 impl Limits {
     pub(crate) fn without_prefix(self, prefix: usize) -> Result<Self, crate::Error> {
         Ok(Self {
-            bytes: self.bytes.checked_sub(prefix).ok_or(crate::Error::Limit)?,
+            bytes: self
+                .bytes
+                .checked_sub(prefix)
+                .ok_or(crate::Error::Limit(crate::LimitKind::Bytes))?,
             allocation: self
                 .allocation
                 .checked_sub(prefix)
-                .ok_or(crate::Error::Limit)?,
+                .ok_or(crate::Error::Limit(crate::LimitKind::Allocation))?,
             ..self
         })
     }

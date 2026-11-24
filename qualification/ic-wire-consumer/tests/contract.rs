@@ -3,6 +3,7 @@ use ic_wire_consumer::{
     Error, REQUEST_LIMITS, Receipt, decode_receipt, decode_upload, encode_receipt, encode_upload,
     sample_upload,
 };
+use wire::LimitKind;
 const REQUEST: &[u8] = &[
     73, 87, 7, 0, 0, 0, 0, 0, 0, 0, 0, 128, 1, 6, 115, 101, 110, 115, 111, 114, 2, 0, 255, 6, 0,
     128, 0, 0, 255, 127, 2, 1, 128, 1,
@@ -34,7 +35,7 @@ fn frozen_contract_and_refusals() {
     assert_eq!(decode_upload(&trailing), Err(Error::Trailing));
     assert_eq!(
         decode_upload(&vec![0; REQUEST_LIMITS.bytes + 1]),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Bytes))
     );
     let mut invalid = RESPONSE.to_vec();
     *invalid.last_mut().unwrap() = 2;

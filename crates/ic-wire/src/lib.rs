@@ -23,7 +23,7 @@ pub mod typescript;
 
 pub use decode::decode;
 pub use encode::{encode, encode_into, encode_to_slice, encoded_len};
-pub use error::Error;
+pub use error::{Error, LimitKind};
 pub use fields::{Bytes, BytesRef, List, Text, TextRef};
 pub use finite::{FiniteF32, FiniteF64};
 pub use framing::{Direction, Encoding, method_id, validate_request_header};

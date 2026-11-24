@@ -25,7 +25,7 @@ One unit represents eight conservative allowance bytes, not measured live heap.
 | Encode text/bytes | 0 | span length | No additional check |
 
 Every failed debit sets a sticky refusal. Subsequent visits fail and errors map
-to Limit. A later buffer debit can still succeed; it does
+to `Error::Limit(kind)`. Within one visit, an existing refusal wins, then depth, nodes and allocation in that order. A later buffer debit can still succeed; it does
 not clear refusal. Trusted custom Serde may catch an error and return success;
 there is no additional post-success refusal check in the current contract.
 Sequence and map size hints are suppressed before consumer visitors reserve.
@@ -53,6 +53,8 @@ Redundant varints remain admitted. A length-prefixed Rust `char` must contain
 exactly one Unicode scalar. Multiple scalars produce `Error::Malformed`.
 No reserialization/canonicality pass is introduced. Incremental decoding may
 allocate a valid prefix before encountering malformed later input.
+
+`LimitKind::Output` identifies a short caller slice. `LimitKind::Field` identifies a bound exceeded in a field constructor. A Serde visitor rejecting invalid field data still reports `Malformed`. Allocation failure after successful admission remains `Error::Allocation`.
 
 ## Narrow reuse decision
 

@@ -1,11 +1,11 @@
-use crate::{Error, Limits};
+use crate::{Error, LimitKind, Limits};
 use core::cell::Cell;
 
 pub(super) struct Budget {
     nodes: Cell<usize>,
     units: Cell<usize>,
     depth: usize,
-    refused: Cell<bool>,
+    refused: Cell<Option<LimitKind>>,
 }
 
 impl Budget {
@@ -14,7 +14,7 @@ impl Budget {
             nodes: Cell::new(limits.nodes),
             units: Cell::new(limits.allocation.saturating_sub(limits.bytes) / 8),
             depth: limits.depth,
-            refused: Cell::new(limits.allocation < limits.bytes),
+            refused: Cell::new((limits.allocation < limits.bytes).then_some(LimitKind::Allocation)),
         }
     }
 
@@ -23,13 +23,25 @@ impl Budget {
         self.enter_many(depth, units, 1)
     }
 
-    #[inline(always)]
+    // Keep one copy of the reason-selecting debit across codec visitors at opt-z.
+    #[inline(never)]
     pub(super) fn enter_many(&self, depth: usize, units: usize, count: usize) -> bool {
         let nodes = self.nodes.get();
         let available = self.units.get();
-        if self.refused.get() || depth > self.depth || nodes < count || available < units {
-            self.refused.set(true);
-
+        if self.refused.get().is_some() {
+            return false;
+        }
+        let reason = if depth > self.depth {
+            Some(LimitKind::Depth)
+        } else if nodes < count {
+            Some(LimitKind::Nodes)
+        } else if available < units {
+            Some(LimitKind::Allocation)
+        } else {
+            None
+        };
+        if reason.is_some() {
+            self.refused.set(reason);
             return false;
         }
         self.units.set(available - units);
@@ -39,7 +51,9 @@ impl Budget {
     }
 
     pub(super) fn refuse(&self) {
-        self.refused.set(true);
+        if self.refused.get().is_none() {
+            self.refused.set(Some(LimitKind::Allocation));
+        }
     }
 
     #[inline(always)]
@@ -53,7 +67,7 @@ impl Budget {
                 true
             }
             None => {
-                self.refused.set(true);
+                self.refuse();
 
                 false
             }
@@ -61,10 +75,6 @@ impl Budget {
     }
 
     pub(super) fn error(&self) -> Error {
-        if self.refused.get() {
-            Error::Limit
-        } else {
-            Error::Malformed
-        }
+        self.refused.get().map_or(Error::Malformed, Error::Limit)
     }
 }

@@ -1,5 +1,6 @@
 //! Literal field contracts and bounded visitor/custody checks.
 
+use ic_wire::LimitKind;
 use ic_wire::{
     Bytes, BytesRef, Direction, Encoding, Error, Limits, List, Text, TextRef, decode, encode,
     encode_into, encode_to_slice,
@@ -25,17 +26,29 @@ fn constructors_admit_exact_bounds_without_copying() {
     assert_eq!(bytes.as_borrowed().as_slice().as_ptr(), pointer);
     let recovered = bytes.into_vec();
     assert_eq!(recovered.as_ptr(), pointer);
-    assert_eq!(Bytes::<1>::new(vec![1, 2]), Err(Error::Limit));
-    assert_eq!(List::<u8, 1>::new(vec![1, 2]), Err(Error::Limit));
-    assert_eq!(Text::<1>::new("é".into()), Err(Error::Limit));
+    assert_eq!(
+        Bytes::<1>::new(vec![1, 2]),
+        Err(Error::Limit(LimitKind::Field))
+    );
+    assert_eq!(
+        List::<u8, 1>::new(vec![1, 2]),
+        Err(Error::Limit(LimitKind::Field))
+    );
+    assert_eq!(
+        Text::<1>::new("é".into()),
+        Err(Error::Limit(LimitKind::Field))
+    );
     let text = Text::<2>::new("é".into()).unwrap();
     assert_eq!(text.as_str(), "é");
     assert_eq!(text.as_borrowed().as_str().as_ptr(), text.as_str().as_ptr());
     assert_eq!(text.into_string(), "é");
     assert!(Bytes::<0>::new(vec![]).is_ok());
     assert!(TextRef::<0>::new("").is_ok());
-    assert_eq!(BytesRef::<0>::new(&[1]), Err(Error::Limit));
-    assert_eq!(TextRef::<1>::new("é"), Err(Error::Limit));
+    assert_eq!(
+        BytesRef::<0>::new(&[1]),
+        Err(Error::Limit(LimitKind::Field))
+    );
+    assert_eq!(TextRef::<1>::new("é"), Err(Error::Limit(LimitKind::Field)));
 }
 
 #[test]
@@ -97,7 +110,7 @@ fn bulk_and_list_admission_remain_distinct_despite_equal_bytes() {
     assert_eq!(encode(&bulk, Encoding::Payload, exact).unwrap(), [2, 9, 10]);
     assert_eq!(
         encode(&vec![9_u8, 10], Encoding::Payload, exact),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Depth))
     );
     assert_eq!(
         encode(
@@ -108,7 +121,7 @@ fn bulk_and_list_admission_remain_distinct_despite_equal_bytes() {
                 ..exact
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
     let exact = Limits {
         bytes: 3,
@@ -122,7 +135,7 @@ fn bulk_and_list_admission_remain_distinct_despite_equal_bytes() {
     );
     assert_eq!(
         decode::<Vec<u8>>(&[2, 9, 10], Encoding::Payload, exact),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Depth))
     );
     assert_eq!(
         decode::<Bytes<2>>(
@@ -133,7 +146,7 @@ fn bulk_and_list_admission_remain_distinct_despite_equal_bytes() {
                 ..exact
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
     let list = List::<u8, 2>::new(vec![9, 10]).unwrap();
     let exact = Limits {
@@ -148,7 +161,7 @@ fn bulk_and_list_admission_remain_distinct_despite_equal_bytes() {
     );
     assert_eq!(
         decode::<List<u8, 2>>(&[2, 9, 10], Encoding::Payload, Limits { nodes: 4, ..exact }),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     );
 }
 
@@ -179,7 +192,7 @@ fn field_refusal_is_malformed_and_budget_refusal_takes_precedence() {
                 ..limits()
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Nodes))
     );
     assert_eq!(
         decode::<Bytes<1>>(
@@ -190,7 +203,7 @@ fn field_refusal_is_malformed_and_budget_refusal_takes_precedence() {
                 ..limits()
             }
         ),
-        Err(Error::Limit)
+        Err(Error::Limit(LimitKind::Allocation))
     );
     assert_eq!(
         decode::<Bytes<2>>(&[3, 9, 10], Encoding::Payload, limits()),

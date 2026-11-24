@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.29.0**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.30.0**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -36,7 +36,10 @@ together. There is no legacy fallback reader or automatic storage migration.
 | `qualification/ic-wire-instructions/` | Private native simulator driver |
 | `vendor/toko-tooling/` | Snapshot-owned tooling; no local edits |
 
-## Development
+## Developing Wire
+
+Contributors can start with the [design glossary](docs/DESIGN.md#vocabulary) and
+the [qualification commands](qualification/README.md) for the part they are changing.
 
 Run commands from this repository root. Prepare the pinned Rust toolchain and
 locked dependencies before running the checks:

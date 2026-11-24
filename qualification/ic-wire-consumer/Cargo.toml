@@ -50,3 +50,14 @@ name = "instruction-counter"
 path = "src/ic.rs"
 crate-type = ["cdylib"]
 required-features = ["ic"]
+
+[[example]]
+name = "raw-service"
+path = "examples/raw_service.rs"
+crate-type = ["cdylib"]
+required-features = ["ic"]
+
+[[example]]
+name = "generate-service"
+path = "examples/generate_service.rs"
+required-features = ["wire/service-client"]
