@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.2] - 2026-11-25
+
+### 📝 Summary
+
+- Adopt the [Toko Studios Network Licence 1.1](LICENSE.md) for this release. Earlier grants remain in effect.
+- Update the development tooling to Toko Tooling 0.46.4 in both Cargo workspaces.
+
 ## [0.30.1] - 2026-11-24
 
 ### 🐛 Fixed

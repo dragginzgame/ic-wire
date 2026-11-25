@@ -4,7 +4,7 @@ Optional schema projection for IC Wire. Prefer the coordinated re-export:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.30.1", features = ["derive"] }
+ic-wire = { version = "0.30.2", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -24,4 +24,4 @@ The same derive works on native and Wasm DTOs. It emits the same schema trait
 implementation on both targets.
 Requires Rust 1.100.0. The derive and runtime crate are released together.
 See [IC Wire](https://github.com/dragginzgame/ic-wire) for usage and qualification.
-Licensed under the included Toko Studios Network Licence (`LICENSE.md`).
+Licensed under the included Toko Studios Network Licence 1.1 (`LICENSE.md`).

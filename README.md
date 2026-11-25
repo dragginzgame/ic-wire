@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.30.1**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.30.2**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -100,7 +100,7 @@ measurement commands; see [qualification](qualification/README.md) for their
 prerequisites and evidence limits. IC measurements additionally require explicitly
 selecting PocketIC.
 
-Toko Tooling **0.45.16** is installed through its authenticated published exporter.
+Toko Tooling **0.46.4** is installed through its authenticated published exporter.
 `.toko-tooling.snapshot` records source identity and owned bytes.
 `make snapshot-check` verifies only installed bytes; `make toko-tooling-check`
 also admits product declarations and Cargo.lock. `make qualification-tooling-check`
@@ -133,7 +133,7 @@ publication and deployment remain separately selected operations.
 - [Current feature scope](docs/design/parity.md)
 - [Performance measurement scope](docs/design/performance.md)
 - [Package/browser verification and release procedure](docs/release.md)
-- [Changelog](CHANGELOG.md) and [licence](LICENSE.md)
+- [Changelog](CHANGELOG.md) and [Toko Studios Network Licence 1.1](LICENSE.md)
 
 Measurements apply to their recorded workloads and source hashes. Current-only
 Wasm size and IC instruction runners report costs separately; correctness checks
