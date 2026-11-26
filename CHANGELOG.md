@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.31.0] - Unreleased
+## [0.31.0] - 2026-11-26
 
 ### ➕ Added
 
@@ -21,6 +21,12 @@
   Serde struct and tuple layouts with `#[wire(fixed)]` for schema projection.
 - When matching Wire errors exhaustively, handle `Incompatible` with the Rust
   evolution feature and `'incompatible'` in generated TypeScript runtimes.
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.46.7. `make deps-list` now lists product packages by default.
+- Share generated serialization code between sizing and Vec output to reduce
+  uncompressed Wasm size in applications that encode many distinct DTOs.
 
 ### 🧪 Testing
 

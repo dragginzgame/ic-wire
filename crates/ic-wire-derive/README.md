@@ -4,7 +4,7 @@ Rust declarations for IC Wire. Use the coordinated re-export.
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.30.2", features = ["derive"] }
+ic-wire = { version = "0.31.0", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 

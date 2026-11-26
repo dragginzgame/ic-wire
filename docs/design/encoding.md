@@ -35,7 +35,9 @@ remain delegated to Postcard. Historical comparison runners have been retired;
 
 ## Contract
 
-- One sizing preflight uses Postcard's serialized_size and fresh admission.
+- The sizing preflight and the Vec writer use the same Postcard serializer type.
+  Its output counts bytes during preflight and writes to the reserved Vec on
+  the second pass. This lets the linker share generated code for each DTO.
   A frame subtracts 11 from both byte and allocation allowances before sizing.
   This preserves the available traversal allowance. The completed length adds
   the header back and cannot overflow because sizing is bounded by bytes.
