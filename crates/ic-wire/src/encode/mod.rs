@@ -12,7 +12,21 @@ fn preflight<T: Serialize + ?Sized>(
     encoding: Encoding,
     limits: Limits,
 ) -> Result<(Option<[u8; HEADER_BYTES]>, usize), Error> {
-    let header = match encoding {
+    let header = frame_header(encoding);
+    let prefix = if header.is_some() { HEADER_BYTES } else { 0 };
+    let payload_limits = limits.without_prefix(prefix)?;
+    let budget = Budget::new(payload_limits);
+    let size = measure_payload(value, &budget, 1)?;
+    if size > payload_limits.bytes {
+        return Err(Error::Limit(crate::LimitKind::Bytes));
+    }
+
+    // The byte allowance was reduced by prefix before sizing, so addition fits.
+    Ok((header, size + prefix))
+}
+
+pub(super) fn frame_header(encoding: Encoding) -> Option<[u8; HEADER_BYTES]> {
+    match encoding {
         Encoding::Payload => None,
         Encoding::Frame { method, direction } => {
             let mut header = [0; HEADER_BYTES];
@@ -24,22 +38,20 @@ fn preflight<T: Serialize + ?Sized>(
             };
             Some(header)
         }
-    };
-    let prefix = if header.is_some() { HEADER_BYTES } else { 0 };
-    let payload_limits = limits.without_prefix(prefix)?;
-    let budget = Budget::new(payload_limits);
-    let size = postcard::experimental::serialized_size(&admitted::Bounded {
-        value,
-        budget: &budget,
-        depth: 1,
-    })
-    .map_err(|_| budget.error())?;
-    if size > payload_limits.bytes {
-        return Err(Error::Limit(crate::LimitKind::Bytes));
     }
+}
 
-    // The byte allowance was reduced by prefix before sizing, so addition fits.
-    Ok((header, size + prefix))
+pub(super) fn measure_payload<T: Serialize + ?Sized>(
+    value: &T,
+    budget: &Budget,
+    depth: usize,
+) -> Result<usize, Error> {
+    postcard::experimental::serialized_size(&admitted::Bounded {
+        value,
+        budget,
+        depth,
+    })
+    .map_err(|_| budget.error())
 }
 
 /// Measure the complete selected encoding without allocating codec output.
@@ -91,17 +103,27 @@ pub fn encode_into<'out, T: Serialize + ?Sized>(
 ) -> Result<&'out [u8], Error> {
     output.clear();
     let (header, size) = preflight(value, encoding, limits)?;
+    write_vec(value, &Budget::new(limits), header, size, output)?;
+    Ok(output)
+}
+
+pub(super) fn write_vec<T: Serialize + ?Sized>(
+    value: &T,
+    budget: &Budget,
+    header: Option<[u8; HEADER_BYTES]>,
+    size: usize,
+    output: &mut Vec<u8>,
+) -> Result<(), Error> {
     output
         .try_reserve_exact(size)
         .map_err(|_| Error::Allocation)?;
     if let Some(header) = header {
         output.extend_from_slice(&header);
     }
-    let budget = Budget::new(limits);
     *output = postcard::serialize_with_flavor(
         &admitted::Bounded {
             value,
-            budget: &budget,
+            budget,
             depth: 1,
         },
         Output {
@@ -110,7 +132,7 @@ pub fn encode_into<'out, T: Serialize + ?Sized>(
         },
     )
     .map_err(|_| budget.error())?;
-    Ok(output)
+    Ok(())
 }
 
 /// Encode into caller storage without allocating codec output.
@@ -140,19 +162,111 @@ pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     } else {
         0
     };
-    let budget = Budget::new(limits);
-    let payload = postcard::to_slice(
-        &admitted::Bounded {
-            value,
-            budget: &budget,
-            depth: 1,
-        },
-        &mut output[prefix..],
-    )
-    .map_err(|_| budget.error())?;
-    let written = prefix + payload.len();
+    let written = prefix + write_payload(value, &Budget::new(limits), 1, &mut output[prefix..])?;
 
     Ok(&output[..written])
+}
+
+pub(super) fn write_payload<T: Serialize + ?Sized>(
+    value: &T,
+    budget: &Budget,
+    depth: usize,
+    output: &mut [u8],
+) -> Result<usize, Error> {
+    postcard::to_slice(
+        &admitted::Bounded {
+            value,
+            budget,
+            depth,
+        },
+        output,
+    )
+    .map(|payload| payload.len())
+    .map_err(|_| budget.error())
+}
+
+#[cfg(feature = "evolution")]
+pub(super) fn write_scratch<T: Serialize + ?Sized>(
+    value: &T,
+    budget: &Budget,
+    depth: usize,
+    output: &mut [u8],
+    capacity_kind: crate::LimitKind,
+) -> Result<usize, Error> {
+    write_bounded_slice::<T, true>(value, budget, depth, output, capacity_kind)
+}
+
+#[cfg(feature = "evolution")]
+pub(super) fn write_bounded_slice<T: Serialize + ?Sized, const CHARGE_SCRATCH: bool>(
+    value: &T,
+    budget: &Budget,
+    depth: usize,
+    output: &mut [u8],
+    capacity_kind: crate::LimitKind,
+) -> Result<usize, Error> {
+    let initial_len = output.len();
+    let result = postcard::serialize_with_flavor(
+        &admitted::Bounded {
+            value,
+            budget,
+            depth,
+        },
+        BoundedSlice::<CHARGE_SCRATCH> {
+            output,
+            budget,
+            capacity_kind,
+            initial_len,
+        },
+    );
+    budget.check()?;
+    result.map_err(|_| Error::Malformed)
+}
+
+// Final output uses the meter's configured byte reservation. Additional
+// staging writes debit the remaining allocation allowance.
+#[cfg(feature = "evolution")]
+struct BoundedSlice<'a, 'budget, const CHARGE_SCRATCH: bool> {
+    output: &'a mut [u8],
+    budget: &'budget Budget,
+    capacity_kind: crate::LimitKind,
+    initial_len: usize,
+}
+
+#[cfg(feature = "evolution")]
+impl<const CHARGE_SCRATCH: bool> BoundedSlice<'_, '_, CHARGE_SCRATCH> {
+    #[inline]
+    fn take(&mut self, len: usize) -> postcard::Result<&mut [u8]> {
+        let Some((head, rest)) = core::mem::take(&mut self.output).split_at_mut_checked(len) else {
+            self.budget.refuse_with(self.capacity_kind);
+            return Err(postcard::Error::SerializeBufferFull);
+        };
+        if CHARGE_SCRATCH && !self.budget.charge_buffer(len) {
+            return Err(postcard::Error::SerializeBufferFull);
+        }
+        self.output = rest;
+        Ok(head)
+    }
+}
+
+#[cfg(feature = "evolution")]
+impl<const CHARGE_SCRATCH: bool> Flavor for BoundedSlice<'_, '_, CHARGE_SCRATCH> {
+    type Output = usize;
+
+    #[inline]
+    fn try_push(&mut self, byte: u8) -> postcard::Result<()> {
+        self.take(1)?[0] = byte;
+        Ok(())
+    }
+
+    #[inline]
+    fn try_extend(&mut self, bytes: &[u8]) -> postcard::Result<()> {
+        self.take(bytes.len())?.copy_from_slice(bytes);
+        Ok(())
+    }
+
+    fn finalize(self) -> postcard::Result<Self::Output> {
+        Ok(self.initial_len - self.output.len())
+    }
 }
 
 // Allocation capacity is not admission: every write is capped at preflight size.

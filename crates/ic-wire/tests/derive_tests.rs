@@ -5,8 +5,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Unit;
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Newtype(u16);
 #[derive(Serialize, Deserialize, Wire)]
 enum Choice {
@@ -15,6 +17,7 @@ enum Choice {
     Record { flag: bool },
 }
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Record {
     r#type: u8,
     choice: Choice,
@@ -22,6 +25,7 @@ struct Record {
     bytes: ic_wire::Bytes<3>,
 }
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Recursive {
     next: Option<Box<Recursive>>,
 }
@@ -32,7 +36,7 @@ fn derives_exact_ordinary_layouts_without_changing_serde() {
     let metadata: Value = serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
     assert_eq!(
         metadata["Record"],
-        json!({"k":"record","fields":[
+        json!({"k":"record","fixed":true,"fields":[
             {"name":"type","value":{"k":"u","bits":8}},
             {"name":"choice","value":{"k":"enum","variants":[
                 {"name":"Empty","id":0,"value":{"k":"unit"}},
@@ -122,6 +126,7 @@ fn manual_projection_cannot_hide_a_nested_admission_failure() {
 }
 
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Generic<Result: Clone = u16, const N: usize = 3>
 where
     Result: PartialEq,
@@ -138,6 +143,7 @@ enum GenericChoice<T> {
 }
 
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Borrowed<'a, T, const N: usize> {
     text: &'a str,
     #[serde(borrow = "'a")]
@@ -216,6 +222,7 @@ fn borrowed_generic_projection_accepts_nonstatic_lifetimes_and_preserves_custody
 }
 
 #[derive(Serialize, Wire)]
+#[wire(fixed)]
 struct DuplicateNames {
     #[serde(rename = "same")]
     first: u8,
@@ -323,6 +330,7 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
     let mut registry = SchemaRegistry::new(SchemaLimits::default()).unwrap();
     let first_name = {
         #[derive(Serialize, Wire)]
+        #[wire(fixed)]
         struct Same {
             value: bool,
         }
@@ -331,6 +339,7 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
     };
     let second_name = {
         #[derive(Serialize, Wire)]
+        #[wire(fixed)]
         struct Same {
             value: u8,
         }

@@ -7,6 +7,9 @@ license-file.workspace = true
 publish = false
 description = "Standalone portable request/response consumer for Wire qualification"
 
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+stats_alloc.workspace = true
+
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
@@ -22,6 +25,9 @@ required-features = ["schema"]
 [features]
 schema = ["wire/derive"]
 ic = ["dep:ic-platform-runtime"]
+evolution-qualification = ["wire/evolution", "wire/api-manifest", "wire/derive"]
+evolution-b-only = []
+evolution-caller-buffer = []
 
 [dependencies]
 ic-platform-runtime = { workspace = true, optional = true, features = ["system-raw"] }
@@ -61,3 +67,35 @@ required-features = ["ic"]
 name = "generate-service"
 path = "examples/generate_service.rs"
 required-features = ["wire/service-client"]
+
+[[example]]
+name = "evolution-contract"
+path = "examples/evolution_contract/main.rs"
+required-features = ["evolution-qualification"]
+
+[[example]]
+name = "evolution-contract-ic"
+path = "examples/evolution_contract/guest.rs"
+crate-type = ["cdylib"]
+required-features = ["ic", "evolution-qualification"]
+
+[[example]]
+name = "evolution-reader-a"
+path = "examples/evolution_contract/reader_a.rs"
+required-features = ["evolution-qualification"]
+
+[[example]]
+name = "evolution-control-ic"
+path = "examples/evolution_contract/control_guest.rs"
+crate-type = ["cdylib"]
+required-features = ["ic"]
+
+[[example]]
+name = "evolution-control-allocation"
+path = "examples/evolution_contract/control_native.rs"
+required-features = ["evolution-qualification"]
+
+[[example]]
+name = "evolution-upgrade"
+path = "examples/evolution_contract/upgrade.rs"
+required-features = ["evolution-qualification"]

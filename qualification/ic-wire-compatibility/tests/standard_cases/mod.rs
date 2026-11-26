@@ -6,7 +6,7 @@ use wire::typescript::{Method, PayloadLimits, SchemaLimits, ValidatedRegistry, W
 use wire::{Encoding, decode, encode};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Pair(u8, u16);
 #[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
 #[wire(crate = "wire")]

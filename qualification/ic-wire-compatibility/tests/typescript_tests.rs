@@ -31,7 +31,7 @@ enum Choice {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Record<T = u8, const N: usize = 3> {
     number: T,
     choice: Choice,
@@ -42,14 +42,14 @@ struct Record<T = u8, const N: usize = 3> {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Chain {
     value: u16,
     next: Option<Box<Chain>>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Shared {
     left: Chain,
     right: Chain,
@@ -68,7 +68,7 @@ fn limits() -> Limits {
 fn typescript_exchanges_payloads_and_frames() {
     let mut types = BTreeMap::from([(
         "Record".into(),
-        json!({"k":"record","fields":[
+        json!({"k":"record","fixed":true,"fields":[
             {"name":"number","value":{"k":"u","bits":8}},
             {"name":"choice","value":{"k":"enum","variants":[
                 {"name":"Ready","id":0,"value":{"k":"unit"}},
@@ -82,14 +82,14 @@ fn typescript_exchanges_payloads_and_frames() {
     )]);
     types.insert(
         "Chain".into(),
-        json!({"k":"record","fields":[
+        json!({"k":"record","fixed":true,"fields":[
             {"name":"value","value":{"k":"u","bits":16}},
             {"name":"next","value":{"k":"option","item":{"k":"ref","name":"Chain"}}}
         ]}),
     );
     types.insert(
         "Shared".into(),
-        json!({"k":"record","fields":[
+        json!({"k":"record","fixed":true,"fields":[
             {"name":"left","value":{"k":"ref","name":"Chain"}},
             {"name":"right","value":{"k":"ref","name":"Chain"}}
         ]}),

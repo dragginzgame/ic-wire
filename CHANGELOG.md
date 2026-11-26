@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.31.0] - Unreleased
+
+### ➕ Added
+
+- Opt into sparse record and tuple extensions, stable open variants, and bounded
+  branch recovery from Rust declarations and generated TypeScript clients. Contributed by [infu](https://github.com/infu) in [infu/ic-wire PR #1](https://github.com/infu/ic-wire/pull/1).
+- Declare typed evolving methods with `#[derive(Wire)]` on request and reply
+  roots. Add optional fields to the original Rust declaration with stable IDs.
+- Derive nested record and tuple evolution through common containers. Validate
+  new required record fields against the deployed request and reply directions.
+- Compare proposed method manifests against supported baselines in request and
+  reply directions, with explicit reports for skipped data and breaking changes.
+- Encode projected frames into reusable caller storage with optional row-local
+  scratch preparation.
+
+### ⚠️ Breaking
+
+- `#[derive(Wire)]` defaults to an extensible struct or tuple. Mark ordinary
+  Serde struct and tuple layouts with `#[wire(fixed)]` for schema projection.
+- When matching Wire errors exhaustively, handle `Incompatible` with the Rust
+  evolution feature and `'incompatible'` in generated TypeScript runtimes.
+
+### 🧪 Testing
+
+- Run focused sparse codec, upgrade-manifest, and strict Rust/TypeScript
+  evolution checks in CI.
+
 ## [0.30.2] - 2026-11-25
 
 ### 📝 Summary

@@ -150,6 +150,13 @@ owned bulk results are qualified separately. Named synchronous checks and
 getters/proxies are trusted work outside the traversal budget. Consumer Serde
 owns matching Rust domain constraints.
 
+The experimental [evolution adapters](design/evolution.md) add explicit
+record fields and tuple tails, stable open cases and optional recovery scopes
+to selected sites. Typed evolving methods reserve an extension block at both
+roots and in nested derived values. The derive composes nested preparation and
+projection under each frame's meter. Host tooling checks emitted manifests
+against prior schemas in the request and reply directions.
+
 ## Qualification and performance limits
 
 Use focused tests for the affected owner: literal byte/frame vectors, malformed

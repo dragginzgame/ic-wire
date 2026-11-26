@@ -27,6 +27,8 @@ help:
 	  'test-typescript       Exchange Rust bytes with current TypeScript (Node required)' \
 	  'lint-typescript       Lint the focused cross-language qualification harness' \
 	  'check-typescript      Strictly typecheck generated clients (npm ci prerequisite)' \
+	  'test-evolution        Check sparse evolution, recovery and upgrade manifests' \
+	  'check-evolution-typescript Typecheck and exchange evolved frames (npm ci prerequisite)' \
 	  'check-raw-service     Run the generated client against a local PocketIC canister' \
 	  'check-api-manifest    Compare the upload contract with its reviewed baseline' \
 	  'check-packages        Assemble archives and verify extracted-package consumers' \
@@ -119,6 +121,22 @@ test-typescript:
 
 lint-typescript:
 	+cargo clippy --manifest-path qualification/Cargo.toml --features typescript --test typescript --locked -- -D warnings
+
+.PHONY: test-evolution check-evolution-typescript
+test-evolution check-evolution-typescript: qualification-tooling-check | toko-execution-check
+
+test-evolution:
+	+cargo test -p ic-wire --features evolution-derive,derive,api-manifest --locked --lib \
+	  --test evolution_tests --test evolution_recovery_tests --test evolution_nested_recovery_tests \
+	  --test evolution_derive_tests --test evolution_inline_derive_tests \
+	  --test evolution_inline_nested_tests --test evolution_schema
+	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --locked \
+	  --features evolution-qualification --example evolution-upgrade
+
+check-evolution-typescript:
+	+IC_WIRE_CHECK_TYPESCRIPT=1 cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer \
+	  --locked --features evolution-qualification --example evolution-contract
+	node --experimental-transform-types qualification/ic-wire-consumer/examples/evolution_contract/runtime.mjs
 
 .PHONY: check-api-manifest
 check-api-manifest: qualification-tooling-check | toko-execution-check

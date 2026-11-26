@@ -31,7 +31,7 @@ pub const RESPONSE_LIMITS: Limits = Limits {
 #[cfg_attr(
     feature = "schema",
     derive(wire::typescript::Wire),
-    wire(crate = "wire")
+    wire(crate = "wire", fixed)
 )]
 pub struct Upload {
     /// Expected application revision.
@@ -50,7 +50,7 @@ pub struct Upload {
 #[cfg_attr(
     feature = "schema",
     derive(wire::typescript::Wire),
-    wire(crate = "wire")
+    wire(crate = "wire", fixed)
 )]
 pub struct Receipt {
     /// Committed revision reported by the application.
