@@ -414,13 +414,13 @@ fn application_policy_matches_declarations_across_modules_and_bare_roots() {
     use wire::typescript::{BulkAdvisory, BulkPolicy, BulkSite, SchemaRegistry, Wire};
 
     #[derive(serde::Serialize, Wire)]
-    #[wire(crate = "wire")]
+    #[wire(crate = "wire", fixed)]
     struct Identifier([u8; 16]);
     #[derive(serde::Serialize, Wire)]
-    #[wire(crate = "wire")]
+    #[wire(crate = "wire", fixed)]
     struct Other([u8; 16]);
     #[derive(serde::Serialize, Wire)]
-    #[wire(crate = "wire")]
+    #[wire(crate = "wire", fixed)]
     struct Policy {
         unlocked_rarity_tiers: Vec<u8>,
         cursor: Vec<u8>,

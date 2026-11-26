@@ -13,7 +13,7 @@ enum Choice {
     Value(u16),
 }
 #[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Record {
     #[serde(rename = "__proto__")]
     flag: bool,
@@ -27,7 +27,7 @@ fn explicit_serde_names_reach_generated_clients_without_changing_bytes() {
     let metadata: Value = serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
     assert_eq!(
         metadata["Record"],
-        json!({"k":"record","fields":[
+        json!({"k":"record","fixed":true,"fields":[
             {"name":"__proto__","value":{"k":"bool"}},
             {"name":"choice-value","value":{"k":"enum","variants":[
                 {"name":"ready-now","id":0,"value":{"k":"unit"}},

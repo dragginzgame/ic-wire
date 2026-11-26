@@ -17,6 +17,10 @@ mod meter;
 mod packed;
 pub mod serde_packed;
 
+/// Experimental sparse extensions and explicit open variants.
+#[cfg(feature = "evolution")]
+pub mod evolution;
+
 /// Optional schema admission and TypeScript declarations.
 #[cfg(feature = "typescript")]
 pub mod typescript;
@@ -27,6 +31,8 @@ pub use error::{Error, LimitKind};
 pub use fields::{Bytes, BytesRef, List, Text, TextRef};
 pub use finite::{FiniteF32, FiniteF64};
 pub use framing::{Direction, Encoding, method_id, validate_request_header};
+#[cfg(feature = "evolution-derive")]
+pub use ic_wire_derive::Wire;
 pub use limits::Limits;
 pub use packed::{Packed, PackedElement};
 

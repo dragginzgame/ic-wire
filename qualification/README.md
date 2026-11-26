@@ -15,6 +15,18 @@ current Rust and TypeScript implementations, with no older Wire dependency.
 Package directories match Cargo package names. `wire` is the renamed dependency
 on the local product crate, also exercising derive support for renamed imports.
 
+## Schema evolution
+
+`make test-evolution` checks sparse framing, typed recovery, schema admission,
+and request and reply compatibility against emitted manifests.
+`make check-evolution-typescript` uses the locked TypeScript compiler and Node
+to check and exchange versioned frames with generated clients. Install the
+compiler with `npm ci --prefix qualification/typescript --ignore-scripts`.
+The tests cover three revisions of inline request and reply types, nested
+records and tuple tails inside containers, required additions in each method
+direction, and a malformed known value inside a branch eligible for recovery.
+[Evolution contract](../docs/design/evolution.md)
+
 ## Candid comparison
 
 Run the optional native matrix to print byte lengths for matched values and

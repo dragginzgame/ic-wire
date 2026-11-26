@@ -4,7 +4,7 @@ use wire::typescript::{SchemaLimits, ValidatedRegistry};
 use wire::{Encoding, Limits, decode, encode};
 
 #[derive(wire::typescript::Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Payment {
     account: Account,
 }

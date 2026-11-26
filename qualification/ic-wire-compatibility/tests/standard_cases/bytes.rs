@@ -4,7 +4,7 @@ use serde_json::json;
 use wire::typescript::{PayloadLimits, SchemaLimits, ValidatedRegistry, Wire};
 use wire::{ByteArray, ByteBuf, Encoding, decode, encode};
 #[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
-#[wire(crate = "wire")]
+#[wire(crate = "wire", fixed)]
 struct Envelope {
     plain: [u8; 2],
     exact: ByteArray<2>,

@@ -2,8 +2,8 @@
 mod service;
 
 use super::{
-    GenerationError, MAX_SAFE_INTEGER, Method, Node, PayloadLimits, RUNTIME_SCHEMA_FORMAT,
-    ValidatedRegistry, identifier,
+    ExtensionField, GenerationError, MAX_SAFE_INTEGER, Method, Node, PayloadLimits,
+    RUNTIME_SCHEMA_FORMAT, ValidatedRegistry, identifier,
 };
 use crate::framing::HEADER_BYTES;
 use alloc::{
@@ -428,8 +428,17 @@ impl ValidatedRegistry {
                 output.write_str(",\"item\":")?;
                 self.metadata_node(*item, output, reference, entry_break)?;
             }
-            Node::Tuple(items) => {
-                output.write_str("\"tuple\",\"items\":[")?;
+            Node::Tuple(items) | Node::ExtensionTuple { items, .. } => {
+                let extensions = match &self.nodes[id] {
+                    Node::ExtensionTuple { extensions, .. } => Some(extensions),
+                    _ => None,
+                };
+                output.quoted(if extensions.is_some() {
+                    "extension-tuple"
+                } else {
+                    "tuple"
+                })?;
+                output.write_str(",\"items\":[")?;
                 for (index, item) in items.iter().enumerate() {
                     if index != 0 {
                         output.write_char(',')?;
@@ -437,6 +446,9 @@ impl ValidatedRegistry {
                     self.metadata_node(*item, output, reference, entry_break)?;
                 }
                 output.write_char(']')?;
+                if let Some(extensions) = extensions {
+                    self.metadata_extensions(extensions, output, reference, entry_break)?;
+                }
             }
             Node::Result { ok, err } => {
                 output.write_str("\"result\",\"ok\":")?;
@@ -444,11 +456,11 @@ impl ValidatedRegistry {
                 output.write_str(",\"err\":")?;
                 self.metadata_node(*err, output, reference, entry_break)?;
             }
-            Node::Option(item) | Node::Alias(item) => {
-                output.quoted(if matches!(self.nodes[id], Node::Option(_)) {
-                    "option"
-                } else {
-                    "newtype"
+            Node::Option(item) | Node::Recover(item) | Node::Alias(item) => {
+                output.quoted(match self.nodes[id] {
+                    Node::Option(_) => "option",
+                    Node::Recover(_) => "recover",
+                    _ => "newtype",
                 })?;
                 output.write_str(",\"item\":")?;
                 self.metadata_node(*item, output, reference, entry_break)?;
@@ -458,8 +470,17 @@ impl ValidatedRegistry {
                 output.write_str("\"ref\",\"name\":")?;
                 output.quoted(&self.names[*root])?;
             }
-            Node::Record(fields) => {
-                output.write_str("\"record\",\"fields\":[")?;
+            Node::Record(fields) | Node::ExtensionRecord { fields, .. } => {
+                let extensions = match &self.nodes[id] {
+                    Node::ExtensionRecord { extensions, .. } => Some(extensions),
+                    _ => None,
+                };
+                output.quoted(if extensions.is_some() {
+                    "extension-record"
+                } else {
+                    "record"
+                })?;
+                output.write_str(",\"fields\":[")?;
                 for (index, (name, child)) in fields.iter().enumerate() {
                     if index != 0 {
                         output.write_char(',')?;
@@ -472,9 +493,20 @@ impl ValidatedRegistry {
                     output.write_char('}')?;
                 }
                 output.write_char(']')?;
+                if let Some(extensions) = extensions {
+                    self.metadata_extensions(extensions, output, reference, entry_break)?;
+                }
             }
-            Node::Enum(variants) => {
-                output.write_str("\"enum\",\"variants\":[")?;
+            Node::Enum(variants) | Node::OpenVariant { variants, .. } => {
+                if let Node::OpenVariant { required, .. } = &self.nodes[id] {
+                    output.quoted("open-variant")?;
+                    if *required {
+                        output.write_str(",\"required\":true")?;
+                    }
+                } else {
+                    output.quoted("enum")?;
+                }
+                output.write_str(",\"variants\":[")?;
                 for (index, (name, tag, child)) in variants.iter().enumerate() {
                     if index != 0 {
                         output.write_char(',')?;
@@ -490,6 +522,12 @@ impl ValidatedRegistry {
             }
         }
         if let Some(annotation) = self.annotations.get(&id) {
+            if annotation.fixed {
+                output.write_str(",\"fixed\":true")?;
+            }
+            if annotation.projected {
+                output.write_str(",\"projected\":true")?;
+            }
             if let Some(bounds) = &annotation.bounds {
                 output.scalar_bounds(bounds, true)?;
             }
@@ -499,6 +537,33 @@ impl ValidatedRegistry {
             }
         }
         output.write_char('}')
+    }
+
+    fn metadata_extensions(
+        &self,
+        extensions: &[ExtensionField],
+        output: &mut Output,
+        reference: &mut impl FnMut(usize),
+        entry_break: &str,
+    ) -> fmt::Result {
+        output.write_str(",\"extensions\":[")?;
+        for (index, entry) in extensions.iter().enumerate() {
+            if index != 0 {
+                output.write_char(',')?;
+            }
+            output.write_str(entry_break)?;
+            output.write_str("{\"name\":")?;
+            output.quoted(&entry.name)?;
+            write!(
+                output,
+                ",\"id\":{},\"required\":{},\"value\":",
+                entry.id, entry.required
+            )?;
+            self.metadata_node(entry.child, output, reference, entry_break)?;
+            output.write_char('}')?;
+        }
+
+        output.write_char(']')
     }
 
     /// Render deterministic TypeScript type aliases from admitted nodes.
@@ -577,24 +642,28 @@ impl ValidatedRegistry {
                 self.render_node(*item, output)?;
                 output.write_char('>')
             }
-            Node::Option(item) => {
-                output.write_str("null | { readonly some: ")?;
-                self.render_node(*item, output)?;
-                output.write_str(" }")
-            }
+            Node::Option(item) | Node::Recover(item) => self.render_option(*item, output),
             Node::Array { item, len } => {
                 output.bounds(None, Some(*len))?;
                 output.write_str("globalThis.ReadonlyArray<")?;
                 self.render_node(*item, output)?;
                 output.write_char('>')
             }
-            Node::Tuple(items) => {
+            Node::Tuple(items) | Node::ExtensionTuple { items, .. } => {
                 output.write_str("readonly [")?;
                 for (index, item) in items.iter().enumerate() {
                     if index != 0 {
                         output.write_str(", ")?;
                     }
                     self.render_node(*item, output)?;
+                }
+                if let Node::ExtensionTuple { extensions, .. } = &self.nodes[id] {
+                    for (index, entry) in extensions.iter().enumerate() {
+                        if !items.is_empty() || index != 0 {
+                            output.write_str(", ")?;
+                        }
+                        self.render_option(entry.child, output)?;
+                    }
                 }
                 output.write_char(']')
             }
@@ -607,7 +676,7 @@ impl ValidatedRegistry {
             }
             Node::Alias(item) => self.render_node(*item, output),
             Node::Ref(root) => output.write_str(&self.names[*root]),
-            Node::Record(fields) => {
+            Node::Record(fields) | Node::ExtensionRecord { fields, .. } => {
                 output.write_char('{')?;
                 for (name, child) in fields {
                     output.write_str(" readonly ")?;
@@ -616,11 +685,36 @@ impl ValidatedRegistry {
                     self.render_node(*child, output)?;
                     output.write_char(';')?;
                 }
+                if let Node::ExtensionRecord { extensions, .. } = &self.nodes[id] {
+                    for entry in extensions {
+                        output.write_str(" readonly ")?;
+                        output.quoted(&entry.name)?;
+                        output.write_str(": ")?;
+                        if entry.required {
+                            self.render_node(entry.child, output)?;
+                        } else {
+                            self.render_option(entry.child, output)?;
+                        }
+                        output.write_char(';')?;
+                    }
+                }
                 output.write_str(" }")
             }
-            Node::Enum(variants) => {
+            Node::Enum(variants) | Node::OpenVariant { variants, .. } => {
+                let accepts_null = matches!(
+                    self.nodes[id],
+                    Node::OpenVariant {
+                        required: false,
+                        ..
+                    }
+                );
+                if accepts_null {
+                    output.write_str("null")?;
+                } else if variants.is_empty() {
+                    output.write_str("never")?;
+                }
                 for (index, (name, tag, child)) in variants.iter().enumerate() {
-                    if index != 0 {
+                    if accepts_null || index != 0 {
                         output.write_str(" | ")?;
                     }
                     write!(output, "/* id {tag} */ {{ readonly tag: ")?;
@@ -632,6 +726,13 @@ impl ValidatedRegistry {
                 Ok(())
             }
         }
+    }
+
+    fn render_option(&self, item: usize, output: &mut Output) -> fmt::Result {
+        output.write_str("null | { readonly some: ")?;
+        self.render_node(item, output)?;
+
+        output.write_str(" }")
     }
 }
 

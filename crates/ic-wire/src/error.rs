@@ -31,6 +31,9 @@ pub enum Error {
     Trailing,
     /// The envelope marker, method identity or direction differs.
     Identity,
+    /// A well-formed evolved value cannot satisfy the required projection.
+    #[cfg(feature = "evolution")]
+    Incompatible,
 }
 
 impl core::fmt::Display for Error {
@@ -46,6 +49,8 @@ impl core::fmt::Display for Error {
             Self::Malformed => "wire malformed",
             Self::Trailing => "wire trailing",
             Self::Identity => "wire identity",
+            #[cfg(feature = "evolution")]
+            Self::Incompatible => "wire incompatible",
         })
     }
 }

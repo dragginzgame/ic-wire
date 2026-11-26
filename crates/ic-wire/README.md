@@ -150,7 +150,8 @@ before expanding the list.
 | `api-manifest` | Also exports bounded per-endpoint API snapshots for CI |
 | `service-client` | Generates a typed TypeScript service over existing method codecs |
 | `typescript` | Schema collection, validated graph, lint and generated clients |
-| `derive` | Also provides `ic_wire::typescript::Wire` derive |
+| `evolution-derive` | Provides the `ic_wire::Wire` derive and evolving codec without schema tooling |
+| `derive` | Adds schema generation to the Wire derive |
 | `platform-types` | Also projects published Platform Types Principal/Account |
 
 For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
@@ -167,6 +168,7 @@ use ic_wire::typescript::Wire;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Wire)]
+#[wire(fixed)]
 struct Request { sequence: u64 }
 ```
 
@@ -218,8 +220,10 @@ promise. An application error variant in a valid reply resolves as typed data.
 Shared error handlers can recognise a Wire codec error from any generated
 runtime copy by its stable `name` and `code` properties. Check for
 `name === 'WireError'` and one of the codes `'limit'`, `'malformed'`,
-`'identity'`, or `'value'`. Each bundled runtime defines its own constructor,
-so `instanceof WireError` only recognises errors from that copy.
+`'identity'`, `'value'`, or `'incompatible'`. An incompatible evolved value
+cannot be represented by this reader at any applicable recovery boundary.
+Each bundled runtime defines its own constructor, so `instanceof WireError`
+only recognises errors from that copy.
 
 The [executable counter example](https://github.com/dragginzgame/ic-wire/tree/main/qualification#raw-service-round-trip)
 connects a generated client to a Rust canister over HTTP. Its `read` query and
@@ -254,6 +258,25 @@ supplied through a consumer runtime wrapper forwarding the factory's optional
 third `Checks` argument. Checks are trusted synchronous functions which throw
 to reject; their work is outside traversal budgets. Consumer Serde owns matching
 Rust validation.
+
+## Evolvable method types
+
+Enable `evolution-derive` and declare `evolution::Method<Request, Reply>` with
+`#[derive(ic_wire::Wire)]` on both types. Every framed root has room
+for later additions. Add an `Option<T>` field to the same struct with
+`#[wire(id = N)]` and a stable, unused ID. Tuples can append optional slots
+identified by their one-based positions. An empty extension block costs one
+byte per root, and IDs and lengths are written only for present additions.
+
+On the host, register the typed method with
+`SchemaRegistry::register_evolving_method` to derive its TypeScript codec and
+method manifest. Nested derived structs and tuple structs also evolve through
+lists, options, results and arrays. Their empty blocks cost one byte per
+occurrence. Use `#[wire(fixed)]` when a nested value should keep its entire
+Serde layout. The explicit projection API supports open variants and branch
+recovery. Manifest checks compare old writes to new request readers and new
+writes to old reply readers, including required fields within nested records.
+[Declarations and projection](https://github.com/dragginzgame/ic-wire/blob/main/docs/design/evolution.md)
 
 ## Upgrade from 0.22
 

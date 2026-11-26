@@ -87,6 +87,8 @@ jobs:
           cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked -- -D warnings
           make test test-host test-compatibility
           cargo test -p ic-wire --features derive --test derive_tests --locked
+      - name: Check sparse evolution and upgrade manifests
+        run: make test-evolution
       - name: Check Wire and Candid comparison matrix
         if: runner.os == 'Linux'
         run: cargo test --manifest-path qualification/Cargo.toml -p ic-wire-compatibility --features candid-comparison --test candid_matrix --locked
@@ -102,7 +104,7 @@ jobs:
         run: perl scripts/ci/setup-diagnostics.pl typescript npm ci --prefix qualification/typescript --ignore-scripts --no-audit --no-fund
       - name: Check strict generated clients and Rust/TypeScript exchange
         if: runner.os == 'Linux'
-        run: make lint-typescript check-typescript check-api-manifest
+        run: make lint-typescript check-typescript check-evolution-typescript check-api-manifest
       - name: Check portable Wasm and execute standalone consumer
         if: runner.os == 'Linux'
         run: |

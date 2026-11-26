@@ -11,7 +11,7 @@ use wire::{Encoding, decode, encode};
 macro_rules! record {
     ($new:ident,$ty:ty,$new_path:literal) => {
         #[derive(Debug, Serialize, Deserialize, wire::typescript::Wire)]
-        #[wire(crate = "wire")]
+        #[wire(crate = "wire", fixed)]
         struct $new {
             #[serde(with=$new_path)]
             value: $ty,
@@ -106,12 +106,12 @@ fn domain_adapters_match_literal_bytes_and_browser_runtime() {
     ] {
         assert_eq!(
             types[name],
-            json!({"k":"record","fields":[{"name":"value","value":{"k":"packed","word":word}}]})
+            json!({"k":"record","fixed":true,"fields":[{"name":"value","value":{"k":"packed","word":word}}]})
         );
     }
     assert_eq!(
         types["Nonzero"],
-        json!({"k":"record","fields":[{"name":"value","value":{"k":"packed","word":"i64","nonzero":true}}]})
+        json!({"k":"record","fixed":true,"fields":[{"name":"value","value":{"k":"packed","word":"i64","nonzero":true}}]})
     );
     let graph = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
     let policy = PayloadLimits {

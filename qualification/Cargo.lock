@@ -949,6 +949,7 @@ dependencies = [
  "ic-platform-types",
  "ic-wire",
  "serde",
+ "stats_alloc",
  "toko-tooling",
 ]
 
