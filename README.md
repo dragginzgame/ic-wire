@@ -5,7 +5,7 @@ advice and generated TypeScript clients. The codec is `no_std` with `alloc`,
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both version **0.31.0**.
+The product crates are `ic-wire` and `ic-wire-derive`, both version **0.31.1**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
@@ -134,8 +134,17 @@ publication and deployment remain separately selected operations.
 - [Current feature scope](docs/design/parity.md)
 - [Performance measurement scope](docs/design/performance.md)
 - [Package/browser verification and release procedure](docs/release.md)
-- [Changelog](CHANGELOG.md) and [Toko Studios Network Licence 1.1](LICENSE.md)
+- [Changelog](CHANGELOG.md) and [Apache License 2.0](LICENSE.md)
 
 Measurements apply to their recorded workloads and source hashes. Current-only
 Wasm size and IC instruction runners report costs separately; correctness checks
 do not establish performance.
+
+## Licensing
+
+Wire's first-party source in this tree, including both product crates and the
+bundled TypeScript runtime, uses the [Apache License 2.0](LICENSE.md) beginning
+with release 0.31.1. The published 0.31.0 archives carry their
+original licence. The installed Toko Tooling baseline and vendored tools are
+covered by the [Toko Tooling licence](LICENSES/toko-tooling.md). External
+dependencies retain their respective licences.

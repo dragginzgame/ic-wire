@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.1] - 2026-11-26
+
+### 🔧 Changed
+
+- Both published crates now use Apache-2.0. Their archives include the full licence.
+- GitHub checks contributor agreement acceptance on pull requests.
+
 ## [0.31.0] - 2026-11-26
 
 ### ➕ Added
@@ -37,7 +44,7 @@
 
 ### 📝 Summary
 
-- Adopt the [Toko Studios Network Licence 1.1](LICENSE.md) for this release. Earlier grants remain in effect.
+- Adopt the [Toko Studios Network Licence 1.1](https://github.com/dragginzgame/ic-wire/blob/v0.30.2/LICENSE.md) for this release. Earlier grants remain in effect.
 - Update the development tooling to Toko Tooling 0.46.4 in both Cargo workspaces.
 
 ## [0.30.1] - 2026-11-24

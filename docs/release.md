@@ -1,6 +1,6 @@
 # Package verification and release
 
-The repository's product manifests and finalized changelog select **0.31.0** for
+The repository's product manifests and finalized changelog select **0.31.1** for
 `ic-wire` and `ic-wire-derive`. Qualification packages remain unpublished. Registry
 state establishes publication status; a changelog, historical approval or dry run
 does not authorize or prove a new upload.

@@ -4,7 +4,7 @@ Rust declarations for IC Wire. Use the coordinated re-export.
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.31.0", features = ["derive"] }
+ic-wire = { version = "0.31.1", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -89,4 +89,4 @@ the first version, including when the tail is empty.
 
 Requires Rust 1.100.0. The derive and runtime crate are released together.
 See [IC Wire](https://github.com/dragginzgame/ic-wire) for usage and qualification.
-Licensed under the included Toko Studios Network Licence 1.1 (`LICENSE.md`).
+Licensed under the included Apache License 2.0 (`LICENSE.md`).

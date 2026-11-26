@@ -7,7 +7,7 @@ Rust 1.100.0 or later is required.
 
 ```toml
 [dependencies]
-ic-wire = "0.31.0"
+ic-wire = "0.31.1"
 serde = { version = "1", features = ["derive"] }
 ```
 
@@ -158,7 +158,7 @@ For a crate that owns shared DTOs, enable `derive` once on its Cargo dependency:
 
 ```toml
 [dependencies]
-ic-wire = { version = "0.31.0", features = ["derive"] }
+ic-wire = { version = "0.31.1", features = ["derive"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -288,5 +288,4 @@ legacy compatibility lane, fallback reader or storage migration is provided.
 
 See the [repository](https://github.com/dragginzgame/ic-wire) for qualification,
 design and measured tradeoffs. Smaller Wasm in the sample workload does not imply
-universally faster encoding. Licensed under the included Toko Studios Network
-Licence 1.1; see `LICENSE.md` for the controlling terms.
+universally faster encoding. See the included `LICENSE.md` for the licence covering this copy.
