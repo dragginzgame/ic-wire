@@ -330,6 +330,9 @@ impl Flavor for Output<'_> {
     }
 
     fn try_extend(&mut self, span: &[u8]) -> postcard::Result<()> {
+        if let [byte] = span {
+            return self.try_push(*byte);
+        }
         match self {
             Self::Count(size) => {
                 *size = size
