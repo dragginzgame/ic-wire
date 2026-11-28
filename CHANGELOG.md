@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.33.0] - 2026-11-28
+
+### ⚠️ Breaking
+
+- The crate-root codec now accepts sparse messages. Derive `Wire` on request,
+  reply and nested records without a feature or layout attribute. Each record
+  writes its existing fields followed by an extension block. Switch both ends
+  together and regenerate clients. Keep stored Serde representations separate.
+- Closed enum payloads follow their nested Wire projections. Named and tuple
+  variants can carry tagged additions. Use `Message<T>` as the sparse root for
+  a scalar, result or enum. Client generation rejects positional roots.
+
+### 🔧 Changed
+
+- Sparse writers share frame handling, and readers share extension dispatch
+  across records with the same extension field types.
+
 ## [0.32.0] - 2026-11-28
 
 ### ⚠️ Breaking

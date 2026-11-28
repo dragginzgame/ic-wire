@@ -2,10 +2,10 @@ use crate::support::{decode, encode};
 use crate::{limits, message_type, run_typescript};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use wire::typescript::{PayloadLimits, Wire};
+use wire::typescript::PayloadLimits;
 use wire::{ByteArray, ByteBuf, Encoding};
-#[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Envelope {
     plain: [u8; 2],
     exact: ByteArray<2>,

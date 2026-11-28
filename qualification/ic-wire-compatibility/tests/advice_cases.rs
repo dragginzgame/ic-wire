@@ -418,16 +418,16 @@ fn hash_list_advice_accounts_for_the_first_byte_prefix_boundary() {
 
 #[test]
 fn application_policy_matches_declarations_across_modules_and_bare_roots() {
-    use wire::typescript::{BulkAdvisory, BulkPolicy, BulkSite, SchemaRegistry, Wire};
+    use wire::typescript::{BulkAdvisory, BulkPolicy, BulkSite, SchemaRegistry};
 
-    #[derive(serde::Serialize, Wire)]
-    #[wire(crate = "wire", fixed)]
+    #[derive(serde::Serialize, wire::WireSchema)]
+    #[wire(crate = "wire")]
     struct Identifier([u8; 16]);
-    #[derive(serde::Serialize, Wire)]
-    #[wire(crate = "wire", fixed)]
+    #[derive(serde::Serialize, wire::WireSchema)]
+    #[wire(crate = "wire")]
     struct Other([u8; 16]);
-    #[derive(serde::Serialize, Wire)]
-    #[wire(crate = "wire", fixed)]
+    #[derive(serde::Serialize, wire::WireSchema)]
+    #[wire(crate = "wire")]
     struct Policy {
         unlocked_rarity_tiers: Vec<u8>,
         cursor: Vec<u8>,

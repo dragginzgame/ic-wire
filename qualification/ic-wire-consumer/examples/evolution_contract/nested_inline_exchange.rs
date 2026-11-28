@@ -10,17 +10,14 @@ use wire::{
 use crate::fixture::LIMITS;
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct PointV1(u16, bool);
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct PointV2(u16, bool, #[wire(id = 3)] Option<()>);
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct JobV1 {
     id: u32,
@@ -28,7 +25,6 @@ struct JobV1 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct JobV2 {
     id: u32,
@@ -38,7 +34,6 @@ struct JobV2 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Request<Job> {
     jobs: List<Job, 2>,
@@ -48,14 +43,12 @@ struct Request<Job> {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct SummaryV1 {
     found: bool,
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct SummaryV2 {
     found: bool,
@@ -64,7 +57,6 @@ struct SummaryV2 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Reply<Summary> {
     result: Result<Option<Summary>, u16>,

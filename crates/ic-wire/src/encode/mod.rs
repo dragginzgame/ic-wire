@@ -81,6 +81,7 @@ pub fn encoded_len<T: Serialize + ?Sized>(
 ///
 /// # Errors
 /// Returns the same errors as [`encode_into`]. No partial output is returned.
+#[cfg(test)]
 pub fn encode<T: Serialize + ?Sized>(
     value: &T,
     encoding: Encoding,
@@ -102,6 +103,7 @@ pub fn encode<T: Serialize + ?Sized>(
 /// # Errors
 /// Returns Limit for exhausted allowances, Allocation for failed output
 /// reservation, otherwise Malformed for serialization failure.
+#[cfg(test)]
 pub fn encode_into<'out, T: Serialize + ?Sized>(
     value: &T,
     encoding: Encoding,
@@ -113,6 +115,7 @@ pub fn encode_into<'out, T: Serialize + ?Sized>(
 }
 
 #[inline(never)]
+#[cfg(test)]
 fn encode_into_with(
     write: &PayloadWriter<'_>,
     encoding: Encoding,
@@ -122,6 +125,27 @@ fn encode_into_with(
     output.clear();
     let (header, size) = preflight(write, encoding, limits)?;
     write_vec_with(write, &Budget::new(limits), header, size, output)
+}
+
+pub(super) fn projected_size<T: Serialize>(
+    value: &T,
+    budget: &Budget,
+    byte_limit: usize,
+) -> Result<usize, Error> {
+    measured_size(&payload_writer(value), budget, byte_limit)
+}
+
+fn measured_size(
+    write: &PayloadWriter<'_>,
+    budget: &Budget,
+    byte_limit: usize,
+) -> Result<usize, Error> {
+    let size = write(budget, Output::Count(0))?;
+    budget.check()?;
+    if size > byte_limit {
+        return Err(Error::Limit(crate::LimitKind::Bytes));
+    }
+    Ok(size)
 }
 
 pub(super) fn write_projected_vec<T: Serialize>(
@@ -142,11 +166,7 @@ fn write_projected_vec_with(
     byte_limit: usize,
     output: &mut Vec<u8>,
 ) -> Result<(), Error> {
-    let size = write(budget, Output::Count(0))?;
-    budget.check()?;
-    if size > byte_limit {
-        return Err(Error::Limit(crate::LimitKind::Bytes));
-    }
+    let size = measured_size(write, budget, byte_limit)?;
     let prefix = if header.is_some() { HEADER_BYTES } else { 0 };
     let len = size + prefix;
     write_vec_with(write, budget, header, len, output)?;
@@ -191,6 +211,7 @@ fn write_vec_with(
 /// # Errors
 /// Returns Limit for exhausted allowances or a short destination, otherwise
 /// Malformed for serialization failure (including growth between passes).
+#[cfg(test)]
 pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     value: &T,
     encoding: Encoding,
@@ -213,6 +234,7 @@ pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     Ok(&output[..written])
 }
 
+#[cfg(test)]
 pub(super) fn write_payload<T: Serialize + ?Sized>(
     value: &T,
     budget: &Budget,

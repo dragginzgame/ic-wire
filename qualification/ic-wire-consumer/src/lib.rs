@@ -27,7 +27,6 @@ pub const RESPONSE_LIMITS: Limits = Limits {
 
 /// Application's explicit field representations; ordinary tags stay a list.
 #[derive(Debug, PartialEq, wire::Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 pub struct Upload {
     /// Expected application revision.
@@ -43,7 +42,6 @@ pub struct Upload {
 }
 /// Application reply, distinct from the upload shape.
 #[derive(Debug, PartialEq, wire::Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 pub struct Receipt {
     /// Committed revision reported by the application.

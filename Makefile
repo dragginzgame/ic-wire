@@ -127,7 +127,7 @@ lint-typescript:
 test-evolution check-evolution-typescript: qualification-tooling-check | toko-execution-check
 
 test-evolution:
-	+cargo test -p ic-wire --features derive,api-manifest --locked --lib \
+	+cargo test -p ic-wire --features api-manifest --locked --lib \
 	  --test evolution_nested_recovery_tests \
 	  --test evolution_derive_tests --test evolution_inline_derive_tests \
 	  --test evolution_inline_nested_tests --test evolution_schema --test layout_selection
@@ -173,11 +173,11 @@ test-derive lint-derive: toko-tooling-check | toko-execution-check
 
 test-derive:
 	+cargo test -p ic-wire-derive --lib --locked
-	+cargo test -p ic-wire --features derive,typescript --test derive_tests --locked
+	+cargo test -p ic-wire --features typescript --test derive_tests --locked
 
 lint-derive:
 	+cargo clippy -p ic-wire-derive --lib --tests --locked -- -D warnings
-	+cargo clippy -p ic-wire --features derive,typescript --lib --test derive_tests --locked -- -D warnings
+	+cargo clippy -p ic-wire --features typescript --lib --test derive_tests --locked -- -D warnings
 
 .PHONY: check-packages check-browser
 check-packages: qualification-tooling-check | toko-execution-check

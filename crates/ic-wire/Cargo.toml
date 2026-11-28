@@ -16,20 +16,18 @@ ignored = ["toko-tooling"]
 service-client = ["typescript"]
 api-manifest = ["typescript"]
 platform-types = ["typescript", "dep:ic-platform-types"]
-derive = ["dep:ic-wire-derive"]
 typescript = ["dep:serde_json"]
 
 [dependencies]
 bytemuck.workspace = true
 ic-platform-types = { workspace = true, optional = true }
-ic-wire-derive = { workspace = true, optional = true }
+ic-wire-derive.workspace = true
 postcard.workspace = true
-serde.workspace = true
+serde = { workspace = true, features = ["derive"] }
 serde_bytes.workspace = true
 serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
-serde = { workspace = true, features = ["derive"] }
 toko-tooling.workspace = true
 
 [lints]

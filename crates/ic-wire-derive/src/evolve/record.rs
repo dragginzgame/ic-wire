@@ -35,12 +35,29 @@ struct FieldOptions {
 
 pub(crate) fn expand(input: &DeriveInput, owner: &Path) -> syn::Result<TokenStream> {
     let layout = layout(input)?;
-    let codec = codec(input, owner, &layout);
+    let codec = codec(input, owner, &layout, None);
     let schema = schema(input, owner, &layout);
     Ok(quote! {
         #codec
         #owner::__wire_evolution_schema! { #schema }
     })
+}
+
+pub(super) fn variant(
+    input: &DeriveInput,
+    owner: &Path,
+    prepare: &Ident,
+) -> syn::Result<TokenStream> {
+    let layout = layout(input)?;
+    let codec = codec(input, owner, &layout, Some(prepare));
+    let schema = schema(input, owner, &layout);
+    let mut declaration = input.clone();
+    if let Data::Struct(data) = &mut declaration.data {
+        for field in &mut data.fields {
+            field.attrs.clear();
+        }
+    }
+    Ok(quote!(#declaration #codec #owner::__wire_evolution_schema! { #schema }))
 }
 
 fn layout(input: &DeriveInput) -> syn::Result<Layout<'_>> {
@@ -145,6 +162,15 @@ fn layout(input: &DeriveInput) -> syn::Result<Layout<'_>> {
         tuple,
         core,
         extensions,
+    })
+}
+
+pub(super) fn optional_extension(field: &Field) -> syn::Result<Option<&Type>> {
+    let options = field_attributes(field)?;
+    Ok(if options.id.is_some() && !options.required {
+        super::optional_content(&field.ty)
+    } else {
+        None
     })
 }
 
@@ -338,7 +364,12 @@ impl Proxies {
     }
 }
 
-fn codec(input: &DeriveInput, owner: &Path, layout: &Layout<'_>) -> TokenStream {
+fn codec(
+    input: &DeriveInput,
+    owner: &Path,
+    layout: &Layout<'_>,
+    parts_method: Option<&Ident>,
+) -> TokenStream {
     let name = &input.ident;
     let local = |base| crate::local_name(input, base);
     let de = Lifetime::new(&format!("'{}", local("__wire_read")), Span::call_site());
@@ -354,8 +385,6 @@ fn codec(input: &DeriveInput, owner: &Path, layout: &Layout<'_>) -> TokenStream 
     let writer = local("__wire_writer");
     let block = local("__wire_block");
     let dto = local("__wire_dto");
-    let field_id = local("__wire_id");
-    let field = local("__wire_field");
     let value = local("__wire_value");
     let incompatible = local("__wire_incompatible");
     let mut generics = input.generics.clone();
@@ -422,7 +451,259 @@ fn codec(input: &DeriveInput, owner: &Path, layout: &Layout<'_>) -> TokenStream 
     };
     // A public Inline impl cannot expose a private field type through its
     // associated types. A nominal transparent view keeps those types private.
-    let (public_views, encoded_type, decoded_type, encoded_dto, unwrap_dto) = if matches!(
+    let Views {
+        declarations: public_views,
+        encoded: encoded_type,
+        decoded: decoded_type,
+        wrap: encoded_dto,
+        unwrap: unwrap_dto,
+    } = views(
+        input,
+        owner,
+        &generics,
+        encoded_type,
+        decoded_type,
+        encoded_dto,
+    );
+    let part = |member: &Member| {
+        let field = format_ident!(
+            "__wire_arg_{}",
+            match member {
+                Member::Named(id) => id.to_string().trim_start_matches("r#").to_owned(),
+                Member::Unnamed(index) => index.index.to_string(),
+            }
+        );
+        if parts_method.is_some() {
+            quote!(#field)
+        } else {
+            quote!(&self.#member)
+        }
+    };
+    let prepare_core = layout.core.iter().zip(&core_values).map(|(slot, binding)| {
+        let Slot { member, ty, .. } = slot;
+        let argument = part(member);
+        quote! {
+            let (#binding, #scratch) =
+                <#ty as #projection>::prepare(#argument, &#context.child(), #scratch)?;
+        }
+    });
+    let project_core =
+        layout
+            .core
+            .iter()
+            .zip(&core_values)
+            .zip(indices)
+            .map(|((slot, binding), index)| {
+                let ty = slot.ty;
+                quote! {
+                    let #binding = #inline::preserve_incompatible(
+                        <#ty as #projection>::project(#dto.#index, &#context.child()),
+                        &mut #incompatible,
+                    )?;
+                }
+            });
+    let writer_mut = (!layout.extensions.is_empty()).then(|| quote!(mut));
+    let local_prefix = local("__wire_member");
+    let additions: Vec<_> = (0..layout.extensions.len())
+        .map(|position| format_ident!("{local_prefix}_{position}"))
+        .collect();
+    let pushes = layout.extensions.iter().map(|addition| {
+        let Addition { id, slot, required } = addition;
+        let argument = part(&slot.member);
+        let ty = slot.ty;
+        if *required {
+            quote!(#writer.push_projected::<#ty>(#context, #id, #argument)?;)
+        } else {
+            quote! {
+                if let ::core::option::Option::Some(#value) = #argument {
+                    #writer.push_projected::<#ty>(#context, #id, #value)?;
+                }
+            }
+        }
+    });
+    fn destinations(fields: &[Addition<'_>], bindings: &[Ident]) -> TokenStream {
+        match fields {
+            [] => quote!(()),
+            [one] => {
+                let id = one.id;
+                let slot = &bindings[0];
+                quote!((#id, &mut #slot))
+            }
+            _ => {
+                let mid = fields.len() / 2;
+                let pivot = fields[mid].id;
+                let left = destinations(&fields[..mid], &bindings[..mid]);
+                let right = destinations(&fields[mid..], &bindings[mid..]);
+                quote!((#pivot, #left, #right))
+            }
+        }
+    }
+    let targets = destinations(&layout.extensions, &additions);
+    let core_members = layout.core.iter().zip(&core_values).map(|(slot, binding)| {
+        let member = &slot.member;
+        quote!(#member: #binding.ok_or(#owner::Error::Incompatible)?)
+    });
+    let extension_members = layout
+        .extensions
+        .iter()
+        .zip(&additions)
+        .map(|(addition, binding)| {
+            let member = &addition.slot.member;
+            if addition.required {
+                quote!(#member: #binding.ok_or(#owner::Error::Incompatible)?)
+            } else {
+                quote!(#member: #binding)
+            }
+        });
+    let check_incompatible =
+        (!layout.core.is_empty() || !layout.extensions.is_empty()).then(|| {
+            quote! {
+                if #incompatible {
+                    return ::core::result::Result::Err(#owner::Error::Incompatible);
+                }
+            }
+        });
+    let unit = matches!(&input.data, Data::Struct(data) if matches!(data.fields, Fields::Unit));
+    let construct = if unit {
+        quote!(Self)
+    } else {
+        quote!(Self {
+            #(#core_members,)*
+            #(#extension_members,)*
+        })
+    };
+    let prepare_body = quote! {
+        #context.admit_preparation()?;
+        #(#prepare_core)*
+        let #writer_mut #writer = #owner::evolution::ExtensionsWriter::new(#scratch);
+        #(#pushes)*
+        let (#block, #scratch) = #writer.finish_and_tail();
+        ::core::result::Result::Ok((#encoded_dto, #scratch))
+    };
+    let mut parts_impl = TokenStream::new();
+    let prepare_body = if let Some(method) = parts_method {
+        let Data::Struct(data) = &input.data else {
+            unreachable!()
+        };
+        let members: Vec<_> = data
+            .fields
+            .iter()
+            .enumerate()
+            .map(|(i, f)| {
+                f.ident
+                    .clone()
+                    .map(Member::Named)
+                    .unwrap_or_else(|| Member::Unnamed(Index::from(i)))
+            })
+            .collect();
+        let args = members.iter().map(part);
+        let types = data.fields.iter().map(|f| &f.ty);
+        let (inherent, _, original_bounds) = input.generics.split_for_impl();
+        let field_types = data.fields.iter().map(|f| &f.ty);
+        // Bounds on the actual projection are supplied on the generated helper's type parameters.
+        let slot_types = layout
+            .core
+            .iter()
+            .chain(layout.extensions.iter().map(|a| &a.slot))
+            .map(|slot| slot.ty);
+        parts_impl = quote! {
+            impl #inherent #name #parameters #original_bounds {
+                fn #method<#de, #stage>(#context: &#owner::evolution::WriteContext<'_>, #scratch: &#stage mut [u8], #(#args: &#stage #types),*)
+                    -> ::core::result::Result<(<Self as #projection>::Encoded<#stage>, &#stage mut [u8]), #owner::Error>
+                    where #(#slot_types: #projection,)* #(#field_types: #stage,)* Self: #stage {
+                    #prepare_body
+                }
+            }
+        };
+        quote!(Self::#method(#context, #scratch, #(&self.#members),*))
+    } else {
+        prepare_body
+    };
+    quote! {
+        const _: () = {
+            #parts_impl
+            #proxy_types
+            #public_views
+
+            impl #implementation #projection for #name #parameters #bounds {
+                const MAY_STAGE: bool = #declares_extensions #(|| #stages_core)*;
+
+                type Encoded<#stage> = #encoded_type where Self: #stage;
+                type Decoded = #decoded_type;
+
+                fn prepare<#stage>(
+                    &#stage self,
+                    #context: &#owner::evolution::WriteContext<'_>,
+                    #scratch: &#stage mut [u8],
+                ) -> ::core::result::Result<(Self::Encoded<#stage>, &#stage mut [u8]), #owner::Error> {
+                    #prepare_body
+                }
+
+                fn project(
+                    #dto: Self::Decoded,
+                    #context: &#owner::evolution::ReadContext<'_>,
+                ) -> ::core::result::Result<Self, #owner::Error> {
+                    #unwrap_dto
+                    let mut #incompatible = false;
+                    #(#project_core)*
+                    #(let mut #additions = ::core::option::Option::None;)*
+                    #inline::read_fields(
+                        #dto.#extension, #context, #targets, &mut #incompatible
+                    )?;
+                    #check_incompatible
+                    ::core::result::Result::Ok(#construct)
+                }
+            }
+
+            impl #implementation #owner::evolution::Evolving<#de> for #name #parameters #bounds {
+                fn encode_evolving(
+                    &self,
+                    #output: &mut #owner::evolution::__private::Vec<u8>,
+                    #encoding: #owner::Encoding,
+                    #limits: #owner::Limits,
+                ) -> ::core::result::Result<(), #owner::Error> {
+                    #inline::encode(self, #output, #encoding, #limits)
+                }
+
+                fn decode_evolving(
+                    #input_bytes: &#de [u8],
+                    #encoding: #owner::Encoding,
+                    #limits: #owner::Limits,
+                ) -> ::core::result::Result<Self, #owner::Error> {
+                    #inline::decode(#input_bytes, #encoding, #limits)
+                }
+            }
+
+            impl #implementation #inline::InlineMessage<#de> for #name #parameters #bounds {}
+        };
+    }
+}
+
+pub(super) struct Views {
+    pub declarations: TokenStream,
+    pub encoded: TokenStream,
+    pub decoded: TokenStream,
+    pub wrap: TokenStream,
+    pub unwrap: TokenStream,
+}
+
+pub(super) fn views(
+    input: &DeriveInput,
+    owner: &Path,
+    generics: &syn::Generics,
+    encoded_type: TokenStream,
+    decoded_type: TokenStream,
+    encoded_dto: TokenStream,
+) -> Views {
+    let local = |base| crate::local_name(input, base);
+    let de = Lifetime::new(&format!("'{}", local("__wire_read")), Span::call_site());
+    let stage = Lifetime::new(&format!("'{}", local("__wire_stage")), Span::call_site());
+    let dto = local("__wire_dto");
+    let value = local("__wire_value");
+    let name = &input.ident;
+    let (implementation, _, bounds) = generics.split_for_impl();
+    let (_, parameters, _) = input.generics.split_for_impl();
+    let (declarations, encoded, decoded, wrap, unwrap) = if matches!(
         input.vis,
         syn::Visibility::Inherited
     ) {
@@ -471,7 +752,7 @@ fn codec(input: &DeriveInput, owner: &Path, layout: &Layout<'_>) -> TokenStream 
             #[repr(transparent)]
             pub struct #decoded_view #implementation (
                 #decoded_type,
-                ::core::marker::PhantomData<fn() -> #name #parameters>,
+                ::core::marker::PhantomData<fn() -> (#name #parameters, &#de ())>,
             ) #bounds;
 
             impl #implementation #serde::Deserialize<#de> for #decoded_view #decoded_parameters #bounds {
@@ -492,165 +773,11 @@ fn codec(input: &DeriveInput, owner: &Path, layout: &Layout<'_>) -> TokenStream 
             quote!(let #dto = #dto.0;),
         )
     };
-    let prepare_core = layout.core.iter().zip(&core_values).map(|(slot, binding)| {
-        let Slot { member, ty, .. } = slot;
-        quote! {
-            let (#binding, #scratch) =
-                <#ty as #projection>::prepare(&self.#member, &#context.child(), #scratch)?;
-        }
-    });
-    let project_core =
-        layout
-            .core
-            .iter()
-            .zip(&core_values)
-            .zip(indices)
-            .map(|((slot, binding), index)| {
-                let ty = slot.ty;
-                quote! {
-                    let #binding = #inline::preserve_incompatible(
-                        <#ty as #projection>::project(#dto.#index, &#context.child()),
-                        &mut #incompatible,
-                    )?;
-                }
-            });
-    let writer_mut = (!layout.extensions.is_empty()).then(|| quote!(mut));
-    let local_prefix = local("__wire_member");
-    let additions: Vec<_> = (0..layout.extensions.len())
-        .map(|position| format_ident!("{local_prefix}_{position}"))
-        .collect();
-    let pushes = layout.extensions.iter().map(|addition| {
-        let Addition { id, slot, required } = addition;
-        let member = &slot.member;
-        let ty = slot.ty;
-        if *required {
-            quote!(#writer.push_projected::<#ty>(#context, #id, &self.#member)?;)
-        } else {
-            quote! {
-                if let ::core::option::Option::Some(#value) = &self.#member {
-                    #writer.push_projected::<#ty>(#context, #id, #value)?;
-                }
-            }
-        }
-    });
-    let assignment = layout
-        .extensions
-        .iter()
-        .zip(&additions)
-        .map(|(addition, binding)| {
-            let Addition { id, slot, .. } = addition;
-            let ty = slot.ty;
-            quote! {
-                #id => {
-                    #binding = #inline::preserve_incompatible(
-                        #field.project_inline::<#ty>(),
-                        &mut #incompatible,
-                    )?;
-                }
-            }
-        });
-    let core_members = layout.core.iter().zip(&core_values).map(|(slot, binding)| {
-        let member = &slot.member;
-        quote!(#member: #binding.ok_or(#owner::Error::Incompatible)?)
-    });
-    let extension_members = layout
-        .extensions
-        .iter()
-        .zip(&additions)
-        .map(|(addition, binding)| {
-            let member = &addition.slot.member;
-            if addition.required {
-                quote!(#member: #binding.ok_or(#owner::Error::Incompatible)?)
-            } else {
-                quote!(#member: #binding)
-            }
-        });
-    let (declare_incompatible, check_incompatible) =
-        if layout.core.is_empty() && layout.extensions.is_empty() {
-            (TokenStream::new(), TokenStream::new())
-        } else {
-            (
-                quote!(let mut #incompatible = false;),
-                quote! {
-                    if #incompatible {
-                        return ::core::result::Result::Err(#owner::Error::Incompatible);
-                    }
-                },
-            )
-        };
-    let unit = matches!(&input.data, Data::Struct(data) if matches!(data.fields, Fields::Unit));
-    let construct = if unit {
-        quote!(Self)
-    } else {
-        quote!(Self {
-            #(#core_members,)*
-            #(#extension_members,)*
-        })
-    };
-    quote! {
-        const _: () = {
-            #proxy_types
-            #public_views
-
-            impl #implementation #projection for #name #parameters #bounds {
-                const MAY_STAGE: bool = #declares_extensions #(|| #stages_core)*;
-
-                type Encoded<#stage> = #encoded_type where Self: #stage;
-                type Decoded = #decoded_type;
-
-                fn prepare<#stage>(
-                    &#stage self,
-                    #context: &#owner::evolution::WriteContext<'_>,
-                    #scratch: &#stage mut [u8],
-                ) -> ::core::result::Result<(Self::Encoded<#stage>, &#stage mut [u8]), #owner::Error> {
-                    #context.admit_preparation()?;
-                    #(#prepare_core)*
-                    let #writer_mut #writer = #owner::evolution::ExtensionsWriter::new(#scratch);
-                    #(#pushes)*
-                    let (#block, #scratch) = #writer.finish_and_tail();
-                    ::core::result::Result::Ok((#encoded_dto, #scratch))
-                }
-
-                fn project(
-                    #dto: Self::Decoded,
-                    #context: &#owner::evolution::ReadContext<'_>,
-                ) -> ::core::result::Result<Self, #owner::Error> {
-                    #unwrap_dto
-                    #declare_incompatible
-                    #(#project_core)*
-                    #(let mut #additions = ::core::option::Option::None;)*
-                    #dto.#extension.visit(#context, |#field_id, #field| {
-                        match #field_id {
-                            #(#assignment,)*
-                            _ => {}
-                        }
-                        ::core::result::Result::Ok(())
-                    })?;
-                    #check_incompatible
-                    ::core::result::Result::Ok(#construct)
-                }
-            }
-
-            impl #implementation #owner::evolution::Evolving<#de> for #name #parameters #bounds {
-                fn encode_evolving(
-                    &self,
-                    #output: &mut #owner::evolution::__private::Vec<u8>,
-                    #encoding: #owner::Encoding,
-                    #limits: #owner::Limits,
-                ) -> ::core::result::Result<(), #owner::Error> {
-                    #inline::encode(self, #output, #encoding, #limits)
-                }
-
-                fn decode_evolving(
-                    #input_bytes: &#de [u8],
-                    #encoding: #owner::Encoding,
-                    #limits: #owner::Limits,
-                ) -> ::core::result::Result<Self, #owner::Error> {
-                    #inline::decode(#input_bytes, #encoding, #limits)
-                }
-            }
-
-            impl #implementation #inline::InlineMessage<#de> for #name #parameters #bounds {}
-        };
+    Views {
+        declarations,
+        encoded,
+        decoded,
+        wrap,
+        unwrap,
     }
 }

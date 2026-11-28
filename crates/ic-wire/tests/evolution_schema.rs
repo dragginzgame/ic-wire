@@ -148,7 +148,6 @@ fn projected_annotations_apply_only_to_extension_layouts() {
     );
 }
 
-#[cfg(feature = "derive")]
 #[test]
 fn fixed_derive_marks_local_aggregates_without_implicit_claims_about_children() {
     use ic_wire::typescript::Wire;
@@ -161,8 +160,7 @@ fn fixed_derive_marks_local_aggregates_without_implicit_claims_about_children() 
     }
 
     #[allow(dead_code)]
-    #[derive(Wire)]
-    #[wire(fixed)]
+    #[derive(ic_wire::WireSchema)]
     enum Layout {
         Named { child: Child },
         Tuple(bool, ()),
@@ -182,14 +180,12 @@ fn fixed_derive_marks_local_aggregates_without_implicit_claims_about_children() 
     assert!(variants[2]["value"].get("fixed").is_none());
 }
 
-#[cfg(feature = "derive")]
 #[test]
 fn serde_dto_annotations_keep_names_and_borrows_in_nested_wire_records() {
     use ic_wire::{Encoding, Limits, Wire, evolution::decode, evolution::encode};
     use serde as dto_serde;
 
     #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize, Wire)]
-    #[wire(sparse)]
     #[serde(crate = "dto_serde")]
     struct Item<'a> {
         #[serde(rename = "displayName", borrow)]
@@ -200,7 +196,6 @@ fn serde_dto_annotations_keep_names_and_borrows_in_nested_wire_records() {
     }
 
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     struct Envelope<'a> {
         item: Item<'a>,
     }
@@ -236,7 +231,6 @@ fn serde_dto_annotations_keep_names_and_borrows_in_nested_wire_records() {
     );
 }
 
-#[cfg(feature = "derive")]
 #[test]
 fn standalone_generation_checks_projected_roots_through_aliases() {
     use ic_wire::{
@@ -247,19 +241,16 @@ fn standalone_generation_checks_projected_roots_through_aliases() {
     use serde::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize, Wire)]
-    #[wire(sparse)]
     struct Inner {
         value: u8,
     }
 
-    #[derive(Serialize, Deserialize, Wire)]
-    #[wire(fixed)]
+    #[derive(Serialize, Deserialize, ic_wire::WireSchema)]
     struct Fixed {
         inner: Inner,
     }
 
     #[derive(Wire)]
-    #[wire(sparse)]
     struct Message {
         fixed: Fixed,
     }
@@ -469,15 +460,13 @@ mod typed_methods {
             RUST_LIMITS,
         ))
         .unwrap();
-        assert_eq!(
-            collected(&Method::<Root<Unmarked>, _>::new(
-                "a",
-                RUST_LIMITS,
-                RUST_LIMITS
-            ))
-            .unwrap_err(),
-            GenerationError::Schema
-        );
+        // Native tuples project each element recursively.
+        collected(&Method::<Root<Unmarked>, _>::new(
+            "a",
+            RUST_LIMITS,
+            RUST_LIMITS,
+        ))
+        .unwrap();
         assert_eq!(
             collected(&Method::<Root<Nested<Opaque>>, _>::new(
                 "a",
@@ -546,12 +535,11 @@ mod typed_methods {
         assert_eq!(registry.finish().unwrap_err(), GenerationError::Schema);
     }
 
-    #[cfg(all(feature = "platform-types", feature = "derive"))]
+    #[cfg(feature = "platform-types")]
     #[test]
     fn typed_method_uses_the_published_account_layout_as_fixed() {
         use ic_platform_types::{Account, Principal};
         #[derive(ic_wire::Wire)]
-        #[wire(sparse)]
         struct Payment {
             account: Account,
         }

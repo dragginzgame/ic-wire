@@ -26,17 +26,21 @@ pub mod evolution;
 #[cfg(feature = "typescript")]
 pub mod typescript;
 
-pub use decode::decode;
-pub use encode::{encode, encode_into, encode_to_slice, encoded_len};
 pub use error::{Error, LimitKind};
 pub use evolution::{Evolving, Method};
+pub use evolution::{decode, encode, encode_into, encode_to_slice, encoded_len};
 pub use fields::{Bytes, BytesRef, List, Text, TextRef};
 pub use finite::{FiniteF32, FiniteF64};
 pub use framing::{Direction, Encoding, method_id, validate_request_header};
-#[cfg(feature = "derive")]
-pub use ic_wire_derive::Wire;
+
+pub use ic_wire_derive::{Wire, WireSchema};
 pub use limits::Limits;
 pub use packed::{Packed, PackedElement};
+
+/// Sparse request or reply around a scalar, result, or other inline payload.
+#[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(crate = "crate")]
+pub struct Message<T>(pub T);
 
 /// Published Serde bulk byte types; ByteArray includes a length prefix, unlike
 /// an ordinary `[u8; N]`. Changing field representation requires consumer review.

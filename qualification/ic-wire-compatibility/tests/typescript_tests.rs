@@ -25,15 +25,15 @@ use std::{
 use wire::typescript::{Method, PayloadLimits, SchemaLimits, SchemaRegistry, ValidatedRegistry};
 use wire::{Bytes, Direction, Encoding, Limits, List, Packed};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
 #[wire(crate = "wire")]
 enum Choice {
     Ready,
     Value(u16),
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Record<T = u8, const N: usize = 3> {
     number: T,
     choice: Choice,
@@ -43,15 +43,15 @@ struct Record<T = u8, const N: usize = 3> {
     ordinary: List<i16, 2>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Chain {
     value: u16,
     next: Option<Box<Chain>>,
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Shared {
     left: Chain,
     right: Chain,
@@ -490,4 +490,72 @@ fn check_typescript(directory: &std::path::Path, fixture: &Value) {
         String::from_utf8_lossy(&result.stdout),
         String::from_utf8_lossy(&result.stderr)
     );
+}
+
+#[test]
+fn closed_enum_projects_nested_records_in_both_languages() {
+    #[derive(Debug, PartialEq, wire::Wire)]
+    #[wire(crate = "wire")]
+    struct Cap {
+        amount: u8,
+    }
+    #[derive(Debug, PartialEq, wire::Wire)]
+    #[wire(crate = "wire")]
+    enum Mode {
+        Capped { cap: Cap },
+    }
+
+    type Root = wire::Message<Mode>;
+    let limits = Limits {
+        bytes: 64,
+        allocation: 65536,
+        nodes: 128,
+        depth: 16,
+    };
+    let root = wire::Message(Mode::Capped {
+        cap: Cap { amount: 42 },
+    });
+    let canonical = wire::encode(&root, Encoding::Payload, limits).unwrap();
+    assert_eq!(canonical, [0, 42, 0, 0, 0]);
+    let newer = [0, 42, 3, 9, 1, 77, 0, 0];
+    let malformed = [0, 42, 6, 9, 1, 77, 9, 1, 88, 0, 0];
+    assert_eq!(
+        wire::decode::<Root>(&newer, Encoding::Payload, limits)
+            .unwrap()
+            .0,
+        root.0
+    );
+    assert!(wire::decode::<Root>(&malformed, Encoding::Payload, limits).is_err());
+    let registry = ValidatedRegistry::from_type::<Root>("Root", Default::default()).unwrap();
+    let module = registry
+        .payload_module(
+            "codec",
+            "Root",
+            "./runtime-adapter.ts",
+            PayloadLimits {
+                bytes: 64,
+                nodes: 128,
+                depth: 16,
+            },
+            &Default::default(),
+            |_| {},
+        )
+        .unwrap();
+    let result = run_typescript(
+        &json!({ "module":module, "canonical":canonical, "newer":newer, "malformed":malformed }),
+        r#"
+        import assert from 'node:assert/strict';
+        import {readFileSync} from 'node:fs';
+        import {pathToFileURL} from 'node:url';
+        const {codec} = await import(new URL('./client.ts', pathToFileURL(process.argv[1])));
+        const {canonical, newer, malformed} = JSON.parse(readFileSync(0, 'utf8'));
+        const value = codec.decode(Uint8Array.from(newer));
+        assert.equal(value[0].tag, 'Capped');
+        assert.equal(value[0].value.cap.amount, 42);
+        assert.deepEqual([...codec.encode(value)], canonical);
+        assert.throws(() => codec.decode(Uint8Array.from(malformed)), e => e.code === 'malformed');
+        console.log(JSON.stringify([...codec.encode(value)]));
+    "#,
+    );
+    assert_eq!(result, json!(canonical));
 }

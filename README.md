@@ -5,13 +5,13 @@ bulk-field advice and generated TypeScript clients. The codec is `no_std` with `
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both prepared at **0.32.0**.
+The product crates are `ic-wire` and `ic-wire-derive`, both prepared at **0.33.0**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 
 - One `Encoding` selection covers payloads and request/response frames.
-- Ordinary Serde messages use positional encoding. A struct or tuple struct
-  opts into stable extension fields with `#[wire(sparse)]` and the `evolution` API.
+- Derive `Wire` on message structs and tuple structs. Every record carries a sparse
+  extension block. Closed enum payloads recursively project their fields.
 - Owned, reusable `Vec` and caller-slice outputs share bounded field admission.
 - Explicit byte, text, list and packed fields retain consumer-selected layouts.
 - Optional schema collection and derive feed one validated graph and one
@@ -24,10 +24,10 @@ they are not a process heap cap. Custom Serde work remains trusted. Preserve
 original bytes for signing, hashing and retries because decode/re-encode may
 normalize collections or accepted noncanonical encodings.
 
-To cut an endpoint over, mark its request and reply types `#[wire(sparse)]`,
-use the typed `Method` on both ends, and regenerate the client. Existing sparse
-declarations also need the marker. Ordinary `ic_wire::encode` and
-`ic_wire::decode` preserve positional Serde payloads and persisted records.
+For the 0.33 cutover, upgrade both peers and regenerate clients together. Wrap a
+scalar, enum or result root in `Message<T>`. Keep existing fields in the core
+and assign stable IDs to new optional fields. Migrate persisted positional
+Wire bytes explicitly before reading them with the new codec.
 
 ## Repository map
 

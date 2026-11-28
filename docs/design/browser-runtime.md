@@ -9,7 +9,7 @@ The admitted runtime kinds include scalars, bytes/text, ordinary and packed
 containers, tuples, arrays, results, options, records, enums and named references.
 Scalar bounds and named custom checks are admitted and executed. Metadata and
 limits are trusted input, not an untrusted-schema service. The unversioned
-interface marker is `ic-wire-json`; generated clients and runtime ship together
+interface marker is `ic-wire-sparse-v1`; generated clients and runtime ship together
 for a hard cut, with no legacy runtime lane.
 
 Source provenance: revision

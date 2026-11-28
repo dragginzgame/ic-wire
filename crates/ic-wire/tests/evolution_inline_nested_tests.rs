@@ -1,5 +1,4 @@
 //! Recursive projection through auto-derived arrays and sequences.
-#![cfg(feature = "derive")]
 
 use ic_wire::{
     BytesRef, Encoding, Error, LimitKind, Limits, TextRef, Wire, evolution::Method,
@@ -14,13 +13,11 @@ const LIMITS: Limits = Limits {
 };
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 struct ItemV1<'a> {
     name: TextRef<'a, 16>,
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 struct ItemV2<'a> {
     name: TextRef<'a, 16>,
     #[wire(id = 1)]
@@ -28,7 +25,6 @@ struct ItemV2<'a> {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 struct Collection<T> {
     fixed_count: [T; 2],
     spare: Vec<T>,
@@ -152,13 +148,11 @@ fn nested_projection_obeys_the_frame_limits() {
 #[test]
 fn ordinary_encoding_stages_large_extensions_nested_inside_extensions() {
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     struct V1 {
         sequence: u8,
     }
 
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     struct V2<'a> {
         sequence: u8,
         #[wire(id = 3)]
@@ -166,7 +160,6 @@ fn ordinary_encoding_stages_large_extensions_nested_inside_extensions() {
     }
 
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     struct Detail<'a> {
         status: u8,
         #[wire(id = 1)]

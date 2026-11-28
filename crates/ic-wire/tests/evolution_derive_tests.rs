@@ -1,8 +1,7 @@
 //! A single ID declaration drives the codec and generated client metadata.
-#![cfg(feature = "derive")]
 
 #[cfg(feature = "typescript")]
-use ic_wire::typescript::{ValidatedRegistry, Wire};
+use ic_wire::typescript::ValidatedRegistry;
 use ic_wire::{
     Encoding, Error, Limits, TextRef,
     evolution::{
@@ -47,7 +46,7 @@ enum State<T> {
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "typescript", derive(Wire))]
+#[cfg_attr(feature = "typescript", derive(ic_wire::WireSchema))]
 struct NewPacket<'a> {
     id: u8,
     #[serde(borrow)]
@@ -76,8 +75,7 @@ fn project_core<T>(root: Projected<'_, T>, ctx: &ReadContext<'_>) -> Result<T, E
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "typescript", derive(Wire))]
-#[cfg_attr(feature = "typescript", wire(fixed))]
+#[cfg_attr(feature = "typescript", derive(ic_wire::WireSchema))]
 struct NewBranch<'a> {
     #[serde(borrow)]
     state: OpenSlot<'a, State<u16>, true>,
@@ -119,7 +117,7 @@ struct TupleTail<'a> {
 }
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "typescript", derive(Wire))]
+#[cfg_attr(feature = "typescript", derive(ic_wire::WireSchema))]
 struct PreviousTuple<'a>(
     u32,
     #[serde(borrow)]
@@ -128,7 +126,7 @@ struct PreviousTuple<'a>(
 );
 
 #[derive(Serialize, Deserialize)]
-#[cfg_attr(feature = "typescript", derive(Wire))]
+#[cfg_attr(feature = "typescript", derive(ic_wire::WireSchema))]
 struct CurrentTuple<'a>(
     u32,
     #[serde(borrow)]

@@ -22,7 +22,6 @@ enum Choice {
     Value(u16),
 }
 #[derive(Debug, PartialEq, wire::Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Record {
     number: u8,

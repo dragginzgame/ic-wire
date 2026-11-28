@@ -1,116 +1,128 @@
-//! Public layout selection for the same bounded frame and logical field.
-#![cfg(feature = "derive")]
-
-use ic_wire::{Direction, Encoding, Error, Limits, Wire, evolution};
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
-struct Stored {
-    value: u8,
-}
+//! A single sparse contract for owned output, caller buffers and generated clients.
+use ic_wire::{
+    Direction, Encoding, Error, Limits, Wire, decode, encode, encode_into, encode_to_slice,
+    encoded_len,
+};
+const LIMITS: Limits = Limits {
+    bytes: 64,
+    allocation: 65536,
+    nodes: 128,
+    depth: 16,
+};
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
-struct Endpoint {
+struct Child {
     value: u8,
+}
+#[derive(Debug, PartialEq, Wire)]
+pub(crate) enum Choice {
+    None,
+    Item(Child),
+    Named {
+        child: Child,
+        #[wire(id = 7)]
+        note: Option<u8>,
+    },
+    Pair(u8, Child),
+}
+#[derive(Debug, PartialEq, Wire)]
+struct Root {
+    choice: Choice,
 }
 
 #[test]
-fn positional_data_and_sparse_messages_have_distinct_explicit_contracts() {
-    let limits = Limits {
-        bytes: 64,
-        allocation: 4096,
-        nodes: 64,
-        depth: 8,
-    };
-    let frame = Encoding::Frame {
+fn every_output_projects_the_same_sparse_record_and_enum_payloads() {
+    let encoding = Encoding::Frame {
         method: 7,
         direction: Direction::Request,
     };
-    let fixed = [73, 87, 7, 0, 0, 0, 0, 0, 0, 0, 0, 42];
-    let empty = [fixed.as_slice(), &[0]].concat();
-    let added = [fixed.as_slice(), &[3, 1, 1, 9]].concat();
-    let stored = Stored { value: 42 };
-    let endpoint = Endpoint { value: 42 };
-
+    let header = [73, 87, 7, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (choice, payload) in [
+        (Choice::None, vec![0, 0]),
+        (Choice::Item(Child { value: 42 }), vec![1, 42, 0, 0]),
+        (
+            Choice::Named {
+                child: Child { value: 42 },
+                note: Some(5),
+            },
+            vec![2, 42, 0, 3, 7, 1, 5, 0],
+        ),
+        (
+            Choice::Pair(7, Child { value: 42 }),
+            vec![3, 7, 42, 0, 0, 0],
+        ),
+    ] {
+        let root = Root { choice };
+        let frame = [header.as_slice(), payload.as_slice()].concat();
+        assert_eq!(encoded_len(&root, encoding, LIMITS), Ok(frame.len()));
+        assert_eq!(encode(&root, encoding, LIMITS).unwrap(), frame);
+        assert_eq!(
+            encode_into(&root, encoding, LIMITS, &mut Vec::new()).unwrap(),
+            frame
+        );
+        assert_eq!(
+            encode_to_slice(&root, encoding, LIMITS, &mut [0; 64]).unwrap(),
+            frame
+        );
+        assert_eq!(decode::<Root>(&frame, encoding, LIMITS), Ok(root));
+    }
     assert_eq!(
-        ic_wire::encoded_len(&stored, frame, limits),
-        Ok(fixed.len())
-    );
-    assert_eq!(ic_wire::encode(&stored, frame, limits).unwrap(), fixed);
-    assert_eq!(ic_wire::decode::<Stored>(&fixed, frame, limits), Ok(stored));
-    assert_eq!(
-        ic_wire::decode::<Stored>(&empty, frame, limits),
-        Err(Error::Trailing)
-    );
-    assert_eq!(evolution::encode(&endpoint, frame, limits), Ok(empty));
-    assert_eq!(
-        evolution::decode::<Endpoint>(&added, frame, limits),
-        Ok(endpoint)
-    );
-    assert_eq!(
-        evolution::decode::<Endpoint>(&fixed, frame, limits),
+        decode::<Root>(&[1, 42], Encoding::Payload, LIMITS),
         Err(Error::Malformed)
     );
 }
 
 #[cfg(feature = "typescript")]
 #[test]
-fn derive_registers_the_chosen_layout() {
-    use ic_wire::typescript::ValidatedRegistry;
-    for (metadata, kind) in [
-        (
-            ValidatedRegistry::from_type::<Stored>("Root", Default::default()),
-            "record",
-        ),
-        (
-            ValidatedRegistry::from_type::<Endpoint>("Root", Default::default()),
-            "extension-record",
-        ),
-    ] {
-        let json: serde_json::Value =
-            serde_json::from_str(&metadata.unwrap().metadata_json().unwrap()).unwrap();
-        assert_eq!(json["Root"]["k"], kind);
-    }
+fn generated_clients_follow_nested_enum_payloads() {
+    use ic_wire::typescript::{PayloadLimits, ValidatedRegistry};
+    let graph = ValidatedRegistry::from_type::<Root>("Root", Default::default()).unwrap();
+    graph
+        .payload_module(
+            "codec",
+            "Root",
+            "./runtime.ts",
+            PayloadLimits {
+                bytes: 64,
+                nodes: 128,
+                depth: 16,
+            },
+            &Default::default(),
+            |_| {},
+        )
+        .unwrap();
 }
 
-#[cfg(feature = "typescript")]
 #[test]
-fn client_generation_rejects_sparse_children_inside_positional_serde() {
-    use ic_wire::typescript::{GenerationError, PayloadLimits, ValidatedRegistry};
-
-    #[derive(Serialize, Deserialize, Wire)]
-    #[wire(sparse)]
-    struct Child {
-        number: u8,
+fn generic_enum_payloads_can_borrow_from_the_input() {
+    use ic_wire::{Message, TextRef};
+    #[derive(Debug, PartialEq, Wire)]
+    enum Entry<'a, T, const N: usize> {
+        Found { label: TextRef<'a, N>, value: T },
     }
+    let entry = Message(Entry::Found {
+        label: TextRef::<16>::new("item").unwrap(),
+        value: 7u8,
+    });
+    let bytes = encode(&entry, Encoding::Payload, LIMITS).unwrap();
+    let decoded: Message<Entry<'_, u8, 16>> = decode(&bytes, Encoding::Payload, LIMITS).unwrap();
+    assert_eq!(decoded, entry);
+    let Entry::Found { label, .. } = decoded.0;
+    assert_eq!(label.as_str().as_ptr(), bytes[2..].as_ptr());
+}
 
-    #[derive(Wire)]
-    struct Record {
-        _child: Option<Child>,
+#[test]
+fn public_unit_enum_has_a_borrow_independent_payload() {
+    #[derive(Debug, PartialEq, Wire)]
+    pub enum Status {
+        Ready,
+        Paused,
     }
-
-    #[derive(Wire)]
-    struct Wrapper(#[allow(dead_code)] Child);
-
-    for graph in [
-        ValidatedRegistry::from_type::<Record>("Root", Default::default()),
-        ValidatedRegistry::from_type::<Wrapper>("Root", Default::default()),
-    ] {
-        assert_eq!(
-            graph.unwrap().payload_module(
-                "codec",
-                "Root",
-                "./runtime.ts",
-                PayloadLimits {
-                    bytes: 32,
-                    nodes: 32,
-                    depth: 8
-                },
-                &Default::default(),
-                |_| {}
-            ),
-            Err(GenerationError::Schema)
-        );
-    }
+    let message = ic_wire::Message(Status::Paused);
+    let bytes = encode(&message, Encoding::Payload, LIMITS).unwrap();
+    assert_eq!(bytes, [1, 0]);
+    assert_eq!(
+        decode::<ic_wire::Message<Status>>(&bytes, Encoding::Payload, LIMITS).unwrap(),
+        message
+    );
 }

@@ -1,31 +1,27 @@
 //! Derived metadata goes through the same graph admission as explicit schemas.
-#![cfg(all(feature = "derive", feature = "typescript"))]
+#![cfg(feature = "typescript")]
 use ic_wire::typescript::{GenerationError, SchemaContext, SchemaLimits, ValidatedRegistry, Wire};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-#[derive(Serialize, Deserialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 struct Unit;
-#[derive(Serialize, Deserialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 struct Newtype(u16);
-#[derive(Serialize, Deserialize, Wire)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 enum Choice {
     Empty,
     Value(u16),
     Record { flag: bool },
 }
-#[derive(Serialize, Deserialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 struct Record {
     r#type: u8,
     choice: Choice,
     ordinary: Vec<u8>,
     bytes: ic_wire::Bytes<3>,
 }
-#[derive(Serialize, Deserialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 struct Recursive {
     next: Option<Box<Recursive>>,
 }
@@ -41,7 +37,7 @@ fn derives_exact_ordinary_layouts_without_changing_serde() {
             {"name":"choice","value":{"k":"enum","variants":[
                 {"name":"Empty","id":0,"value":{"k":"unit"}},
                 {"name":"Value","id":1,"value":{"k":"u","bits":16}},
-                {"name":"Record","id":2,"value":{"k":"record","fields":[{"name":"flag","value":{"k":"bool"}}]}}
+                {"name":"Record","id":2,"value":{"k":"record","fixed":true,"fields":[{"name":"flag","value":{"k":"bool"}}]}}
             ]}},
             {"name":"ordinary","value":{"k":"list","item":{"k":"u","bits":8}}},
             {"name":"bytes","value":{"k":"bytes","max":3}}
@@ -125,8 +121,7 @@ fn manual_projection_cannot_hide_a_nested_admission_failure() {
     );
 }
 
-#[derive(Serialize, Deserialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 struct Generic<Result: Clone = u16, const N: usize = 3>
 where
     Result: PartialEq,
@@ -142,8 +137,7 @@ enum GenericChoice<T> {
     Named { value: T },
 }
 
-#[derive(Serialize, Deserialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, Deserialize, ic_wire::WireSchema)]
 struct Borrowed<'a, T, const N: usize> {
     text: &'a str,
     #[serde(borrow = "'a")]
@@ -190,7 +184,6 @@ fn borrowed_generic_projection_accepts_nonstatic_lifetimes_and_preserves_custody
     use ic_wire::{Encoding, Limits, evolution::decode};
 
     #[derive(Wire)]
-    #[wire(sparse)]
     struct Message<'a>(Borrowed<'a, u16, 3>);
 
     fn project<'a>(_: &'a str) -> ValidatedRegistry {
@@ -226,8 +219,7 @@ fn borrowed_generic_projection_accepts_nonstatic_lifetimes_and_preserves_custody
     assert_eq!(decoded.bytes.as_slice().as_ptr(), literal[4..].as_ptr());
 }
 
-#[derive(Serialize, Wire)]
-#[wire(fixed)]
+#[derive(Serialize, ic_wire::WireSchema)]
 struct DuplicateNames {
     #[serde(rename = "same")]
     first: u8,
@@ -334,8 +326,7 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
     use ic_wire::typescript::SchemaRegistry;
     let mut registry = SchemaRegistry::new(SchemaLimits::default()).unwrap();
     let first_name = {
-        #[derive(Serialize, Wire)]
-        #[wire(fixed)]
+        #[derive(Serialize, ic_wire::WireSchema)]
         struct Same {
             value: bool,
         }
@@ -343,8 +334,7 @@ fn distinct_types_with_identical_diagnostic_names_are_rechecked() {
         std::any::type_name::<Same>()
     };
     let second_name = {
-        #[derive(Serialize, Wire)]
-        #[wire(fixed)]
+        #[derive(Serialize, ic_wire::WireSchema)]
         struct Same {
             value: u8,
         }

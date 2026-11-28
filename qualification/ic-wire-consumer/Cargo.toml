@@ -29,7 +29,7 @@ evolution-caller-buffer = []
 [dependencies]
 ic-platform-runtime = { workspace = true, optional = true, features = ["system-raw"] }
 serde.workspace = true
-wire = { workspace = true, features = ["derive"] }
+wire.workspace = true
 
 [dev-dependencies]
 ic-platform-types.workspace = true

@@ -17,7 +17,7 @@ use alloc::{
     vec,
     vec::Vec,
 };
-#[cfg(feature = "derive")]
+
 pub use ic_wire_derive::Wire;
 #[doc(hidden)]
 pub use native::{PackedField, SerdeBytesField};
@@ -34,7 +34,7 @@ pub mod __private {
 
 /// Generated client modules require this metadata/runtime interface marker.
 /// This labels tooling artifacts, never Wire payload bytes.
-pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-json";
+pub const RUNTIME_SCHEMA_FORMAT: &str = "ic-wire-sparse-v1";
 
 /// TypeScript interpreter for the admitted schema subset. Write this beside
 /// generated client modules at their selected runtime import path.
@@ -269,11 +269,7 @@ impl ValidatedRegistry {
         Ok(graph)
     }
 
-    fn message_root_nodes(
-        &self,
-        roots: &[usize],
-        require_sparse: bool,
-    ) -> Result<Vec<usize>, GenerationError> {
+    fn message_root_nodes(&self, roots: &[usize]) -> Result<Vec<usize>, GenerationError> {
         if roots.is_empty() {
             return Ok(Vec::new());
         }
@@ -288,7 +284,7 @@ impl ValidatedRegistry {
                         id = *item
                     }
                     Node::Ref(root) => id = self.roots[*root],
-                    _ if require_sparse && !self.sparse_node(id) => {
+                    _ if !self.sparse_node(id) => {
                         return Err(GenerationError::Schema);
                     }
                     _ => {
@@ -306,7 +302,7 @@ impl ValidatedRegistry {
             .iter()
             .map(|root| self.root_index(root))
             .collect::<Result<Vec<_>, _>>()?;
-        self.validate_projection_layouts(self.message_root_nodes(&indices, true)?, Vec::new())
+        self.validate_projection_layouts(self.message_root_nodes(&indices)?)
     }
 
     fn sparse_node(&self, id: usize) -> bool {
@@ -317,32 +313,27 @@ impl ValidatedRegistry {
     }
 
     fn validate_message_roots(&self, roots: &[usize]) -> Result<(), GenerationError> {
-        let mut sparse = Vec::new();
-        let mut positional = Vec::new();
-        for id in self.message_root_nodes(roots, false)? {
-            if !self.sparse_node(id) {
-                positional.push(id);
-            } else if self.annotations.get(&id).is_some_and(|a| a.projected) {
-                sparse.push(id);
-            }
-        }
-        self.validate_projection_layouts(sparse, positional)
+        let roots = self
+            .message_root_nodes(roots)?
+            .into_iter()
+            .filter(|id| {
+                self.annotations
+                    .get(id)
+                    .is_some_and(|annotation| annotation.projected)
+            })
+            .collect();
+        self.validate_projection_layouts(roots)
     }
 
-    fn validate_projection_layouts(
-        &self,
-        roots: Vec<usize>,
-        positional: Vec<usize>,
-    ) -> Result<(), GenerationError> {
+    fn validate_projection_layouts(&self, roots: Vec<usize>) -> Result<(), GenerationError> {
         #[derive(Clone, Copy, PartialEq, Eq)]
         enum Layout {
-            Positional,
             Projected,
             FixedChild,
         }
-        use Layout::{FixedChild, Positional, Projected};
+        use Layout::{FixedChild, Projected};
 
-        let mut pending: Vec<_> = positional.into_iter().map(|id| (id, Positional)).collect();
+        let mut pending = Vec::new();
         for id in roots {
             match &self.nodes[id] {
                 Node::ExtensionRecord { fields, extensions } => {
@@ -363,7 +354,7 @@ impl ValidatedRegistry {
         // Generated projection follows containers. A fixed Serde aggregate
         // decodes its descendants as ordinary Serde, so reachability from each
         // context must be checked separately even for the same named node.
-        let mut visited = vec![[false; 3]; self.nodes.len()];
+        let mut visited = vec![[false; 2]; self.nodes.len()];
         while let Some((id, layout)) = pending.pop() {
             if core::mem::replace(&mut visited[id][layout as usize], true) {
                 continue;
@@ -373,19 +364,16 @@ impl ValidatedRegistry {
             let projected = layout == Projected && flags.is_some_and(|a| a.projected);
             // An ordinary Serde parent cannot emit a derived child's sparse projection.
             // Explicit carrier schemas own their custom Serde representation.
-            if layout == Positional && flags.is_some_and(|a| a.projected) {
+            if layout == FixedChild && flags.is_some_and(|a| a.projected) {
                 return Err(GenerationError::Schema);
             }
-            let child_layout = if layout == Positional {
-                Positional
-            } else {
-                FixedChild
-            };
+            let child_layout = FixedChild;
             match &self.nodes[id] {
                 Node::Record(fields) if fixed => {
                     pending.extend(fields.iter().map(|(_, child)| (*child, child_layout)));
                 }
-                Node::Tuple(items) if fixed => {
+                Node::Tuple(items) => {
+                    let child_layout = if fixed { child_layout } else { layout };
                     pending.extend(items.iter().map(|&item| (item, child_layout)));
                 }
                 Node::ExtensionRecord { fields, extensions } if projected => {
@@ -405,15 +393,10 @@ impl ValidatedRegistry {
                     pending.extend([(*ok, layout), (*err, layout)]);
                 }
                 Node::Enum(variants) => {
+                    let child_layout = if projected { Projected } else { child_layout };
                     pending.extend(variants.iter().map(|(_, _, child)| (*child, child_layout)));
                 }
-                Node::ExtensionRecord { .. }
-                | Node::ExtensionTuple { .. }
-                | Node::OpenVariant { .. }
-                | Node::Recover(_)
-                    if layout == Positional => {}
                 Node::Record(_)
-                | Node::Tuple(_)
                 | Node::ExtensionRecord { .. }
                 | Node::ExtensionTuple { .. }
                 | Node::OpenVariant { .. }
@@ -539,7 +522,7 @@ impl Importer {
             "newtype" => &["k", "check", "item", "fixed"],
             "ref" => &["k", "check", "name"],
             "record" => &["k", "check", "fields", "fixed"],
-            "enum" => &["k", "check", "variants"],
+            "enum" => &["k", "check", "variants", "projected"],
             "extension-record" => &["k", "check", "fields", "extensions", "projected"],
             "extension-tuple" => &["k", "check", "items", "extensions", "projected"],
             "open-variant" => &["k", "check", "variants", "required"],

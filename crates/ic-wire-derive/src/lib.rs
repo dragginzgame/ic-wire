@@ -7,27 +7,19 @@ use proc_macro::TokenStream;
 use quote::{ToTokens, format_ident, quote};
 use syn::{Data, DeriveInput, Fields, parse_macro_input};
 
-/// Describe an ordinary Serde layout or opt a struct into sparse evolution.
-///
-/// Add `#[wire(sparse)]` to a named, tuple or unit struct for an evolving projection.
-///
-/// Untagged fields form the positional prefix. Optional additions use
-/// `#[wire(id = N)]`. A named addition may use `#[wire(id = N, required)]`
-/// to require its presence. Tuple IDs are one-based optional slot positions.
-/// Every evolving struct has one trailing extension block. This derive does
-/// not implement or change the type's Serde traits.
-/// On an evolving struct, symmetric Serde field names also name Wire fields.
-/// Serde crate paths and field borrow declarations may accompany the derive.
-///
-/// Use `#[wire(fixed)]` to describe an ordinary fixed Serde struct. Enums
-/// describe their closed, externally tagged Serde layout. These projections
-/// support symmetric Serde renames, borrows and standard byte/packed adapters.
-/// Use `#[wire(crate = "renamed_dependency")]` when ic-wire is renamed.
-/// Use `#[wire(extensions)]` on a final `ExtensionSlot` field to describe a
-/// record or tuple with explicit projection.
+/// Derive the bounded sparse network projection for an application type.
 #[proc_macro_derive(Wire, attributes(serde, wire))]
 pub fn derive_wire(input: TokenStream) -> TokenStream {
     expand(&parse_macro_input!(input as DeriveInput))
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+
+/// Describe a hand-authored Serde field or carrier for schema inspection.
+#[proc_macro_derive(WireSchema, attributes(serde, wire))]
+pub fn derive_schema(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    expand_schema(&input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
 }
@@ -177,19 +169,9 @@ fn has_extension_carrier(fields: &Fields) -> syn::Result<bool> {
     Ok(false)
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Layout {
-    Fixed,
-    Sparse,
-}
-
-fn type_options(
-    input: &DeriveInput,
-    allow_layout: bool,
-) -> syn::Result<(syn::Path, Option<Layout>)> {
+fn type_options(input: &DeriveInput) -> syn::Result<syn::Path> {
     let mut owner: syn::Path = syn::parse_quote!(::ic_wire);
     let mut renamed = false;
-    let mut layout = None;
     let mut serde_crate = false;
     for attr in &input.attrs {
         if attr.path().is_ident("wire") {
@@ -199,16 +181,6 @@ fn type_options(
                     owner = value.parse()?;
                     renamed = true;
                     return Ok(());
-                }
-                if allow_layout && layout.is_none() {
-                    if meta.path.is_ident("sparse") {
-                        layout = Some(Layout::Sparse);
-                        return Ok(());
-                    }
-                    if meta.path.is_ident("fixed") {
-                        layout = Some(Layout::Fixed);
-                        return Ok(());
-                    }
                 }
                 Err(meta.error("unsupported or duplicate Wire option"))
             })?;
@@ -225,7 +197,7 @@ fn type_options(
             })?;
         }
     }
-    Ok((owner, layout))
+    Ok(owner)
 }
 
 fn local_name(input: &DeriveInput, base: &str) -> syn::Ident {
@@ -238,29 +210,26 @@ fn local_name(input: &DeriveInput, base: &str) -> syn::Ident {
 }
 
 fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
-    let (owner, layout) = type_options(input, true)?;
+    let owner = type_options(input)?;
+    match &input.data {
+        Data::Struct(_) => evolve::expand_record(input, &owner),
+        Data::Enum(_) => evolve::expand_enum(input, &owner),
+        Data::Union(data) => Err(syn::Error::new_spanned(
+            data.union_token,
+            "unions cannot be projected",
+        )),
+    }
+}
+
+fn expand_schema(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
+    let owner = type_options(input)?;
     let explicit_extensions = match &input.data {
         Data::Struct(data) => has_extension_carrier(&data.fields)?,
         _ => false,
     };
-    if layout == Some(Layout::Sparse) {
-        if explicit_extensions {
-            return Err(syn::Error::new_spanned(
-                input,
-                "sparse records derive their extension block",
-            ));
-        }
-        return evolve::expand_record(input, &owner);
-    }
     let context = local_name(input, "__wire_context");
     let body = match &input.data {
-        Data::Struct(data) => fields(
-            &data.fields,
-            &owner,
-            &context,
-            true,
-            layout.is_some() || !explicit_extensions,
-        )?,
+        Data::Struct(data) => fields(&data.fields, &owner, &context, true, !explicit_extensions)?,
         Data::Enum(data) => {
             let mut variants = Vec::new();
             for (id, variant) in data.variants.iter().enumerate() {
@@ -279,22 +248,10 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                         let bytes = unnamed_attributes(&unnamed.unnamed[0].attrs, &owner)?;
                         projection(&unnamed.unnamed[0].ty, bytes, &context)
                     } else {
-                        fields(
-                            &variant.fields,
-                            &owner,
-                            &context,
-                            false,
-                            layout == Some(Layout::Fixed),
-                        )?
+                        fields(&variant.fields, &owner, &context, false, true)?
                     }
                 } else {
-                    fields(
-                        &variant.fields,
-                        &owner,
-                        &context,
-                        false,
-                        layout == Some(Layout::Fixed),
-                    )?
+                    fields(&variant.fields, &owner, &context, false, true)?
                 };
                 variants.push(quote!({"name":#name,"id":#id,"value":#value}));
             }

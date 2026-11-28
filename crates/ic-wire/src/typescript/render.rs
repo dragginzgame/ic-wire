@@ -107,7 +107,7 @@ impl Write for Output {
 impl ValidatedRegistry {
     /// Generate a typed payload client with privately owned metadata and policy.
     ///
-    /// `root` names a positional or sparse schema. `export` names the
+    /// `root` names a sparse message schema. `export` names the
     /// exported codec object.
     /// The trusted runtime module must export `schemaFormat` matching
     /// [`RUNTIME_SCHEMA_FORMAT`] and `createPayloadCodec(metadata, registry)`.
@@ -136,9 +136,6 @@ impl ValidatedRegistry {
     ) -> Result<String, GenerationError> {
         Self::admit_runtime_module(runtime_module)?;
         let root_index = self.admit_client(export, root, limits)?;
-        if limits.bytes == 0 {
-            self.admit_zero_byte_roots(&[root_index])?;
-        }
         self.validate_message_roots(&[root_index])?;
         let mut output = Output::new(self.output_bytes);
         self.render_payload_module(&mut output, export, root, runtime_module, limits)
@@ -163,17 +160,6 @@ impl ValidatedRegistry {
         Ok(())
     }
 
-    fn admit_zero_byte_roots(&self, roots: &[usize]) -> Result<(), GenerationError> {
-        if self
-            .message_root_nodes(roots, false)?
-            .iter()
-            .any(|&id| self.sparse_node(id))
-        {
-            return Err(GenerationError::Schema);
-        }
-        Ok(())
-    }
-
     fn admit_client(
         &self,
         export: &str,
@@ -187,6 +173,7 @@ impl ValidatedRegistry {
                 .names
                 .binary_search_by(|name| name.as_str().cmp(export))
                 .is_ok()
+            || limits.bytes == 0
             || limits.nodes == 0
             || limits.depth == 0
         {
@@ -260,7 +247,6 @@ impl ValidatedRegistry {
         let mut names = BTreeSet::new();
         let mut ids = BTreeSet::new();
         let mut roots = Vec::new();
-        let mut zero_byte_roots = Vec::new();
         for method in methods {
             for (root, limits) in [
                 (method.request, method.request_limits),
@@ -268,9 +254,6 @@ impl ValidatedRegistry {
             ] {
                 let id = self.admit_client(method.export, root, limits)?;
                 roots.push(id);
-                if limits.bytes == 0 {
-                    zero_byte_roots.push(id);
-                }
                 if limits.bytes > MAX_SAFE_INTEGER - HEADER_BYTES as u64 {
                     return Err(GenerationError::Complexity);
                 }
@@ -280,7 +263,6 @@ impl ValidatedRegistry {
             }
         }
 
-        self.admit_zero_byte_roots(&zero_byte_roots)?;
         self.validate_message_roots(&roots)
     }
 

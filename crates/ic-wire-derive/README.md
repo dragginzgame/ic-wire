@@ -4,13 +4,12 @@ Rust declarations for IC Wire. Use the coordinated re-export.
 
 ```toml
 [dependencies]
-ic-wire = { path = "../ic-wire", features = ["derive", "typescript"] }
+ic-wire = { path = "../ic-wire", features = ["typescript"] }
 serde = { version = "1", features = ["derive"] }
 ```
 
 ```rust
-#[derive(serde::Serialize, serde::Deserialize, ic_wire::typescript::Wire)]
-#[wire(fixed)]
+#[derive(serde::Serialize, serde::Deserialize, ic_wire::WireSchema)]
 struct FixedSequence { sequence: u64 }
 ```
 
@@ -23,8 +22,8 @@ IC Wire packed adapters. Renamed dependencies use `#[wire(crate = "dependency_na
 The same derive works on native and Wasm DTOs. It emits the same schema trait
 implementation on both targets.
 
-Use `#[derive(ic_wire::Wire)]` with `#[wire(sparse)]` on the request and reply types of an
-`ic_wire::Method`. Enable `derive` for Rust and `typescript` for client metadata. Add optional fields to the same declaration with
+Use `#[derive(ic_wire::Wire)]` on the request and reply types of an
+`ic_wire::Method`. Enable `typescript` for client metadata. Add optional fields to the same declaration with
 `#[wire(id = N)]` and a stable, unused ID. Untagged fields form the positional
 core. Every method root encodes an extension block, including the first release
 with no tagged fields. Tuple structs use the same derive and assign each
@@ -32,7 +31,7 @@ optional tail element its one-based tuple position. The derive also projects
 nested `Wire` structs and tuple structs through supported containers. Add a
 required named field with `#[wire(id = N, required)]` and its non-optional
 type. Check new required IDs against each shipped request and reply schema.
-Choose `#[wire(fixed)]` when a nested subtree uses its ordinary Serde layout.
+Use `WireSchema` for fields with an explicit fixed Serde contract.
 
 Use `Evolve` on the field or case declarations when projecting explicit nested
 envelopes.
@@ -54,7 +53,7 @@ enum State {
     Waiting(u16),
 }
 
-#[derive(serde::Serialize, serde::Deserialize, ic_wire::typescript::Wire)]
+#[derive(serde::Serialize, serde::Deserialize, ic_wire::WireSchema)]
 struct Reply<'a> {
     sequence: u64,
     #[serde(borrow)]

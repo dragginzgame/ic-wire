@@ -182,7 +182,6 @@ fn caller_owned_destinations_allocate_nothing() {
 
 fn automatic_scratch_is_admitted_before_allocation() {
     #[derive(wire::Wire)]
-    #[wire(sparse)]
     #[wire(crate = "wire")]
     struct Reply<'a> {
         code: u8,

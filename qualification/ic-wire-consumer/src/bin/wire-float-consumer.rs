@@ -2,12 +2,11 @@
 use serde::{Deserialize, Serialize};
 use std::hint::black_box;
 
-#[derive(Serialize, Deserialize, wire::Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct PackedValues(#[serde(with = "wire::serde_packed::finite_f32")] Vec<f32>);
 
 #[derive(wire::Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Values(PackedValues);
 

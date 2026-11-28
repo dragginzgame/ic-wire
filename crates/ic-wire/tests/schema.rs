@@ -344,7 +344,7 @@ fn generated_payload_module_admits_names_policy_and_total_output() {
             |report| eprint!("{report}"),
         )
         .unwrap();
-    assert!(source.contains("ic-wire-json"));
+    assert!(source.contains("ic-wire-sparse-v1"));
     assert!(source.contains("encode:(value: Root)"));
     assert!(graph.declarations().unwrap().contains("export type Fixed"));
     for name in ["Root", "globalThis", "class", "x;throw"] {

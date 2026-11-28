@@ -4,7 +4,6 @@ use wire::typescript::{SchemaLimits, ValidatedRegistry};
 use wire::{Encoding, Limits, evolution::decode, evolution::encode};
 
 #[derive(wire::typescript::Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Payment {
     account: Account,

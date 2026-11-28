@@ -8,14 +8,13 @@ Adjust the path to the checked-out IC Wire crate in your workspace.
 
 ```toml
 [dependencies]
-ic-wire = { path = "crates/ic-wire", features = ["derive"] }
+ic-wire = { path = "crates/ic-wire" }
 ```
 
 ```rust
-use ic_wire::{evolution::decode, evolution::encode, Encoding, Limits, Wire};
+use ic_wire::{decode, encode, Encoding, Limits, Wire};
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 struct Reply { accepted: bool, revision: u64 }
 
 let limits = Limits { bytes: 64, allocation: 4096, nodes: 64, depth: 8 };
@@ -139,14 +138,13 @@ before expanding the list.
 | `api-manifest` | Also exports bounded per-endpoint API snapshots for CI |
 | `service-client` | Generates a typed TypeScript service over existing method codecs |
 | `typescript` | Schema collection, validated graph, lint and generated clients |
-| `derive` | Provides the `ic_wire::Wire` and explicit `Evolve` derives |
 | `platform-types` | Also projects published Platform Types Principal/Account |
 
-Use `derive` for shared DTOs. Enable `typescript` in the builds that generate client metadata:
+Enable `typescript` in the builds that generate client metadata:
 
 ```toml
 [dependencies]
-ic-wire = { path = "crates/ic-wire", features = ["derive", "typescript"] }
+ic-wire = { path = "crates/ic-wire", features = ["typescript"] }
 ```
 
 Use the same declaration on native and Wasm:
@@ -155,13 +153,12 @@ Use the same declaration on native and Wasm:
 use ic_wire::Wire;
 
 #[derive(Wire)]
-#[wire(sparse)]
 struct Request { sequence: u64 }
 ```
 
-With `derive` and `typescript` enabled, the schema trait implementation is
+With `typescript` enabled, the schema trait implementation is
 available on both targets, including `ValidatedRegistry::from_type::<Request>`.
-A codec-only guest can keep `derive` and omit `typescript`.
+A codec-only guest can omit `typescript`.
 
 For API drift checks, enable `api-manifest` on the host-side generator.
 Pass the deployed endpoint names and the same `Method` descriptors used to
@@ -247,8 +244,8 @@ Rust validation.
 
 ## Evolvable method types
 
-Enable `derive` and declare `Method<Request, Reply>` with
-`#[derive(ic_wire::Wire)]` and `#[wire(sparse)]` on both types. Each sparse root has room
+Declare `Method<Request, Reply>` with
+`#[derive(ic_wire::Wire)]` on both types. Each sparse root has room
 for later additions. Add an `Option<T>` field to the same struct with
 `#[wire(id = N)]` and a stable, unused ID. Tuples can append optional slots
 identified by their one-based positions. An empty extension block costs one
@@ -258,22 +255,19 @@ On the host, register the typed method with
 `SchemaRegistry::register_evolving_method` to derive its TypeScript codec and
 method manifest. Nested derived structs and tuple structs also evolve through
 lists, options, results and arrays. Their empty blocks cost one byte per
-occurrence. Use `#[wire(fixed)]` when a nested value should keep its entire
-Serde layout. The explicit projection API supports open variants and branch
+occurrence. Use `WireSchema` for a supplier field whose contract specifies a fixed Serde representation. The explicit projection API supports open variants and branch
 recovery. Manifest checks compare old writes to new request readers and new
 writes to old reply readers, including required fields within nested records.
 [Declarations and projection](https://github.com/dragginzgame/ic-wire/blob/main/docs/design/evolution.md)
 
 ## Cutover to evolvable messages
 
-Use the crate-root `encode`, `encoded_len`, `encode_into`, `encode_to_slice`
-and `decode` functions for positional Serde data. A plain `#[derive(Wire)]`
-describes that layout for generated clients. For sparse request or reply types,
-select `#[wire(sparse)]` and call `evolution::encode` / `evolution::decode` or
-use a typed `Method`. The TypeScript generator follows each root's declaration.
-Switch both peers together when cutting a positional endpoint over. Once sparse,
-an older reader can skip a newly added optional field. Persisted positional
-values can continue to use the crate-root functions.
+Derive `Wire` on structs and tuple structs and remove previous layout markers.
+Use `Message<T>` for scalar, enum or result roots. The crate-root codec,
+typed methods and generated clients all use sparse messages. Closed enums
+preserve declaration-order tags and recursively project their payloads.
+Switch both peers together, regenerate clients, and migrate any stored
+positional Wire bytes before reading them with this release.
 
 See the [repository](https://github.com/dragginzgame/ic-wire) for qualification,
 design and measured tradeoffs. Smaller Wasm in the sample workload does not imply

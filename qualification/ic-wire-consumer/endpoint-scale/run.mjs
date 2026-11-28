@@ -68,7 +68,7 @@ function snapshot(ref) {
   const manifest = readFileSync(join(stage, 'Cargo.toml'), 'utf8');
   const version = manifest.match(/\[workspace\.package\][^[]*?^version\s*=\s*"(\d+)\.(\d+)\./m);
   assert(version, 'missing Wire workspace version');
-  const explicitSparse = Number(version[1]) > 0 || Number(version[2]) >= 32;
+  const explicitSparse = Number(version[1]) === 0 && Number(version[2]) === 32;
   const src = guest(count, shape, legacy, false, explicitSparse);
   for (const [name, code] of [['endpoint-scale', src], ['endpoint-scale-counter', guest(count, shape, legacy, true, explicitSparse)]]) {
     const path = 'examples/' + name.replaceAll('-', '_') + '.rs';
@@ -105,8 +105,10 @@ function codeBytes(bytes) {
 }
 function build(input, profile, name = 'endpoint-scale') {
   const target = join(input.dir, 'target');
+  const manifest = readFileSync(join(input.dir, 'crates/ic-wire/Cargo.toml'), 'utf8');
+  const features = /^derive\s*=/m.test(manifest) ? 'ic,wire/derive' : 'ic';
   run('cargo', ['build', '--locked', '--manifest-path', join(input.dir, 'qualification/Cargo.toml'),
-    '-p', 'ic-wire-consumer', '--example', name, '--features', 'ic,wire/derive',
+    '-p', 'ic-wire-consumer', '--example', name, '--features', features,
     '--target', 'wasm32-unknown-unknown', '--target-dir', target, '--profile', profile]);
   return join(target, 'wasm32-unknown-unknown', profile, 'examples', name.replaceAll('-', '_') + '.wasm');
 }

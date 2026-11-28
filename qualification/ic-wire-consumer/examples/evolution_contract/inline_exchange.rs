@@ -10,15 +10,14 @@ use wire::{
 
 use crate::fixture::LIMITS;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Filter {
     active: bool,
     code: u8,
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct RequestV1 {
     post_id: u32,
@@ -26,7 +25,6 @@ struct RequestV1 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct RequestV2 {
     post_id: u32,
@@ -36,7 +34,6 @@ struct RequestV2 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct RequestV3<'a> {
     post_id: u32,
@@ -48,17 +45,14 @@ struct RequestV3<'a> {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct ReplyV1(u32, bool);
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct ReplyV2(u32, bool, #[wire(id = 3)] Option<bool>);
 
 #[derive(Debug, PartialEq, Eq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct ReplyV3(
     u32,

@@ -1,5 +1,4 @@
 //! Regression for projection of known nested fields before optional recovery.
-#![cfg(feature = "derive")]
 
 use ic_wire::{
     Encoding, Error, LimitKind, Limits,
@@ -21,7 +20,7 @@ struct DetailFields {
 }
 
 #[derive(Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "typescript", derive(ic_wire_derive::Wire))]
+#[cfg_attr(feature = "typescript", derive(ic_wire::WireSchema))]
 struct Detail<'a>(
     #[serde(borrow)]
     #[cfg_attr(feature = "typescript", wire(extensions))]

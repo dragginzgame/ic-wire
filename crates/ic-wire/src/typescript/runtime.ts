@@ -1,7 +1,7 @@
 // Candidate interpreter for the admitted schema subset. See
 // docs/design/browser-runtime.md for source provenance and the reuse contract.
 // Generated metadata is trusted; allowances do not bound the JS engine heap.
-export const schemaFormat = 'ic-wire-json';
+export const schemaFormat = 'ic-wire-sparse-v1';
 export class WireError extends Error {
   override name = 'WireError';
   constructor(readonly code: 'limit' | 'malformed' | 'identity' | 'value' | 'incompatible') { super(`wire ${code}`); }
@@ -27,7 +27,7 @@ export type Schema = ({ k: 'unit' | 'bool' }
   | { k: 'record'; fields: readonly Field[]; fixed?: true }
   | { k: 'extension-record'; fields: readonly Field[]; extensions: readonly Extension[]; projected?: true }
   | { k: 'extension-tuple'; items: readonly Schema[]; extensions: readonly Extension[]; projected?: true }
-  | { k: 'enum'; variants: readonly Variant[] }
+  | { k: 'enum'; variants: readonly Variant[]; projected?: true }
   | { k: 'open-variant'; variants: readonly Variant[]; required?: boolean }
   | { k: 'ref'; name: string }) & {check?:string};
 export type Checks=Readonly<Record<string,(value:unknown)=>void>>;
@@ -91,7 +91,7 @@ function minimumRootBytes(schema: Schema, types: Types): number {
     if (!schema || typeof schema !== 'object' || visited.has(schema)) return fail('value');
     if (schema.k === 'extension-record' || schema.k === 'extension-tuple') return 1;
     visited.add(schema);
-    if (schema.k === 'newtype') {
+    if (schema.k === 'newtype' && !schema.fixed) {
       schema = schema.item;
     } else if (schema.k === 'ref') {
       if (!Object.hasOwn(types, schema.name)) return fail('value');
@@ -99,7 +99,7 @@ function minimumRootBytes(schema: Schema, types: Types): number {
       if (next === undefined) return fail('value');
       schema = next;
     } else {
-      return 0;
+      return fail('value');
     }
   }
 }

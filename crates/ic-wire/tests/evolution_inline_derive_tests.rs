@@ -1,5 +1,4 @@
 //! Inline sparse declarations use one stock Serde codec and one operation meter.
-#![cfg(feature = "derive")]
 
 use ic_wire::{
     Encoding, Error, LimitKind, Limits, TextRef, Wire, evolution::decode, evolution::encode,
@@ -14,13 +13,11 @@ const LIMITS: Limits = Limits {
 };
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 struct Previous {
     sequence: u16,
 }
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 struct Current<'a, T: Copy, const MAX: usize>
 where
     T: PartialEq,
@@ -86,11 +83,9 @@ fn inline_record_revisions_share_exact_bytes_and_borrowed_fields() {
 }
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 struct PreviousTuple(u8);
 
 #[derive(Debug, PartialEq, Wire, serde::Serialize, serde::Deserialize)]
-#[wire(sparse)]
 struct CurrentTuple(u8, #[wire(id = 2)] Option<bool>);
 
 #[test]
@@ -124,7 +119,6 @@ fn inline_tuple_does_not_change_its_separately_derived_serde_layout() {
 }
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 struct Wide(
     u8,
     u8,
@@ -164,7 +158,6 @@ fn inline_tuple_core_exceeds_serde_tuple_trait_arity() {
 }
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 struct Empty;
 
 #[test]
@@ -185,7 +178,6 @@ mod public_record {
     use super::*;
 
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     struct PrivateRow<'a, T> {
         id: T,
         #[wire(id = 1)]
@@ -194,7 +186,6 @@ mod public_record {
 
     /// A public DTO can keep its nested projection's type private.
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     pub struct Packet<'a, T> {
         row: PrivateRow<'a, T>,
         checksum: u16,
@@ -220,8 +211,7 @@ mod public_record {
 
 #[test]
 fn codec_only_wire_accepts_fixed_struct_and_closed_enum_leaves() {
-    #[derive(Debug, PartialEq, Wire, serde::Serialize, serde::Deserialize)]
-    #[wire(fixed)]
+    #[derive(Debug, PartialEq, ic_wire::WireSchema, serde::Serialize, serde::Deserialize)]
     struct Key(u8);
 
     #[derive(Debug, PartialEq, Wire, serde::Serialize, serde::Deserialize)]
@@ -230,7 +220,6 @@ fn codec_only_wire_accepts_fixed_struct_and_closed_enum_leaves() {
     }
 
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     struct Root {
         key: Key,
         mode: Mode,

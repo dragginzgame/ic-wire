@@ -1,4 +1,4 @@
-//! Stock Serde projections used by `#[wire(sparse)]` declarations.
+//! Stock Serde projections used by derived Wire messages.
 
 #[cfg(test)]
 use super::encode_value_into;
@@ -98,6 +98,71 @@ pub fn preserve_incompatible<T>(
     }
 }
 
+/// Sorted extension destinations for a derived sparse record.
+#[doc(hidden)]
+pub trait FieldTargets<'de> {
+    /// Assign a bounded field to its declared destination, if present.
+    ///
+    /// # Errors
+    /// Propagates structural and resource failures from known fields.
+    fn assign(
+        &mut self,
+        id: u32,
+        field: super::Field<'_, 'de>,
+        incompatible: &mut bool,
+    ) -> Result<(), Error>;
+}
+
+impl<'de> FieldTargets<'de> for () {
+    fn assign(&mut self, _: u32, _: super::Field<'_, 'de>, _: &mut bool) -> Result<(), Error> {
+        Ok(())
+    }
+}
+
+impl<'de, T: Inline<'de>> FieldTargets<'de> for (u32, &mut Option<T>) {
+    fn assign(
+        &mut self,
+        id: u32,
+        field: super::Field<'_, 'de>,
+        incompatible: &mut bool,
+    ) -> Result<(), Error> {
+        if id == self.0 {
+            *self.1 = preserve_incompatible(field.project_inline::<T>(), incompatible)?;
+        }
+        Ok(())
+    }
+}
+
+impl<'de, L: FieldTargets<'de>, R: FieldTargets<'de>> FieldTargets<'de> for (u32, L, R) {
+    fn assign(
+        &mut self,
+        id: u32,
+        field: super::Field<'_, 'de>,
+        incompatible: &mut bool,
+    ) -> Result<(), Error> {
+        if id < self.0 {
+            self.1.assign(id, field, incompatible)
+        } else {
+            self.2.assign(id, field, incompatible)
+        }
+    }
+}
+
+/// Validate the block and fill its known destinations.
+///
+/// # Errors
+/// Propagates structural and resource failures in input order.
+#[doc(hidden)]
+#[inline(never)]
+pub fn read_fields<'de>(
+    extensions: super::Extensions<'de>,
+    context: &ReadContext<'_>,
+    mut targets: impl FieldTargets<'de>,
+    incompatible: &mut bool,
+) -> Result<(), Error> {
+    extensions.visit(context, |id, field| targets.assign(id, field, incompatible))
+}
+
 /// Stage and encode an inline value into the existing projected frame path.
 ///
 /// # Errors
@@ -110,14 +175,20 @@ pub fn encode<'de, T: InlineMessage<'de>>(
     encoding: Encoding,
     limits: Limits,
 ) -> Result<(), Error> {
-    encode_value_into_with(output, encoding, limits, |output, header, context| {
+    type FrameWriter<'a> = dyn FnMut(
+            &mut Vec<u8>,
+            Option<[u8; crate::framing::HEADER_BYTES]>,
+            &WriteContext<'_>,
+        ) -> Result<(), Error>
+        + 'a;
+    let write: &mut FrameWriter<'_> = &mut |output, header, context| {
         with_scratch(T::MAY_STAGE, context.budget, |scratch| {
             let (prepared, _) = value.prepare(context, scratch)?;
             context.budget.check()?;
             write_value_into(output, header, context, &prepared)
         })
-    })
-    .map(|_| ())
+    };
+    encode_value_into_with(output, encoding, limits, write).map(|_| ())
 }
 
 const STACK_SCRATCH: usize = 32;

@@ -42,7 +42,7 @@ serde_bytes.workspace = true
 serde_json.workspace = true
 stats_alloc.workspace = true
 toko-tooling.workspace = true
-wire = { workspace = true, features = ["derive"] }
+wire.workspace = true
 
 [[test]]
 name = "compatibility"

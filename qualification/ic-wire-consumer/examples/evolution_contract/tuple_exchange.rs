@@ -35,7 +35,7 @@ struct PacketTail {
 
 macro_rules! revision {
     ($row:ident, $packet:ident, $row_tail:ty, $packet_tail:ty) => {
-        #[derive(Serialize, Deserialize, Wire)]
+        #[derive(Serialize, Deserialize, wire::WireSchema)]
         #[wire(crate = "wire")]
         struct $row<'a>(
             u16,
@@ -45,7 +45,7 @@ macro_rules! revision {
             ExtensionSlot<'a, $row_tail>,
         );
 
-        #[derive(Serialize, Deserialize, Wire)]
+        #[derive(Serialize, Deserialize, wire::WireSchema)]
         #[wire(crate = "wire")]
         struct $packet<'a>(
             #[serde(borrow)] List<$row<'a>, 4>,

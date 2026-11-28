@@ -20,7 +20,6 @@ const LIMITS: Limits = Limits {
 ///
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Batch<T> {
     rows: Vec<Option<T>>,
@@ -42,7 +41,6 @@ impl<T> Batch<T> {
 ///
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct PreviousRow {
     count: PreviousCount,
@@ -55,7 +53,6 @@ struct PreviousRow {
 ///
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct PreviousCount(u16);
 
@@ -65,7 +62,6 @@ struct PreviousCount(u16);
 ///
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct CurrentRow {
     count: CurrentCount,
@@ -80,7 +76,6 @@ struct CurrentRow {
 ///
 
 #[derive(Debug, PartialEq, Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 struct CurrentCount(u16, #[wire(id = 2)] Option<()>);
 

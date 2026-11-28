@@ -11,7 +11,7 @@
       {"name":"enabled","value":{"k":"bool"}}],"extensions":[]},
     "Authority":{"k":"enum","variants":[
       {"name":"User","id":0,"value":{"k":"unit"}},
-      {"name":"Admin","id":1,"value":{"k":"unit"}}]},
+      {"name":"Admin","id":1,"value":{"k":"unit"}}],"projected":true},
     "Request":{"k":"extension-tuple","items":[],"extensions":[]}
   }
 }

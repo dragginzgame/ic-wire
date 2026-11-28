@@ -11,8 +11,8 @@ use wire::typescript::{Method, PayloadLimits, SchemaLimits, ValidatedRegistry};
 
 macro_rules! record {
     ($new:ident,$ty:ty,$new_path:literal) => {
-        #[derive(Debug, Serialize, Deserialize, wire::typescript::Wire)]
-        #[wire(crate = "wire", fixed)]
+        #[derive(Debug, Serialize, Deserialize, wire::WireSchema)]
+        #[wire(crate = "wire")]
         struct $new {
             #[serde(with=$new_path)]
             value: $ty,

@@ -48,8 +48,7 @@ fn supports_ordinary_shapes_and_renamed_dependency() {
         "struct Generic<'a, T: Clone = u8, const N: usize = 4> where T: Copy { value: T, text: &'a str, bytes: Bytes<N> }",
         "struct Borrowed<'a> { #[serde(borrow = \"'a\")] bytes: BytesRef<'a, 8> }",
     ] {
-        let fixed = format!("#[wire(fixed)] {input}");
-        assert!(expand(&syn::parse_str(&fixed).unwrap()).is_ok());
+        assert!(super::expand_schema(&syn::parse_str(input).unwrap()).is_ok());
     }
 }
 
@@ -85,7 +84,7 @@ fn checks_inline_record_and_tuple_positions() {
         "struct EmptyTuple();",
         "struct EmptyUnit;",
     ] {
-        let input = syn::parse_str(&format!("#[wire(sparse)] {input}")).unwrap();
+        let input = syn::parse_str(input).unwrap();
         assert!(expand(&input).is_ok());
     }
     for input in [
@@ -106,8 +105,10 @@ fn checks_inline_record_and_tuple_positions() {
         "struct Message(#[wire(id = 1)] Option<u16>, u8);",
         "#[wire(fixed)] struct Message { #[wire(id = 7)] note: Option<u8> }",
         "#[wire(record)] struct Message { tag: u16 }",
+        "#[wire(sparse)] struct Message;",
+        "enum Empty {}",
     ] {
-        let input = syn::parse_str(&format!("#[wire(sparse)] {input}")).unwrap();
+        let input = syn::parse_str(input).unwrap();
         assert!(expand(&input).is_err());
     }
 }
@@ -124,13 +125,13 @@ fn checks_extension_carrier_position_in_wire_derive() {
         "enum Physical { Variant(u8, #[wire(extensions)] ExtensionSlot) }",
         "enum Physical { Variant(#[wire(extensions)] ExtensionSlot) }",
     ] {
-        assert!(expand(&syn::parse_str(input).unwrap()).is_err());
+        assert!(super::expand_schema(&syn::parse_str(input).unwrap()).is_err());
     }
     for input in [
         "struct Physical<'a> { core: u32, #[wire(extensions)] #[serde(borrow)] fields: ExtensionSlot<'a, Fields<'a>> }",
         "struct Physical<'a>(u32, #[wire(extensions)] #[serde(borrow)] ExtensionSlot<'a, Fields<'a>>);",
         "struct Physical<'a>(#[wire(extensions)] #[serde(borrow)] ExtensionSlot<'a, Fields<'a>>);",
     ] {
-        assert!(expand(&syn::parse_str(input).unwrap()).is_ok());
+        assert!(super::expand_schema(&syn::parse_str(input).unwrap()).is_ok());
     }
 }

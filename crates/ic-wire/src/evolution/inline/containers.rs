@@ -54,6 +54,30 @@ fixed!(ic_platform_types::Principal, ic_platform_types::Account);
 
 type Prepared<'s, T> = Result<(T, &'s mut [u8]), Error>;
 
+macro_rules! tuple {
+    ($($ty:ident $slot:tt $binding:ident),+) => {
+        impl<'de,$($ty: Inline<'de>),+> Inline<'de> for ($($ty,)+) {
+            const MAY_STAGE: bool = false $(|| $ty::MAY_STAGE)+;
+            type Encoded<'s> = ($($ty::Encoded<'s>,)+) where Self:'s;
+            type Decoded = ($($ty::Decoded,)+);
+            fn prepare<'s>(&'s self,context:&WriteContext<'_>,scratch:&'s mut [u8]) -> Prepared<'s,Self::Encoded<'s>> {
+                context.admit_preparation()?;
+                $(let ($binding,scratch) = self.$slot.prepare(&context.child(),scratch)?;)+
+                Ok((($($binding,)+),scratch))
+            }
+            fn project(input:Self::Decoded,context:&ReadContext<'_>)->Result<Self,Error>{
+                let mut incompatible=false;
+                $(let $binding=preserve_incompatible($ty::project(input.$slot,&context.child()),&mut incompatible)?;)+
+                Ok(($($binding.ok_or(Error::Incompatible)?,)+))
+            }
+        }
+    }
+}
+tuple!(A 0 a);
+tuple!(A 0 a,B 1 b);
+tuple!(A 0 a,B 1 b,C 2 c);
+tuple!(A 0 a,B 1 b,C 2 c,D 3 d);
+
 impl<'de, T: Inline<'de>> Inline<'de> for Option<T> {
     const MAY_STAGE: bool = T::MAY_STAGE;
 

@@ -1,6 +1,8 @@
 //! Declarations for typed envelopes. Leaf encoding stays with Serde.
 
+mod closed;
 mod record;
+pub(crate) use closed::expand as expand_enum;
 pub(super) use record::expand as expand_record;
 
 use proc_macro2::{Span, TokenStream};
@@ -21,7 +23,7 @@ struct Member {
 }
 
 pub(super) fn expand(input: &DeriveInput) -> syn::Result<TokenStream> {
-    let (owner, _) = super::type_options(input, false)?;
+    let owner = super::type_options(input)?;
     let (members, is_open) = collect(input)?;
     let schema = schema(input, &owner, &members, is_open);
     let codec = if is_open {

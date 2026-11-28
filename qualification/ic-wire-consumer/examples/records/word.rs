@@ -4,7 +4,6 @@
 pub(crate) const PAYLOAD_BYTES: usize = 6;
 
 #[derive(wire::Wire)]
-#[wire(sparse)]
 #[wire(crate = "wire")]
 pub(crate) struct Word {
     pub(crate) value: u32,

@@ -9,12 +9,11 @@ negotiation or an extra round trip.
 
 ## Declare a method that can evolve
 
-Enable `derive` for the Rust macros. Enable `api-manifest` where you also
+Enable `api-manifest` where you also
 generate TypeScript bindings and method manifests.
 The Rust-only feature graph omits the schema runtime and JSON dependency.
 
-Use `#[derive(Wire)]` and `#[wire(sparse)]` on request and reply types chosen for evolution.
-Ordinary structs and tuple structs use positional Serde layout by default. Every typed method root
+Use `#[derive(Wire)]` on request and reply structs. Every typed method root
 writes a sparse extension block, even when it has no additions. An empty block
 adds one byte to a request or reply. The deployed method name determines the
 frame ID.
@@ -23,13 +22,11 @@ frame ID.
 use ic_wire::{Error, Limits, Wire, evolution::Method};
 
 #[derive(Wire)]
-#[wire(sparse)]
 struct GetPost {
     post_id: u64,
 }
 
 #[derive(Wire)]
-#[wire(sparse)]
 struct GetPostReply {
     found: bool,
 }
@@ -49,7 +46,6 @@ In the next release, edit `GetPost` in place.
 
 ```rust
 #[derive(Wire)]
-#[wire(sparse)]
 struct GetPost {
     post_id: u64,
     #[wire(id = 1)]
@@ -85,7 +81,6 @@ extension block. A Postcard list writes its count followed by the elements.
 use ic_wire::{List, Wire};
 
 #[derive(Wire)]
-#[wire(sparse)]
 struct Search {
     filters: List<Filter, 32>,
     cursor: u32,
@@ -93,7 +88,6 @@ struct Search {
 
 // V1 has enabled only. V2 adds the tagged field.
 #[derive(Wire)]
-#[wire(sparse)]
 struct Filter {
     enabled: bool,
     #[wire(id = 1)]
@@ -107,7 +101,7 @@ frame meter. A newly required named field uses `#[wire(id = N, required)]`
 with a non-optional type. The decoder reports incompatibility when a required
 field is missing. Tuple tails remain optional.
 
-Use `#[wire(fixed)]` to select a fixed Serde subtree. Its Serde layout controls
+Use `WireSchema` for a field with an explicit fixed Serde contract. Its Serde layout controls
 every descendant and host schema generation checks that the subtree's
 metadata matches that choice. The built-in Platform Types `Account` schema
 declares its record fixed. For a large fixed collection, a fixed Serde newtype

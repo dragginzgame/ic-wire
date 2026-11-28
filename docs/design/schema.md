@@ -63,8 +63,7 @@ definition preserves existing output. This is structural evidence, not a host
 performance comparison. `make lint-host`, `make doc-host` and
 `make check-wasm-host` check the optional module and its target boundary.
 Codec-only native and Wasm builds omit `serde_json`. Enabling `typescript`
-selects it on both targets. Postcard 1.2.0 lets codec-only consumers omit
-`serde_derive`. Applications using Serde derives enable Serde's `derive` feature.
+selects it on both targets. Generated closed enum projections use Serde derives in the build-time dependency graph.
 
 `metadata_json()` exports only admitted graph nodes, never the original input.
 Round-trip tests preserve all admitted kinds, signedness, bounds, IDs, recursive
@@ -91,7 +90,7 @@ is valid for unit payloads; nodes/depth must be positive and all limits fit exac
 JavaScript integers. This does not infer browser policy from Rust allocation or
 claim equal traversal accounting.
 
-The imported runtime must export `schemaFormat = "ic-wire-json"` and
+The imported runtime must export `schemaFormat = "ic-wire-sparse-v1"` and
 `createPayloadCodec(metadata, registry)`. That factory uses the exported JSON
 grammar and returns encode/decode functions. A mismatch throws before factory
 creation. The marker identifies an interface, not cryptographic supplier identity;
@@ -138,7 +137,7 @@ Independent separately generated modules are not a global routing registry.
 
 ## Strict Rust metadata projection (0.23.5)
 
-Enable `derive` to use the `Wire` derive on shared DTOs. On native and Wasm targets
+Use the included `Wire` derive on shared DTOs. On native and Wasm targets
 the schema trait is available under the same name.
 `ValidatedRegistry::from_type::<T>("Root", limits)` projects an inline root and
 feeds it through the existing JSON admission boundary. The derive is a producer

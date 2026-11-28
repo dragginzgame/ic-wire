@@ -63,6 +63,35 @@ pub fn encode_into<'out, 'de, T: Evolving<'de>>(
     Ok(output)
 }
 
+/// Measure a derived message using its sparse projection and shared budget.
+///
+/// # Errors
+/// Returns projection, serialization and admission errors.
+pub fn encoded_len<'de, T: InlineMessage<'de>>(
+    value: &T,
+    encoding: Encoding,
+    limits: Limits,
+) -> Result<usize, Error> {
+    let prefix = super::writer::frame_header(encoding).map_or(0, |_| crate::framing::HEADER_BYTES);
+    let limits = limits.without_prefix(prefix)?;
+    let budget = crate::meter::Budget::new(limits);
+    budget.check()?;
+    let context = super::WriteContext {
+        budget: &budget,
+        depth: 1,
+        byte_limit: limits.bytes,
+    };
+    let mut length = 0;
+    super::inline::with_scratch(T::MAY_STAGE, &budget, |scratch| {
+        let (prepared, _) = value.prepare(&context, scratch)?;
+        budget.check()?;
+        length = super::writer::projected_size(&prepared, &budget, limits.bytes)?;
+        Ok(())
+    })?;
+    budget.check()?;
+    Ok(length + prefix)
+}
+
 /// Encode a derived Wire message directly into caller-owned output.
 ///
 /// Use [`crate::evolution::encode_projected_to_slice`] for a manually

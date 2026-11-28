@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use wire::Encoding;
 use wire::typescript::{PayloadLimits, SchemaLimits, ValidatedRegistry};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
 #[wire(crate = "wire")]
 enum Choice {
     #[serde(rename = "ready-now")]
@@ -13,8 +13,8 @@ enum Choice {
     #[serde(rename = "has-value")]
     Value(u16),
 }
-#[derive(Debug, PartialEq, Serialize, Deserialize, wire::typescript::Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Record {
     #[serde(rename = "__proto__")]
     flag: bool,

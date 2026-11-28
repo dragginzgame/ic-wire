@@ -255,7 +255,7 @@ mod tests {
         dead_code,
         reason = "Only the Wire declaration is needed for this test"
     )]
-    #[derive(Wire)]
+    #[derive(wire::WireSchema)]
     #[wire(crate = "wire")]
     struct OldExtended {
         core: bool,
@@ -267,7 +267,7 @@ mod tests {
         dead_code,
         reason = "Only the Wire declaration is needed for this test"
     )]
-    #[derive(Wire)]
+    #[derive(wire::WireSchema)]
     #[wire(crate = "wire")]
     struct NewExtended {
         core: bool,
@@ -323,14 +323,12 @@ mod tests {
     #[test]
     fn inline_additions_require_an_id_to_leave_the_positional_core_unchanged() {
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct First {
             count: u16,
         }
 
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct TaggedAddition {
             count: u16,
@@ -339,7 +337,6 @@ mod tests {
         }
 
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct UntaggedAddition {
             count: u16,
@@ -367,14 +364,12 @@ mod tests {
     #[test]
     fn nested_evolution_is_checked_in_the_method_direction() {
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct First {
             count: u16,
         }
 
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct Optional {
             count: u16,
@@ -383,7 +378,6 @@ mod tests {
         }
 
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct Required {
             count: u16,
@@ -392,7 +386,6 @@ mod tests {
         }
 
         #[derive(wire::Wire)]
-        #[wire(sparse)]
         #[wire(crate = "wire")]
         struct Batch<T> {
             items: wire::List<Option<T>, 4>,
@@ -673,21 +666,21 @@ mod tests {
             #[wire(id = 4)]
             marker: Option<()>,
         }
-        #[derive(Wire)]
+        #[derive(wire::WireSchema)]
         #[wire(crate = "wire")]
         struct A(
             bool,
             u16,
             #[wire(extensions)] ExtensionSlot<'static, OldExtensions>,
         );
-        #[derive(Wire)]
+        #[derive(wire::WireSchema)]
         #[wire(crate = "wire")]
         struct B(
             bool,
             u16,
             #[wire(extensions)] ExtensionSlot<'static, BSlots>,
         );
-        #[derive(Wire)]
+        #[derive(wire::WireSchema)]
         #[wire(crate = "wire")]
         struct C(
             bool,

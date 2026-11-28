@@ -39,24 +39,18 @@ const fixedRoot = {k:'ref',name:'Fixed'};
 const evolvingRoot = {k:'ref',name:'Evolved'};
 const refusal = error => error instanceof runtime.WireError && error.code === 'value';
 for (const schema of [fixed, fixedRoot]) {
-  assert.deepEqual(runtime.createPayloadCodec({schema, ...policy}, aliases).encode(true), Uint8Array.of(1));
+  assert.throws(() => runtime.createPayloadCodec({schema, ...policy}, aliases), refusal);
 }
 const frame = {id:'7', requestBytes:16, responseBytes:16, requestNodes:8, responseNodes:8, requestDepth:4, responseDepth:4};
 for (const [request,response] of [[fixedRoot,evolvingRoot],[evolvingRoot,fixedRoot]]) {
-  const codec = runtime.createCodec({...frame,request,response}, aliases);
-  const input = request === fixedRoot ? true : [true];
-  const reply = response === fixedRoot ? true : [true];
-  assert.deepEqual(codec.decodeRequest(codec.encodeRequest(input)), input);
-  assert.deepEqual(codec.decodeResponse(codec.encodeResponse(reply)), reply);
+  assert.throws(() => runtime.createCodec({...frame,request,response}, aliases), refusal);
 }
 const message = runtime.createPayloadCodec({schema:evolvingRoot,...policy},aliases);
 assert.deepEqual(message.encode([true]), Uint8Array.of(1,0));
 assert.throws(() => message.decode(Uint8Array.of(1)), error => error instanceof runtime.WireError && error.code === 'malformed');
 
 const unit = {k:'unit'};
-const storedUnit = runtime.createPayloadCodec({...policy,schema:unit,bytes:0});
-assert.deepEqual(storedUnit.encode(null), Uint8Array.of());
-assert.equal(storedUnit.decode(Uint8Array.of()), null);
+assert.throws(() => runtime.createPayloadCodec({...policy,schema:unit,bytes:0}), refusal);
 
 const emptyRoot = {k:'extension-tuple',items:[],extensions:[]};
 const emptyPayload = {...policy,schema:emptyRoot,bytes:1};

@@ -9,15 +9,15 @@ mod declaration;
 #[doc(hidden)]
 pub use declaration::__private;
 mod method;
-#[cfg(feature = "derive")]
+
 pub use declaration::Evolve;
 #[cfg(feature = "typescript")]
 pub use declaration::{ExtensionLayout, OpenLayout, SchemaFields};
 pub use declaration::{ExtensionSlot, OpenSlot, RecoverSlot};
-pub use method::{Evolving, Method, decode, encode, encode_into, encode_to_slice};
+pub use method::{Evolving, Method, decode, encode, encode_into, encode_to_slice, encoded_len};
 #[doc(hidden)]
 pub mod inline;
-#[cfg(feature = "derive")]
+
 #[doc(hidden)]
 pub use serde as __serde;
 
@@ -139,6 +139,7 @@ pub(crate) fn encode_value_into<T: Serialize>(
     })
 }
 
+#[inline(never)]
 fn encode_value_into_with(
     output: &mut Vec<u8>,
     encoding: Encoding,
@@ -557,7 +558,7 @@ impl<'a> Extensions<'a> {
     }
 }
 
-#[inline]
+#[inline(never)]
 fn extension_header(rest: &[u8]) -> Result<(u32, &[u8], &[u8]), Error> {
     // Single-byte Postcard headers need one bounds check for the field span.
     if let Some(([id, length], tail)) = rest.split_first_chunk::<2>()

@@ -6,10 +6,10 @@ use std::{borrow::Cow, collections::BTreeMap};
 use wire::Encoding;
 use wire::typescript::{Method, PayloadLimits, SchemaLimits, ValidatedRegistry, Wire};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
-#[wire(crate = "wire", fixed)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+#[wire(crate = "wire")]
 struct Pair(u8, u16);
-#[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
 #[wire(crate = "wire")]
 enum Choice {
     Empty(),
@@ -108,13 +108,13 @@ fn standard_shapes_preserve_prefixes_tags_and_traversal() {
 
 #[test]
 fn projected_root_exchanges_fixed_struct_and_closed_enum() {
-    #[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
-    #[wire(crate = "wire", fixed)]
+    #[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
+    #[wire(crate = "wire")]
     struct FixedPair {
         pair: (u8, u16),
     }
 
-    #[derive(Debug, PartialEq, Serialize, Deserialize, Wire)]
+    #[derive(Debug, PartialEq, Serialize, Deserialize, wire::WireSchema)]
     #[wire(crate = "wire")]
     enum FixedChoice {
         Pair(u8, u16),
@@ -122,7 +122,6 @@ fn projected_root_exchanges_fixed_struct_and_closed_enum() {
     }
 
     #[derive(Debug, PartialEq, Wire)]
-    #[wire(sparse)]
     #[wire(crate = "wire")]
     struct Message {
         fixed: FixedPair,
