@@ -5,7 +5,7 @@ bulk-field advice and generated TypeScript clients. The codec is `no_std` with `
 Wasm-safe and independent of IC SDKs. Rust 1.100.0 is the compiler floor and the
 pinned development toolchain.
 
-The product crates are `ic-wire` and `ic-wire-derive`, both prepared at **0.33.0**.
+The product crates are `ic-wire` and `ic-wire-derive`, both prepared at **0.33.1**.
 Start with the [package guide](crates/ic-wire/README.md) for installation, a Rust
 round trip, feature flags and TypeScript delivery.
 

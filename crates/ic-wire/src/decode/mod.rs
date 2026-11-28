@@ -59,7 +59,8 @@ pub(super) fn admit_input(
     Ok((payload, limits))
 }
 
-#[inline(always)]
+// Keep payload decoding out of endpoint wrappers to reduce opt-z Wasm size.
+#[inline(never)]
 pub(super) fn decode_payload<'de, T: Deserialize<'de>>(
     input: &'de [u8],
     budget: &Budget,

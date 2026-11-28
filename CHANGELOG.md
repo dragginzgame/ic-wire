@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.33.1] - 2026-11-28
+
+### 🔧 Changed
+
+- Keep payload decoding out of endpoint wrappers. On the 300-layout canister,
+  this saved 21,236 bytes after `wasm-opt -Oz`. The opt-level 3 build grew by
+  17,606 bytes.
+
 ## [0.33.0] - 2026-11-28
 
 ### ⚠️ Breaking
