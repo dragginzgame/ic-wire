@@ -94,7 +94,7 @@ pub fn encode_projected_into<T: Serialize>(
     let dto = prepare(&context);
     budget.check()?;
     let dto = dto?;
-    let size = encode::measure_payload(&dto, &budget, 1)?;
+    let size = encode::measure_payload(&dto, &budget)?;
     budget.check()?;
     if size > limits.bytes {
         return Err(Error::Limit(LimitKind::Bytes));

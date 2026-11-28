@@ -58,24 +58,13 @@ pub(super) fn admit_input(
     Ok((payload, limits))
 }
 
+#[inline(always)]
 pub(super) fn decode_payload<'de, T: Deserialize<'de>>(
     input: &'de [u8],
     budget: &Budget,
     depth: usize,
 ) -> Result<T, Error> {
-    let (value, rest) = take_payload(input, budget, depth)?;
-    if !rest.is_empty() {
-        return Err(Error::Trailing);
-    }
-    Ok(value)
-}
-
-pub(super) fn take_payload<'de, T: Deserialize<'de>>(
-    payload: &'de [u8],
-    budget: &Budget,
-    depth: usize,
-) -> Result<(T, &'de [u8]), Error> {
-    let mut deserializer = postcard::Deserializer::from_bytes(payload);
+    let mut deserializer = postcard::Deserializer::from_bytes(input);
     let value = T::deserialize(admitted::Bounded {
         inner: &mut deserializer,
         budget,
@@ -83,5 +72,9 @@ pub(super) fn take_payload<'de, T: Deserialize<'de>>(
     })
     .map_err(|_| budget.error())?;
     let rest = deserializer.finalize().map_err(|_| Error::Malformed)?;
-    Ok((value, rest))
+    if rest.is_empty() {
+        Ok(value)
+    } else {
+        Err(Error::Trailing)
+    }
 }

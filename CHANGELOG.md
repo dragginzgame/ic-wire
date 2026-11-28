@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.31.2] - 2026-11-28
+
+### 🔧 Changed
+
+- Update the product and qualification workspaces to Toko Tooling 0.46.9.
+- Reduce Wasm size for consumers that decode many record types by inlining
+  visitor forwarding and checking for trailing bytes in the payload decoder.
+- Share encoding preflight and vector output handling across request and reply
+  types. The encoder still checks the full size before reserving output.
+
 ## [0.31.1] - 2026-11-26
 
 ### 🔧 Changed

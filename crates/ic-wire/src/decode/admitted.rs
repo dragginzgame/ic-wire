@@ -47,6 +47,7 @@ impl<'de, T: DeserializeSeed<'de>> DeserializeSeed<'de> for Seed<'_, T> {
 // Preserve the exact admission and visitor-depth rule in one expansion.
 macro_rules! admit_visitor {
     ($($method:ident $(($($arg:ident: $ty:ty),* $(,)?))?),* $(,)?) => {$(
+        #[inline(always)]
         fn $method<V: Visitor<'de>>(self, $($($arg: $ty,)*)? visitor: V) -> Result<V::Value, Self::Error> {
             if !self.budget.enter(self.depth, size_of::<V::Value>()) {
                 return Err(de::Error::custom("payload resource allowance exceeded"));
@@ -176,6 +177,7 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for CheckedVisitor<'_, V> {
         })
     }
 
+    #[inline(always)]
     fn visit_seq<A: SeqAccess<'de>>(self, inner: A) -> Result<Self::Value, A::Error> {
         self.inner.visit_seq(Access {
             inner,

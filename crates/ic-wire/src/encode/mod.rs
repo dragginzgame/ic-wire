@@ -7,8 +7,28 @@ use alloc::vec::Vec;
 use postcard::ser_flavors::Flavor;
 use serde::Serialize;
 
-fn preflight<T: Serialize + ?Sized>(
+// Dispatch once per pass so framing, reservation and error handling are shared
+// across root types. Field serialization stays statically dispatched.
+type PayloadWriter<'a> = dyn Fn(&Budget, Output<'_>) -> Result<usize, Error> + 'a;
+
+fn payload_writer<T: Serialize + ?Sized>(
     value: &T,
+) -> impl Fn(&Budget, Output<'_>) -> Result<usize, Error> + '_ {
+    move |budget, output| {
+        postcard::serialize_with_flavor(
+            &admitted::Bounded {
+                value,
+                budget,
+                depth: 1,
+            },
+            output,
+        )
+        .map_err(|_| budget.error())
+    }
+}
+
+fn preflight(
+    write: &PayloadWriter<'_>,
     encoding: Encoding,
     limits: Limits,
 ) -> Result<(Option<[u8; HEADER_BYTES]>, usize), Error> {
@@ -16,7 +36,7 @@ fn preflight<T: Serialize + ?Sized>(
     let prefix = if header.is_some() { HEADER_BYTES } else { 0 };
     let payload_limits = limits.without_prefix(prefix)?;
     let budget = Budget::new(payload_limits);
-    let size = measure_payload(value, &budget, 1)?;
+    let size = write(&budget, Output::Count(0))?;
     if size > payload_limits.bytes {
         return Err(Error::Limit(crate::LimitKind::Bytes));
     }
@@ -41,20 +61,12 @@ pub(super) fn frame_header(encoding: Encoding) -> Option<[u8; HEADER_BYTES]> {
     }
 }
 
+#[cfg(feature = "evolution")]
 pub(super) fn measure_payload<T: Serialize + ?Sized>(
     value: &T,
     budget: &Budget,
-    depth: usize,
 ) -> Result<usize, Error> {
-    postcard::serialize_with_flavor(
-        &admitted::Bounded {
-            value,
-            budget,
-            depth,
-        },
-        Output::Count(0),
-    )
-    .map_err(|_| budget.error())
+    payload_writer(value)(budget, Output::Count(0))
 }
 
 /// Measure the complete selected encoding without allocating codec output.
@@ -70,7 +82,7 @@ pub fn encoded_len<T: Serialize + ?Sized>(
     encoding: Encoding,
     limits: Limits,
 ) -> Result<usize, Error> {
-    preflight(value, encoding, limits).map(|(_, size)| size)
+    preflight(&payload_writer(value), encoding, limits).map(|(_, size)| size)
 }
 
 /// Encode into owned storage after a complete sizing/admission pass.
@@ -104,14 +116,35 @@ pub fn encode_into<'out, T: Serialize + ?Sized>(
     limits: Limits,
     output: &'out mut Vec<u8>,
 ) -> Result<&'out [u8], Error> {
-    output.clear();
-    let (header, size) = preflight(value, encoding, limits)?;
-    write_vec(value, &Budget::new(limits), header, size, output)?;
+    encode_into_with(&payload_writer(value), encoding, limits, output)?;
     Ok(output)
 }
 
+#[inline(never)]
+fn encode_into_with(
+    write: &PayloadWriter<'_>,
+    encoding: Encoding,
+    limits: Limits,
+    output: &mut Vec<u8>,
+) -> Result<(), Error> {
+    output.clear();
+    let (header, size) = preflight(write, encoding, limits)?;
+    write_vec_with(write, &Budget::new(limits), header, size, output)
+}
+
+#[cfg(feature = "evolution")]
 pub(super) fn write_vec<T: Serialize + ?Sized>(
     value: &T,
+    budget: &Budget,
+    header: Option<[u8; HEADER_BYTES]>,
+    size: usize,
+    output: &mut Vec<u8>,
+) -> Result<(), Error> {
+    write_vec_with(&payload_writer(value), budget, header, size, output)
+}
+
+fn write_vec_with(
+    write: &PayloadWriter<'_>,
     budget: &Budget,
     header: Option<[u8; HEADER_BYTES]>,
     size: usize,
@@ -124,18 +157,13 @@ pub(super) fn write_vec<T: Serialize + ?Sized>(
     if let Some(header) = header {
         bytes.extend_from_slice(&header);
     }
-    postcard::serialize_with_flavor(
-        &admitted::Bounded {
-            value,
-            budget,
-            depth: 1,
-        },
+    write(
+        budget,
         Output::Buffer {
             bytes: &mut bytes,
             limit: size,
         },
-    )
-    .map_err(|_| budget.error())?;
+    )?;
     *output = bytes;
     Ok(())
 }
@@ -156,7 +184,7 @@ pub fn encode_to_slice<'out, T: Serialize + ?Sized>(
     limits: Limits,
     output: &'out mut [u8],
 ) -> Result<&'out [u8], Error> {
-    let (header, size) = preflight(value, encoding, limits)?;
+    let (header, size) = preflight(&payload_writer(value), encoding, limits)?;
     let output = output
         .get_mut(..size)
         .ok_or(Error::Limit(crate::LimitKind::Output))?;

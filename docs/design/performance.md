@@ -5,6 +5,29 @@ opt-z total uncompressed Wasm first, then opt-3, code-section bytes, payload byt
 allocation behavior and IC instructions separately. No historical implementation
 is installed or used as a baseline. Correctness checks establish no speed claim.
 
+## Toko Project canister
+
+A fixed copy of the Toko 0.22.0 project sources was built against Wire 0.31.1,
+then with the decoder changes, then with both decoder and encoder changes.
+The encoder shares preflight and vector output handling across root types,
+with one indirect call per serialization pass. Rust 1.100.0, dependencies,
+features, fat LTO and one codegen unit were held fixed. Each cell gives total
+uncompressed Wasm bytes / code-section payload bytes.
+
+| Project build | Wire 0.31.1 | Decoder change | Decoder and encoder changes |
+| --- | ---: | ---: | ---: |
+| opt-z | 2,824,588 / 2,582,683 | 2,784,526 / 2,543,312 | 2,720,067 / 2,475,499 |
+| opt-z followed by Binaryen 132 `wasm-opt -Oz` | 2,246,998 / 2,037,046 | 2,224,645 / 2,014,713 | 2,166,523 / 1,952,979 |
+| opt-3 | 3,092,935 / 2,888,550 | 3,092,685 / 2,888,300 | 3,054,731 / 2,846,641 |
+
+The encoder alone saved 58,122 bytes after post-link optimization. All 319 Canic
+custom sections matched byte-for-byte across the builds. On the separate
+PocketIC upload probe, the same opt-z plus `-Oz` change raised median
+instructions per eight request encodes from 41,528 to 42,736 and per eight
+reply encodes from 16,744 to 17,072. At opt-3 without post-link optimization
+the increases were 5.2% and 17.0%. The probe verified the same 23-byte request
+and 3-byte reply payloads. All eight native allocation test groups passed.
+
 ## Standalone Wasm
 
 Run `make measure-consumer-wasm` from the repository root with locked dependencies,
