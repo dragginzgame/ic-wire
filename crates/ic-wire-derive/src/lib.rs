@@ -7,13 +7,17 @@ use proc_macro::TokenStream;
 use quote::{ToTokens, format_ident, quote};
 use syn::{Data, DeriveInput, Fields, parse_macro_input};
 
-/// Derive an evolvable Wire record or tuple from a struct.
+/// Describe an ordinary Serde layout or opt a struct into sparse evolution.
+///
+/// Add `#[wire(sparse)]` to a named, tuple or unit struct for an evolving projection.
 ///
 /// Untagged fields form the positional prefix. Optional additions use
 /// `#[wire(id = N)]`. A named addition may use `#[wire(id = N, required)]`
 /// to require its presence. Tuple IDs are one-based optional slot positions.
 /// Every evolving struct has one trailing extension block. This derive does
 /// not implement or change the type's Serde traits.
+/// On an evolving struct, symmetric Serde field names also name Wire fields.
+/// Serde crate paths and field borrow declarations may accompany the derive.
 ///
 /// Use `#[wire(fixed)]` to describe an ordinary fixed Serde struct. Enums
 /// describe their closed, externally tagged Serde layout. These projections
@@ -69,7 +73,7 @@ fn fields(
     let mut extension = None;
     for (index, field) in fields.iter().enumerate() {
         let (ordinary, carrier) = extension_attribute(&field.attrs)?;
-        let (rename, adapter) = member_attributes(&ordinary, true, owner)?;
+        let (rename, adapter) = member_attributes(&ordinary, true, Some(owner))?;
         if carrier {
             if fixed {
                 return Err(syn::Error::new_spanned(
@@ -119,7 +123,7 @@ fn fields(
             quote!(#owner::typescript::__private::json!({"k":"record","fields":[#(#entries),*]#fixed}))
         }
         (false, None, [item]) => {
-            quote!(#owner::typescript::__private::json!({"k":"newtype","item":#item}))
+            quote!(#owner::typescript::__private::json!({"k":"newtype","item":#item #fixed}))
         }
         (false, None, _) => {
             quote!(#owner::typescript::__private::json!({"k":"tuple","items":[#(#entries),*]#fixed}))
@@ -173,10 +177,20 @@ fn has_extension_carrier(fields: &Fields) -> syn::Result<bool> {
     Ok(false)
 }
 
-fn type_options(input: &DeriveInput, marker: Option<&str>) -> syn::Result<(syn::Path, bool)> {
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Layout {
+    Fixed,
+    Sparse,
+}
+
+fn type_options(
+    input: &DeriveInput,
+    allow_layout: bool,
+) -> syn::Result<(syn::Path, Option<Layout>)> {
     let mut owner: syn::Path = syn::parse_quote!(::ic_wire);
     let mut renamed = false;
-    let mut marked = false;
+    let mut layout = None;
+    let mut serde_crate = false;
     for attr in &input.attrs {
         if attr.path().is_ident("wire") {
             attr.parse_nested_meta(|meta| {
@@ -186,22 +200,32 @@ fn type_options(input: &DeriveInput, marker: Option<&str>) -> syn::Result<(syn::
                     renamed = true;
                     return Ok(());
                 }
-                if !marked && marker.is_some_and(|marker| meta.path.is_ident(marker)) {
-                    marked = true;
-                    return Ok(());
+                if allow_layout && layout.is_none() {
+                    if meta.path.is_ident("sparse") {
+                        layout = Some(Layout::Sparse);
+                        return Ok(());
+                    }
+                    if meta.path.is_ident("fixed") {
+                        layout = Some(Layout::Fixed);
+                        return Ok(());
+                    }
                 }
-                Err(match marker {
-                    Some(marker) => meta.error(format_args!(
-                        "expected wire(crate = \"dependency\") or wire({marker}) once"
-                    )),
-                    None => meta.error("expected one wire(crate = \"dependency\")"),
-                })
+                Err(meta.error("unsupported or duplicate Wire option"))
             })?;
-        } else {
-            reject_attributes(std::slice::from_ref(attr))?;
+        } else if attr.path().is_ident("serde") {
+            attr.parse_nested_meta(|meta| {
+                if meta.path.is_ident("crate") && !serde_crate {
+                    let value: syn::LitStr = meta.value()?.parse()?;
+                    let _: syn::Path = value.parse()?;
+                    serde_crate = true;
+                    Ok(())
+                } else {
+                    Err(meta.error("unsupported or duplicate Serde type attribute"))
+                }
+            })?;
         }
     }
-    Ok((owner, marked))
+    Ok((owner, layout))
 }
 
 fn local_name(input: &DeriveInput, base: &str) -> syn::Ident {
@@ -214,21 +238,33 @@ fn local_name(input: &DeriveInput, base: &str) -> syn::Ident {
 }
 
 fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
-    let (owner, fixed) = type_options(input, Some("fixed"))?;
+    let (owner, layout) = type_options(input, true)?;
     let explicit_extensions = match &input.data {
         Data::Struct(data) => has_extension_carrier(&data.fields)?,
         _ => false,
     };
-    if matches!(input.data, Data::Struct(_)) && !fixed && !explicit_extensions {
+    if layout == Some(Layout::Sparse) {
+        if explicit_extensions {
+            return Err(syn::Error::new_spanned(
+                input,
+                "sparse records derive their extension block",
+            ));
+        }
         return evolve::expand_record(input, &owner);
     }
     let context = local_name(input, "__wire_context");
     let body = match &input.data {
-        Data::Struct(data) => fields(&data.fields, &owner, &context, true, fixed)?,
+        Data::Struct(data) => fields(
+            &data.fields,
+            &owner,
+            &context,
+            true,
+            layout.is_some() || !explicit_extensions,
+        )?,
         Data::Enum(data) => {
             let mut variants = Vec::new();
             for (id, variant) in data.variants.iter().enumerate() {
-                let (renamed_variant, _) = member_attributes(&variant.attrs, false, &owner)?;
+                let (renamed_variant, _) = member_attributes(&variant.attrs, false, None)?;
                 if variant.discriminant.is_some() {
                     return Err(syn::Error::new_spanned(
                         variant,
@@ -243,10 +279,22 @@ fn expand(input: &DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
                         let bytes = unnamed_attributes(&unnamed.unnamed[0].attrs, &owner)?;
                         projection(&unnamed.unnamed[0].ty, bytes, &context)
                     } else {
-                        fields(&variant.fields, &owner, &context, false, fixed)?
+                        fields(
+                            &variant.fields,
+                            &owner,
+                            &context,
+                            false,
+                            layout == Some(Layout::Fixed),
+                        )?
                     }
                 } else {
-                    fields(&variant.fields, &owner, &context, false, fixed)?
+                    fields(
+                        &variant.fields,
+                        &owner,
+                        &context,
+                        false,
+                        layout == Some(Layout::Fixed),
+                    )?
                 };
                 variants.push(quote!({"name":#name,"id":#id,"value":#value}));
             }
@@ -301,10 +349,10 @@ fn projection(
     }
 }
 
-fn member_attributes(
-    attrs: &[syn::Attribute],
+fn member_attributes<'a>(
+    attrs: impl IntoIterator<Item = &'a syn::Attribute>,
     allow_field: bool,
-    owner: &syn::Path,
+    adapter_owner: Option<&syn::Path>,
 ) -> syn::Result<(Option<String>, Option<Adapter>)> {
     let mut borrowed = false;
     let mut renamed = None;
@@ -316,6 +364,11 @@ fn member_attributes(
                     let name: syn::LitStr = meta.value()?.parse()?;
                     renamed = Some(name.value());
                 } else if meta.path.is_ident("with") && allow_field && bytes.is_none() {
+                    let Some(owner) = adapter_owner else {
+                        return Err(meta.error(
+                            "express Serde adapters on evolving records with a fixed Wire field type",
+                        ));
+                    };
                     let path: syn::LitStr = meta.value()?.parse()?;
                     let path = path.value();
                     let path = path.trim_start_matches("::");
@@ -355,7 +408,7 @@ fn member_attributes(
 }
 
 fn unnamed_attributes(attrs: &[syn::Attribute], owner: &syn::Path) -> syn::Result<Option<Adapter>> {
-    let (rename, bytes) = member_attributes(attrs, true, owner)?;
+    let (rename, bytes) = member_attributes(attrs, true, Some(owner))?;
     if rename.is_some() {
         return Err(syn::Error::new(
             proc_macro2::Span::call_site(),

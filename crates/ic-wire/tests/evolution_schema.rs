@@ -182,7 +182,160 @@ fn fixed_derive_marks_local_aggregates_without_implicit_claims_about_children() 
     assert!(variants[2]["value"].get("fixed").is_none());
 }
 
-#[cfg(feature = "evolution")]
+#[cfg(feature = "derive")]
+#[test]
+fn serde_dto_annotations_keep_names_and_borrows_in_nested_wire_records() {
+    use ic_wire::{Encoding, Limits, Wire, evolution::decode, evolution::encode};
+    use serde as dto_serde;
+
+    #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize, Wire)]
+    #[wire(sparse)]
+    #[serde(crate = "dto_serde")]
+    struct Item<'a> {
+        #[serde(rename = "displayName", borrow)]
+        name: &'a str,
+        #[wire(id = 1)]
+        #[serde(rename = "ratingScore")]
+        rating: Option<u8>,
+    }
+
+    #[derive(Debug, PartialEq, Wire)]
+    #[wire(sparse)]
+    struct Envelope<'a> {
+        item: Item<'a>,
+    }
+
+    let graph =
+        ValidatedRegistry::from_type::<Envelope<'_>>("Root", SchemaLimits::default()).unwrap();
+    let exported: Value = serde_json::from_str(&graph.metadata_json().unwrap()).unwrap();
+    let item = &exported["Root"]["fields"][0]["value"];
+    assert_eq!(item["fields"][0]["name"], "displayName");
+    assert_eq!(item["extensions"][0]["name"], "ratingScore");
+    assert_eq!(item["extensions"][0]["id"], 1);
+
+    let value = Envelope {
+        item: Item {
+            name: "hi",
+            rating: Some(8),
+        },
+    };
+    let limits = Limits {
+        bytes: 64,
+        allocation: 4096,
+        nodes: 64,
+        depth: 8,
+    };
+    let bytes = encode(&value, Encoding::Payload, limits).unwrap();
+    assert_eq!(bytes, [2, b'h', b'i', 3, 1, 1, 8, 0]);
+    let decoded: Envelope<'_> = decode(&bytes, Encoding::Payload, limits).unwrap();
+    assert_eq!(decoded, value);
+    assert_eq!(decoded.item.name.as_ptr(), bytes[1..].as_ptr());
+    assert_eq!(
+        postcard::to_allocvec(&value.item).unwrap(),
+        [2, b'h', b'i', 1, 8]
+    );
+}
+
+#[cfg(feature = "derive")]
+#[test]
+fn standalone_generation_checks_projected_roots_through_aliases() {
+    use ic_wire::{
+        Encoding, Limits, Wire,
+        evolution::encode,
+        typescript::{Method, PayloadLimits},
+    };
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Serialize, Deserialize, Wire)]
+    #[wire(sparse)]
+    struct Inner {
+        value: u8,
+    }
+
+    #[derive(Serialize, Deserialize, Wire)]
+    #[wire(fixed)]
+    struct Fixed {
+        inner: Inner,
+    }
+
+    #[derive(Wire)]
+    #[wire(sparse)]
+    struct Message {
+        fixed: Fixed,
+    }
+
+    let value = Message {
+        fixed: Fixed {
+            inner: Inner { value: 7 },
+        },
+    };
+    let limits = Limits {
+        bytes: 16,
+        allocation: 4096,
+        nodes: 64,
+        depth: 8,
+    };
+    // The fixed Serde subtree emits no inner extension block.
+    assert_eq!(encode(&value, Encoding::Payload, limits).unwrap(), [7, 0]);
+
+    let registry =
+        ValidatedRegistry::from_type::<Message>("Root", SchemaLimits::default()).unwrap();
+    let mut types: BTreeMap<String, Value> =
+        serde_json::from_str(&registry.metadata_json().unwrap()).unwrap();
+    types.insert(
+        "Alias".into(),
+        json!({"k":"newtype","item":{"k":"ref","name":"Root"},"check":"checkRoot"}),
+    );
+    let browser_limits = PayloadLimits {
+        bytes: 16,
+        nodes: 16,
+        depth: 8,
+    };
+    let method = Method {
+        export: "call",
+        id: 7,
+        request: "Alias",
+        response: "Alias",
+        request_limits: browser_limits,
+        response_limits: browser_limits,
+    };
+
+    for projected in [true, false] {
+        if !projected {
+            // An explicit projection may supply the inner block itself.
+            types
+                .get_mut("Root")
+                .unwrap()
+                .as_object_mut()
+                .unwrap()
+                .remove("projected");
+        }
+        let registry = ValidatedRegistry::from_metadata(&types, SchemaLimits::default()).unwrap();
+        let expected = projected.then_some(GenerationError::Schema);
+        assert_eq!(
+            registry
+                .payload_module(
+                    "payload",
+                    "Alias",
+                    "./runtime.ts",
+                    browser_limits,
+                    &BTreeMap::new(),
+                    |_| {},
+                )
+                .err(),
+            expected
+        );
+        assert_eq!(
+            registry
+                .method_module(&[method], "./runtime.ts", &BTreeMap::new(), |_| {})
+                .err(),
+            expected
+        );
+        #[cfg(feature = "api-manifest")]
+        assert_eq!(registry.api_manifests(&[("call", method)]).err(), expected);
+    }
+}
+
 mod typed_methods {
     use super::*;
     use core::marker::PhantomData;
@@ -303,15 +456,21 @@ mod typed_methods {
     }
 
     #[test]
-    fn typed_roots_allow_fixed_recursion_and_reject_unprojected_nested_layouts() {
+    fn typed_roots_allow_fixed_recursion_and_plain_aggregates_inside_fixed_values() {
         collected(&Method::<Root<Nested<Fixed>>, _>::new(
             "canister_export",
             RUST_LIMITS,
             RUST_LIMITS,
         ))
         .unwrap();
+        collected(&Method::<Root<Nested<Unmarked>>, _>::new(
+            "a",
+            RUST_LIMITS,
+            RUST_LIMITS,
+        ))
+        .unwrap();
         assert_eq!(
-            collected(&Method::<Root<Nested<Unmarked>>, _>::new(
+            collected(&Method::<Root<Unmarked>, _>::new(
                 "a",
                 RUST_LIMITS,
                 RUST_LIMITS
@@ -387,14 +546,12 @@ mod typed_methods {
         assert_eq!(registry.finish().unwrap_err(), GenerationError::Schema);
     }
 
-    #[cfg(all(
-        feature = "platform-types",
-        any(feature = "derive", feature = "evolution-derive")
-    ))]
+    #[cfg(all(feature = "platform-types", feature = "derive"))]
     #[test]
     fn typed_method_uses_the_published_account_layout_as_fixed() {
         use ic_platform_types::{Account, Principal};
         #[derive(ic_wire::Wire)]
+        #[wire(sparse)]
         struct Payment {
             account: Account,
         }
@@ -418,9 +575,7 @@ mod typed_methods {
             },
         };
         let mut output = Vec::new();
-        method
-            .encode_request(&payment, &mut output, &mut [])
-            .unwrap();
+        method.encode_request(&payment, &mut output).unwrap();
         assert_eq!(&output[11..], &[1, 4, 0, 0]);
         let decoded = method.decode_request(&output).unwrap();
         assert_eq!(decoded.account.owner, payment.account.owner);

@@ -61,14 +61,6 @@ pub(super) fn frame_header(encoding: Encoding) -> Option<[u8; HEADER_BYTES]> {
     }
 }
 
-#[cfg(feature = "evolution")]
-pub(super) fn measure_payload<T: Serialize + ?Sized>(
-    value: &T,
-    budget: &Budget,
-) -> Result<usize, Error> {
-    payload_writer(value)(budget, Output::Count(0))
-}
-
 /// Measure the complete selected encoding without allocating codec output.
 ///
 /// Custom Serialize code is trusted and must be deterministic across calls.
@@ -132,15 +124,36 @@ fn encode_into_with(
     write_vec_with(write, &Budget::new(limits), header, size, output)
 }
 
-#[cfg(feature = "evolution")]
-pub(super) fn write_vec<T: Serialize + ?Sized>(
+pub(super) fn write_projected_vec<T: Serialize>(
     value: &T,
     budget: &Budget,
     header: Option<[u8; HEADER_BYTES]>,
-    size: usize,
+    byte_limit: usize,
     output: &mut Vec<u8>,
 ) -> Result<(), Error> {
-    write_vec_with(&payload_writer(value), budget, header, size, output)
+    write_projected_vec_with(&payload_writer(value), budget, header, byte_limit, output)
+}
+
+#[inline(never)]
+fn write_projected_vec_with(
+    write: &PayloadWriter<'_>,
+    budget: &Budget,
+    header: Option<[u8; HEADER_BYTES]>,
+    byte_limit: usize,
+    output: &mut Vec<u8>,
+) -> Result<(), Error> {
+    let size = write(budget, Output::Count(0))?;
+    budget.check()?;
+    if size > byte_limit {
+        return Err(Error::Limit(crate::LimitKind::Bytes));
+    }
+    let prefix = if header.is_some() { HEADER_BYTES } else { 0 };
+    let len = size + prefix;
+    write_vec_with(write, budget, header, len, output)?;
+    if output.len() != len {
+        return Err(Error::Malformed);
+    }
+    Ok(())
 }
 
 fn write_vec_with(
@@ -218,7 +231,6 @@ pub(super) fn write_payload<T: Serialize + ?Sized>(
     .map_err(|_| budget.error())
 }
 
-#[cfg(feature = "evolution")]
 pub(super) fn write_scratch<T: Serialize + ?Sized>(
     value: &T,
     budget: &Budget,
@@ -229,7 +241,6 @@ pub(super) fn write_scratch<T: Serialize + ?Sized>(
     write_bounded_slice::<T, true>(value, budget, depth, output, capacity_kind)
 }
 
-#[cfg(feature = "evolution")]
 pub(super) fn write_bounded_slice<T: Serialize + ?Sized, const CHARGE_SCRATCH: bool>(
     value: &T,
     budget: &Budget,
@@ -257,7 +268,6 @@ pub(super) fn write_bounded_slice<T: Serialize + ?Sized, const CHARGE_SCRATCH: b
 
 // Final output uses the meter's configured byte reservation. Additional
 // staging writes debit the remaining allocation allowance.
-#[cfg(feature = "evolution")]
 struct BoundedSlice<'a, 'budget, const CHARGE_SCRATCH: bool> {
     output: &'a mut [u8],
     budget: &'budget Budget,
@@ -265,7 +275,6 @@ struct BoundedSlice<'a, 'budget, const CHARGE_SCRATCH: bool> {
     initial_len: usize,
 }
 
-#[cfg(feature = "evolution")]
 impl<const CHARGE_SCRATCH: bool> BoundedSlice<'_, '_, CHARGE_SCRATCH> {
     #[inline]
     fn take(&mut self, len: usize) -> postcard::Result<&mut [u8]> {
@@ -281,7 +290,6 @@ impl<const CHARGE_SCRATCH: bool> BoundedSlice<'_, '_, CHARGE_SCRATCH> {
     }
 }
 
-#[cfg(feature = "evolution")]
 impl<const CHARGE_SCRATCH: bool> Flavor for BoundedSlice<'_, '_, CHARGE_SCRATCH> {
     type Output = usize;
 
@@ -332,6 +340,9 @@ impl Flavor for Output<'_> {
     }
 
     fn try_extend(&mut self, span: &[u8]) -> postcard::Result<()> {
+        if let [byte] = span {
+            return self.try_push(*byte);
+        }
         match self {
             Self::Count(size) => {
                 *size = size

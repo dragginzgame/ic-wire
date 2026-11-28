@@ -21,7 +21,8 @@ export type Schema = ({ k: 'unit' | 'bool' }
   | { k: 'array'; item: Schema; max: number }
   | { k: 'tuple'; items: readonly Schema[]; fixed?: true }
   | { k: 'result'; ok: Schema; err: Schema }
-  | { k: 'option' | 'newtype'; item: Schema }
+  | { k: 'option'; item: Schema }
+  | { k: 'newtype'; item: Schema; fixed?: true }
   | { k: 'recover'; item: Schema }
   | { k: 'record'; fields: readonly Field[]; fixed?: true }
   | { k: 'extension-record'; fields: readonly Field[]; extensions: readonly Extension[]; projected?: true }
@@ -33,11 +34,17 @@ export type Checks=Readonly<Record<string,(value:unknown)=>void>>;
 type Types = Readonly<Record<string, Schema>>;
 type Payload = { schema: Schema; bytes: number; nodes: number; depth: number };
 type Method = { id: string; request: Schema; response: Schema; requestBytes: number; responseBytes: number; requestNodes: number; responseNodes: number; requestDepth: number; responseDepth: number };
+const headerBytes = 11;
 const fail = (code: WireError['code']): never => { throw new WireError(code); };
 const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
 const utf16 = new TextEncoder();
 const littleEndian = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 const packedArrays = {i8:Int8Array,i16:Int16Array,u16:Uint16Array,i32:Int32Array,u32:Uint32Array,i64:BigInt64Array,u64:BigUint64Array,hash16:Uint8Array,hash32:Uint8Array,'finite-f32':Float32Array,'finite-f64':Float64Array} as const;
+// The intrinsic getter reads the typed-array brand across realms and ignores user-defined tags.
+const typedArrayTag = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)!.get!;
+function isTypedArray<C extends { name: string; prototype: ArrayBufferView }>(value: unknown, ctor: C): value is C['prototype'] {
+  return typedArrayTag.call(value) === ctor.name;
+}
 function finiteWords(bytes: Uint8Array, width: number, little: boolean): boolean {
   const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
   for(let offset=0;offset<bytes.length;offset+=width) {
@@ -75,6 +82,26 @@ function resolve(schema: Schema, types: Types, visit?: (schema:Schema)=>void): S
   }
   visit?.(schema);
   return schema;
+}
+function minimumRootBytes(schema: Schema, types: Types): number {
+  // Inspect the shape without dropping wrapper visits or custom checks
+  // during the actual encode/decode.
+  const visited = new Set<Schema>();
+  for (;;) {
+    if (!schema || typeof schema !== 'object' || visited.has(schema)) return fail('value');
+    if (schema.k === 'extension-record' || schema.k === 'extension-tuple') return 1;
+    visited.add(schema);
+    if (schema.k === 'newtype') {
+      schema = schema.item;
+    } else if (schema.k === 'ref') {
+      if (!Object.hasOwn(types, schema.name)) return fail('value');
+      const next = types[schema.name];
+      if (next === undefined) return fail('value');
+      schema = next;
+    } else {
+      return 0;
+    }
+  }
 }
 function validate(schema:Schema,value:unknown,checks:Checks):void {
   if(schema.check!==undefined) {
@@ -186,7 +213,7 @@ function write(schema: Schema, value: unknown, out: Writer, budget: Budget, dept
       return;
     }
     case 'bytes': {
-      if (!(value instanceof Uint8Array)) return fail('value');
+      if (!isTypedArray(value, Uint8Array)) return fail('value');
       if (s.min !== undefined && value.length < s.min) fail('value');
       if (s.max !== undefined && value.length > s.max) fail('limit');
       out.varint(BigInt(value.length)); out.raw(value); return;
@@ -202,7 +229,7 @@ function write(schema: Schema, value: unknown, out: Writer, budget: Budget, dept
       }
 
       const kind=s.word, ctor=packedArrays[kind];
-      if (!(value instanceof ctor)) return fail('value');
+      if (!isTypedArray(value, ctor)) return fail('value');
       const opaque=kind==='hash16'||kind==='hash32', width=kind==='hash16'?16:kind==='hash32'?32:ctor.BYTES_PER_ELEMENT;
       if(value.byteLength%width) return fail('value');
       if (s.max !== undefined && value.byteLength / width > s.max) fail('limit');
@@ -474,22 +501,22 @@ function decodeError(error: unknown): never { if (error instanceof WireError) th
 // Factories consume generated private metadata. They do not validate arbitrary
 // external schemas or clone/protect objects supplied by a custom trusted caller.
 export function createPayloadCodec(metadata: unknown, registry: unknown = {}, checks:Checks = {}) {
-  const meta = metadata as Payload, types = registry as Types;
-  if (!Number.isSafeInteger(meta.bytes) || meta.bytes < 0) fail('value');
+  const meta = metadata as Payload, {schema} = meta, types = registry as Types;
+  if (!Number.isSafeInteger(meta.bytes) || meta.bytes < minimumRootBytes(schema, types)) fail('value');
   for (const value of [meta.nodes, meta.depth]) if (!Number.isSafeInteger(value) || value < 1) fail('value');
   return {
     encode(value: unknown): Uint8Array {
       const out = new Writer(meta.bytes);
-      write(meta.schema, value, out, new Budget(meta.nodes, meta.depth), 1, types,checks);
+      write(schema, value, out, new Budget(meta.nodes, meta.depth), 1, types,checks);
       return out.finish();
     },
     decode(bytes: Uint8Array): unknown {
-      if (!(bytes instanceof Uint8Array)) return fail('value');
+      if (!isTypedArray(bytes, Uint8Array)) return fail('value');
       if (bytes.length > meta.bytes) return fail('limit');
       try {
         const input = new Reader(bytes);
         const budget = new Budget(meta.nodes, meta.depth);
-        const value = read(meta.schema, input, budget, 1, types,checks);
+        const value = read(schema, input, budget, 1, types,checks);
         if (input.offset !== bytes.length) return fail('malformed');
         if (budget.incompatible !== 0) return fail('incompatible');
         return value;
@@ -498,28 +525,29 @@ export function createPayloadCodec(metadata: unknown, registry: unknown = {}, ch
   };
 }
 export function createCodec(metadata: unknown, registry: unknown = {}, checks:Checks = {}) {
-  const meta = metadata as Method, types = registry as Types, id = BigInt(meta.id);
+  const meta = metadata as Method, {request, response} = meta, types = registry as Types, id = BigInt(meta.id);
   if (id < 0n || id >= (1n << 64n)) fail('value');
   for (const value of [meta.requestBytes, meta.responseBytes, meta.requestNodes, meta.responseNodes, meta.requestDepth, meta.responseDepth]) {
     if (!Number.isSafeInteger(value) || value < 1) fail('value');
   }
-  if (meta.requestBytes < 11 || meta.responseBytes < 11) fail('value');
+  if (meta.requestBytes < headerBytes + minimumRootBytes(request, types) ||
+      meta.responseBytes < headerBytes + minimumRootBytes(response, types)) fail('value');
   function encode(value: unknown, direction: 0 | 1): Uint8Array {
-    const out = new Writer(direction ? meta.responseBytes : meta.requestBytes, 11);
+    const out = new Writer(direction ? meta.responseBytes : meta.requestBytes, headerBytes);
     out.header(id, direction);
-    write(direction ? meta.response : meta.request, value, out, new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth), 1, types,checks);
+    write(direction ? response : request, value, out, new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth), 1, types,checks);
     return out.finish();
   }
   function decode(bytes: Uint8Array, direction: 0 | 1): unknown {
-    if (!(bytes instanceof Uint8Array)) return fail('value');
+    if (!isTypedArray(bytes, Uint8Array)) return fail('value');
     if (bytes.length > (direction ? meta.responseBytes : meta.requestBytes)) return fail('limit');
-    if (bytes.length < 11) return fail('malformed');
+    if (bytes.length < headerBytes) return fail('malformed');
     if (bytes[0] !== 73 || bytes[1] !== 87 || bytes[10] !== direction) return fail('identity');
     try {
-      const input = new Reader(bytes, 11);
+      const input = new Reader(bytes, headerBytes);
       if (input.view.getBigUint64(2, true) !== id) return fail('identity');
       const budget = new Budget(direction ? meta.responseNodes : meta.requestNodes, direction ? meta.responseDepth : meta.requestDepth);
-      const value = read(direction ? meta.response : meta.request, input, budget, 1, types,checks);
+      const value = read(direction ? response : request, input, budget, 1, types,checks);
       if (input.offset !== bytes.length) return fail('malformed');
       if (budget.incompatible !== 0) return fail('incompatible');
       return value;

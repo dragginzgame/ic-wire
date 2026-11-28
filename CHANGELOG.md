@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.32.0] - 2026-11-28
+
+### ⚠️ Breaking
+
+- Mark evolving records and tuples with `#[wire(sparse)]`. Plain `Wire` derives
+  describe positional Serde layouts. Use the `evolution` module or a typed
+  `Method` for sparse messages and regenerate clients for endpoints that change layout.
+- Sparse encoders manage bounded staging storage. Remove the scratch argument
+  from typed method calls. Use `derive` for declarations and `typescript` for
+  schema generation.
+
+### 🔧 Changed
+
+- Share sparse scratch-buffer growth and projected output sizing across types.
+  Ordinary Serde encode/decode and the generated clients support positional
+  roots, including zero-byte unit payloads.
+- Accept byte and packed typed arrays from other JavaScript realms and validate
+  generated nested projections under their declared layout.
+
+### 🧪 Testing
+
+- Compare Wasm size and IC instruction counts across Wire revisions on generated canisters with up to 1,000 distinct query endpoints.
+
 ## [0.31.2] - 2026-11-28
 
 ### 🔧 Changed

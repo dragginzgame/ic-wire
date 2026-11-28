@@ -912,7 +912,7 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.31.2"
+version = "0.32.0"
 dependencies = [
  "bytemuck",
  "ic-platform-types",
@@ -949,13 +949,12 @@ dependencies = [
  "ic-platform-types",
  "ic-wire",
  "serde",
- "stats_alloc",
  "toko-tooling",
 ]
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.31.2"
+version = "0.32.0"
 dependencies = [
  "proc-macro2",
  "quote",

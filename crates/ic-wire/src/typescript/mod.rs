@@ -48,6 +48,7 @@ pub const RUNTIME: &str = include_str!("runtime.ts");
 #[derive(Clone, Copy, Debug)]
 pub struct PayloadLimits {
     /// Maximum payload bytes, excluding any frame or transport envelope.
+    /// A sparse root requires at least one byte for its extension block.
     pub bytes: u64,
     /// Maximum runtime value visits; must be nonzero.
     pub nodes: u64,
@@ -268,72 +269,149 @@ impl ValidatedRegistry {
         Ok(graph)
     }
 
-    #[cfg(feature = "evolution")]
-    fn validate_evolving_roots(&self, roots: &BTreeSet<String>) -> Result<(), GenerationError> {
+    fn message_root_nodes(
+        &self,
+        roots: &[usize],
+        require_sparse: bool,
+    ) -> Result<Vec<usize>, GenerationError> {
         if roots.is_empty() {
-            return Ok(());
+            return Ok(Vec::new());
         }
         let mut checked_roots = vec![false; self.nodes.len()];
-        let mut pending = Vec::new();
-        for root in roots {
-            let mut id = self.root_index(root)?;
+        let mut terminals = Vec::new();
+        for &root in roots {
+            let mut id = self.roots[root];
             // Alias cycles have already been rejected. Share the walk across roots.
             while !core::mem::replace(&mut checked_roots[id], true) {
                 match &self.nodes[id] {
-                    Node::Alias(item) => id = *item,
+                    Node::Alias(item) if !self.annotations.get(&id).is_some_and(|a| a.fixed) => {
+                        id = *item
+                    }
                     Node::Ref(root) => id = self.roots[*root],
-                    Node::ExtensionRecord { fields, extensions } => {
-                        pending.extend(fields.iter().map(|(_, child)| (*child, true)));
-                        pending.extend(extensions.iter().map(|entry| (entry.child, true)));
+                    _ if require_sparse && !self.sparse_node(id) => {
+                        return Err(GenerationError::Schema);
+                    }
+                    _ => {
+                        terminals.push(id);
                         break;
                     }
-                    Node::ExtensionTuple { items, extensions } => {
-                        pending.extend(items.iter().map(|&item| (item, true)));
-                        pending.extend(extensions.iter().map(|entry| (entry.child, true)));
-                        break;
-                    }
-                    _ => return Err(GenerationError::Schema),
                 }
             }
+        }
+        Ok(terminals)
+    }
+
+    fn validate_evolving_roots(&self, roots: &BTreeSet<String>) -> Result<(), GenerationError> {
+        let indices = roots
+            .iter()
+            .map(|root| self.root_index(root))
+            .collect::<Result<Vec<_>, _>>()?;
+        self.validate_projection_layouts(self.message_root_nodes(&indices, true)?, Vec::new())
+    }
+
+    fn sparse_node(&self, id: usize) -> bool {
+        matches!(
+            self.nodes[id],
+            Node::ExtensionRecord { .. } | Node::ExtensionTuple { .. }
+        )
+    }
+
+    fn validate_message_roots(&self, roots: &[usize]) -> Result<(), GenerationError> {
+        let mut sparse = Vec::new();
+        let mut positional = Vec::new();
+        for id in self.message_root_nodes(roots, false)? {
+            if !self.sparse_node(id) {
+                positional.push(id);
+            } else if self.annotations.get(&id).is_some_and(|a| a.projected) {
+                sparse.push(id);
+            }
+        }
+        self.validate_projection_layouts(sparse, positional)
+    }
+
+    fn validate_projection_layouts(
+        &self,
+        roots: Vec<usize>,
+        positional: Vec<usize>,
+    ) -> Result<(), GenerationError> {
+        #[derive(Clone, Copy, PartialEq, Eq)]
+        enum Layout {
+            Positional,
+            Projected,
+            FixedChild,
+        }
+        use Layout::{FixedChild, Positional, Projected};
+
+        let mut pending: Vec<_> = positional.into_iter().map(|id| (id, Positional)).collect();
+        for id in roots {
+            match &self.nodes[id] {
+                Node::ExtensionRecord { fields, extensions } => {
+                    pending.extend(fields.iter().map(|(_, child)| (*child, Projected)));
+                    pending.extend(extensions.iter().map(|entry| (entry.child, Projected)));
+                }
+                Node::ExtensionTuple { items, extensions } => {
+                    pending.extend(items.iter().map(|&item| (item, Projected)));
+                    pending.extend(extensions.iter().map(|entry| (entry.child, Projected)));
+                }
+                _ => unreachable!("admitted evolving root"),
+            }
+        }
+        if pending.is_empty() {
+            return Ok(());
         }
 
         // Generated projection follows containers. A fixed Serde aggregate
         // decodes its descendants as ordinary Serde, so reachability from each
         // context must be checked separately even for the same named node.
-        let mut visited = vec![[false; 2]; self.nodes.len()];
-        while let Some((id, can_project)) = pending.pop() {
-            if core::mem::replace(&mut visited[id][usize::from(can_project)], true) {
+        let mut visited = vec![[false; 3]; self.nodes.len()];
+        while let Some((id, layout)) = pending.pop() {
+            if core::mem::replace(&mut visited[id][layout as usize], true) {
                 continue;
             }
             let flags = self.annotations.get(&id);
-            let fixed = flags.is_some_and(|a| a.fixed);
-            let projected = can_project && flags.is_some_and(|a| a.projected);
+            let fixed = layout != Projected || flags.is_some_and(|a| a.fixed);
+            let projected = layout == Projected && flags.is_some_and(|a| a.projected);
+            // An ordinary Serde parent cannot emit a derived child's sparse projection.
+            // Explicit carrier schemas own their custom Serde representation.
+            if layout == Positional && flags.is_some_and(|a| a.projected) {
+                return Err(GenerationError::Schema);
+            }
+            let child_layout = if layout == Positional {
+                Positional
+            } else {
+                FixedChild
+            };
             match &self.nodes[id] {
                 Node::Record(fields) if fixed => {
-                    pending.extend(fields.iter().map(|(_, child)| (*child, false)));
+                    pending.extend(fields.iter().map(|(_, child)| (*child, child_layout)));
                 }
                 Node::Tuple(items) if fixed => {
-                    pending.extend(items.iter().map(|&item| (item, false)));
+                    pending.extend(items.iter().map(|&item| (item, child_layout)));
                 }
                 Node::ExtensionRecord { fields, extensions } if projected => {
-                    pending.extend(fields.iter().map(|(_, child)| (*child, true)));
-                    pending.extend(extensions.iter().map(|entry| (entry.child, true)));
+                    pending.extend(fields.iter().map(|(_, child)| (*child, Projected)));
+                    pending.extend(extensions.iter().map(|entry| (entry.child, Projected)));
                 }
                 Node::ExtensionTuple { items, extensions } if projected => {
-                    pending.extend(items.iter().map(|&item| (item, true)));
-                    pending.extend(extensions.iter().map(|entry| (entry.child, true)));
+                    pending.extend(items.iter().map(|&item| (item, Projected)));
+                    pending.extend(extensions.iter().map(|entry| (entry.child, Projected)));
                 }
                 Node::List { item, .. } | Node::Array { item, .. } | Node::Option(item) => {
-                    pending.push((*item, can_project))
+                    pending.push((*item, layout))
                 }
-                Node::Alias(item) => pending.push((*item, false)),
-                Node::Ref(root) => pending.push((self.roots[*root], can_project)),
+                Node::Alias(item) => pending.push((*item, child_layout)),
+                Node::Ref(root) => pending.push((self.roots[*root], layout)),
                 Node::Result { ok, err } => {
-                    pending.extend([(*ok, can_project), (*err, can_project)]);
+                    pending.extend([(*ok, layout), (*err, layout)]);
                 }
                 Node::Enum(variants) => {
-                    pending.extend(variants.iter().map(|(_, _, child)| (*child, false)));
+                    pending.extend(variants.iter().map(|(_, _, child)| (*child, child_layout)));
                 }
+                Node::ExtensionRecord { .. }
+                | Node::ExtensionTuple { .. }
+                | Node::OpenVariant { .. }
+                | Node::Recover(_)
+                    if layout == Positional => {}
                 Node::Record(_)
                 | Node::Tuple(_)
                 | Node::ExtensionRecord { .. }
@@ -457,7 +535,8 @@ impl Importer {
             "list" | "array" => &["k", "check", "item", "max"],
             "tuple" => &["k", "check", "items", "fixed"],
             "result" => &["k", "check", "ok", "err"],
-            "option" | "recover" | "newtype" => &["k", "check", "item"],
+            "option" | "recover" => &["k", "check", "item"],
+            "newtype" => &["k", "check", "item", "fixed"],
             "ref" => &["k", "check", "name"],
             "record" => &["k", "check", "fields", "fixed"],
             "enum" => &["k", "check", "variants"],

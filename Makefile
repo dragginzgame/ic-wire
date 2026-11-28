@@ -17,7 +17,7 @@ help:
 	  'deps-update           Run cargo update -v for maintained workspaces' \
 	  '  Optional: DEPENDENCY_PACKAGE=name DEPENDENCY_PRECISE=version' \
 	  'test                  Aggregate product tests (default features)' \
-	  '  Focused codec: cargo test -p ic-wire --test encode_tests --locked' \
+	  '  Focused codec: cargo test -p ic-wire --lib tests::encode_tests --locked' \
 	  'test-compatibility    Aggregate qualification tests (default features)' \
 	  'test-allocation       Run isolated native allocation checks' \
 	  'test-host             Run focused host schema contracts' \
@@ -36,6 +36,7 @@ help:
 	  'test-consumer         Standalone contract against the current codec' \
 	  'check-consumer-wasm   Build/run the current Wasm consumer (Node required)' \
 	  'measure-consumer-wasm Measure current opt-z/opt-3 consumer Wasm sizes' \
+	  'measure-endpoint-scale Compare generated many-endpoint canisters (SCALE_ARGS)' \
 	  'measure-consumer-ic   Installed counters (explicit POCKET_IC_BIN required)' \
 	  'lint-instructions    Lint the native driver without starting PocketIC' \
 	  'doc-instructions     Check native driver Rustdoc without starting PocketIC' \
@@ -126,10 +127,10 @@ lint-typescript:
 test-evolution check-evolution-typescript: qualification-tooling-check | toko-execution-check
 
 test-evolution:
-	+cargo test -p ic-wire --features evolution-derive,derive,api-manifest --locked --lib \
-	  --test evolution_tests --test evolution_recovery_tests --test evolution_nested_recovery_tests \
+	+cargo test -p ic-wire --features derive,api-manifest --locked --lib \
+	  --test evolution_nested_recovery_tests \
 	  --test evolution_derive_tests --test evolution_inline_derive_tests \
-	  --test evolution_inline_nested_tests --test evolution_schema
+	  --test evolution_inline_nested_tests --test evolution_schema --test layout_selection
 	+cargo test --manifest-path qualification/Cargo.toml -p ic-wire-consumer --locked \
 	  --features evolution-qualification --example evolution-upgrade
 
@@ -152,6 +153,10 @@ test-consumer check-consumer-wasm: qualification-tooling-check | toko-execution-
 measure-consumer-wasm: qualification-tooling-check | toko-execution-check
 	node qualification/ic-wire-consumer/measure-wasm.mjs
 
+.PHONY: measure-endpoint-scale
+measure-endpoint-scale:
+	node qualification/ic-wire-consumer/endpoint-scale/run.mjs $(SCALE_ARGS)
+
 .PHONY: measure-consumer-ic
 measure-consumer-ic: qualification-tooling-check | toko-execution-check
 	bash qualification/ic-wire-instructions/run.sh
@@ -168,11 +173,11 @@ test-derive lint-derive: toko-tooling-check | toko-execution-check
 
 test-derive:
 	+cargo test -p ic-wire-derive --lib --locked
-	+cargo test -p ic-wire --features derive --test derive_tests --locked
+	+cargo test -p ic-wire --features derive,typescript --test derive_tests --locked
 
 lint-derive:
 	+cargo clippy -p ic-wire-derive --lib --tests --locked -- -D warnings
-	+cargo clippy -p ic-wire --features derive --lib --test derive_tests --locked -- -D warnings
+	+cargo clippy -p ic-wire --features derive,typescript --lib --test derive_tests --locked -- -D warnings
 
 .PHONY: check-packages check-browser
 check-packages: qualification-tooling-check | toko-execution-check

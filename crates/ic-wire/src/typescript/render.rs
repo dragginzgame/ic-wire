@@ -10,6 +10,7 @@ use alloc::{
     collections::{BTreeMap, BTreeSet},
     format,
     string::String,
+    vec::Vec,
 };
 use core::fmt::{self, Write};
 
@@ -106,7 +107,8 @@ impl Write for Output {
 impl ValidatedRegistry {
     /// Generate a typed payload client with privately owned metadata and policy.
     ///
-    /// `root` names an admitted type. `export` names the exported codec object.
+    /// `root` names a positional or sparse schema. `export` names the
+    /// exported codec object.
     /// The trusted runtime module must export `schemaFormat` matching
     /// [`RUNTIME_SCHEMA_FORMAT`] and `createPayloadCodec(metadata, registry)`.
     /// The factory returns `encode(unknown): Uint8Array` and `decode(Uint8Array):
@@ -119,10 +121,10 @@ impl ValidatedRegistry {
     /// Acknowledgements never change generated source.
     ///
     /// # Errors
-    /// Returns Schema for invalid names, missing roots, empty module specifiers
-    /// or zero node/depth allowances; Complexity for unsafe JS integers or an
-    /// artifact exceeding the registry's output allowance. Rooted advice can also
-    /// return the errors documented by [`Self::lint_bulk_roots`].
+    /// Returns Schema for invalid names or message layouts, empty module
+    /// specifiers, zero node/depth allowances, or zero bytes for a sparse root. Returns Complexity
+    /// for unsafe JS integers or excess output. Rooted advice can also return
+    /// the errors documented by [`Self::lint_bulk_roots`].
     pub fn payload_module(
         &self,
         export: &str,
@@ -133,14 +135,18 @@ impl ValidatedRegistry {
         diagnostics: impl FnOnce(super::BulkLintReport),
     ) -> Result<String, GenerationError> {
         Self::admit_runtime_module(runtime_module)?;
-        self.admit_client(export, root, limits)?;
+        let root_index = self.admit_client(export, root, limits)?;
+        if limits.bytes == 0 {
+            self.admit_zero_byte_roots(&[root_index])?;
+        }
+        self.validate_message_roots(&[root_index])?;
         let mut output = Output::new(self.output_bytes);
         self.render_payload_module(&mut output, export, root, runtime_module, limits)
             .map_err(|_| GenerationError::Complexity)?;
         let report = self.lint_roots(
             [Ok((
                 format!("/types/{}", super::advice::escape(root)),
-                self.root_index(root)?,
+                root_index,
             ))],
             acknowledgements,
         )?;
@@ -157,18 +163,26 @@ impl ValidatedRegistry {
         Ok(())
     }
 
+    fn admit_zero_byte_roots(&self, roots: &[usize]) -> Result<(), GenerationError> {
+        if self
+            .message_root_nodes(roots, false)?
+            .iter()
+            .any(|&id| self.sparse_node(id))
+        {
+            return Err(GenerationError::Schema);
+        }
+        Ok(())
+    }
+
     fn admit_client(
         &self,
         export: &str,
         root: &str,
         limits: PayloadLimits,
-    ) -> Result<(), GenerationError> {
+    ) -> Result<usize, GenerationError> {
         identifier(export)?;
+        let root = self.root_index(root)?;
         if export == "globalThis"
-            || self
-                .names
-                .binary_search_by(|name| name.as_str().cmp(root))
-                .is_err()
             || self
                 .names
                 .binary_search_by(|name| name.as_str().cmp(export))
@@ -185,7 +199,7 @@ impl ValidatedRegistry {
             return Err(GenerationError::Complexity);
         }
 
-        Ok(())
+        Ok(root)
     }
 
     /// Generate typed framed codecs with independent request/response policy.
@@ -194,6 +208,7 @@ impl ValidatedRegistry {
     /// bundled framed-codec interface. IDs are emitted as decimal strings,
     /// preserving all u64 values without JavaScript Number rounding. Duplicate
     /// IDs or exports reject before rendering. This emits no routing/execution.
+    /// Each direction independently selects its registered root layout.
     /// Bulk advice always reviews each `/methods/EXPORT/request` and `/response`
     /// independently. The required handler runs once on success, even when clean.
     ///
@@ -244,12 +259,18 @@ impl ValidatedRegistry {
     ) -> Result<(), GenerationError> {
         let mut names = BTreeSet::new();
         let mut ids = BTreeSet::new();
+        let mut roots = Vec::new();
+        let mut zero_byte_roots = Vec::new();
         for method in methods {
             for (root, limits) in [
                 (method.request, method.request_limits),
                 (method.response, method.response_limits),
             ] {
-                self.admit_client(method.export, root, limits)?;
+                let id = self.admit_client(method.export, root, limits)?;
+                roots.push(id);
+                if limits.bytes == 0 {
+                    zero_byte_roots.push(id);
+                }
                 if limits.bytes > MAX_SAFE_INTEGER - HEADER_BYTES as u64 {
                     return Err(GenerationError::Complexity);
                 }
@@ -259,7 +280,8 @@ impl ValidatedRegistry {
             }
         }
 
-        Ok(())
+        self.admit_zero_byte_roots(&zero_byte_roots)?;
+        self.validate_message_roots(&roots)
     }
 
     fn render_methods(
@@ -742,7 +764,7 @@ impl ValidatedRegistry {
     ///
     /// Supply the deployed name alongside the existing client descriptor. Map keys
     /// are endpoint names, not filesystem paths. Each document contains only named
-    /// definitions reachable from its two roots. The sum of all document lengths
+    /// definitions reachable from its two message roots. The sum of all document lengths
     /// is limited by the registry's output byte allowance. Empty inventories are valid.
     /// Applications own export coverage and the decision to accept baseline changes.
     ///

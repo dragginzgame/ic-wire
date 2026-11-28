@@ -1,5 +1,6 @@
 //! Installed counters over original PocketIC types; the runner owns the server.
 #![forbid(unsafe_code)]
+mod endpoint_scale;
 mod numeric;
 
 use ic_testkit::{
@@ -79,7 +80,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::env::args_os().nth(2).as_deref() == Some(std::ffi::OsStr::new("--numeric"));
     let service_mode =
         std::env::args_os().nth(2).as_deref() == Some(std::ffi::OsStr::new("--service"));
+    let scale_mode =
+        std::env::args_os().nth(2).as_deref() == Some(std::ffi::OsStr::new("--endpoint-scale"));
     let result = async {
+        if scale_mode {
+            return endpoint_scale::run(pic, &directory).await;
+        }
         if service_mode {
             let wasm = fs::read(directory.join("raw_service.wasm"))?;
             let canister = pic.create_canister().await;
@@ -96,8 +102,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if numeric_mode {
             return numeric::run(pic, &directory).await;
         }
-        let expected = [73,87,7,0,0,0,0,0,0,0,0,128,1,6,115,101,110,115,111,114,2,0,255,6,0,128,0,0,255,127,2,1,128,1,
-            73,87,7,0,0,0,0,0,0,0,1,129,1,1];
+        let expected = [73,87,7,0,0,0,0,0,0,0,0,128,1,6,115,101,110,115,111,114,2,0,255,6,0,128,0,0,255,127,2,1,128,1,0,
+            73,87,7,0,0,0,0,0,0,0,1,129,1,1,0];
         let mut rows = Vec::new();
         let mut caller = 0_u64;
         for profile in ["wire-size", "wire-speed"] {
@@ -170,11 +176,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "qualification_lock_sha256":hash(include_bytes!("../../Cargo.lock")),"driver_sha256":hash(include_bytes!("main.rs")),"guest_sha256":hash(include_bytes!("../../ic-wire-consumer/src/ic.rs")),
         "consumer_sha256":hash(include_bytes!("../../ic-wire-consumer/src/lib.rs")),"meter_sha256":hash(include_bytes!("../../../crates/ic-wire/src/meter.rs")),
         "compiler":String::from_utf8(std::process::Command::new("rustc").arg("-Vv").output()?.stdout)?});
-    if numeric_mode {
+    if scale_mode || numeric_mode {
         let fields = report.as_object_mut().unwrap();
         for field in ["guest_sha256", "consumer_sha256", "meter_sha256"] {
             fields.remove(field);
         }
+    }
+    if scale_mode {
+        report["scale_driver_sha256"] = json!(hash(include_bytes!("endpoint_scale.rs")));
+    }
+    if numeric_mode {
+        let fields = report.as_object_mut().unwrap();
         fields.insert(
             "probe_sha256".into(),
             json!(hash(include_bytes!(

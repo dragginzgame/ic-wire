@@ -1,10 +1,10 @@
 //! Inline sparse declarations use one stock Serde codec and one operation meter.
-#![cfg(all(
-    feature = "evolution",
-    any(feature = "derive", feature = "evolution-derive")
-))]
+#![cfg(feature = "derive")]
 
-use ic_wire::{Encoding, Error, LimitKind, Limits, TextRef, Wire, evolution::Evolving};
+use ic_wire::{
+    Encoding, Error, LimitKind, Limits, TextRef, Wire, evolution::decode, evolution::encode,
+    evolution::encode_into, evolution::encode_to_slice,
+};
 
 const LIMITS: Limits = Limits {
     bytes: 256,
@@ -14,11 +14,13 @@ const LIMITS: Limits = Limits {
 };
 
 #[derive(Debug, PartialEq, Wire)]
+#[wire(sparse)]
 struct Previous {
     sequence: u16,
 }
 
 #[derive(Debug, PartialEq, Wire)]
+#[wire(sparse)]
 struct Current<'a, T: Copy, const MAX: usize>
 where
     T: PartialEq,
@@ -39,25 +41,20 @@ fn inline_record_revisions_share_exact_bytes_and_borrowed_fields() {
         note: Some(TextRef::new("hi").unwrap()),
     };
     let payload = Encoding::Payload;
-    let mut output = Vec::new();
-    let mut scratch = [0; 16];
-    old.encode_evolving(&mut output, payload, LIMITS, &mut [])
-        .unwrap();
+    let mut output = encode(&old, payload, LIMITS).unwrap();
     assert_eq!(output, [0x81, 2, 0]);
     assert_eq!(
-        Current::<u16, 16>::decode_evolving(&output, payload, LIMITS),
+        decode::<Current<'_, u16, 16>>(&output, payload, LIMITS),
         Ok(Current {
             sequence: 257,
             note: None,
             stamp: None
         })
     );
-    current
-        .encode_evolving(&mut output, payload, LIMITS, &mut scratch)
-        .unwrap();
+    encode_into(&current, payload, LIMITS, &mut output).unwrap();
     assert_eq!(output, [0x81, 2, 7, 4, 3, 2, b'h', b'i', 9, 0]);
-    assert_eq!(Previous::decode_evolving(&output, payload, LIMITS), Ok(old));
-    let decoded = Current::<u16, 16>::decode_evolving(&output, payload, LIMITS).unwrap();
+    assert_eq!(decode::<Previous>(&output, payload, LIMITS), Ok(old));
+    let decoded = decode::<Current<'_, u16, 16>>(&output, payload, LIMITS).unwrap();
     assert_eq!(decoded, current);
     assert_eq!(
         decoded.note.unwrap().as_str().as_ptr(),
@@ -67,61 +64,67 @@ fn inline_record_revisions_share_exact_bytes_and_borrowed_fields() {
     let mut malformed = output.clone();
     malformed[8] = 4;
     assert_eq!(
-        Previous::decode_evolving(&malformed, payload, LIMITS),
+        decode::<Previous>(&malformed, payload, LIMITS),
         Err(Error::Malformed)
     );
     malformed[8] = 9;
     malformed[6] = 0xff;
     assert_eq!(
-        Current::<u16, 16>::decode_evolving(&malformed, payload, LIMITS),
+        decode::<Current<'_, u16, 16>>(&malformed, payload, LIMITS),
         Err(Error::Malformed)
     );
     let too_shallow = Limits { depth: 2, ..LIMITS };
     assert_eq!(
-        Previous::decode_evolving(&output, payload, too_shallow),
+        decode::<Previous>(&output, payload, too_shallow),
         Err(Error::Limit(LimitKind::Depth))
     );
     assert_eq!(
-        current.encode_evolving(&mut output, payload, LIMITS, &mut [0; 2]),
-        Err(Error::Limit(LimitKind::Output))
+        encode_into(&current, payload, too_shallow, &mut output),
+        Err(Error::Limit(LimitKind::Depth))
     );
     assert!(output.is_empty());
 }
 
 #[derive(Debug, PartialEq, Wire)]
+#[wire(sparse)]
 struct PreviousTuple(u8);
 
 #[derive(Debug, PartialEq, Wire, serde::Serialize, serde::Deserialize)]
+#[wire(sparse)]
 struct CurrentTuple(u8, #[wire(id = 2)] Option<bool>);
 
 #[test]
 fn inline_tuple_does_not_change_its_separately_derived_serde_layout() {
     let latest = CurrentTuple(17, Some(true));
     let payload = Encoding::Payload;
-    let mut output = Vec::new();
-    latest
-        .encode_evolving(&mut output, payload, LIMITS, &mut [0; 8])
-        .unwrap();
+    let mut output = encode(&latest, payload, LIMITS).unwrap();
     assert_eq!(output, [17, 3, 2, 1, 1]);
     assert_eq!(
-        PreviousTuple::decode_evolving(&output, payload, LIMITS),
+        decode::<PreviousTuple>(&output, payload, LIMITS),
         Ok(PreviousTuple(17))
     );
-    PreviousTuple(17)
-        .encode_evolving(&mut output, payload, LIMITS, &mut [])
-        .unwrap();
+    encode_into(&PreviousTuple(17), payload, LIMITS, &mut output).unwrap();
     assert_eq!(output, [17, 0]);
     assert_eq!(
-        CurrentTuple::decode_evolving(&output, payload, LIMITS),
+        decode::<CurrentTuple>(&output, payload, LIMITS),
         Ok(CurrentTuple(17, None))
     );
+    assert_eq!(postcard::to_allocvec(&latest).unwrap(), [17, 1, 1]);
+
+    let mut storage = [0xff; 8];
     assert_eq!(
-        ic_wire::encode(&latest, payload, LIMITS).unwrap(),
-        [17, 1, 1]
+        encode_to_slice(&latest, payload, LIMITS, &mut storage),
+        Ok([17, 3, 2, 1, 1].as_slice())
+    );
+    assert_eq!(storage[5..], [0xff; 3]);
+    assert_eq!(
+        encode_to_slice(&latest, payload, LIMITS, &mut storage[..4]),
+        Err(Error::Limit(LimitKind::Output))
     );
 }
 
 #[derive(Debug, PartialEq, Wire)]
+#[wire(sparse)]
 struct Wide(
     u8,
     u8,
@@ -146,43 +149,34 @@ struct Wide(
 #[test]
 fn inline_tuple_core_exceeds_serde_tuple_trait_arity() {
     let wide = Wide(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
-    let mut output = Vec::new();
     let limits = Limits {
         allocation: 16_384,
         ..LIMITS
     };
-    wide.encode_evolving(&mut output, Encoding::Payload, limits, &mut [])
-        .unwrap();
+    let output = encode(&wide, Encoding::Payload, limits).unwrap();
     assert_eq!(
         output,
         [
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0
         ]
     );
-    assert_eq!(
-        Wide::decode_evolving(&output, Encoding::Payload, limits),
-        Ok(wide)
-    );
+    assert_eq!(decode::<Wide>(&output, Encoding::Payload, limits), Ok(wide));
 }
 
 #[derive(Debug, PartialEq, Wire)]
+#[wire(sparse)]
 struct Empty;
 
 #[test]
 fn inline_unit_sends_and_validates_an_extension_block() {
     let payload = Encoding::Payload;
-    let mut bytes = Vec::new();
-    Empty
-        .encode_evolving(&mut bytes, payload, LIMITS, &mut [])
-        .unwrap();
+    let bytes = encode(&Empty, payload, LIMITS).unwrap();
     assert_eq!(bytes, [0]);
-    assert_eq!(Empty::decode_evolving(&bytes, payload, LIMITS), Ok(Empty));
+    assert_eq!(decode::<Empty>(&bytes, payload, LIMITS), Ok(Empty));
+    assert_eq!(decode::<Empty>(&[], payload, LIMITS), Err(Error::Malformed));
+    assert_eq!(decode::<Empty>(&[2, 7, 0], payload, LIMITS), Ok(Empty));
     assert_eq!(
-        Empty::decode_evolving(&[2, 7, 0], payload, LIMITS),
-        Ok(Empty)
-    );
-    assert_eq!(
-        Empty::decode_evolving(&[2, 0, 0], payload, LIMITS),
+        decode::<Empty>(&[2, 0, 0], payload, LIMITS),
         Err(Error::Malformed)
     );
 }
@@ -191,6 +185,7 @@ mod public_record {
     use super::*;
 
     #[derive(Debug, PartialEq, Wire)]
+    #[wire(sparse)]
     struct PrivateRow<'a, T> {
         id: T,
         #[wire(id = 1)]
@@ -199,6 +194,7 @@ mod public_record {
 
     /// A public DTO can keep its nested projection's type private.
     #[derive(Debug, PartialEq, Wire)]
+    #[wire(sparse)]
     pub struct Packet<'a, T> {
         row: PrivateRow<'a, T>,
         checksum: u16,
@@ -213,13 +209,10 @@ mod public_record {
             },
             checksum: 8,
         };
-        let mut output = Vec::new();
-        packet
-            .encode_evolving(&mut output, Encoding::Payload, LIMITS, &mut [0; 8])
-            .unwrap();
+        let output = encode(&packet, Encoding::Payload, LIMITS).unwrap();
         assert_eq!(output, [7, 4, 1, 2, 1, b'x', 8, 0]);
         assert_eq!(
-            Packet::<u8>::decode_evolving(&output, Encoding::Payload, LIMITS),
+            decode::<Packet<'_, u8>>(&output, Encoding::Payload, LIMITS),
             Ok(packet)
         );
     }
@@ -237,6 +230,7 @@ fn codec_only_wire_accepts_fixed_struct_and_closed_enum_leaves() {
     }
 
     #[derive(Debug, PartialEq, Wire)]
+    #[wire(sparse)]
     struct Root {
         key: Key,
         mode: Mode,
@@ -246,13 +240,10 @@ fn codec_only_wire_accepts_fixed_struct_and_closed_enum_leaves() {
         key: Key(9),
         mode: Mode::Set(42),
     };
-    let mut output = Vec::new();
-    value
-        .encode_evolving(&mut output, Encoding::Payload, LIMITS, &mut [])
-        .unwrap();
+    let output = encode(&value, Encoding::Payload, LIMITS).unwrap();
     assert_eq!(output, [9, 0, 42, 0]);
     assert_eq!(
-        Root::decode_evolving(&output, Encoding::Payload, LIMITS),
+        decode::<Root>(&output, Encoding::Payload, LIMITS),
         Ok(value)
     );
 }

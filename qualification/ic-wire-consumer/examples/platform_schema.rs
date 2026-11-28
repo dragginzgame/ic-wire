@@ -1,10 +1,11 @@
 //! Exercise a derived schema containing a published Platform Account on native and Wasm.
 use ic_platform_types::{Account, Principal};
 use wire::typescript::{SchemaLimits, ValidatedRegistry};
-use wire::{Encoding, Limits, decode, encode};
+use wire::{Encoding, Limits, evolution::decode, evolution::encode};
 
 #[derive(wire::typescript::Wire)]
-#[wire(crate = "wire", fixed)]
+#[wire(sparse)]
+#[wire(crate = "wire")]
 struct Payment {
     account: Account,
 }
@@ -29,11 +30,10 @@ fn main() {
                 subaccount,
             },
         };
-        let value = payment.account;
-        let bytes = encode(&value, Encoding::Payload, limits).unwrap();
-        let decoded: Account = decode(&bytes, Encoding::Payload, limits).unwrap();
-        assert_eq!(decoded.owner, value.owner);
-        assert_eq!(decoded.subaccount, subaccount);
-        assert_eq!(bytes.len(), if subaccount.is_some() { 36 } else { 3 });
+        let bytes = encode(&payment, Encoding::Payload, limits).unwrap();
+        let decoded: Payment = decode(&bytes, Encoding::Payload, limits).unwrap();
+        assert_eq!(decoded.account.owner, payment.account.owner);
+        assert_eq!(decoded.account.subaccount, subaccount);
+        assert_eq!(bytes.len(), if subaccount.is_some() { 37 } else { 4 });
     }
 }

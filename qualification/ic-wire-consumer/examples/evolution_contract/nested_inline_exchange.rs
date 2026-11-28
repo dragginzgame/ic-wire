@@ -10,14 +10,17 @@ use wire::{
 use crate::fixture::LIMITS;
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct PointV1(u16, bool);
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct PointV2(u16, bool, #[wire(id = 3)] Option<()>);
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct JobV1 {
     id: u32,
@@ -25,6 +28,7 @@ struct JobV1 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct JobV2 {
     id: u32,
@@ -34,6 +38,7 @@ struct JobV2 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Request<Job> {
     jobs: List<Job, 2>,
@@ -43,12 +48,14 @@ struct Request<Job> {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct SummaryV1 {
     found: bool,
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct SummaryV2 {
     found: bool,
@@ -57,6 +64,7 @@ struct SummaryV2 {
 }
 
 #[derive(Debug, PartialEq, Eq, Wire)]
+#[wire(sparse)]
 #[wire(crate = "wire")]
 struct Reply<Summary> {
     result: Result<Option<Summary>, u16>,
@@ -140,14 +148,13 @@ pub(super) fn emit(directory: &Path) -> Result<(), Box<dyn Error>> {
     write_client(&V2, &directory.join("nested-v2.ts"))?;
 
     let mut bytes = Vec::new();
-    let mut scratch = [0; 64];
-    V1.encode_request(&request_v1(), &mut bytes, &mut [])?;
+    V1.encode_request(&request_v1(), &mut bytes)?;
     std::fs::write(directory.join("nested-v1-request.bin"), &bytes)?;
-    V2.encode_request(&request_v2(), &mut bytes, &mut scratch)?;
+    V2.encode_request(&request_v2(), &mut bytes)?;
     std::fs::write(directory.join("nested-v2-request.bin"), &bytes)?;
-    V1.encode_reply(&reply_v1(), &mut bytes, &mut [])?;
+    V1.encode_reply(&reply_v1(), &mut bytes)?;
     std::fs::write(directory.join("nested-v1-reply.bin"), &bytes)?;
-    V2.encode_reply(&reply_v2(), &mut bytes, &mut scratch)?;
+    V2.encode_reply(&reply_v2(), &mut bytes)?;
     std::fs::write(directory.join("nested-v2-reply.bin"), &bytes)?;
     Ok(())
 }

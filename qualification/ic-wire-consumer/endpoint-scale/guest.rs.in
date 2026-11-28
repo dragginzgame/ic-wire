@@ -1,0 +1,48 @@
+// Generated into the selected qualification workspace as a canister example.
+use ic_platform_runtime::raw;
+use wire::{Limits, evolution::Method};
+
+const LIMITS: Limits = Limits { bytes: 256, allocation: 4096, nodes: 256, depth: 16 };
+
+fn query(handle: impl FnOnce(&[u8]) -> Result<Vec<u8>, wire::Error>) {
+    let mut buffer = [0; LIMITS.bytes];
+    let input = buffer.get_mut(..raw::msg_arg_data_size()).unwrap_or_else(|| raw::trap(b"size"));
+    raw::msg_arg_data_copy(input, 0);
+    let reply = handle(input).unwrap_or_else(|_| raw::trap(b"wire"));
+    /* COUNTER */
+    raw::msg_reply_data_append(&reply);
+    raw::msg_reply();
+}
+
+macro_rules! endpoint {
+    ($module:ident, $name:literal, $id:literal, $a:ty, $b:ty, $c:ty, $d:ty, $e:ty) => {
+        mod $module {
+            use super::*;
+            #[derive(wire::Wire)]
+            #[wire(crate = "wire")]
+            pub struct Request {
+                a: $a, c: $c, d: $d, e: $e,
+                #[wire(id = $id)] b: Option<$b>,
+            }
+            #[derive(wire::Wire)]
+            #[wire(crate = "wire")]
+            pub struct Reply {
+                b: $b, c: $c, d: $d, e: $e,
+                #[wire(id = $id)] a: Option<$a>,
+            }
+            const METHOD: Method<Request, Reply> = Method::new($name, LIMITS, LIMITS);
+
+            #[expect(unsafe_code, reason = "Distinct IC query export for this measured method")]
+            #[unsafe(export_name = concat!("canister_query ", $name))]
+            extern "C" fn run() {
+                query(|input| {
+                    let r = METHOD.decode_request(input)?;
+                    let reply = Reply { b: r.b.unwrap_or_default(), c: r.c, d: r.d, e: r.e, a: Some(r.a) };
+                    let mut bytes = Vec::new();
+                    METHOD.encode_reply(&reply, &mut bytes /* SCRATCH */)?;
+                    Ok(bytes)
+                });
+            }
+        }
+    };
+}

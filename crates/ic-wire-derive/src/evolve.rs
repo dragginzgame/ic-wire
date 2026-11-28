@@ -21,7 +21,7 @@ struct Member {
 }
 
 pub(super) fn expand(input: &DeriveInput) -> syn::Result<TokenStream> {
-    let (owner, _) = super::type_options(input, None)?;
+    let (owner, _) = super::type_options(input, false)?;
     let (members, is_open) = collect(input)?;
     let schema = schema(input, &owner, &members, is_open);
     let codec = if is_open {
